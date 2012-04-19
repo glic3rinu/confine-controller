@@ -11,7 +11,7 @@ class Node(models.Model):
     longitude = models.CharField(max_length=255, blank=True)
     uci = models.FileField("UCI", upload_to=settings.UCI_DIR, blank=True)
     public_key = models.TextField()
-    status = models.CharField(max_length=32, choices=settings.NODE_STATUS_CHOICES, default=settings.DEFAULT_NODE_STATUS)
+    state = models.CharField(max_length=32, choices=settings.NODE_STATE_CHOICES, default=settings.DEFAULT_NODE_STATE)
         
     def __unicode__(self):
         return self.hostname

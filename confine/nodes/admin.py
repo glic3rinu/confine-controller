@@ -30,13 +30,13 @@ NODE_STATE_COLORS = { settings.ONLINE: "green",
                       settings.DISABLED: "gray",
                       settings.OFFLINE: "red",}
 
-def colored_status(node):
-    status = escape(node.status)
-    color = NODE_STATE_COLORS.get(node.status, "black")
-    return """<b><span style="color: %s;">%s</span></b>""" % (color, status)
-colored_status.short_description = "status" 
-colored_status.allow_tags = True
-colored_status.admin_order_field = 'status'
+def colored_state(node):
+    state = escape(node.state)
+    color = NODE_STATE_COLORS.get(node.state, "black")
+    return """<b><span style="color: %s;">%s</span></b>""" % (color, state)
+colored_state.short_description = "State" 
+colored_state.allow_tags = True
+colored_state.admin_order_field = 'state'
 
 
 def url_link(self):
@@ -46,12 +46,12 @@ url_link.allow_tags = True
 url_link.admin_order_field = 'url'
 
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ['hostname', url_link, 'architecture', colored_status ]
-    list_filter = ['architecture', 'status']
+    list_display = ['hostname', url_link, 'architecture', colored_state ]
+    list_filter = ['architecture', 'state']
     inlines = [CPUInline, MemoryInline, StorageInline, InterfaceInline]
     fieldsets = (
         (None, {
-            'fields': (('hostname',), ('status',), ('architecture',), ('public_key',), ('uci',))
+            'fields': (('hostname',), ('state',), ('architecture',), ('public_key',), ('uci',))
         }),
         ('Community node', {
             'fields': (('url',), ('latitude',), ('longitude',))

@@ -1,10 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-from nodes.models import Node
+from nodes.models import Node, Interface
 import settings 
 
 class Slice(models.Model):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
     status = models.CharField(max_length=16, choices=settings.STATUS_CHOICES, default=settings.DEFAULT_SLICE_STATUS)
     code = models.FileField(upload_to=settings.CODE_DIR, blank=True)

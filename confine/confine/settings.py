@@ -45,7 +45,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = '/home/confine/trunk/confine/media/'
+MEDIA_ROOT = '/home/controller/controller/confine/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -62,14 +62,14 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/home/confine/trunk/confine/static/'
+STATIC_ROOT = '/home/controller/controller/confine/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
 # Additional locations of static files
-STATICFILES_DIRS = ('/home/confine/trunk/confine/media/',)
+STATICFILES_DIRS = ('/home/controller/controller/confine/media/',)
 
 # List of finder classes that know how to find static files in
 # various locations.

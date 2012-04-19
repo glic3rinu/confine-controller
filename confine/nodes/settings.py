@@ -45,9 +45,19 @@ NODE_STATUS_CHOICES = getattr(settings, 'NODE_STATUS_CHOICES', (
     
 DEFAULT_NODE_STATUS = getattr(settings, 'DEFAULT_NODEL_STATUS', ONLINE)
 
+IFACE_TYPE_CHOICES = getattr(settings, 'IFACE_TYPE_CHOICES', (
+    ('802.11a/b', '802.11a/b'),
+    ('802.11a/b/g', '802.11a/b/g'),
+    ('802.11a/b/g/n', '802.11a/b/g/n'),
+    ('802.3u', 'Fast Ethernet 802.3z'),
+    ('802.3z', 'Gigabit Ethernet 802.3z'),
+    ('802.16', 'WiMax'),
+))
 
-LINK_STATUS_CHOICES = getattr(settings, 'LINK_STATUS_CHOICES', (
-    (ONLINE, 'ONLINE'),
-    (OFFLINE, 'OFFLINE'),))
+DEFAULT_IFACE_TYPE = getattr(settings, 'DEFAULT_IFACE_TYPE', '802.11a/b/g/n')
 
-DEFAULT_LINK_STATUS = getattr(settings, 'DEFAULT_LINK_STATUS', ONLINE)
+#LINK_STATUS_CHOICES = getattr(settings, 'LINK_STATUS_CHOICES', (
+#    (ONLINE, 'ONLINE'),
+#    (OFFLINE, 'OFFLINE'),))
+
+#DEFAULT_LINK_STATUS = getattr(settings, 'DEFAULT_LINK_STATUS', ONLINE)

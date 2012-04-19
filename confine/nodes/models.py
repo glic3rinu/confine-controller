@@ -1,6 +1,7 @@
 from django.db import models
 import settings
 
+
 class Node(models.Model):
     hostname = models.CharField(max_length=255)
     url = models.URLField("URL", blank=True)
@@ -11,7 +12,7 @@ class Node(models.Model):
     uci = models.FileField("UCI", upload_to=settings.UCI_DIR, blank=True)
     public_key = models.TextField()
     status = models.CharField(max_length=32, choices=settings.NODE_STATUS_CHOICES, default=settings.DEFAULT_NODE_STATUS)
-    
+        
     def __unicode__(self):
         return self.hostname
 
@@ -22,6 +23,10 @@ class Node(models.Model):
     @property
     def tinc_public_key(self):
         return self.public_key
+    
+    @property
+    def local_ip(self):
+        return '"TODO: local ipv6 iface"'
     
 class Storage(models.Model):
     node = models.OneToOneField(Node)
@@ -47,17 +52,11 @@ class CPU(models.Model):
     class Meta:
         verbose_name_plural = 'CPU'
 
-class Link(models.Model):
+class Interface(models.Model):
     node = models.ForeignKey(Node)
-    status = models.CharField(max_length=32, choices=settings.LINK_STATUS_CHOICES, default=settings.DEFAULT_LINK_STATUS)
-    connected_to = models.ManyToManyField(Node, related_name='connected_to', blank=True)
+    type = models.CharField(max_length=255, choices=settings.IFACE_TYPE_CHOICES)
     
-
-class CommunityLink(Link): pass
-
-class GatewayLink(Link): pass
-
-class LocalLink(Link): pass
-
-class DirectLink(Link): pass
+    
+    def __unicode__(self):
+        return self.type
 

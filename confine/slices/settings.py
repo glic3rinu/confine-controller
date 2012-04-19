@@ -11,10 +11,9 @@ CPU_REQUEST_CHOICES = getattr(settings, 'CPU_REQUEST_CHOICES', (
 DEFAULT_CPU_REQUEST = getattr(settings, 'DEFAULT_CPU_REQUEST', 'weighted')
 
 NETWORK_REQUESRT_CHOICES = getattr(settings, 'NETWORK_REQUESRT_CHOICES', (
-    ('public', 'Public'),
     ('isolated', 'Isolated'),
     ('passive', 'Passive'),
-    ('RAW', 'RAW'),
+    ('raw', 'RAW'),
 ))
     
 DEFAULT_NETWORK_REQUEST = getattr(settings, 'DEFAULT_NETWORK_REQUEST', 'public')

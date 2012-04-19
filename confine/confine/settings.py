@@ -202,3 +202,5 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'slices/slice': "slice.png",
     'slices/sliver': "linux-containers.png",
 }
+
+

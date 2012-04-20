@@ -6,7 +6,9 @@ import settings
 from django.utils.html import escape
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
-
+from django.utils.encoding import force_unicode
+from django.http import HttpResponseRedirect, HttpResponse
+from django.utils.html import escapejs
 
 STATE_COLORS = { settings.ALLOCATED: "darkorange",
                  settings.DEPLOYED: "magenta",
@@ -44,11 +46,45 @@ class SliverAdmin(admin.ModelAdmin):
     list_filter = ['storagerequest__type', 'cpurequest__type', 'networkrequest__type', 'state']
     inlines = [CPURequestInline, MemoryRequestInline, StorageRequestInline, NetworkRequestInline]
 
+
+    def response_change(self, request, obj):
+        """
+        Hack that closes browser window after SliverForm popup edition (emulating behaviour of popup addition).
+        """
+        # Semi-copypasta of django ModelAdmin
+        opts = obj._meta
+        verbose_name = opts.verbose_name
+        if obj._deferred:
+            opts_ = opts.proxy_for_model._meta
+            verbose_name = opts_.verbose_name
+
+        pk_value = obj._get_pk_val()
+        msg = 'The %(name)s "%(obj)s" was changed successfully.' % {'name': force_unicode(verbose_name), 'obj': force_unicode(obj)}
+        
+        if "_continue" in request.POST:
+            self.message_user(request, msg + ' ' + _("You may edit it again below."))
+            if "_popup" in request.REQUEST:
+                return HttpResponseRedirect(request.path + "?_popup=1")
+            else:
+                return HttpResponseRedirect(request.path)
+        # end of copypasta
+        elif "_popup" in request.POST:
+            return HttpResponse(
+                '<!DOCTYPE html><html><head><title></title></head><body>'
+                '<script type="text/javascript">opener.dismissAddAnotherPopup(window, "%s", "%s");</script></body></html>' % \
+                # escape() calls force_unicode.
+                (escape(pk_value), escapejs(obj)))        
+
+        return super(SliverAdmin, self).response_change(request, obj)
+
+
 class SliverForm(forms.ModelForm):
     """ 
-        Read-only form for displaying slivers in slice change form.
-        Also it provides popup links to each sliver change form.
+    Read-only form for displaying slivers in slice change form.
+    Also it provides popup links to each sliver change form.
     """
+    #FIXME: js needed: when save popup the main form is not updated with the new/changed slivers
+    #TODO: possible reimplementation when nested inlines support becomes available on django.contrib.admin
 
     sliver = forms.CharField(label="Sliver", widget=ShowText(bold=True))
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
@@ -64,8 +100,7 @@ class SliverForm(forms.ModelForm):
         if 'instance' in kwargs:
             instance = kwargs['instance']
             sliver_change = reverse('admin:slices_sliver_change', args=(instance.pk,))
-            #FIXME: popup does not close on save submit
-            self.initial['sliver'] = mark_safe("<a href='%s' onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
+            self.initial['sliver'] = mark_safe("<a href='%s' id='add_id_user' onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
             node_change = reverse('admin:nodes_node_change', args=(instance.node.pk,))
             self.initial['node'] = mark_safe("<a href='%s'>%s</a>" % (node_change, instance.node))
             self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.url, instance.node.url))

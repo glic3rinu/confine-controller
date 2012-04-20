@@ -11,12 +11,12 @@ from django.utils.safestring import mark_safe
 STATE_COLORS = { settings.ALLOCATED: "darkorange",
                  settings.DEPLOYED: "magenta",
                  settings.STARTED: "green" 
-                }
+               }
 
 def colored_state(self):
     state = escape(self.state)
     color = STATE_COLORS.get(self.state, "black")
-    return """<b><span style="color: %s;">%s</span></b>""" % (color, state)
+    return "<b><span style='color: %s;'>%s</span></b>" % (color, state)
 colored_state.short_description = "State" 
 colored_state.allow_tags = True
 colored_state.admin_order_field = 'state'
@@ -45,6 +45,11 @@ class SliverAdmin(admin.ModelAdmin):
     inlines = [CPURequestInline, MemoryRequestInline, StorageRequestInline, NetworkRequestInline]
 
 class SliverForm(forms.ModelForm):
+    """ 
+        Read-only form for displaying slivers in slice change form.
+        Also it provides popup links to each sliver change form.
+    """
+
     sliver = forms.CharField(label="Sliver", widget=ShowText(bold=True))
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
     url = forms.CharField(label="Node URL", widget=ShowText(bold=True))
@@ -59,12 +64,14 @@ class SliverForm(forms.ModelForm):
         if 'instance' in kwargs:
             instance = kwargs['instance']
             sliver_change = reverse('admin:slices_sliver_change', args=(instance.pk,))
-            self.initial['sliver'] = mark_safe("<a href='%s'>%s</a>" % (sliver_change, instance))
+            #FIXME: popup does not close on save submit
+            self.initial['sliver'] = mark_safe("<a href='%s' onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
             node_change = reverse('admin:nodes_node_change', args=(instance.node.pk,))
             self.initial['node'] = mark_safe("<a href='%s'>%s</a>" % (node_change, instance.node))
             self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.url, instance.node.url))
-            self.initial['state'] = instance.state
+            self.initial['state'] = mark_safe(colored_state(instance))
 
+    
 
 class SliverInline(admin.TabularInline):
     model = Sliver

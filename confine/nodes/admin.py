@@ -3,6 +3,7 @@ from models import Node, Storage, Memory, CPU, Interface
 from django import forms
 import settings
 from django.utils.html import escape
+from utils.admin import admin_link_factory
 
 class StorageInlineForm(forms.ModelForm):
     types = forms.MultipleChoiceField(choices=settings.STORAGE_CHOICES)
@@ -39,14 +40,8 @@ colored_state.allow_tags = True
 colored_state.admin_order_field = 'state'
 
 
-def url_link(self):
-    return '<a href="%s">%s' % (self.url, self.url)
-url_link.short_description = "URL"
-url_link.allow_tags = True
-url_link.admin_order_field = 'url'
-
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ['hostname', url_link, 'architecture', colored_state ]
+    list_display = ['hostname', admin_link_factory('url', description='URL'), 'architecture', colored_state ]
     list_filter = ['architecture', 'state']
     inlines = [CPUInline, MemoryInline, StorageInline, InterfaceInline]
     fieldsets = (

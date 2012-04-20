@@ -7,6 +7,7 @@ class Slice(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLICE_STATE)
+    template = models.FileField(upload_to=settings.TEMPLATE_DIR, blank=True)
     code = models.FileField(upload_to=settings.CODE_DIR, blank=True)
     
     def __unicode__(self):

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from models import Slice, Sliver, MemoryRequest, StorageRequest, CPURequest, NetworkRequest
 from utils.widgets import ShowText
+from utils.admin import admin_link_factory
 from django import forms 
 import settings 
 from django.utils.html import escape
@@ -119,7 +120,10 @@ def users(slice):
     #return ",".join(self.user.all().values_list('username', flat=True))
 
 class SliceAdmin(admin.ModelAdmin):
-    list_display = ['__unicode__', users, colored_state ]
+    list_display = ['__unicode__', users, colored_state, 
+                    admin_link_factory('template', base_url='/static/'), 
+                    admin_link_factory('code', base_url='/static/')
+                   ]
     list_filter = ['state']
     inlines = [SliverInline]
 

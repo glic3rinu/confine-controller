@@ -18,7 +18,6 @@ NETWORK_REQUESRT_CHOICES = getattr(settings, 'NETWORK_REQUESRT_CHOICES', (
     
 DEFAULT_NETWORK_REQUEST = getattr(settings, 'DEFAULT_NETWORK_REQUEST', 'public')
 
-
 STORAGE_CHOICES = getattr(settings, 'STORAGE_CHOICES', (
    ('debian-squeeze-amd64', 'Debian Squeeze amd64'),
    ('openwrt-backfire-amd64', 'OpenWRT Backfire amd64'),))
@@ -42,3 +41,4 @@ DEFAULT_SLIVER_STATE = getattr(settings, 'DEFAULT_SLICE_STATE', ALLOCATED)
 
 
 CODE_DIR = getattr(settings, 'CODE_DIR', 'code') 
+TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', 'templates')

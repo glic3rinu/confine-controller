@@ -8,7 +8,9 @@
   </div>
   <div>
     <h3>Slivers</h3>
-    <p>{{ slice.node.hostname }}
+    {% for sliver in slice.sliver_set.all %}
+    <p>{{ sliver.node.hostname }}</p>
+    {% endfor %}
   </div>
   {% endfor %}
 

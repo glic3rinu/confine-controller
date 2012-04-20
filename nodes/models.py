@@ -22,6 +22,11 @@ class Node(models.Model):
     @property
     def tinc_public_key(self):
         return self.public_key
+
+class DeleteRequest(models.Model):
+    node = models.ForeignKey("Node",
+                             verbose_name = "node")
+    
     
 class Storage(models.Model):
     node = models.OneToOneField(Node)

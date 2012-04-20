@@ -1,0 +1,44 @@
+{% extends "site_base.html" %}
+
+{% block content %}
+<select name="node_id">
+  {% for node in nodes %}
+  <option value="{{ node.id }}">
+    {{ node.hostname }}
+  </option>
+  {% endfor %}
+</select>
+
+<div id="node_info_container">
+  {% for node in nodes %}
+  <div id="node_info_{{ node.id }}" style="display:none">
+    <p>
+      <span style="font-weight:bold;">
+        hostname:
+      </span>
+      {{ node.hostname }}
+    </p>
+
+    <p>
+      <span style="font-weight:bold;">
+        url:
+      </span>
+      {{ node.url }}
+    </p>
+
+    <p>
+      <span style="font-weight:bold;">
+        architecture:
+      </span>
+      {{ node.architecture }}
+    </p>
+  </div>
+  {% endfor %}
+</div>
+
+{% if request.user.is_authenticated %}
+<a href="{% url create_slice %}">Create Slice</a>
+<a href="{% url show_own_slices %}">Show own slices</a>
+{% endif %}
+
+{% endblock %}

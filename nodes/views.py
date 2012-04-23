@@ -155,6 +155,27 @@ def get_node_public_keys(request):
     1 -> ok
     0 -> problem
     """
+    hostname_found = 0
+    keys = []
+    if request.method == "POST":
+        raw_xml = request.POST.get("node_data", None)
+        tree = ElementTree.fromstring(raw_xml)
+        hostname = tree.find('hostname').text
+
+        try:
+            node = node_models.Node.objects.get(hostname = hostname)
+            keys.append(node.public_key)
+            hostname_found = 1
+        except:
+            pass
+    return render_to_response("public/xml/get_node_keys.xml",
+                              RequestContext(request,
+                                             {
+                                                 'hostname_found': hostname_found,
+                                                 'keys': keys
+                                                 }
+                                             )
+                              )
     
 
 # HTML (XML SOON)

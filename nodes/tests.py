@@ -55,7 +55,7 @@ class XMLTest(TestCase):
         before_nodes = models.Node.objects.all().count()
         before_requests = models.DeleteRequest.objects.all().count()
         
-        args = {'node_data': examples.DELETE_NODE_DATA}
+        args = {'node_data': examples.HOSTNAME_NODE_DATA}
         response = self.client.post("/delete_node/",
                                     args,
                                     **self.request_headers
@@ -78,7 +78,7 @@ class XMLTest(TestCase):
         """
         self.test_right_upload_node()
         
-        args = {'node_data': examples.CONFIG_NODE_DATA}
+        args = {'node_data': examples.HOSTNAME_NODE_DATA}
         response = self.client.post("/get_node_configuration/",
                                     args,
                                     **self.request_headers
@@ -91,3 +91,20 @@ class XMLTest(TestCase):
 
     def test_right_config_file_generated(self):
         pass
+
+    def test_right_keys_retrieved(self):
+        """
+        Test to check if right config 
+        """
+        self.test_right_upload_node()
+        
+        args = {'node_data': examples.HOSTNAME_NODE_DATA}
+        response = self.client.post("/get_node_public_keys/",
+                                    args,
+                                    **self.request_headers
+                                    )
+        self.assertEqual(response.status_code,
+                         200)
+
+        tree = ElementTree.fromstring(response.content)
+        self.assertEqual('1', tree.find('key_request').text)

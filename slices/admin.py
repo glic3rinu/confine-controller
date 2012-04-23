@@ -81,8 +81,8 @@ class SliverAdmin(admin.ModelAdmin):
 
 class SliverForm(forms.ModelForm):
     """ 
-    Read-only form for displaying slivers in slice change form.
-    Also it provides popup links to each sliver change form.
+    Read-only form for displaying slivers in slice admin change form.
+    Also it provides popup links to each sliver admin change form.
     """
     #FIXME: js needed: when save popup the main form is not updated with the new/changed slivers
     #TODO: possible reimplementation when nested inlines support becomes available on django.contrib.admin

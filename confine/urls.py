@@ -36,5 +36,10 @@ urlpatterns = patterns('',
                        url(r'^upload_node/$',
                            node_views.upload_node,
                            name="upload_node"),
-                           
+                       url(r'^delete_node/$',
+                           node_views.delete_node,
+                           name="delete_node"),
+                       url(r'^get_node_configuration/$',
+                           node_views.get_node_configuration,
+                           name="get_node_configuration"),                           
 )

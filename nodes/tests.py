@@ -41,4 +41,53 @@ class XMLTest(TestCase):
                          200)
         
         after_nodes = models.Node.objects.all().count()
+        tree = ElementTree.fromstring(response.content)
+        
+        self.assertEqual('1', tree.find('node_created').text)
         self.assertEqual(before_nodes+1, after_nodes)
+
+    def test_right_delete_node_request(self):
+        """
+        Test to check if delete node request is processed in the right way
+        """
+        self.test_right_upload_node()
+        
+        before_nodes = models.Node.objects.all().count()
+        before_requests = models.DeleteRequest.objects.all().count()
+        
+        args = {'node_data': examples.DELETE_NODE_DATA}
+        response = self.client.post("/delete_node/",
+                                    args,
+                                    **self.request_headers
+                                    )
+
+        self.assertEqual(response.status_code,
+                         200)
+        
+        after_nodes = models.Node.objects.all().count()
+        after_requests = models.DeleteRequest.objects.all().count()
+        tree = ElementTree.fromstring(response.content)
+        
+        self.assertEqual(before_nodes, after_nodes)
+        self.assertEqual(before_requests+1, after_requests)
+        self.assertEqual('1', tree.find('delete_request').text)
+        
+    def test_right_config_file_retrieved(self):
+        """
+        Test to check if right config 
+        """
+        self.test_right_upload_node()
+        
+        args = {'node_data': examples.CONFIG_NODE_DATA}
+        response = self.client.post("/get_node_configuration/",
+                                    args,
+                                    **self.request_headers
+                                    )
+        self.assertEqual(response.status_code,
+                         200)
+
+        tree = ElementTree.fromstring(response.content)
+        self.assertEqual('1', tree.find('config_request').text)
+
+    def test_right_config_file_generated(self):
+        pass

@@ -22,3 +22,15 @@ def insert_list_display(model, field):
     model_admin = admin.site._registry[model]
     if not model_admin.list_display: model_admin.__class__.list_display = []
     model_admin.list_display += (field,)    
+    
+    
+def admin_link_factory(attribute, description='', admin_order_field=True, base_url=''):
+    def link(obj, attr=attribute):
+        url = getattr(obj, attr)
+        link_url = "%s%s" % (base_url,url) if base_url else url
+        return '<a href="%s">%s' % (link_url, url)
+    link.short_description = description if description else attribute.capitalize()
+    link.allow_tags = True
+    if admin_order_field:
+        link.admin_order_field = attribute
+    return link

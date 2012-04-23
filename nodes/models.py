@@ -1,9 +1,9 @@
 from django.db import models
 import settings
 
+
 class Node(models.Model):
-    hostname = models.CharField(max_length=255,
-                                unique = True)
+    hostname = models.CharField(max_length=255, unique=True)
     url = models.URLField("URL", blank=True)
     architecture = models.CharField(max_length=128, choices=settings.ARCHITECTURE_CHOICES, default=settings.DEFAULT_ARCHITECTURE)
     #TODO: use GeoDjango ? 
@@ -11,8 +11,8 @@ class Node(models.Model):
     longitude = models.CharField(max_length=255, blank=True)
     uci = models.FileField("UCI", upload_to=settings.UCI_DIR, blank=True)
     public_key = models.TextField()
-    status = models.CharField(max_length=32, choices=settings.NODE_STATUS_CHOICES, default=settings.DEFAULT_NODE_STATUS)
-    
+    state = models.CharField(max_length=32, choices=settings.NODE_STATE_CHOICES, default=settings.DEFAULT_NODE_STATE)
+        
     def __unicode__(self):
         return self.hostname
 
@@ -23,11 +23,10 @@ class Node(models.Model):
     @property
     def tinc_public_key(self):
         return self.public_key
-
-class DeleteRequest(models.Model):
-    node = models.ForeignKey("Node",
-                             verbose_name = "node")
     
+    @property
+    def local_ip(self):
+        return '"TODO: local ipv6 iface"'
     
 class Storage(models.Model):
     node = models.OneToOneField(Node)
@@ -53,17 +52,11 @@ class CPU(models.Model):
     class Meta:
         verbose_name_plural = 'CPU'
 
-class Link(models.Model):
+class Interface(models.Model):
     node = models.ForeignKey(Node)
-    status = models.CharField(max_length=32, choices=settings.LINK_STATUS_CHOICES, default=settings.DEFAULT_LINK_STATUS)
-    connected_to = models.ManyToManyField(Node, related_name='connected_to', blank=True)
+    type = models.CharField(max_length=255, choices=settings.IFACE_TYPE_CHOICES)
     
-
-class CommunityLink(Link): pass
-
-class GatewayLink(Link): pass
-
-class LocalLink(Link): pass
-
-class DirectLink(Link): pass
+    
+    def __unicode__(self):
+        return self.type
 

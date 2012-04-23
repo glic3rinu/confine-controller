@@ -11,14 +11,12 @@ CPU_REQUEST_CHOICES = getattr(settings, 'CPU_REQUEST_CHOICES', (
 DEFAULT_CPU_REQUEST = getattr(settings, 'DEFAULT_CPU_REQUEST', 'weighted')
 
 NETWORK_REQUESRT_CHOICES = getattr(settings, 'NETWORK_REQUESRT_CHOICES', (
-    ('public', 'Public'),
     ('isolated', 'Isolated'),
     ('passive', 'Passive'),
-    ('RAW', 'RAW'),
+    ('raw', 'RAW'),
 ))
     
 DEFAULT_NETWORK_REQUEST = getattr(settings, 'DEFAULT_NETWORK_REQUEST', 'public')
-
 
 STORAGE_CHOICES = getattr(settings, 'STORAGE_CHOICES', (
    ('debian-squeeze-amd64', 'Debian Squeeze amd64'),
@@ -27,15 +25,20 @@ STORAGE_CHOICES = getattr(settings, 'STORAGE_CHOICES', (
 DEFAULT_STORAGE = getattr(settings, 'DEFAULT_STORAGE', 'openwrt-backfire-amd64')
 
 
-ONLINE = 'ONLINE'
-OFFLINE = 'OFFLINE'
+ALLOCATED = 'ALLOCATED'
+DEPLOYED = 'DEPLOYED'
+STARTED = 'STARTED'
 
-STATUS_CHOICES = getattr(settings, 'STATUS_CHOICES', (
-    (ONLINE, 'ONLINE'),
-    (OFFLINE, 'OFFLINE'),))
+STATE_CHOICES = getattr(settings, 'STATE_CHOICES', (
+    (ALLOCATED, 'ALLOCATED'),
+    (DEPLOYED, 'DEPLOYED'),
+    (STARTED, 'STARTED'),
+    
+))
 
-DEFAULT_SLICE_STATUS = getattr(settings, 'DEFAULT_SLICE_STATUS', ONLINE)
-DEFAULT_SLIVER_STATUS = getattr(settings, 'DEFAULT_SLICE_STATUS', ONLINE)
+DEFAULT_SLICE_STATE = getattr(settings, 'DEFAULT_SLICE_STATE', ALLOCATED)
+DEFAULT_SLIVER_STATE = getattr(settings, 'DEFAULT_SLICE_STATE', ALLOCATED)
 
 
 CODE_DIR = getattr(settings, 'CODE_DIR', 'code') 
+TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', 'templates')

@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
-from nodes.models import Node
+from nodes.models import Node, Interface
 import settings 
 
 class Slice(models.Model):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
-    status = models.CharField(max_length=16, choices=settings.STATUS_CHOICES, default=settings.DEFAULT_SLICE_STATUS)
+    state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLICE_STATE)
+    template = models.FileField(upload_to=settings.TEMPLATE_DIR, blank=True)
     code = models.FileField(upload_to=settings.CODE_DIR, blank=True)
     
     def __unicode__(self):
@@ -15,7 +16,7 @@ class Slice(models.Model):
 class Sliver(models.Model):
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    status = models.CharField(max_length=16, choices=settings.STATUS_CHOICES, default=settings.DEFAULT_SLIVER_STATUS)
+    state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE)
     
     def __unicode__(self):
         return "%s:%s" % (self.slice, self.node)

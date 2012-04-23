@@ -2,7 +2,8 @@ from django.db import models
 import settings
 
 class Node(models.Model):
-    hostname = models.CharField(max_length=255)
+    hostname = models.CharField(max_length=255,
+                                unique = True)
     url = models.URLField("URL", blank=True)
     architecture = models.CharField(max_length=128, choices=settings.ARCHITECTURE_CHOICES, default=settings.DEFAULT_ARCHITECTURE)
     #TODO: use GeoDjango ? 

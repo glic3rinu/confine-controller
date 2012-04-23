@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from nodes import settings
 from nodes import models as node_models
+from nodes import utils
 # XML ONLY
 
 @csrf_exempt
@@ -56,20 +57,105 @@ def upload_node(request):
 def delete_node(request):
     """
     Delete request for node X
+    Input format:
+    <xml>
+    <node>
+    <hostname>hostname</hostname>
+    </node>
+    Output format:
+    <xml>
+    <response>
+    <delete_request>status</delete_request>
+    </response>
+
+    Status:
+    1 -> ok
+    0 -> problem
     """
-    pass
+    node_deleted = 0
+    if request.method == "POST":
+        raw_xml = request.POST.get("node_data", None)
+        tree = ElementTree.fromstring(raw_xml)
+        hostname = tree.find('hostname').text
+
+        try:
+            node = node_models.Node.objects.get(hostname = hostname)
+            delete_request = node_models.DeleteRequest(node = node)
+            delete_request.save()
+            node_deleted = 1
+        except:
+            pass
+    return render_to_response("public/xml/delete_node.xml",
+                              RequestContext(request,
+                                             {
+                                                 'node_deleted': node_deleted,
+                                                 }
+                                             )
+                              )
 
 def get_node_configuration(request):
     """
     Retrieve the node configuration file
+    Input format:
+    <xml>
+    <node>
+    <hostname>hostname</hostname>
+    </node>
+    Output format:
+    <xml>
+    <response>
+    <config_request>status</config_request>
+    <node_config>config</node_config>
+    </response>
+
+    Status:
+    1 -> ok
+    0 -> problem
     """
-    pass
+    hostname_found = 0
+    config = ""
+    if request.method == "POST":
+        raw_xml = request.POST.get("node_data", None)
+        tree = ElementTree.fromstring(raw_xml)
+        hostname = tree.find('hostname').text
+
+        try:
+            node = node_models.Node.objects.get(hostname = hostname)
+            config = utils.load_node_config(node)
+            hostname_found = 1
+        except:
+            pass
+    return render_to_response("public/xml/get_node_configuration.xml",
+                              RequestContext(request,
+                                             {
+                                                 'hostname_found': hostname_found,
+                                                 'config': config
+                                                 }
+                                             )
+                              )
 
 def get_node_public_keys(request):
     """
     Retrieve public keys of node users
+    <xml>
+    <node>
+    <hostname>hostname</hostname>
+    </node>
+    Output format:
+    <xml>
+    <response>
+    <key_request>status</config_request>
+    <node_keys>
+    <node_key>key</node_key>
+    <node_key>key</node_key>
+    </node_keys>
+    </response>
+
+    Status:
+    1 -> ok
+    0 -> problem
     """
-    pass
+    
 
 # HTML (XML SOON)
 def index(request):

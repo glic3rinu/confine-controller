@@ -1,7 +1,7 @@
 from django.contrib import admin
 from models import Slice, Sliver, MemoryRequest, StorageRequest, CPURequest, NetworkRequest
-from utils.widgets import ShowText
-from utils.admin import admin_link_factory
+from confine_utils.widgets import ShowText
+from confine_utils.admin import admin_link_factory
 from django import forms 
 import settings 
 from django.utils.html import escape

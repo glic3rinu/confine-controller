@@ -15,6 +15,8 @@ from nodes import utils
 
 from xml.etree import ElementTree
 
+from django.contrib.auth.models import User
+
 class SimpleTest(TestCase):
     def test_basic_addition(self):
         """
@@ -110,3 +112,90 @@ class XMLTest(TestCase):
 
         tree = ElementTree.fromstring(response.content)
         self.assertEqual('1', tree.find('key_request').text)
+
+
+class HTMLTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.request_headers = { 'HTTP_HOST': 'myhost.com' }
+        
+    def test_index(self):
+        """
+        Test to check if index is beign returned without conflicts
+        """
+        args = {}
+        response = self.client.get("/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_node_index(self):
+        """
+        Test to check if index is beign returned without conflicts
+        """
+        args = {}
+        response = self.client.get("/node_index/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_create_slice(self):
+        """
+        Test to check if index is beign returned without conflicts
+        """
+        node_id = self.create_node()
+        username, password = self.create_user()
+        user = self.client.login(username=username, password=password)
+        
+        args = {}
+        response = self.client.get("/create_slice/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+
+
+
+        args = {'nodes': [node_id], 'name': 'test'}
+        response = self.client.post("/create_slice/",
+                                    args,
+                                    **self.request_headers
+                                    )
+        self.assertRedirects(response,
+                             '/show_own_slices/')
+
+    def test_show_own_slices(self):
+        """
+        Test to check if index is beign returned without conflicts
+        """
+        username, password = self.create_user()
+        user = self.client.login(username=username, password=password)
+        
+        args = {}
+        response = self.client.get("/show_own_slices/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def create_user(self,
+                    username = "fakename",
+                    mail = "fake@pukkared.com",
+                    password = "mypassword"):
+        User.objects.create_user(username, mail, password)
+        return username, password
+
+    def create_node(self,
+                    hostname = "host",
+                    url = "host.host.eu"):
+        node = models.Node(hostname = hostname,
+                           url = url)
+        node.save()
+        return node.id

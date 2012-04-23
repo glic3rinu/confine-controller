@@ -214,6 +214,7 @@ def create_slice(request):
     Create a new slice for the given nodes
     """
     if request.method == "POST":
+        import pdb; pdb.set_trace()
         form = forms.NewSliceForm(request.POST)
         if form.is_valid():
             c_data = form.cleaned_data

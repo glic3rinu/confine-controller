@@ -11,6 +11,8 @@ from django.test.client import Client
 from nodes import models
 from nodes import examples
 
+from nodes import utils
+
 from xml.etree import ElementTree
 
 class SimpleTest(TestCase):

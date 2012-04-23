@@ -1,4 +1,5 @@
-# Create your views here.
+# -*- coding: utf-8 -*-
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from xml.etree import ElementTree
@@ -9,6 +10,9 @@ from django.views.decorators.csrf import csrf_exempt
 from nodes import settings
 from nodes import models as node_models
 from nodes import utils
+from nodes import forms
+
+from slices import models as slice_models
 # XML ONLY
 
 @csrf_exempt
@@ -209,11 +213,28 @@ def create_slice(request):
     """
     Create a new slice for the given nodes
     """
-    nodes = node_models.Node.objects.all()
+    if request.method == "POST":
+        form = forms.NewSliceForm(request.POST)
+        if form.is_valid():
+            c_data = form.cleaned_data
+            nodes = c_data.get('nodes', [])
+            if len(nodes) > 0:
+                c_slice = slice_models.Slice(name = c_data.get('name'),
+                                             user = request.user,)
+                c_slice.save()
+                for node in nodes:
+                    c_node = node_models.Node.objects.get(id = node)
+                    c_sliver = slice_models.Sliver(slice = c_slice,
+                                                   node = c_node)
+                    c_sliver.save()
+                return HttpResponseRedirect("/show_own_slices/")
+            
+    else:
+        form = forms.NewSliceForm()
     return render_to_response("public/create_slice.html",
                               RequestContext(request,
                                              {
-                                                 'nodes': nodes
+                                                 'form': form,
                                                  }
                                              )
                               )

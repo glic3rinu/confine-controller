@@ -3,13 +3,17 @@
 {% block content %}
 <form action="" method="POST">
   {% csrf_token %}
-<p>
-  {% for node in nodes %}
-  <label>
-    {{ node.hostname }}: <input type="checkbox" value="{{ node.id }}">
-  </label>
-  {% endfor %}
-</p>
+
+  <div class="field">
+    {{ form.name.label_tag }}
+    {{ form.name }}
+  </div>
+  <div class="field">
+    {{ form.nodes }}
+  </div>
+
+  <input type="submit" value="submit"/>
+
 </form>
 
 {% if request.user.is_authenticated %}

@@ -10,13 +10,17 @@ CPU_REQUEST_CHOICES = getattr(settings, 'CPU_REQUEST_CHOICES', (
     
 DEFAULT_CPU_REQUEST = getattr(settings, 'DEFAULT_CPU_REQUEST', 'weighted')
 
+PUBLIC = 'public'
+ISOLATED = 'isolated'
+
 NETWORK_REQUESRT_CHOICES = getattr(settings, 'NETWORK_REQUESRT_CHOICES', (
-    ('isolated', 'Isolated'),
-    ('passive', 'Passive'),
+    (PUBLIC, 'Public'),
+    (ISOLATED, 'Isolated'),
+#    ('passive', 'Passive'),
 #    ('raw', 'RAW'),
 ))
     
-DEFAULT_NETWORK_REQUEST = getattr(settings, 'DEFAULT_NETWORK_REQUEST', 'public')
+DEFAULT_NETWORK_REQUEST = getattr(settings, 'DEFAULT_NETWORK_REQUEST', PUBLIC)
 
 STORAGE_CHOICES = getattr(settings, 'STORAGE_CHOICES', (
    ('debian-squeeze-amd64', 'Debian Squeeze amd64'),
@@ -44,3 +48,4 @@ CODE_DIR = getattr(settings, 'CODE_DIR', 'code')
 TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', '/home/controller/controller/media/templates')
 
 MAC_PREFIX = getattr(settings, 'MAC_PREFIX', '06:ab')
+IPV6_PREFIX = getattr(settings, 'IPV6_PREFIX', 'X:Y:Z')

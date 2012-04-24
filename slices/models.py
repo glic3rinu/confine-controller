@@ -34,6 +34,11 @@ class Sliver(models.Model):
         if not self.pk: self._provide_number()
         super(Sliver, self).save(*args, **kwargs)
 
+    @property
+    def ip_address(self):
+        id = hex(self.id)[2:]
+        return "%s:ffff::%s:0" % (settings.IPV6_PREFIX, id)
+
 
 class MemoryRequest(models.Model):
     sliver = models.OneToOneField(Sliver)
@@ -90,4 +95,13 @@ class NetworkRequest(models.Model):
         interface = (('0' * (2-len(interface))) + interface)[0:2]
         return "%s:%s:%s:%s" % (settings.MAC_PREFIX, node, sliver, interface)
         
+    @property
+    def ip_address(self):
+        if self.type == settings.PUBLIC:
+            node = hex(self.sliver.node.id)[2:]
+            sliver = hex(self.sliver.id)[2:]
+            interface = hex(self.number)[2:]
+            return "%s:%s::%s:%s" % (settings.IPV6_PREFIX, node, sliver, interface)
+        return 'unassigned'
         
+

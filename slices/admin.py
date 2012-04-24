@@ -40,12 +40,14 @@ class CPURequestInline(admin.TabularInline):
 
 class NetworkRequestInlineForm(forms.ModelForm):
     mac_address = forms.CharField(label="MAC Address", widget=ShowText(), initial='unassigned')
+    ip_address = forms.CharField(label="IP Address", widget=ShowText(), initial='unasigned')
     
     def __init__(self, *args, **kwargs):
         super(NetworkRequestInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             instance = kwargs['instance']
             self.initial['mac_address'] = instance.mac_address
+            self.initial['ip_address'] = instance.ip_address
 
 class NetworkRequestInline(admin.TabularInline):
     model = NetworkRequest
@@ -55,7 +57,13 @@ class NetworkRequestInline(admin.TabularInline):
 
 class SliverForm(forms.ModelForm):
     state = forms.CharField(label="State", widget=ShowText(), initial=settings.DEFAULT_SLIVER_STATE)
-    
+    ip_address = forms.CharField(label="Internal IP Address", widget=ShowText(), required=False, initial='unasigned')
+
+    def __init__(self, *args, **kwargs):
+        super(SliverForm, self).__init__(*args, **kwargs)
+        if 'instance' in kwargs:
+            instance = kwargs['instance']
+            self.initial['ip_address'] = instance.ip_address
 
 class SliverAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'slice', 'node', 'cpurequest', 'memoryrequest', 'storagerequest', colored_state]

@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from nodes import settings
 from nodes import models as node_models
-from nodes import utils
+from nodes import node_utils as utils
 from nodes import forms
 
 from slices import models as slice_models
@@ -47,7 +47,7 @@ def upload_node(request):
         node = node_models.Node(hostname = hostname,
                                 url = url,
                                 architecture = architecture,
-                                status = settings.PROJECTED)
+                                state = settings.PROJECTED)
         node.save()
         node_created = 1
     return render_to_response("public/xml/upload_node.xml",
@@ -214,7 +214,6 @@ def create_slice(request):
     Create a new slice for the given nodes
     """
     if request.method == "POST":
-        import pdb; pdb.set_trace()
         form = forms.NewSliceForm(request.POST)
         if form.is_valid():
             c_data = form.cleaned_data

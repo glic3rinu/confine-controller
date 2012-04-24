@@ -27,6 +27,10 @@ class Node(models.Model):
     @property
     def local_ip(self):
         return '"TODO: local ipv6 iface"'
+
+class DeleteRequest(models.Model):
+    node = models.ForeignKey("Node",
+                             verbose_name = "node")
     
 class Storage(models.Model):
     node = models.OneToOneField(Node)

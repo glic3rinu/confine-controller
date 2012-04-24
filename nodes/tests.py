@@ -11,7 +11,7 @@ from django.test.client import Client
 from nodes import models
 from nodes import examples
 
-from nodes import utils
+from nodes import node_utils as utils
 
 from xml.etree import ElementTree
 
@@ -27,7 +27,7 @@ class SimpleTest(TestCase):
 class XMLTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.request_headers = { 'HTTP_HOST': 'myhost.com' }
+        self.request_headers = { 'HTTP_HOST': 'testserver' }
         
     def test_right_upload_node(self):
         """
@@ -117,7 +117,7 @@ class XMLTest(TestCase):
 class HTMLTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.request_headers = { 'HTTP_HOST': 'myhost.com' }
+        self.request_headers = { 'HTTP_HOST': 'testserver' }
         
     def test_index(self):
         """

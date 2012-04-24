@@ -43,7 +43,7 @@ class NetworkRequestInline(admin.TabularInline):
 
 
 class SliverForm(forms.ModelForm):
-    state = forms.CharField(label="State", widget=ShowText(bold=True), initial=settings.DEFAULT_SLIVER_STATE)
+    state = forms.CharField(label="State", widget=ShowText(), initial=settings.DEFAULT_SLIVER_STATE)
     
 
 class SliverAdmin(admin.ModelAdmin):

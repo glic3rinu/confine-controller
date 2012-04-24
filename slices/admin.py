@@ -42,11 +42,15 @@ class NetworkRequestInline(admin.TabularInline):
     extra = 0
 
 
+class SliverForm(forms.ModelForm):
+    state = forms.CharField(label="State", widget=ShowText(bold=True), initial=settings.DEFAULT_SLIVER_STATE)
+    
+
 class SliverAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'slice', 'node', 'cpurequest', 'memoryrequest', 'storagerequest', colored_state]
     list_filter = ['storagerequest__type', 'cpurequest__type', 'networkrequest__type', 'state']
     inlines = [CPURequestInline, MemoryRequestInline, StorageRequestInline, NetworkRequestInline]
-
+    form = SliverForm
 
     def response_change(self, request, obj):
         """
@@ -79,7 +83,7 @@ class SliverAdmin(admin.ModelAdmin):
         return super(SliverAdmin, self).response_change(request, obj)
 
 
-class SliverForm(forms.ModelForm):
+class SliverInlineForm(forms.ModelForm):
     """ 
     Read-only form for displaying slivers in slice admin change form.
     Also it provides popup links to each sliver admin change form.
@@ -97,7 +101,7 @@ class SliverForm(forms.ModelForm):
         fields = []
     
     def __init__(self, *args, **kwargs):
-        super(SliverForm, self).__init__(*args, **kwargs)
+        super(SliverInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             instance = kwargs['instance']
             sliver_change = reverse('admin:slices_sliver_change', args=(instance.pk,))
@@ -108,11 +112,11 @@ class SliverForm(forms.ModelForm):
             self.initial['state'] = mark_safe(colored_state(instance))
 
     
-
 class SliverInline(admin.TabularInline):
     model = Sliver
-    form = SliverForm
+    form = SliverInlineForm
     max_num = 0    
+
 
 def users(slice):
     return slice.user.username

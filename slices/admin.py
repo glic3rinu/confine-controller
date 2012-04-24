@@ -57,13 +57,17 @@ class NetworkRequestInline(admin.TabularInline):
 
 class SliverForm(forms.ModelForm):
     state = forms.CharField(label="State", widget=ShowText(), initial=settings.DEFAULT_SLIVER_STATE)
-    ip_address = forms.CharField(label="Internal IP Address", widget=ShowText(), required=False, initial='unasigned')
+    ipv4_address = forms.CharField(label="Internal IPv4 Address", widget=ShowText(), required=False, initial='unasigned')
+    ipv6_address = forms.CharField(label="Internal IPv6 Address", widget=ShowText(), required=False, initial='unasigned')
 
+    
     def __init__(self, *args, **kwargs):
         super(SliverForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             instance = kwargs['instance']
-            self.initial['ip_address'] = instance.ip_address
+            self.initial['ipv4_address'] = instance.ipv4_address
+            self.initial['ipv6_address'] = instance.ipv6_address
+
 
 class SliverAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'slice', 'node', 'cpurequest', 'memoryrequest', 'storagerequest', colored_state]

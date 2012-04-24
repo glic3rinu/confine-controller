@@ -35,10 +35,13 @@ class Sliver(models.Model):
         super(Sliver, self).save(*args, **kwargs)
 
     @property
-    def ip_address(self):
+    def ipv4_address(self):
+        return "%s.%s" % (settings.IPV4_PREFIX, self.id)
+
+    @property
+    def ipv6_address(self):
         id = hex(self.id)[2:]
         return "%s:ffff::%s:0" % (settings.IPV6_PREFIX, id)
-
 
 class MemoryRequest(models.Model):
     sliver = models.OneToOneField(Sliver)

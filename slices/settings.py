@@ -49,3 +49,5 @@ TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', '/home/controller/controller/me
 
 MAC_PREFIX = getattr(settings, 'MAC_PREFIX', '06:ab')
 IPV6_PREFIX = getattr(settings, 'IPV6_PREFIX', 'X:Y:Z')
+IPV4_PREFIX = getattr(settings, 'IPV4_PREFIX', '192.168.157')
+

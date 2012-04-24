@@ -18,6 +18,9 @@ class Sliver(models.Model):
     node = models.ForeignKey(Node)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE)
     
+    class Meta:
+        unique_together = ('slice', 'node')
+    
     def __unicode__(self):
         return "%s:%s" % (self.slice, self.node)
     

@@ -3,7 +3,7 @@ from models import Node, Storage, Memory, CPU, Interface
 from django import forms
 import settings
 from django.utils.html import escape
-from utils.admin import admin_link_factory
+from confine_utils.admin import admin_link_factory
 
 class StorageInlineForm(forms.ModelForm):
     types = forms.MultipleChoiceField(choices=settings.STORAGE_CHOICES)

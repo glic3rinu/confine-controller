@@ -18,6 +18,7 @@ class Sliver(models.Model):
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE)
+    number = models.IntegerField(blank=True)
     
     class Meta:
         unique_together = ('slice', 'node')
@@ -25,7 +26,15 @@ class Sliver(models.Model):
     def __unicode__(self):
         return "%s:%s" % (self.slice, self.node)
     
-    
+    def _provide_number(self):
+        try: self.number = self.__class__._default_manager.filter(node=self.node).order_by('-number')[0].number + 1
+        except IndexError: self.number = 1     
+
+    def save(self, *args, **kwargs):
+        if not self.pk: self._provide_number()
+        super(Sliver, self).save(*args, **kwargs)
+
+
 class MemoryRequest(models.Model):
     sliver = models.OneToOneField(Sliver)
     min = models.BigIntegerField()
@@ -52,11 +61,33 @@ class CPURequest(models.Model):
 
 class NetworkRequest(models.Model):
     sliver = models.ForeignKey(Sliver)
+    number = models.IntegerField(blank=True)
     type = models.CharField(max_length=16, choices=settings.NETWORK_REQUESRT_CHOICES, default=settings.DEFAULT_NETWORK_REQUEST)
-    min_rate = models.IntegerField(null=True)
-    max_rate = models.IntegerField(null=True)
-    max_throughput = models.IntegerField(null=True)
     
     def __unicode__(self):
-        return "%s:(%s-%s):%s" % (self.type, self.min_rate, self.max_rate, self.max_throughput)    
+        return self.name
 
+    def _provide_number(self):
+        try: self.number = self.__class__._default_manager.filter(sliver__node=self.sliver.node).order_by('-number')[0].number + 1
+        except IndexError: self.number = 0        
+
+    def save(self, *args, **kwargs):
+        if not self.pk: self._provide_number()
+        super(NetworkRequest, self).save(*args, **kwargs)
+
+    @property
+    def name(self):
+        return "eth%s" % self.number 
+
+    @property
+    def mac_address(self):
+        node = hex(self.sliver.node.id)[2:]
+        node = ('0' * (4-len(node))) + node
+        node = "%s:%s" % (node[0:2], node[2:4])
+        sliver = hex(self.sliver.number)[2:]
+        sliver = (('0' * (2-len(sliver))) + sliver)[0:2]
+        interface = hex(self.number)[2:]
+        interface = (('0' * (2-len(interface))) + interface)[0:2]
+        return "%s:%s:%s:%s" % (settings.MAC_PREFIX, node, sliver, interface)
+        
+        

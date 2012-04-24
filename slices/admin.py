@@ -37,10 +37,21 @@ class CPURequestInline(admin.TabularInline):
     model = CPURequest
     max_num = 0
 
+
+class NetworkRequestInlineForm(forms.ModelForm):
+    mac_address = forms.CharField(label="MAC Address", widget=ShowText(), initial='unassigned')
+    
+    def __init__(self, *args, **kwargs):
+        super(NetworkRequestInlineForm, self).__init__(*args, **kwargs)
+        if 'instance' in kwargs:
+            instance = kwargs['instance']
+            self.initial['mac_address'] = instance.mac_address
+
 class NetworkRequestInline(admin.TabularInline):
     model = NetworkRequest
+    form = NetworkRequestInlineForm
     extra = 0
-
+    
 
 class SliverForm(forms.ModelForm):
     state = forms.CharField(label="State", widget=ShowText(), initial=settings.DEFAULT_SLIVER_STATE)
@@ -67,7 +78,7 @@ class SliverAdmin(admin.ModelAdmin):
         msg = 'The %(name)s "%(obj)s" was changed successfully.' % {'name': force_unicode(verbose_name), 'obj': force_unicode(obj)}
         
         if "_continue" in request.POST:
-            self.message_user(request, msg + ' ' + _("You may edit it again below."))
+            self.message_user(request, msg + ' ' + "You may edit it again below.")
             if "_popup" in request.REQUEST:
                 return HttpResponseRedirect(request.path + "?_popup=1")
             else:

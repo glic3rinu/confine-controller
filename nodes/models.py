@@ -58,9 +58,11 @@ class CPU(models.Model):
 
 class Interface(models.Model):
     node = models.ForeignKey(Node)
-    type = models.CharField(max_length=255, choices=settings.IFACE_TYPE_CHOICES)
-    
+    name = models.CharField(max_length=8, help_text='e.g. eth1')
+    type = models.CharField(max_length=255, choices=settings.IFACE_TYPE_CHOICES, default=settings.DEFAULT_IFACE_TYPE)
     
     def __unicode__(self):
-        return self.type
+        return self.name
+
+
 

@@ -42,3 +42,5 @@ DEFAULT_SLIVER_STATE = getattr(settings, 'DEFAULT_SLICE_STATE', ALLOCATED)
 
 CODE_DIR = getattr(settings, 'CODE_DIR', 'code') 
 TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', '/home/controller/controller/media/templates')
+
+MAC_PREFIX = getattr(settings, 'MAC_PREFIX', '06:ab')

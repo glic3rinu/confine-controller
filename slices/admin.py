@@ -11,8 +11,9 @@ from django.utils.encoding import force_unicode
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.html import escapejs
 
-STATE_COLORS = { settings.ALLOCATED: "darkorange",
-                 settings.DEPLOYED: "magenta",
+STATE_COLORS = { settings.INSERTED: "darkorange",
+                 settings.ALLOCATED: "magenta",
+                 settings.DEPLOYED: "blue",
                  settings.STARTED: "green" 
                }
 
@@ -38,16 +39,24 @@ class CPURequestInline(admin.TabularInline):
     max_num = 0
 
 
+#MAC_RE = r'^([0-9a-fA-F]{2}([:-]?|$)){6}$'
+#mac_re = re.compile(MAC_RE)
+
 class NetworkRequestInlineForm(forms.ModelForm):
-    mac_address = forms.CharField(label="MAC Address", widget=ShowText(), initial='unassigned')
-    ip_address = forms.CharField(label="IP Address", widget=ShowText(), initial='unasigned')
+    _mac_address = forms.CharField(label="MAC Address", widget=ShowText(), initial='unassigned', required=False)
+    _ipv4_address = forms.CharField(label="IPv4 Address", widget=ShowText(), initial='unasigned', required=False)
+    _ipv6_address = forms.CharField(label="IPv6 Address", widget=ShowText(), initial='unasigned', required=False)
+    
+    class Meta:
+        fields = ('number', 'type')
     
     def __init__(self, *args, **kwargs):
         super(NetworkRequestInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             instance = kwargs['instance']
-            self.initial['mac_address'] = instance.mac_address
-            self.initial['ip_address'] = instance.ip_address
+            self.initial['_mac_address'] = instance.mac_address if instance.mac_address else 'unassigned'
+            self.initial['_ipv4_address'] = instance.ipv4_address if instance.ipv4_address else 'unassigned'
+            self.initial['_ipv6_address'] = instance.ipv6_address if instance.ipv6_address else 'unassigned'
 
 class NetworkRequestInline(admin.TabularInline):
     model = NetworkRequest
@@ -55,25 +64,36 @@ class NetworkRequestInline(admin.TabularInline):
     extra = 0
     
 
-class SliverForm(forms.ModelForm):
-    state = forms.CharField(label="State", widget=ShowText(), initial=settings.DEFAULT_SLIVER_STATE)
-    ipv4_address = forms.CharField(label="Internal IPv4 Address", widget=ShowText(), required=False, initial='unasigned')
-    ipv6_address = forms.CharField(label="Internal IPv6 Address", widget=ShowText(), required=False, initial='unasigned')
+#class SliverForm(forms.ModelForm):
+#    state = forms.CharField(label="State", widget=ShowText(), initial=settings.DEFAULT_SLIVER_STATE)
+#    ipv4_address = forms.CharField(label="Internal IPv4 Address", widget=ShowText(), required=False, initial='unasigned')
+#    ipv6_address = forms.CharField(label="Internal IPv6 Address", widget=ShowText(), required=False, initial='unasigned')
 
-    
-    def __init__(self, *args, **kwargs):
-        super(SliverForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
-            instance = kwargs['instance']
-            self.initial['ipv4_address'] = instance.ipv4_address
-            self.initial['ipv6_address'] = instance.ipv6_address
+#    
+#    def __init__(self, *args, **kwargs):
+#        super(SliverForm, self).__init__(*args, **kwargs)
+#        if 'instance' in kwargs:
+#            instance = kwargs['instance']
+#            self.initial['ipv4_address'] = instance.ipv4_address
+#            self.initial['ipv6_address'] = instance.ipv6_address
 
 
 class SliverAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'slice', 'node', 'cpurequest', 'memoryrequest', 'storagerequest', colored_state]
     list_filter = ['storagerequest__type', 'cpurequest__type', 'networkrequest__type', 'state']
     inlines = [CPURequestInline, MemoryRequestInline, StorageRequestInline, NetworkRequestInline]
-    form = SliverForm
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('slice', 'node')}
+        ),
+    )
+
+
+    def get_fieldsets(self, request, obj=None):
+        if not obj:
+            return self.add_fieldsets
+        return super(SliverAdmin, self).get_fieldsets(request, obj)
 
     def response_change(self, request, obj):
         """

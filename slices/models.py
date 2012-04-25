@@ -17,8 +17,10 @@ class Slice(models.Model):
 class Sliver(models.Model):
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE)
+    state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE, blank=True)
     number = models.IntegerField(blank=True)
+    ipv4_address = models.GenericIPAddressField(protocol='IPv4', blank=True, null=True)
+    ipv6_address = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
     
     class Meta:
         unique_together = ('slice', 'node')
@@ -31,17 +33,19 @@ class Sliver(models.Model):
         except IndexError: self.number = 1     
 
     def save(self, *args, **kwargs):
-        if not self.pk: self._provide_number()
+        if not self.pk: 
+            self._provide_number()
+            if not self.state: self.state=settings.DEFAULT_SLIVER_STATE
         super(Sliver, self).save(*args, **kwargs)
 
-    @property
-    def ipv4_address(self):
-        return "%s.%s" % (settings.IPV4_PREFIX, self.id)
+#    @property
+#    def ipv4_address(self):
+#        return "%s.%s" % (settings.IPV4_PREFIX, self.id)
 
-    @property
-    def ipv6_address(self):
-        id = hex(self.id)[2:]
-        return "%s:ffff::%s:0" % (settings.IPV6_PREFIX, id)
+#    @property
+#    def ipv6_address(self):
+#        id = hex(self.id)[2:]
+#        return "%s:ffff::%s:0" % (settings.IPV6_PREFIX, id)
 
 class MemoryRequest(models.Model):
     sliver = models.OneToOneField(Sliver)
@@ -67,11 +71,15 @@ class CPURequest(models.Model):
     def __unicode__(self):
         return "%s:%s" % (self.type, self.value)
 
+
 class NetworkRequest(models.Model):
     sliver = models.ForeignKey(Sliver)
     number = models.IntegerField(blank=True)
     type = models.CharField(max_length=16, choices=settings.NETWORK_REQUESRT_CHOICES, default=settings.DEFAULT_NETWORK_REQUEST)
-    
+    mac_address = models.CharField(max_length=18, blank=True)
+    ipv4_address = models.GenericIPAddressField(protocol='IPv4', blank=True, null=True)
+    ipv6_address = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
+
     def __unicode__(self):
         return self.name
 
@@ -87,24 +95,24 @@ class NetworkRequest(models.Model):
     def name(self):
         return "eth%s" % self.number 
 
-    @property
-    def mac_address(self):
-        node = hex(self.sliver.node.id)[2:]
-        node = ('0' * (4-len(node))) + node
-        node = "%s:%s" % (node[0:2], node[2:4])
-        sliver = hex(self.sliver.number)[2:]
-        sliver = (('0' * (2-len(sliver))) + sliver)[0:2]
-        interface = hex(self.number)[2:]
-        interface = (('0' * (2-len(interface))) + interface)[0:2]
-        return "%s:%s:%s:%s" % (settings.MAC_PREFIX, node, sliver, interface)
-        
-    @property
-    def ip_address(self):
-        if self.type == settings.PUBLIC:
-            node = hex(self.sliver.node.id)[2:]
-            sliver = hex(self.sliver.id)[2:]
-            interface = hex(self.number)[2:]
-            return "%s:%s::%s:%s" % (settings.IPV6_PREFIX, node, sliver, interface)
-        return 'unassigned'
+#    @property
+#    def mac_address(self):
+#        node = hex(self.sliver.node.id)[2:]
+#        node = ('0' * (4-len(node))) + node
+#        node = "%s:%s" % (node[0:2], node[2:4])
+#        sliver = hex(self.sliver.number)[2:]
+#        sliver = (('0' * (2-len(sliver))) + sliver)[0:2]
+#        interface = hex(self.number)[2:]
+#        interface = (('0' * (2-len(interface))) + interface)[0:2]
+#        return "%s:%s:%s:%s" % (settings.MAC_PREFIX, node, sliver, interface)
+#        
+#    @property
+#    def ip_address(self):
+#        if self.type == settings.PUBLIC:
+#            node = hex(self.sliver.node.id)[2:]
+#            sliver = hex(self.sliver.id)[2:]
+#            interface = hex(self.number)[2:]
+#            return "%s:%s::%s:%s" % (settings.IPV6_PREFIX, node, sliver, interface)
+#        return 'unassigned'
         
 

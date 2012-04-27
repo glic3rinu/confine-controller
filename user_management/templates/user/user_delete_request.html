@@ -1,0 +1,7 @@
+{% extends "site_base.html" %}
+
+{% block content %}
+<p> Your are here to delete your account. Are you sure to continue?</p>
+<a href="{% url user_delete_request %}?delete=yes">Yes</a>
+<a href="{% url user_delete_request %}?delete=no">No</a>
+{% endblock %}

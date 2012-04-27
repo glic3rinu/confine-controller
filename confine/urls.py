@@ -5,7 +5,8 @@ from django.conf import settings
 from django.contrib import admin
 admin.autodiscover()
 
-from nodes import views as node_views
+from nodes.urls import urlpatterns as nodes_urlpatterns
+from user_management.urls import urlpatterns as user_management_urlpatterns
 
 urlpatterns = patterns('',
     # Examples:
@@ -19,31 +20,7 @@ urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),
                        url(r'^admin_tools/', include('admin_tools.urls')),
                        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-
-                       url(r'^$',
-                           node_views.index,
-                           name="index"),
-                       url(r'^node_index/$',
-                           node_views.node_index,
-                           name="node_index"),
-                       url(r'^create_slice/$',
-                           node_views.create_slice,
-                           name="create_slice"),
-                       url(r'^show_own_slices/$',
-                           node_views.show_own_slices,
-                           name="show_own_slices"),
-
-                       url(r'^upload_node/$',
-                           node_views.upload_node,
-                           name="upload_node"),
-                       url(r'^delete_node/$',
-                           node_views.delete_node,
-                           name="delete_node"),
-                       url(r'^get_node_configuration/$',
-                           node_views.get_node_configuration,
-                           name="get_node_configuration"),
-                       url(r'^get_node_public_keys/$',
-                           node_views.get_node_public_keys,
-                           name="get_node_public_keys"),                       
 )
 
+urlpatterns += nodes_urlpatterns
+urlpatterns += user_management_urlpatterns

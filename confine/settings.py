@@ -140,6 +140,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
           
     'user_profile',
+    'user_management',
     'nodes',
     'slices',
 )
@@ -210,3 +211,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
 }
 
 
+# User login settings
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+LOGIN_REDIRECT_URL = '/logged_in/'

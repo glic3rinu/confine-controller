@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Node, Storage, Memory, CPU, Interface
+from models import Node, Storage, Memory, CPU, Interface, DeleteRequest
 from django import forms
 import settings
 from django.utils.html import escape
@@ -54,6 +54,8 @@ class NodeAdmin(admin.ModelAdmin):
     )
 
 
+class DeleteRequestAdmin(admin.ModelAdmin):
+    model = DeleteRequest
 
 admin.site.register(Node, NodeAdmin)
-
+admin.site.register(DeleteRequest, DeleteRequestAdmin)

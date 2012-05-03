@@ -31,6 +31,9 @@ class Node(models.Model):
 class DeleteRequest(models.Model):
     node = models.ForeignKey("Node",
                              verbose_name = "node")
+
+    def __unicode__(self):
+        return self.node.hostname
     
 class Storage(models.Model):
     node = models.OneToOneField(Node)

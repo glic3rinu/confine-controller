@@ -92,7 +92,7 @@ def user_profile(request):
     return render_to_response('user/user_profile.html', 
                               RequestContext(request, {'form': form}))
 
-
+@login_required
 def change_user_password(request):
     """
     Shows a form to change user password

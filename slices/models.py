@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from nodes.models import Node, Interface
 import settings 
 
+from slices import managers
+
 class Slice(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User)
@@ -10,6 +12,8 @@ class Slice(models.Model):
     template = models.FilePathField(path=settings.TEMPLATE_DIR, recursive=True)
     write_size = models.IntegerField(default=0)
     code = models.FileField(upload_to=settings.CODE_DIR, blank=True)
+
+    objects = managers.SliceManager()
     
     def __unicode__(self):
         return self.name

@@ -1,7 +1,6 @@
 from django.db import models
 import settings
 
-
 class Node(models.Model):
     hostname = models.CharField(max_length=255, unique=True)
     url = models.URLField("URL", blank=True)
@@ -9,12 +8,16 @@ class Node(models.Model):
     #TODO: use GeoDjango ? 
     latitude = models.CharField(max_length=255, blank=True)
     longitude = models.CharField(max_length=255, blank=True)
-    uci = models.FileField("UCI", upload_to=settings.UCI_DIR, blank=True)
+    uci = models.TextField(blank=True)
     public_key = models.TextField()
     state = models.CharField(max_length=32, choices=settings.NODE_STATE_CHOICES, default=settings.DEFAULT_NODE_STATE)
+    ip = models.IPAddressField()
         
     def __unicode__(self):
         return self.hostname
+    
+    def port(self):
+        return "2222"
 
     @property
     def tinc_name(self):
@@ -27,6 +30,8 @@ class Node(models.Model):
     @property
     def local_ip(self):
         return '"TODO: local ipv6 iface"'
+
+    
 
 class DeleteRequest(models.Model):
     node = models.ForeignKey("Node",

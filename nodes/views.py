@@ -13,6 +13,8 @@ from nodes import node_utils as utils
 from nodes import forms
 
 from slices import models as slice_models
+
+from nodes import api
 # XML ONLY
 
 @csrf_exempt
@@ -23,7 +25,7 @@ def upload_node(request):
     <xml>
     <node>
     <hostname>hostname</hostname>
-    <url>url</url>
+    <ip>ip</ip>
     <architecture>architecture</architecture>
     </node>
     Output format:
@@ -40,16 +42,9 @@ def upload_node(request):
     if request.method == "POST":
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
-        hostname = tree.find('hostname').text
-        url = tree.find('url').text
-        architecture = tree.find('architecture').text
-        # TODO: complete parse tree
-        node = node_models.Node(hostname = hostname,
-                                url = url,
-                                architecture = architecture,
-                                state = settings.PROJECTED)
-        node.save()
-        node_created = 1
+        params = utils.extract_params(tree, ['hostname', 'ip', 'architecture'])
+        if api.create_node(params):
+            node_created = 1
     return render_to_response("public/xml/upload_node.xml",
                               RequestContext(request,
                                              {
@@ -80,15 +75,10 @@ def delete_node(request):
     if request.method == "POST":
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
-        hostname = tree.find('hostname').text
+        params = utils.extract_params(tree, ['hostname'])
+        if api.delete_node(params):
+            node_deleted = 1 
 
-        try:
-            node = node_models.Node.objects.get(hostname = hostname)
-            delete_request = node_models.DeleteRequest(node = node)
-            delete_request.save()
-            node_deleted = 1
-        except:
-            pass
     return render_to_response("public/xml/delete_node.xml",
                               RequestContext(request,
                                              {

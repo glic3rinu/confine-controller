@@ -12,6 +12,8 @@ from nodes import models
 from nodes import examples
 
 from nodes import node_utils as utils
+from nodes import api
+from nodes import settings as node_settings
 
 from xml.etree import ElementTree
 
@@ -23,6 +25,42 @@ class SimpleTest(TestCase):
         Tests that 1 + 1 always equals 2.
         """
         self.assertEqual(1 + 1, 2)
+
+class APITest(TestCase):
+    def setUp(self):
+        pass
+
+    def test_create_node(self):
+        before_nodes = models.Node.objects.all().count()
+        self.assertTrue(api.create_node(examples.NODE_CREATION))
+        after_nodes = models.Node.objects.all().count()
+        self.assertEqual(before_nodes+1, after_nodes)
+
+    def test_delete_node(self):
+        node1 = self.create_test_node()
+        before_requests = models.DeleteRequest.objects.all().count()
+        self.assertTrue(api.delete_node({'hostname': node1.hostname}))
+        after_requests = models.DeleteRequest.objects.all().count()
+        self.assertEqual(before_requests+1, after_requests)
+
+        hostname = "test2"
+        ip = "2.2.2.2"
+        node2 = self.create_test_node(hostname = hostname, ip = ip)
+        before_requests = models.DeleteRequest.objects.all().count()
+        self.assertTrue(api.delete_node({'ip': ip}))
+        after_requests = models.DeleteRequest.objects.all().count()
+        self.assertEqual(before_requests+1, after_requests)
+
+    def create_test_node(self,
+                         hostname = "hostname",
+                         ip = "1.1.1.1",
+                         architecture = "x86_generic"):
+        node = models.Node(hostname = hostname,
+                                ip = ip,
+                                architecture = architecture,
+                                state = node_settings.ONLINE)
+        node.save()
+        return node
 
 class XMLTest(TestCase):
     def setUp(self):
@@ -194,8 +232,8 @@ class HTMLTest(TestCase):
 
     def create_node(self,
                     hostname = "host",
-                    url = "host.host.eu"):
+                    ip = "1.1.1.1"):
         node = models.Node(hostname = hostname,
-                           url = url)
+                           ip = ip)
         node.save()
         return node.id

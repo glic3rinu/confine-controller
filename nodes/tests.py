@@ -15,6 +15,8 @@ from nodes import node_utils as utils
 from nodes import api
 from nodes import settings as node_settings
 
+from slices import models as slices_models
+
 from xml.etree import ElementTree
 
 from django.contrib.auth.models import User
@@ -31,12 +33,18 @@ class APITest(TestCase):
         pass
 
     def test_create_node(self):
+        """
+        Test create_node api call
+        """
         before_nodes = models.Node.objects.all().count()
         self.assertTrue(api.create_node(examples.NODE_CREATION))
         after_nodes = models.Node.objects.all().count()
         self.assertEqual(before_nodes+1, after_nodes)
 
     def test_delete_node(self):
+        """
+        Test delete_node api call
+        """
         node1 = self.create_test_node()
         before_requests = models.DeleteRequest.objects.all().count()
         self.assertTrue(api.delete_node({'hostname': node1.hostname}))
@@ -51,6 +59,69 @@ class APITest(TestCase):
         after_requests = models.DeleteRequest.objects.all().count()
         self.assertEqual(before_requests+1, after_requests)
 
+    def test_create_slice(self):
+        """
+        Test create slice api call
+        """
+        node1 = self.create_test_node(hostname = "hostname1",
+                                 ip = "1.1.1.1")
+        node2 = self.create_test_node(hostname = "hostname2",
+                                 ip = "1.1.1.2")
+        node3 = self.create_test_node(hostname = "hostname3",
+                                 ip = "1.1.1.3")
+        before_slices = slices_models.Slice.objects.all().count()
+        before_slivers = slices_models.Sliver.objects.all().count()
+
+        name = 'slice_test'
+        user = self.create_user()
+        slice_params = {
+            'nodes': [node1.id, node2.id, node3.id],
+            'name': name,
+            'user': user
+            }
+        self.assertTrue(api.create_slice(slice_params))
+
+        after_slices = slices_models.Slice.objects.all().count()
+        after_slivers = slices_models.Sliver.objects.all().count()
+
+        self.assertEqual(before_slices+1, after_slices)
+        self.assertEqual(before_slivers+3, after_slivers)
+
+        c_slice = slices_models.Slice.objects.get(name = name)
+        self.assertEqual(c_slice.sliver_set.all().count(), 3)
+
+        self.assertEqual(node1.sliver_set.all().count(), 1)
+        self.assertEqual(node2.sliver_set.all().count(), 1)
+        self.assertEqual(node3.sliver_set.all().count(), 1)
+
+    def test_show_slices(self):
+        """
+        Test show_slices api call
+        """
+        user1 = self.create_user()
+        user2 = self.create_user(username = "user2",
+                                 mail = "user2@test.com")
+
+        name1 = "name1"
+        name2 = "name2"
+        name3 = "name3"
+        
+        slice1 = self.create_slice(user = user1, name=name1)
+        slice1 = self.create_slice(user = user1, name=name2)
+        slice1 = self.create_slice(user = user2, name=name3)
+
+        user1_slices = api.show_slices({'user': user1})
+        user2_slices = api.show_slices({'user': user2})
+
+        self.assertEqual(user1_slices.count(), 2)
+        self.assertEqual(user2_slices.count(), 1)
+
+    def create_slice(self, user, name):
+        new_slice = slices_models.Slice(name = name,
+                                       user = user)
+        new_slice.save()
+        return new_slice
+        
     def create_test_node(self,
                          hostname = "hostname",
                          ip = "1.1.1.1",
@@ -61,6 +132,13 @@ class APITest(TestCase):
                                 state = node_settings.ONLINE)
         node.save()
         return node
+    
+    def create_user(self,
+                    username = "fakename",
+                    mail = "fake@pukkared.com",
+                    password = "mypassword"):
+        user = User.objects.create_user(username, mail, password)
+        return user
 
 class XMLTest(TestCase):
     def setUp(self):
@@ -74,7 +152,7 @@ class XMLTest(TestCase):
         before_nodes = models.Node.objects.all().count()
 
         args = {'node_data': examples.UPLOAD_NODE_DATA}
-        response = self.client.post("/upload_node/",
+        response = self.client.post("/upload_node/xml/",
                                     args,
                                     **self.request_headers
                                     )
@@ -98,7 +176,7 @@ class XMLTest(TestCase):
         before_requests = models.DeleteRequest.objects.all().count()
         
         args = {'node_data': examples.HOSTNAME_NODE_DATA}
-        response = self.client.post("/delete_node/",
+        response = self.client.post("/delete_node/xml/",
                                     args,
                                     **self.request_headers
                                     )
@@ -121,7 +199,7 @@ class XMLTest(TestCase):
         self.test_right_upload_node()
         
         args = {'node_data': examples.HOSTNAME_NODE_DATA}
-        response = self.client.post("/get_node_configuration/",
+        response = self.client.post("/get_node_configuration/xml/",
                                     args,
                                     **self.request_headers
                                     )
@@ -141,7 +219,7 @@ class XMLTest(TestCase):
         self.test_right_upload_node()
         
         args = {'node_data': examples.HOSTNAME_NODE_DATA}
-        response = self.client.post("/get_node_public_keys/",
+        response = self.client.post("/get_node_public_keys/xml/",
                                     args,
                                     **self.request_headers
                                     )

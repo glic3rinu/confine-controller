@@ -18,7 +18,7 @@ from nodes import api
 # XML ONLY
 
 @csrf_exempt
-def upload_node(request):
+def upload_node_xml(request):
     """
     Upload node function. POST request. Set to PROJECTED state
     Input format:
@@ -53,7 +53,7 @@ def upload_node(request):
                                              )
                               )
 
-def delete_node(request):
+def delete_node_xml(request):
     """
     Delete request for node X
     Input format:
@@ -87,7 +87,7 @@ def delete_node(request):
                                              )
                               )
 
-def get_node_configuration(request):
+def get_node_configuration_xml(request):
     """
     Retrieve the node configuration file
     Input format:
@@ -128,7 +128,7 @@ def get_node_configuration(request):
                                              )
                               )
 
-def get_node_public_keys(request):
+def get_node_public_keys_xml(request):
     """
     Retrieve public keys of node users
     <xml>
@@ -208,15 +208,11 @@ def create_slice(request):
         if form.is_valid():
             c_data = form.cleaned_data
             nodes = c_data.get('nodes', [])
-            if len(nodes) > 0:
-                c_slice = slice_models.Slice(name = c_data.get('name'),
-                                             user = request.user,)
-                c_slice.save()
-                for node in nodes:
-                    c_node = node_models.Node.objects.get(id = node)
-                    c_sliver = slice_models.Sliver(slice = c_slice,
-                                                   node = c_node)
-                    c_sliver.save()
+            if api.create_slice({
+                'nodes': nodes,
+                'user': request.user,
+                'name': c_data.get('name')
+                }):
                 return HttpResponseRedirect("/show_own_slices/")
             
     else:
@@ -234,7 +230,7 @@ def show_own_slices(request):
     """
     Shows all user slices
     """
-    slices = request.user.slice_set.all()
+    slices = api.show_slices({'user': request.user})
     return render_to_response("public/show_own_slices.html",
                               RequestContext(request,
                                              {
@@ -242,3 +238,41 @@ def show_own_slices(request):
                                                  }
                                              )
                               )
+
+@login_required
+def upload_node(request):
+    """
+    Create a new node
+    """
+    if request.method == "POST":
+        form = forms.NodeForm(request.POST)
+        if form.is_valid():
+            c_data = form.cleaned_data
+            data = {
+                'hostname': c_data.get('hostname'),
+                'ip': c_data.get('ip'),
+                'architecture': c_data.get('architecture')
+                    }
+            if api.create_node(data):
+                return HttpResponseRedirect("/node_index/")
+    else:
+        form = forms.NodeForm()
+    return render_to_response("public/upload_node.html",
+                              RequestContext(request,
+                                             {
+                                                 'form': form,
+                                                 }
+                                             )
+                              )
+
+@login_required
+def delete_node(request):
+    pass
+
+@login_required
+def get_node_configuration(request):
+    pass
+
+@login_required
+def get_node_public_keys(request):
+    pass

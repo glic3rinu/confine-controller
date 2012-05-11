@@ -116,6 +116,37 @@ class APITest(TestCase):
         self.assertEqual(user1_slices.count(), 2)
         self.assertEqual(user2_slices.count(), 1)
 
+    def test_get_node_configuration(self):
+        """
+        Test get_node_configuration api call
+        """
+        user = self.create_user()
+        name = "slice1"
+        node = self.create_test_node()
+        slice1 = self.create_slice(user, name)
+        sliver1 = self.create_sliver(node, slice1)
+
+        params = {'hostname': node.hostname}
+        self.assertNotEqual(api.get_node_configuration(params), "")
+
+    def test_get_node_public_keys(self):
+        """
+        Test get_node_public_keys api call
+        """
+        pass
+
+    def test_get_slice_public_keys(self):
+        """
+        Test get_slice_public_keys api call
+        """
+        pass
+
+    def create_sliver(self, c_node, c_slice):
+        sliver = slices_models.Sliver(slice = c_slice,
+                                      node = c_node)
+        sliver.save()
+        return sliver
+
     def create_slice(self, user, name):
         new_slice = slices_models.Slice(name = name,
                                        user = user)

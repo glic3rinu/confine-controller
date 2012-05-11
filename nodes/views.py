@@ -112,13 +112,10 @@ def get_node_configuration_xml(request):
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
         hostname = tree.find('hostname').text
-
-        try:
-            node = node_models.Node.objects.get(hostname = hostname)
-            config = utils.load_node_config(node)
+        config = api.get_node_configuration({'hostname': hostname})
+        if config:
             hostname_found = 1
-        except:
-            pass
+        
     return render_to_response("public/xml/get_node_configuration.xml",
                               RequestContext(request,
                                              {
@@ -155,13 +152,9 @@ def get_node_public_keys_xml(request):
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
         hostname = tree.find('hostname').text
-
-        try:
-            node = node_models.Node.objects.get(hostname = hostname)
-            keys.append(node.public_key)
+        keys = api.get_node_public_keys({'hostname': hostname})
+        if keys:
             hostname_found = 1
-        except:
-            pass
     return render_to_response("public/xml/get_node_keys.xml",
                               RequestContext(request,
                                              {
@@ -267,12 +260,66 @@ def upload_node(request):
 
 @login_required
 def delete_node(request):
-    pass
+    """
+    Create a new delete request for a node
+    """
+    if request.method == "POST":
+        form = forms.DeleteRequestForm(request.POST)
+        if form.is_valid():
+            c_data = form.cleaned_data
+            data = {
+                'hostname': c_data.get('node').hostname,
+                    }
+            if api.delete_node(data):
+                return HttpResponseRedirect("/node_index/")
+    else:
+        form = forms.DeleteRequestForm()
+    return render_to_response("public/delete_node.html",
+                              RequestContext(request,
+                                             {
+                                                 'form': form,
+                                                 }
+                                             )
+                              )
 
 @login_required
-def get_node_configuration(request):
-    pass
+def get_node_configuration(request, node_hostname):
+    """
+    Displays the current node configuration
+    """
+    config = api.get_node_configuration({'hostname': node_hostname})
+    return render_to_response("public/get_node_configuration.html",
+                              RequestContext(request,
+                                             {
+                                                 'config': config,
+                                                 }
+                                             )
+                              )
 
 @login_required
-def get_node_public_keys(request):
-    pass
+def get_node_public_keys(request, node_hostname):
+    """
+    Displays all node related keys
+    """
+    keys = api.get_node_public_keys({'hostname': node_hostname})
+    return render_to_response("public/get_node_public_keys.html",
+                              RequestContext(request,
+                                             {
+                                                 'keys': keys,
+                                                 }
+                                             )
+                              )
+
+@login_required
+def get_slice_public_keys(request, slice_name):
+    """
+    Displays all node related keys
+    """
+    keys = api.get_slice_public_keys({'name': slice_name})
+    return render_to_response("public/get_slice_public_keys.html",
+                              RequestContext(request,
+                                             {
+                                                 'keys': keys,
+                                                 }
+                                             )
+                              )

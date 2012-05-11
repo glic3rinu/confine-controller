@@ -1,6 +1,9 @@
 <html>
   <head>
     <script type="text/javascript"
+            src="/static/js/jquery-1.6.1.min.js">
+    </script>
+    <script type="text/javascript"
             src="/static/js/public.js">
     </script>
   </head>
@@ -9,7 +12,6 @@
     <div id="menu">
       <a href="{% url node_index %}">Node index</a>
       {% if request.user.is_authenticated %}
-      <a href="{% url create_slice %}">Create Slice</a>
       <a href="{% url show_own_slices %}">Show own slices</a>
       <a href="{% url user_profile %}">Profile</a>
       <a href="{% url logout %}">Logout</a>

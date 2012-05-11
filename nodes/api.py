@@ -89,3 +89,48 @@ def show_slices(slice_params = {}):
     if user:
         return user.slice_set.all()
     return []
+
+def get_node_configuration(node_params = {}):
+    """
+    Provides a way to retrieve a node configuration
+    through all slice config snippets.
+    Accepted parameters:
+    - hostname
+    """
+    hostname = node_params.get("hostname", None)
+    try:
+        node = node_models.Node.objects.get(hostname = hostname)
+        return node_utils.load_node_config(node)
+    except:
+        pass
+    return ""
+
+def get_node_public_keys(node_params = {}):
+    """
+    Provides a way to retrieve all public keys related
+    to a given node
+    Accepted parameters:
+    - hostname
+    """
+    hostname = node_params.get("hostname", None)
+    try:
+        slices = slice_models.Slice.objects.filter(sliver__node__hostname = hostname)
+        return map(lambda a: a.user.get_profile().ssh_key, slices)
+    except:
+        pass
+    return []
+
+def get_slice_public_keys(node_params = {}):
+    """
+    Provides a way to retrieve all public keys related
+    to a given slice
+    Accepted parameters:
+    - name
+    """
+    name = node_params.get("name", None)
+    try:
+        c_slice = slice_models.Slice.objects.get(name = name)
+        return [c_slice.user.get_profile().ssh_key]
+    except:
+        pass
+    return []

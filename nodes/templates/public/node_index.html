@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% block content %}
-<select name="node_id">
+<select name="node_id" onchange="show_info_box(this);">
   {% for node in nodes %}
   <option value="{{ node.id }}">
     {{ node.hostname }}
@@ -11,7 +11,7 @@
 
 <div id="node_info_container">
   {% for node in nodes %}
-  <div id="node_info_{{ node.id }}" style="display:none">
+  <div id="info_box_{{ node.id }}" class="info_box" style="display:none">
     <p>
       <span style="font-weight:bold;">
         hostname:
@@ -32,7 +32,21 @@
       </span>
       {{ node.architecture }}
     </p>
+
+    <p>
+      <a href="{% url get_node_configuration node.hostname %}">
+        Get Node Config file
+      </a>
+      <a href="{% url get_node_public_keys node.hostname %}">
+        Get Node Public Keys
+      </a>
+    </p>
   </div>
   {% endfor %}
+</div>
+
+<div id="node_menu">
+  <a href="{% url upload_node %}">Upload Node</a>
+  <a href="{% url delete_node %}">Delete Node</a>
 </div>
 {% endblock %}

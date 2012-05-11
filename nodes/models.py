@@ -9,7 +9,7 @@ class Node(models.Model):
     latitude = models.CharField(max_length=255, blank=True)
     longitude = models.CharField(max_length=255, blank=True)
     uci = models.TextField(blank=True)
-    public_key = models.TextField()
+    public_key = models.TextField(blank=True)
     state = models.CharField(max_length=32, choices=settings.NODE_STATE_CHOICES, default=settings.DEFAULT_NODE_STATE)
     ip = models.IPAddressField()
         

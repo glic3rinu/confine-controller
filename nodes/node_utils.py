@@ -14,7 +14,7 @@ def load_node_config(node):
     for sl in slices:
         node_config += NODE_CONFIG_TEMPLATE % {
             'sliver_id': "%.12i" % sl.id,
-            'ssh_key': sl.user.ssh_key,
+            'ssh_key': sl.user.get_profile().ssh_key,
             'fs_template_url': 'http://downloads.openwrt.org/backfire/10.03.1-rc6/x86_generic/openwrt-x86-generic-rootfs.tar.gz',
             'exp_data_url': 'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
             'if00_type': 'internal',

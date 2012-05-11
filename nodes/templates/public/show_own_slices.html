@@ -1,7 +1,8 @@
 {% extends "site_base.html" %}
 
 {% block content %}
-  {% for slice in slices %}
+{% for slice in slices %}
+<div>
   <div>
     <h3>Info</h3>
     <p>{{ slice.name }}</p>
@@ -13,6 +14,15 @@
     <p>{{ sliver.node.hostname }}</p>
     {% endfor %}
   </div>
-  {% endfor %}
+  <p>
+    <a href="{% url get_slice_public_keys slice.name %}">
+      Get Slice Public Keys
+    </a>
+  </p>
+</div>
+{% endfor %}
 
+<div id="slice_menu">
+  <a href="{% url create_slice %}">Create Slice</a>
+</div>
 {% endblock %}

@@ -158,9 +158,9 @@ class APITest(TestCase):
                          ip = "1.1.1.1",
                          architecture = "x86_generic"):
         node = models.Node(hostname = hostname,
-                                ip = ip,
-                                architecture = architecture,
-                                state = node_settings.ONLINE)
+                           ip = ip,
+                           architecture = architecture,
+                           state = node_settings.ONLINE)
         node.save()
         return node
     

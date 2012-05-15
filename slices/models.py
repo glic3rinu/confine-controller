@@ -1,13 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes import generic
+
 from nodes.models import Node, Interface
+
 import settings 
 
 from slices import managers
 
+from user_management import models as user_m_models
+
+
 class Slice(models.Model):
+    global_permissions = generic.GenericRelation(user_m_models.GlobalPermission,
+                                                 verbose_name = "global permission")
+    discrete_permissions = generic.GenericRelation(user_m_models.DiscretePermission,
+                                                 verbose_name = "discrete permission")
+    
     name = models.CharField(max_length=255, unique=True)
-    user = models.ForeignKey(User)
+    research_group = models.ForeignKey(user_m_models.ResearchGroup)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLICE_STATE)
     template = models.FilePathField(path=settings.TEMPLATE_DIR, recursive=True)
     write_size = models.IntegerField(default=0)
@@ -19,6 +30,10 @@ class Slice(models.Model):
         return self.name
     
 class Sliver(models.Model):
+    global_permissions = generic.GenericRelation(user_m_models.GlobalPermission,
+                                                 verbose_name = "global permission")
+    discrete_permissions = generic.GenericRelation(user_m_models.DiscretePermission,
+                                                 verbose_name = "discrete permission")
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE, blank=True)

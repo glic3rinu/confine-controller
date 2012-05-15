@@ -46,7 +46,7 @@ class NodeAdmin(admin.ModelAdmin):
     inlines = [CPUInline, MemoryInline, StorageInline, InterfaceInline]
     fieldsets = (
         (None, {
-            'fields': (('hostname',), ('state',), ('architecture',), ('public_key',), ('uci',))
+            'fields': (('owner'), ('hostname',), ('ip',), ('state',), ('architecture',), ('public_key',), ('uci',))
         }),
         ('Community node', {
             'fields': (('url',), ('latitude',), ('longitude',))

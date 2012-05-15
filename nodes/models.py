@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth import models as auth_models
+
 import settings
 
 class Node(models.Model):
@@ -11,7 +13,11 @@ class Node(models.Model):
     uci = models.TextField(blank=True)
     public_key = models.TextField(blank=True)
     state = models.CharField(max_length=32, choices=settings.NODE_STATE_CHOICES, default=settings.DEFAULT_NODE_STATE)
-    ip = models.IPAddressField()
+    ip = models.IPAddressField(verbose_name = "ip")
+    owner = models.ForeignKey(auth_models.User,
+                              verbose_name = "owner",
+                              blank = True,
+                              null = True)
         
     def __unicode__(self):
         return self.hostname

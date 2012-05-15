@@ -1,4 +1,5 @@
 from django.conf import settings
+import os
 
 ugettext = lambda s: s
 
@@ -47,7 +48,7 @@ DEFAULT_SLIVER_STATE = getattr(settings, 'DEFAULT_SLICE_STATE', INSERTED)
 
 
 CODE_DIR = getattr(settings, 'CODE_DIR', 'code') 
-TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', '/home/controller/controller/media/templates')
+TEMPLATE_DIR = getattr(settings, 'TEMPLATE_DIR', os.path.join(os.path.dirname(__file__), '../media/templates').replace('\\', '/'))
 
 MAC_PREFIX = getattr(settings, 'MAC_PREFIX', '06:ab')
 IPV6_PREFIX = getattr(settings, 'IPV6_PREFIX', 'X:Y:Z')

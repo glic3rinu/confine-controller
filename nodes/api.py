@@ -103,7 +103,7 @@ def get_node_configuration(node_params = {}):
         return node_utils.load_node_config(node)
     except:
         pass
-    return ""
+    return None
 
 def get_node_public_keys(node_params = {}):
     """
@@ -118,7 +118,7 @@ def get_node_public_keys(node_params = {}):
         return map(lambda a: a.user.get_profile().ssh_key, slices)
     except:
         pass
-    return []
+    return None
 
 def get_slice_public_keys(node_params = {}):
     """

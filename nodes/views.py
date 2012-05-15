@@ -113,7 +113,7 @@ def get_node_configuration_xml(request):
         tree = ElementTree.fromstring(raw_xml)
         hostname = tree.find('hostname').text
         config = api.get_node_configuration({'hostname': hostname})
-        if config:
+        if config != None:
             hostname_found = 1
         
     return render_to_response("public/xml/get_node_configuration.xml",
@@ -153,7 +153,7 @@ def get_node_public_keys_xml(request):
         tree = ElementTree.fromstring(raw_xml)
         hostname = tree.find('hostname').text
         keys = api.get_node_public_keys({'hostname': hostname})
-        if keys:
+        if keys != None:
             hostname_found = 1
     return render_to_response("public/xml/get_node_keys.xml",
                               RequestContext(request,

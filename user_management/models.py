@@ -40,7 +40,9 @@ class DeleteRequest(models.Model):
 class ResearchGroup(models.Model):
     # Relations
     users = models.ManyToManyField(auth_models.User,
-                                   verbose_name = "users")
+                                   verbose_name = "users",
+                                   blank = True,
+                                   null = True)
 
     # Attributes
     name = models.CharField(max_length = 150,
@@ -56,11 +58,13 @@ class ResearchGroup(models.Model):
 
 class Role(models.Model):
     # Relations
-    research_groups = models.ForeignKey("ResearchGroup",
+    research_group = models.ForeignKey("ResearchGroup",
                                         verbose_name = "research groups")
     users = models.ManyToManyField(auth_models.User,
                                    verbose_name = "users",
-                                   related_name = "roles")
+                                   related_name = "roles",
+                                   blank = True,
+                                   null = True)
 
     # Attributes
     name = models.CharField(max_length = 150,
@@ -73,10 +77,11 @@ class Role(models.Model):
         verbose_name = "role"
         verbose_name_plural = "roles"
 
-class DiscretePermission(models.Model):
+class ConfinePermission(models.Model):
     # Relations
-    user = models.ManyToManyField(auth_models.User,
-                                  verbose_name = "user",
+    role = models.ManyToManyField("Role",
+                                  verbose_name = "role",
+                                  related_name = "permissions",
                                   blank = True,
                                   null = True)
     content_type = models.ForeignKey(ContentType)
@@ -95,24 +100,5 @@ class DiscretePermission(models.Model):
     def __unicode__(self):
         return "%s" % self.name
     class Meta:
-        verbose_name = "discrete permission"
-        verbose_name_plural = "discrete permissions"
-
-class GlobalPermission(models.Model):
-    # Relations
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    entity = generic.GenericForeignKey('content_type', 'object_id')
-    
-    # Attributes
-    name = models.CharField(max_length = 150,
-                            verbose_name = "name")
-    permission = models.CharField(max_length = 10,
-                                  choices = settings.PERMISSIONS,
-                                  verbose_name = "permission")
-        
-    def __unicode__(self):
-        return "%s" % self.name
-    class Meta:
-        verbose_name = "global permission"
-        verbose_name_plural = "global permissions"
+        verbose_name = "confine permission"
+        verbose_name_plural = "confine permissions"

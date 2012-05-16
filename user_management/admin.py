@@ -14,13 +14,10 @@ class RoleAdminModel(admin.ModelAdmin):
     class Meta:
         model = models.Role
 
-class GlobalPermissionAdminModel(admin.ModelAdmin):
+class ConfinePermissionAdminModel(admin.ModelAdmin):
     class Meta:
-        model = models.GlobalPermission
+        model = models.ConfinePermission
 
-class DiscretePermissionAdminModel(admin.ModelAdmin):
-    class Meta:
-        model = models.DiscretePermission
 
 class ActivationRequestAdminModel(admin.ModelAdmin):
     actions = [admin_actions.activate_user]
@@ -36,5 +33,4 @@ admin.site.register(models.ActivationRequest, ActivationRequestAdminModel)
 admin.site.register(models.DeleteRequest, DeleteRequestAdminModel)
 admin.site.register(models.Role, RoleAdminModel)
 admin.site.register(models.ResearchGroup, ResearchGroupAdminModel)
-admin.site.register(models.DiscretePermission, DiscretePermissionAdminModel)
-admin.site.register(models.GlobalPermission, GlobalPermissionAdminModel)
+admin.site.register(models.ConfinePermission, ConfinePermissionAdminModel)

@@ -7,7 +7,6 @@ def has_permission(action, user):
     action is formed as following:
     objecttype_objectid_action
     """
-    import pdb; pdb.set_trace()
     if user.is_superuser:
         return True
     objecttype, objectid, perm = action.split("_")

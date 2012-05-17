@@ -12,6 +12,9 @@ from django.contrib.auth.models import User
 
 from user_management import forms
 from user_management import models
+from user_management import user_management_utils as utils
+
+from slices import models as slice_models
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
@@ -166,6 +169,44 @@ class UserManagementTest(TestCase):
         self.assertTrue(self.client.login(
             username=username,
             password=new_password))
+
+
+    def test_has_permission_system(self):
+        user, uname, passw, mail = self.create_user()
+        user2, uname2, passw2, mail2 = self.create_user(username = "username2",
+                                                        email = "username2@test.org")
+        user3, uname3, passw3, mail3 = self.create_user(username = "username3",
+                                                        email = "username3@test.org")
+        r1 = models.ResearchGroup(name = "r1")
+        r1.save()
+        r1.users.add(user)
+        r1.users.add(user2)
+
+        role1 = models.Role(research_group = r1,
+                            name = "role1")
+        role1.save()
+        role1.users.add(user)
+        role2 = models.Role(research_group = r1,
+                            name = "role2")
+        role2.save()
+        role2.users.add(user2)
+        role3 = models.Role(research_group = r1,
+                            name = "role3")
+        role3.save()
+
+        slice1 = self.create_slice(user)
+
+        perm_create = self.create_permission(slice1, "C", "C", [role1])
+        perm_read = self.create_permission(slice1, "R", "R", [role1, role2])
+        perm_update = self.create_permission(slice1, "U", "U", [role1])
+        perm_delete = self.create_permission(slice1, "D", "D", [role1])
+        perm_access = self.create_permission(slice1, "A", "A", [role1])
+        
+        
+        self.assertTrue(utils.has_permission("slice_%i_C" % slice1.id, user))
+        self.assertFalse(utils.has_permission("slice_%i_C" % slice1.id, user2))
+        self.assertTrue(utils.has_permission("slice_%i_R" % slice1.id, user2))
+                
         
     def create_user(self,
                     username = "username",
@@ -180,3 +221,24 @@ class UserManagementTest(TestCase):
         user.save()
         return [user, username, password, email]
         
+    def create_slice(self,
+                     user,
+                     name = "name"):
+        c_slice = slice_models.Slice(user = user,
+                                     name = name)
+        c_slice.save()
+        return c_slice
+
+    def create_permission(self,
+                          entity,
+                          name,
+                          permission,
+                          roles = []):
+        
+        perm = models.ConfinePermission(name = name,
+                                        permission = permission)
+        perm.entity = entity
+        perm.save()
+        for role in roles:
+            perm.role.add(role)
+        return perm

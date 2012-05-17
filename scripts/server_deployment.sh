@@ -8,7 +8,7 @@ prepare_image() {
     
     local FILE=$1
     
-    dd if=/dev/zero of=$FILE bs=1G count=5
+    dd if=/dev/zero of=$FILE bs=1G count=2
     mkfs.ext4 -F $FILE
 }
 
@@ -189,7 +189,7 @@ install_portal() {
     apt-get install -y libapache2-mod-wsgi rabbitmq-server git python-paramiko \
         screen python-pip python-psycopg2
 
-    # rabbitmq-server doesn't start automatically by default ...
+    # rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
     sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
     update-rc.d rabbitmq-server defaults
@@ -207,7 +207,7 @@ install_portal() {
     ln -s /usr/share/django-trunk/django/bin/django-admin.py /usr/bin
     pip install django-admin-tools django-fluent-dashboard south
 
-    # Installing MQ broker
+    # Installing and configuring MQ
     pip install django-celery
     wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' -O /etc/init.d/celeryd
     cat <<- EOF > /etc/default/celeryd
@@ -363,13 +363,13 @@ print_help () {
 		            where the container or chroot will be deployed
 		            
 		    -u, --user
-		            system user for the portal software it will create it if does not exists (default is confine)
+		            system user that will run the portal, it will be created if does not exists (default confine)
 		            
 		    -p, --password
-		            for the new user (default will be confine)
+		            password is needed if USER does not exists (default confine)
 
 		    -I, --install_path
-		            where the portal code will live (default ~user/controller)
+		            where the portal code will live (default ~USER/controller)
 		            		            
 		    -a, --arch
 		            when debootsraping i.e amd64, i686 ... (amd64 by default)
@@ -402,7 +402,8 @@ print_help () {
 		    #TODO: create db when correct db values are provided
 		    #TODO: virtualenv support for local deployment
 		    #TODO: modify settings.py according to DB and install_dir parameters
-		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu do
+		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
+		    #TODO: custom image size
 		EOF
 }
 
@@ -481,7 +482,8 @@ if [[ $TYPE != 'local' ]]; then
     if ( $image ); then 
         DIRECTORY="/tmp/raNDOM_point_$RANDOM"
         prepare_image $IMAGE
-        [ -e $DIRECTORY ] || { echo -e "\nErr. I'm affraid to continue: mount point $DIRECTORY already exists.\n" >&2; exit 1; }
+        [ -e $DIRECTORY ] && { echo -e "\nErr. I'm affraid to continue: mount point $DIRECTORY already exists.\n" >&2; exit 1; }
+        mkdir $DIRECTORY
         custom_mount -l $IMAGE $DIRECTORY
         trap "custom_umount -l $DIRECTORY; $image && rm -fr /tmp/raNDOM_point; exit 1;" INT TERM EXIT 
     fi

@@ -3,19 +3,64 @@
 {% block content %}
 {% for slice in slices %}
 <div>
-  <div>
-    <h3>Info</h3>
-    <p>{{ slice.name }}</p>
-    <p>{{ slice.status }}</p>
-  </div>
-  <div>
-    <h3>Slivers</h3>
+  <fieldset>
+    <legend>Info</legend>
+    <p>
+      <span style="font-weight:bold;">
+        name:
+      </span>
+      {{ slice.name }}
+    </p>
+    <p>
+      <span style="font-weight:bold;">
+        state:
+      </span>
+      {{ slice.state }}
+    </p>
+
+  </fieldset>
+  <fieldset>
+    <legend>Slivers</legend>
     {% for sliver in slice.sliver_set.all %}
-    <p>{{ sliver.node.hostname }}</p>
+    <fieldset>
+      <legend>Sliver on host {{ sliver.node.hostname }}</legend>
+      <p>
+        <span style="font-weight:bold;">
+          state:
+        </span>
+        {{ sliver.state }}
+      </p>
+      <p>
+        <span style="font-weight:bold;">
+          number:
+        </span>
+        {{ sliver.number }}
+      </p>
+      <fieldset>
+        <legend>Interfaces</legend>
+        {% for interface in sliver.interfaces.all %}
+        <fieldset>
+          <legend>Interface {{ forloop.counter }}</legend>
+          <p>
+            <span style="font-weight:bold;">
+              name:
+            </span>
+            {{ interface.name }}
+          </p>
+          <p>
+            <span style="font-weight:bold;">
+              type:
+            </span>
+            {{ interface.type }}
+          </p>          
+        </fieldset>
+        {% endfor %}
+      </fieldset>
+    </fieldset>
     {% endfor %}
-  </div>
+  </fieldset>
   <p>
-    <a href="{% url get_slice_public_keys slice.name %}">
+    <a href="{% url get_slice_public_keys slice.slug %}">
       Get Slice Public Keys
     </a>
   </p>

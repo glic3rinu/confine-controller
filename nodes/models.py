@@ -26,6 +26,10 @@ class Node(models.Model):
         return "2222"
 
     @property
+    def interface_ids(self):
+        return map(lambda a: unicode(a.id), self.interface_set.all())
+
+    @property
     def tinc_name(self):
         return "node_%s" % self.id
     
@@ -48,24 +52,34 @@ class DeleteRequest(models.Model):
     
 class Storage(models.Model):
     node = models.OneToOneField(Node)
-    types = models.CharField(max_length=128)
-    size = models.IntegerField()
+    types = models.CharField(max_length=128,
+                             null = True,
+                             blank = True,
+                             choices = settings.STORAGE_CHOICES)
+    size = models.IntegerField(null = True,
+                               blank = True)
 
     class Meta:
         verbose_name_plural = 'Storage'
 
 class Memory(models.Model):
     node = models.OneToOneField(Node)
-    size = models.BigIntegerField(null=True)
+    size = models.BigIntegerField(null=True,
+                                  blank = True)
 
     class Meta:
         verbose_name_plural = 'Memory'
 
 class CPU(models.Model):
     node = models.OneToOneField(Node)
-    model = models.CharField(max_length=64, blank=True)
-    number = models.IntegerField(default='1')
-    frequency = models.CharField(max_length=64, blank=True)
+    model = models.CharField(max_length=64,
+                             blank=True,
+                             null = True)
+    number = models.IntegerField(default='1',
+                                 null = True,
+                                 blank = True)
+    frequency = models.CharField(max_length=64, blank=True,
+                                 null = True)
 
     class Meta:
         verbose_name_plural = 'CPU'

@@ -41,6 +41,12 @@ class APITest(TestCase):
         after_nodes = models.Node.objects.all().count()
         self.assertEqual(before_nodes+1, after_nodes)
 
+    def test_get_nodes(self):
+        """
+        Test get_nodes api call
+        """
+        pass
+
     def test_delete_node(self):
         """
         Test delete_node api call
@@ -51,14 +57,7 @@ class APITest(TestCase):
         after_requests = models.DeleteRequest.objects.all().count()
         self.assertEqual(before_requests+1, after_requests)
 
-        hostname = "test2"
-        ip = "2.2.2.2"
-        node2 = self.create_test_node(hostname = hostname, ip = ip)
-        before_requests = models.DeleteRequest.objects.all().count()
-        self.assertTrue(api.delete_node({'ip': ip}))
-        after_requests = models.DeleteRequest.objects.all().count()
-        self.assertEqual(before_requests+1, after_requests)
-
+        
     def test_create_slice(self):
         """
         Test create slice api call

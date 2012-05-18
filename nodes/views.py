@@ -15,6 +15,9 @@ from nodes import forms
 from slices import models as slice_models
 
 from nodes import api
+
+from django.forms.models import modelformset_factory
+
 # XML ONLY
 
 @csrf_exempt
@@ -182,7 +185,7 @@ def node_index(request):
     """
     Shows all available nodes
     """
-    nodes = node_models.Node.objects.all()
+    nodes = api.get_nodes()
     return render_to_response("public/node_index.html",
                               RequestContext(request,
                                              {
@@ -201,8 +204,10 @@ def create_slice(request):
         if form.is_valid():
             c_data = form.cleaned_data
             nodes = c_data.get('nodes', [])
+            interfaces = request.POST.get("interfaces", [])
             if api.create_slice({
                 'nodes': nodes,
+                'interfaces': interfaces,
                 'user': request.user,
                 'name': c_data.get('name')
                 }):
@@ -237,23 +242,49 @@ def upload_node(request):
     """
     Create a new node
     """
+    InterfaceFormset = modelformset_factory(node_models.Interface,
+                                            extra = 1,
+                                            form = forms.InterfaceForm)
+    
     if request.method == "POST":
-        form = forms.NodeForm(request.POST)
-        if form.is_valid():
-            c_data = form.cleaned_data
+        node_form = forms.NodeForm(request.POST, prefix = "node")
+        storage_form = forms.StorageForm(request.POST,prefix = "storage")
+        memory_form = forms.MemoryForm(request.POST,prefix = "memory")
+        cpu_form = forms.CPUForm(request.POST,prefix = "cpu")
+        interface_formset = InterfaceFormset(request.POST, prefix = "interfaces")
+                                             
+        if node_form.is_valid() and storage_form.is_valid() and memory_form.is_valid() and cpu_form.is_valid() and interface_formset.is_valid():
+
+            node = node_form.save(commit = False)
+            storage = storage_form.save(commit = False)
+            memory = memory_form.save(commit = False)
+            cpu = cpu_form.save(commit = False)
+            interfaces = interface_formset.save(commit = False)
             data = {
-                'hostname': c_data.get('hostname'),
-                'ip': c_data.get('ip'),
-                'architecture': c_data.get('architecture')
+                'node': node,
+                'storage': storage,
+                'memory': memory,
+                'cpu': cpu,
+                'interfaces': interfaces
                     }
-            if api.create_node(data):
+            if api.set_node(data):
                 return HttpResponseRedirect("/node_index/")
     else:
-        form = forms.NodeForm()
+        node_form = forms.NodeForm(prefix = "node")
+        storage_form = forms.StorageForm(prefix = "storage")
+        memory_form = forms.MemoryForm(prefix = "memory")
+        cpu_form = forms.CPUForm(prefix = "cpu")
+        interface_formset = InterfaceFormset(prefix = "interfaces",
+                                             queryset = node_models.Interface.objects.none())
+        
     return render_to_response("public/upload_node.html",
                               RequestContext(request,
                                              {
-                                                 'form': form,
+                                                 'node_form': node_form,
+                                                 'storage_form': storage_form,
+                                                 'memory_form': memory_form,
+                                                 'cpu_form': cpu_form,
+                                                 'interface_formset': interface_formset
                                                  }
                                              )
                               )
@@ -311,11 +342,11 @@ def get_node_public_keys(request, node_hostname):
                               )
 
 @login_required
-def get_slice_public_keys(request, slice_name):
+def get_slice_public_keys(request, slice_slug):
     """
     Displays all node related keys
     """
-    keys = api.get_slice_public_keys({'name': slice_name})
+    keys = api.get_slice_public_keys({'slug': slice_slug})
     return render_to_response("public/get_slice_public_keys.html",
                               RequestContext(request,
                                              {

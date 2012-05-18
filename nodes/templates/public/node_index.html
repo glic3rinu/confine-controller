@@ -12,27 +12,96 @@
 <div id="node_info_container">
   {% for node in nodes %}
   <div id="info_box_{{ node.id }}" class="info_box" style="display:none">
-    <p>
-      <span style="font-weight:bold;">
-        hostname:
-      </span>
-      {{ node.hostname }}
-    </p>
+    <fieldset>
+      <legend>Node info</legend>
+      <p>
+        <span style="font-weight:bold;">
+          hostname:
+        </span>
+        {{ node.hostname }}
+      </p>
+      <p>
+        <span style="font-weight:bold;">
+          url:
+        </span>
+        {{ node.url }}
+      </p>
+      <p>
+        <span style="font-weight:bold;">
+          architecture:
+        </span>
+        {{ node.architecture }}
+      </p>
+    </fieldset>
 
-    <p>
-      <span style="font-weight:bold;">
-        url:
-      </span>
-      {{ node.url }}
-    </p>
+    <fieldset>
+      <legend>Storage</legend>
+      <p>
+        <span style="font-weight:bold;">
+          type:
+        </span>
+        {{ node.storage.types }}
+      </p>
+      <p>
+        <span style="font-weight:bold;">
+          size:
+        </span>
+        {{ node.storage.size }}
+      </p>
+    </fieldset>
 
-    <p>
-      <span style="font-weight:bold;">
-        architecture:
-      </span>
-      {{ node.architecture }}
-    </p>
+    <fieldset>
+      <legend>Memory</legend>
+      <p>
+        <span style="font-weight:bold;">
+          size:
+        </span>
+        {{ node.memory.size }}
+      </p>
+    </fieldset>
 
+    <fieldset>
+      <legend>CPU</legend>
+      <p>
+        <span style="font-weight:bold;">
+          model:
+        </span>
+        {{ node.cpu.model }}
+      </p>
+      <p>
+        <span style="font-weight:bold;">
+          number:
+        </span>
+        {{ node.cpu.number }}
+      </p>
+      <p>
+        <span style="font-weight:bold;">
+          frequency:
+        </span>
+        {{ node.cpu.frequency }}
+      </p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Interfaces</legend>
+      {% for interface in node.interface_set.all %}
+      <fieldset>
+        <legend>Interface {{ forloop.counter }}</legend>
+        <p>
+          <span style="font-weight:bold;">
+            name:
+          </span>
+          {{ interface.name }}
+        </p>
+        <p>
+          <span style="font-weight:bold;">
+            type:
+          </span>
+          {{ interface.type }}
+        </p>
+      </fieldset>
+      {% endfor %}
+    </fieldset>
     <p>
       <a href="{% url get_node_configuration node.hostname %}">
         Get Node Config file

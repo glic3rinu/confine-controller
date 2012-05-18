@@ -10,6 +10,8 @@ from slices import managers
 
 from user_management import models as user_m_models
 
+from django.template.defaultfilters import slugify
+
 
 class Slice(models.Model):
     confine_permissions = generic.GenericRelation(user_m_models.ConfinePermission,
@@ -17,6 +19,7 @@ class Slice(models.Model):
     
     
     name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(unique = True)
     user = models.ForeignKey(User)
     research_group = models.ForeignKey(user_m_models.ResearchGroup,
                                        blank = True,
@@ -30,10 +33,18 @@ class Slice(models.Model):
     
     def __unicode__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Slice, self).save(*args, **kwargs)
     
 class Sliver(models.Model):
     confine_permissions = generic.GenericRelation(user_m_models.ConfinePermission,
                                                   verbose_name = "confine permission")
+    interfaces = models.ManyToManyField(Interface,
+                                        related_name = 'slivers',
+                                        blank = True,
+                                        null = True)
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE, blank=True)

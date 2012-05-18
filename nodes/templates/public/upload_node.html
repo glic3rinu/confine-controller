@@ -4,7 +4,38 @@
 <form action="" method="POST">
   {% csrf_token %}
 
-  {{ form.as_p }}
+  {{ interface_formset.management_form }}
+
+  <fieldset>
+    <legend>Node</legend>
+    {{ node_form.as_p }}
+  </fieldset>
+  <fieldset>
+    <legend>Storage</legend>
+    {{ storage_form.as_p }}
+  </fieldset>
+  <fieldset>
+    <legend>Memory</legend>
+    {{ memory_form.as_p }}
+  </fieldset>
+  <fieldset>
+    <legend>CPU</legend> 
+    {{ cpu_form.as_p }}
+  </fieldset>
+
+  <a href="#"
+     onclick="add_new_form_element('id_interfaces-TOTAL_FORMS','interface_container'); return false;" 
+     class="new_form_item">New interface</a>
+  <fieldset id="interface_container">
+    <legend>Interfaces</legend>
+    {% for form in interface_formset %}
+    <fieldset>
+      <legend>Interface</legend>
+      {{ form.as_p }}
+    </fieldset>
+    {% endfor %}
+
+  </fieldset>
   <input type="submit" value="submit"/>
 
 </form>

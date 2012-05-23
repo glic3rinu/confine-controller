@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import socket
 
-from node_templates import NODE_CONFIG_TEMPLATE
+import node_templates
 
 from slices import models as slice_models
 
@@ -11,17 +11,20 @@ def load_node_config(node):
     """
     slices = slice_models.Slice.objects.from_node(node.id)
     node_config = ""
+    interfaces = ""
+    ifnumber = 1
+    for iface in list(node.interface_set.all()):
+        interfaces += node_templates.INTERFACE_CONFIG_TEMPLATE % {
+            'ifnumber': "%.2i" % ifnumber,
+            'iftype': iface.type
+            }
     for sl in slices:
-        node_config += NODE_CONFIG_TEMPLATE % {
+        node_config += node_templates.NODE_CONFIG_TEMPLATE % {
             'sliver_id': "%.12i" % sl.id,
             'ssh_key': sl.user.get_profile().ssh_key,
             'fs_template_url': 'http://downloads.openwrt.org/backfire/10.03.1-rc6/x86_generic/openwrt-x86-generic-rootfs.tar.gz',
             'exp_data_url': 'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
-            'if00_type': 'internal',
-            'if01_type': 'public',
-            'if01_ipv4_proto': 'static',
-            'if02_type': 'isolated',
-            'if01_parent': 'eth1',
+            'interfaces': interfaces
             }
         node_config += "\n\n"
     return node_config
@@ -31,12 +34,32 @@ def send_node_config(node):
     Sends node configuration (all slices) to node platform
     """
     config = load_node_config(node)
-    node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    node_socket.connect((node.ip, node.port))
-    node_socket.sendall(config)
-    data = node_socket.recv(1024)
-    node_socket.close()
-    return data
+    host = node.hostname
+    port = node.port
+    s = None
+    error_message = ""
+    for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOC_STREAM):
+        af, socktype, proto, canonname, sa = res
+        try:
+            s = socket.socket(af, socktype, proto)
+        except socket.error, msg:
+            s = None
+            error_message = msg
+            continue
+        try:
+            s.connect(sa)
+        except socket.error, msg:
+            s.close()
+            s = None
+            error_message = msg
+            continue
+        break
+    if s is None:
+        return [False, error_message]
+    s.sendall(config)
+    return_data = s.recv(1024)
+    s.close()
+    return [True, return_data]
 
 def extract_params(xml_tree, params = []):
     """

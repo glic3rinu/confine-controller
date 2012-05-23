@@ -290,6 +290,29 @@ def upload_node(request):
                               )
 
 @login_required
+def edit_node(request, node_hostname):
+    node = api.get_node({'hostname': node_hostname})
+    if node:
+        if request.method == "POST":
+            pass
+        else:
+            node_form = forms.NodeForm(prefix = "node",
+                                       instance = node)
+        return render_to_response("public/upload_node.html",
+                                  RequestContext(request,
+                                                 {
+                                                     'node_form': node_form,
+                                                     'storage_form': storage_form,
+                                                     'memory_form': memory_form,
+                                                     'cpu_form': cpu_form,
+                                                     'interface_formset': interface_formset
+                                                     }
+                                                 )
+                                  )
+    else:
+        return HttpResponseRedirect("/")
+
+@login_required
 def delete_node(request):
     """
     Create a new delete request for a node

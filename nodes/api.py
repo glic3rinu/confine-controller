@@ -3,6 +3,25 @@ from slices import models as slice_models
 from nodes import settings as node_settings
 from nodes import node_utils
 
+def get_node(node_params = {}):
+    """
+    Retrieve a node
+    - hostname
+    """
+    hostname = node_params.get('hostname', '')
+    try:
+        node = node_models.objects.get(hostname = hostname)
+        return node
+    except:
+        pass
+    return None
+
+def edit_node(node_params = {}):
+    """
+    Edit node
+    """
+    pass
+
 def set_node(node_params = {}):
     """
     Set up a node. This is a clone method of create node, but data is not

@@ -201,10 +201,10 @@ install_portal() {
     fi
 
     # Install Django
-    git clone git://github.com/django/django.git /usr/share/django-trunk
+    git clone git://github.com/django/django.git /usr/local/share/django-trunk
     local PYVERSION=$(ls -al /usr/bin/python)
-    ln -s /usr/share/django-trunk/django /usr/lib/${PYVERSION##*' '}/dist-packages/
-    ln -s /usr/share/django-trunk/django/bin/django-admin.py /usr/bin
+    ln -s /usr/local/share/django-trunk/django /usr/lib/${PYVERSION##*' '}/dist-packages/
+    ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/bin
     pip install django-admin-tools django-fluent-dashboard south
 
     # Installing and configuring MQ

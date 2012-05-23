@@ -189,7 +189,7 @@ install_portal() {
     apt-get install -y libapache2-mod-wsgi rabbitmq-server git python-paramiko \
         screen python-pip python-psycopg2
 
-    # rabbitmq-server will not start automatically by default unless ...
+    # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
     sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
     update-rc.d rabbitmq-server defaults
@@ -289,7 +289,7 @@ echo_portal_configuration_script () {
 
     $create_db && cat <<- EOF 
 		su postgres -c "psql -c \"CREATE USER $DB_USER PASSWORD '$DB_PWD';\""
-		su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_PWD;\""
+		su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\""
 		EOF
 
     cat <<- EOF 
@@ -299,9 +299,12 @@ echo_portal_configuration_script () {
 }
 export -f echo_portal_configuration_script
 
-configure_portal_posposed () {
+configure_portal_postponed () {
     
     # USAGE: echo_portal_configuration_steps dir user db_name db_user db_password
+    
+    # Some configuration commands should run when the database is online, 
+    # this function postpone these actions until first boot.
     
     local DIR=$(eval echo $1)
     local USER=$2
@@ -328,7 +331,7 @@ configure_portal_posposed () {
     chmod a+x /etc/init.d/setup_portal_db
     insserv /etc/init.d/setup_portal_db
 }
-export -f configure_portal_posposed
+export -f configure_portal_postponed
 
   
 print_help () {
@@ -354,7 +357,7 @@ print_help () {
 		                'container' LXC/OpenVZ compatible
 		                'bootable' KVM/XEN compatible
 		                'local' compatible with any debian-like system
-		                'chroot' (notice that proces namespace and network stack will be shared with the local system)
+		                'chroot' (notice that process namespace and network stack will be shared with the local system)
 		    -i, --image
 		            /path/file_name, i.e.: /tmp/confine_portal.img
 		            compatible with: container, bootable and chroot
@@ -363,16 +366,16 @@ print_help () {
 		            where the container or chroot will be deployed
 		            
 		    -u, --user
-		            system user that will run the portal, it will be created if does not exists (default confine)
+		            system user that will run the portal, it will be created if it does not exist (default confine)
 		            
 		    -p, --password
-		            password is needed if USER does not exists (default confine)
+		            password is needed if USER does not exist (default confine)
 
 		    -I, --install_path
 		            where the portal code will live (default ~USER/controller)
 		            		            
 		    -a, --arch
-		            when debootsraping i.e amd64, i686 ... (amd64 by default)
+		            when debootsraping i.e amd64, i386 ... (amd64 by default)
 		            
 		    -s, --suite
 		            debian suite (default stable)
@@ -398,7 +401,7 @@ print_help () {
 		    server_deployment.sh --type local -u confine -p 2hd4nd
 		    
 		${bold}TODO${normal}
-		    #TODO: script to raise chroot when chroot deployment type is choosed 
+		    #TODO: script to raise chroot when chroot deployment type is chosen 
 		    #TODO: create db when correct db values are provided
 		    #TODO: virtualenv support for local deployment
 		    #TODO: modify settings.py according to DB and install_dir parameters
@@ -480,24 +483,25 @@ esac
 if [[ $TYPE != 'local' ]]; then 
 
     if ( $image ); then 
-        DIRECTORY="/tmp/raNDOM_point_$RANDOM"
+        DIRECTORY=$(mktemp -d)
+        chmod 0644 $DIRECTORY
         prepare_image $IMAGE
         [ -e $DIRECTORY ] && { echo -e "\nErr. I'm affraid to continue: mount point $DIRECTORY already exists.\n" >&2; exit 1; }
         mkdir $DIRECTORY
         custom_mount -l $IMAGE $DIRECTORY
-        trap "custom_umount -l $DIRECTORY; $image && rm -fr /tmp/raNDOM_point; exit 1;" INT TERM EXIT 
+        trap "custom_umount -l $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
     fi
     
     [ $TYPE == 'bootable' ] && EXCLUDE='' || EXCLUDE='--exclude=udev'
     debootstrap --include=locales --arch=$ARCH $EXCLUDE $SUITE $DIRECTORY || exit 1
 
     custom_mount -s $DIRECTORY
-    trap "custom_umount -sl $DIRECTORY; $image && rm -fr /tmp/raNDOM_point; exit 1;" INT TERM EXIT 
+    trap "custom_umount -sl $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
     chroot $DIRECTORY /bin/bash -c "basic_strap_configuration root"
 
     if [ $TYPE == 'bootable' ]; then 
         custom_mount -d $DIRECTORY
-        trap "custom_umount -sdl $DIRECTORY; $image && rm -fr /tmp/raNDOM_point; exit 1;" INT TERM EXIT
+        trap "custom_umount -sdl $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT
         DEVICE=$(losetup -j $IMAGE|cut -d':' -f1) || { echo "ERROR: $IMAGE not mapped" >&2; exit 2; }
         chroot $DIRECTORY /bin/bash -c "install_kernel_and_grub $DEVICE"
     elif [ $TYPE == 'container' ]; then
@@ -515,14 +519,14 @@ if [[ $TYPE != 'local' ]]; then
     chroot $DIRECTORY /bin/bash -c "install_portal $INSTALL_PATH $USER $PWD $create_db"
     rm -fr $DIRECTORY/usr/sbin/policy-rc.d
 
-    chroot $DIRECTORY /bin/bash -c "configure_portal_posposed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
+    chroot $DIRECTORY /bin/bash -c "configure_portal_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
 
     # Clean up
     custom_umount -s $DIRECTORY
     [ $TYPE == 'bootable' ] && custom_umount -d $DIRECTORY
     $image && custom_umount -l $DIRECTORY
     trap - INT TERM EXIT
-    $image && [ -e /tmp/raNDOM_point ] && { mountpoint -q /tmp/raNDOM_point || rm -fr /tmp/raNDOM_point; }
+    $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
 
 else
     install_portal $INSTALL_PATH $USER $PWD $create_db

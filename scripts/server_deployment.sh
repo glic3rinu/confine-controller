@@ -124,11 +124,11 @@ container_customization () {
 
 basic_strap_configuration() {
     
-    local PWD=$1
+    local PASSWORD=$1
     
     sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
     locale-gen
-    echo "root:$PWD"|chpasswd
+    echo "root:$PASSWORD"|chpasswd
     echo confine-server > /etc/hostname
 
 }
@@ -161,11 +161,11 @@ try_create_system_user() {
     # USAGE: try_create_system_user user password
     
     local USER=$1
-    local PWD=$2
+    local PASSWORD=$2
 
     if ( ! $(id $USER &> /dev/null) ); then 
         useradd $USER -p '' -s "/bin/bash"
-        echo "$USER:$PWD"| chpasswd
+        echo "$USER:$PASSWORD"| chpasswd
         mkdir /home/$USER
         chown $USER.$USER /home/$USER
     fi
@@ -175,14 +175,20 @@ export -f try_create_system_user
 
 install_portal() {
     
-    #USAGE: install_portal dir username userpassword
+    #USAGE: install_portal dir username userpassword create_db db_name db_user db_password db_host db_port
     
     local USER=$2
-    local PWD=$3
+    local PASSWORD=$3
     local install_db=$4
-    try_create_system_user $USER $PWD
+    try_create_system_user $USER $PASSWORD
     # user must exist befor evaluate ~user
     local DIR=$(eval echo $1)
+
+    local DB_NAME=$5
+    local DB_USER=$6
+    local DB_PASSWORD=$7
+    local DB_HOST=$8
+    local DB_PORT=$9
 
     # Install dependencies
     apt-get update
@@ -196,17 +202,18 @@ install_portal() {
 
     if ( $install_db ); then 
         apt-get install -y postgresql
-        # make sure that postgres will start at port 5432
-        sed -i "s/port = .*/port = 5432/" /etc/postgresql/*/main/postgresql.conf
+        # make sure that postgres will start at port $DB_PORT
+        sed -i "s/port = .*/port = $DB_PORT/" /etc/postgresql/*/main/postgresql.conf
     fi
 
     # Install Django
-    mkdir -p /usr/local/share /usr/lib/${PYVERSION##*' '}/dist-packages /usr/local/bin
-    git clone git://github.com/django/django.git /usr/local/share/django-trunk
-    local PYVERSION=$(ls -al /usr/bin/python)
-    ln -s /usr/local/share/django-trunk/django /usr/local/lib/${PYVERSION##*' '}/dist-packages/
-    ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
-
+    python -c "import django" 2> /dev/null || { 
+        mkdir -p /usr/local/share /usr/lib/${PYVERSION##*' '}/dist-packages /usr/local/bin
+        git clone git://github.com/django/django.git /usr/local/share/django-trunk
+        local PYVERSION=$(ls -al /usr/bin/python)
+        ln -s /usr/local/share/django-trunk/django /usr/local/lib/${PYVERSION##*' '}/dist-packages/
+        ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
+    }
     pip install django-admin-tools django-fluent-dashboard south
 
     # Installing and configuring MQ
@@ -261,6 +268,13 @@ install_portal() {
 
     # Install the portal
     su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
+    
+    su $USER -c "cp $DIR/confine/settings.example.py $DIR/confine/settings.py"
+    sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $DIR/confine/settings.py
+    sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $DIR/confine/settings.py
+    sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $DIR/confine/settings.py
+    sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $DIR/confine/settings.py
+    sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $DIR/confine/settings.py
 
     cat <<- EOF > /etc/apache2/httpd.conf
 		WSGIScriptAlias / $DIR/confine/wsgi.py
@@ -287,10 +301,10 @@ echo_portal_configuration_script () {
     local create_db=$3
     local DB_NAME=$4
     local DB_USER=$5
-    local DB_PWD=$6
+    local DB_PASSWORD=$6
 
     $create_db && cat <<- EOF 
-		su postgres -c "psql -c \"CREATE USER $DB_USER PASSWORD '$DB_PWD';\""
+		su postgres -c "psql -c \"CREATE USER $DB_USER PASSWORD '$DB_PASSWORD';\""
 		su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\""
 		EOF
 
@@ -314,7 +328,7 @@ configure_portal_postponed () {
     local USER=$2
     local DB_NAME=$3
     local DB_USER=$4
-    local DB_PWD=$5
+    local DB_PASSWORD=$5
 
     cat <<- EOF > /etc/init.d/setup_portal_db
 		#!/bin/sh
@@ -327,7 +341,7 @@ configure_portal_postponed () {
 		# Short-Description: Creates and fills database on first boot
 		# Description:       Creates and fills database on first boot
 		### END INIT INFO
-		$(echo_portal_configuration_script $DIR $USER true $DB_NAME $DB_USER $DB_PWD)
+		$(echo_portal_configuration_script $DIR $USER true $DB_NAME $DB_USER $DB_PASSWORD)
 		insserv -r /etc/init.d/setup_portal_db
 		rm -f \$0
 		EOF
@@ -385,19 +399,19 @@ print_help () {
 		            debian suite (default stable)
 		  
 		    -N, --db_name
-		            if this option is provided, no DB will be created nor installed (default confine)
+		            db will be created if not exists (default confine)
 		                      
 		    -U, --db_user
-		            if this option is provided, no DB will be created nor installed (default confine)
+		            user will be created if not exists (default confine)
 		            
 		    -W, --db_password
-		            if this option is provided, no DB will be created nor installed (default confine)
+		            default confine
 		            
 		    -H, --db_host 
 		            if this option is provided, no DB will be created nor installed (default localhost)
 		            
 		    -P, --db_port
-		            if this option is provided, no DB will be created nor installed (default empty)
+		            default 5432
 		            
 		${bold}EXAMPLES${normal}
 		    server_deployment.sh --type bootable --image /tmp/server.img --suite squeeze
@@ -406,9 +420,7 @@ print_help () {
 		    
 		${bold}TODO${normal}
 		    #TODO: script to raise chroot when chroot deployment type is chosen 
-		    #TODO: create db when correct db values are provided
 		    #TODO: virtualenv support for local deployment
-		    #TODO: modify settings.py according to DB and install_dir parameters
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
 		    #TODO: custom image size
 		EOF
@@ -427,7 +439,7 @@ type=false
 image=false
 directory=false
 USER="confine"
-PWD="confine"
+PASSWORD="confine"
 INSTALL_PATH=false
 ARCH="amd64"
 SUITE="stable"
@@ -436,7 +448,7 @@ DB_NAME="confine"
 DB_USER="confine"
 DB_PASSWORD="confine"
 DB_HOST="localhost"
-DB_PORT=""
+DB_PORT="5432"
 
 while [ $# -gt 0 ]; do  
     case $1 in
@@ -445,14 +457,14 @@ while [ $# -gt 0 ]; do
         -d|--directory) DIRECTORY="${2:1:-1}"; directory=true; shift ;;
         -u|--user) USER="${2:1:-1}"; shift ;;
         -I|--install_path) INSTALL_PATH="${2:1:-1}"; shift ;;
-        -p|--password) PWD="${2:1:-1}"; shift ;;
+        -p|--password) PASSWORD="${2:1:-1}"; shift ;;
         -a|--arch) ARCH="${2:1:-1}"; shift ;;
         -s|--suite) SUITE="${2:1:-1}"; shift ;; 
-        -U|--db_name) DB_NAME="${2:1:-1}"; create_db=false; shift ;;         
-        -U|--db_user) DB_USER="${2:1:-1}"; create_db=false; shift ;; 
-        -W|--db_password) DB_PASSWORD="${2:1:-1}"; create_db=false; shift ;; 
+        -U|--db_name) DB_NAME="${2:1:-1}"; shift ;;         
+        -U|--db_user) DB_USER="${2:1:-1}"; shift ;; 
+        -W|--db_password) DB_PASSWORD="${2:1:-1}"; shift ;; 
         -S|--db_host) DB_HOST="${2:1:-1}"; create_db=false; shift ;;
-        -P|--dp_port) DB_PORT="${2:1:-1}"; create_db=false; shift ;;
+        -P|--dp_port) DB_PORT="${2:1:-1}"; shift ;;
         -h|--help) print_help; exit 0 ;;
         (--) shift; break;;
         (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
@@ -520,7 +532,7 @@ if [[ $TYPE != 'local' ]]; then
 			EOF
         chmod 755 $DIRECTORY/usr/sbin/policy-rc.d
     fi
-    chroot $DIRECTORY /bin/bash -c "install_portal $INSTALL_PATH $USER $PWD $create_db"
+    chroot $DIRECTORY /bin/bash -c "install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD $DB_HOST $DB_PORT"
     rm -fr $DIRECTORY/usr/sbin/policy-rc.d
 
     chroot $DIRECTORY /bin/bash -c "configure_portal_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
@@ -533,8 +545,8 @@ if [[ $TYPE != 'local' ]]; then
     $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
 
 else
-    install_portal $INSTALL_PATH $USER $PWD $create_db
-    try_create_system_user $USER $PWD
+    install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD $DB_HOST $DB_PORT
+    try_create_system_user $USER $PASSWORD
     /bin/bash -c "$(echo_portal_configuration_script $INSTALL_PATH $USER $create_db $DB_NAME $DB_USER $DB_PASSWORD)"
 fi
 

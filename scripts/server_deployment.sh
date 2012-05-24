@@ -138,11 +138,12 @@ export -f basic_strap_configuration
 
 install_kernel_and_grub() {
 
-    DEVICE=$1
+    local DEVICE=$1
     
     apt-get update
     apt-get install -y linux-image-amd64 
     apt-get install -y dmsetup gettext-base grub-common libdevmapper1.02.1 libfreetype6 os-prober ucf
+    # Download grub and manually install it in order to avoid interactive questions.
     apt-get -dy install grub-pc
     local GRUB_PKG=$(find /var/cache/apt/archives/ -type f -name grub-pc*.deb)
     dpkg -x $GRUB_PKG /
@@ -182,7 +183,7 @@ install_portal() {
     local PASSWORD=$3
     local install_db=$4
     try_create_system_user $USER $PASSWORD
-    # user must exist befor evaluate ~user
+    # user must exists befor evaluate ~user
     local DIR=$(eval echo $1)
 
     local DB_NAME=$5
@@ -426,6 +427,7 @@ print_help () {
 		    #TODO: offer script to raise chroot when chroot deployment type is chosen 
 		    #TODO: virtualenv support for local deployment
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
+		    #TODO: Tinc and confine user ssh-key
 		EOF
 }
 

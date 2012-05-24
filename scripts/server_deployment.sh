@@ -4,11 +4,12 @@ set -u
 
 prepare_image() {
 
-    # USAGE: prepare_image file
+    # USAGE: prepare_image file size
     
     local FILE=$1
-    
-    dd if=/dev/zero of=$FILE bs=1G count=2
+    local SIZE=$2
+        
+    dd if=/dev/zero of=$FILE bs=$SIZE count=1
     mkfs.ext4 -F $FILE
 }
 
@@ -379,7 +380,10 @@ print_help () {
 		    -i, --image
 		            /path/file_name, i.e.: /tmp/confine_portal.img
 		            compatible with: container, bootable and chroot
-
+		            
+		    -S, --image_size
+		            default 2G
+		        
 		    -d, --directory
 		            where the container or chroot will be deployed
 		            
@@ -422,7 +426,6 @@ print_help () {
 		    #TODO: script to raise chroot when chroot deployment type is chosen 
 		    #TODO: virtualenv support for local deployment
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
-		    #TODO: custom image size
 		EOF
 }
 
@@ -431,12 +434,14 @@ print_help () {
 #### MAIN ####
 ##############
 
-opts=$(getopt -o Cht:i:d:u:p:a:s:U:P:H:I:W:N: -l create,user:,password:,help,type:,image:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path: -- "$@") || exit 1
+opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path: -- "$@") || exit 1
 set -- $opts
 
 # Default values 
 type=false
 image=false
+IMAGE_SIZE="2G"
+image_size=false
 directory=false
 USER="confine"
 PASSWORD="confine"
@@ -454,6 +459,7 @@ while [ $# -gt 0 ]; do
     case $1 in
         -t|--type) TYPE="${2:1:-1}"; type=true; shift ;;
         -i|--image) IMAGE="${2:1:-1}"; image=true; shift ;;
+        -S|--image_size) IMAGE_SIZE="${2:1:-1}"; image_size=true; shift ;;        
         -d|--directory) DIRECTORY="${2:1:-1}"; directory=true; shift ;;
         -u|--user) USER="${2:1:-1}"; shift ;;
         -I|--install_path) INSTALL_PATH="${2:1:-1}"; shift ;;
@@ -477,6 +483,7 @@ done
 
 # Input validation
 $type || { echo -e "\nErr. --type is required\n" >&2; exit 1; } 
+$image_size && ! $image && { echo -e "\nErr. --image_size without --image?\n" >&2; exit 1; }
 case $TYPE in 
     'container')
         ( ! $image && ! $directory ) && { echo -e "\nErr. Provide --directory or --image\n" >&2; exit 1; }
@@ -501,7 +508,7 @@ if [[ $TYPE != 'local' ]]; then
     if ( $image ); then 
         DIRECTORY=$(mktemp -d)
         chmod 0644 $DIRECTORY
-        prepare_image $IMAGE
+        prepare_image $IMAGE $IMAGE_SIZE
         [ -e $DIRECTORY ] && { echo -e "\nErr. I'm affraid to continue: mount point $DIRECTORY already exists.\n" >&2; exit 1; }
         mkdir $DIRECTORY
         custom_mount -l $IMAGE $DIRECTORY

@@ -362,12 +362,12 @@ print_help () {
 		
 		${bold}NAME${normal}
 		    server_deployment.sh - Confine server installation script
-
+		    
 		${bold}SYNOPSIS${normal}
-		    required parameters: -t TYPE ( -d DIRECTORY | -i IMAGE ) 
-
-		    OS options: [ -u USER ] [ -p PASSWORD ] [ -I INSTALL_PATH ] [ -a ARCH ] [ -s SUITE ] 
-
+		    required parameters: -t TYPE ( -d DIRECTORY | -i IMAGE )
+		    
+		    OS options: [ -u USER ] [ -p PASSWORD ] [ -I INSTALL_PATH ] [ -a ARCH ] [ -s SUITE ] [ -S IMAGE_SIZE ]
+		    
 		    database options: [ -N DB_NAME ] [ -U DB_USER ] [ -W DB_PASSWORD ] [ -H DB_HOST ] [ -P DB_PORT ]
 		    
 		${bold}OPTIONS${normal}
@@ -380,50 +380,50 @@ print_help () {
 		    -i, --image
 		            /path/file_name, i.e.: /tmp/confine_portal.img
 		            compatible with: container, bootable and chroot
-		            
+		    
 		    -S, --image_size
 		            default 2G
-		        
+		    
 		    -d, --directory
 		            where the container or chroot will be deployed
-		            
+		    
 		    -u, --user
 		            system user that will run the portal, it will be created if it does not exist (default confine)
-		            
+		    
 		    -p, --password
 		            password is needed if USER does not exist (default confine)
-
+		    
 		    -I, --install_path
 		            where the portal code will live (default ~USER/controller)
-		            		            
+		    
 		    -a, --arch
 		            when debootsraping i.e amd64, i386 ... (amd64 by default)
-		            
+		    
 		    -s, --suite
 		            debian suite (default stable)
-		  
+		    
 		    -N, --db_name
 		            db will be created if not exists (default confine)
-		                      
+		    
 		    -U, --db_user
 		            user will be created if not exists (default confine)
-		            
+		    
 		    -W, --db_password
 		            default confine
-		            
+		    
 		    -H, --db_host 
 		            if this option is provided, no DB will be created nor installed (default localhost)
-		            
+		    
 		    -P, --db_port
 		            default 5432
-		            
+		    
 		${bold}EXAMPLES${normal}
 		    server_deployment.sh --type bootable --image /tmp/server.img --suite squeeze
 		    
 		    server_deployment.sh --type local -u confine -p 2hd4nd
 		    
 		${bold}TODO${normal}
-		    #TODO: script to raise chroot when chroot deployment type is chosen 
+		    #TODO: offer script to raise chroot when chroot deployment type is chosen 
 		    #TODO: virtualenv support for local deployment
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
 		EOF
@@ -509,8 +509,6 @@ if [[ $TYPE != 'local' ]]; then
         DIRECTORY=$(mktemp -d)
         chmod 0644 $DIRECTORY
         prepare_image $IMAGE $IMAGE_SIZE
-        [ -e $DIRECTORY ] && { echo -e "\nErr. I'm affraid to continue: mount point $DIRECTORY already exists.\n" >&2; exit 1; }
-        mkdir $DIRECTORY
         custom_mount -l $IMAGE $DIRECTORY
         trap "custom_umount -l $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
     fi

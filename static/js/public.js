@@ -1,8 +1,9 @@
 $ (document).ready (function (){
-  $ (".node_interfaces").hide ();
+  $ (".node_extra").hide ();
   $ (".node_item").bind ("click", function (){
     var thisCheck = $ (this);
-    var childs = $ (".interfaces_" + thisCheck.val ());
+    var c_id = thisCheck.val ();
+    var childs = $ (".network_" + c_id + ", .cpu_" + c_id + ", .storage_" + c_id + ", .memory_" + c_id);
     if (thisCheck.is (":checked")){
       childs.show ();
     }else{

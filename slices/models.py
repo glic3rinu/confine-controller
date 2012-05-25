@@ -41,10 +41,6 @@ class Slice(models.Model):
 class Sliver(models.Model):
     confine_permissions = generic.GenericRelation(user_m_models.ConfinePermission,
                                                   verbose_name = "confine permission")
-    interfaces = models.ManyToManyField(Interface,
-                                        related_name = 'slivers',
-                                        blank = True,
-                                        null = True)
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
     state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE, blank=True)
@@ -101,9 +97,13 @@ class CPURequest(models.Model):
     def __unicode__(self):
         return "%s:%s" % (self.type, self.value)
 
-
 class NetworkRequest(models.Model):
     sliver = models.ForeignKey(Sliver)
+    interface = models.ForeignKey(Interface,
+                                  related_name = 'network_requests',
+                                  blank = True,
+                                  null = True)
+
     number = models.IntegerField(blank=True)
     type = models.CharField(max_length=16, choices=settings.NETWORK_REQUESRT_CHOICES, default=settings.DEFAULT_NETWORK_REQUEST)
     mac_address = models.CharField(max_length=18, blank=True)

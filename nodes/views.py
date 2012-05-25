@@ -13,6 +13,7 @@ from nodes import node_utils as utils
 from nodes import forms
 
 from slices import models as slice_models
+from slices import forms as slices_forms
 
 from nodes import api
 
@@ -199,15 +200,57 @@ def create_slice(request):
     """
     Create a new slice for the given nodes
     """
+    NetworkFormset = modelformset_factory(slice_models.NetworkRequest,
+                                          extra = 1,
+                                          form = slices_forms.NetworkRequestForm)
     if request.method == "POST":
         form = forms.NewSliceForm(request.POST)
+        import pdb; pdb.set_trace()
         if form.is_valid():
             c_data = form.cleaned_data
             nodes = c_data.get('nodes', [])
-            interfaces = request.POST.get("interfaces", [])
+            node_info = {}
+            node_widget = form.fields.get('nodes').widget
+            for node_id in nodes:
+                network = NetworkFormset(request.POST,
+                                         prefix = "node_%s_nr" % node_id)
+                node_widget.set_retented_data(node_id,
+                                              'network',
+                                              network)
+                cpu = slices_forms.CPURequestForm(request.POST,
+                                                  prefix = "node_%s_c" % node_id)
+                node_widget.set_retented_data(node_id,
+                                              'cpu',
+                                              cpu)
+                storage = slices_forms.StorageRequestForm(request.POST,
+                                                          prefix = "node_%s_s" % node_id)
+                node_widget.set_retented_data(node_id,
+                                              'storage',
+                                              storage)
+                memory = slices_forms.MemoryRequestForm(request.POST,
+                                                        prefix = "node_%s_m" % node_id)
+                node_widget.set_retented_data(node_id,
+                                              'memory',
+                                              memory)
+                child_networks = []
+                child_cpu = None
+                child_storage = None
+                child_memory = None
+                if network.is_valid():
+                    child_networks = network.save(commit = False)
+                if cpu.is_valid():
+                    child_cpu = cpu.save(commit = False)
+                if storage.is_valid():
+                    child_storage = storage.save(commit = False)
+                if memory.is_valid():
+                    child_memory = memory.save(commit = False)
+                node_info[node_id] = {'networks': child_networks,
+                                      'cpu': child_cpu,
+                                      'storage': child_storage,
+                                      'memory': child_memory}
+                
             if api.create_slice({
-                'nodes': nodes,
-                'interfaces': interfaces,
+                'nodes': node_info,
                 'user': request.user,
                 'name': c_data.get('name')
                 }):

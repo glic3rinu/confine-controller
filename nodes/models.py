@@ -90,7 +90,7 @@ class Interface(models.Model):
     type = models.CharField(max_length=255, choices=settings.IFACE_TYPE_CHOICES, default=settings.DEFAULT_IFACE_TYPE)
     
     def __unicode__(self):
-        return self.name
+        return "%s - %s" % (self.node.hostname, self.name)
 
 
 

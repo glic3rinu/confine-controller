@@ -115,23 +115,28 @@ def create_slice(slice_params = {}):
     user = slice_params.get('user', None)
     nodes = slice_params.get('nodes', [])
     name = slice_params.get('name', '')
-    interfaces = slice_params.get('interfaces', [])
     
     if user and len(nodes) > 0:
         c_slice = slice_models.Slice(name = name,
                                      user = user)
         c_slice.save()
-        for node in nodes:
+        for node in nodes.keys():
             c_node = node_models.Node.objects.get(id = node)
             c_sliver = slice_models.Sliver(slice = c_slice,
                                            node = c_node)
             c_sliver.save()
 
-            iface_ids = c_node.interface_ids
-            current_interfaces = map(lambda a: node_models.Interface.objects.get(id = a),
-                                     list(set(iface_ids) - set(interfaces)))
-            for iface in current_interfaces:
-                c_sliver.interfaces.add(iface)
+
+            for extra in ['cpu', 'storage', 'memory']:
+                ext = nodes[node][extra]
+                if ext:
+                    ext.sliver = c_sliver
+                    ext.save()
+            networks = nodes[node]['networks']
+            if len(networks) > 0:
+                for network in networks:
+                    network.sliver = c_sliver
+                    network.save()                
             #node_utils.send_node_config(c_node)
         return True
     return False

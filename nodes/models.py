@@ -41,6 +41,14 @@ class Node(models.Model):
     def local_ip(self):
         return '"TODO: local ipv6 iface"'
 
+    @property
+    def ipv6(self):
+        return "%s:%s:0000::2" % (settings.TESTBED_BASE_IP,
+                                  self.hex_id)
+
+    @property
+    def hex_id(self):
+        return hex(self.id).replace("0x", "")
     
 
 class DeleteRequest(models.Model):

@@ -137,7 +137,7 @@ def create_slice(slice_params = {}):
                 for network in networks:
                     network.sliver = c_sliver
                     network.save()                
-            #node_utils.send_node_config(c_node)
+            allocate_slivers({'node': c_node})
         return True
     return False
 
@@ -203,3 +203,53 @@ def get_slice_public_keys(node_params = {}):
     except:
         pass
     return []
+
+def allocate_slivers(node_params = {}):
+    """
+    Allocate all slivers from a given node
+    - node
+    - node_id
+    """
+    node = node_params.get("node", None)
+    if node:
+        #return node_utils.send_node_config(c_node)
+    else:
+        node_id = node_params.get("node_id", None)
+        if node_id:
+            node = node_models.Node.objects.get(id = node_id)
+            #return node_utils.send_node_config(c_node)
+    return False
+    
+
+def deploy_slivers(sliver_params = {}):
+    """
+    Deploy given slivers
+    - sliver_id
+    """
+    sliver_id = sliver_params.get('sliver_id', None)
+    if sliver_id:
+        sliver = slice_models.Sliver.objects.get(id = sliver_id)
+        return node_utils.send_deploy_sliver(sliver)
+    return False
+
+def start_slivers(sliver_params = {}):
+    """
+    Start given slivers
+    - sliver_id
+    """
+    sliver_id = sliver_params.get('sliver_id', None)
+    if sliver_id:
+        sliver = slice_models.Sliver.objects.get(id = sliver_id)
+        return node_utils.send_start_sliver(sliver)
+    return False
+
+def stop_slivers(sliver_params = {}):
+    """
+    Stop given slivers
+    - sliver_id
+    """
+    sliver_id = sliver_params.get('sliver_id', None)
+    if sliver_id:
+        sliver = slice_models.Sliver.objects.get(id = sliver_id)
+        return node_utils.send_stop_sliver(sliver)
+    return False

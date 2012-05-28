@@ -12,7 +12,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'rata',                      # Or path to database file if using sqlite3.
+        'NAME': 'confine',                      # Or path to database file if using sqlite3.
         'USER': 'confine',                      # Not used with sqlite3.
         'PASSWORD': 'confine',                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -215,3 +215,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/logged_in/'
+
+# Project needed settings
+
+TESTBED_BASE_IP = "fdf5:5351:1dfd"

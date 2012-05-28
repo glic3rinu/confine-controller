@@ -7,6 +7,8 @@ SERVER_TINC_PORT = getattr(settings, 'SERVER_TINC_PORT', '')
 SERVER_URL = getattr(settings, 'SERVER_URL', '') 
 SERVER_PUBLIC_KEY = getattr(settings, 'SERVER_PUBLIC_KEY', '') 
 
+TESTBED_BASE_IP = getattr(settings, 'TESTBED_BASE_IP', '') 
+
 
 UCI_DIR = getattr(settings, 'UCI_DIR', 'uci') 
 

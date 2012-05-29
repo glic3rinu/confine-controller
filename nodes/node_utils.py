@@ -122,7 +122,6 @@ def send_node_config(node):
             'config': config[1], 'sliver_id': config[0]
             }
         return_data = ssh_connection(node.ipv6,
-                                     username,
                                      settings.SERVER_PUBLIC_KEY,
                                      script)
         process_sliver_status(return_data, node)
@@ -136,7 +135,6 @@ def send_deploy_sliver(sliver):
         }
 
     return_data = ssh_connection(sliver.node.ipv6,
-                                 username,
                                  settings.SERVER_PUBLIC_KEY,
                                  script)
 
@@ -146,7 +144,6 @@ def send_start_sliver(sliver):
         }
 
     return_data = ssh_connection(sliver.node.ipv6,
-                                 username,
                                  settings.SERVER_PUBLIC_KEY,
                                  script)
 
@@ -156,11 +153,10 @@ def send_stop_sliver(sliver):
         }
 
     return_data = ssh_connection(sliver.node.ipv6,
-                                 username,
                                  settings.SERVER_PUBLIC_KEY,
                                  script)
 
-def ssh_connection(host, username, key, script):
+def ssh_connection(host, key, script, username = "root"):
     ssh = paramiko.SSHClient()
     nkey = paramiko.PKey(key)
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

@@ -15,13 +15,21 @@ def load_slice_config(c_slice):
     """
     slice_config = ""
     for sliver in c_slice.sliver_set.all():
-        pass
+        slice_config += load_sliver_config(sliver, True)[1] + "\n\n"
     return [int212hex(c_slice.id), slice_config]
 
-def load_sliver_config(sl):
+def load_sliver_config(sl, use_complete_id = False):
     """
     Returns sliver config
     """
+    sliver_id = int212hex(sl.slice.id)
+    complete_sliver_id = "%s_%s" % (sliver_id, sl.node.hex_id)
+
+    if use_complete_id:
+        current_id = complete_sliver_id
+    else:
+        current_id = sliver_id
+    
     interfaces = ""
     for request in sl.networkrequest_set.all():
         if request.number:
@@ -34,13 +42,13 @@ def load_sliver_config(sl):
             interfaces += node_templates.SLIVER_INTERFACE_MAC % {'number': "%.2i" % request.number, 'mac': request.mac_address}
             
     sliver_config = node_templates.NODE_CONFIG_TEMPLATE % {
-        'sliver_id': int212hex(sl.slice.id),
+        'sliver_id': current_id,
         'ssh_key': sl.slice.user.get_profile().ssh_key,
         'fs_template_url': 'http://downloads.openwrt.org/backfire/10.03.1-rc6/x86_generic/openwrt-x86-generic-rootfs.tar.gz',
         'exp_data_url': 'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
         'interfaces': interfaces
         }
-    return [int212hex(sl.slice.id), sliver_config]
+    return [sliver_id, sliver_config]
 
 def get_interface_number(line):
     """

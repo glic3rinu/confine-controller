@@ -48,7 +48,7 @@ class Node(models.Model):
 
     @property
     def hex_id(self):
-        return hex(self.id).replace("0x", "")
+        return "%X" % self.id
     
 
 class DeleteRequest(models.Model):

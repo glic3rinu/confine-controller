@@ -126,11 +126,28 @@ container_customization () {
 basic_strap_configuration() {
     
     local PASSWORD=$1
+    local KEYBOARD_LAYOUT=$2
     
     sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
     locale-gen
     echo "root:$PASSWORD"|chpasswd
     echo confine-server > /etc/hostname
+
+    #TODO: only useful for bootable?
+    case $KEYBOARD_LAYOUT in
+        'spanish') 
+            cat <<- EOF > /etc/default/keyboard
+				XKBMODEL="pc105"
+				XKBLAYOUT="es"
+				XKBVARIANT=""
+				XKBOPTIONS=""
+				EOF
+            ;;
+        *) ;; 
+    esac
+    
+    # at least provide loopback interface
+    echo -e "auto lo\niface lo inet loopback\n" > /etc/network/interfaces
 
 }
 export -f basic_strap_configuration
@@ -195,7 +212,7 @@ install_portal() {
     # Install dependencies
     apt-get update
     apt-get install -y libapache2-mod-wsgi rabbitmq-server git python-paramiko \
-        screen python-pip python-psycopg2
+        screen python-pip python-psycopg2 openssh-server tinc
 
     # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
@@ -294,6 +311,56 @@ install_portal() {
 export -f install_portal
 
 
+echo_generate_ssh_keys () {
+    
+    local USER=$1
+
+    cat <<- EOF
+		# Generate host keys
+		ssh-keygen -f /etc/ssh/ssh_host_rsa_key -t rsa -N ""
+		ssh-keygen -f /etc/ssh/ssh_host_dsa_key -t dsa -N ""
+		
+		# Generate ssh keys for $USER and root
+		su $USER -c "mkdir -p ~$USER/.ssh/"
+		chmod 700 ~$USER/.ssh/
+		su $USER -c "ssh-keygen -P '' -f ~$USER/.ssh/id_rsa"
+		mkdir -p /root/.ssh
+		chmod 700 /root/.ssh
+		ssh-keygen -P '' -f /root/.ssh/id_rsa
+		EOF
+
+}
+export -f echo_generate_ssh_keys
+
+generate_ssh_keys_postponed () {
+
+    local USER=$1
+
+    rm -f /etc/ssh/ssh_host_*
+    cat <<- EOF > /etc/init.d/generate_ssh_keys
+		#!/bin/sh
+		### BEGIN INIT INFO
+		# Provides:          generate_ssh_keys
+		# Required-Start:    $remote_fs $syslog
+		# Required-Stop:     $remote_fs $syslog
+		# Default-Start:     2 3 4 5
+		# Default-Stop:
+		# Short-Description: Generates fresh ssh keys on first boot
+		# Description:       Generates fresh ssh keys on first boot
+		### END INIT INFO
+		
+		$(echo_generate_ssh_keys $USER)
+		
+		insserv -r /etc/init.d/generate_ssh_keys
+		rm -f \$0
+		EOF
+
+    chmod a+x /etc/init.d/generate_ssh_keys
+    insserv /etc/init.d/generate_ssh_keys
+}
+export -f generate_ssh_keys_postponed
+
+
 echo_portal_configuration_script () {
 
     # USAGE: echo_portal_configuration_steps install_path user create_db db_name db_user db_password
@@ -313,7 +380,7 @@ echo_portal_configuration_script () {
     cat <<- EOF 
 		su $USER -c "python $DIR/manage.py syncdb --noinput"
 		su $USER -c "python $DIR/manage.py migrate --noinput"
-		su $USER -c "echo \"from django.contrib.auth.models import User; \
+		su $USER -c "echo \"from django.contrib.auth.models import User; \\
 		             User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
 		EOF
 }
@@ -335,7 +402,7 @@ configure_portal_postponed () {
     cat <<- EOF > /etc/init.d/setup_portal_db
 		#!/bin/sh
 		### BEGIN INIT INFO
-		# Provides:          Creates and fills database on first boot
+		# Provides:          setup_portal_db
 		# Required-Start:    \$remote_fs \$syslog \$all
 		# Required-Stop:     \$remote_fs \$syslog
 		# Default-Start:     2 3 4 5
@@ -367,7 +434,7 @@ print_help () {
 		${bold}SYNOPSIS${normal}
 		    required parameters: -t TYPE ( -d DIRECTORY | -i IMAGE )
 		    
-		    OS options: [ -u USER ] [ -p PASSWORD ] [ -I INSTALL_PATH ] [ -a ARCH ] [ -s SUITE ] [ -S IMAGE_SIZE ]
+		    OS options: [ -u USER ] [ -p PASSWORD ] [ -I INSTALL_PATH ] [ -a ARCH ] [ -s SUITE ] [ -S IMAGE_SIZE ] [ -k KEYBOARD_LAYOUT ]
 		    
 		    database options: [ -N DB_NAME ] [ -U DB_USER ] [ -W DB_PASSWORD ] [ -H DB_HOST ] [ -P DB_PORT ]
 		    
@@ -417,6 +484,9 @@ print_help () {
 		    
 		    -P, --db_port
 		            default 5432
+		            
+		    -k, --keyboard_layout
+		            supported layouts: spanish and english (default)
 		    
 		${bold}EXAMPLES${normal}
 		    server_deployment.sh --type bootable --image /tmp/server.img --suite squeeze
@@ -427,7 +497,8 @@ print_help () {
 		    #TODO: offer script to raise chroot when chroot deployment type is chosen 
 		    #TODO: virtualenv support for local deployment
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
-		    #TODO: Tinc and confine user ssh-key
+		    #TODO: Tinc
+		    #TODO: Option: Use provided ssh keys instead of generating them
 		EOF
 }
 
@@ -436,7 +507,7 @@ print_help () {
 #### MAIN ####
 ##############
 
-opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path: -- "$@") || exit 1
+opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N:k: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path:,keyboard_layout: -- "$@") || exit 1
 set -- $opts
 
 # Default values 
@@ -456,6 +527,7 @@ DB_USER="confine"
 DB_PASSWORD="confine"
 DB_HOST="localhost"
 DB_PORT="5432"
+KEYBOARD_LAYOUT=''
 
 while [ $# -gt 0 ]; do  
     case $1 in
@@ -473,6 +545,7 @@ while [ $# -gt 0 ]; do
         -W|--db_password) DB_PASSWORD="${2:1:-1}"; shift ;; 
         -S|--db_host) DB_HOST="${2:1:-1}"; create_db=false; shift ;;
         -P|--dp_port) DB_PORT="${2:1:-1}"; shift ;;
+        -k|--keyboard_layout) KEYBOARD_LAYOUT="${2:1:-1}"; shift ;;
         -h|--help) print_help; exit 0 ;;
         (--) shift; break;;
         (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
@@ -520,7 +593,7 @@ if [[ $TYPE != 'local' ]]; then
 
     custom_mount -s $DIRECTORY
     trap "custom_umount -sl $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
-    chroot $DIRECTORY /bin/bash -c "basic_strap_configuration root"
+    chroot $DIRECTORY /bin/bash -c "basic_strap_configuration confine $KEYBOARD_LAYOUT"
 
     if [ $TYPE == 'bootable' ]; then 
         custom_mount -d $DIRECTORY
@@ -543,6 +616,7 @@ if [[ $TYPE != 'local' ]]; then
     rm -fr $DIRECTORY/usr/sbin/policy-rc.d
 
     chroot $DIRECTORY /bin/bash -c "configure_portal_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
+    chroot $DIRECTORY /bin/bash -c "generate_ssh_keys_postponed $USER"
 
     # Clean up
     custom_umount -s $DIRECTORY

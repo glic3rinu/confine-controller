@@ -16,7 +16,7 @@ def load_slice_config(c_slice):
     slice_config = ""
     for sliver in c_slice.sliver_set.all():
         pass
-    return ["%.12i" % c_slice.id, slice_config]
+    return [int212hex(c_slice.id), slice_config]
 
 def load_sliver_config(sl):
     """
@@ -24,27 +24,72 @@ def load_sliver_config(sl):
     """
     interfaces = ""
     for request in sl.networkrequest_set.all():
-        interfaces += node_templates.SLIVER_INTERFACE_TYPE % {'number': request.number, 'type': request.type}
-        interfaces += node_templates.SLIVER_INTERFACE_NAME % {'number': request.number, 'name': request.interface.name} if request.interface else ""
-        interfaces += node_templates.SLIVER_INTERFACE_IPV4_PROTO % {'number': request.number, 'proto': 'static'}
-        interfaces += node_templates.SLIVER_INTERFACE_IPV4 % {'number': request.number, 'ip': request.ipv4_address}
-        interfaces += node_templates.SLIVER_INTERFACE_IPV6_PROTO % {'number': request.number, 'proto': 'static'}
-        interfaces += node_templates.SLIVER_INTERFACE_IPV6 % {'number': request.number, 'ip': request.ipv6_address}
-        interfaces += node_templates.SLIVER_INTERFACE_MAC % {'number': request.number, 'mac': request.mac_address}
+        if request.number:
+            interfaces += node_templates.SLIVER_INTERFACE_TYPE % {'number': "%.2i" % request.number, 'type': request.type}
+            interfaces += node_templates.SLIVER_INTERFACE_NAME % {'number': "%.2i" % request.number, 'name': request.interface.name} if request.interface else ""
+            interfaces += node_templates.SLIVER_INTERFACE_IPV4_PROTO % {'number': "%.2i" % request.number, 'proto': 'static'}
+            interfaces += node_templates.SLIVER_INTERFACE_IPV4 % {'number': "%.2i" % request.number, 'ip': request.ipv4_address}
+            interfaces += node_templates.SLIVER_INTERFACE_IPV6_PROTO % {'number': "%.2i" % request.number, 'proto': 'static'}
+            interfaces += node_templates.SLIVER_INTERFACE_IPV6 % {'number': "%.2i" % request.number, 'ip': request.ipv6_address}
+            interfaces += node_templates.SLIVER_INTERFACE_MAC % {'number': "%.2i" % request.number, 'mac': request.mac_address}
+            
     sliver_config = node_templates.NODE_CONFIG_TEMPLATE % {
-        'sliver_id': "%.12i" % sl.slice.id,
+        'sliver_id': int212hex(sl.slice.id),
         'ssh_key': sl.slice.user.get_profile().ssh_key,
         'fs_template_url': 'http://downloads.openwrt.org/backfire/10.03.1-rc6/x86_generic/openwrt-x86-generic-rootfs.tar.gz',
         'exp_data_url': 'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
         'interfaces': interfaces
         }
-    return ["%.12i" % sl.slice.id, sliver_config]
+    return [int212hex(sl.slice.id), sliver_config]
 
-def process_sliver_status(sliver_status):
+def get_interface_number(line):
+    """
+    This function is a helper to retrieve an interface number from
+    standar UCI lines
+    """
+    return int(line.split(" ")[1].split("_")[0].replace("if", ""))
+
+def process_sliver_status(sliver_status, node):
     """
     This function will process return of sliver status from node
     """
-    pass
+    slice_id = None
+    sliver_nr = None
+    ipv4 = {}
+    ipv6 = {}
+    mac = {}
+    current_state = None
+    for line in sliver_status.split("\n"):
+        line = line.strip()
+        if u"config sliver" in line:
+            slice_id = hex2int(line.split(" ")[-1].replace("'", ""))
+        elif u"sliver_nr" in line:
+            sliver_nr = int(line.split(" ")[-1].replace("'", ""))
+        elif u"ipv4" in line and u"proto" not in line:
+            iface = get_interface_number(line)
+            ipv4[iface] = line.split(" ")[-1].replace("'", "")
+        elif u"ipv6" in line and u"proto" not in line:
+            iface = get_interface_number(line)
+            ipv6[iface] = line.split(" ")[-1].replace("'", "")
+        elif u"mac" in line:
+            iface = get_interface_number(line)
+            mac[iface] = line.split(" ")[-1].replace("'", "")
+        elif u"state" in line:
+            current_state = line.split(" ")[-1].replace("'", "")
+
+    sliver = slice_models.Sliver.objects.get(node = node, slice__id = slice_id)
+    sliver.number = sliver_nr
+    sliver.state = current_state
+    sliver.save()
+    network_reqs = sliver.networkrequest_set.all()
+    for nq in network_reqs:
+        if nq.number in mac.keys():
+            nq.mac_address = mac[nq.number]
+        if nq.number in ipv4.keys():
+            nq.ipv4_address = ipv4[nq.number]
+        if nq.number in ipv6.keys():
+            nq.ipv6_address = ipv6[nq.number]
+        nq.save()
 
 def load_node_config(node):
     """
@@ -72,7 +117,7 @@ def send_node_config(node):
                                      username,
                                      settings.SERVER_PUBLIC_KEY,
                                      script)
-        process_sliver_status(return_data)
+        process_sliver_status(return_data, node)
     return True
 
 def send_deploy_sliver(sliver):
@@ -89,7 +134,7 @@ def send_deploy_sliver(sliver):
 
 def send_start_sliver(sliver):
     script = node_templates.SLIVER_START_SCRIPT % {
-        'slice_id': "%.12i" % sliver.slice.id
+        'slice_id': int212hex(sliver.slice.id)
         }
 
     return_data = ssh_connection(sliver.node.ipv6,
@@ -99,7 +144,7 @@ def send_start_sliver(sliver):
 
 def send_stop_sliver(sliver):
     script = node_templates.SLIVER_STOP_SCRIPT % {
-        'slice_id': "%.12i" % sliver.slice.id
+        'slice_id': int212hex(sliver.slice.id)
         }
 
     return_data = ssh_connection(sliver.node.ipv6,
@@ -127,3 +172,9 @@ def extract_params(xml_tree, params = []):
     for param in params:
         return_hash[param] = xml_tree.find(param).text
     return return_hash
+
+def int212hex(cint):
+    return "%.12X" % cint
+
+def hex2int(chex):
+    return int(chex, 16)

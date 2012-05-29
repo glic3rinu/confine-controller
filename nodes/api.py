@@ -212,24 +212,26 @@ def allocate_slivers(node_params = {}):
     """
     node = node_params.get("node", None)
     if node:
-        #return node_utils.send_node_config(c_node)
+        return node_utils.send_node_config(c_node)
     else:
         node_id = node_params.get("node_id", None)
         if node_id:
             node = node_models.Node.objects.get(id = node_id)
-            #return node_utils.send_node_config(c_node)
+            return node_utils.send_node_config(c_node)
     return False
     
 
 def deploy_slivers(sliver_params = {}):
     """
     Deploy given slivers
-    - sliver_id
+    - slice_slug
     """
-    sliver_id = sliver_params.get('sliver_id', None)
-    if sliver_id:
-        sliver = slice_models.Sliver.objects.get(id = sliver_id)
-        return node_utils.send_deploy_sliver(sliver)
+    slice_slug = sliver_params.get('slice_slug', None)
+    if slice_slug:
+        slivers = slice_models.Sliver.objects.filter(slice__slug = slice_slug)
+        for sliver in slivers:
+            node_utils.send_deploy_sliver(sliver)
+        return True
     return False
 
 def start_slivers(sliver_params = {}):

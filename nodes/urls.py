@@ -29,6 +29,15 @@ urlpatterns = patterns('',
                        url(r'^get_slice_public_keys/html/([a-zA-Z0-9\-\_\.\,]+)/$',
                            node_views.get_slice_public_keys,
                            name="get_slice_public_keys"),
+                       url(r'^deploy_slivers/html/([a-zA-Z0-9\-\_\.\,]+)/$',
+                           node_views.deploy_slivers,
+                           name="deploy_slivers"),
+                       url(r'^start_sliver/html/([a-zA-Z0-9\-\_\.\,]+)/$',
+                           node_views.start_sliver,
+                           name="start_sliver"),
+                       url(r'^stop_sliver/html/([a-zA-Z0-9\-\_\.\,]+)/$',
+                           node_views.stop_sliver,
+                           name="stop_sliver"),
 
                        # XML
 

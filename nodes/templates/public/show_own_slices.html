@@ -38,27 +38,62 @@
       </p>
       <fieldset>
         <legend>Interfaces</legend>
-        {% for interface in sliver.interfaces.all %}
+        {% for nr in sliver.networkrequest.all %}
         <fieldset>
           <legend>Interface {{ forloop.counter }}</legend>
           <p>
             <span style="font-weight:bold;">
               name:
             </span>
-            {{ interface.name }}
+            {{ nr.interface.name }}
           </p>
           <p>
             <span style="font-weight:bold;">
               type:
             </span>
-            {{ interface.type }}
+            {{ nr.type }}
+          </p>
+          <p>
+            <span style="font-weight:bold;">
+              number:
+            </span>
+            {{ nr.number }}
+          </p>
+          <p>
+            <span style="font-weight:bold;">
+              mac:
+            </span>
+            {{ nr.mac_address }}
+          </p>
+          <p>
+            <span style="font-weight:bold;">
+              ipv4:
+            </span>
+            {{ nr.ipv4 }}
+          </p>
+          <p>
+            <span style="font-weight:bold;">
+              ipv6:
+            </span>
+            {{ nr.ipv6 }}
           </p>          
         </fieldset>
         {% endfor %}
       </fieldset>
+      <p style="margin-left: 50px;">
+        <a href="{% url start_sliver sliver.id %}">Start sliver</a>
+      </p>
+      <p style="margin-left: 50px;">
+        <a href="{% url stop_sliver sliver.id %}">Stop sliver</a>
+      </p>
     </fieldset>
     {% endfor %}
   </fieldset>
+  <p>
+    <a href="{% url deploy_slivers slice.slug %}">
+      Deploy slivers
+    </a>
+  </p>
   <p>
     <a href="{% url get_slice_public_keys slice.slug %}">
       Get Slice Public Keys

@@ -420,3 +420,27 @@ def get_slice_public_keys(request, slice_slug):
                                                  }
                                              )
                               )
+
+@login_required
+def deploy_slivers(request, slice_slug):
+    """
+    Deploy all slivers for a given slice
+    """
+    keys = api.deploy_slivers({'slice_slug': slice_slug})
+    return HttpResponseRedirect("/show_own_slices/")
+
+@login_required
+def start_sliver(request, sliver_id):
+    """
+    Start the given sliver
+    """
+    keys = api.start_slivers({'sliver_id': sliver_id})
+    return HttpResponseRedirect("/show_own_slices/")
+
+@login_required
+def stop_sliver(request, sliver_id):
+    """
+    Stop the given sliver
+    """
+    keys = api.stop_slivers({'sliver_id': sliver_id})
+    return HttpResponseRedirect("/show_own_slices/")

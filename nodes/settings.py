@@ -5,8 +5,9 @@ ugettext = lambda s: s
 SERVER_TINC_IP = getattr(settings, 'SERVER_TINC_IP', '') 
 SERVER_TINC_PORT = getattr(settings, 'SERVER_TINC_PORT', '') 
 SERVER_URL = getattr(settings, 'SERVER_URL', '') 
-SERVER_PUBLIC_KEY = getattr(settings, 'SERVER_PUBLIC_KEY', '') 
+SERVER_PUBLIC_KEY = getattr(settings, 'SERVER_PUBLIC_KEY', '')
 
+SERVER_PRIVATE_KEY = getattr(settings, 'SERVER_PRIVATE_KEY', '') 
 TESTBED_BASE_IP = getattr(settings, 'TESTBED_BASE_IP', '') 
 
 

@@ -219,3 +219,4 @@ LOGIN_REDIRECT_URL = '/logged_in/'
 # Project needed settings
 
 TESTBED_BASE_IP = "fdf5:5351:1dfd"
+SERVER_PRIVATE_KEY = "/home/confine/.ssh/id_rsa"

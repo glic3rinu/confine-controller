@@ -205,7 +205,6 @@ def create_slice(request):
                                           form = slices_forms.NetworkRequestForm)
     if request.method == "POST":
         form = forms.NewSliceForm(request.POST)
-        import pdb; pdb.set_trace()
         if form.is_valid():
             c_data = form.cleaned_data
             nodes = c_data.get('nodes', [])

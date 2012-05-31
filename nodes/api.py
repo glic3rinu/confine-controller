@@ -212,7 +212,7 @@ def allocate_slivers(node_params = {}):
     """
     node = node_params.get("node", None)
     if node:
-        return node_utils.send_node_config(c_node)
+        return node_utils.send_node_config(node)
     else:
         node_id = node_params.get("node_id", None)
         if node_id:

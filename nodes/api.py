@@ -212,13 +212,13 @@ def allocate_slivers(node_params = {}):
     """
     node = node_params.get("node", None)
     if node:
-        #return node_utils.send_node_config(node)
+        return node_utils.send_node_config(node)
         pass
     else:
         node_id = node_params.get("node_id", None)
         if node_id:
             node = node_models.Node.objects.get(id = node_id)
-            #return node_utils.send_node_config(c_node)
+            return node_utils.send_node_config(node)
     return False
     
 
@@ -231,8 +231,7 @@ def deploy_slivers(sliver_params = {}):
     if slice_slug:
         slivers = slice_models.Sliver.objects.filter(slice__slug = slice_slug)
         for sliver in slivers:
-            #node_utils.send_deploy_sliver(sliver)
-            pass
+            node_utils.send_deploy_sliver(sliver)
         return True
     return False
 
@@ -244,7 +243,7 @@ def start_slivers(sliver_params = {}):
     sliver_id = sliver_params.get('sliver_id', None)
     if sliver_id:
         sliver = slice_models.Sliver.objects.get(id = sliver_id)
-        #return node_utils.send_start_sliver(sliver)
+        return node_utils.send_start_sliver(sliver)
     return False
 
 def stop_slivers(sliver_params = {}):
@@ -255,5 +254,5 @@ def stop_slivers(sliver_params = {}):
     sliver_id = sliver_params.get('sliver_id', None)
     if sliver_id:
         sliver = slice_models.Sliver.objects.get(id = sliver_id)
-        #return node_utils.send_stop_sliver(sliver)
+        return node_utils.send_stop_sliver(sliver)
     return False

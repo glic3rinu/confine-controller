@@ -38,7 +38,7 @@
       </p>
       <fieldset>
         <legend>Interfaces</legend>
-        {% for nr in sliver.networkrequest.all %}
+        {% for nr in sliver.networkrequest_set.all %}
         <fieldset>
           <legend>Interface {{ forloop.counter }}</legend>
           <p>

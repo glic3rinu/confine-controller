@@ -257,6 +257,7 @@ def create_slice(request):
             
     else:
         form = forms.NewSliceForm()
+        form.fields['nodes'].choices = map(lambda a: [a.id, a.hostname], api.get_nodes())
     return render_to_response("public/create_slice.html",
                               RequestContext(request,
                                              {

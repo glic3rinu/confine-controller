@@ -7,10 +7,7 @@ from nodes import widgets
 
 class NewSliceForm(forms.Form):
     name = forms.CharField(required = True)
-    nodes = forms.MultipleChoiceField(choices = map(lambda a: [a.id, a.hostname],
-                                                    api.get_nodes()),
-                                      widget=widgets.NodeWithInterfacesWidget)
-
+    nodes = forms.MultipleChoiceField(widget=widgets.NodeWithInterfacesWidget)
 
 class NodeForm(forms.ModelForm):    
     class Meta:

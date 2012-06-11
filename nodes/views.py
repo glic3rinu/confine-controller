@@ -335,14 +335,56 @@ def upload_node(request):
 
 @login_required
 def edit_node(request, node_hostname):
+    InterfaceFormset = modelformset_factory(node_models.Interface,
+                                            extra = 1,
+                                            form = forms.InterfaceForm)
+
     node = api.get_node({'hostname': node_hostname})
     if node:
         if request.method == "POST":
-            pass
+            node_form = forms.NodeForm(request.POST, prefix = "node")
+            storage_form = forms.StorageForm(request.POST,prefix = "storage")
+            memory_form = forms.MemoryForm(request.POST,prefix = "memory")
+            cpu_form = forms.CPUForm(request.POST,prefix = "cpu")
+            interface_formset = InterfaceFormset(request.POST, prefix = "interfaces")
+                                             
+            if node_form.is_valid() and storage_form.is_valid() and memory_form.is_valid() and cpu_form.is_valid() and interface_formset.is_valid():
+
+                node = node_form.save(commit = False)
+                storage = storage_form.save(commit = False)
+                memory = memory_form.save(commit = False)
+                cpu = cpu_form.save(commit = False)
+                interfaces = interface_formset.save(commit = False)
+                data = {
+                    'node': node,
+                    'storage': storage,
+                    'memory': memory,
+                    'cpu': cpu,
+                    'interfaces': interfaces
+                    }
+                if api.edit_node(data):
+                    return HttpResponseRedirect("/node_index/")
         else:
             node_form = forms.NodeForm(prefix = "node",
                                        instance = node)
-        return render_to_response("public/upload_node.html",
+            try:
+                storage_form = forms.StorageForm(prefix = "storage",
+                                                 instance = node.storage)
+            except:
+                storage_form = forms.StorageForm(prefix = "storage")
+            try:
+                memory_form = forms.MemoryForm(prefix = "memory",
+                                               instance = node.memory)
+            except:
+                memory_form = forms.MemoryForm(prefix = "memory")
+            try:
+                cpu_form = forms.CPUForm(prefix = "cpu",
+                                         instance = node.cpu)
+            except:
+                cpu_form = forms.CPUForm(prefix = "cpu")
+            interface_formset = InterfaceFormset(prefix = "interfaces",
+                                                 queryset = node_models.Interface.objects.filter(node = node))
+        return render_to_response("public/edit_node.html",
                                   RequestContext(request,
                                                  {
                                                      'node_form': node_form,

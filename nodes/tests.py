@@ -43,6 +43,31 @@ class APITest(TestCase):
         self.assertEqual(None, api.get_node({'hostname': wrong_hostname}))
         
 
+    def test_edit_node(self):
+        """
+        Test edit_node api call
+        """
+        pass
+
+
+    def test_set_node(self):
+        """
+        Test set_node api call
+        """
+        node = self.create_test_node(commit = False)
+        storage = self.create_test_storage(commit = False)
+        memory = self.create_test_memory(commit = False)
+        cpu = self.create_test_cpu(commit = False)
+        iface1 = self.create_test_interface(commit = False)
+        iface2 = self.create_test_interface(commit = False)
+
+        self.assertTrue(api.set_node({'node': node,
+                                      'storage': storage,
+                                      'memory': memory,
+                                      'cpu': cpu,
+                                      'interfaces': [iface1, iface2]}))
+    
+
     def test_create_node(self):
         """
         Test create_node api call
@@ -179,13 +204,67 @@ class APITest(TestCase):
     def create_test_node(self,
                          hostname = "hostname",
                          ip = "1.1.1.1",
-                         architecture = "x86_generic"):
+                         architecture = "x86_generic",
+                         commit = True):
         node = models.Node(hostname = hostname,
                            ip = ip,
                            architecture = architecture,
                            state = node_settings.ONLINE)
-        node.save()
+        if commit:
+            node.save()
         return node
+
+    def create_test_storage(self,
+                            types = "debian-squeeze-amd64",
+                            size = 64,
+                            node = None,
+                            commit = True):
+        storage = models.Storage(types = types,
+                                 size = size)
+        if node:
+            storage.node = node
+        if commit:
+            storage.save()
+        return storage
+
+    def create_test_memory(self,
+                           size = 64,
+                           node = None,
+                           commit = True):
+        memory = models.Memory(size = size)
+        if node:
+            memory.node = node
+        if commit:
+            memory.save()
+        return memory
+
+    def create_test_cpu(self,
+                        model = "intel x86",
+                        number = 1,
+                        frequency = "64",
+                        node = None,
+                        commit = False):
+        cpu = models.CPU(model = model,
+                         number = number,
+                         frequency = frequency)
+        if node:
+            cpu.node = node
+        if commit:
+            cpu.save()
+        return cpu
+
+    def create_test_interface(self,
+                              name = "eth0",
+                              itype = "802.3u",
+                              node = None,
+                              commit = True): 
+        interface = models.Interface(name = name,
+                                     type = itype)
+        if node:
+            interface.node = node
+        if commit:
+            interface.save()
+        return interface
     
     def create_user(self,
                     username = "fakename",

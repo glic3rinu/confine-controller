@@ -32,6 +32,17 @@ class APITest(TestCase):
     def setUp(self):
         pass
 
+    def test_get_node(self):
+        """
+        Test get_node api call
+        """
+        right_hostname = "hostname"
+        wrong_hostname = "no name"
+        node = self.create_test_node(hostname = right_hostname)
+        self.assertEqual(node.id, api.get_node({'hostname': right_hostname}).id)
+        self.assertEqual(None, api.get_node({'hostname': wrong_hostname}))
+        
+
     def test_create_node(self):
         """
         Test create_node api call
@@ -73,8 +84,21 @@ class APITest(TestCase):
 
         name = 'slice_test'
         user = self.create_user()
+        node_info = {}
+        node_info[node1.id] = {'networks': [],
+                               'cpu': None,
+                               'storage': None,
+                               'memory': None}
+        node_info[node2.id] = {'networks': [],
+                               'cpu': None,
+                               'storage': None,
+                               'memory': None}
+        node_info[node3.id] = {'networks': [],
+                               'cpu': None,
+                               'storage': None,
+                               'memory': None}
         slice_params = {
-            'nodes': [node1.id, node2.id, node3.id],
+            'nodes': node_info,
             'name': name,
             'user': user
             }
@@ -288,33 +312,6 @@ class HTMLTest(TestCase):
                                    )
         self.assertEqual(response.status_code,
                          200)
-
-    def test_create_slice(self):
-        """
-        Test to check if index is beign returned without conflicts
-        """
-        node_id = self.create_node()
-        username, password = self.create_user()
-        user = self.client.login(username=username, password=password)
-        
-        args = {}
-        response = self.client.get("/create_slice/",
-                                   args,
-                                   **self.request_headers
-                                   )
-        self.assertEqual(response.status_code,
-                         200)
-
-
-
-
-        args = {'nodes': [node_id], 'name': 'test'}
-        response = self.client.post("/create_slice/",
-                                    args,
-                                    **self.request_headers
-                                    )
-        self.assertRedirects(response,
-                             '/show_own_slices/')
 
     def test_show_own_slices(self):
         """

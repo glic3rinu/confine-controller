@@ -205,6 +205,7 @@ def create_slice(request):
                                           form = slices_forms.NetworkRequestForm)
     if request.method == "POST":
         form = forms.NewSliceForm(request.POST)
+        form.fields['nodes'].choices = map(lambda a: [a.id, a.hostname], api.get_nodes())
         if form.is_valid():
             c_data = form.cleaned_data
             nodes = c_data.get('nodes', [])

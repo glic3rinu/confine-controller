@@ -10,7 +10,7 @@ def get_node(node_params = {}):
     """
     hostname = node_params.get('hostname', '')
     try:
-        node = node_models.objects.get(hostname = hostname)
+        node = node_models.Node.objects.get(hostname = hostname)
         return node
     except:
         pass
@@ -137,7 +137,7 @@ def create_slice(slice_params = {}):
                 for network in networks:
                     network.sliver = c_sliver
                     network.save()                
-            allocate_slivers({'node': c_node})
+            #allocate_slivers({'node': c_node})
         return True
     return False
 

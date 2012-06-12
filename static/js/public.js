@@ -11,6 +11,8 @@ $ (document).ready (function (){
     }
   });
 
+  $ ("#message_overlay").fadeIn ('slow');
+
 });
 
 function show_info_box (box_id){

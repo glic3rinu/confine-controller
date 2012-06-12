@@ -19,6 +19,8 @@ from nodes import api
 
 from django.forms.models import modelformset_factory
 
+from django.contrib import messages
+
 # XML ONLY
 
 @csrf_exempt
@@ -254,8 +256,9 @@ def create_slice(request):
                 'user': request.user,
                 'name': c_data.get('name')
                 }):
+                messages.info(request, "Slice created")
                 return HttpResponseRedirect("/show_own_slices/")
-            
+        messages.info(request, "A problem arised when creating slice")    
     else:
         form = forms.NewSliceForm()
         form.fields['nodes'].choices = map(lambda a: [a.id, a.hostname], api.get_nodes())
@@ -312,7 +315,9 @@ def upload_node(request):
                 'interfaces': interfaces
                     }
             if api.set_node(data):
+                messages.info(request, "Node uploaded successfuly")
                 return HttpResponseRedirect("/node_index/")
+        messages.info(request, "A problem arised while uploading node")
     else:
         node_form = forms.NodeForm(prefix = "node")
         storage_form = forms.StorageForm(prefix = "storage")
@@ -363,7 +368,9 @@ def edit_node(request, node_hostname):
                     'interfaces': interfaces
                     }
                 if api.edit_node(data):
+                    messages.info(request, "Node updated successfuly")
                     return HttpResponseRedirect("/node_index/")
+            messages.info(request, "A problem arised while updating node")
         else:
             node_form = forms.NodeForm(prefix = "node",
                                        instance = node)
@@ -411,7 +418,9 @@ def delete_node(request):
                 'hostname': c_data.get('node').hostname,
                     }
             if api.delete_node(data):
+                messages.info(request, "Delete request created successfuly")
                 return HttpResponseRedirect("/node_index/")
+        messages.info(request, "A problem arised while creating delete request")
     else:
         form = forms.DeleteRequestForm()
     return render_to_response("public/delete_node.html",
@@ -470,6 +479,7 @@ def deploy_slivers(request, slice_slug):
     Deploy all slivers for a given slice
     """
     keys = api.deploy_slivers({'slice_slug': slice_slug})
+    messages.info(request, "Deploy sliver task started")
     return HttpResponseRedirect("/show_own_slices/")
 
 @login_required
@@ -478,6 +488,7 @@ def start_sliver(request, sliver_id):
     Start the given sliver
     """
     keys = api.start_slivers({'sliver_id': sliver_id})
+    messages.info(request, "Start sliver task started")
     return HttpResponseRedirect("/show_own_slices/")
 
 @login_required
@@ -486,4 +497,5 @@ def stop_sliver(request, sliver_id):
     Stop the given sliver
     """
     keys = api.stop_slivers({'sliver_id': sliver_id})
+    messages.info(request, "Stop sliver task started")
     return HttpResponseRedirect("/show_own_slices/")

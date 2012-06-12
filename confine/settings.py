@@ -220,3 +220,7 @@ LOGIN_REDIRECT_URL = '/logged_in/'
 
 TESTBED_BASE_IP = "fdf5:5351:1dfd"
 SERVER_PRIVATE_KEY = "/home/confine/.ssh/id_rsa"
+
+# Message framework configuration
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

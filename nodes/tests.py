@@ -189,6 +189,12 @@ class APITest(TestCase):
         """
         pass
 
+    def test_delete_sliver(self):
+        """
+        Test delete_sliver api call
+        """
+        pass
+
     def create_sliver(self, c_node, c_slice):
         sliver = slices_models.Sliver(slice = c_slice,
                                       node = c_node)

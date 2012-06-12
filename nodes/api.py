@@ -242,7 +242,6 @@ def allocate_slivers(node_params = {}):
             node = node_models.Node.objects.get(id = node_id)
             return node_utils.send_node_config(node)
     return False
-    
 
 def deploy_slivers(sliver_params = {}):
     """
@@ -255,6 +254,19 @@ def deploy_slivers(sliver_params = {}):
         for sliver in slivers:
             node_utils.send_deploy_sliver(sliver)
         return True
+    return False
+
+def delete_slivers(sliver_params = {}):
+    """
+    Delete given slivers
+    - sliver_id
+    """
+    sliver_id = sliver_params.get('sliver_id', None)
+    if sliver_id:
+        sliver = slice_models.Sliver.objects.get(id = sliver_id)
+        node = sliver.node
+        sliver.delete()
+        return allocate_slivers({"node": node})
     return False
 
 def start_slivers(sliver_params = {}):

@@ -41,6 +41,9 @@ urlpatterns = patterns('',
                        url(r'^stop_sliver/html/([a-zA-Z0-9\-\_\.\,]+)/$',
                            node_views.stop_sliver,
                            name="stop_sliver"),
+                       url(r'^delete_sliver/html/([a-zA-Z0-9\-\_\.\,]+)/$',
+                           node_views.delete_sliver,
+                           name="delete_sliver"),
 
                        # XML
 

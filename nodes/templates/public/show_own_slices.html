@@ -86,6 +86,9 @@
       <p style="margin-left: 50px;">
         <a href="{% url stop_sliver sliver.id %}">Stop sliver</a>
       </p>
+      <p style="margin-left: 50px;">
+        <a href="{% url delete_sliver sliver.id %}">Delete sliver</a>
+      </p>
     </fieldset>
     {% endfor %}
   </fieldset>

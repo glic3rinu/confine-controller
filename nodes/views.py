@@ -526,3 +526,14 @@ def stop_sliver(request, sliver_id):
     keys = api.stop_slivers({'sliver_id': sliver_id})
     messages.info(request, "Stop sliver task started")
     return HttpResponseRedirect("/show_own_slices/")
+
+@login_required
+def delete_sliver(request, sliver_id):
+    """
+    Delete the given sliver
+    """
+    if api.delete_slivers({"sliver_id": sliver_id}):
+        messages.info(request, "Sliver deleted successfuly")
+    else:
+        messages.info(request, "An error appeared on deleting the given sliver")
+    return HttpResponseRedirect("/show_own_slices/")

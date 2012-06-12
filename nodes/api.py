@@ -18,9 +18,31 @@ def get_node(node_params = {}):
 
 def edit_node(node_params = {}):
     """
-    Edit node
+    Edit a node. Data provided is through objects.
+    - node
+    - storage
+    - memory
+    - cpu
+    - interfaces
     """
-    pass
+    node = node_params.get('node', '')
+    storage = node_params.get('storage', '')
+    memory = node_params.get('memory', '')
+    cpu = node_params.get('cpu', '')
+    interfaces = node_params.get('interfaces', '')
+
+    node.save()
+    node.interface_set.all().delete()
+    storage.node = node
+    storage.save()
+    memory.node = node
+    memory.save()
+    cpu.node = node
+    cpu.save()
+    for interface in interfaces:
+        interface.node = node
+        interface.save()
+    return True
 
 def set_node(node_params = {}):
     """

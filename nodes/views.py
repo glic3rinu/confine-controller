@@ -340,6 +340,9 @@ def upload_node(request):
 
 @login_required
 def edit_node(request, node_hostname):
+    """
+    Edit and update a given node
+    """
     InterfaceFormset = modelformset_factory(node_models.Interface,
                                             extra = 1,
                                             form = forms.InterfaceForm)
@@ -347,11 +350,35 @@ def edit_node(request, node_hostname):
     node = api.get_node({'hostname': node_hostname})
     if node:
         if request.method == "POST":
-            node_form = forms.NodeForm(request.POST, prefix = "node")
-            storage_form = forms.StorageForm(request.POST,prefix = "storage")
-            memory_form = forms.MemoryForm(request.POST,prefix = "memory")
-            cpu_form = forms.CPUForm(request.POST,prefix = "cpu")
-            interface_formset = InterfaceFormset(request.POST, prefix = "interfaces")
+            node_form = forms.NodeForm(request.POST,
+                                       prefix = "node",
+                                       instance = node)
+            try:
+                storage_form = forms.StorageForm(request.POST,
+                                                 prefix = "storage",
+                                                 instance = node.storage)
+            except:
+                storage_form = forms.StorageForm(request.POST,
+                                                 prefix = "storage")
+
+            try:
+                memory_form = forms.MemoryForm(request.POST,
+                                               prefix = "memory",
+                                               instance = node.memory)
+            except:
+                memory_form = forms.MemoryForm(request.POST,
+                                               prefix = "memory")
+
+            try:
+                cpu_form = forms.CPUForm(request.POST,
+                                         prefix = "cpu",
+                                         instance = node.cpu)
+            except:
+                cpu_form = forms.CPUForm(request.POST,
+                                         prefix = "cpu")
+            
+            interface_formset = InterfaceFormset(request.POST,
+                                                 prefix = "interfaces")
                                              
             if node_form.is_valid() and storage_form.is_valid() and memory_form.is_valid() and cpu_form.is_valid() and interface_formset.is_valid():
 

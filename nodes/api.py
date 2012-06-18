@@ -159,7 +159,7 @@ def create_slice(slice_params = {}):
                 for network in networks:
                     network.sliver = c_sliver
                     network.save()                
-            #allocate_slivers({'node': c_node})
+            allocate_slivers({'node': c_node})
         return True
     return False
 
@@ -225,6 +225,29 @@ def get_slice_public_keys(node_params = {}):
     except:
         pass
     return []
+
+def delete_slices(slice_params = {}):
+    """
+    Delete given slices with all slivers
+    - slice_slug
+    """
+    slice_slug = sliver_params.get('slice_slug', None)
+    if slice_slug:
+        c_slice = slice_models.Slice.objects.get(slug = slice_slug)
+        nodes_involved = []
+        for sliver in c_slice.sliver_set.all():
+            nodes_involved.append(sliver.node)
+            sliver.delete()
+
+        clean_nodes = []
+        for node in nodes_involved:
+            if not node in clean_nodes:
+                clean_nodes.append(node)
+
+        for node in clean_nodes:
+            allocate_slivers({"node": node})
+        return True
+    return False
 
 def allocate_slivers(node_params = {}):
     """

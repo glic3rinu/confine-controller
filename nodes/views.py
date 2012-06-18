@@ -501,6 +501,17 @@ def get_slice_public_keys(request, slice_slug):
                               )
 
 @login_required
+def delete_slice(request, slice_slug):
+    """
+    Delete the given slice
+    """
+    if api.delete_slices({"slice_slug": slice_slug}):
+        messages.info(request, "Slice deleted successfuly")
+    else:
+        messages.info(request, "An error appeared on deleting the given slice")
+    return HttpResponseRedirect("/show_own_slices/")
+
+@login_required
 def deploy_slivers(request, slice_slug):
     """
     Deploy all slivers for a given slice

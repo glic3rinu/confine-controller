@@ -1,8 +1,11 @@
 {% extends "site_base.html" %}
 
 {% block content %}
+<div id="slice_menu">
+  <a href="{% url create_slice %}">Create Slice</a>
+</div>
 {% for slice in slices %}
-<div>
+<div class="slice_container">
   <fieldset>
     <legend>Info</legend>
     <p>

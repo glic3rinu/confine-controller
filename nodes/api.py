@@ -130,7 +130,6 @@ def create_slice(slice_params = {}):
     to node.
     Accepted parameters:
     - nodes (list of node_id)
-    - interfaces (list of interface_id)
     - user
     - name 
     """

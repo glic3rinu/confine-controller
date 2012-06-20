@@ -1,4 +1,9 @@
 
+/* Global */
+#content{
+    width: 950px;
+    margin: 0 auto;
+}
 
 /* Utils */
 #message_overlay{

@@ -40,6 +40,7 @@ vct_server_customize () {
 		BindToAddress = $VCT_SERVER_TINC_IP
 		Port = $VCT_SERVER_TINC_PORT
 		Name = server
+		StrictSubnets = yes
 		EOF
     cat <<- EOF > $MOUNT_POINT/etc/tinc/confine/tinc-down 
 		#!/bin/sh

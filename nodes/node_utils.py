@@ -119,7 +119,7 @@ def send_node_config(node):
     config = load_node_config(node)
     for sliver_config in config:
         script = node_templates.SLIVER_SCRIPT % {
-            'config': config[1], 'sliver_id': config[0]
+            'config': sliver_config[1], 'sliver_id': sliver_config[0]
             }
         return_data = ssh_connection(node.ipv6,
                                      settings.SERVER_PRIVATE_KEY,

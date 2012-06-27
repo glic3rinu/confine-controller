@@ -1,5 +1,10 @@
 {% extends "site_base.html" %}
 
 {% block content %}
-{{ config|linebreaksbr }}
+{% for conf in config %}
+<h3> Sliver {{ conf.0 }}</h3>
+<p>
+  {{ conf.1|linebreaksbr }}
+</p>
+{% endfor %}
 {% endblock %}

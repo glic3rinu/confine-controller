@@ -46,7 +46,8 @@ class ResearchGroup(models.Model):
 
     # Attributes
     name = models.CharField(max_length = 150,
-                            verbose_name = "name")
+                            verbose_name = "name",
+                            unique = True)
     
 
     # Functions

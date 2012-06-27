@@ -17,6 +17,8 @@ from nodes import settings as node_settings
 
 from slices import models as slices_models
 
+from user_management import models as user_management_models
+
 from xml.etree import ElementTree
 
 from django.contrib.auth.models import User
@@ -194,6 +196,25 @@ class APITest(TestCase):
         Test delete_sliver api call
         """
         pass
+
+    def test_create_research_group(self):
+        """
+        Test create_research_group api call
+        """
+        name1 = "name1"
+        name2 = "name2"
+        before_research_groups = user_management_models.ResearchGroup.objects.all().count()
+        self.assertTrue(api.create_research_group({'name': name1}))
+        after_research_groups = user_management_models.ResearchGroup.objects.all().count()
+        self.assertEqual(before_research_groups+1, after_research_groups)
+
+        self.assertTrue(api.create_research_group({'name': name2}))
+        after_research_groups_3 = user_management_models.ResearchGroup.objects.all().count()
+        self.assertEqual(after_research_groups+1, after_research_groups_3)
+
+        self.assertFalse(api.create_research_group({'name': name1}))
+        after_research_groups_2 = user_management_models.ResearchGroup.objects.all().count()
+        self.assertEqual(after_research_groups_3, after_research_groups_2)        
 
     def create_sliver(self, c_node, c_slice):
         sliver = slices_models.Sliver(slice = c_slice,

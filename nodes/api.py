@@ -1,7 +1,10 @@
 from nodes import models as node_models
 from slices import models as slice_models
+from user_management import models as user_management_models
 from nodes import settings as node_settings
 from nodes import node_utils
+
+from django.db import transaction, IntegrityError
 
 def get_node(node_params = {}):
     """
@@ -256,13 +259,14 @@ def allocate_slivers(node_params = {}):
     """
     node = node_params.get("node", None)
     if node:
-        return node_utils.send_node_config(node)
-        pass
+        #return node_utils.send_node_config(node)
+        return True
     else:
         node_id = node_params.get("node_id", None)
         if node_id:
             node = node_models.Node.objects.get(id = node_id)
-            return node_utils.send_node_config(node)
+            #return node_utils.send_node_config(node)
+            return True
     return False
 
 def deploy_slivers(sliver_params = {}):
@@ -311,4 +315,21 @@ def stop_slivers(sliver_params = {}):
     if sliver_id:
         sliver = slice_models.Sliver.objects.get(id = sliver_id)
         return node_utils.send_stop_sliver(sliver)
+    return False
+
+def create_research_group(research_group_params = {}):
+    """
+    Creates a new research group
+    - name
+    """
+    name = research_group_params.get('name', '')
+    if name:
+        research_group = user_management_models.ResearchGroup(name = name)
+        try:
+            sid = transaction.savepoint()
+            research_group.save()
+            transaction.savepoint_commit(sid)
+            return True
+        except IntegrityError:
+            transaction.savepoint_rollback(sid)
     return False

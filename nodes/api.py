@@ -9,11 +9,11 @@ from django.db import transaction, IntegrityError
 def get_node(node_params = {}):
     """
     Retrieve a node
-    - hostname
+    - id
     """
-    hostname = node_params.get('hostname', '')
+    id = node_params.get('id', '')
     try:
-        node = node_models.Node.objects.get(hostname = hostname)
+        node = node_models.Node.objects.get(id = id)
         return node
     except:
         pass
@@ -112,13 +112,13 @@ def delete_node(node_params = {}):
     Provides a way to request a delete of a given node. It accepts a node_params
     as a hash, that will include needed node params
     Accepted parameters:
-    - hostname
+    - id
     """
-    hostname = node_params.get('hostname', '')
+    id = node_params.get('id', '')
 
     try:
-        if hostname:
-            node = node_models.Node.objects.get(hostname = hostname)
+        if id:
+            node = node_models.Node.objects.get(id = id)
         else:
             raise Exception("Missing needed params")
         delete_request = node_models.DeleteRequest(node = node)
@@ -183,11 +183,11 @@ def get_node_configuration(node_params = {}):
     Provides a way to retrieve a node configuration
     through all slice config snippets.
     Accepted parameters:
-    - hostname
+    - id
     """
-    hostname = node_params.get("hostname", None)
+    id = node_params.get("id", None)
     try:
-        node = node_models.Node.objects.get(hostname = hostname)
+        node = node_models.Node.objects.get(id = id)
         return node_utils.load_node_config(node)
     except:
         pass
@@ -198,11 +198,11 @@ def get_node_public_keys(node_params = {}):
     Provides a way to retrieve all public keys related
     to a given node
     Accepted parameters:
-    - hostname
+    - id
     """
-    hostname = node_params.get("hostname", None)
+    id = node_params.get("id", None)
     try:
-        slices = slice_models.Slice.objects.filter(sliver__node__hostname = hostname)
+        slices = slice_models.Slice.objects.filter(sliver__node__id = id)
         return map(lambda a: a.user.get_profile().ssh_key, slices)
     except:
         pass

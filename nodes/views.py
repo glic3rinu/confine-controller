@@ -65,7 +65,7 @@ def delete_node_xml(request):
     Input format:
     <xml>
     <node>
-    <hostname>hostname</hostname>
+    <id>id</id>
     </node>
     Output format:
     <xml>
@@ -81,7 +81,7 @@ def delete_node_xml(request):
     if request.method == "POST":
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
-        params = utils.extract_params(tree, ['hostname'])
+        params = utils.extract_params(tree, ['id'])
         if api.delete_node(params):
             node_deleted = 1 
 
@@ -99,7 +99,7 @@ def get_node_configuration_xml(request):
     Input format:
     <xml>
     <node>
-    <hostname>hostname</hostname>
+    <id>id</id>
     </node>
     Output format:
     <xml>
@@ -117,8 +117,8 @@ def get_node_configuration_xml(request):
     if request.method == "POST":
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
-        hostname = tree.find('hostname').text
-        config = api.get_node_configuration({'hostname': hostname})
+        id = tree.find('id').text
+        config = api.get_node_configuration({'id': id})
         if config != None:
             hostname_found = 1
         
@@ -136,7 +136,7 @@ def get_node_public_keys_xml(request):
     Retrieve public keys of node users
     <xml>
     <node>
-    <hostname>hostname</hostname>
+    <id>id</id>
     </node>
     Output format:
     <xml>
@@ -157,8 +157,8 @@ def get_node_public_keys_xml(request):
     if request.method == "POST":
         raw_xml = request.POST.get("node_data", None)
         tree = ElementTree.fromstring(raw_xml)
-        hostname = tree.find('hostname').text
-        keys = api.get_node_public_keys({'hostname': hostname})
+        id = tree.find('id').text
+        keys = api.get_node_public_keys({'id': id})
         if keys != None:
             hostname_found = 1
     return render_to_response("public/xml/get_node_keys.xml",
@@ -339,7 +339,7 @@ def upload_node(request):
                               )
 
 @login_required
-def edit_node(request, node_hostname):
+def edit_node(request, node_id):
     """
     Edit and update a given node
     """
@@ -347,7 +347,7 @@ def edit_node(request, node_hostname):
                                             extra = 1,
                                             form = forms.InterfaceForm)
 
-    node = api.get_node({'hostname': node_hostname})
+    node = api.get_node({'id': node_id})
     if node:
         if request.method == "POST":
             node_form = forms.NodeForm(request.POST,
@@ -442,7 +442,7 @@ def delete_node(request):
         if form.is_valid():
             c_data = form.cleaned_data
             data = {
-                'hostname': c_data.get('node').hostname,
+                'id': c_data.get('node').id,
                     }
             if api.delete_node(data):
                 messages.info(request, "Delete request created successfuly")
@@ -459,11 +459,11 @@ def delete_node(request):
                               )
 
 @login_required
-def get_node_configuration(request, node_hostname):
+def get_node_configuration(request, node_id):
     """
     Displays the current node configuration
     """
-    config = api.get_node_configuration({'hostname': node_hostname})
+    config = api.get_node_configuration({'id': node_id})
     return render_to_response("public/get_node_configuration.html",
                               RequestContext(request,
                                              {
@@ -473,11 +473,11 @@ def get_node_configuration(request, node_hostname):
                               )
 
 @login_required
-def get_node_public_keys(request, node_hostname):
+def get_node_public_keys(request, node_id):
     """
     Displays all node related keys
     """
-    keys = api.get_node_public_keys({'hostname': node_hostname})
+    keys = api.get_node_public_keys({'id': node_id})
     return render_to_response("public/get_node_public_keys.html",
                               RequestContext(request,
                                              {

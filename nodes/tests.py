@@ -38,13 +38,11 @@ class APITest(TestCase):
         """
         Test get_node api call
         """
-        right_hostname = "hostname"
-        wrong_hostname = "no name"
-        node = self.create_test_node(hostname = right_hostname)
-        self.assertEqual(node.id, api.get_node({'hostname': right_hostname}).id)
-        self.assertEqual(None, api.get_node({'hostname': wrong_hostname}))
+        hostname = "hostname"
+        node = self.create_test_node(hostname = hostname)
+        self.assertEqual(node.id, api.get_node({'id': node.id}).id)
+        self.assertEqual(None, api.get_node({'id': node.id+1}))
         
-
     def test_edit_node(self):
         """
         Test edit_node api call
@@ -91,7 +89,7 @@ class APITest(TestCase):
         """
         node1 = self.create_test_node()
         before_requests = models.DeleteRequest.objects.all().count()
-        self.assertTrue(api.delete_node({'hostname': node1.hostname}))
+        self.assertTrue(api.delete_node({'id': node1.id}))
         after_requests = models.DeleteRequest.objects.all().count()
         self.assertEqual(before_requests+1, after_requests)
 
@@ -176,7 +174,7 @@ class APITest(TestCase):
         slice1 = self.create_slice(user, name)
         sliver1 = self.create_sliver(node, slice1)
 
-        params = {'hostname': node.hostname}
+        params = {'id': node.id}
         self.assertNotEqual(api.get_node_configuration(params), "")
 
     def test_get_node_public_keys(self):
@@ -335,7 +333,7 @@ class XMLTest(TestCase):
         before_nodes = models.Node.objects.all().count()
         before_requests = models.DeleteRequest.objects.all().count()
         
-        args = {'node_data': examples.HOSTNAME_NODE_DATA}
+        args = {'node_data': examples.HOSTNAME_NODE_DATA % models.Node.objects.all()[0].id}
         response = self.client.post("/delete_node/xml/",
                                     args,
                                     **self.request_headers
@@ -358,7 +356,7 @@ class XMLTest(TestCase):
         """
         self.test_right_upload_node()
         
-        args = {'node_data': examples.HOSTNAME_NODE_DATA}
+        args = {'node_data': examples.HOSTNAME_NODE_DATA % models.Node.objects.all()[0].id}
         response = self.client.post("/get_node_configuration/xml/",
                                     args,
                                     **self.request_headers
@@ -378,7 +376,7 @@ class XMLTest(TestCase):
         """
         self.test_right_upload_node()
         
-        args = {'node_data': examples.HOSTNAME_NODE_DATA}
+        args = {'node_data': examples.HOSTNAME_NODE_DATA % models.Node.objects.all()[0].id}
         response = self.client.post("/get_node_public_keys/xml/",
                                     args,
                                     **self.request_headers

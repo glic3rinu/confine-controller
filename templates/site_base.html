@@ -41,6 +41,7 @@
               {% if request.user.is_authenticated %}
               <li><a href="{% url show_own_slices %}">Show own slices</a></li>
               <li><a href="{% url user_profile %}">Profile</a></li>
+              <li><a href="{% url show_tickets %}">Ticket system</a></li>
               <li><a href="{% url logout %}">Logout</a></li>
               {% endif %}
               {% if not request.user.is_authenticated %}

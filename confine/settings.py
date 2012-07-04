@@ -141,6 +141,7 @@ INSTALLED_APPS = (
           
     'user_profile',
     'user_management',
+    'ticket_system',
     'nodes',
     'slices',
 )
@@ -197,6 +198,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'django.contrib.auth.*', 
             'nodes.*',
             'slices.*',
+            'ticket_system.*'
         ),
         'collapsible': True,
     }),

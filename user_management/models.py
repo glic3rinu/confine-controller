@@ -42,7 +42,8 @@ class ResearchGroup(models.Model):
     users = models.ManyToManyField(auth_models.User,
                                    verbose_name = "users",
                                    blank = True,
-                                   null = True)
+                                   null = True,
+                                   related_name = "research_groups")
 
     # Attributes
     name = models.CharField(max_length = 150,

@@ -67,7 +67,8 @@ class Queue(models.Model):
 
     # Attributes
     name = models.CharField(max_length = 200,
-                               verbose_name = "name")
+                            verbose_name = "name",
+                            unique = True)
     
     # Functions
     def __unicode__(self):

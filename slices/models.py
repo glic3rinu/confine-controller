@@ -14,6 +14,10 @@ from django.template.defaultfilters import slugify
 
 
 class Slice(models.Model):
+    template = models.ForeignKey("SliverTemplate",
+                                 verbose_name = "template",
+                                 blank = True,
+                                 null = True)
     confine_permissions = generic.GenericRelation(user_m_models.ConfinePermission,
                                                  verbose_name = "confine permission")
     
@@ -72,6 +76,21 @@ class Sliver(models.Model):
 #    def ipv6_address(self):
 #        id = hex(self.id)[2:]
 #        return "%s:ffff::%s:0" % (settings.IPV6_PREFIX, id)
+
+class SliverTemplate(models.Model):
+    name = models.CharField(max_length = 200,
+                            verbose_name = "name")
+    template_type = models.CharField(max_length = 50,
+                                     verbose_name = "type")
+    arch = models.CharField(max_length = 50,
+                            verbose_name = "architecture")
+    enabled = models.BooleanField(verbose_name = "enabled")
+    data_uri = models.URLField(verbose_name = "data URI")
+    data_sha256 = models.CharField(max_length = 150,
+                                   verbose_name = "sha256")
+
+    def __unicode__(self):
+        return self.name
 
 class MemoryRequest(models.Model):
     sliver = models.OneToOneField(Sliver)

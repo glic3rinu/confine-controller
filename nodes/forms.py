@@ -1,4 +1,5 @@
 from django import forms
+from slices import models as slice_models
 from nodes import models
 
 from nodes import api
@@ -7,6 +8,7 @@ from nodes import widgets
 
 class NewSliceForm(forms.Form):
     name = forms.CharField(required = True)
+    template = forms.ChoiceField(choices = map(lambda a: [a.id, a.name], slice_models.SliverTemplate.objects.filter(enabled = True)))
     nodes = forms.MultipleChoiceField(widget=widgets.NodeWithInterfacesWidget)
 
 class NodeForm(forms.ModelForm):    

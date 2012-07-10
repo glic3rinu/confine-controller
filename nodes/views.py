@@ -254,7 +254,8 @@ def create_slice(request):
             if api.create_slice({
                 'nodes': node_info,
                 'user': request.user,
-                'name': c_data.get('name')
+                'name': c_data.get('name'),
+                'template': c_data.get('template', None),
                 }):
                 messages.info(request, "Slice created")
                 return HttpResponseRedirect("/show_own_slices/")

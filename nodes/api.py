@@ -134,15 +134,19 @@ def create_slice(slice_params = {}):
     Accepted parameters:
     - nodes (list of node_id)
     - user
-    - name 
+    - name
+    - template
     """
     user = slice_params.get('user', None)
     nodes = slice_params.get('nodes', [])
     name = slice_params.get('name', '')
+    template = slice_params.get('template', None)
     
     if user and len(nodes) > 0:
         c_slice = slice_models.Slice(name = name,
                                      user = user)
+        if template:
+            c_slice.template = template
         c_slice.save()
         for node in nodes.keys():
             c_node = node_models.Node.objects.get(id = node)

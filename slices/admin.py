@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Slice, Sliver, MemoryRequest, StorageRequest, CPURequest, NetworkRequest
+from models import Slice, Sliver, SliverTemplate, MemoryRequest, StorageRequest, CPURequest, NetworkRequest
 from confine_utils.widgets import ShowText
 from confine_utils.admin import admin_link_factory
 from django import forms 
@@ -174,6 +174,10 @@ class SliceAdmin(admin.ModelAdmin):
     list_filter = ['state']
     inlines = [SliverInline]
 
+class SliverTemplateAdmin(admin.ModelAdmin):
+    class Meta:
+        model = SliverTemplate
 
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Sliver, SliverAdmin)
+admin.site.register(SliverTemplate, SliverTemplateAdmin)

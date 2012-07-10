@@ -40,11 +40,14 @@ def load_sliver_config(sl, use_complete_id = False):
             interfaces += node_templates.SLIVER_INTERFACE_IPV6_PROTO % {'number': "%.2i" % request.number, 'proto': 'static'}
             interfaces += node_templates.SLIVER_INTERFACE_IPV6 % {'number': "%.2i" % request.number, 'ip': request.ipv6_address}
             interfaces += node_templates.SLIVER_INTERFACE_MAC % {'number': "%.2i" % request.number, 'mac': request.mac_address}
-            
+
+    fs_template_uri = ""
+    if sl.slice.template:
+        fs_template_url = sl.slice.template.data_uri
     sliver_config = node_templates.NODE_CONFIG_TEMPLATE % {
         'sliver_id': current_id,
         'ssh_key': sl.slice.user.get_profile().ssh_key,
-        'fs_template_url': 'http://downloads.openwrt.org/backfire/10.03.1-rc6/x86_generic/openwrt-x86-generic-rootfs.tar.gz',
+        'fs_template_url': fs_template_uri,
         'exp_data_url': 'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
         'interfaces': interfaces
         }

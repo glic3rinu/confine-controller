@@ -4,6 +4,11 @@ from django.contrib.auth import models as auth_models
 import settings
 
 class Node(models.Model):
+    island = models.ForeignKey("Island",
+                               blank = True,
+                               null = True,
+                               verbose_name = "island")
+    
     hostname = models.CharField(max_length=255)
     url = models.URLField("URL", blank=True)
     architecture = models.CharField(max_length=128, choices=settings.ARCHITECTURE_CHOICES, default=settings.DEFAULT_ARCHITECTURE)
@@ -57,7 +62,12 @@ class DeleteRequest(models.Model):
 
     def __unicode__(self):
         return self.node.hostname
-    
+
+
+class Island(models.Model):
+    name = models.CharField(max_length = 200,
+                            verbose_name = "name")
+
 class Storage(models.Model):
     node = models.OneToOneField(Node)
     types = models.CharField(max_length=128,

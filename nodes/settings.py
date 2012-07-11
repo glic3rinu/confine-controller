@@ -2,13 +2,15 @@ from django.conf import settings
 
 ugettext = lambda s: s
 
+API_VERSION = getattr(settings, 'API_VERSION', '0.1') 
+
 SERVER_TINC_IP = getattr(settings, 'SERVER_TINC_IP', '') 
 SERVER_TINC_PORT = getattr(settings, 'SERVER_TINC_PORT', '') 
 SERVER_URL = getattr(settings, 'SERVER_URL', '') 
 SERVER_PUBLIC_KEY = getattr(settings, 'SERVER_PUBLIC_KEY', '')
 
 SERVER_PRIVATE_KEY = getattr(settings, 'SERVER_PRIVATE_KEY', '') 
-TESTBED_BASE_IP = getattr(settings, 'TESTBED_BASE_IP', '') 
+TESTBED_BASE_IP = getattr(settings, 'TESTBED_BASE_IP', '2001:db8:cafe::2') 
 
 
 UCI_DIR = getattr(settings, 'UCI_DIR', 'uci') 

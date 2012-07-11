@@ -10,4 +10,7 @@ urlpatterns = patterns('',
                        url(r'^nodes/([0-9]+)/$',
                            rest_views.node,
                            name="rest_node"),
+                       url(r'^slices/$',
+                           rest_views.slice_list,
+                           name="rest_slice_list"),
                        )

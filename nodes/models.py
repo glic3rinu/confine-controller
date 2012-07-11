@@ -106,6 +106,13 @@ class Interface(models.Model):
     node = models.ForeignKey(Node)
     name = models.CharField(max_length=8, help_text='e.g. eth1')
     type = models.CharField(max_length=255, choices=settings.IFACE_TYPE_CHOICES, default=settings.DEFAULT_IFACE_TYPE)
+    channel = models.IntegerField(blank = True,
+                                  null = True,
+                                  verbose_name = "channel")
+    essid = models.CharField(max_length = "150",
+                             blank = True,
+                             null = True,
+                             verbose_name = "essid")
     
     def __unicode__(self):
         return "%s - %s" % (self.node.hostname, self.name)

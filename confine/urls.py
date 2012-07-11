@@ -21,6 +21,7 @@ urlpatterns = patterns('',
                        url(r'^admin_tools/', include('admin_tools.urls')),
                        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
                        url(r'^ticket_system/', include('ticket_system.urls')),
+                       url(r'^confine/', include('nodes.rest_api_urls')),
 )
 
 urlpatterns += nodes_urlpatterns

@@ -59,7 +59,7 @@ def slice_list(request):
         mimetype="application/json"
         )
 
-def node(request, node_id):
+def single_node(request, node_id):
     node = node_models.Node.objects.get(id = node_id)
     response_dict = {
         'api_version': settings.API_VERSION,
@@ -122,6 +122,65 @@ def node(request, node_id):
 
 
 
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def single_slice(request, slice_id):
+    sl = slice_models.Slice.objects.get(id = slice_id)
+    template = sl.template
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'id': sl.id,
+        'alias': sl.name,
+        'vlan_nr': "",
+        'template': {
+            'id': template.id if template else -1,
+            'arch': template.arch if template else "",
+            'href': "https://%s/confine/templates/%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    slice.id,
+                    ) if template else ""
+            },
+        'exp_data_uri': "",
+        'exp_data_sha256': "",
+        'action': "",
+        'users': [],
+        'slivers': [],
+        }
+    response_dict['users'].append(
+        {
+            'id': sl.user.id,
+            'pub_key': sl.user.get_profile().ssh_key,
+            'href': "https://%s/confine/users/%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    sl.user.id,
+                    )
+            }
+        )
+    if sl.research_group:
+        for user in slice.research_group.users.all():
+            response_dict['users'].append(
+                {
+                    'id': user.id,
+                    'pub_key': user.get_profile().ssh_key,
+                    'href': "https://%s/confine/users/%i/" % (
+                        settings.TESTBED_BASE_IP,
+                        user.id,
+                        )
+                    }
+                )
+    for sliver in sl.sliver_set.all():
+        response_dict['slivers'].append(
+            {
+                'node': sliver.node.id,
+                'href': "https://%s/confine/slivers/%i/" % (
+                        settings.TESTBED_BASE_IP,
+                        sliver.id,
+                        )
+                }
+            )
     return HttpResponse(
         simplejson.dumps(response_dict),
         mimetype="application/json"

@@ -12,7 +12,61 @@ from nodes import models as node_models
 from slices import models as slice_models
 
 def testbed(request):
-    pass
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'params': {
+            'mgmt_ipv6_prefix': "",
+            'priv_ipv4_prefix_dflt': "",
+            'sliver_mac_prefix_dflt': ""
+            },
+        'server': "https://%s/confine/server/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'nodes': "https://%s/confine/nodes/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'slices': "https://%s/confine/slices/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'slivers': "https://%s/confine/slivers/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'users': "https://%s/confine/users/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'gateways': "https://%s/confine/gateways/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'hosts': "https://%s/confine/hosts/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'templates': "https://%s/confine/templates/" % (
+                    settings.TESTBED_BASE_IP,
+                    ),
+        'islands': "https://%s/confine/islands/" % (
+                    settings.TESTBED_BASE_IP,
+                    )
+        }
+    
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def server(request):
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'cn_url': "",
+        'tinc_name': "",
+        'tinc_pubkey': "",
+        'tinc_connect_to': [],
+        'tinc_addresses': [],
+        }
+    
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
 
 def node_list(request):
     response_dict = {}
@@ -175,12 +229,153 @@ def single_slice(request, slice_id):
         response_dict['slivers'].append(
             {
                 'node': sliver.node.id,
-                'href': "https://%s/confine/slivers/%i/" % (
-                        settings.TESTBED_BASE_IP,
-                        sliver.id,
-                        )
+                'href': "https://%s/confine/slivers/%i-%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    sliver.node.id,
+                    sliver.slice.id
+                    )
                 }
             )
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def sliver_list(request):
+    slivers = slice_models.Sliver.objects.all()
+
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'slivers': []
+        }
+
+    for sliver in slivers:
+        response_dict['slivers'].append(
+            {
+                'node': sliver.node.id,
+                'slice': sliver.slice.id,
+                'href': "https://%s/confine/slivers/%i-%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    sliver.node.id,
+                    sliver.slice.id
+                    )
+                }
+            )
+    
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def single_sliver(request, sliver_id):
+    node_id, slice_id = sliver_id.split("-")
+    sliver = slice_models.Sliver.objects.get(node__id = node_id,
+                                             slice__id = slice_id)
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'slice':{
+            'id': sliver.slice.id,
+            'href': "https://%s/confine/slices/%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    sliver.slice.id
+                    )
+            },
+        'node': {
+            'id': sliver.node.id,
+            'href': "https://%s/confine/nodes/%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    sliver.node.id
+                    )
+            },
+        'interfaces': []
+        }
+    for nr in sliver.networkrequest_set.all():
+        if nr.interface:
+            response_dict['interfaces'].append(
+                {
+                    'name': nr.interface.name,
+                    'type': nr.type,
+                    'use_default_gw': "",
+                    'parent_name': ""
+                    }
+                )
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def template_list(request):
+    templates = slice_models.SliverTemplate.objects.all()
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'templates': []
+        }
+    for template in templates:
+        response_dict['templates'].append(
+            {
+                'id': template.id,
+                'name': template.name,
+                'href': "https://%s/confine/templates/%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    template.id
+                    )
+                }
+            )
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def single_template(request, template_id):
+    template = slice_models.SliverTemplate.objects.get(id = template_id)
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'id': template.id,
+        'name': template.name,
+        'type': template.template_type,
+        'arch': template.arch,
+        'enabled': template.enabled,
+        'data_uri': template.data_uri,
+        'data_sha256': template.data_sha256
+        }
+    
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def island_list(request):
+    islands = node_models.Island.objects.all()
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'islands': []
+        }
+
+    for island in islands:
+        response_dict['islands'].append(
+            {
+                'id': island.id,
+                'name': island.name,
+                'href': "https://%s/confine/islands/%i/" % (
+                    settings.TESTBED_BASE_IP,
+                    island.id
+                    )
+                }
+            )
+    
+    return HttpResponse(
+        simplejson.dumps(response_dict),
+        mimetype="application/json"
+        )
+
+def single_island(request, island_id):
+    island = node_models.Island.objects.get(id = island_id)
+    response_dict = {
+        'api_version': settings.API_VERSION,
+        'id': island.id,
+        'name': island.name
+        }
+    
     return HttpResponse(
         simplejson.dumps(response_dict),
         mimetype="application/json"

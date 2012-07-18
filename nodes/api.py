@@ -84,17 +84,20 @@ def create_node(node_params = {}):
     Accepted parameters:
     - hostname
     - ip
-    - architecture
+    - rd_arch
+    - admin
     """
     hostname = node_params.get('hostname', '')
     ip = node_params.get('ip', '')
-    architecture = node_params.get('architecture', '')
+    rd_arch = node_params.get('rd_arch', '')
+    admin = node_params.get('admin', None)
 
     try:
         node = node_models.Node(hostname = hostname,
                                 ip = ip,
-                                architecture = architecture,
-                                state = node_settings.PROJECTED)
+                                rd_arch = rd_arch,
+                                admin = admin
+                                )
         
         node.save()
     except:
@@ -136,15 +139,24 @@ def create_slice(slice_params = {}):
     - user
     - name
     - template
+    - vlan_nr
+    - exp_data_uri
+    - exp_data_sha256
     """
     user = slice_params.get('user', None)
     nodes = slice_params.get('nodes', [])
     name = slice_params.get('name', '')
     template = slice_params.get('template', None)
-    
+    vlan_nr = slice_params.get('vlan_nr', None)
+    exp_data_uri = slice_params.get('exp_data_uri', None)
+    exp_data_sha256 = slice_params.get('exp_data_sha256', None)
+
     if user and len(nodes) > 0:
         c_slice = slice_models.Slice(name = name,
-                                     user = user)
+                                     user = user,
+                                     vlan_nr = vlan_nr,
+                                     exp_data_uri = exp_data_uri,
+                                     exp_data_sha256 = exp_data_sha256)
         if template:
             c_slice.template = template
         c_slice.save()

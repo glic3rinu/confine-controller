@@ -3,26 +3,77 @@ from django.contrib.auth import models as auth_models
 
 import settings
 
-class Node(models.Model):
+
+
+
+class Island(models.Model):
+    name = models.CharField(max_length = 200,
+                            verbose_name = "name")
+
+class TincAddress(models.Model):
     island = models.ForeignKey("Island",
-                               blank = True,
-                               null = True,
                                verbose_name = "island")
+    tinc_ip = models.IPAddressField(verbose_name="tinc_ip")
+    tinc_port = models.CharField(max_length = 10,
+                                 verbose_name = "tinc_port")
     
+
+class TincHost(models.Model):
+    tinc_name = models.CharField(max_length = 200,
+                                 verbose_name = "tinc_name")
+    tinc_pubkey = models.TextField(verbose_name = "tinc_pubkey")
+
+class TincClient(TincHost):
+    island = models.ManyToManyField("Island",
+                                    verbose_name = "island")
+
+class TincServer(TincHost):
+    tinc_address = models.ForeignKey("TincAddress",
+                                     verbose_name = "tinc address")
+
+
+class Gateway(TincServer):
+    cn_url = models.URLField("URL", blank=True)
+
+class Host(TincClient):
+    admin = models.ForeignKey(auth_models.User,
+                              verbose_name = "admin")
+
+class Node(TincClient):
     hostname = models.CharField(max_length=255)
-    url = models.URLField("URL", blank=True)
-    architecture = models.CharField(max_length=128, choices=settings.ARCHITECTURE_CHOICES, default=settings.DEFAULT_ARCHITECTURE)
+    cn_url = models.URLField("URL", blank=True)
+    rd_arch = models.CharField(max_length=128,
+                                    choices=settings.ARCHITECTURE_CHOICES,
+                                    default=settings.DEFAULT_ARCHITECTURE)
     #TODO: use GeoDjango ? 
     latitude = models.CharField(max_length=255, blank=True)
     longitude = models.CharField(max_length=255, blank=True)
     uci = models.TextField(blank=True)
-    public_key = models.TextField(blank=True)
-    state = models.CharField(max_length=32, choices=settings.NODE_STATE_CHOICES, default=settings.DEFAULT_NODE_STATE)
     ip = models.IPAddressField(verbose_name = "ip")
-    owner = models.ForeignKey(auth_models.User,
-                              verbose_name = "owner",
-                              blank = True,
-                              null = True)
+    admin = models.ForeignKey(auth_models.User,
+                              verbose_name = "admin")
+
+    # Added for barebones
+    action = models.CharField(max_length=32,
+                              choices=settings.NODE_STATE_CHOICES,
+                              default=settings.DEFAULT_NODE_STATE)
+    rd_public_ipv4_total = models.IntegerField(verbose_name = "rd public IPv4 total",
+                                               default = 1)
+    priv_ipv4_prefix = models.CharField(max_length = 50,
+                                        verbose_name = "private ipv4 prefix",
+                                        blank = True,
+                                        null = True)
+    sliver_mac_prefix = models.CharField(max_length = 50,
+                                         default = "0x200",
+                                         verbose_name = "sliver MAC prefix")
+
+    # A-HACK params
+    state = models.CharField(max_length=32,
+                             choices=settings.NODE_STATE_CHOICES,
+                             default=settings.DEFAULT_NODE_STATE)
+    rd_public_ipv4_avail = models.IntegerField(verbose_name = "rd public IPv4 available",
+                                               blank = True,
+                                               null = True)
         
     def __unicode__(self):
         return self.hostname
@@ -35,12 +86,8 @@ class Node(models.Model):
         return map(lambda a: unicode(a.id), self.interface_set.all())
 
     @property
-    def tinc_name(self):
-        return "node_%s" % self.id
-    
-    @property
-    def tinc_public_key(self):
-        return self.public_key
+    def public_key(self):
+        return self.tinc_pubkey
     
     @property
     def local_ip(self):
@@ -62,11 +109,6 @@ class DeleteRequest(models.Model):
 
     def __unicode__(self):
         return self.node.hostname
-
-
-class Island(models.Model):
-    name = models.CharField(max_length = 200,
-                            verbose_name = "name")
 
 class Storage(models.Model):
     node = models.OneToOneField(Node)

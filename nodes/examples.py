@@ -6,5 +6,7 @@ HOSTNAME_NODE_DATA = '<?xml version="1.0" encoding="utf-8"?><node version="1.0">
 NODE_CREATION = {
     'hostname': 'hostname',
     'ip': '1.1.1.1',
-    'architecture': 'x86_generic'
+    'rd_arch': 'x86_generic',
+    'admin': None,
+
     }

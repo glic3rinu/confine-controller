@@ -28,10 +28,23 @@ class Slice(models.Model):
     research_group = models.ForeignKey(user_m_models.ResearchGroup,
                                        blank = True,
                                        null = True)
-    state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLICE_STATE)
+    state = models.CharField(max_length=16,
+                             choices=settings.STATE_CHOICES,
+                             default=settings.DEFAULT_SLICE_STATE)
 
     write_size = models.IntegerField(default=0)
     code = models.FileField(upload_to=settings.CODE_DIR, blank=True)
+
+    # Added for barebones
+    vlan_nr = models.IntegerField(verbose_name = "vlan number")
+    exp_data_uri = models.URLField(verbose_name = "exp data URI")
+    exp_data_sha256 = models.CharField(max_length = 150,
+                                   verbose_name = "exp data sha256")
+    action = models.CharField(max_length=16,
+                              choices=settings.STATE_CHOICES,
+                              default=settings.DEFAULT_SLICE_STATE)
+ 
+    
 
     objects = managers.SliceManager()
     
@@ -47,10 +60,16 @@ class Sliver(models.Model):
                                                   verbose_name = "confine permission")
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    state = models.CharField(max_length=16, choices=settings.STATE_CHOICES, default=settings.DEFAULT_SLIVER_STATE, blank=True)
-    number = models.IntegerField(blank=True)
+
     ipv4_address = models.GenericIPAddressField(protocol='IPv4', blank=True, null=True)
     ipv6_address = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
+
+    # A-HACK params
+    state = models.CharField(max_length=16,
+                             choices=settings.STATE_CHOICES,
+                             default=settings.DEFAULT_SLIVER_STATE,
+                             blank=True)
+    nr = models.IntegerField(blank=True)
     
     class Meta:
         unique_together = ('slice', 'node')
@@ -59,8 +78,8 @@ class Sliver(models.Model):
         return "%s:%s" % (self.slice, self.node)
     
     def _provide_number(self):
-        try: self.number = self.__class__._default_manager.filter(node=self.node).order_by('-number')[0].number + 1
-        except IndexError: self.number = 1     
+        try: self.nr = self.__class__._default_manager.filter(node=self.node).order_by('-nr')[0].nr + 1
+        except IndexError: self.nr = 1     
 
     def save(self, *args, **kwargs):
         if not self.pk: 
@@ -124,7 +143,9 @@ class NetworkRequest(models.Model):
                                   null = True)
 
     number = models.IntegerField(blank=True)
-    type = models.CharField(max_length=16, choices=settings.NETWORK_REQUESRT_CHOICES, default=settings.DEFAULT_NETWORK_REQUEST)
+    type = models.CharField(max_length=16,
+                            choices=settings.NETWORK_REQUESRT_CHOICES,
+                            default=settings.DEFAULT_NETWORK_REQUEST)
     mac_address = models.CharField(max_length=18, blank=True)
     ipv4_address = models.GenericIPAddressField(protocol='IPv4', blank=True, null=True)
     ipv6_address = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
@@ -165,3 +186,36 @@ class NetworkRequest(models.Model):
 #        return 'unassigned'
         
 
+class SliverIface(models.Model):
+    nr = models.IntegerField(verbose_name = "number")
+    name = models.CharField(max_length = 200,
+                            verbose_name = "name")
+
+    # A-HACK params
+    mac_addr = models.CharField(max_length = 200,
+                                verbose_name = "mac address",
+                                blank = True,
+                                null = True)
+
+class IsolatedIface(SliverIface):
+    sliver = models.ForeignKey(Sliver)
+    parent = models.ForeignKey(Interface,
+                               verbose_name = "parent")
+
+    def parent_name(self):
+        self.parent.name
+
+class IpSliverIface(SliverIface):
+    use_default_gw = models.BooleanField(verbose_name = "use default gateway")
+
+    # A-HACK params
+    ipv6_addr = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
+    ipv4_addr = models.GenericIPAddressField(protocol='IPv4', blank=True, null=True)
+
+class PublicIface(IpSliverIface):
+    sliver = models.ForeignKey(Sliver)
+    nr = models.IntegerField(verbose_name = "number")
+
+class PrivateIface(IpSliverIface):
+    sliver = models.ForeignKey(Sliver)
+    nr = models.IntegerField(verbose_name = "number")

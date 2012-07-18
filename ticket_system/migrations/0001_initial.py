@@ -20,14 +20,14 @@ class Migration(SchemaMigration):
             ('status', self.gf('django.db.models.fields.CharField')(max_length=50)),
             ('creation_date', self.gf('django.db.models.fields.DateTimeField')()),
             ('last_modification_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('cc_mails', self.gf('django.db.models.fields.TextField')()),
+            ('cc_mails', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
         ))
         db.send_create_signal('ticket_system', ['Ticket'])
 
         # Adding model 'Queue'
         db.create_table('ticket_system_queue', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
+            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=200)),
         ))
         db.send_create_signal('ticket_system', ['Queue'])
 
@@ -35,6 +35,7 @@ class Migration(SchemaMigration):
         db.create_table('ticket_system_message', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('ticket', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ticket_system.Ticket'])),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(related_name='ticket_messages', to=orm['auth.User'])),
             ('visibility', self.gf('django.db.models.fields.CharField')(max_length=200)),
             ('content', self.gf('django.db.models.fields.TextField')()),
         ))
@@ -89,6 +90,7 @@ class Migration(SchemaMigration):
         },
         'ticket_system.message': {
             'Meta': {'object_name': 'Message'},
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ticket_messages'", 'to': "orm['auth.User']"}),
             'content': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ticket': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ticket_system.Ticket']"}),
@@ -97,11 +99,11 @@ class Migration(SchemaMigration):
         'ticket_system.queue': {
             'Meta': {'object_name': 'Queue'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'})
         },
         'ticket_system.ticket': {
-            'Meta': {'object_name': 'Ticket'},
-            'cc_mails': ('django.db.models.fields.TextField', [], {}),
+            'Meta': {'ordering': "['-last_modification_date']", 'object_name': 'Ticket'},
+            'cc_mails': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'content': ('django.db.models.fields.TextField', [], {}),
             'creation_date': ('django.db.models.fields.DateTimeField', [], {}),
             'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_ticket'", 'to': "orm['auth.User']"}),

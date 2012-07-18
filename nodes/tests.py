@@ -39,7 +39,9 @@ class APITest(TestCase):
         Test get_node api call
         """
         hostname = "hostname"
-        node = self.create_test_node(hostname = hostname)
+        admin = self.create_user()
+        node = self.create_test_node(hostname = hostname,
+                                     admin = admin)
         self.assertEqual(node.id, api.get_node({'id': node.id}).id)
         self.assertEqual(None, api.get_node({'id': node.id+1}))
         
@@ -54,7 +56,9 @@ class APITest(TestCase):
         """
         Test set_node api call
         """
-        node = self.create_test_node(commit = False)
+        admin = self.create_user()
+        node = self.create_test_node(commit = False,
+                                     admin = admin)
         storage = self.create_test_storage(commit = False)
         memory = self.create_test_memory(commit = False)
         cpu = self.create_test_cpu(commit = False)
@@ -73,7 +77,9 @@ class APITest(TestCase):
         Test create_node api call
         """
         before_nodes = models.Node.objects.all().count()
-        self.assertTrue(api.create_node(examples.NODE_CREATION))
+        node_creation = examples.NODE_CREATION
+        node_creation['admin'] = self.create_user()
+        self.assertTrue(api.create_node(node_creation))
         after_nodes = models.Node.objects.all().count()
         self.assertEqual(before_nodes+1, after_nodes)
 
@@ -87,7 +93,8 @@ class APITest(TestCase):
         """
         Test delete_node api call
         """
-        node1 = self.create_test_node()
+        admin = self.create_user()
+        node1 = self.create_test_node(admin = admin)
         before_requests = models.DeleteRequest.objects.all().count()
         self.assertTrue(api.delete_node({'id': node1.id}))
         after_requests = models.DeleteRequest.objects.all().count()
@@ -98,17 +105,20 @@ class APITest(TestCase):
         """
         Test create slice api call
         """
+        user = self.create_user()
         node1 = self.create_test_node(hostname = "hostname1",
-                                 ip = "1.1.1.1")
+                                      ip = "1.1.1.1",
+                                      admin = user)
         node2 = self.create_test_node(hostname = "hostname2",
-                                 ip = "1.1.1.2")
+                                      ip = "1.1.1.2",
+                                      admin = user)
         node3 = self.create_test_node(hostname = "hostname3",
-                                 ip = "1.1.1.3")
+                                      ip = "1.1.1.3",
+                                      admin = user)
         before_slices = slices_models.Slice.objects.all().count()
         before_slivers = slices_models.Sliver.objects.all().count()
 
         name = 'slice_test'
-        user = self.create_user()
         node_info = {}
         node_info[node1.id] = {'networks': [],
                                'cpu': None,
@@ -125,7 +135,10 @@ class APITest(TestCase):
         slice_params = {
             'nodes': node_info,
             'name': name,
-            'user': user
+            'user': user,
+            'vlan_nr': 1,
+            'exp_data_uri': "http://none.no/",
+            'exp_data_sha256': "aaa"
             }
         self.assertTrue(api.create_slice(slice_params))
 
@@ -170,7 +183,7 @@ class APITest(TestCase):
         """
         user = self.create_user()
         name = "slice1"
-        node = self.create_test_node()
+        node = self.create_test_node(admin = user)
         slice1 = self.create_slice(user, name)
         sliver1 = self.create_sliver(node, slice1)
 
@@ -220,21 +233,33 @@ class APITest(TestCase):
         sliver.save()
         return sliver
 
-    def create_slice(self, user, name):
+    def create_slice(self,
+                     user,
+                     name,
+                     vlan_nr = 1,
+                     exp_data_uri = "http://none.no/",
+                     exp_data_sha256 = "abc"):
+        
         new_slice = slices_models.Slice(name = name,
-                                       user = user)
+                                        user = user,
+                                        vlan_nr = vlan_nr,
+                                        exp_data_uri = exp_data_uri,
+                                        exp_data_sha256 = exp_data_sha256)
         new_slice.save()
         return new_slice
         
     def create_test_node(self,
                          hostname = "hostname",
                          ip = "1.1.1.1",
-                         architecture = "x86_generic",
+                         rd_arch = "x86_generic",
+                         admin = None,
                          commit = True):
         node = models.Node(hostname = hostname,
                            ip = ip,
-                           architecture = architecture,
-                           state = node_settings.ONLINE)
+                           rd_arch = rd_arch,
+                           state = node_settings.ONLINE,
+                           admin = admin,
+                           )
         if commit:
             node.save()
         return node

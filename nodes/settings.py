@@ -6,11 +6,21 @@ API_VERSION = getattr(settings, 'API_VERSION', '0.1')
 
 SERVER_TINC_IP = getattr(settings, 'SERVER_TINC_IP', '') 
 SERVER_TINC_PORT = getattr(settings, 'SERVER_TINC_PORT', '') 
-SERVER_URL = getattr(settings, 'SERVER_URL', '') 
+SERVER_URL = getattr(settings, 'SERVER_URL', '')
+SERVER_NAME = getattr(settings, 'SERVER_NAME', '')
 SERVER_PUBLIC_KEY = getattr(settings, 'SERVER_PUBLIC_KEY', '')
 
 SERVER_PRIVATE_KEY = getattr(settings, 'SERVER_PRIVATE_KEY', '') 
 TESTBED_BASE_IP = getattr(settings, 'TESTBED_BASE_IP', '2001:db8:cafe::2') 
+
+# Confine params
+DEBUG_IPV6_PREFIX = getattr(settings, 'DEBUG_IPV6_PREFIX', '')
+PRIV_IPV6_PREFIX = getattr(settings, 'PRIV_IPV6_PREFIX', '')
+
+# Testbed params
+MGMT_IPV6_PREFIX = getattr(settings, 'MGMT_IPV6_PREFIX', '')
+PRIV_IPV4_PREFIX_DFLT = getattr(settings, 'PRIV_IPV4_PREFIX_DFLT', '') 
+SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'SLIVER_MAC_PREFIX_DFLT', '')
 
 
 UCI_DIR = getattr(settings, 'UCI_DIR', 'uci') 

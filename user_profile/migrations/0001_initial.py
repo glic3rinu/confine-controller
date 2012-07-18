@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         db.create_table('user_profile_userprofile', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
-            ('ssh_key', self.gf('django.db.models.fields.TextField')()),
+            ('ssh_key', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
         ))
         db.send_create_signal('user_profile', ['UserProfile'])
 
@@ -60,7 +60,7 @@ class Migration(SchemaMigration):
         'user_profile.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ssh_key': ('django.db.models.fields.TextField', [], {}),
+            'ssh_key': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
         }
     }

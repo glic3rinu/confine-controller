@@ -47,19 +47,5 @@ urlpatterns = patterns('',
                            node_views.delete_sliver,
                            name="delete_sliver"),
 
-                       # XML
-
-                       url(r'^upload_node/xml/$',
-                           node_views.upload_node_xml,
-                           name="upload_node_xml"),
-                       url(r'^delete_node/xml/$',
-                           node_views.delete_node_xml,
-                           name="delete_node_xml"),
-                       url(r'^get_node_configuration/xml/$',
-                           node_views.get_node_configuration_xml,
-                           name="get_node_configuration_xml"),
-                       url(r'^get_node_public_keys/xml/$',
-                           node_views.get_node_public_keys_xml,
-                           name="get_node_public_keys_xml"),
 
                        )

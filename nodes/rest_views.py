@@ -15,9 +15,9 @@ def testbed(request):
     response_dict = {
         'api_version': settings.API_VERSION,
         'params': {
-            'mgmt_ipv6_prefix': "",
-            'priv_ipv4_prefix_dflt': "",
-            'sliver_mac_prefix_dflt': ""
+            'mgmt_ipv6_prefix': settings.MGMT_IPV6_PREFIX,
+            'priv_ipv4_prefix_dflt': settings.PRIV_IPV4_PREFIX_DFLT,
+            'sliver_mac_prefix_dflt': settings.SLIVER_MAC_PREFIX_DFLT
             },
         'server': "https://%s/confine/server/" % (
                     settings.TESTBED_BASE_IP,
@@ -56,9 +56,9 @@ def testbed(request):
 def server(request):
     response_dict = {
         'api_version': settings.API_VERSION,
-        'cn_url': "",
-        'tinc_name': "",
-        'tinc_pubkey': "",
+        'cn_url': settings.SERVER_URL,
+        'tinc_name': settings.SERVER_NAME,
+        'tinc_pubkey': settings.SERVER_PUBLIC_KEY,
         'tinc_connect_to': [],
         'tinc_addresses': [],
         }
@@ -78,7 +78,7 @@ def node_list(request):
         response_dict['nodes'].append(
             {
                 'id': node.id,
-                'action': "",
+                'action': node.action,
                 'href': "https://%s/confine/nodes/%i/" % (
                     settings.TESTBED_BASE_IP,
                     node.id
@@ -119,10 +119,10 @@ def single_node(request, node_id):
         'api_version': settings.API_VERSION,
         'id': node.id,
         'rd_arch': node.architecture,
-        'rd_public_ipv4_total': "",
-        'priv_ipv4_prefix': "",
-        'sliver_mac_prefix': "",
-        'action': "",
+        'rd_public_ipv4_total': node.rd_public_ipv4_total,
+        'priv_ipv4_prefix': node.priv_ipv4_prefix,
+        'sliver_mac_prefix': node.sliver_mac_prefix,
+        'action': node.action,
         'direct_ifaces': [],
         'cn_url': node.url,
         'tinc_name': "node_%i" % node.id,
@@ -151,14 +151,15 @@ def single_node(request, node_id):
                 }
             )
 
-    if node.island:
+
+    for island in node.island.all():
         response_dict['islands'].append(
             {
-                'id': node.island.id,
-                'name': node.island.name,
+                'id': island.id,
+                'name': island.name,
                 'href': "https://%s/confine/islands/%i/" % (
                     settings.TESTBED_BASE_IP,
-                    node.island.id
+                    island.id
                     )
                 }
             )
@@ -188,7 +189,7 @@ def single_slice(request, slice_id):
         'api_version': settings.API_VERSION,
         'id': sl.id,
         'alias': sl.name,
-        'vlan_nr': "",
+        'vlan_nr': sl.vlan_nr,
         'template': {
             'id': template.id if template else -1,
             'arch': template.arch if template else "",
@@ -197,9 +198,9 @@ def single_slice(request, slice_id):
                     slice.id,
                     ) if template else ""
             },
-        'exp_data_uri': "",
-        'exp_data_sha256': "",
-        'action': "",
+        'exp_data_uri': sl.exp_data_uri,
+        'exp_data_sha256': sl.exp_data_sha256,
+        'action': sl.action,
         'users': [],
         'slivers': [],
         }

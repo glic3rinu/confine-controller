@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Node, Storage, Memory, CPU, Interface, DeleteRequest
+from models import Node, Storage, Memory, CPU, Interface, DeleteRequest, Island
 from django import forms
 import settings
 from django.utils.html import escape
@@ -41,21 +41,25 @@ colored_state.admin_order_field = 'state'
 
 
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ['hostname', admin_link_factory('url', description='URL'), 'architecture', colored_state ]
-    list_filter = ['architecture', 'state']
+    list_display = ['hostname', admin_link_factory('url', description='URL'), 'rd_arch', colored_state ]
+    list_filter = ['rd_arch', 'state']
     inlines = [CPUInline, MemoryInline, StorageInline, InterfaceInline]
     fieldsets = (
         (None, {
-            'fields': (('owner'), ('hostname',), ('ip',), ('state',), ('architecture',), ('public_key',), ('uci',))
+            'fields': (('admin'), ('hostname',), ('ip',), ('state',), ('rd_arch',), ('tinc_pubkey',), ('uci',))
         }),
         ('Community node', {
-            'fields': (('url',), ('latitude',), ('longitude',))
+            'fields': (('cn_url',), ('latitude',), ('longitude',))
         }),
     )
 
 
 class DeleteRequestAdmin(admin.ModelAdmin):
     model = DeleteRequest
+    
+class IslandAdmin(admin.ModelAdmin):
+    model = Island
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(DeleteRequest, DeleteRequestAdmin)
+admin.site.register(Island, IslandAdmin)

@@ -10,6 +10,9 @@ class Island(models.Model):
     name = models.CharField(max_length = 200,
                             verbose_name = "name")
 
+    def __unicode__(self):
+        return self.name
+
 class TincAddress(models.Model):
     island = models.ForeignKey("Island",
                                verbose_name = "island")
@@ -48,7 +51,6 @@ class Node(TincClient):
     #TODO: use GeoDjango ? 
     latitude = models.CharField(max_length=255, blank=True)
     longitude = models.CharField(max_length=255, blank=True)
-    uci = models.TextField(blank=True)
     ip = models.IPAddressField(verbose_name = "ip")
     admin = models.ForeignKey(auth_models.User,
                               verbose_name = "admin")
@@ -68,6 +70,7 @@ class Node(TincClient):
                                          verbose_name = "sliver MAC prefix")
 
     # A-HACK params
+    uci = models.TextField(blank=True)
     state = models.CharField(max_length=32,
                              choices=settings.NODE_STATE_CHOICES,
                              default=settings.DEFAULT_NODE_STATE)

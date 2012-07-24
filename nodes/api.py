@@ -158,7 +158,7 @@ def create_slice(slice_params = {}):
                                      exp_data_uri = exp_data_uri,
                                      exp_data_sha256 = exp_data_sha256)
         if template:
-            c_slice.template = template
+            c_slice.template_id = template
         c_slice.save()
         for node in nodes.keys():
             c_node = node_models.Node.objects.get(id = node)
@@ -172,11 +172,23 @@ def create_slice(slice_params = {}):
                 if ext:
                     ext.sliver = c_sliver
                     ext.save()
-            networks = nodes[node]['networks']
-            if len(networks) > 0:
-                for network in networks:
-                    network.sliver = c_sliver
-                    network.save()                
+                    
+            ii = nodes[node]['ii']
+            if len(ii) > 0:
+                for isolatedinterface in ii:
+                    isolatedinterface.sliver = c_sliver
+                    isolatedinterface.save()
+            pubi = nodes[node]['pubi']
+            if len(pubi) > 0:
+                for publicinterface in pubi:
+                    publicinterface.sliver = c_sliver
+                    publicinterface.save()
+            privi = nodes[node]['privi']
+            if len(privi) > 0:
+                for privateinterface in privi:
+                    privateinterface.sliver = c_sliver
+                    privateinterface.save()
+                    
             allocate_slivers({'node': c_node})
         return True
     return False

@@ -3,7 +3,7 @@ $ (document).ready (function (){
   $ (".node_item").bind ("click", function (){
     var thisCheck = $ (this);
     var c_id = thisCheck.val ();
-    var childs = $ (".network_" + c_id + ", .cpu_" + c_id + ", .storage_" + c_id + ", .memory_" + c_id);
+    var childs = $ (".ii_" + c_id + ", .pubi_" + c_id + ", .privi_" + c_id + ", .cpu_" + c_id + ", .storage_" + c_id + ", .memory_" + c_id);
     if (thisCheck.is (":checked")){
       childs.show ();
     }else{

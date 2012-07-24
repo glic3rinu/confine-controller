@@ -53,9 +53,16 @@ def create_slice(request):
     """
     Create a new slice for the given nodes
     """
-    NetworkFormset = modelformset_factory(slice_models.NetworkRequest,
-                                          extra = 1,
-                                          form = slices_forms.NetworkRequestForm)
+    IsolatedifaceFormset = modelformset_factory(slice_models.IsolatedIface,
+                                              extra = 1,
+                                              form = slices_forms.IsolatedIfaceForm)
+    PublicIfaceFormset = modelformset_factory(slice_models.PublicIface,
+                                              extra = 1,
+                                              form = slices_forms.PublicIfaceForm)
+    PrivateIfaceFormset = modelformset_factory(slice_models.PrivateIface,
+                                              extra = 1,
+                                              form = slices_forms.PrivateIfaceForm)
+    
     if request.method == "POST":
         form = forms.NewSliceForm(request.POST)
         form.fields['nodes'].choices = map(lambda a: [a.id, a.hostname], api.get_nodes())
@@ -65,11 +72,22 @@ def create_slice(request):
             node_info = {}
             node_widget = form.fields.get('nodes').widget
             for node_id in nodes:
-                network = NetworkFormset(request.POST,
-                                         prefix = "node_%s_nr" % node_id)
+                ii = IsolatedifaceFormset(request.POST,
+                                          prefix = "node_%s_ii" % node_id)
                 node_widget.set_retented_data(node_id,
-                                              'network',
-                                              network)
+                                              'isolatediface',
+                                              ii)
+                pubi = PublicIfaceFormset(request.POST,
+                                          prefix = "node_%s_pubi" % node_id)
+                node_widget.set_retented_data(node_id,
+                                              'publiciface',
+                                              pubi)
+                privi = PrivateIfaceFormset(request.POST,
+                                            prefix = "node_%s_privi" % node_id)
+                node_widget.set_retented_data(node_id,
+                                              'privateiface',
+                                              privi)
+                
                 cpu = slices_forms.CPURequestForm(request.POST,
                                                   prefix = "node_%s_c" % node_id)
                 node_widget.set_retented_data(node_id,
@@ -85,19 +103,27 @@ def create_slice(request):
                 node_widget.set_retented_data(node_id,
                                               'memory',
                                               memory)
-                child_networks = []
+                child_ii = []
+                child_privi = []
+                child_pubi = []
                 child_cpu = None
                 child_storage = None
                 child_memory = None
-                if network.is_valid():
-                    child_networks = network.save(commit = False)
+                if ii.is_valid():
+                    child_ii = ii.save(commit = False)
+                if pubi.is_valid():
+                    child_pubi = pubi.save(commit = False)
+                if privi.is_valid():
+                    child_privi = privi.save(commit = False)
                 if cpu.is_valid():
                     child_cpu = cpu.save(commit = False)
                 if storage.is_valid():
                     child_storage = storage.save(commit = False)
                 if memory.is_valid():
                     child_memory = memory.save(commit = False)
-                node_info[node_id] = {'networks': child_networks,
+                node_info[node_id] = {'ii': child_ii,
+                                      'pubi': child_pubi,
+                                      'privi': child_privi,
                                       'cpu': child_cpu,
                                       'storage': child_storage,
                                       'memory': child_memory}
@@ -107,6 +133,9 @@ def create_slice(request):
                 'user': request.user,
                 'name': c_data.get('name'),
                 'template': c_data.get('template', None),
+                'vlan_nr': c_data.get('vlan_nr', 0),
+                'exp_data_uri': c_data.get('exp_data_uri', ''),
+                'exp_data_sha256': c_data.get('exp_data_sha256', ''),
                 }):
                 messages.info(request, "Slice created")
                 return HttpResponseRedirect("/show_own_slices/")

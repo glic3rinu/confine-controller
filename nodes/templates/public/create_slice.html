@@ -13,6 +13,18 @@
     {{ form.template }}
   </div>
   <div class="field">
+    {{ form.vlan_nr.label_tag }}
+    {{ form.vlan_nr }}
+  </div>
+  <div class="field">
+    {{ form.exp_data_uri.label_tag }}
+    {{ form.exp_data_uri }}
+  </div>
+  <div class="field">
+    {{ form.exp_data_sha256.label_tag }}
+    {{ form.exp_data_sha256 }}
+  </div>
+  <div class="field">
     {{ form.nodes }}
   </div>
 

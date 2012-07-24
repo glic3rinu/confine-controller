@@ -9,6 +9,9 @@ from nodes import widgets
 class NewSliceForm(forms.Form):
     name = forms.CharField(required = True)
     template = forms.ChoiceField(choices = map(lambda a: [a.id, a.name], slice_models.SliverTemplate.objects.filter(enabled = True)))
+    vlan_nr = forms.CharField(required = True)
+    exp_data_uri = forms.CharField(required = True)
+    exp_data_sha256 = forms.CharField(required = True)
     nodes = forms.MultipleChoiceField(widget=widgets.NodeWithInterfacesWidget)
 
 class NodeForm(forms.ModelForm):    

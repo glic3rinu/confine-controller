@@ -40,11 +40,16 @@ class Slice(models.Model):
     exp_data_uri = models.URLField(verbose_name = "exp data URI")
     exp_data_sha256 = models.CharField(max_length = 150,
                                    verbose_name = "exp data sha256")
-    action = models.CharField(max_length=16,
-                              choices=settings.STATE_CHOICES,
-                              default=settings.DEFAULT_SLICE_STATE)
- 
-    
+    set_state = models.CharField(max_length=16,
+                                 choices=settings.STATE_CHOICES,
+                                 default=settings.DEFAULT_SLICE_STATE)
+    uuid = models.CharField(max_length = 150,
+                            verbose_name = "UUID",
+                            unique = True)
+    pubkey = models.TextField(verbose_name = "public key")
+    expires = models.DateField(verbose_name = "expires at")
+    serial = models.IntegerField(verbose_name = "serial")
+    new_sliver_serial = models.IntegerField(verbose_name = "new sliver serial")
 
     objects = managers.SliceManager()
     
@@ -63,6 +68,10 @@ class Sliver(models.Model):
 
     ipv4_address = models.GenericIPAddressField(protocol='IPv4', blank=True, null=True)
     ipv6_address = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
+
+    # Added for BareBones
+    serial = models.IntegerField(verbose_name = "serial")
+
 
     # A-HACK params
     state = models.CharField(max_length=16,

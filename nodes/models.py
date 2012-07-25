@@ -46,7 +46,7 @@ class NodeProps(models.Model):
     name = models.CharField(max_length = 150,
                             verbose_name = "name")
     value = models.CharField(max_length = 200,
-                             verbose_name = "name")
+                             verbose_name = "value")
 
 class Node(TincClient):
     hostname = models.CharField(max_length=255)

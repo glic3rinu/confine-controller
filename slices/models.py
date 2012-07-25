@@ -13,6 +13,15 @@ from user_management import models as user_m_models
 from django.template.defaultfilters import slugify
 
 
+class SliceProps(models.Model):
+    c_slice = models.ForeignKey("Slice",
+                                verbose_name = "slice")
+    
+    name = models.CharField(max_length = 150,
+                            verbose_name = "name")
+    value = models.CharField(max_length = 200,
+                             verbose_name = "value")
+
 class Slice(models.Model):
     template = models.ForeignKey("SliverTemplate",
                                  verbose_name = "template",
@@ -59,6 +68,15 @@ class Slice(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(Slice, self).save(*args, **kwargs)
+
+class SliverProps(models.Model):
+    sliver = models.ForeignKey("Sliver",
+                               verbose_name = "node")
+    
+    name = models.CharField(max_length = 150,
+                            verbose_name = "name")
+    value = models.CharField(max_length = 200,
+                             verbose_name = "value")
     
 class Sliver(models.Model):
     confine_permissions = generic.GenericRelation(user_m_models.ConfinePermission,

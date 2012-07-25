@@ -4,9 +4,18 @@ ugettext = lambda s: s
 
 API_VERSION = getattr(settings, 'API_VERSION', '0.1') 
 
-SERVER_TINC_IP = getattr(settings, 'SERVER_TINC_IP', '') 
-SERVER_TINC_PORT = getattr(settings, 'SERVER_TINC_PORT', '')
-SERVER_ISLAND_ID = getattr(settings, 'SERVER_ISLAND_ID', -1)
+SERVER_CONNECTIONS = getattr(settings, 'SERVER_CONNECTIONS',
+                             [
+                                 {
+                                     'SERVER_TINC_IP': '',
+                                     'SERVER_TINC_PORT': '',
+                                     'SERVER_ISLAND_ID': -1
+                                     },
+
+                                 ]
+                             )
+
+
 SERVER_URL = getattr(settings, 'SERVER_URL', '')
 SERVER_NAME = getattr(settings, 'SERVER_NAME', '')
 SERVER_PUBLIC_KEY = getattr(settings, 'SERVER_PUBLIC_KEY', '')

@@ -54,31 +54,33 @@ def testbed(request):
         )
 
 def server(request):
-    try:
-        island = node_models.Island.object.get(id = settings.SERVER_ISLAND_ID)
-    except:
-        island = None
     response_dict = {
         'api_version': settings.API_VERSION,
         'cn_url': settings.SERVER_URL,
         'tinc_name': settings.SERVER_NAME,
         'tinc_pubkey': settings.SERVER_PUBLIC_KEY,
         'tinc_connect_to': [],
-        'tinc_addresses': [
-            {
-                'ip': settings.SERVER_TINC_IP,
-                'port': settings.SERVER_TINC_PORT,
-                'island': {
-                    'id': island.id,
-                    'name': island.name,
-                    'href': "https://%s/confine/islands/%i/" % (
-                        settings.TESTBED_BASE_IP,
-                        island.id
-                        )
-                    } if island else {}
-                }
-            ],
+        'tinc_addresses': [],
         }
+
+    for connection in settings.SERVER_CONNECTIONS:
+        try:
+            island = node_models.Island.object.get(id = connection.get('SERVER_ISLAND_ID', -1))
+        except:
+            island = None
+        response_dict['tinc_addresses'].append({
+                                                       'ip': connection.get('SERVER_TINC_IP'),
+                                                       'port': connection.get('SERVER_TINC_PORT'),
+                                                       'island': {
+                                                           'id': island.id,
+                                                           'name': island.name,
+                                                           'href': "https://%s/confine/islands/%i/" % (
+                                                               settings.TESTBED_BASE_IP,
+                                                               island.id
+                                                               )
+                                                           } if island else {}
+                                                       }
+                                               )
     
     return HttpResponse(
         simplejson.dumps(response_dict),

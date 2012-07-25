@@ -8,5 +8,14 @@ NODE_CREATION = {
     'ip': '1.1.1.1',
     'rd_arch': 'x86_generic',
     'admin': None,
-
+    'uuid': 'uuid',
+    'pubkey': 'PUBKEY',
+    'rd_cert': 'RDCERT',
+    'rd_boot_serial': 1,
+    'nodeprops': [
+        {
+            'name': 'NAME',
+            'value': 'VALUE'
+            }
+        ]
     }

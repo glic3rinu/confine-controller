@@ -86,20 +86,41 @@ def create_node(node_params = {}):
     - ip
     - rd_arch
     - admin
+    - uuid
+    - pubkey
+    - rd_cert
+    - rd_boot_serial
+    - nodeprops
+    -- name
+    -- value
     """
     hostname = node_params.get('hostname', '')
     ip = node_params.get('ip', '')
     rd_arch = node_params.get('rd_arch', '')
     admin = node_params.get('admin', None)
-
+    uuid = node_params.get('uuid', '')
+    pubkey = node_params.get('pubkey', '')
+    rd_cert = node_params.get('rd_cert', '')
+    rd_boot_serial = node_params.get('rd_boot_serial')
+    nodeprops = node_params.get('nodeprops', [])
     try:
         node = node_models.Node(hostname = hostname,
                                 ip = ip,
                                 rd_arch = rd_arch,
-                                admin = admin
+                                admin = admin,
+                                uuid = uuid,
+                                pubkey = pubkey,
+                                rd_cert = rd_cert,
+                                rd_boot_serial = rd_boot_serial
                                 )
         
         node.save()
+        for np in nodeprops:
+            nodeprop = node_models.NodeProps(name = np.get('name', 'missing name'),
+                                             value = np.get('value', 'missing value')
+                                             )
+            nodeprop.node = node
+            nodeprop.save()
     except:
         return False
     return True
@@ -142,6 +163,11 @@ def create_slice(slice_params = {}):
     - vlan_nr
     - exp_data_uri
     - exp_data_sha256
+    - uuid
+    - pubkey
+    - expires
+    - serial
+    - new_sliver_serial
     """
     user = slice_params.get('user', None)
     nodes = slice_params.get('nodes', [])
@@ -150,20 +176,31 @@ def create_slice(slice_params = {}):
     vlan_nr = slice_params.get('vlan_nr', None)
     exp_data_uri = slice_params.get('exp_data_uri', None)
     exp_data_sha256 = slice_params.get('exp_data_sha256', None)
+    uuid = slice_params.get('uuid', None)
+    pubkey = slice_params.get('pubkey', None)
+    expires = slice_params.get('expires', None)
+    serial = slice_params.get('serial', None)
+    new_sliver_serial = slice_params.get('new_sliver_serial', None)
 
     if user and len(nodes) > 0:
         c_slice = slice_models.Slice(name = name,
                                      user = user,
                                      vlan_nr = vlan_nr,
                                      exp_data_uri = exp_data_uri,
-                                     exp_data_sha256 = exp_data_sha256)
+                                     exp_data_sha256 = exp_data_sha256,
+                                     uuid = uuid,
+                                     pubkey = pubkey,
+                                     expires = expires,
+                                     serial = serial,
+                                     new_sliver_serial = new_sliver_serial)
         if template:
             c_slice.template_id = template
         c_slice.save()
         for node in nodes.keys():
             c_node = node_models.Node.objects.get(id = node)
             c_sliver = slice_models.Sliver(slice = c_slice,
-                                           node = c_node)
+                                           node = c_node,
+                                           serial = new_sliver_serial)
             c_sliver.save()
 
 

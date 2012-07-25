@@ -23,6 +23,8 @@ from xml.etree import ElementTree
 
 from django.contrib.auth.models import User
 
+import datetime
+
 class SimpleTest(TestCase):
     def test_basic_addition(self):
         """
@@ -77,12 +79,15 @@ class APITest(TestCase):
         Test create_node api call
         """
         before_nodes = models.Node.objects.all().count()
+        before_node_props = models.NodeProps.objects.all().count()
         node_creation = examples.NODE_CREATION
         node_creation['admin'] = self.create_user()
         self.assertTrue(api.create_node(node_creation))
         after_nodes = models.Node.objects.all().count()
         self.assertEqual(before_nodes+1, after_nodes)
-
+        after_node_props = models.NodeProps.objects.all().count()
+        self.assertEqual(before_node_props+1, after_node_props)
+        
     def test_get_nodes(self):
         """
         Test get_nodes api call
@@ -108,13 +113,16 @@ class APITest(TestCase):
         user = self.create_user()
         node1 = self.create_test_node(hostname = "hostname1",
                                       ip = "1.1.1.1",
-                                      admin = user)
+                                      admin = user,
+                                      uuid = "hostname1")
         node2 = self.create_test_node(hostname = "hostname2",
                                       ip = "1.1.1.2",
-                                      admin = user)
+                                      admin = user,
+                                      uuid = "hostname2")
         node3 = self.create_test_node(hostname = "hostname3",
                                       ip = "1.1.1.3",
-                                      admin = user)
+                                      admin = user,
+                                      uuid = "hostname3")
         before_slices = slices_models.Slice.objects.all().count()
         before_slivers = slices_models.Sliver.objects.all().count()
 
@@ -144,7 +152,12 @@ class APITest(TestCase):
             'user': user,
             'vlan_nr': 1,
             'exp_data_uri': "http://none.no/",
-            'exp_data_sha256': "aaa"
+            'exp_data_sha256': "aaa",
+            'uuid': 'UUID1',
+            'pubkey': 'PUBKEY',
+            'expires': datetime.datetime.now(),
+            'serial': 1,
+            'new_sliver_serial': 1
             }
         self.assertTrue(api.create_slice(slice_params))
 
@@ -173,9 +186,9 @@ class APITest(TestCase):
         name2 = "name2"
         name3 = "name3"
         
-        slice1 = self.create_slice(user = user1, name=name1)
-        slice1 = self.create_slice(user = user1, name=name2)
-        slice1 = self.create_slice(user = user2, name=name3)
+        slice1 = self.create_slice(user = user1, name=name1, uuid = name1)
+        slice1 = self.create_slice(user = user1, name=name2, uuid = name2)
+        slice1 = self.create_slice(user = user2, name=name3, uuid = name3)
 
         user1_slices = api.show_slices({'user': user1})
         user2_slices = api.show_slices({'user': user2})
@@ -190,7 +203,7 @@ class APITest(TestCase):
         user = self.create_user()
         name = "slice1"
         node = self.create_test_node(admin = user)
-        slice1 = self.create_slice(user, name)
+        slice1 = self.create_slice(user, name, uuid = name)
         sliver1 = self.create_sliver(node, slice1)
 
         params = {'id': node.id}
@@ -233,9 +246,13 @@ class APITest(TestCase):
         after_research_groups_2 = user_management_models.ResearchGroup.objects.all().count()
         self.assertEqual(after_research_groups_3, after_research_groups_2)        
 
-    def create_sliver(self, c_node, c_slice):
+    def create_sliver(self,
+                      c_node,
+                      c_slice,
+                      serial = 1):
         sliver = slices_models.Sliver(slice = c_slice,
-                                      node = c_node)
+                                      node = c_node,
+                                      serial = serial)
         sliver.save()
         return sliver
 
@@ -244,13 +261,23 @@ class APITest(TestCase):
                      name,
                      vlan_nr = 1,
                      exp_data_uri = "http://none.no/",
-                     exp_data_sha256 = "abc"):
+                     exp_data_sha256 = "abc",
+                     uuid = "UUID",
+                     pubkey = "PUBKEY",
+                     expires = datetime.datetime.now(),
+                     serial = 1,
+                     new_sliver_serial = 1):
         
         new_slice = slices_models.Slice(name = name,
                                         user = user,
                                         vlan_nr = vlan_nr,
                                         exp_data_uri = exp_data_uri,
-                                        exp_data_sha256 = exp_data_sha256)
+                                        exp_data_sha256 = exp_data_sha256,
+                                        uuid = uuid,
+                                        pubkey = pubkey,
+                                        expires = expires,
+                                        serial = serial,
+                                        new_sliver_serial = new_sliver_serial)
         new_slice.save()
         return new_slice
         
@@ -259,12 +286,20 @@ class APITest(TestCase):
                          ip = "1.1.1.1",
                          rd_arch = "x86_generic",
                          admin = None,
+                         uuid = "UUID",
+                         pubkey = "PUBKEY",
+                         rd_cert = "RD CERT",
+                         rd_boot_serial = 1,
                          commit = True):
         node = models.Node(hostname = hostname,
                            ip = ip,
                            rd_arch = rd_arch,
                            state = node_settings.ONLINE,
                            admin = admin,
+                           uuid = uuid,
+                           pubkey = pubkey,
+                           rd_cert = rd_cert,
+                           rd_boot_serial = rd_boot_serial
                            )
         if commit:
             node.save()

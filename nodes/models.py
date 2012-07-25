@@ -52,8 +52,8 @@ class Node(TincClient):
     hostname = models.CharField(max_length=255)
     cn_url = models.URLField("URL", blank=True)
     rd_arch = models.CharField(max_length=128,
-                                    choices=settings.ARCHITECTURE_CHOICES,
-                                    default=settings.DEFAULT_ARCHITECTURE)
+                               choices=settings.ARCHITECTURE_CHOICES,
+                               default=settings.DEFAULT_ARCHITECTURE)
     #TODO: use GeoDjango ? 
     latitude = models.CharField(max_length=255, blank=True)
     longitude = models.CharField(max_length=255, blank=True)
@@ -62,7 +62,7 @@ class Node(TincClient):
                               verbose_name = "admin")
 
     # Added for barebones
-    action = models.CharField(max_length=32,
+    set_state = models.CharField(max_length=32,
                               choices=settings.NODE_STATE_CHOICES,
                               default=settings.DEFAULT_NODE_STATE)
     rd_public_ipv4_total = models.IntegerField(verbose_name = "rd public IPv4 total",
@@ -74,6 +74,13 @@ class Node(TincClient):
     sliver_mac_prefix = models.CharField(max_length = 50,
                                          default = "0x200",
                                          verbose_name = "sliver MAC prefix")
+    uuid = models.CharField(max_length = 150,
+                            verbose_name = "UUID",
+                            unique = True)
+    pubkey = models.TextField(verbose_name = "public key")
+    rd_cert = models.TextField(verbose_name = "research device certificate")
+    rd_boot_serial = models.IntegerField(verbose_name = "research device boot serial")
+    
 
     # A-HACK params
     uci = models.TextField(blank=True)
@@ -96,7 +103,7 @@ class Node(TincClient):
 
     @property
     def public_key(self):
-        return self.tinc_pubkey
+        return self.pubkey
     
     @property
     def local_ip(self):

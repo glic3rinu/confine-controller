@@ -3,9 +3,6 @@ from django.contrib.auth import models as auth_models
 
 import settings
 
-
-
-
 class Island(models.Model):
     name = models.CharField(max_length = 200,
                             verbose_name = "name")
@@ -41,6 +38,15 @@ class Gateway(TincServer):
 class Host(TincClient):
     admin = models.ForeignKey(auth_models.User,
                               verbose_name = "admin")
+
+class NodeProps(models.Model):
+    node = models.ForeignKey("Node",
+                             verbose_name = "node")
+    
+    name = models.CharField(max_length = 150,
+                            verbose_name = "name")
+    value = models.CharField(max_length = 200,
+                             verbose_name = "name")
 
 class Node(TincClient):
     hostname = models.CharField(max_length=255)

@@ -120,15 +120,21 @@ class APITest(TestCase):
 
         name = 'slice_test'
         node_info = {}
-        node_info[node1.id] = {'networks': [],
+        node_info[node1.id] = {'ii': [],
+                               'pubi': [],
+                               'privi': [],
                                'cpu': None,
                                'storage': None,
                                'memory': None}
-        node_info[node2.id] = {'networks': [],
+        node_info[node2.id] = {'ii': [],
+                               'pubi': [],
+                               'privi': [],
                                'cpu': None,
                                'storage': None,
                                'memory': None}
-        node_info[node3.id] = {'networks': [],
+        node_info[node3.id] = {'ii': [],
+                               'pubi': [],
+                               'privi': [],
                                'cpu': None,
                                'storage': None,
                                'memory': None}

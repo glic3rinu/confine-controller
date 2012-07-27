@@ -86,10 +86,10 @@ def create_node(node_params = {}):
     - ip
     - rd_arch
     - admin
-    - uuid
-    - pubkey
+    - rd_uuid
+    - rd_pubkey
     - rd_cert
-    - rd_boot_serial
+    - rd_boot_sn
     - nodeprops
     -- name
     -- value
@@ -98,20 +98,20 @@ def create_node(node_params = {}):
     ip = node_params.get('ip', '')
     rd_arch = node_params.get('rd_arch', '')
     admin = node_params.get('admin', None)
-    uuid = node_params.get('uuid', '')
-    pubkey = node_params.get('pubkey', '')
+    rd_uuid = node_params.get('rd_uuid', '')
+    rd_pubkey = node_params.get('rd_pubkey', '')
     rd_cert = node_params.get('rd_cert', '')
-    rd_boot_serial = node_params.get('rd_boot_serial')
+    rd_boot_sn = node_params.get('rd_boot_sn')
     nodeprops = node_params.get('nodeprops', [])
     try:
         node = node_models.Node(hostname = hostname,
                                 ip = ip,
                                 rd_arch = rd_arch,
                                 admin = admin,
-                                uuid = uuid,
-                                pubkey = pubkey,
+                                rd_uuid = rd_uuid,
+                                rd_pubkey = rd_pubkey,
                                 rd_cert = rd_cert,
-                                rd_boot_serial = rd_boot_serial
+                                rd_boot_sn = rd_boot_sn
                                 )
         
         node.save()
@@ -167,7 +167,7 @@ def create_slice(slice_params = {}):
     - pubkey
     - expires
     - serial
-    - new_sliver_serial
+    - new_sliver_instance_sn
     """
     user = slice_params.get('user', None)
     nodes = slice_params.get('nodes', [])
@@ -179,8 +179,8 @@ def create_slice(slice_params = {}):
     uuid = slice_params.get('uuid', None)
     pubkey = slice_params.get('pubkey', None)
     expires = slice_params.get('expires', None)
-    serial = slice_params.get('serial', None)
-    new_sliver_serial = slice_params.get('new_sliver_serial', None)
+    instance_sn = slice_params.get('instance_sn', None)
+    new_sliver_instance_sn = slice_params.get('new_sliver_instance_sn', None)
 
     if user and len(nodes) > 0:
         c_slice = slice_models.Slice(name = name,
@@ -191,8 +191,8 @@ def create_slice(slice_params = {}):
                                      uuid = uuid,
                                      pubkey = pubkey,
                                      expires = expires,
-                                     serial = serial,
-                                     new_sliver_serial = new_sliver_serial)
+                                     instance_sn = instance_sn,
+                                     new_sliver_instance_sn = new_sliver_instance_sn)
         if template:
             c_slice.template_id = template
         c_slice.save()
@@ -200,7 +200,7 @@ def create_slice(slice_params = {}):
             c_node = node_models.Node.objects.get(id = node)
             c_sliver = slice_models.Sliver(slice = c_slice,
                                            node = c_node,
-                                           serial = new_sliver_serial)
+                                           instance_sn = instance_sn)
             c_sliver.save()
 
 

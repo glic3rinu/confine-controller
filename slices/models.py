@@ -57,8 +57,8 @@ class Slice(models.Model):
                             unique = True)
     pubkey = models.TextField(verbose_name = "public key")
     expires = models.DateField(verbose_name = "expires at")
-    serial = models.IntegerField(verbose_name = "serial")
-    new_sliver_serial = models.IntegerField(verbose_name = "new sliver serial")
+    instance_sn = models.IntegerField(verbose_name = "instance serial number")
+    new_sliver_instance_sn = models.IntegerField(verbose_name = "new sliver instance serial number")
 
     objects = managers.SliceManager()
     
@@ -88,7 +88,7 @@ class Sliver(models.Model):
     ipv6_address = models.GenericIPAddressField(protocol='IPv6', blank=True, null=True)
 
     # Added for BareBones
-    serial = models.IntegerField(verbose_name = "serial")
+    instance_sn = models.IntegerField(verbose_name = "instance serial number")
 
 
     # A-HACK params

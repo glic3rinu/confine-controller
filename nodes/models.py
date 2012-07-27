@@ -13,15 +13,15 @@ class Island(models.Model):
 class TincAddress(models.Model):
     island = models.ForeignKey("Island",
                                verbose_name = "island")
-    tinc_ip = models.IPAddressField(verbose_name="tinc_ip")
-    tinc_port = models.CharField(max_length = 10,
-                                 verbose_name = "tinc_port")
+    ip_addr = models.IPAddressField(verbose_name="ip address")
+    port = models.CharField(max_length = 10,
+                                 verbose_name = "port")
     
 
 class TincHost(models.Model):
-    tinc_name = models.CharField(max_length = 200,
-                                 verbose_name = "tinc_name")
-    tinc_pubkey = models.TextField(verbose_name = "tinc_pubkey")
+    name = models.CharField(max_length = 200,
+                                 verbose_name = "name")
+    pubkey = models.TextField(verbose_name = "pubkey")
 
 class TincClient(TincHost):
     island = models.ManyToManyField("Island",
@@ -74,12 +74,12 @@ class Node(TincClient):
     sliver_mac_prefix = models.CharField(max_length = 50,
                                          default = "0x200",
                                          verbose_name = "sliver MAC prefix")
-    uuid = models.CharField(max_length = 150,
-                            verbose_name = "UUID",
+    rd_uuid = models.CharField(max_length = 150,
+                            verbose_name = "research device UUID",
                             unique = True)
-    pubkey = models.TextField(verbose_name = "public key")
+    rd_pubkey = models.TextField(verbose_name = "research device public key")
     rd_cert = models.TextField(verbose_name = "research device certificate")
-    rd_boot_serial = models.IntegerField(verbose_name = "research device boot serial")
+    rd_boot_sn = models.IntegerField(verbose_name = "research device boot serial number")
     
 
     # A-HACK params
@@ -103,7 +103,7 @@ class Node(TincClient):
 
     @property
     def public_key(self):
-        return self.pubkey
+        return self.rd_pubkey
     
     @property
     def local_ip(self):

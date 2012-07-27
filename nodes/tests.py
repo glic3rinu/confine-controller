@@ -114,15 +114,15 @@ class APITest(TestCase):
         node1 = self.create_test_node(hostname = "hostname1",
                                       ip = "1.1.1.1",
                                       admin = user,
-                                      uuid = "hostname1")
+                                      rd_uuid = "hostname1")
         node2 = self.create_test_node(hostname = "hostname2",
                                       ip = "1.1.1.2",
                                       admin = user,
-                                      uuid = "hostname2")
+                                      rd_uuid = "hostname2")
         node3 = self.create_test_node(hostname = "hostname3",
                                       ip = "1.1.1.3",
                                       admin = user,
-                                      uuid = "hostname3")
+                                      rd_uuid = "hostname3")
         before_slices = slices_models.Slice.objects.all().count()
         before_slivers = slices_models.Sliver.objects.all().count()
 
@@ -156,8 +156,8 @@ class APITest(TestCase):
             'uuid': 'UUID1',
             'pubkey': 'PUBKEY',
             'expires': datetime.datetime.now(),
-            'serial': 1,
-            'new_sliver_serial': 1
+            'instance_sn': 1,
+            'new_sliver_instance_sn': 1
             }
         self.assertTrue(api.create_slice(slice_params))
 
@@ -249,10 +249,10 @@ class APITest(TestCase):
     def create_sliver(self,
                       c_node,
                       c_slice,
-                      serial = 1):
+                      instance_sn = 1):
         sliver = slices_models.Sliver(slice = c_slice,
                                       node = c_node,
-                                      serial = serial)
+                                      instance_sn = instance_sn)
         sliver.save()
         return sliver
 
@@ -265,8 +265,8 @@ class APITest(TestCase):
                      uuid = "UUID",
                      pubkey = "PUBKEY",
                      expires = datetime.datetime.now(),
-                     serial = 1,
-                     new_sliver_serial = 1):
+                     instance_sn = 1,
+                     new_sliver_instance_sn = 1):
         
         new_slice = slices_models.Slice(name = name,
                                         user = user,
@@ -276,8 +276,8 @@ class APITest(TestCase):
                                         uuid = uuid,
                                         pubkey = pubkey,
                                         expires = expires,
-                                        serial = serial,
-                                        new_sliver_serial = new_sliver_serial)
+                                        instance_sn = instance_sn,
+                                        new_sliver_instance_sn = new_sliver_instance_sn)
         new_slice.save()
         return new_slice
         
@@ -286,20 +286,20 @@ class APITest(TestCase):
                          ip = "1.1.1.1",
                          rd_arch = "x86_generic",
                          admin = None,
-                         uuid = "UUID",
-                         pubkey = "PUBKEY",
+                         rd_uuid = "UUID",
+                         rd_pubkey = "PUBKEY",
                          rd_cert = "RD CERT",
-                         rd_boot_serial = 1,
+                         rd_boot_sn = 1,
                          commit = True):
         node = models.Node(hostname = hostname,
                            ip = ip,
                            rd_arch = rd_arch,
                            state = node_settings.ONLINE,
                            admin = admin,
-                           uuid = uuid,
-                           pubkey = pubkey,
+                           rd_uuid = rd_uuid,
+                           rd_pubkey = rd_pubkey,
                            rd_cert = rd_cert,
-                           rd_boot_serial = rd_boot_serial
+                           rd_boot_sn = rd_boot_sn
                            )
         if commit:
             node.save()

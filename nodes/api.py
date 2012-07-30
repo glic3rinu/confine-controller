@@ -226,7 +226,6 @@ def create_slice(slice_params = {}):
                     privateinterface.sliver = c_sliver
                     privateinterface.save()
                     
-            allocate_slivers({'node': c_node})
         return True
     return False
 
@@ -312,7 +311,8 @@ def delete_slices(slice_params = {}):
                 clean_nodes.append(node)
 
         for node in clean_nodes:
-            allocate_slivers({"node": node})
+            #allocate_slivers({"node": node})
+            aa = 22
         return True
     return False
 
@@ -324,13 +324,13 @@ def allocate_slivers(node_params = {}):
     """
     node = node_params.get("node", None)
     if node:
-        #return node_utils.send_node_config(node)
+        return node_utils.send_node_config(node)
         return True
     else:
         node_id = node_params.get("node_id", None)
         if node_id:
             node = node_models.Node.objects.get(id = node_id)
-            #return node_utils.send_node_config(node)
+            return node_utils.send_node_config(node)
             return True
     return False
 
@@ -357,7 +357,8 @@ def delete_slivers(sliver_params = {}):
         sliver = slice_models.Sliver.objects.get(id = sliver_id)
         node = sliver.node
         sliver.delete()
-        return allocate_slivers({"node": node})
+        #return allocate_slivers({"node": node})
+        return True
     return False
 
 def start_slivers(sliver_params = {}):

@@ -393,6 +393,15 @@ def delete_slice(request, slice_slug):
     return HttpResponseRedirect("/show_own_slices/")
 
 @login_required
+def allocate_slivers(request, node_id):
+    """
+    Allocate all slivers from a given node
+    """
+    keys = api.allocate_slivers({'node_id': node_id})
+    messages.info(request, "Allocate sliver task started")
+    return HttpResponseRedirect("/node_index/")
+
+@login_required
 def deploy_slivers(request, slice_slug):
     """
     Deploy all slivers for a given slice

@@ -65,8 +65,8 @@ class Node(TincClient):
     set_state = models.CharField(max_length=32,
                               choices=settings.NODE_STATE_CHOICES,
                               default=settings.DEFAULT_NODE_STATE)
-    rd_public_ipv4_total = models.IntegerField(verbose_name = "rd public IPv4 total",
-                                               default = 1)
+    sliver_public_ipv4_total = models.IntegerField(verbose_name = "rd public IPv4 total",
+                                                   default = 1)
     priv_ipv4_prefix = models.CharField(max_length = 50,
                                         verbose_name = "private ipv4 prefix",
                                         blank = True,
@@ -87,9 +87,9 @@ class Node(TincClient):
     state = models.CharField(max_length=32,
                              choices=settings.NODE_STATE_CHOICES,
                              default=settings.DEFAULT_NODE_STATE)
-    rd_public_ipv4_avail = models.IntegerField(verbose_name = "rd public IPv4 available",
-                                               blank = True,
-                                               null = True)
+    sliver_public_ipv4_avail = models.IntegerField(verbose_name = "rd public IPv4 available",
+                                                   blank = True,
+                                                   null = True)
         
     def __unicode__(self):
         return self.hostname

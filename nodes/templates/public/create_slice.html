@@ -25,6 +25,28 @@
     {{ form.exp_data_sha256 }}
   </div>
   <div class="field">
+    {{ form.uuid.label_tag }}
+    {{ form.uuid }}
+  </div>
+  <div class="field">
+    {{ form.pubkey.label_tag }}
+    {{ form.pubkey }}
+  </div>
+  <div class="field">
+    {{ form.expires.label_tag }}
+    {{ form.expires }}
+  </div>
+  <div class="field">
+    {{ form.instance_sn.label_tag }}
+    {{ form.instance_sn }}
+  </div>
+  <div class="field">
+    {{ form.new_sliver_instance_sn.label_tag }}
+    {{ form.new_sliver_instance_sn }}
+  </div>
+
+
+  <div class="field">
     {{ form.nodes }}
   </div>
 

@@ -21,6 +21,7 @@ from django.forms.models import modelformset_factory
 
 from django.contrib import messages
 
+import datetime
 
 # HTML (XML SOON)
 def index(request):
@@ -136,6 +137,11 @@ def create_slice(request):
                 'vlan_nr': c_data.get('vlan_nr', 0),
                 'exp_data_uri': c_data.get('exp_data_uri', ''),
                 'exp_data_sha256': c_data.get('exp_data_sha256', ''),
+                'uuid': c_data.get('uuid', ''),
+                'pubkey': c_data.get('pubkey', ''),
+                'expires': c_data.get('expires', datetime.datetime.now()),
+                'instance_sn': c_data.get('instance_sn', 1),
+                'new_sliver_instance_sn': c_data.get('new_sliver_instance_sn', 1),
                 }):
                 messages.info(request, "Slice created")
                 return HttpResponseRedirect("/show_own_slices/")

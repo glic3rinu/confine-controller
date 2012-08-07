@@ -120,6 +120,7 @@ def send_node_config(node):
     Sends node configuration (all slices) to node platform
     """
     config = load_node_config(node)
+    all_returned_data = []
     for sliver_config in config:
         script = node_templates.SLIVER_SCRIPT % {
             'config': sliver_config[1], 'sliver_id': sliver_config[0]
@@ -127,8 +128,9 @@ def send_node_config(node):
         return_data = ssh_connection(node.ipv6,
                                      settings.SERVER_PRIVATE_KEY,
                                      script)
+        all_returned_data.append(return_data)
         process_sliver_status(return_data, node)
-    return True
+    return [True, all_returned_data]
 
 def send_deploy_sliver(sliver):
     config = load_slice_config(sliver.slice)
@@ -140,7 +142,7 @@ def send_deploy_sliver(sliver):
     return_data = ssh_connection(sliver.node.ipv6,
                                  settings.SERVER_PRIVATE_KEY,
                                  script)
-
+    return return_data
 def send_start_sliver(sliver):
     script = node_templates.SLIVER_START_SCRIPT % {
         'slice_id': int212hex(sliver.slice.id)
@@ -149,6 +151,7 @@ def send_start_sliver(sliver):
     return_data = ssh_connection(sliver.node.ipv6,
                                  settings.SERVER_PRIVATE_KEY,
                                  script)
+    return return_data
 
 def send_stop_sliver(sliver):
     script = node_templates.SLIVER_STOP_SCRIPT % {
@@ -158,17 +161,23 @@ def send_stop_sliver(sliver):
     return_data = ssh_connection(sliver.node.ipv6,
                                  settings.SERVER_PRIVATE_KEY,
                                  script)
+    return return_data
 
-def ssh_connection(host, file_key, script, username = "root"):
-    fkey = open(file_key, 'r')
-    key = fkey.read()
-    fkey.close()
+def ssh_connection(host, file_key, script, username = "root", password = "confine"):
+    import pdb; pdb.set_trace()
+    #fkey = open(file_key, 'r')
+    #key = fkey.read()
+    #fkey.close()
     ssh = paramiko.SSHClient()
-    nkey = paramiko.PKey(key)
+    #nkey = paramiko.PKey(key)
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host,
-                username = username,
-                pkey = nkey)
+    #ssh.connect(host,
+    #            username = username,
+    #            pkey = nkey)
+    aa = ssh.connect(host,
+                     username = username,
+                     password = password)
+                
     channel = ssh.get_transport().open_session()
     channel.exec_command(script)
     return channel.makefile('rb', -1).readlines()

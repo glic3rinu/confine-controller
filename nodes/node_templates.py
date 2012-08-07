@@ -6,13 +6,11 @@
 #option if01_parent     %(if01_parent)s
 
 NODE_CONFIG_TEMPLATE = """
-confine_sliver_allocate <<EOF
 config sliver %(sliver_id)s
 \toption user_pubkey     '%(ssh_key)s'
 \toption fs_template_url '%(fs_template_url)s'
 \toption exp_data_url    '%(exp_data_url)s'
 %(interfaces)s
-EOF
 """
 
 

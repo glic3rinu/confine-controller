@@ -12,6 +12,12 @@ class NewSliceForm(forms.Form):
     vlan_nr = forms.CharField(required = True)
     exp_data_uri = forms.CharField(required = True)
     exp_data_sha256 = forms.CharField(required = True)
+    uuid = forms.CharField(required = True)
+    pubkey = forms.CharField(required = True,
+                             widget = forms.Textarea)
+    expires = forms.DateField(required = True)
+    instance_sn = forms.IntegerField(required = True)
+    new_sliver_instance_sn = forms.IntegerField(required = True)
     nodes = forms.MultipleChoiceField(widget=widgets.NodeWithInterfacesWidget)
 
 class NodeForm(forms.ModelForm):    

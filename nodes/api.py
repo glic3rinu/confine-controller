@@ -166,7 +166,7 @@ def create_slice(slice_params = {}):
     - uuid
     - pubkey
     - expires
-    - serial
+    - instance_sn
     - new_sliver_instance_sn
     """
     user = slice_params.get('user', None)
@@ -297,7 +297,7 @@ def delete_slices(slice_params = {}):
     Delete given slices with all slivers
     - slice_slug
     """
-    slice_slug = sliver_params.get('slice_slug', None)
+    slice_slug = slice_params.get('slice_slug', None)
     if slice_slug:
         c_slice = slice_models.Slice.objects.get(slug = slice_slug)
         nodes_involved = []
@@ -313,6 +313,8 @@ def delete_slices(slice_params = {}):
         for node in clean_nodes:
             #allocate_slivers({"node": node})
             aa = 22
+
+        c_slice.delete()
         return True
     return False
 

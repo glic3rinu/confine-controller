@@ -111,8 +111,9 @@ class Node(TincClient):
 
     @property
     def ipv6(self):
-        return "%s:%s:0000::2" % (settings.TESTBED_BASE_IP,
-                                  self.hex_id)
+        #return "%s:%s:0000::2" % (settings.TESTBED_BASE_IP,
+        #                          self.hex_id)
+        return self.ip
 
     @property
     def hex_id(self):

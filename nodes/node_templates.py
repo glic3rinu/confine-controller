@@ -23,27 +23,31 @@ SLIVER_INTERFACE_IPV6 = "\toption if%(number)s_ipv6 '%(ip)s'\n"
 SLIVER_INTERFACE_MAC = "\toption if%(number)s_mac '%(mac)s'\n"
 
 SLIVER_SCRIPT = """
-#!/bin/bash
-confine_sliver_allocate %(sliver_id)s << EOF 
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+/bin/bash -c \"confine_sliver_allocate %(sliver_id)s << EOF 
 %(config)s
 EOF
+\"
 """
 
 SLICE_SCRIPT = """
-#!/bin/bash
-confine_sliver_deploy %(slice_id)s <<EOF
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+/bin/bash -c \"confine_sliver_deploy %(slice_id)s <<EOF
 %(config)s
 EOF
+\"
 """
 
 SLIVER_START_SCRIPT = """
-#!/bin/bash
-confine_sliver_start %(slice_id)s <<EOF
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+/bin/bash -c \"confine_sliver_start %(slice_id)s <<EOF
 EOF
+\"
 """
 
 SLIVER_STOP_SCRIPT = """
-#!/bin/bash
-confine_sliver_stop %(slice_id)s <<EOF
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+/bin/bash -c \"confine_sliver_stop %(slice_id)s <<EOF
 EOF
+\"
 """

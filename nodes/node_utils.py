@@ -70,7 +70,7 @@ def process_sliver_status(sliver_status, node):
     ipv6 = {}
     mac = {}
     current_state = None
-    for line in sliver_status.split("\n"):
+    for line in sliver_status:
         line = line.strip()
         if u"config sliver" in line:
             slice_id = hex2int(line.split(" ")[-1].replace("'", ""))
@@ -126,10 +126,11 @@ def send_node_config(node):
             'config': sliver_config[1], 'sliver_id': sliver_config[0]
             }
         return_data = ssh_connection(node.ipv6,
-                                     settings.SERVER_PRIVATE_KEY,
-                                     script)
+                                                 settings.SERVER_PRIVATE_KEY,
+                                                 script)
         all_returned_data.append(return_data)
-        process_sliver_status(return_data, node)
+
+        process_sliver_status(return_data[0], node)
     return [True, all_returned_data]
 
 def send_deploy_sliver(sliver):
@@ -164,7 +165,6 @@ def send_stop_sliver(sliver):
     return return_data
 
 def ssh_connection(host, file_key, script, username = "root", password = "confine"):
-    import pdb; pdb.set_trace()
     #fkey = open(file_key, 'r')
     #key = fkey.read()
     #fkey.close()
@@ -174,13 +174,15 @@ def ssh_connection(host, file_key, script, username = "root", password = "confin
     #ssh.connect(host,
     #            username = username,
     #            pkey = nkey)
-    aa = ssh.connect(host,
-                     username = username,
-                     password = password)
+    ssh.connect(host,
+                username = username,
+                password = password)
                 
     channel = ssh.get_transport().open_session()
     channel.exec_command(script)
-    return channel.makefile('rb', -1).readlines()
+    return_data = channel.makefile('rb', -1).readlines()
+    error_data = channel.makefile_stderr('rb', -1).readlines()
+    return [return_data, error_data]
 
 def extract_params(xml_tree, params = []):
     """

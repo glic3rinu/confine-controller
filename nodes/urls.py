@@ -49,6 +49,8 @@ urlpatterns = patterns('',
                        url(r'^delete_sliver/html/([a-zA-Z0-9\-\_\.\,]+)/$',
                            node_views.delete_sliver,
                            name="delete_sliver"),
-
+                       url(r'^delete_slivers/html/([a-zA-Z0-9\-\_\.\,]+)/$',
+                           node_views.delete_slivers,
+                           name="delete_slivers"),
 
                        )

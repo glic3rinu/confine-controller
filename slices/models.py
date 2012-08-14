@@ -230,7 +230,7 @@ class IsolatedIface(SliverIface):
                                verbose_name = "parent")
 
     def parent_name(self):
-        self.parent.name
+        return self.parent.name
 
 class IpSliverIface(SliverIface):
     use_default_gw = models.BooleanField(verbose_name = "use default gateway")

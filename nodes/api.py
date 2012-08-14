@@ -300,20 +300,8 @@ def delete_slices(slice_params = {}):
     slice_slug = slice_params.get('slice_slug', None)
     if slice_slug:
         c_slice = slice_models.Slice.objects.get(slug = slice_slug)
-        nodes_involved = []
-        for sliver in c_slice.sliver_set.all():
-            nodes_involved.append(sliver.node)
-            sliver.delete()
-
-        clean_nodes = []
-        for node in nodes_involved:
-            if not node in clean_nodes:
-                clean_nodes.append(node)
-
-        for node in clean_nodes:
-            #allocate_slivers({"node": node})
-            aa = 22
-
+        slivers = c_slice.sliver_set.all()
+        delete_slivers({'slivers': slivers})
         c_slice.delete()
         return True
     return False
@@ -351,16 +339,23 @@ def deploy_slivers(sliver_params = {}):
 
 def delete_slivers(sliver_params = {}):
     """
-    Delete given slivers
+    Stop given slivers
     - sliver_id
+    - slivers
     """
     sliver_id = sliver_params.get('sliver_id', None)
+    slivers = sliver_params.get('slivers', [])
     if sliver_id:
         sliver = slice_models.Sliver.objects.get(id = sliver_id)
-        node = sliver.node
+        accum = node_utils.send_remove_sliver(sliver)
         sliver.delete()
-        #return allocate_slivers({"node": node})
-        return True
+        return accum
+    elif slivers:
+        accum = []
+        for sliver in slivers:
+            accum.append(node_utils.send_remove_sliver(sliver))
+            sliver.delete()
+        return accum
     return False
 
 def start_slivers(sliver_params = {}):
@@ -384,6 +379,7 @@ def stop_slivers(sliver_params = {}):
         sliver = slice_models.Sliver.objects.get(id = sliver_id)
         return node_utils.send_stop_sliver(sliver)
     return False
+
 
 def create_research_group(research_group_params = {}):
     """

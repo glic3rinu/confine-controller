@@ -21,6 +21,7 @@ SLIVER_INTERFACE_IPV4 = "\toption if%(number)s_ipv4 '%(ip)s'\n"
 SLIVER_INTERFACE_IPV6_PROTO = "\toption if%(number)s_ipv6_proto '%(proto)s'\n"
 SLIVER_INTERFACE_IPV6 = "\toption if%(number)s_ipv6 '%(ip)s'\n"
 SLIVER_INTERFACE_MAC = "\toption if%(number)s_mac '%(mac)s'\n"
+SLIVER_INTERFACE_PARENT = "\toption if%(number)s_parent '%(parent)s'\n"
 
 SLIVER_SCRIPT = """
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
@@ -48,6 +49,13 @@ EOF
 SLIVER_STOP_SCRIPT = """
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 /bin/bash -c \"confine_sliver_stop %(slice_id)s <<EOF
+EOF
+\"
+"""
+
+SLIVER_REMOVE_SCRIPT = """
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+/bin/bash -c \"confine_sliver_remove %(slice_id)s <<EOF
 EOF
 \"
 """

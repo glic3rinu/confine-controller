@@ -444,3 +444,16 @@ def delete_sliver(request, sliver_id):
     else:
         messages.info(request, "An error appeared on deleting the given sliver")
     return HttpResponseRedirect("/show_own_slices/")
+
+@login_required
+def delete_slivers(request, node_id):
+    """
+    Delete all slivers from the given node
+    """
+    node = node_models.Node.objects.get(id = node_id)
+    if api.delete_slivers({"slivers": node.sliver_set.all()}):
+        messages.info(request, "Slivers from node %i deleted successfuly" % node.id)
+    else:
+        messages.info(request, "An error appeared on deleting slivers from node %i" % node.id)
+    return HttpResponseRedirect("/node_index/")
+

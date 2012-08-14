@@ -31,24 +31,30 @@ def load_sliver_config(sl, use_complete_id = False):
         current_id = sliver_id
     
     interfaces = ""
-    for request in sl.networkrequest_set.all():
-        if request.number:
-            interfaces += node_templates.SLIVER_INTERFACE_TYPE % {'number': "%.2i" % request.number, 'type': request.type}
-            interfaces += node_templates.SLIVER_INTERFACE_NAME % {'number': "%.2i" % request.number, 'name': request.interface.name} if request.interface else ""
-            interfaces += node_templates.SLIVER_INTERFACE_IPV4_PROTO % {'number': "%.2i" % request.number, 'proto': 'static'}
-            interfaces += node_templates.SLIVER_INTERFACE_IPV4 % {'number': "%.2i" % request.number, 'ip': request.ipv4_address}
-            interfaces += node_templates.SLIVER_INTERFACE_IPV6_PROTO % {'number': "%.2i" % request.number, 'proto': 'static'}
-            interfaces += node_templates.SLIVER_INTERFACE_IPV6 % {'number': "%.2i" % request.number, 'ip': request.ipv6_address}
-            interfaces += node_templates.SLIVER_INTERFACE_MAC % {'number': "%.2i" % request.number, 'mac': request.mac_address}
+
+    for iface in sl.privateiface_set.all():
+        interfaces += node_templates.SLIVER_INTERFACE_TYPE % {'number': "%.2i" % iface.nr, 'type': 'internal'}
+        interfaces += node_templates.SLIVER_INTERFACE_NAME % {'number': "%.2i" % iface.nr, 'name': iface.name}
+
+    for iface in sl.publiciface_set.all():
+        interfaces += node_templates.SLIVER_INTERFACE_TYPE % {'number': "%.2i" % iface.nr, 'type': 'public'}
+        interfaces += node_templates.SLIVER_INTERFACE_NAME % {'number': "%.2i" % iface.nr, 'name': iface.name}
+
+    for iface in sl.isolatediface_set.all():
+        interfaces += node_templates.SLIVER_INTERFACE_TYPE % {'number': "%.2i" % iface.nr, 'type': 'isolated'}
+        interfaces += node_templates.SLIVER_INTERFACE_NAME % {'number': "%.2i" % iface.nr, 'name': iface.name}
+        interfaces += node_templates.SLIVER_INTERFACE_PARENT % {'number': "%.2i" % iface.nr, 'parent': iface.parent_name()}
 
     fs_template_uri = ""
+
     if sl.slice.template:
-        fs_template_url = sl.slice.template.data_uri
+        fs_template_uri = sl.slice.template.data_uri
     sliver_config = node_templates.NODE_CONFIG_TEMPLATE % {
         'sliver_id': current_id,
         'ssh_key': sl.slice.user.get_profile().ssh_key,
         'fs_template_url': fs_template_uri,
-        'exp_data_url': 'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
+        'exp_data_url': sl.slice.exp_data_uri,#'http://distro.confine-project.eu/misc/openwrt-exp-data.tgz',
+        'vlan_nr': sl.slice.vlan_nr,
         'interfaces': interfaces
         }
     return [sliver_id, sliver_config]
@@ -156,6 +162,16 @@ def send_start_sliver(sliver):
 
 def send_stop_sliver(sliver):
     script = node_templates.SLIVER_STOP_SCRIPT % {
+        'slice_id': int212hex(sliver.slice.id)
+        }
+
+    return_data = ssh_connection(sliver.node.ipv6,
+                                 settings.SERVER_PRIVATE_KEY,
+                                 script)
+    return return_data
+
+def send_remove_sliver(sliver):
+    script = node_templates.SLIVER_REMOVE_SCRIPT % {
         'slice_id': int212hex(sliver.slice.id)
         }
 

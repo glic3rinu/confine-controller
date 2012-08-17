@@ -10,6 +10,8 @@ config sliver %(sliver_id)s
 \toption user_pubkey     '%(ssh_key)s'
 \toption fs_template_url '%(fs_template_url)s'
 \toption exp_data_url    '%(exp_data_url)s'
+\toption exp_name        '%(exp_name)s'
+\toption vlan_nr         '%(vlan_nr)s'
 %(interfaces)s
 """
 

@@ -241,8 +241,6 @@ class IpSliverIface(SliverIface):
 
 class PublicIface(IpSliverIface):
     sliver = models.ForeignKey(Sliver)
-    nr = models.IntegerField(verbose_name = "number")
 
 class PrivateIface(IpSliverIface):
     sliver = models.ForeignKey(Sliver)
-    nr = models.IntegerField(verbose_name = "number")

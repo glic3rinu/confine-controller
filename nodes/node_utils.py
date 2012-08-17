@@ -185,14 +185,20 @@ def send_node_config(node):
         script = node_templates.SLIVER_SCRIPT % {
             'config': sliver_config[1], 'sliver_id': sliver_config[0]
             }
-        import pdb; pdb.set_trace()
         return_data = ssh_connection(node.ipv6,
                                                  settings.SERVER_PRIVATE_KEY,
                                                  script)
         all_returned_data.append(return_data)
-        import pdb; pdb.set_trace()
         process_sliver_status(return_data[0], node)
     return [True, all_returned_data]
+
+def test_deploy_sliver(sliver):
+    config = load_slice_config(sliver.slice)
+
+    script = node_templates.SLICE_SCRIPT % {
+        'config': config[1], 'slice_id': config[0]
+        }
+    return script
 
 def send_deploy_sliver(sliver):
     config = load_slice_config(sliver.slice)
@@ -204,7 +210,10 @@ def send_deploy_sliver(sliver):
     return_data = ssh_connection(sliver.node.ipv6,
                                  settings.SERVER_PRIVATE_KEY,
                                  script)
+    process_sliver_status(return_data[0], sliver.node)
+    
     return return_data
+
 def send_start_sliver(sliver):
     script = node_templates.SLIVER_START_SCRIPT % {
         'slice_id': int212hex(sliver.slice.id)
@@ -213,6 +222,8 @@ def send_start_sliver(sliver):
     return_data = ssh_connection(sliver.node.ipv6,
                                  settings.SERVER_PRIVATE_KEY,
                                  script)
+    process_sliver_status(return_data[0], sliver.node)
+    
     return return_data
 
 def send_stop_sliver(sliver):
@@ -223,6 +234,8 @@ def send_stop_sliver(sliver):
     return_data = ssh_connection(sliver.node.ipv6,
                                  settings.SERVER_PRIVATE_KEY,
                                  script)
+    process_sliver_status(return_data[0], sliver.node)
+    
     return return_data
 
 def send_remove_sliver(sliver):

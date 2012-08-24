@@ -22,6 +22,11 @@ class TincHost(models.Model):
     name = models.CharField(max_length = 200,
                                  verbose_name = "name")
     pubkey = models.TextField(verbose_name = "pubkey")
+    connect_to = models.ManyToManyField("TincAddress",
+                                        related_name = "host_connect_to",
+                                        blank = True,
+                                        null = True
+                                        )
 
 class TincClient(TincHost):
     island = models.ManyToManyField("Island",
@@ -51,9 +56,7 @@ class NodeProps(models.Model):
 class Node(TincClient):
     hostname = models.CharField(max_length=255)
     cn_url = models.URLField("URL", blank=True)
-    rd_arch = models.CharField(max_length=128,
-                               choices=settings.ARCHITECTURE_CHOICES,
-                               default=settings.DEFAULT_ARCHITECTURE)
+
     #TODO: use GeoDjango ? 
     latitude = models.CharField(max_length=255, blank=True)
     longitude = models.CharField(max_length=255, blank=True)
@@ -74,12 +77,38 @@ class Node(TincClient):
     sliver_mac_prefix = models.CharField(max_length = 50,
                                          default = "0x200",
                                          verbose_name = "sliver MAC prefix")
+    cn_url = models.URLField(blank=True,
+                             null = True,
+                             verbose_name = "cn url")
+    cndb_uri = models.URLField(blank=True,
+                               null = True,
+                               verbose_name = "cndb uri")
+    cndb_cached = models.DateTimeField(blank=True,
+                                       null = True,
+                                       verbose_name = "cndb cached")
+
     rd_uuid = models.CharField(max_length = 150,
                             verbose_name = "research device UUID",
                             unique = True)
     rd_pubkey = models.TextField(verbose_name = "research device public key")
     rd_cert = models.TextField(verbose_name = "research device certificate")
     rd_boot_sn = models.IntegerField(verbose_name = "research device boot serial number")
+    rd_arch = models.CharField(max_length=128,
+                               choices=settings.ARCHITECTURE_CHOICES,
+                               default=settings.DEFAULT_ARCHITECTURE)
+    rd_local_iface = models.CharField(max_length = 200,
+                                      default = "eth0",
+                                      verbose_name = "research device local interface")
+    rd_cn_url = models.URLField(blank=True,
+                                null = True,
+                                verbose_name = "research device cn url")
+    rd_cndb_uri = models.URLField(blank=True,
+                                  null = True,
+                                  verbose_name = "research device cndb uri")
+    rd_cndb_cached = models.DateTimeField(blank=True,
+                                          null = True,
+                                          verbose_name = "research device cndb cached")
+
     
 
     # A-HACK params

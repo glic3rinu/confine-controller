@@ -32,6 +32,258 @@ class SimpleTest(TestCase):
         """
         self.assertEqual(1 + 1, 2)
 
+class RESTAPITest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.request_headers = { 'HTTP_HOST': 'testserver' }
+        self.create_island()
+        self.create_template()
+        user = self.create_user()
+        node = self.create_test_node(admin = user)
+        c_slice = self.create_slice(user, "slice1")
+        sliver = self.create_sliver(node, c_slice)
+        
+    def test_testbed(self):
+        """
+        Test no errors on testbed rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_server(self):
+        """
+        Test no errors on server rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/server/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_nodes(self):
+        """
+        Test no errors on nodes rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/nodes/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_node(self):
+        """
+        Test no errors on node rest api call
+        """
+        node_id = models.Node.objects.all()[0].id
+        args = {}
+        response = self.client.get("/confine/nodes/%i/" % node_id,
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_slices(self):
+        """
+        Test no errors on slices rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/slices/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_slice(self):
+        """
+        Test no errors on slice rest api call
+        """
+        slice_id = slices_models.Slice.objects.all()[0].id
+        args = {}
+        response = self.client.get("/confine/slices/%i/" % slice_id,
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_slivers(self):
+        """
+        Test no errors on slivers rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/slivers/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_sliver(self):
+        """
+        Test no errors on sliver rest api call
+        """
+        sliver_id = slices_models.Sliver.objects.all()[0].id
+        args = {}
+        response = self.client.get("/confine/slivers/%i/" % sliver_id,
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_templates(self):
+        """
+        Test no errors on server rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/templates/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_template(self):
+        """
+        Test no errors on template rest api call
+        """
+        template_id = slices_models.SliverTemplate.objects.all()[0].id
+        args = {}
+        response = self.client.get("/confine/templates/%i/" % template_id,
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_islands(self):
+        """
+        Test no errors on islands rest api call
+        """
+        args = {}
+        response = self.client.get("/confine/islands/",
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_island(self):
+        """
+        Test no errors on island rest api call
+        """
+        island_id = models.Island.objects.all()[0].id
+        args = {}
+        response = self.client.get("/confine/islands/%i/" % island_id,
+                                   args,
+                                   **self.request_headers
+                                   )
+        self.assertEqual(response.status_code,
+                         200)
+
+        
+
+    def create_island(self,
+                      name = "island1"):
+        island = models.Island(name = name)
+        island.save()
+        return island
+
+    def create_template(self,
+                        name = "template1",
+                        template_type = "type1",
+                        arch = "arch1",
+                        enabled = True,
+                        data_uri = "http://yes.yes",
+                        data_sha256 = "1234"):
+        template = slices_models.SliverTemplate(name = name,
+                                                template_type = template_type,
+                                                arch = arch,
+                                                enabled = enabled,
+                                                data_uri = data_uri,
+                                                data_sha256 = data_sha256)
+        template.save()
+        return template
+    
+
+    def create_sliver(self,
+                      c_node,
+                      c_slice,
+                      instance_sn = 1):
+        sliver = slices_models.Sliver(slice = c_slice,
+                                      node = c_node,
+                                      instance_sn = instance_sn)
+        sliver.save()
+        return sliver
+
+    def create_slice(self,
+                     user,
+                     name,
+                     vlan_nr = 1,
+                     exp_data_uri = "http://none.no/",
+                     exp_data_sha256 = "abc",
+                     uuid = "UUID",
+                     pubkey = "PUBKEY",
+                     expires = datetime.datetime.now(),
+                     instance_sn = 1,
+                     new_sliver_instance_sn = 1):
+        
+        new_slice = slices_models.Slice(name = name,
+                                        user = user,
+                                        vlan_nr = vlan_nr,
+                                        exp_data_uri = exp_data_uri,
+                                        exp_data_sha256 = exp_data_sha256,
+                                        uuid = uuid,
+                                        pubkey = pubkey,
+                                        expires = expires,
+                                        instance_sn = instance_sn,
+                                        new_sliver_instance_sn = new_sliver_instance_sn)
+        new_slice.save()
+        return new_slice
+        
+    def create_test_node(self,
+                         hostname = "hostname",
+                         ip = "1.1.1.1",
+                         rd_arch = "x86_generic",
+                         admin = None,
+                         rd_uuid = "UUID",
+                         rd_pubkey = "PUBKEY",
+                         rd_cert = "RD CERT",
+                         rd_boot_sn = 1,
+                         commit = True):
+        node = models.Node(hostname = hostname,
+                           ip = ip,
+                           rd_arch = rd_arch,
+                           state = node_settings.ONLINE,
+                           admin = admin,
+                           rd_uuid = rd_uuid,
+                           rd_pubkey = rd_pubkey,
+                           rd_cert = rd_cert,
+                           rd_boot_sn = rd_boot_sn
+                           )
+        if commit:
+            node.save()
+        return node
+
+    def create_user(self,
+                    username = "fakename",
+                    mail = "fake@pukkared.com",
+                    password = "mypassword"):
+        user = User.objects.create_user(username, mail, password)
+        return user
+
+
 class APITest(TestCase):
     def setUp(self):
         pass

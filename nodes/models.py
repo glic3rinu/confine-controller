@@ -6,6 +6,9 @@ import settings
 class Island(models.Model):
     name = models.CharField(max_length = 200,
                             verbose_name = "name")
+    description = models.TextField(verbose_name = "description",
+                                   blank = True,
+                                   null = True)
 
     def __unicode__(self):
         return self.name
@@ -86,6 +89,9 @@ class Node(TincClient):
     cndb_cached = models.DateTimeField(blank=True,
                                        null = True,
                                        verbose_name = "cndb cached")
+    description = models.TextField(verbose_name = "description",
+                                   blank = True,
+                                   null = True)
 
     rd_uuid = models.CharField(max_length = 150,
                             verbose_name = "research device UUID",

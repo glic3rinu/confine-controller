@@ -59,6 +59,9 @@ class Slice(models.Model):
     expires = models.DateField(verbose_name = "expires at")
     instance_sn = models.IntegerField(verbose_name = "instance serial number")
     new_sliver_instance_sn = models.IntegerField(verbose_name = "new sliver instance serial number")
+    description = models.TextField(verbose_name = "description",
+                                   blank = True,
+                                   null = True)
 
     objects = managers.SliceManager()
     
@@ -89,7 +92,9 @@ class Sliver(models.Model):
 
     # Added for BareBones
     instance_sn = models.IntegerField(verbose_name = "instance serial number")
-
+    description = models.TextField(verbose_name = "description",
+                                   blank = True,
+                                   null = True)
 
     # A-HACK params
     state = models.CharField(max_length=16,
@@ -134,6 +139,9 @@ class SliverTemplate(models.Model):
     data_uri = models.URLField(verbose_name = "data URI")
     data_sha256 = models.CharField(max_length = 150,
                                    verbose_name = "sha256")
+    description = models.TextField(verbose_name = "description",
+                                   blank = True,
+                                   null = True)
 
     def __unicode__(self):
         return self.name

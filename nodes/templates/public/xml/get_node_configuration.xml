@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<response version="1.0">
-  <config_request>{{ hostname_found }}</config_request>
-  <node_config>{{ config }}</node_config>
-</response>

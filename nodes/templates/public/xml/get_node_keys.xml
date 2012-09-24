@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<response version="1.0">
-  <key_request>{{ hostname_found }}</key_request>
-  <node_keys>
-    {% for key in keys %}
-    <node_key>{{ key }}</node_key>
-    {% endfor %}
-  </node_keys>
-</response>

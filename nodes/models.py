@@ -57,8 +57,7 @@ class CnHost(models.Model):
 class ResearchDevice(CnHost, TincClient):
     uuid = fields.UUIDField(auto=True, primary_key=True)
     node = models.OneToOneField(Node)
-    #TODO: pubkey clashes with field of similar name from base class 'TincClient'
-    #pubkey = models.TextField(verbose_name="Public Key")
+    pubkey = models.TextField(verbose_name="Public Key")
     cert = models.TextField(verbose_name="Certificate")
     arch = models.CharField(verbose_name="Architecture", max_length=16, 
         choices=settings.RESEARCH_DEVICE_ARCHS, default=settings.DEFAULT_RESEARCH_DEVICE_ARCH)
@@ -77,11 +76,13 @@ class RdDirectIface(models.Model):
         return self.name
 
 
-class Gateway(TincServer, CnHost):
+class Gateway(TincHosts):
+    #TODO: ID >= 2
     pass
 
 
-class Server(SingletonModel, TincServer, CnHost):
+class Server(SingletonModel, Gateway):
+    #TODO: ID = 2
     class Meta:
         verbose_name = "Server"
         verbose_name_plural = "Server"

@@ -24,21 +24,15 @@ class TincAddress(models.Model):
 
 
 class TincHost(models.Model):
-    name = models.CharField(max_length=64)
-    pubkey = models.TextField(verbose_name="Public Key")
+    tinc_name = models.CharField(max_length=64)
+    tinc_pubkey = models.TextField(verbose_name="Public Key")
     connect_to = models.ManyToManyField(TincAddress, blank=True)
     
     class Meta:
         abstract = True
 
     def __unicode__(self):
-        return self.name
-
-
-class TincServer(TincHost): pass
-    #TODO: This class can't be abstract because of TincAddress.server relation
-#    class Meta: 
-#        abstract = True
+        return self.tinc_name
 
 
 class TincClient(TincHost):

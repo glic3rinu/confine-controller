@@ -1,0 +1,9 @@
+from django.conf import settings
+
+ugettext = lambda s: s
+
+DEFAULT_AUTHORIZED_OFFICIAL_CITY = getattr(settings, 'DEFAULT_AUTHORIZED_OFFICIAL_CITY', 'Barcelona')
+
+DEFAULT_AUTHORIZED_OFFICIAL_PROVINCE = getattr(settings, 'DEFAULT_AUTHORIZED_OFFICIAL_PROVINCE', 'Barcelona')
+
+DEFAULT_AUTHORIZED_OFFICIAL_COUNTRY = getattr(settings, 'DEFAULT_AUTHORIZED_OFFICIAL_COUNTRY', 'Spain')

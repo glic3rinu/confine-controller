@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 import settings
 from singleton_models.models import SingletonModel
 from utils import fields
-from tinc .models import TincServer, TincClient
+from tinc.models import Gateway, TincClient
 
 
 class Node(models.Model):
@@ -74,11 +74,6 @@ class RdDirectIface(models.Model):
     
     def __unicode__(self):
         return self.name
-
-
-class Gateway(TincHosts):
-    #TODO: ID >= 2
-    pass
 
 
 class Server(SingletonModel, Gateway):

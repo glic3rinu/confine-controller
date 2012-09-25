@@ -14,7 +14,6 @@ class CustomMenu(Menu):
                 items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')),
                 items.MenuItem('Research Devices', reverse('admin:nodes_researchdevice_changelist')),
                 items.MenuItem('Hosts', reverse('admin:nodes_host_changelist')),
-                items.MenuItem('Gateways', reverse('admin:nodes_gateway_changelist')),
                 items.MenuItem('Server', reverse('admin:nodes_server_changelist')),
             ]))
 

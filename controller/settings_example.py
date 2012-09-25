@@ -227,12 +227,12 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'auth_extension/authorizedofficial': "Contact-new.svg",
     'nodes/node': "linksys-WRT54G.svg",
     'nodes/host': "computer-dell-dimension-E521.svg",
-    'nodes/gateway': "Network.svg",
     'nodes/server': "poweredge_r510.svg",
     'nodes/researchdevice': "Conical_flask_red.svg",
     'slices/slice': "slice.png",
     'slices/sliver': "linux-containers.png",
     'slices/template': "Application-x-gerber.svg",
+    'tinc/gateway': "Network.svg",
     'tinc/island': "Weather-overcast.svg",
     'tinc/tincaddress': "X-office-address-book.svg",
 }

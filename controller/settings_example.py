@@ -145,7 +145,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Confine
-    'auth',
+    'auth_extension',
     'tinc',
     'nodes',
     'slices',
@@ -207,7 +207,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     ('Auth', {
         'models': (
             'django.contrib.auth.*.User',
-            'auth.*'
+            'auth_extension.*'
         ),
         'collapsible': True,
     }),
@@ -222,9 +222,9 @@ FLUENT_DASHBOARD_APP_GROUPS = (
 FLUENT_DASHBOARD_APP_ICONS = {
     'auth/user': "Mr-potato.svg",
     'auth/group': "System-users.svg",
-    'auth/testbedpermission': "Locked.svg",
-    'auth/researchgroup': "research_group.svg",
-    'auth/authorizedofficial': "Contact-new.svg",
+    'auth_extension/testbedpermission': "Locked.svg",
+    'auth_extension/researchgroup': "research_group.svg",
+    'auth_extension/authorizedofficial': "Contact-new.svg",
     'nodes/node': "linksys-WRT54G.svg",
     'nodes/host': "computer-dell-dimension-E521.svg",
     'nodes/gateway': "Network.svg",

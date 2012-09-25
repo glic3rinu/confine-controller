@@ -1,9 +1,9 @@
+from common import fields
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 import settings
 from singleton_models.models import SingletonModel
-from utils import fields
 from tinc.models import Gateway, TincClient
 
 

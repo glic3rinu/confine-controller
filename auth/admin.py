@@ -1,9 +1,9 @@
+from common.admin import insert_inline
+from common.fields import MultiSelectFormField
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 from models import UserProfile, AuthToken, ResearchGroup, TestbedPermission, AuthorizedOfficial
-from utils.admin import insert_inline
-from utils.fields import MultiSelectFormField
 
 
 class UserProfileInline(admin.StackedInline):

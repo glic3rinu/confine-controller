@@ -41,6 +41,12 @@ class UserProfile(models.Model):
         return self.user.username
 
 
+@receiver(post_save, sender=User, dispatch_uid="user_profile.create_user_profile")
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+       profile, created = UserProfile.objects.get_or_create(user=instance)
+
+
 class TestbedPermission(models.Model):
     ACTIONS = ((1, _("Create")),
                (2, _("Read")),
@@ -70,7 +76,3 @@ class AuthToken(models.Model):
         return str(self.pk)
 
 
-@receiver(post_save, sender=User, dispatch_uid="user_profile.create_user_profile")
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-       profile, created = UserProfile.objects.get_or_create(user=instance)

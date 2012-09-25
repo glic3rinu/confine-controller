@@ -18,6 +18,7 @@ class AuthTokenInline(admin.TabularInline):
 
 class TestbedPermissionInline(admin.TabularInline):
     model = TestbedPermission
+    extra = 0
 
 
 class AuthorizedOfficialInline(admin.StackedInline):
@@ -33,7 +34,7 @@ class TestbedPermissionAdmin(admin.ModelAdmin):
 
 
 class ResearchGroupAdmin(admin.ModelAdmin):
-    inlines = [AuthorizedOfficialInline]
+    inlines = [AuthorizedOfficialInline, TestbedPermissionInline]
 
 
 insert_inline(User, UserProfileInline)

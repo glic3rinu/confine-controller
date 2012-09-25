@@ -145,13 +145,13 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Confine
-    'auth_extension',
+    'slices',
     'tinc',
     'nodes',
-    'slices',
+    'auth_extension',
 )
 
-AUTH_PROFILE_MODULE = 'user_profile.UserProfile'
+AUTH_PROFILE_MODULE = 'auth_extension.UserProfile'
 
 
 # A sample logging configuration. The only tangible logging

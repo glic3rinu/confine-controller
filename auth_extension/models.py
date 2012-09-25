@@ -1,7 +1,7 @@
 from common import fields
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_syncdb
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 import settings
@@ -41,12 +41,6 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-@receiver(post_save, sender=User, dispatch_uid="user_profile.create_user_profile")
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-       profile, created = UserProfile.objects.get_or_create(user=instance)
-
-
 class TestbedPermission(models.Model):
     ACTIONS = ((1, _("Create")),
                (2, _("Read")),
@@ -76,3 +70,9 @@ class AuthToken(models.Model):
         return str(self.pk)
 
 
+
+# Create User profile on sync_db
+#@receiver(post_syncdb, sender=User, dispatch_uid="user_profile.create_user_profile")
+#def create_user_profile(app, created_models, verbosity, **kwargs):
+#    print 'fuck'
+#    profile, created = UserProfile.objects.create(user=instance)

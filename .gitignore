@@ -1,0 +1,7 @@
+*.log
+*.pot
+*.pyc
+*~
+controller/settings.py
+
+

@@ -51,8 +51,7 @@ class SliverInlineForm(forms.ModelForm):
         if 'instance' in kwargs:
             instance = kwargs['instance']
             sliver_change = reverse('admin:slices_sliver_change', args=(instance.pk,))
-            self.initial['sliver'] = mark_safe("<a href='%s' id='add_id_user' 
-                onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
+            self.initial['sliver'] = mark_safe("<a href='%s' id='add_id_user' onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
             node_change = reverse('admin:nodes_node_change', args=(instance.node.pk,))
             self.initial['node'] = mark_safe("<a href='%s'>%s</a>" % (node_change, instance.node))
             self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, 
@@ -71,6 +70,9 @@ class SlicePropInline(admin.TabularInline):
 
 
 class SliceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', 'set_state', 'template', 'expires_on']
+    list_filter = ['set_state']
+    date_hierarchy = 'expires_on'
     inlines = [SlicePropInline,SliverInline]
 
 

@@ -32,9 +32,9 @@ class AuthorizedOfficial(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    uuid = fields.UUIDField(auto=True)
+    uuid = fields.UUIDField(auto=True, unique=True)
     description = models.TextField(blank=True)
-    pubkey = models.TextField(verbose_name="Public Key", blank=True)
+    pubkey = models.TextField(unique=True, blank=True, verbose_name="Public Key")
     research_groups = models.ManyToManyField(ResearchGroup)
 
     def __unicode__(self):

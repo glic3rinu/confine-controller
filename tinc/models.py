@@ -3,8 +3,8 @@ import settings
 
 
 class TincHost(models.Model):
-    tinc_name = models.CharField(max_length=64)
-    tinc_pubkey = models.TextField(verbose_name="Tinc Public Key")
+    tinc_name = models.CharField(max_length=64, unique=True)
+    tinc_pubkey = models.TextField(unique=True, verbose_name="Tinc Public Key")
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True)
     
     class Meta:

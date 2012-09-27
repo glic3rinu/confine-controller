@@ -54,6 +54,7 @@ class Sliver(models.Model):
     description = models.CharField(max_length=256)
     instance_sn = models.IntegerField(verbose_name="Instance Sequence Number")
     slice = models.ForeignKey(Slice)
+    node = models.ForeignKey('nodes.Node')
     
     def __unicode__(self):
         return self.description

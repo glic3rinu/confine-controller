@@ -16,6 +16,7 @@ class Node(models.Model):
               ('production', _('Production')),)
 
     description = models.CharField(max_length=256)
+    admin = models.ForeignKey(User)
     priv_ipv4_prefix = models.GenericIPAddressField(protocol='IPv4', null=True, blank=True)
     sliver_mac_prefix = models.PositiveSmallIntegerField(max_length=16, null=True, blank=True)
     sliver_pub_ipv4_total = models.IntegerField()
@@ -39,7 +40,7 @@ class NodeProp(models.Model):
 
 class Host(TincClient):
     description = models.CharField(max_length=256)
-    user = models.ForeignKey(User)
+    admin = models.ForeignKey(User)
 
 
 class CnHost(models.Model):

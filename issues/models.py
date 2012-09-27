@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 
 class Queue(models.Model):
@@ -11,19 +12,17 @@ class Queue(models.Model):
 
 class Ticket(models.Model):
 
-    PRIORITIES = (
-        ('high', _("High")),
-        ('hedium', _("Medium")),
-        ('low', _("Low")),)
+    PRIORITIES = (('high', _("High")),
+                  ('hedium', _("Medium")),
+                  ('low', _("Low")),)
 
-    STATES = (
-        ('new', _"(New")),
-        ('open', _("Open")),
-        ('resolved', _("Resolved")),
-        ('rejected', _("Rejected")),)
+    STATES = (('new', _("New")),
+              ('open', _("Open")),
+              ('resolved', _("Resolved")),
+              ('rejected', _("Rejected")),)
 
     created_by = models.ForeignKey(User)
-    owner = models.ForeignKey(User, null=True, blank=True)
+    owner = models.ForeignKey(User, related_name='ticket_owned_set', null=True, blank=True)
     queue = models.ForeignKey(Queue)
     subject = models.CharField(max_length=256)
     priority = models.CharField(max_length=32, choices=PRIORITIES, default='medium')
@@ -41,10 +40,9 @@ class Ticket(models.Model):
 
 class Message(models.Model):
 
-    VISIBILITY_CHOICES = (
-        ('internal', _("Internal")),
-        ('public', _("Public")),
-        ('private', _("Private")),)
+    VISIBILITY_CHOICES = (('internal', _("Internal")),
+                          ('public', _("Public")),
+                          ('private', _("Private")),)
 
     ticket = models.ForeignKey(Ticket)
     author = models.ForeignKey(User)

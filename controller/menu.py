@@ -2,6 +2,7 @@ from django.core.urlresolvers import reverse
 from admin_tools.menu import items, Menu
 import settings
 
+
 class CustomMenu(Menu):
     def __init__(self, **kwargs):
         Menu.__init__(self, **kwargs)
@@ -26,5 +27,5 @@ class CustomMenu(Menu):
 
         self.children.append(items.AppList(
             'Administration',
-            models=('django.contrib.auth.*', 'auth_extensions.*')))
+            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*.Ticket')))
 

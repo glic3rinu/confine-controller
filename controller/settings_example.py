@@ -148,6 +148,8 @@ INSTALLED_APPS = (
     'slices',
     'tinc',
     'nodes',
+    'issues',
+    # must be the las one due to South migrations problems
     'auth_extension',
 )
 
@@ -204,10 +206,11 @@ FLUENT_DASHBOARD_APP_GROUPS = (
         ),
         'collapsible': True,
     }),
-    ('Auth', {
+    ('Administration', {
         'models': (
             'django.contrib.auth.*.User',
-            'auth_extension.*'
+            'auth_extension.*',
+            'issues.*',
         ),
         'collapsible': True,
     }),
@@ -235,5 +238,6 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/gateway': "Network.svg",
     'tinc/island': "Weather-overcast.svg",
     'tinc/tincaddress': "X-office-address-book.svg",
+    'issues/ticket': "Ticket.sv",
 }
 

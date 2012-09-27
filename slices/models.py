@@ -29,7 +29,7 @@ class Slice(models.Model):
     name = models.CharField(max_length=64)
     pubkey = models.TextField("Public Key")
     description = models.TextField(blank=True)
-    expires_on = models.DateField(blank=True)
+    expires_on = models.DateField(null=True, blank=True)
     instance_sn = models.IntegerField(verbose_name="Instance Sequence Number")
     vlan_nr = models.IntegerField("Vlan Number")
     exp_data = models.FileField(verbose_name="Experiment Data",

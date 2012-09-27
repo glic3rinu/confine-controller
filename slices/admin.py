@@ -1,6 +1,7 @@
 from common.widgets import ShowText
 from django import forms
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 from models import Sliver, SliverProp, IsolatedIface, PublicIface, PrivateIface, Slice, SliceProp, Template
 
@@ -38,7 +39,7 @@ class SliverInlineForm(forms.ModelForm):
     #TODO: possible reimplementation when nested inlines support becomes available on django.contrib.admin
     sliver = forms.CharField(label="Sliver", widget=ShowText(bold=True))
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
-    url = forms.CharField(label="Node URL", widget=ShowText(bold=True))
+    url = forms.CharField(label="Node CN URL", widget=ShowText(bold=True))
 
     class Meta:
         # reset model field order
@@ -52,7 +53,7 @@ class SliverInlineForm(forms.ModelForm):
             self.initial['sliver'] = mark_safe("<a href='%s' id='add_id_user' onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
             node_change = reverse('admin:nodes_node_change', args=(instance.node.pk,))
             self.initial['node'] = mark_safe("<a href='%s'>%s</a>" % (node_change, instance.node))
-            self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.url, instance.node.url))
+            self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, instance.node.cn_url))
 
 
 class SliverInline(admin.TabularInline):

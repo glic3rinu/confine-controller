@@ -26,7 +26,7 @@ class Slice(models.Model):
               (ACTIVATE, _('Activate')),)
 
     uuid = fields.UUIDField(auto=True)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True)
     pubkey = models.TextField("Public Key")
     description = models.TextField(blank=True)
     expires_on = models.DateField(null=True, blank=True)

@@ -36,7 +36,8 @@ class SliverInlineForm(forms.ModelForm):
     Also it provides popup links to each sliver admin change form.
     """
     #FIXME: js needed: when save popup the main form is not updated with the new/changed slivers
-    #TODO: possible reimplementation when nested inlines support becomes available on django.contrib.admin
+    #TODO: possible reimplementation when nested inlines support becomes available 
+    #      on django.contrib.admin
     sliver = forms.CharField(label="Sliver", widget=ShowText(bold=True))
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
     url = forms.CharField(label="Node CN URL", widget=ShowText(bold=True))
@@ -50,10 +51,12 @@ class SliverInlineForm(forms.ModelForm):
         if 'instance' in kwargs:
             instance = kwargs['instance']
             sliver_change = reverse('admin:slices_sliver_change', args=(instance.pk,))
-            self.initial['sliver'] = mark_safe("<a href='%s' id='add_id_user' onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
+            self.initial['sliver'] = mark_safe("<a href='%s' id='add_id_user' 
+                onclick='return showAddAnotherPopup(this);'>%s </a>" % (sliver_change, instance))
             node_change = reverse('admin:nodes_node_change', args=(instance.node.pk,))
             self.initial['node'] = mark_safe("<a href='%s'>%s</a>" % (node_change, instance.node))
-            self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, instance.node.cn_url))
+            self.initial['url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, 
+                instance.node.cn_url))
 
 
 class SliverInline(admin.TabularInline):

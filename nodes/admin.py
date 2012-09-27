@@ -44,6 +44,7 @@ class NodeAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', link_factory('cn_url', description='CN URL'), 
         'set_state', 'researchdevice', researchdevice__arch, colored_set_state]
     list_filter = ['researchdevice__arch', 'set_state']
+    search_fields = ['description', 'id']
     inlines = [ResearchDeviceInline, NodePropInline]
 
 
@@ -68,6 +69,7 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', node_link, link_factory('cn_url', description='CN URL'), 
         'arch', colored_set_state_node]
     list_filter = ['arch', 'node__set_state']
+    search_fields = ['uuid', 'node__description']
 
 
 class ServerAdmin(SingletonModelAdmin):

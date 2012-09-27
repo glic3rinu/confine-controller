@@ -35,7 +35,7 @@ class UserProfile(models.Model):
     uuid = fields.UUIDField(auto=True, unique=True)
     description = models.TextField(blank=True)
     pubkey = models.TextField(unique=True, blank=True, verbose_name="Public Key")
-    research_groups = models.ManyToManyField(ResearchGroup)
+    research_groups = models.ManyToManyField(ResearchGroup, blank=True)
 
     def __unicode__(self):
         return self.user.username
@@ -69,10 +69,3 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return str(self.pk)
 
-
-
-# Create User profile on sync_db
-#@receiver(post_syncdb, sender=User, dispatch_uid="user_profile.create_user_profile")
-#def create_user_profile(app, created_models, verbosity, **kwargs):
-#    print 'fuck'
-#    profile, created = UserProfile.objects.create(user=instance)

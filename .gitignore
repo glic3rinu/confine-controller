@@ -3,6 +3,6 @@
 *.pyc
 *~
 controller/settings.py
-media/exp_data/*
-media/templates/*
+media/exp_data/.*
+media/templates/.*
 

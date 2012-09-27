@@ -25,8 +25,8 @@ class Slice(models.Model):
     STATES = ((INSTANTIATE, _('Instantiate')),
               (ACTIVATE, _('Activate')),)
 
-    uuid = fields.UUIDField(auto=True)
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64)
+    uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField("Public Key")
     description = models.TextField(blank=True)
     expires_on = models.DateField(null=True, blank=True)
@@ -39,11 +39,11 @@ class Slice(models.Model):
     users = models.ManyToManyField(User)
 
     def __unicode__(self):
-        return str(self.uuid)
+        return self.name
 
 class SliceProp(models.Model):
     slice = models.ForeignKey(Slice)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True)
     value = models.CharField(max_length=256)
     
     def __unicode__(self):
@@ -62,7 +62,7 @@ class Sliver(models.Model):
 
 class SliverProp(models.Model):
     sliver = models.ForeignKey(Sliver)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True)
     value = models.CharField(max_length=256)
     
     def __unicode__(self):
@@ -70,7 +70,7 @@ class SliverProp(models.Model):
 
 
 class SliverIface(models.Model):
-    name = models.CharField(max_length=16, default='eth')
+    name = models.CharField(max_length=16, default='eth0')
 
     class Meta:
         abstract = True
@@ -81,7 +81,10 @@ class SliverIface(models.Model):
 
 class IsolatedIface(SliverIface):
     sliver = models.ForeignKey(Sliver)
-    parent_name = models.CharField(max_length=16, default='eth')
+    parent_name = models.CharField(max_length=16, default='eth0')
+
+    class Meta:
+        unique_together = ['sliver', 'parent_name']
 
 
 class IpSliverIface(SliverIface):

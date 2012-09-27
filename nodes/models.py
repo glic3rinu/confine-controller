@@ -31,7 +31,7 @@ class Node(models.Model):
 
 class NodeProp(models.Model):
     node = models.ForeignKey(Node)
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32, unique=True)
     value = models.CharField(max_length=256)
 
     def __unicode__(self):
@@ -58,8 +58,8 @@ class CnHost(models.Model):
 class ResearchDevice(CnHost, TincClient):
     uuid = fields.UUIDField(auto=True, primary_key=True)
     node = models.OneToOneField(Node)
-    pubkey = models.TextField(verbose_name="Public Key")
-    cert = models.TextField(verbose_name="Certificate")
+    pubkey = models.TextField(unique=True, verbose_name="Public Key")
+    cert = models.TextField(unique=True, verbose_name="Certificate")
     arch = models.CharField(verbose_name="Architecture", max_length=16, 
         choices=settings.RESEARCH_DEVICE_ARCHS, default=settings.DEFAULT_RESEARCH_DEVICE_ARCH)
     boot_sn = models.IntegerField(verbose_name="Boot Sequence Number", default=0)
@@ -72,6 +72,9 @@ class ResearchDevice(CnHost, TincClient):
 class RdDirectIface(models.Model):
     name = models.CharField(max_length=16, default='eth0')
     rd = models.ForeignKey(ResearchDevice)
+    
+    class Meta:
+        unique_together = ['name', 'rd']
     
     def __unicode__(self):
         return self.name

@@ -25,7 +25,7 @@ class Node(models.Model):
     set_state = models.CharField(max_length=16, choices=STATES, default='install_conf')
 
     def __unicode__(self):
-        return str(self.pk)
+        return self.description
 
 
 class NodeProp(models.Model):

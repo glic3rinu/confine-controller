@@ -210,7 +210,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
         'models': (
             'django.contrib.auth.*.User',
             'auth_extension.*',
-            'issues.*',
+            'issues.*Ticket',
         ),
         'collapsible': True,
     }),

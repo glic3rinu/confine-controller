@@ -4,7 +4,7 @@ import settings
 
 class TincHost(models.Model):
     tinc_name = models.CharField(max_length=64)
-    tinc_pubkey = models.TextField(verbose_name="Public Key")
+    tinc_pubkey = models.TextField(verbose_name="Tinc Public Key")
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True)
     
     class Meta:
@@ -28,7 +28,7 @@ class Island(models.Model):
 
 
 class TincAddress(models.Model):
-    ip_addr = models.GenericIPAddressField(verbose_name="IP Address", protocol='IPv6')
+    ip_addr = models.GenericIPAddressField(verbose_name="IPv6 Address", protocol='IPv6')
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT)
     island = models.ForeignKey(Island)
     server = models.ForeignKey(Gateway)

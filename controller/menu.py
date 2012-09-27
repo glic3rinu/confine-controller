@@ -27,5 +27,5 @@ class CustomMenu(Menu):
 
         self.children.append(items.AppList(
             'Administration',
-            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*.Ticket')))
+            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*')))
 

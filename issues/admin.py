@@ -8,7 +8,7 @@ class MessageInline(admin.TabularInline):
     
     
 class TicketAdmin(admin.ModelAdmin):
-    inline = [MessageInline]
+    inlines = [MessageInline]
 
 
 admin.site.register(Ticket, TicketAdmin)

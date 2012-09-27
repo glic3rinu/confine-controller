@@ -238,6 +238,6 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/gateway': "Network.svg",
     'tinc/island': "Weather-overcast.svg",
     'tinc/tincaddress': "X-office-address-book.svg",
-    'issues/ticket': "Ticket.sv",
+    'issues/ticket': "Ticket.svg",
 }
 

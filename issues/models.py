@@ -35,7 +35,7 @@ class Ticket(models.Model):
         ordering = ["-last_modified_on"]
 
     def __unicode__(self):
-        return self.subject[:32]
+        return str(self.id)
 
 
 class Message(models.Model):

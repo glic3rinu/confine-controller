@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from django.core.urlresolvers import reverse
 
 def insert_inline(model, inline, head=False):
     """ Insert model inline into an existing model_admin """
@@ -43,4 +43,14 @@ def link_factory(attribute, description='', admin_order_field=True, base_url='')
     return link
 
 
-
+def admin_link_factory(field_name, app_model='auth_user'):
+    def link(obj, field=field_name):
+        rel = getattr(obj, field)
+        if not rel: return ''
+        url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
+        return '<a href="%s">%s</a>' % (url, rel)
+    link.short_description = field_name.capitalize()
+    link.allow_tags = True
+    link.admin_order_field = field_name
+    
+    return link

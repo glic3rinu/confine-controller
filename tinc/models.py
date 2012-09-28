@@ -28,7 +28,8 @@ class Island(models.Model):
 
 
 class TincAddress(models.Model):
-    ip_addr = models.GenericIPAddressField(verbose_name="IPv6 Address", protocol='IPv6')
+    ip_addr = models.GenericIPAddressField(verbose_name="IP Address", 
+        protocol='IPv6', help_text="IPv6 Address")
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT)
     island = models.ForeignKey(Island)
     server = models.ForeignKey(Gateway)

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
 from django.utils.html import escape
 from forms import NodeInlineAdminForm, HostInlineAdminForm
-from models import Node, NodeProp, Host, Gateway, Server, ResearchDevice, RdDirectIface
+from models import Node, NodeProp, Host, Server, ResearchDevice, RdDirectIface
 from singleton_models.admin import SingletonModelAdmin
 
 
@@ -40,6 +40,7 @@ def colored_set_state(node):
 colored_set_state.short_description = 'Set State'
 colored_set_state.allow_tags = True
 colored_set_state.admin_order_field = 'set_state'
+
 
 def admin_link(self):
     url = reverse('admin:auth_user_change', args=(self.admin.pk,))
@@ -111,12 +112,11 @@ class ServerAdmin(SingletonModelAdmin):
 
 
 class HostAdmin(admin.ModelAdmin):
-    list_display = ['description', 'id', admin_link]
+    list_display = ['description', 'id', 'tinc_name', admin_link]
 
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Host, HostAdmin)
-admin.site.register(Gateway)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(ResearchDevice, ResearchDeviceAdmin)
 

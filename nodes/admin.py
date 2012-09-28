@@ -1,5 +1,4 @@
-from common.admin import link_factory, insert_inline
-from django.core.urlresolvers import reverse
+from common.admin import link_factory, insert_inline, admin_link_factory
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
@@ -42,28 +41,12 @@ colored_set_state.allow_tags = True
 colored_set_state.admin_order_field = 'set_state'
 
 
-def admin_link(self):
-    url = reverse('admin:auth_user_change', args=(self.admin.pk,))
-    return '<a href="%s">%s</a>' % (url, self.admin)
-admin_link.short_description = "Admin"
-admin_link.allow_tags = True
-admin_link.admin_order_field = 'admin'
-
-
 class NodeAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', link_factory('cn_url', description='CN URL'), 
-        'researchdevice', researchdevice__arch, colored_set_state, admin_link]
+        'researchdevice', researchdevice__arch, colored_set_state, admin_link_factory('admin')]
     list_filter = ['researchdevice__arch', 'set_state']
     search_fields = ['description', 'id']
     inlines = [ResearchDeviceInline, NodePropInline]
-
-
-def node_link(researchdevice):
-    url = reverse('admin:nodes_node_change', args=(researchdevice.node.pk,))
-    return '<a href="%s">%s</a>' % (url, researchdevice.node)
-node_link.short_description = "Node"
-node_link.allow_tags = True
-node_link.admin_order_field = 'node'
 
 
 def colored_set_state_node(researchdevice):
@@ -76,8 +59,8 @@ colored_set_state_node.admin_order_field = 'set_state'
 
 
 class ResearchDeviceAdmin(admin.ModelAdmin):
-    list_display = ['__unicode__', node_link, link_factory('cn_url', description='CN URL'), 
-        'arch', colored_set_state_node]
+    list_display = ['__unicode__', admin_link_factory('node', app_model='nodes_node'),
+        link_factory('cn_url', description='CN URL'), 'arch', colored_set_state_node]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
 
@@ -112,7 +95,7 @@ class ServerAdmin(SingletonModelAdmin):
 
 
 class HostAdmin(admin.ModelAdmin):
-    list_display = ['description', 'id', 'tinc_name', admin_link]
+    list_display = ['description', 'id', 'tinc_name', admin_link_factory('admin')]
 
 
 admin.site.register(Node, NodeAdmin)

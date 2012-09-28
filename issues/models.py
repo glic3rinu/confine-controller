@@ -11,22 +11,21 @@ class Queue(models.Model):
 
 
 class Ticket(models.Model):
+    PRIORITIES = (('HIGH', _("High")),
+                  ('MEDIUM', _("Medium")),
+                  ('LOW', _("Low")),)
 
-    PRIORITIES = (('high', _("High")),
-                  ('hedium', _("Medium")),
-                  ('low', _("Low")),)
-
-    STATES = (('new', _("New")),
-              ('open', _("Open")),
-              ('resolved', _("Resolved")),
-              ('rejected', _("Rejected")),)
+    STATES = (('NEW', _("New")),
+              ('OPEN', _("Open")),
+              ('RESOLVED', _("Resolved")),
+              ('REJECTED', _("Rejected")),)
 
     created_by = models.ForeignKey(User)
     owner = models.ForeignKey(User, related_name='ticket_owned_set', null=True, blank=True)
     queue = models.ForeignKey(Queue)
     subject = models.CharField(max_length=256)
-    priority = models.CharField(max_length=32, choices=PRIORITIES, default='medium')
-    state = models.CharField(max_length=32, choices=STATES, default='new')
+    priority = models.CharField(max_length=32, choices=PRIORITIES, default='MEDIUM')
+    state = models.CharField(max_length=32, choices=STATES, default='NEW')
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified_on = models.DateTimeField(auto_now=True)
     cc = models.TextField(blank=True, verbose_name="CC")
@@ -39,16 +38,15 @@ class Ticket(models.Model):
 
 
 class Message(models.Model):
-
-    VISIBILITY_CHOICES = (('internal', _("Internal")),
-                          ('public', _("Public")),
-                          ('private', _("Private")),)
+    VISIBILITY_CHOICES = (('INTERNAL', _("Internal")),
+                          ('PUBLIC', _("Public")),
+                          ('PRIVATE', _("Private")),)
 
     ticket = models.ForeignKey(Ticket)
     author = models.ForeignKey(User)
-    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default='public')
-    content = models.TextField()
+    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default='PUBLIC')
+    content = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return self.name
+        return str(self.id)

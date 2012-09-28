@@ -1,19 +1,18 @@
-from common.admin import link_factory, insert_inline, admin_link_factory
+from common.admin import link, insert_inline, admin_link, colored
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
-from django.utils.html import escape
 from forms import NodeInlineAdminForm, HostInlineAdminForm
 from models import Node, NodeProp, Host, Server, ResearchDevice, RdDirectIface
 from singleton_models.admin import SingletonModelAdmin
 
 
-NODE_STATES_COLORS = { 'install_conf': 'black',
-                       'install_cert': 'grey',
-                       'debug': 'darkorange',
-                       'failure': 'red',
-                       'safe': 'grey',
-                       'production': 'green', }
+STATES_COLORS = { 'install_conf': 'black',
+                  'install_cert': 'grey',
+                  'debug': 'darkorange',
+                  'failure': 'red',
+                  'safe': 'grey',
+                  'production': 'green', }
 
 
 class NodePropInline(admin.TabularInline):
@@ -32,35 +31,18 @@ researchdevice__arch.short_description = 'ResearchDevice Arch'
 researchdevice__arch.admin_order_field = 'researchdevice__arch'
 
 
-def colored_set_state(node):
-    state = escape(node.set_state)
-    color = NODE_STATES_COLORS.get(state, "black")
-    return """<b><span style="color: %s;">%s</span></b>""" % (color, state)
-colored_set_state.short_description = 'Set State'
-colored_set_state.allow_tags = True
-colored_set_state.admin_order_field = 'set_state'
-
-
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ['description', 'id', link_factory('cn_url', description='CN URL'), 
-        'researchdevice', researchdevice__arch, colored_set_state, admin_link_factory('admin')]
+    list_display = ['description', 'id', link('cn_url', description='CN URL'), 
+        'researchdevice', researchdevice__arch, colored('set_state', STATES_COLORS), 
+        admin_link('admin')]
     list_filter = ['researchdevice__arch', 'set_state']
     search_fields = ['description', 'id']
     inlines = [ResearchDeviceInline, NodePropInline]
 
 
-def colored_set_state_node(researchdevice):
-    state = escape(researchdevice.node.set_state)
-    color = NODE_STATES_COLORS.get(state, "black")
-    return """<b><span style="color: %s;">%s</span></b>""" % (color, state)
-colored_set_state_node.short_description = 'Set State'
-colored_set_state_node.allow_tags = True
-colored_set_state_node.admin_order_field = 'set_state'
-
-
 class ResearchDeviceAdmin(admin.ModelAdmin):
-    list_display = ['__unicode__', admin_link_factory('node', app_model='nodes_node'),
-        link_factory('cn_url', description='CN URL'), 'arch', colored_set_state_node]
+    list_display = ['__unicode__', admin_link('node', app_model='nodes_node'),
+        link('cn_url', description='CN URL'), 'arch', colored('node__set_state', STATES_COLORS)]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
 
@@ -95,7 +77,7 @@ class ServerAdmin(SingletonModelAdmin):
 
 
 class HostAdmin(admin.ModelAdmin):
-    list_display = ['description', 'id', 'tinc_name', admin_link_factory('admin')]
+    list_display = ['description', 'id', 'tinc_name', admin_link('admin')]
 
 
 admin.site.register(Node, NodeAdmin)

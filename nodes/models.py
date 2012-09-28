@@ -58,11 +58,12 @@ class CnHost(models.Model):
 class ResearchDevice(CnHost, TincClient):
     uuid = fields.UUIDField(auto=True, primary_key=True)
     node = models.OneToOneField(Node)
-    pubkey = models.TextField(unique=True, verbose_name="Public Key")
-    cert = models.TextField(unique=True, verbose_name="Certificate")
+    pubkey = models.TextField(unique=True, blank=True, verbose_name="Public Key")
+    cert = models.TextField(unique=True, blank=True, verbose_name="Certificate")
     arch = models.CharField(verbose_name="Architecture", max_length=16, 
         choices=settings.RESEARCH_DEVICE_ARCHS, default=settings.DEFAULT_RESEARCH_DEVICE_ARCH)
-    boot_sn = models.IntegerField(verbose_name="Boot Sequence Number", default=0)
+    boot_sn = models.IntegerField(verbose_name="Boot Sequence Number", default=0,
+        help_text=_("The number of times this node's RD has been instructed to be rebooted"))
     local_iface = models.CharField(verbose_name="Local Interface", max_length=16, default='eth0')
 
     def __unicode__(self):

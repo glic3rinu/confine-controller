@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.utils.html import escape
+from utils import get_field
 
 def insert_inline(model, inline, head=False):
     """ Insert model inline into an existing model_admin """
@@ -29,23 +31,23 @@ def insert_list_display(model, field):
     model_admin.list_display += (field,)    
 
 
-def link_factory(attribute, description='', admin_order_field=True, base_url=''):
-    def link(obj, attr=attribute):
-        url = getattr(obj, attr)
+def link(attribute, description='', admin_order_field=True, base_url=''):
+    def admin_link(obj, attr=attribute):
+        url = get_field(obj, attr)
         link_url = "%s%s" % (base_url,url) if base_url else url
         return '<a href="%s">%s' % (link_url, url)
-    link.short_description = description if description else attribute.capitalize()
-    link.allow_tags = True
+    admin_link.short_description = description if description else attribute.capitalize()
+    admin_link.allow_tags = True
 
     if admin_order_field:
-        link.admin_order_field = attribute
+        admin_link.admin_order_field = attribute
 
-    return link
+    return admin_link
 
 
-def admin_link_factory(field_name, app_model='auth_user'):
+def admin_link(field_name, app_model='auth_user'):
     def link(obj, field=field_name):
-        rel = getattr(obj, field)
+        rel = get_field(obj, field)
         if not rel: return ''
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
         return '<a href="%s">%s</a>' % (url, rel)
@@ -54,3 +56,15 @@ def admin_link_factory(field_name, app_model='auth_user'):
     link.admin_order_field = field_name
     
     return link
+
+
+def colored(field_name, colours, description=''):
+    def colored_field(obj, field=field_name, colors=colours):
+        value = escape(get_field(obj, field))
+        color = colors.get(value, "black")
+        return """<b><span style="color: %s;">%s</span></b>""" % (color, value)
+    admin_link.short_description = description if description else field_name.capitalize()
+    colored_field.allow_tags = True
+    colored_field.admin_order_field = field_name
+    
+    return colored_field

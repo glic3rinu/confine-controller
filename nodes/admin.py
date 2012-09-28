@@ -1,8 +1,10 @@
-from common.admin import link_factory
+from common.admin import link_factory, insert_inline
 from django.core.urlresolvers import reverse
 from django.contrib import admin
+from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
 from django.utils.html import escape
+from forms import NodeInlineAdminForm, HostInlineAdminForm
 from models import Node, NodeProp, Host, Gateway, Server, ResearchDevice, RdDirectIface
 from singleton_models.admin import SingletonModelAdmin
 
@@ -39,10 +41,17 @@ colored_set_state.short_description = 'Set State'
 colored_set_state.allow_tags = True
 colored_set_state.admin_order_field = 'set_state'
 
+def admin_link(self):
+    url = reverse('admin:auth_user_change', args=(self.admin.pk,))
+    return '<a href="%s">%s</a>' % (url, self.admin)
+admin_link.short_description = "Admin"
+admin_link.allow_tags = True
+admin_link.admin_order_field = 'admin'
+
 
 class NodeAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', link_factory('cn_url', description='CN URL'), 
-        'set_state', 'researchdevice', researchdevice__arch, colored_set_state]
+        'researchdevice', researchdevice__arch, colored_set_state, admin_link]
     list_filter = ['researchdevice__arch', 'set_state']
     search_fields = ['description', 'id']
     inlines = [ResearchDeviceInline, NodePropInline]
@@ -101,8 +110,27 @@ class ServerAdmin(SingletonModelAdmin):
         return urlpatterns
 
 
+class HostAdmin(admin.ModelAdmin):
+    list_display = ['description', 'id', admin_link]
+
+
 admin.site.register(Node, NodeAdmin)
-admin.site.register(Host)
+admin.site.register(Host, HostAdmin)
 admin.site.register(Gateway)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(ResearchDevice, ResearchDeviceAdmin)
+
+
+class HostInline(admin.TabularInline):
+    model = Host
+    form = HostInlineAdminForm
+    max_num = 0
+
+
+class NodeInline(admin.TabularInline):
+    model = Node
+    form = NodeInlineAdminForm
+    max_num = 0
+
+insert_inline(User, HostInline)
+insert_inline(User, NodeInline)

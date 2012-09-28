@@ -1,7 +1,17 @@
-from common.admin import admin_link_factory
+from common.admin import admin_link, colored
 from django.contrib import admin
 from models import Ticket, Queue, Message
 
+
+PRIORITY_COLORS = { 'HIGH': 'red',
+                    'MEDIUM': 'darkorange',
+                    'LOW': 'green',}
+
+
+STATE_COLORS = { 'NEW': 'grey',
+                 'OPEN': 'darkorange',
+                 'RESOLVED': 'green',
+                 'REJECTED': 'yellow' }
 
 class MessageInline(admin.TabularInline):
     model = Message
@@ -15,9 +25,10 @@ class TicketInline(admin.TabularInline):
 
 
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ['id', 'subject', admin_link_factory('created_by'), 
-        admin_link_factory('owner'), admin_link_factory('queue', app_model='issues_queue'),
-        'priority', 'state', 'created_on', 'last_modified_on']
+    list_display = ['id', 'subject', admin_link('created_by'), 
+        admin_link('owner'), admin_link('queue', app_model='issues_queue'),
+        colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
+        'created_on', 'last_modified_on']
     #TODO: create a list filter for 'owner__username'
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
@@ -45,7 +56,7 @@ class TicketAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
-        return super(UserAdmin, self).get_fieldsets(request, obj)
+        return super(TicketAdmin, self).get_fieldsets(request, obj)
 
 
 class QueueAdmin(admin.ModelAdmin):

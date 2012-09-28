@@ -25,7 +25,17 @@ class CustomMenu(Menu):
                 items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
             ]))
 
+        self.children.append(items.MenuItem('Tinc', '/admin/tinc/',
+            children=[
+                items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
+                items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
+                items.MenuItem('TincAddresses', reverse('admin:tinc_tincaddress_changelist')),
+            ]))
+
         self.children.append(items.AppList(
             'Administration',
-            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*')))
+            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*')
+            ))
 
+        self.children += [
+                    items.MenuItem('API', 'https://api.controller.confine-project.eu'),]

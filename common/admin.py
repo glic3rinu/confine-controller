@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.html import escape
-from utils import get_field
+from utils import get_field_value
 
 def insert_inline(model, inline, head=False):
     """ Insert model inline into an existing model_admin """
@@ -33,7 +33,7 @@ def insert_list_display(model, field):
 
 def link(attribute, description='', admin_order_field=True, base_url=''):
     def admin_link(obj, attr=attribute):
-        url = get_field(obj, attr)
+        url = get_field_value(obj, attr)
         link_url = "%s%s" % (base_url,url) if base_url else url
         return '<a href="%s">%s' % (link_url, url)
     admin_link.short_description = description if description else attribute.capitalize()
@@ -47,7 +47,7 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
 
 def admin_link(field_name, app_model='auth_user'):
     def link(obj, field=field_name):
-        rel = get_field(obj, field)
+        rel = get_field_value(obj, field)
         if not rel: return ''
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
         return '<a href="%s">%s</a>' % (url, rel)
@@ -60,10 +60,11 @@ def admin_link(field_name, app_model='auth_user'):
 
 def colored(field_name, colours, description=''):
     def colored_field(obj, field=field_name, colors=colours):
-        value = escape(get_field(obj, field))
+        value = escape(get_field_value(obj, field))
         color = colors.get(value, "black")
         return """<b><span style="color: %s;">%s</span></b>""" % (color, value)
-    admin_link.short_description = description if description else field_name.capitalize()
+    if not description: description = field_name.split('__').pop().replace('_', ' ').capitalize()
+    colored_field.short_description = description
     colored_field.allow_tags = True
     colored_field.admin_order_field = field_name
     

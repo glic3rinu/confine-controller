@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'admin_tools.dashboard',
     'singleton_models',
 #    'rest_framework',
+#    'django_extensions',
 
     # Django.contrib
     'django.contrib.auth',

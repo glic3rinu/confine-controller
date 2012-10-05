@@ -24,13 +24,14 @@ class CustomMenu(Menu):
                 items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
             ]))
 
-        self.children.append(items.MenuItem('Tinc', '/admin/tinc/',
-            children=[
-                items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
-                items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
-                items.MenuItem('TincAddresses', reverse('admin:tinc_tincaddress_changelist')),
-                items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
-            ]))
+        if 'tinc' in settings.INSTALLED_APPS:
+            self.children.append(items.MenuItem('Tinc', '/admin/tinc/',
+                children=[
+                    items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
+                    items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
+                    items.MenuItem('TincAddresses', reverse('admin:tinc_tincaddress_changelist')),
+                    items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
+                ]))
 
         self.children.append(items.AppList(
             'Administration',

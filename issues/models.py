@@ -1,3 +1,4 @@
+from common.models import generate_chainer_manager
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -14,6 +15,17 @@ class Queue(models.Model):
         if self.default:
             Queue.objects.filter(default=True).update(default=False)
         super(Queue, self).save(*args, **kwargs)
+
+
+class TicketQuerySet(models.query.QuerySet):
+    def resolve(self):
+        return self.update(state='RESOLVED')
+
+    def open(self):
+        return self.update(state='OPEN')
+        
+    def reject(self):
+        return self.update(state='REJECTED')
 
 
 class Ticket(models.Model):
@@ -35,6 +47,8 @@ class Ticket(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified_on = models.DateTimeField(auto_now=True)
     cc = models.TextField(blank=True, verbose_name="CC")
+
+    objects = generate_chainer_manager(TicketQuerySet)
 
     class Meta:
         ordering = ["-last_modified_on"]

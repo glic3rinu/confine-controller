@@ -1,5 +1,6 @@
 from common.admin import admin_link, colored
 from django.contrib import admin
+from issues.actions import reject_tickets, resolve_tickets, open_tickets
 from issues.forms import MessageInlineForm
 from issues.models import Ticket, Queue, Message
 
@@ -43,6 +44,7 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email', 
         'queue', 'owner__username']
     inlines = [MessageInline]
+    actions = [reject_tickets, resolve_tickets, open_tickets]
     readonly_fields = ('created_by',)
     fieldsets = (
         (None, {

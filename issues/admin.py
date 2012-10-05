@@ -36,7 +36,7 @@ class TicketAdmin(admin.ModelAdmin):
     #TODO: Bold (id, subject) when tickets are unread for request.user
     #TODO: create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), 
-        admin_link('owner'), admin_link('queue', app_model='issues_queue'),
+        admin_link('owner'), admin_link('queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
         'created_on', 'last_modified_on']
     list_display_links = ('id', 'subject')

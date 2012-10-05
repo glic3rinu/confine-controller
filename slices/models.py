@@ -81,10 +81,10 @@ class SliverIface(models.Model):
 
 class IsolatedIface(SliverIface):
     sliver = models.ForeignKey(Sliver)
-    parent_name = models.CharField(max_length=16, default='eth0')
+    parent = models.ForeignKey('nodes.RdDirectIface', null=True, blank=True)
 
     class Meta:
-        unique_together = ['sliver', 'parent_name']
+        unique_together = ['sliver', 'parent']
 
 
 class IpSliverIface(SliverIface):

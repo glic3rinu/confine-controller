@@ -45,10 +45,11 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
     return admin_link
 
 
-def admin_link(field_name, app_model='auth_user'):
-    def link(obj, field=field_name):
+def admin_link(field_name, app_model=''):
+    def link(obj, field=field_name, app_model=app_model):
         rel = get_field_value(obj, field)
         if not rel: return ''
+        if not app_model: app_model = rel._meta.db_table
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
         return '<a href="%s">%s</a>' % (url, rel)
     link.short_description = field_name.capitalize()

@@ -33,7 +33,7 @@ researchdevice__arch.admin_order_field = 'researchdevice__arch'
 
 class NodeAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', link('cn_url', description='CN URL'), 
-        'researchdevice', researchdevice__arch, colored('set_state', STATES_COLORS), 
+        admin_link('researchdevice'), researchdevice__arch, colored('set_state', STATES_COLORS), 
         admin_link('admin')]
     list_filter = ['researchdevice__arch', 'set_state']
     search_fields = ['description', 'id']
@@ -41,7 +41,7 @@ class NodeAdmin(admin.ModelAdmin):
 
 
 class ResearchDeviceAdmin(admin.ModelAdmin):
-    list_display = ['__unicode__', admin_link('node', app_model='nodes_node'),
+    list_display = ['__unicode__', admin_link('node'),
         link('cn_url', description='CN URL'), 'arch', colored('node__set_state', STATES_COLORS)]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']

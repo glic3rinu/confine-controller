@@ -28,10 +28,13 @@ class Island(models.Model):
 
 
 class TincAddress(models.Model):
-    ip_addr = models.GenericIPAddressField(verbose_name="IP Address", 
-        protocol='IPv6', help_text="IPv6 Address")
-    port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT)
-    island = models.ForeignKey(Island)
+    ip_addr = models.GenericIPAddressField(protocol='IPv6', help_text="""The IPv6 
+        address of this tinc address.IPv6 Address""")
+    port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, help_text="""
+        The TCP/UDP port of this tinc address.""")
+    island = models.ForeignKey(Island, help_text="""The <a 
+        href="http://wiki.confine-project.eu/arch:rest-api#island_at_server">island</a> 
+        this tinc address is reachable from.""")
     server = models.ForeignKey(Gateway)
     
     class Meta:

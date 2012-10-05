@@ -71,7 +71,7 @@ class ResearchDevice(CnHost, TincClient):
 
 
 class RdDirectIface(models.Model):
-    name = models.CharField(max_length=16, default='eth0')
+    name = models.CharField(max_length=16)
     rd = models.ForeignKey(ResearchDevice)
     
     class Meta:

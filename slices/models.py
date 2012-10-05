@@ -70,7 +70,7 @@ class SliverProp(models.Model):
 
 
 class SliverIface(models.Model):
-    name = models.CharField(max_length=16, default='eth0')
+    name = models.CharField(max_length=16)
 
     class Meta:
         abstract = True

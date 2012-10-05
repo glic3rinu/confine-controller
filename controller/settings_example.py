@@ -230,7 +230,6 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'auth_extension/researchgroup': "research_group.svg",
     'auth_extension/authorizedofficial': "Contact-new.svg",
     'nodes/node': "linksys-WRT54G.svg",
-    'nodes/host': "computer-dell-dimension-E521.svg",
     'nodes/server': "poweredge_r510.svg",
     'nodes/researchdevice': "western-digital-mybook-pro.svg",
     'slices/slice': "ChemSlice.svg",
@@ -239,6 +238,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/gateway': "Network.svg",
     'tinc/island': "Weather-overcast.svg",
     'tinc/tincaddress': "X-office-address-book.svg",
+    'tinc/host': "computer-dell-dimension-E521.svg",
     'issues/ticket': "Ticket.svg",
 }
 

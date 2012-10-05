@@ -4,11 +4,16 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from nodes.models import ResearchDevice, Server
 from tinc.forms import HostInlineAdminForm
-from tinc.models import Host, TincClient, TincAddress, Island, Gateway
+from tinc.models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
 
 class TincClientInline(generic.GenericTabularInline):
     model = TincClient
+    max_num = 1
+
+
+class TincServerInline(admin.TabularInline):
+    model = TincServer
     max_num = 1
 
 
@@ -24,7 +29,8 @@ class IslandAdmin(admin.ModelAdmin):
 
 
 class GatewayAdmin(admin.ModelAdmin):
-    list_display = ['tinc_name', 'id' ]
+#    list_display = ['tinc_name', 'id' ]
+    inlines = [TincServerInline]
 
 
 class HostAdmin(admin.ModelAdmin):

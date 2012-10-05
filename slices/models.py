@@ -29,9 +29,14 @@ class Slice(models.Model):
     uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField("Public Key")
     description = models.TextField(blank=True)
-    expires_on = models.DateField(null=True, blank=True)
-    instance_sn = models.IntegerField(verbose_name="Instance Sequence Number")
-    vlan_nr = models.IntegerField("Vlan Number")
+    expires_on = models.DateField(null=True, blank=True, help_text="""The date of 
+        expiration of this slice. Once a slices expires, it is automatically deleted.""")
+    instance_sn = models.IntegerField(help_text="""The number of times this slice 
+        has been instructed to be reset (instance sequence number).""")
+    vlan_nr = models.IntegerField(help_text="""A VLAN number allocated to this 
+        slice by the server. The only values that can be /set/ are null (no VLAN 
+        wanted) and -1 (asks the server to allocate a new VLAN number (2 <= 
+        vlan_nr < 0xFFF) on slice instantiation).""")
     exp_data = models.FileField(verbose_name="Experiment Data",
         upload_to=settings.SLICE_EXP_DATA_DIR)
     set_state = models.CharField(max_length=16, choices=STATES, default=INSTANTIATE)
@@ -52,7 +57,8 @@ class SliceProp(models.Model):
 
 class Sliver(models.Model):
     description = models.CharField(max_length=256)
-    instance_sn = models.IntegerField(verbose_name="Instance Sequence Number")
+    instance_sn = models.IntegerField(help_text="""The number of times this sliver 
+        has been instructed to be reset (instance sequence number).""")
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey('nodes.Node')
     

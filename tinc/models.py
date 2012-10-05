@@ -1,5 +1,13 @@
+from django.contrib.auth.models import User
+from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 import settings
+
+
+class Host(models.Model):
+    description = models.CharField(max_length=256)
+    admin = models.ForeignKey(User)
 
 
 class TincHost(models.Model):
@@ -46,6 +54,11 @@ class TincAddress(models.Model):
 
 class TincClient(TincHost):
     islands = models.ManyToManyField(Island, blank=True)
-    
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey()
+
+
     class Meta:
         abstract = True
+        unique_together = ('content_type', 'object_id')

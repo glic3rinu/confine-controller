@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 import settings
 from singleton_models.models import SingletonModel
-from tinc.models import Gateway, TincClient
+#from tinc.models import Gateway, TincClient
 
 
 class Node(models.Model):
@@ -56,9 +56,9 @@ class NodeProp(models.Model):
         return self.name
 
 
-class Host(TincClient):
-    description = models.CharField(max_length=256)
-    admin = models.ForeignKey(User)
+#class Host(TincClient):
+#    description = models.CharField(max_length=256)
+#    admin = models.ForeignKey(User)
 
 
 class CnHost(models.Model):
@@ -73,7 +73,7 @@ class CnHost(models.Model):
         return str(self.pk)
 
 
-class ResearchDevice(CnHost, TincClient):
+class ResearchDevice(CnHost):
     uuid = fields.UUIDField(auto=True, primary_key=True)
     node = models.OneToOneField(Node)
     pubkey = models.TextField(unique=True, blank=True, verbose_name="Public Key")
@@ -100,8 +100,10 @@ class RdDirectIface(models.Model):
         return self.name
 
 
-class Server(SingletonModel, Gateway):
+class Server(SingletonModel, CnHost):
     #TODO: ID = 2
+    #gateway = models.OneToOneField(TincClient)
+
     class Meta:
         verbose_name = "Server"
         verbose_name_plural = "Server"

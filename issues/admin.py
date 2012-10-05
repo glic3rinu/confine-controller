@@ -1,6 +1,6 @@
 from common.admin import admin_link, colored
 from django.contrib import admin
-from issues.actions import reject_tickets, resolve_tickets, open_tickets
+from issues.actions import reject_tickets, resolve_tickets, open_tickets, take_tickets, mark_as_unread
 from issues.forms import MessageInlineForm
 from issues.models import Ticket, Queue, Message
 
@@ -33,22 +33,23 @@ class TicketInline(admin.TabularInline):
 
 
 class TicketAdmin(admin.ModelAdmin):
+    #TODO: Bold (id, subject) when tickets are unread for request.user
+    #TODO: create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), 
         admin_link('owner'), admin_link('queue', app_model='issues_queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
         'created_on', 'last_modified_on']
     list_display_links = ('id', 'subject')
-    #TODO: create a list filter for 'owner__username'
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email', 
         'queue', 'owner__username']
     inlines = [MessageInline]
-    actions = [reject_tickets, resolve_tickets, open_tickets]
+    actions = [reject_tickets, resolve_tickets, open_tickets, take_tickets, mark_as_unread]
     readonly_fields = ('created_by',)
     fieldsets = (
         (None, {
-            'fields': ('created_by', 'subject', ('queue', 'owner'), ('priority', 'state'))
+            'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority', 'state'))
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -56,7 +57,7 @@ class TicketAdmin(admin.ModelAdmin):
         }),)
     add_fieldsets = (
         (None, {
-            'fields': ('subject', ('queue', 'owner'), ('priority', 'state'))
+            'fields': ('subject', ('owner', 'queue'), ('priority', 'state'))
         }),
         ('CC', {
             'classes': ('collapse',),

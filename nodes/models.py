@@ -6,12 +6,12 @@ from singleton_models.models import SingletonModel
 
 
 class Node(models.Model):
-    STATES = (('install_conf', _('Install Configuration')),
-              ('install_cert', _('Install Certificate')),
-              ('debug', _('Debug')),
-              ('failure', _('Failure')),
-              ('safe', _('Safe')),
-              ('production', _('Production')),)
+    STATES = (('install_conf', 'Install Configuration'),
+              ('install_cert', 'Install Certificate'),
+              ('debug', 'Debug'),
+              ('failure', 'Failure'),
+              ('safe', 'Safe'),
+              ('production', 'Production'),)
 
     description = models.CharField(max_length=256)
     admin = models.ForeignKey(User, help_text="""The user who administrates this 
@@ -74,7 +74,7 @@ class ResearchDevice(CnHost):
     arch = models.CharField(verbose_name="Architecture", max_length=16, 
         choices=settings.RESEARCH_DEVICE_ARCHS, default=settings.DEFAULT_RESEARCH_DEVICE_ARCH)
     boot_sn = models.IntegerField(default=0, help_text="""Number of times this 
-        node's RD has been instructed to be rebooted"""))
+        node's RD has been instructed to be rebooted.""")
     local_iface = models.CharField(verbose_name="Local Interface", max_length=16, 
         default='eth0', help_text="""Name of the interface used as a local interface. 
         See <a href="wiki.confine-project.eu/arch:node">node architecture</a>.""")

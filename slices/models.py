@@ -21,8 +21,8 @@ class Template(models.Model):
 class Slice(models.Model):
     INSTANTIATE = 'instantiate'
     ACTIVATE = 'activate'
-    STATES = ((INSTANTIATE, _('Instantiate')),
-              (ACTIVATE, _('Activate')),)
+    STATES = ((INSTANTIATE, 'Instantiate'),
+              (ACTIVATE, 'Activate'),)
 
     name = models.CharField(max_length=64)
     uuid = fields.UUIDField(auto=True, unique=True)

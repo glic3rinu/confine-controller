@@ -14,7 +14,6 @@ class CustomMenu(Menu):
             children=[
                 items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')),
                 items.MenuItem('Research Devices', reverse('admin:nodes_researchdevice_changelist')),
-                items.MenuItem('Hosts', reverse('admin:nodes_host_changelist')),
                 items.MenuItem('Server', reverse('admin:nodes_server_changelist')),
             ]))
 
@@ -30,6 +29,7 @@ class CustomMenu(Menu):
                 items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
                 items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
                 items.MenuItem('TincAddresses', reverse('admin:tinc_tincaddress_changelist')),
+                items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
             ]))
 
         self.children.append(items.AppList(

@@ -60,5 +60,4 @@ class TincClient(TincHost):
 
 
     class Meta:
-        abstract = True
         unique_together = ('content_type', 'object_id')

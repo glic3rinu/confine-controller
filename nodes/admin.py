@@ -80,20 +80,9 @@ class ServerAdmin(SingletonModelAdmin):
         return urlpatterns
 
 
-#class HostAdmin(admin.ModelAdmin):
-#    list_display = ['description', 'id', admin_link('admin')]
-
-
 admin.site.register(Node, NodeAdmin)
-#admin.site.register(Host, HostAdmin)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(ResearchDevice, ResearchDeviceAdmin)
-
-
-#class HostInline(admin.TabularInline):
-#    model = Host
-#    form = HostInlineAdminForm
-#    max_num = 0
 
 
 class NodeInline(admin.TabularInline):
@@ -101,5 +90,5 @@ class NodeInline(admin.TabularInline):
     form = NodeInlineAdminForm
     max_num = 0
 
-#insert_inline(User, HostInline)
+
 insert_inline(User, NodeInline)

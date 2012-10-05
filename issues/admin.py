@@ -36,6 +36,7 @@ class TicketAdmin(admin.ModelAdmin):
         admin_link('owner'), admin_link('queue', app_model='issues_queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
         'created_on', 'last_modified_on']
+    list_display_links = ('id', 'subject')
     #TODO: create a list filter for 'owner__username'
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
@@ -77,6 +78,8 @@ class TicketAdmin(admin.ModelAdmin):
 
 
 class QueueAdmin(admin.ModelAdmin):
+    list_display = ('name', 'default')
+    list_editable = ('default', )
     inlines = [TicketInline]
 
 

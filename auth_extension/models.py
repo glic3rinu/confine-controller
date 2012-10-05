@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_syncdb
 from django.dispatch import receiver
-from django.utils.translation import ugettext_lazy as _
 import settings
 
 
@@ -42,11 +41,11 @@ class UserProfile(models.Model):
 
 
 class TestbedPermission(models.Model):
-    ACTIONS = ((1, _("Create")),
-               (2, _("Read")),
-               (3, _("Update")),
-               (4, _("Delete")),
-               (5, _("Access")),)
+    ACTIONS = ((1, "Create"),
+               (2, "Read"),
+               (3, "Update"),
+               (4, "Delete"),
+               (5, "Access"),)
 
     action = fields.MultiSelectField(max_length=250, blank=True, choices=ACTIONS)
     research_group = models.ForeignKey(ResearchGroup, null=True, blank=True)

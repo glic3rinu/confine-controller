@@ -1,7 +1,6 @@
 from common.models import generate_chainer_manager
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 
 
 class Queue(models.Model):
@@ -32,14 +31,14 @@ class TicketQuerySet(models.query.QuerySet):
 
 
 class Ticket(models.Model):
-    PRIORITIES = (('HIGH', _("High")),
-                  ('MEDIUM', _("Medium")),
-                  ('LOW', _("Low")),)
+    PRIORITIES = (('HIGH', "High"),
+                  ('MEDIUM', "Medium"),
+                  ('LOW', "Low"),)
 
-    STATES = (('NEW', _("New")),
-              ('OPEN', _("Open")),
-              ('RESOLVED', _("Resolved")),
-              ('REJECTED', _("Rejected")),)
+    STATES = (('NEW', "New"),
+              ('OPEN', "Open"),
+              ('RESOLVED', "Resolved"),
+              ('REJECTED', "Rejected"),)
 
     created_by = models.ForeignKey(User)
     owner = models.ForeignKey(User, related_name='ticket_owned_set', null=True, blank=True)
@@ -61,9 +60,9 @@ class Ticket(models.Model):
 
 
 class Message(models.Model):
-    VISIBILITY_CHOICES = (('INTERNAL', _("Internal")),
-                          ('PUBLIC', _("Public")),
-                          ('PRIVATE', _("Private")),)
+    VISIBILITY_CHOICES = (('INTERNAL', "Internal"),
+                          ('PUBLIC',  "Public"),
+                          ('PRIVATE', "Private"),)
 
     ticket = models.ForeignKey(Ticket)
     author = models.ForeignKey(User)

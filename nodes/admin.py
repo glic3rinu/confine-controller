@@ -25,6 +25,10 @@ class ResearchDeviceInline(admin.StackedInline):
     max_num = 0
 
 
+class RdDirectIfaceInline(admin.TabularInline):
+    model = RdDirectIface
+
+
 def researchdevice__arch(node):
     return node.researchdevice.arch
 researchdevice__arch.short_description = 'ResearchDevice Arch'
@@ -45,7 +49,7 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
         link('cn_url', description='CN URL'), 'arch', colored('node__set_state', STATES_COLORS)]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
-
+    inlines = [RdDirectIfaceInline]
 
 class ServerAdmin(SingletonModelAdmin):
 

@@ -5,9 +5,15 @@ from django.utils.translation import ugettext_lazy as _
 
 class Queue(models.Model):
     name = models.CharField(max_length=128, unique=True)
-    
+    default = models.BooleanField(default=False)
+
     def __unicode__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.default:
+            Queue.objects.filter(default=True).update(default=False)
+        super(Queue, self).save(*args, **kwargs)
 
 
 class Ticket(models.Model):

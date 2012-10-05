@@ -19,7 +19,6 @@ class MessageInline(admin.TabularInline):
     extra = 1
     form = MessageInlineForm
 
-
     def get_formset(self, request, *args, **kwargs):
         """ hook request.user on the inline form """
         self.form.user = request.user
@@ -69,6 +68,12 @@ class TicketAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, *args, **kwargs):
         obj.created_by = request.user
         super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
+
+    def get_form(self, request, *args, **kwargs):
+        """ Ugly trick for providing default ticket queue """
+        query_string = 'queue=%s' % Queue.objects.get(default=True).id
+        request.META['QUERY_STRING'] = query_string
+        return super(TicketAdmin, self).get_form(request, *args, **kwargs)
 
 
 class QueueAdmin(admin.ModelAdmin):

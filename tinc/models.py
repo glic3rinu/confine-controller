@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from nodes.models import CnHost
 import settings
 
 
@@ -22,9 +23,13 @@ class TincHost(models.Model):
         return self.tinc_name
 
 
-class Gateway(TincHost):
+class Gateway(CnHost):
     #TODO: ID >= 2
     pass
+
+
+class TincServer(TincHost):
+    gateway = models.OneToOneField(Gateway)
 
 
 class Island(models.Model):
@@ -43,7 +48,7 @@ class TincAddress(models.Model):
     island = models.ForeignKey(Island, help_text="""The <a 
         href="http://wiki.confine-project.eu/arch:rest-api#island_at_server">island</a> 
         this tinc address is reachable from.""")
-    server = models.ForeignKey(Gateway)
+    server = models.ForeignKey(TincServer)
     
     class Meta:
         verbose_name_plural = 'Tinc Addresses'

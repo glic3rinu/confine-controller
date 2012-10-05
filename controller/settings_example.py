@@ -147,11 +147,11 @@ INSTALLED_APPS = (
 
     # Confine
     'slices',
-    'tinc',
     'nodes',
     'issues',
     # must be the las one due to South migrations problems
     'auth_extension',
+    'tinc',
 )
 
 AUTH_PROFILE_MODULE = 'auth_extension.UserProfile'

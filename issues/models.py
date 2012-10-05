@@ -27,6 +27,9 @@ class TicketQuerySet(models.query.QuerySet):
     def reject(self):
         return self.update(state='REJECTED')
 
+    def take(self, owner):
+        return self.update(owner=owner)
+
 
 class Ticket(models.Model):
     PRIORITIES = (('HIGH', _("High")),

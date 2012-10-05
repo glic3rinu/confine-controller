@@ -27,10 +27,11 @@ class Slice(models.Model):
 
     name = models.CharField(max_length=64)
     uuid = fields.UUIDField(auto=True, unique=True)
-    pubkey = models.TextField("Public Key")
+    pubkey = models.TextField(help_text="""A PEM-encoded RSA public key for this 
+        slice (used by SFA).""")
     description = models.TextField(blank=True)
-    expires_on = models.DateField(null=True, blank=True, help_text="""The date of 
-        expiration of this slice. Once a slices expires, it is automatically deleted.""")
+    expires_on = models.DateField(null=True, blank=True, help_text="""Expiration 
+        date of this slice. Automatically deleted once expires.""")
     instance_sn = models.IntegerField(help_text="""The number of times this slice 
         has been instructed to be reset (instance sequence number).""")
     vlan_nr = models.IntegerField(help_text="""A VLAN number allocated to this 

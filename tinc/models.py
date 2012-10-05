@@ -13,7 +13,8 @@ class Host(models.Model):
 
 class TincHost(models.Model):
     tinc_name = models.CharField(max_length=64, unique=True)
-    tinc_pubkey = models.TextField(unique=True, verbose_name="Tinc Public Key")
+    tinc_pubkey = models.TextField(unique=True, 
+        help_text="""PEM-encoded RSA public key used on tinc management network.""")
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True)
     
     class Meta:
@@ -41,10 +42,10 @@ class Island(models.Model):
 
 
 class TincAddress(models.Model):
-    ip_addr = models.GenericIPAddressField(protocol='IPv6', help_text="""The IPv6 
-        address of this tinc address.""")
-    port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, help_text="""
-        The TCP/UDP port of this tinc address.""")
+    ip_addr = models.GenericIPAddressField(protocol='IPv6', 
+        help_text="""The IPv6 address of this tinc address.""")
+    port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
+        help_text="""The TCP/UDP port of this tinc address.""")
     island = models.ForeignKey(Island, help_text="""The <a 
         href="http://wiki.confine-project.eu/arch:rest-api#island_at_server">island</a> 
         this tinc address is reachable from.""")
@@ -62,7 +63,6 @@ class TincClient(TincHost):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey()
-
 
     class Meta:
         unique_together = ('content_type', 'object_id')

@@ -29,7 +29,7 @@ class Island(models.Model):
 
 class TincAddress(models.Model):
     ip_addr = models.GenericIPAddressField(protocol='IPv6', help_text="""The IPv6 
-        address of this tinc address.IPv6 Address""")
+        address of this tinc address.""")
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, help_text="""
         The TCP/UDP port of this tinc address.""")
     island = models.ForeignKey(Island, help_text="""The <a 

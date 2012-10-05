@@ -27,6 +27,7 @@ class ResearchDeviceInline(admin.StackedInline):
 
 class RdDirectIfaceInline(admin.TabularInline):
     model = RdDirectIface
+    extra = 0
 
 
 def researchdevice__arch(node):
@@ -50,6 +51,14 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
     inlines = [RdDirectIfaceInline]
+    fieldsets = (
+        (None, {
+            'fields': ('cn_url', 'cndb_uri', 'cndb_cached_on', 'node', 'arch', 'boot_sn', 'local_iface'),
+        }),
+        ('Keys', {
+            'classes': ('collapse',),
+            'fields': ('pubkey', 'cert')
+        }),)
 
 class ServerAdmin(SingletonModelAdmin):
 

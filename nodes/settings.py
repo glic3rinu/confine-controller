@@ -5,11 +5,11 @@ ugettext = lambda s: s
 
 RESEARCH_DEVICE_ARCHS = getattr(settings, 'RESEARCH_DEVICE_ARCHS', (
     ('x86', 'x86'),
-    ('amd64', 'amd64'),
+    ('x86_64', 'x86_64'),
     ('ar71xx', 'ar71xx'),
 ))
 
-DEFAULT_RESEARCH_DEVICE_ARCH = getattr(settings, 'DEFAULT_RESEARCH_DEVICE_ARCH', 'amd64')
+DEFAULT_RESEARCH_DEVICE_ARCH = getattr(settings, 'DEFAULT_RESEARCH_DEVICE_ARCH', 'x86_64')
 
 
 # ConfineParams

@@ -75,8 +75,9 @@ class TicketAdmin(admin.ModelAdmin):
 
     def get_form(self, request, *args, **kwargs):
         """ Ugly trick for providing default ticket queue """
-        query_string = 'queue=%s' % Queue.objects.get(default=True).id
-        request.META['QUERY_STRING'] = query_string
+        try: query_string = 'queue=%s' % Queue.objects.get_default().id
+        except Queue.DoesNotExist: pass
+        else:  request.META['QUERY_STRING'] = query_string
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
 
 

@@ -3,9 +3,16 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+class QueueQuerySet(models.query.QuerySet):
+    def get_default(self):
+        return self.get(default=True)
+
+
 class Queue(models.Model):
     name = models.CharField(max_length=128, unique=True)
     default = models.BooleanField(default=False)
+
+    objects = generate_chainer_manager(QueueQuerySet)
 
     def __unicode__(self):
         return self.name
@@ -13,6 +20,8 @@ class Queue(models.Model):
     def save(self, *args, **kwargs):
         if self.default:
             Queue.objects.filter(default=True).update(default=False)
+        elif not Queue.objects.count():
+            self.default = True
         super(Queue, self).save(*args, **kwargs)
 
 

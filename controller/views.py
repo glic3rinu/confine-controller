@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-BASE_API_URL = 'http://controller.confine-project.eu:8888/confine'
+BASE_API_URL = '/confine'
 
 class Base(APIView):
     def get(self, request, format=None):

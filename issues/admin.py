@@ -2,7 +2,7 @@ from common.admin import admin_link, colored
 from django.contrib import admin
 from issues.actions import (reject_tickets, resolve_tickets, open_tickets, 
     take_tickets, mark_as_unread)
-from issues.forms import MessageInlineForm
+from issues.forms import MessageInlineForm, TicketInlineForm
 from issues.models import Ticket, Queue, Message
 
 
@@ -29,6 +29,7 @@ class MessageInline(admin.TabularInline):
 
 class TicketInline(admin.TabularInline):
     model = Ticket
+    form = TicketInlineForm
     extra = 0
     max_num = 0
 

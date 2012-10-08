@@ -1,8 +1,6 @@
 from common.forms import colored_field, admin_link
 from common.widgets import ShowText
 from django import forms
-from django.core.urlresolvers import reverse
-from django.utils.safestring import mark_safe
 
 
 class MessageInlineForm(forms.ModelForm):

@@ -1,4 +1,5 @@
 from common.admin import link, insert_inline, admin_link, colored
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
@@ -64,8 +65,6 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
 
 class ServerAdmin(SingletonModelAdmin):
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url
-
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)

@@ -1,4 +1,4 @@
-from common.forms import colored_field
+from common.forms import colored_field, admin_link
 from common.widgets import ShowText
 from django import forms
 from django.core.urlresolvers import reverse
@@ -18,9 +18,7 @@ class MessageInlineForm(forms.ModelForm):
         super(MessageInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             instance = kwargs['instance']
-            author_change = reverse('admin:auth_user_change', args=(instance.author.pk,))
-            author_change = mark_safe("<a href='%s'>%s</a>" % (author_change, instance.author))
-            self.initial['author'] = author_change
+            self.initial['author'] = admin_link(instance.author)
             self.initial['created_on'] = instance.created_on.strftime("%Y-%m-%d %H:%M:%S")
             self.fields['content'].widget = ShowText()
         else: 
@@ -52,19 +50,10 @@ class TicketInlineForm(forms.ModelForm):
             # Avoid circular imports
             from issues.admin import STATE_COLORS, PRIORITY_COLORS
             instance = kwargs['instance']
-            ticket_change = reverse('admin:issues_ticket_change', args=(instance.pk,))
-            ticket_id = mark_safe("<a href='%s'>%s</a>" % (ticket_change, instance.pk))
-            self.initial['ticket_id'] = ticket_id
-            subject = mark_safe("<a href='%s'>%s</a>" % (ticket_change, instance.subject))
-            self.initial['subject'] = subject
-            created_change = reverse('admin:auth_user_change', args=(instance.created_by.pk,))
-            created_change = mark_safe("<a href='%s'>%s</a>" % (created_change, instance.created_by))
-            self.initial['created_by'] = created_change
-            if instance.owner: 
-                owner_change = reverse('admin:auth_user_change', args=(instance.owner.pk,))
-                owner_change = mark_safe("<a href='%s'>%s</a>" % (owner_change, instance.owner))
-            else: owner_change = ''
-            self.initial['owner'] = owner_change
+            self.initial['ticket_id'] = admin_link(instance)
+            self.initial['subject'] = admin_link(instance, title=instance.subject)
+            self.initial['created_by'] = admin_link(instance.created_by)
+            self.initial['owner'] = admin_link(instance.owner) if instance.owner else ''
             self.initial['state'] = colored_field(instance.state, STATE_COLORS)
             self.initial['priority'] = colored_field(instance.priority, PRIORITY_COLORS)
             self.initial['created_on'] = instance.created_on.strftime("%Y-%m-%d %H:%M:%S")

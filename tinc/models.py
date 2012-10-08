@@ -12,9 +12,9 @@ class Host(models.Model):
 
 
 class TincHost(models.Model):
-    tinc_name = models.CharField(max_length=64, unique=True)
-    tinc_pubkey = models.TextField(unique=True, 
-        help_text="PEM-encoded RSA public key used on tinc management network.")
+    #name = models.CharField(max_length=64, unique=True)
+    pubkey = models.TextField(unique=True, help_text="""PEM-encoded RSA public 
+        key used on tinc management network.""")
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True)
     
     class Meta:
@@ -32,10 +32,18 @@ class Gateway(CnHost):
 class TincServer(TincHost):
     gateway = models.OneToOneField(Gateway)
 
+    def __unicode__(self):
+        return "gateway_%s" % self.id
+
+    @property
+    def name(self):
+        return str(self)
+
 
 class Island(models.Model):
     name = models.CharField(max_length=64)
-    description = models.TextField()
+    description = models.TextField(blank=True, help_text="""An optional free-form 
+        textual description of this island.""")
     
     def __unicode__(self):
         return self.name
@@ -66,3 +74,12 @@ class TincClient(TincHost):
 
     class Meta:
         unique_together = ('content_type', 'object_id')
+
+    def __unicode__(self):
+        return "%s_%s" % (self.content_type.model, self.object_id)
+
+    @property
+    def name(self):
+        return str(self)
+
+

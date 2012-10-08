@@ -1,9 +1,9 @@
+from auth_extension import settings
 from common import fields
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_syncdb
 from django.dispatch import receiver
-import settings
 
 
 class ResearchGroup(models.Model):

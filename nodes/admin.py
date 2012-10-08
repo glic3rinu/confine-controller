@@ -2,8 +2,8 @@ from common.admin import link, insert_inline, admin_link, colored
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
-from forms import NodeInlineAdminForm
-from models import Node, NodeProp, Server, ResearchDevice, RdDirectIface
+from nodes.forms import NodeInlineAdminForm
+from nodes.models import Node, NodeProp, Server, ResearchDevice, RdDirectIface
 from singleton_models.admin import SingletonModelAdmin
 
 
@@ -38,8 +38,8 @@ researchdevice__arch.admin_order_field = 'researchdevice__arch'
 
 class NodeAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', link('cn_url', description='CN URL'), 
-        admin_link('researchdevice'), researchdevice__arch, colored('set_state', STATES_COLORS), 
-        admin_link('admin')]
+        admin_link('researchdevice'), researchdevice__arch, 
+        colored('set_state', STATES_COLORS), admin_link('admin')]
     list_filter = ['researchdevice__arch', 'set_state']
     search_fields = ['description', 'id']
     inlines = [ResearchDeviceInline, NodePropInline]
@@ -47,13 +47,15 @@ class NodeAdmin(admin.ModelAdmin):
 
 class ResearchDeviceAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', admin_link('node'),
-        link('cn_url', description='CN URL'), 'arch', colored('node__set_state', STATES_COLORS)]
+        link('cn_url', description='CN URL'), 'arch', 
+        colored('node__set_state', STATES_COLORS)]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
     inlines = [RdDirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('cn_url', 'cndb_uri', 'cndb_cached_on', 'node', 'arch', 'boot_sn', 'local_iface'),
+            'fields': ('cn_url', 'cndb_uri', 'cndb_cached_on', 'node', 'arch', 
+                       'boot_sn', 'local_iface'),
         }),
         ('Keys', {
             'classes': ('collapse',),
@@ -61,7 +63,6 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
         }),)
 
 class ServerAdmin(SingletonModelAdmin):
-
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
 

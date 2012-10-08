@@ -1,6 +1,7 @@
 from django.contrib import admin
-from forms import SliverInlineAdminForm
-from models import Sliver, SliverProp, IsolatedIface, PublicIface, PrivateIface, Slice, SliceProp, Template
+from slices.forms import SliverInlineAdminForm
+from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
+    PrivateIface, Slice, SliceProp, Template)
 
 
 class SliverPropInline(admin.TabularInline):
@@ -27,7 +28,8 @@ class SliverAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', 'instance_sn', 'node', 'slice']
     list_filter = ['slice__name',]
     search_fields = ['description', 'node__description', 'slice__name']
-    inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, PrivateIfaceInline]
+    inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
+               PrivateIfaceInline]
 
 
 class SliverInline(admin.TabularInline):

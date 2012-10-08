@@ -20,7 +20,8 @@ class TincServerInline(admin.TabularInline):
 class TincAddressAdmin(admin.ModelAdmin):
     list_display = ['ip_addr', 'port', 'island', 'server']
     list_filter = ['island__name', 'port', 'server']
-    search_fields = ['ip_addr', 'island__name', 'island__description', 'server__tinc_name'] 
+    search_fields = ['ip_addr', 'island__name', 'island__description', 
+                     'server__tinc_name'] 
 
 
 class IslandAdmin(admin.ModelAdmin):

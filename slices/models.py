@@ -1,7 +1,7 @@
 from common import fields
 from django.contrib.auth.models import User
 from django.db import models
-import settings
+from slices import settings
 
 
 class Template(models.Model):

@@ -49,6 +49,7 @@ class TicketInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
+            # Avoid circular imports
             from issues.admin import STATE_COLORS, PRIORITY_COLORS
             instance = kwargs['instance']
             ticket_change = reverse('admin:issues_ticket_change', args=(instance.pk,))

@@ -1,7 +1,9 @@
+from common.forms import admin_link
 from common.widgets import ShowText
 from django import forms
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
+
 
 class SliverInlineAdminForm(forms.ModelForm):
     """ 
@@ -22,10 +24,9 @@ class SliverInlineAdminForm(forms.ModelForm):
         if 'instance' in kwargs:
             instance = kwargs['instance']
             sliver_change = reverse('admin:slices_sliver_change', args=(instance.pk,))
-            node_change = reverse('admin:nodes_node_change', args=(instance.node.pk,))
             self.initial['sliver'] = mark_safe("""<a href='%s' id='add_id_user' 
                 onclick='return showAddAnotherPopup(this);'>%s </a>""" % (sliver_change, instance))
-            self.initial['node'] = mark_safe("<a href='%s'>%s</a>" % (node_change, instance.node))
+            self.initial['node'] = admin_link(instance.node)
             self.initial['cn_url'] = mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, 
                 instance.node.cn_url))
 

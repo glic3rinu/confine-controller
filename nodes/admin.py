@@ -63,6 +63,7 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
             'fields': ('pubkey', 'cert')
         }),)
 
+
 class ServerAdmin(SingletonModelAdmin):
     def get_urls(self):
         def wrap(view):

@@ -1,6 +1,7 @@
 from common.admin import admin_link, colored
 from django.contrib import admin
-from issues.actions import reject_tickets, resolve_tickets, open_tickets, take_tickets, mark_as_unread
+from issues.actions import (reject_tickets, resolve_tickets, open_tickets, 
+    take_tickets, mark_as_unread)
 from issues.forms import MessageInlineForm
 from issues.models import Ticket, Queue, Message
 

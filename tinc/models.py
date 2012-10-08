@@ -3,7 +3,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from nodes.models import CnHost
-import settings
+from tinc import settings
 
 
 class Host(models.Model):
@@ -19,9 +19,6 @@ class TincHost(models.Model):
     
     class Meta:
         abstract = True
-
-    def __unicode__(self):
-        return self.tinc_name
 
 
 class Gateway(CnHost):

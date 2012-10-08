@@ -5,6 +5,8 @@ BASE_API_URL = 'http://controller.confine-project.eu:8888/confine'
 
 class Base(APIView):
     def get(self, request, format=None):
+        print dir(request._request)
+        print request._request
         testbed_params = {
             "mgmt_ipv6_prefix": "2001:db8:cafe::/48",
             "priv_ipv4_prefix_dflt": "192.168.157.0/24",

@@ -146,8 +146,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Confine
-    'slices',
     'nodes',
+    'slices',
     'issues',
     # must be the las one due to South migrations problems
     'auth_extension',

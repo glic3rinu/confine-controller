@@ -89,7 +89,7 @@ class ServerAdmin(SingletonModelAdmin):
                 {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
-        #TODO call super get_urls first?
+
         return urlpatterns
 
 

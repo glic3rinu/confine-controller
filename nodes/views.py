@@ -5,20 +5,22 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 
-class NodeRoot(generics.ListCreateAPIView):
+class Nodes(generics.ListCreateAPIView):
+    """
+        List of the nodes available in the testbed.
+    """
+
     model = Node
     serializer_class = NodeSerializer
 
-class APIRootView(APIView):
-    def get(self, request):
-        data = {
-            'url': reverse('node_instance', request, args=[])
-        }
-        return Response(data)
 
+class Node(generics.RetrieveUpdateDestroyAPIView):
+    """ 
+        A Node resource describes a node in the testbed (including its associated 
+        research device or RD), as well as listing the slivers intended to run 
+        on it with API URIs to navigate to them.
+    """
 
-
-class NodeInstance(generics.RetrieveUpdateDestroyAPIView):
     model = Node
     serializer_class = NodeSerializer
 

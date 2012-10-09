@@ -70,12 +70,12 @@ class ResearchDevice(CnHost):
     uuid = fields.UUIDField(auto=True, primary_key=True, help_text="""A universally 
         unique identifier (UUID, RFC 4122).""")
     node = models.OneToOneField(Node)
-    pubkey = models.TextField(unique=True, blank=True, help_text="""A PEM-encoded 
-        RSA public key for this RD (used by SFA).""")
-    cert = models.TextField(unique=True, blank=True, help_text="""An X.509 
-        PEM-encoded certificate for this RD. The certificate may be signed by a 
-        CA recognised in the testbed and required by clients and services accessing 
-        the node API.""")
+    pubkey = models.TextField(unique=True, null=True, blank=True, help_text="""A 
+        PEM-encoded RSA public key for this RD (used by SFA).""")
+    cert = models.TextField(unique=True, null=True, blank=True, help_text="""An 
+        X.509 PEM-encoded certificate for this RD. The certificate may be signed 
+        by a CA recognised in the testbed and required by clients and services 
+        accessing the node API.""")
     arch = models.CharField(max_length=16, choices=settings.RESEARCH_DEVICE_ARCHS, 
         default=settings.DEFAULT_RESEARCH_DEVICE_ARCH, help_text="""Architecture 
         of this RD (as reported by uname -m).""")

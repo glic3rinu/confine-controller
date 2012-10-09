@@ -1,4 +1,4 @@
-from common import fields
+from django_extensions.db import fields
 from django.contrib.auth.models import User
 from django.db import models
 from nodes import settings
@@ -87,6 +87,12 @@ class ResearchDevice(CnHost):
 
     def __unicode__(self):
         return str(self.uuid)
+
+    def clean(self):
+        """ Save pubkey and cert as NULL instead of empty string """
+        if self.pubkey is u'': self.pubkey = None
+        if self.cert is u'': self.cert = None
+        super(ResearchDevice, self).clean()
 
 
 class RdDirectIface(models.Model):

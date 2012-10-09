@@ -89,7 +89,7 @@ class ResearchDevice(CnHost):
         return str(self.uuid)
 
     def clean(self):
-        """ Save pubkey and cert as NULL instead of empty string """
+        """ Empty pubkey and cert as NULL instead of empty string """
         if self.pubkey is u'': self.pubkey = None
         if self.cert is u'': self.cert = None
         super(ResearchDevice, self).clean()

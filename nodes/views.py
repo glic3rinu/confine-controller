@@ -1,8 +1,6 @@
 from nodes.models import Node
 from nodes.serializers import NodeSerializer
 from rest_framework import generics
-from rest_framework.reverse import reverse
-from rest_framework.views import APIView
 
 
 class Nodes(generics.ListCreateAPIView):

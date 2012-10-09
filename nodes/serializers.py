@@ -10,7 +10,7 @@ class ResearchDeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ResearchDevice
-
+        exclude = ('node',)
 
 class NodeSerializer(serializers.HyperlinkedModelSerializer):
     researchdevice = ResearchDeviceSerializer()

@@ -1,4 +1,4 @@
-from common import fields
+from django_extensions.db import fields
 from django.contrib.auth.models import User
 from django.db import models
 from slices import settings

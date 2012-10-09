@@ -1,5 +1,6 @@
 from auth_extension import settings
-from common import fields
+from common.fields import MultiSelectField
+from django_extensions.db.fields import UUIDField
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_syncdb
@@ -31,7 +32,7 @@ class AuthorizedOfficial(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    uuid = fields.UUIDField(auto=True, unique=True)
+    uuid = UUIDField(auto=True, unique=True)
     description = models.TextField(blank=True)
     pubkey = models.TextField(unique=True, blank=True, verbose_name="Public Key")
     research_groups = models.ManyToManyField(ResearchGroup, blank=True)
@@ -47,7 +48,7 @@ class TestbedPermission(models.Model):
                (4, "Delete"),
                (5, "Access"),)
 
-    action = fields.MultiSelectField(max_length=250, blank=True, choices=ACTIONS)
+    action = MultiSelectField(max_length=250, blank=True, choices=ACTIONS)
     research_group = models.ForeignKey(ResearchGroup, null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
     slice = models.ForeignKey('slices.Slice', null=True, blank=True)

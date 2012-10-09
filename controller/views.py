@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-BASE_API_URL = 'https://controller.confine-project.eu/confine'
+BASE_API_URL = 'https://controller.confine-project.eu/api'
 
 class Base(APIView):
     """ 

@@ -1,9 +1,8 @@
 from django.conf.urls import patterns, url
-from nodes.views import NodeRoot, NodeInstance, APIRootView
-
+from nodes.views import Nodes, Node
 
 urlpatterns = patterns('nodes.views',
-    url(r'^$', NodeRoot.as_view()),
-    url(r'^(?P<pk>[0-9]+)$', NodeInstance.as_view(), name="node_instance"),
+    url(r'^$', Nodes.as_view(), name='nodes'),
+    url(r'^(?P<pk>[0-9]+)$', Node.as_view(), name="node"),
     )
 

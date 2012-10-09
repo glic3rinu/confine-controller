@@ -43,6 +43,7 @@ class NodeAdmin(admin.ModelAdmin):
         colored('set_state', STATES_COLORS), admin_link('admin')]
     list_filter = ['researchdevice__arch', 'set_state']
     search_fields = ['description', 'id']
+    readonly_fields = ['cndb_cached_on']
     inlines = [ResearchDeviceInline, NodePropInline]
 
 
@@ -52,10 +53,11 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
         colored('node__set_state', STATES_COLORS)]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
+    readonly_fields = ['cndb_cached_on']
     inlines = [RdDirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('cn_url', 'cndb_uri', 'cndb_cached_on', 'node', 'arch', 
+            'fields': ('cn_url', ('cndb_uri', 'cndb_cached_on'), 'node', 'arch', 
                        'boot_sn', 'local_iface'),
         }),
         ('Keys', {
@@ -87,6 +89,7 @@ class ServerAdmin(SingletonModelAdmin):
                 {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
+        #TODO call super get_urls first?
         return urlpatterns
 
 

@@ -8,6 +8,7 @@ class ResearchDeviceSerializer(serializers.ModelSerializer):
 
 
 class NodeSerializer(serializers.ModelSerializer):
+    admin = serializers.HyperlinkedRelatedField(view_name='user_instance')
     researchdevice = ResearchDeviceSerializer()
     
     class Meta:

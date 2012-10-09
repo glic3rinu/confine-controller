@@ -17,5 +17,3 @@ class NodeSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Node
-
-

@@ -15,8 +15,8 @@ node_instance = NodeResource.as_view(actions={
 
 
 urlpatterns = patterns('nodes.views',
-    url(r'^$', Nodes.as_view(), name='nodes'),
-    url(r'^(?P<pk>[0-9]+)$', Node.as_view(), name="node"),
+    url(r'^$', Nodes.as_view(), name='node-list'),
+    url(r'^(?P<pk>[0-9]+)$', Node.as_view(), name="node-detail"),
     url(r'^rata$', node_root),
     url(r'^rata/(?P<pk>[0-9]+)$', node_instance),
     )

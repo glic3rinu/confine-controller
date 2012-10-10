@@ -87,8 +87,12 @@ class TicketAdmin(admin.ModelAdmin):
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
 
 
+def tickets(queue):
+    return queue.number_of_tickets
+
+
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'default', messages)
+    list_display = ('name', 'default', tickets, messages)
     list_editable = ('default', )
     inlines = [TicketInline]
 

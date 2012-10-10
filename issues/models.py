@@ -24,6 +24,10 @@ class Queue(models.Model):
         super(Queue, self).save(*args, **kwargs)
 
     @property
+    def number_of_tickets(self):
+        return self.ticket_set.all().count()
+
+    @property
     def number_of_messages(self):
         return Message.objects.filter(ticket__queue=self).count()
 

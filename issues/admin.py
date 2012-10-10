@@ -40,7 +40,7 @@ class TicketAdmin(admin.ModelAdmin):
     list_display = ['id', 'subject', admin_link('created_by'), 
         admin_link('owner'), admin_link('queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
-        'created_on', 'last_modified_on']
+        'number_of_messages', 'created_on', 'last_modified_on']
     list_display_links = ('id', 'subject')
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
@@ -84,7 +84,7 @@ class TicketAdmin(admin.ModelAdmin):
 
 
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'default')
+    list_display = ('name', 'default', 'number_of_messages')
     list_editable = ('default', )
     inlines = [TicketInline]
 

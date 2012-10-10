@@ -84,7 +84,7 @@ class TincClient(TincHost):
 @property
 def tinc(self):
     try: return self.related_tinc.get()
-    except TincClient.DoesNotExist: return []
+    except TincClient.DoesNotExist: return {}
 
 
 for model in [Host, ResearchDevice, Server]:

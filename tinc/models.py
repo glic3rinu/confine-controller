@@ -83,9 +83,12 @@ class TincClient(TincHost):
 
 @property
 def tinc(self):
-    return self.related_tinc.get()
+    try: return self.related_tinc.get()
+    except TincClient.DoesNotExist: return []
 
 
 for model in [Host, ResearchDevice, Server]:
-    generic.GenericRelation('tinc.TincClient', related_name="%(app_label)s_%(class)s_related").contribute_to_class(model, 'related_tinc')
+    related_tinc = generic.GenericRelation('tinc.TincClient', 
+        related_name="%(app_label)s_%(class)s_related")
+    related_tinc.contribute_to_class(model, 'related_tinc')
     model.tinc = tinc

@@ -3,6 +3,13 @@ from django.core import exceptions
 from django.db.models import Field, SubfieldBase
 from django.utils.text import capfirst
 
+#try:
+#    from south.modelsinspector import add_introspection_rules
+#    add_introspection_rules([], [r"^common\.fields\.UUIDField"])
+#except ImportError:
+#    pass
+
+
 #### MultiCSelect #####
 # New version of this snippet http://djangosnippets.org/snippets/1200/
 # tested with Django 1.4

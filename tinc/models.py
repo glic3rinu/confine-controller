@@ -66,7 +66,8 @@ class TincAddress(models.Model):
 class TincClient(TincHost):
     islands = models.ManyToManyField(Island, blank=True)
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    # we use a CharField instead of a PositiveIntegerField because of rd.uuid pk
+    object_id = models.CharField(max_length=36)
     content_object = generic.GenericForeignKey()
 
     class Meta:

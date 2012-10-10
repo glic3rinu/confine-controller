@@ -34,13 +34,17 @@ class TicketInline(admin.TabularInline):
     max_num = 0
 
 
+def messages(self):
+    return self.number_of_messages
+
+
 class TicketAdmin(admin.ModelAdmin):
     #TODO: Bold (id, subject) when tickets are unread for request.user
     #TODO: create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), 
         admin_link('owner'), admin_link('queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
-        'number_of_messages', 'created_on', 'last_modified_on']
+        messages, 'created_on', 'last_modified_on']
     list_display_links = ('id', 'subject')
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
@@ -84,7 +88,7 @@ class TicketAdmin(admin.ModelAdmin):
 
 
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'default', 'number_of_messages')
+    list_display = ('name', 'default', messages)
     list_editable = ('default', )
     inlines = [TicketInline]
 

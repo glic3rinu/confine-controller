@@ -29,10 +29,10 @@ class Node(models.Model):
         for legal values. When null, use the default value provided in 
         <a href="http://wiki.confine-project.eu/arch:rest-api#base_at_server">
         testbed parameters</a>.""")
-    sliver_pub_ipv4_total = models.IntegerField(help_text="""Total number of public 
-        (from the point of view of the CN) IPv4 addresses available in this node's 
-        local network to be allocated to slivers' public interfaces (see <a 
-        href="http://wiki.confine-project.eu/arch:node">node</a> architecture). 
+    sliver_pub_ipv4_total = models.IntegerField(default=0, help_text="""Total number 
+        of public (from the point of view of the CN) IPv4 addresses available in 
+        this node's local network to be allocated to slivers' public interfaces (see 
+        <a href="http://wiki.confine-project.eu/arch:node">node</a> architecture). 
         If the local network uses private addresses the value should be 0.""")
     cn_url = models.URLField(blank=True, help_text="""An optional URL pointing to 
         a description of this node in its CN's node DB web application.""")

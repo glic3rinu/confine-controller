@@ -5,12 +5,12 @@ from tinc.serializers import TincHostSerializer, TincClientSerializer
 #TODO dynamically hook tinc serializers instead of hardcoding them
 
 class ResearchDeviceSerializer(serializers.ModelSerializer):
-    tinchost = TincHostSerializer
-    tincclient = TincClientSerializer
+    tinc = TincClientSerializer()
 
     class Meta:
         model = ResearchDevice
         exclude = ('node',)
+
 
 class NodeSerializer(serializers.HyperlinkedModelSerializer):
     researchdevice = ResearchDeviceSerializer()

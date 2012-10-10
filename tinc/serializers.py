@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from tinc.models import TincHost, TincClient
+from tinc.models import Island, TincAddress, TincHost, TincClient
 
 
 class TincHostSerializer(serializers.ModelSerializer):
@@ -7,6 +7,21 @@ class TincHostSerializer(serializers.ModelSerializer):
         model = TincHost
 
 
+class TincAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TincAddress
+        exclude = ('id',)
+
+
+class IslandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Island
+
+
 class TincClientSerializer(serializers.ModelSerializer):
+    connect_to = TincAddressSerializer()
+    islands = IslandSerializer()
+    
     class Meta:
         model = TincClient
+        exclude = ('object_id', 'content_type', 'id')

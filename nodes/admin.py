@@ -49,6 +49,11 @@ class NodeAdmin(admin.ModelAdmin):
     readonly_fields = ['cndb_cached_on']
     inlines = [ResearchDeviceInline, NodePropInline]
 
+    def save_model(self, request, obj, form, change):
+        """ Always create a related RD when new node is added """
+        super(NodeAdmin, self).save_model(request, obj, form, change)
+        if not change: ResearchDevice(node=obj).save()
+
 
 class ResearchDeviceAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', admin_link('node'),

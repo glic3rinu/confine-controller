@@ -24,6 +24,7 @@ class NodePropInline(admin.TabularInline):
 class ResearchDeviceInline(admin.StackedInline):
     model = ResearchDevice
     max_num = 0
+    readonly_fields = ['cndb_cached_on']
 
 
 class RdDirectIfaceInline(admin.TabularInline):
@@ -38,6 +39,8 @@ researchdevice__arch.admin_order_field = 'researchdevice__arch'
 
 
 class NodeAdmin(admin.ModelAdmin):
+    # TODO Full RD inline edition:
+    # Wait for this feature https://code.djangoproject.com/ticket/9025
     list_display = ['description', 'id', link('cn_url', description='CN URL'), 
         admin_link('researchdevice'), researchdevice__arch, 
         colored('set_state', STATES_COLORS), admin_link('admin')]

@@ -1,5 +1,4 @@
 from common.models import generate_chainer_manager
-from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -23,6 +22,10 @@ class Queue(models.Model):
         elif not Queue.objects.count():
             self.default = True
         super(Queue, self).save(*args, **kwargs)
+
+    @property
+    def number_of_messages(self):
+        return Message.objects.filter(ticket__queue=self).count()
 
 
 class TicketQuerySet(models.query.QuerySet):
@@ -49,8 +52,9 @@ class Ticket(models.Model):
               ('RESOLVED', "Resolved"),
               ('REJECTED', "Rejected"),)
 
-    created_by = models.ForeignKey(User)
-    owner = models.ForeignKey(User, related_name='ticket_owned_set', null=True, blank=True)
+    created_by = models.ForeignKey('auth.User')
+    owner = models.ForeignKey('auth.User', related_name='ticket_owned_set', 
+        null=True, blank=True)
     queue = models.ForeignKey(Queue)
     subject = models.CharField(max_length=256)
     priority = models.CharField(max_length=32, choices=PRIORITIES, default='MEDIUM')
@@ -67,14 +71,18 @@ class Ticket(models.Model):
     def __unicode__(self):
         return str(self.id)
 
+    @property
+    def number_of_messages(self):
+        return self.message_set.all().count()
+
 
 class Message(models.Model):
     VISIBILITY_CHOICES = (('INTERNAL', "Internal"),
                           ('PUBLIC',  "Public"),
                           ('PRIVATE', "Private"),)
 
-    ticket = models.ForeignKey(Ticket)
-    author = models.ForeignKey(User)
+    ticket = models.ForeignKey('issues.Ticket')
+    author = models.ForeignKey('auth.User')
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default='PUBLIC')
     content = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)

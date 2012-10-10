@@ -21,6 +21,7 @@ class IslandSerializer(serializers.ModelSerializer):
 class TincClientSerializer(serializers.ModelSerializer):
     connect_to = TincAddressSerializer()
     islands = IslandSerializer()
+    name = serializers.CharField()
     
     class Meta:
         model = TincClient

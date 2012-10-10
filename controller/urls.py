@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^api/$', Base.as_view()),
     url(r'^api/nodes/', include('nodes.urls')),
     url(r'^api/users/', include('auth_extension.urls')),
+    url(r'^api/islands/', include('tinc.urls')),
 )

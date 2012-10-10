@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from nodes.models import CnHost
+from nodes.models import CnHost, Server, ResearchDevice
 from tinc import settings
 
 
@@ -81,3 +81,11 @@ class TincClient(TincHost):
         return str(self)
 
 
+@property
+def tinc(self):
+    return self.related_tinc.get()
+
+
+for model in [Host, ResearchDevice, Server]:
+    generic.GenericRelation('tinc.TincClient', related_name="%(app_label)s_%(class)s_related").contribute_to_class(model, 'related_tinc')
+    model.tinc = tinc

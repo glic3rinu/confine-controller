@@ -57,8 +57,8 @@ class Ticket(models.Model):
               ('REJECTED', "Rejected"),)
 
     created_by = models.ForeignKey('auth.User')
-    owner = models.ForeignKey('auth.User', related_name='ticket_owned_set', 
-        null=True, blank=True)
+    owner = models.ForeignKey('auth.User', null=True, blank=True,
+        related_name='owned_tickets_set')
     queue = models.ForeignKey(Queue)
     subject = models.CharField(max_length=256)
     priority = models.CharField(max_length=32, choices=PRIORITIES, default='MEDIUM')

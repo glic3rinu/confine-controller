@@ -62,9 +62,13 @@ class TincAddress(models.Model):
     def __unicode__(self):
         return str(self.ip_addr)
 
+    @property
+    def pubkey(self):
+        return self.server.pubkey
+
 
 class TincClient(TincHost):
-    islands = models.ManyToManyField(Island, blank=True)
+    island = models.ForeignKey(Island)
     content_type = models.ForeignKey(ContentType)
     # we use a CharField instead of a PositiveIntegerField because of rd.uuid pk
     object_id = models.CharField(max_length=36)
@@ -81,7 +85,7 @@ class TincClient(TincHost):
         return str(self)
 
 
-# Hook TincClient support to related models
+# Hook TincClient support for related models
 related_models = [Host, ResearchDevice, Server]
 
 @property

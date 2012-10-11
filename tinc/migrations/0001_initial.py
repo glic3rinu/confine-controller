@@ -63,8 +63,9 @@ class Migration(SchemaMigration):
         db.create_table('tinc_tincclient', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('pubkey', self.gf('django.db.models.fields.TextField')(unique=True)),
+            ('island', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tinc.Island'])),
             ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('object_id', self.gf('django.db.models.fields.CharField')(max_length=36)),
         ))
         db.send_create_signal('tinc', ['TincClient'])
 
@@ -78,14 +79,6 @@ class Migration(SchemaMigration):
             ('tincaddress', models.ForeignKey(orm['tinc.tincaddress'], null=False))
         ))
         db.create_unique('tinc_tincclient_connect_to', ['tincclient_id', 'tincaddress_id'])
-
-        # Adding M2M table for field islands on 'TincClient'
-        db.create_table('tinc_tincclient_islands', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('tincclient', models.ForeignKey(orm['tinc.tincclient'], null=False)),
-            ('island', models.ForeignKey(orm['tinc.island'], null=False))
-        ))
-        db.create_unique('tinc_tincclient_islands', ['tincclient_id', 'island_id'])
 
 
     def backwards(self, orm):
@@ -115,9 +108,6 @@ class Migration(SchemaMigration):
 
         # Removing M2M table for field connect_to on 'TincClient'
         db.delete_table('tinc_tincclient_connect_to')
-
-        # Removing M2M table for field islands on 'TincClient'
-        db.delete_table('tinc_tincclient_islands')
 
 
     models = {
@@ -189,8 +179,8 @@ class Migration(SchemaMigration):
             'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'islands': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.Island']", 'symmetrical': 'False', 'blank': 'True'}),
-            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tinc.Island']"}),
+            'object_id': ('django.db.models.fields.CharField', [], {'max_length': '36'}),
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         },
         'tinc.tincserver': {

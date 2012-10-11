@@ -2,6 +2,7 @@ from nodes.models import Node
 from nodes.serializers import NodeSerializer
 from rest_framework import generics
 
+# TODO refactor this with a ModelResource when they are stable 
 
 class Nodes(generics.ListCreateAPIView):
     """

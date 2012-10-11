@@ -35,7 +35,7 @@ class Migration(SchemaMigration):
         db.create_table('auth_extension_userprofile', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
-            ('uuid', self.gf('common.fields.UUIDField')(unique=True, max_length=32, blank=True)),
+            ('uuid', self.gf('django.db.models.fields.CharField')(unique=True, max_length=36, blank=True)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('pubkey', self.gf('django.db.models.fields.TextField')(unique=True, blank=True)),
         ))
@@ -160,7 +160,7 @@ class Migration(SchemaMigration):
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True', 'blank': 'True'}),
             'research_groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth_extension.ResearchGroup']", 'symmetrical': 'False', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
-            'uuid': ('common.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'blank': 'True'})
+            'uuid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '36', 'blank': 'True'})
         },
         'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
@@ -180,7 +180,7 @@ class Migration(SchemaMigration):
             'priv_ipv4_prefix': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
             'set_state': ('django.db.models.fields.CharField', [], {'default': "'install_conf'", 'max_length': '16'}),
             'sliver_mac_prefix': ('django.db.models.fields.PositiveSmallIntegerField', [], {'max_length': '16', 'null': 'True', 'blank': 'True'}),
-            'sliver_pub_ipv4_total': ('django.db.models.fields.IntegerField', [], {})
+            'sliver_pub_ipv4_total': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         'slices.slice': {
             'Meta': {'object_name': 'Slice'},
@@ -194,7 +194,7 @@ class Migration(SchemaMigration):
             'set_state': ('django.db.models.fields.CharField', [], {'default': "'register'", 'max_length': '16'}),
             'template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['slices.Template']"}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'symmetrical': 'False'}),
-            'uuid': ('common.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'blank': 'True'}),
+            'uuid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '36', 'blank': 'True'}),
             'vlan_nr': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'slices.template': {

@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
             ('admin', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('priv_ipv4_prefix', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, null=True, blank=True)),
             ('sliver_mac_prefix', self.gf('django.db.models.fields.PositiveSmallIntegerField')(max_length=16, null=True, blank=True)),
-            ('sliver_pub_ipv4_total', self.gf('django.db.models.fields.IntegerField')()),
+            ('sliver_pub_ipv4_total', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('cn_url', self.gf('django.db.models.fields.URLField')(max_length=200, blank=True)),
             ('cndb_uri', self.gf('django.db.models.fields.CharField')(max_length=256, blank=True)),
             ('cndb_cached_on', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
@@ -37,10 +37,10 @@ class Migration(SchemaMigration):
             ('cn_url', self.gf('django.db.models.fields.URLField')(max_length=200, blank=True)),
             ('cndb_uri', self.gf('django.db.models.fields.CharField')(max_length=256, blank=True)),
             ('cndb_cached_on', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('uuid', self.gf('common.fields.UUIDField')(unique=True, max_length=32, primary_key=True)),
+            ('uuid', self.gf('django.db.models.fields.CharField')(max_length=36, primary_key=True)),
             ('node', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['nodes.Node'], unique=True)),
-            ('pubkey', self.gf('django.db.models.fields.TextField')(unique=True, blank=True)),
-            ('cert', self.gf('django.db.models.fields.TextField')(unique=True, blank=True)),
+            ('pubkey', self.gf('django.db.models.fields.TextField')(unique=True, null=True, blank=True)),
+            ('cert', self.gf('django.db.models.fields.TextField')(unique=True, null=True, blank=True)),
             ('arch', self.gf('django.db.models.fields.CharField')(default='x86_64', max_length=16)),
             ('boot_sn', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('local_iface', self.gf('django.db.models.fields.CharField')(default='eth0', max_length=16)),
@@ -136,7 +136,7 @@ class Migration(SchemaMigration):
             'priv_ipv4_prefix': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
             'set_state': ('django.db.models.fields.CharField', [], {'default': "'install_conf'", 'max_length': '16'}),
             'sliver_mac_prefix': ('django.db.models.fields.PositiveSmallIntegerField', [], {'max_length': '16', 'null': 'True', 'blank': 'True'}),
-            'sliver_pub_ipv4_total': ('django.db.models.fields.IntegerField', [], {})
+            'sliver_pub_ipv4_total': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         'nodes.nodeprop': {
             'Meta': {'object_name': 'NodeProp'},
@@ -155,14 +155,14 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'ResearchDevice'},
             'arch': ('django.db.models.fields.CharField', [], {'default': "'x86_64'", 'max_length': '16'}),
             'boot_sn': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'cert': ('django.db.models.fields.TextField', [], {'unique': 'True', 'blank': 'True'}),
+            'cert': ('django.db.models.fields.TextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'cn_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
             'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'local_iface': ('django.db.models.fields.CharField', [], {'default': "'eth0'", 'max_length': '16'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['nodes.Node']", 'unique': 'True'}),
-            'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True', 'blank': 'True'}),
-            'uuid': ('common.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'primary_key': 'True'})
+            'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'uuid': ('django.db.models.fields.CharField', [], {'max_length': '36', 'primary_key': 'True'})
         },
         'nodes.server': {
             'Meta': {'object_name': 'Server'},
@@ -170,6 +170,43 @@ class Migration(SchemaMigration):
             'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        'tinc.gateway': {
+            'Meta': {'object_name': 'Gateway'},
+            'cn_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
+            'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        'tinc.island': {
+            'Meta': {'object_name': 'Island'},
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '64'})
+        },
+        'tinc.tincaddress': {
+            'Meta': {'object_name': 'TincAddress'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip_addr': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tinc.Island']"}),
+            'port': ('django.db.models.fields.SmallIntegerField', [], {'default': "'666'"}),
+            'server': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tinc.TincServer']"})
+        },
+        'tinc.tincclient': {
+            'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincClient'},
+            'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tinc.Island']"}),
+            'object_id': ('django.db.models.fields.CharField', [], {'max_length': '36'}),
+            'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
+        },
+        'tinc.tincserver': {
+            'Meta': {'object_name': 'TincServer'},
+            'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
+            'gateway': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['tinc.Gateway']", 'unique': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         }
     }
 

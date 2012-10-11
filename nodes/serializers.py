@@ -12,6 +12,7 @@ class ResearchDeviceSerializer(serializers.ModelSerializer):
         exclude = ('node',)
 
 
+
 class NodeSerializer(serializers.HyperlinkedModelSerializer):
     researchdevice = ResearchDeviceSerializer()
     

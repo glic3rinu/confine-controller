@@ -8,6 +8,8 @@ class TincHostSerializer(serializers.ModelSerializer):
 
 
 class TincAddressSerializer(serializers.ModelSerializer):
+    pubkey = serializers.CharField()
+    
     class Meta:
         model = TincAddress
         exclude = ('id',)

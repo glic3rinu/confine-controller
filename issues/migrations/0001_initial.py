@@ -20,7 +20,7 @@ class Migration(SchemaMigration):
         db.create_table('issues_ticket', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='ticket_owned_set', null=True, to=orm['auth.User'])),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='owned_tickets_set', null=True, to=orm['auth.User'])),
             ('queue', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['issues.Queue'])),
             ('subject', self.gf('django.db.models.fields.CharField')(max_length=256)),
             ('priority', self.gf('django.db.models.fields.CharField')(default='MEDIUM', max_length=32)),
@@ -113,7 +113,7 @@ class Migration(SchemaMigration):
             'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'ticket_owned_set'", 'null': 'True', 'to': "orm['auth.User']"}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'owned_tickets_set'", 'null': 'True', 'to': "orm['auth.User']"}),
             'priority': ('django.db.models.fields.CharField', [], {'default': "'MEDIUM'", 'max_length': '32'}),
             'queue': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['issues.Queue']"}),
             'state': ('django.db.models.fields.CharField', [], {'default': "'NEW'", 'max_length': '32'}),

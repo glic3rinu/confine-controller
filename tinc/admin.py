@@ -10,6 +10,7 @@ from tinc.models import Host, TincClient, TincAddress, TincServer, Island, Gatew
 class TincClientInline(generic.GenericTabularInline):
     model = TincClient
     max_num = 1
+    readonly_fields = ['connect_to']
 
 
 class TincServerInline(admin.TabularInline):

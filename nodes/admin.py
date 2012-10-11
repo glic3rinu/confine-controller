@@ -24,7 +24,7 @@ class NodePropInline(admin.TabularInline):
 class ResearchDeviceInline(admin.StackedInline):
     model = ResearchDevice
     max_num = 0
-    readonly_fields = ['cndb_cached_on']
+    readonly_fields = ['cndb_cached_on', 'boot_sn', 'cert']
 
 
 class RdDirectIfaceInline(admin.TabularInline):
@@ -49,11 +49,6 @@ class NodeAdmin(admin.ModelAdmin):
     readonly_fields = ['cndb_cached_on']
     inlines = [ResearchDeviceInline, NodePropInline]
 
-    def save_model(self, request, obj, form, change):
-        """ Always create a related RD when new node is added """
-        super(NodeAdmin, self).save_model(request, obj, form, change)
-        if not change: ResearchDevice(node=obj).save()
-
 
 class ResearchDeviceAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', admin_link('node'),
@@ -61,7 +56,7 @@ class ResearchDeviceAdmin(admin.ModelAdmin):
         colored('node__set_state', STATES_COLORS)]
     list_filter = ['arch', 'node__set_state']
     search_fields = ['uuid', 'node__description']
-    readonly_fields = ['cndb_cached_on']
+    readonly_fields = ['cndb_cached_on', 'boot_sn', 'cert']
     inlines = [RdDirectIfaceInline]
     fieldsets = (
         (None, {

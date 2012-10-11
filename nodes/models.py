@@ -79,8 +79,8 @@ class ResearchDevice(CnHost):
     arch = models.CharField(max_length=16, choices=settings.RESEARCH_DEVICE_ARCHS, 
         default=settings.DEFAULT_RESEARCH_DEVICE_ARCH, help_text="""Architecture 
         of this RD (as reported by uname -m).""")
-    boot_sn = models.IntegerField(default=0, help_text="""Number of times this 
-        RD has been instructed to be rebooted.""")
+    boot_sn = models.IntegerField(default=0, blank=True, help_text="""Number of 
+        times this RD has been instructed to be rebooted.""")
     local_iface = models.CharField(verbose_name="Local Interface", max_length=16, 
         default='eth0', help_text="""Name of the interface used as a local interface. 
         See <a href="wiki.confine-project.eu/arch:node">node architecture</a>.""")

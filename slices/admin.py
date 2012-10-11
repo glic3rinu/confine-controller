@@ -26,7 +26,8 @@ class PrivateIfaceInline(admin.TabularInline):
 
 class SliverAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', 'instance_sn', 'node', 'slice']
-    list_filter = ['slice__name',]
+    list_filter = ['slice__name']
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
                PrivateIfaceInline]
@@ -36,6 +37,7 @@ class SliverInline(admin.TabularInline):
     model = Sliver
     form = SliverInlineAdminForm
     max_num = 0
+    readonly_fields = ['instance_sn']
 
 
 class SlicePropInline(admin.TabularInline):
@@ -47,6 +49,7 @@ class SliceAdmin(admin.ModelAdmin):
     list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', 'set_state',
         'template', 'expires_on']
     list_filter = ['set_state']
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn']
     date_hierarchy = 'expires_on'
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline,SliverInline]

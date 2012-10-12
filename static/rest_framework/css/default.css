@@ -54,6 +54,7 @@ pre {
 }
 
 
+
 /*=== dabapps bootstrap styles ====*/
 
 html{
@@ -63,7 +64,7 @@ html{
 
 body, .navbar .navbar-inner .container-fluid{
   max-width: 1150px;
-  margin: 0 auto;
+  margin: 1 auto;
 }
 
 body{

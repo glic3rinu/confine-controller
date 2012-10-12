@@ -36,7 +36,6 @@ class Slice(models.Model):
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text="""The number of times this slice has been instructed to be 
         reset (instance sequence number).""")
-    # TODO this looks like a dynamic attribute to me
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text="""Instance sequence number that newly created slivers will get.""")
     vlan_nr = models.IntegerField(null=True, blank=True, help_text="""A VLAN 
@@ -52,6 +51,25 @@ class Slice(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.vlan_nr == -1 and self.set_state == INSTANTIATE:
+            self.vlan_nr = self._get_vlan_nr()
+        super(Slice, self).save(*args, **kwargs)
+
+    def _get_vlan_nr(self):
+        last_nr = Node.objects.all().order_by('vlan_nr')[0]
+        if last_nr < 2: return 2
+        if last_nr >= int('FFFF', 16):
+            for new_nr in range(2, int('FFFF', 16)):
+                if not Node.objects.filter(vlan_nr=new_nr):
+                    return new_nr
+            raise self.DoNotAllocateVlan
+        return last_nr + 1
+
+    class DoNotAllocateVlan(Exception):
+        "No address space left for allocating more Vlans"
+        pass
 
 
 class SliceProp(models.Model):

@@ -9,8 +9,10 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 
-# TODO improvements on autodiscoverability of resource_name and more
-
+# TODO Reimplement resource with rest_framework.ModelResource and urls with Routers
+#      when they become available in the final release of rest_framework2
+# TODO make this reusable within their own application: maybe this app should 
+#      be called apis and have a rest module to avoid module clashing
 
 class Api(object):
     def __init__(self):

@@ -58,18 +58,16 @@ class Slice(models.Model):
         super(Slice, self).save(*args, **kwargs)
 
     def _get_vlan_nr(self):
-        last_nr = Node.objects.all().order_by('vlan_nr')[0]
+        last_nr = Node.objects.order_by('-vlan_nr')[0]
         if last_nr < 2: return 2
         if last_nr >= int('FFFF', 16):
             for new_nr in range(2, int('FFFF', 16)):
                 if not Node.objects.filter(vlan_nr=new_nr):
                     return new_nr
-            raise self.DoNotAllocateVlan
+            raise self.VlanAllocationError("No vlan address space left")
         return last_nr + 1
 
-    class DoNotAllocateVlan(Exception):
-        "No address space left for allocating more Vlans"
-        pass
+    class VlanAllocationError(Exception): pass
 
 
 class SliceProp(models.Model):

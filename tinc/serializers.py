@@ -22,7 +22,7 @@ class IslandSerializer(serializers.ModelSerializer):
 
 class TincClientSerializer(serializers.ModelSerializer):
     connect_to = TincAddressSerializer()
-    islands = IslandSerializer()
+    island = IslandSerializer()
     name = serializers.CharField()
     
     class Meta:

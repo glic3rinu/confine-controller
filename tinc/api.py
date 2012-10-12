@@ -4,14 +4,14 @@ from tinc.models import Island
 from tinc.serializers import IslandSerializer
 
 
-class Islands(generics.ListCreateAPIView):
+class IslandList(generics.ListCreateAPIView):
     model = Island
     serializer_class = IslandSerializer
 
 
-class Island(generics.RetrieveUpdateDestroyAPIView):
+class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Island
     serializer_class = IslandSerializer
 
 
-api.register((Islands, Island), 'island')
+api.register((IslandList, IslandDetail))

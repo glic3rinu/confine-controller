@@ -4,14 +4,14 @@ from django.contrib.auth.models import User
 from rest_framework import generics
 
 
-class Users(generics.ListCreateAPIView):
+class UserList(generics.ListCreateAPIView):
     model = User
     serializer_class = UserSerializer
 
 
-class User(generics.RetrieveUpdateDestroyAPIView):
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     model = User
     serializer_class = UserSerializer
 
 
-api.register((Users, User), 'user')
+api.register((UserList, UserDetail))

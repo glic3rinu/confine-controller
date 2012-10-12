@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls import patterns, url
 from django.utils import six
+from django.utils.encoding import smart_str, force_unicode
 from django.utils.importlib import import_module
 from nodes import settings as nodes_settings
 from rest_framework.views import APIView
@@ -15,8 +16,8 @@ class Api(object):
     def __init__(self):
         self._registry = {}
     
-    def register(self, resource, name):
-        self._registry.update({name: resource})
+    def register(self, resource):
+        self._registry.update({resource[0].model: resource})
 
     def base(self):
         class Base(APIView):
@@ -32,10 +33,11 @@ class Api(object):
                     "sliver_mac_prefix_dflt": nodes_settings.SLIVER_MAC_PREFIX_DFLT, }
 
                 output = {"testbed_params": testbed_params}
-                for name in self._registry:
-                    output.update({'%s_href' % name: reverse('%s-list' %name, 
-                                                             args=[], 
-                                                             request=request)})
+                for model in self._registry:
+                    name = force_unicode(model._meta.verbose_name)
+                    name_plural = force_unicode(model._meta.verbose_name_plural)
+                    output.update({'%s_href' % name_plural: reverse('%s-list' % name,
+                        args=[], request=request)})
                 return Response(output)
 
         return Base.as_view()
@@ -51,14 +53,16 @@ class Api(object):
         urlpatterns = patterns('',
             url(r'^$', self.base(), name='base'),)
 
-        for resource_name, (resource_list, resource) in six.iteritems(self._registry):
+        for model, resource in six.iteritems(self._registry):
+            name = force_unicode(model._meta.verbose_name)
+            name_plural = force_unicode(model._meta.verbose_name_plural)
             urlpatterns += patterns('',
-                url(r'^%ss/' % resource_name, 
-                    resource_list.as_view(),
-                    name='%s-list' % resource_name),
-                url(r'^%ss/(?P<pk>[0-9]+)$' % resource_name, 
-                    resource.as_view(),
-                    name="%s-detail" % resource_name),
+                url(r'^%s/$' % name_plural,
+                    resource[0].as_view(),
+                    name='%s-list' % name),
+                url(r'^%s/(?P<pk>[0-9]+)$' % name_plural, 
+                    resource[1].as_view(),
+                    name="%s-detail" % name),
             )
         return urlpatterns
 

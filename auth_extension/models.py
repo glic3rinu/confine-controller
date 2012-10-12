@@ -34,17 +34,23 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     uuid = UUIDField(auto=True, unique=True)
     description = models.TextField(blank=True)
-    pubkey = models.TextField(unique=True, blank=True, verbose_name="Public Key")
+    pubkey = models.TextField(unique=True, null=True, blank=True, verbose_name="Public Key")
     research_groups = models.ManyToManyField(ResearchGroup, blank=True)
 
     def __unicode__(self):
         return self.user.username
 
+    def clean(self):
+        """ Empty pubkey and cert as NULL instead of empty string """
+        if self.pubkey is u'': self.pubkey = None
+        super(UserProfile, self).clean()
 
+
+# FIXME how to ensure that a userprofile is created each time a new user is added 
+#       at a model level (no admin)
 @receiver(post_save, sender=User, dispatch_uid="auth_extension.create_user_profile")
 def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-       profile, created = UserProfile.objects.get_or_create(user=instance)
+    profile, created = UserProfile.objects.get_or_create(user=instance)
 
 
 class TestbedPermission(models.Model):

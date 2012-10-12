@@ -108,8 +108,8 @@ class RdDirectIface(models.Model):
 
 class Server(SingletonModel, CnHost):
     class Meta:
-        verbose_name = "Server"
-        verbose_name_plural = "Server"
+        verbose_name = "server"
+        verbose_name_plural = "server"
 
     def __unicode__(self):
         return 'Server'

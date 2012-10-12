@@ -48,6 +48,24 @@ class NodeAdmin(admin.ModelAdmin):
     search_fields = ['description', 'id']
     readonly_fields = ['cndb_cached_on']
     inlines = [ResearchDeviceInline, NodePropInline]
+    fieldsets = (
+        (None, {
+            'fields': ('description', ('cndb_uri', 'cndb_cached_on'), 'admin', 
+                       'sliver_pub_ipv4_total', 'set_state',),
+        }),
+        ('Prefixes', {
+            'classes': ('collapse',),
+            'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
+        }),)
+
+    # TODO override the save_related() in order to autocreate a RD. 
+    # Maybe this will not be necessary with the new node definition.
+
+    def get_form(self, request, *args, **kwargs):
+        """ request.user as default node admin """
+        form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
+        form.base_fields['admin'].initial = request.user
+        return form
 
 
 class ResearchDeviceAdmin(admin.ModelAdmin):

@@ -37,8 +37,8 @@ class Slice(models.Model):
         help_text="""The number of times this slice has been instructed to be 
         reset (instance sequence number).""")
     # TODO this looks like a dynamic attribute to me
-#    new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
-#        help_text="""Instance sequence number that newly created slivers will get.""")
+    new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
+        help_text="""Instance sequence number that newly created slivers will get.""")
     vlan_nr = models.IntegerField(null=True, blank=True, help_text="""A VLAN 
         number allocated to this slice by the server. The only values that can 
         be /set/ are null (no VLAN wanted) and -1 (asks the server to allocate a 

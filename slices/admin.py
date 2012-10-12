@@ -27,7 +27,7 @@ class PrivateIfaceInline(admin.TabularInline):
 class SliverAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', 'instance_sn', 'node', 'slice']
     list_filter = ['slice__name']
-    readonly_fields = ['instance_sn', 'new_sliver_instance_sn']
+    readonly_fields = ['instance_sn']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
                PrivateIfaceInline]

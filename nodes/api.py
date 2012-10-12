@@ -1,4 +1,5 @@
 from controller import api
+from django.http import Http404
 from nodes.models import Node, Server
 from nodes.serializers import ServerSerializer, NodeSerializer
 from rest_framework import generics
@@ -25,8 +26,8 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = NodeSerializer
 
 
-from django.http import Http404
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
+    """ This resource describes the testbed server (controller)."""
     model = Server
     serialiizer_class = ServerSerializer
     

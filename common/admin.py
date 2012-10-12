@@ -70,3 +70,26 @@ def colored(field_name, colours, description=''):
     colored_field.admin_order_field = field_name
     
     return colored_field
+
+
+class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
+    """ 
+        Mixin class providing support for independent change and add inline forms
+            add_form = AddSystemUserInlineForm
+            change_form = ChangeSystemUserInlineForm
+    """
+
+    def get_formset(self, request, obj=None, **kwargs):
+        # Determine if we need to use add_form or change_form
+        field_name = self.model._meta.module_name
+        try:
+            getattr(obj, field_name)
+        except (self.model.DoesNotExist, AttributeError):
+            if hasattr(self, 'add_form'):
+                self.form = self.add_form
+        else:
+            if hasattr(self, 'change_form'):
+                self.form = self.change_form
+
+        return super(AddOrChangeInlineFormMixin, self).get_formset(request, obj=obj, **kwargs)
+

@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 
+# TODO improvements on autodiscoverability of resource_name and more
+
+
 class Api(object):
     def __init__(self):
         self._registry = {}
@@ -62,12 +65,10 @@ class Api(object):
     def autodiscover(self):
         """ Auto-discover INSTALLED_APPS api.py modules """
         for app in settings.INSTALLED_APPS:
-            print app
             mod = import_module(app)
             try: import_module('%s.api' % app)
             except ImportError: pass
 
+# singletons
 api = Api()
-
-
 

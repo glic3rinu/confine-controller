@@ -58,7 +58,7 @@ class NodeAdmin(admin.ModelAdmin):
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
 
-    # TODO override the save_related() in order to autocreate a RD. 
+    # TODO override save_related() in order to autocreate a RD. 
     # Maybe this will not be necessary with the new node definition.
 
     def get_form(self, request, *args, **kwargs):
@@ -97,17 +97,13 @@ class ServerAdmin(SingletonModelAdmin):
         info = self.model._meta.app_label, self.model._meta.module_name
 
         urlpatterns = patterns('',
-            url(r'^history/$',
-                wrap(self.history_view),
-                {'object_id': '1'},
+            url(r'^history/$', wrap(self.history_view), {'object_id': '1'},
                 name='%s_%s_history' % info),
             url(r'^$',
-                wrap(self.change_view),
-                {'object_id': '1'},
+                wrap(self.change_view), {'object_id': '1'}, 
                 name='%s_%s_change' % info),
             url(r'^$',
-                wrap(self.change_view),
-                {'object_id': '1'},
+                wrap(self.change_view), {'object_id': '1'}, 
                 name='%s_%s_changelist' % info),
         )
 

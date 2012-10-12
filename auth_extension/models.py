@@ -3,7 +3,7 @@ from common.fields import MultiSelectField
 from django_extensions.db.fields import UUIDField
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_syncdb
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
@@ -39,6 +39,12 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         return self.user.username
+
+
+@receiver(post_save, sender=User, dispatch_uid="auth_extension.create_user_profile")
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+       profile, created = UserProfile.objects.get_or_create(user=instance)
 
 
 class TestbedPermission(models.Model):

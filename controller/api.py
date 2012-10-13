@@ -74,6 +74,10 @@ class Api(object):
             mod = import_module(app)
             try: import_module('%s.api' % app)
             except ImportError: pass
+    
+    def insert_field(self, model, field):
+        for resource in self._registry[model]:
+            resource.serializer_class.tinc = field
 
 # singletons
 api = Api()

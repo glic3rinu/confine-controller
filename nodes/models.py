@@ -44,6 +44,14 @@ class Node(models.Model):
     def __unicode__(self):
         return self.description
 
+    @property
+    def properties(self):
+        return dict(self.nodeprop_set.all().values_list('name', 'value'))
+
+    @property
+    def slivers(self):
+        return self.sliver_set.all()
+
 
 class NodeProp(models.Model):
     node = models.ForeignKey(Node)

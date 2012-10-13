@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from nodes.models import Server, Node, ResearchDevice
+
+# TODO dynamically hook other app serializers instead of hardcoding them
 from tinc.serializers import TincHostSerializer, TincClientSerializer
 
-# TODO dynamically hook tinc serializers instead of hardcoding them
 
 class ServerSerializer(serializers.HyperlinkedModelSerializer):
     tinc = TincClientSerializer()
-
+    
     class Meta:
         model = Server
 
@@ -21,6 +22,9 @@ class ResearchDeviceSerializer(serializers.ModelSerializer):
 
 class NodeSerializer(serializers.HyperlinkedModelSerializer):
     researchdevice = ResearchDeviceSerializer()
-    
+    properties = serializers.Field()
+    slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
+
     class Meta:
         model = Node
+

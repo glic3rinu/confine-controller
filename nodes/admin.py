@@ -41,6 +41,7 @@ researchdevice__arch.admin_order_field = 'researchdevice__arch'
 class NodeAdmin(admin.ModelAdmin):
     # TODO Full RD inline edition:
     # Wait for this feature https://code.djangoproject.com/ticket/9025
+    # Or maybe this will not be necessary with the new node definition, so wait!
     list_display = ['description', 'id', link('cn_url', description='CN URL'), 
         admin_link('researchdevice'), researchdevice__arch, 
         colored('set_state', STATES_COLORS), admin_link('admin')]
@@ -53,13 +54,13 @@ class NodeAdmin(admin.ModelAdmin):
             'fields': ('description', ('cndb_uri', 'cndb_cached_on'), 'admin', 
                        'sliver_pub_ipv4_total', 'set_state',),
         }),
-        ('Prefixes', {
+        ('Optional Prefixes', {
             'classes': ('collapse',),
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
 
-    # TODO override save_related() in order to autocreate a RD. 
-    # Maybe this will not be necessary with the new node definition.
+    # TODO override save_related() in order to autocreate a RD. Or maybe this
+    #      will not be necessary with the new node definition, so wait!
 
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """

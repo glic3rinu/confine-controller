@@ -29,7 +29,7 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """ This resource describes the testbed server (controller)."""
     model = Server
-    serialiizer_class = ServerSerializer
+    serializer_class = ServerSerializer
     
     def get_object(self):
         try:

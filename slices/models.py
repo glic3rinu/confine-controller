@@ -53,16 +53,24 @@ class Slice(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self.vlan_nr == -1 and self.set_state == INSTANTIATE:
+        if self.vlan_nr == -1 and self.set_state == self.INSTANTIATE:
             self.vlan_nr = self._get_vlan_nr()
         super(Slice, self).save(*args, **kwargs)
 
+    @property
+    def slivers(self):
+        return self.sliver_set.all()
+
+    @property
+    def properties(self):
+        return dict(self.sliceprop_set.all().values_list('name', 'value'))
+
     def _get_vlan_nr(self):
-        last_nr = Node.objects.order_by('-vlan_nr')[0]
+        last_nr = Slice.objects.order_by('-vlan_nr')[0]
         if last_nr < 2: return 2
         if last_nr >= int('FFFF', 16):
             for new_nr in range(2, int('FFFF', 16)):
-                if not Node.objects.filter(vlan_nr=new_nr):
+                if not Slice.objects.filter(vlan_nr=new_nr):
                     return new_nr
             raise self.VlanAllocationError("No vlan address space left")
         return last_nr + 1
@@ -90,6 +98,17 @@ class Sliver(models.Model):
     def __unicode__(self):
         return self.description
 
+    @property
+    def properties(self):
+        return dict(self.sliverprop_set.all().values_list('name', 'value'))
+
+    @property
+    def interfaces(self):
+        ifaces = [self.privateiface]
+        ifaces += list(self.publiciface_set.all())
+        ifaces += list(self.isolatediface_set.all())
+        return ifaces
+
 
 class SliverProp(models.Model):
     sliver = models.ForeignKey(Sliver)
@@ -109,6 +128,16 @@ class SliverIface(models.Model):
     def __unicode__(self):
         return str(self.pk)
 
+    @property
+    def type(self):
+        return self._meta.verbose_name.split(' ')[0]
+
+    @property
+    def parent_name(self):
+        if hasattr(self, 'parent'): 
+            return self.parent.name
+        return None
+
 
 class IsolatedIface(SliverIface):
     sliver = models.ForeignKey(Sliver)
@@ -116,6 +145,10 @@ class IsolatedIface(SliverIface):
 
     class Meta:
         unique_together = ['sliver', 'parent']
+
+    @property
+    def use_default_gw(self):
+        return None
 
 
 class IpSliverIface(SliverIface):

@@ -119,7 +119,7 @@ ROOT_URLCONF = 'controller.urls'
 WSGI_APPLICATION = 'controller.wsgi.application'
 
 TEMPLATE_DIRS = (
-    '/home/confine/controller/controller/templates',
+#    '/home/confine/controller/controller/templates',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -134,7 +134,6 @@ INSTALLED_APPS = (
     'admin_tools.menu',
     'admin_tools.dashboard',
     'singleton_models',
-    'rest_framework',
 #    'django_extensions',
 
     # Django.contrib
@@ -151,9 +150,11 @@ INSTALLED_APPS = (
     'nodes',
     'slices',
     'issues',
-    # must be the las one due to South migrations problems
     'auth_extension',
     'tinc',
+
+    # Third party apps that should load last
+    'rest_framework',
 )
 
 AUTH_PROFILE_MODULE = 'auth_extension.UserProfile'

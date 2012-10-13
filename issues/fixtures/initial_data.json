@@ -1,0 +1,59 @@
+[
+  {
+    "model": "issues.queue",
+    "pk": 1,
+    "fields": {
+      "name": "Web Interface",
+      "default": "True"
+    }
+  },
+  {
+    "model": "issues.queue",
+    "pk": 2,
+    "fields": {
+      "name": "Nodes",
+      "default": "False"
+    }
+  },
+  {
+    "model": "issues.queue",
+    "pk": 3,
+    "fields": {
+      "name": "Support",
+      "default": "False"
+    }
+  },
+  {
+    "model": "issues.queue",
+    "pk": 4,
+    "fields": {
+      "name": "Legal",
+      "default": "False"
+    }
+  },
+  {
+    "model": "issues.queue",
+    "pk": 5,
+    "fields": {
+      "name": "Administration",
+      "default": "False"
+    }
+  },
+  {
+    "model": "issues.queue",
+    "pk": 6,
+    "fields": {
+      "name": "Community Networks",
+      "default": "False"
+    }
+  },
+  {
+    "model": "issues.queue",
+    "pk": 7,
+    "fields": {
+      "name": "Other",
+      "default": "False"
+    }
+  }
+]
+

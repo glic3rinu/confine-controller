@@ -39,5 +39,5 @@ class CustomMenu(Menu):
             ))
 
         self.children += [
-                    items.MenuItem('API', 'https://controller.confine-project.eu/api'),
-                    items.MenuItem('Documentation', 'https://wiki.confine-project.eu/soft:server'),]
+                    items.MenuItem('API', '/api'),
+                    items.MenuItem('Documentation', 'http://wiki.confine-project.eu/soft:server'),]

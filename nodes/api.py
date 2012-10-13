@@ -1,4 +1,4 @@
-from controller import api
+from apis import rest
 from django.http import Http404
 from nodes.models import Node, Server
 from nodes.serializers import ServerSerializer, NodeSerializer
@@ -38,5 +38,5 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
             raise Http404
 
 
-api.register(NodeList, NodeDetail)
-api.register(ServerDetail, ServerDetail)
+rest.api.register(NodeList, NodeDetail)
+rest.api.register(ServerDetail, ServerDetail)

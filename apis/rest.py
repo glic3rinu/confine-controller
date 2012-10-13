@@ -11,11 +11,9 @@ from rest_framework.reverse import reverse
 
 # TODO Reimplement resource with rest_framework.ModelResource and urls with Routers
 #      when they become available in the final release of rest_framework2
-# TODO Make this reusable within their own application: maybe this app should 
-#      be called apis and have a rest.py module to avoid api.py module clashing
 # TODO Make this more generic, for now only works with Model based resources
 
-class Api(object):
+class RestApi(object):
     def __init__(self):
         self._registry = {}
     
@@ -82,5 +80,5 @@ class Api(object):
             self._registry[model][1].serializer_class.base_fields.update({name: field()})
 
 # singleton
-api = Api()
+api = RestApi()
 

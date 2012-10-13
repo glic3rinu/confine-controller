@@ -1,5 +1,5 @@
 from auth_extension.serializers import UserSerializer
-from controller import api
+from apis import rest
 from django.contrib.auth.models import User
 from rest_framework import generics
 
@@ -14,4 +14,4 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 
-api.register(UserList, UserDetail)
+rest.api.register(UserList, UserDetail)

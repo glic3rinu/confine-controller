@@ -1,4 +1,4 @@
-from controller import api
+from apis import rest
 from slices.models import Slice, Sliver, Template
 from slices.serializers import SliceSerializer, SliverSerializer, TemplateSerializer
 from rest_framework import generics
@@ -30,7 +30,7 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Template
 
 
-api.register(SliceList, SliceDetail)
-api.register(SliverList, SliverDetail)
-api.register(TemplateList, TemplateDetail)
+rest.api.register(SliceList, SliceDetail)
+rest.api.register(SliverList, SliverDetail)
+rest.api.register(TemplateList, TemplateDetail)
 

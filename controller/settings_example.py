@@ -147,6 +147,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Confine
+    'apis',
     'nodes',
     'slices',
     'issues',

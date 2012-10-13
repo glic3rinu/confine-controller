@@ -2,18 +2,14 @@ from rest_framework import serializers
 from nodes.models import Server, Node, ResearchDevice
 
 # TODO dynamically hook other app serializers instead of hardcoding them
-from tinc.serializers import TincHostSerializer, TincClientSerializer
+#from tinc.serializers import TincHostSerializer, TincClientSerializer
 
 
 class ServerSerializer(serializers.HyperlinkedModelSerializer):
-    tinc = TincClientSerializer()
-    
     class Meta:
         model = Server
 
-
 class ResearchDeviceSerializer(serializers.ModelSerializer):
-    tinc = TincClientSerializer()
 
     class Meta:
         model = ResearchDevice

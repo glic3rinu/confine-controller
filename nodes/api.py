@@ -38,5 +38,5 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
             raise Http404
 
 
-api.register((NodeList, NodeDetail))
-api.register((ServerDetail, ServerDetail))
+api.register(NodeList, NodeDetail)
+api.register(ServerDetail, ServerDetail)

@@ -24,5 +24,5 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = HostSerializer
 
 
-api.register((IslandList, IslandDetail))
-api.register((HostList, HostDetail))
+api.register(IslandList, IslandDetail)
+api.register(HostList, HostDetail)

@@ -12,8 +12,8 @@ from rest_framework.reverse import reverse
 # TODO Reimplement resource with rest_framework.ModelResource and urls with Routers
 #      when they become available in the final release of rest_framework2
 # TODO Make this reusable within their own application: maybe this app should 
-#      be called apis and have a rest module to avoid module clashing
-# TODO Make this more generic because for now only works with Model based resources
+#      be called apis and have a rest.py module to avoid api.py module clashing
+# TODO Make this more generic, for now only works with Model based resources
 
 class Api(object):
     def __init__(self):
@@ -48,10 +48,7 @@ class Api(object):
 
     @property
     def urls(self):
-        # This is ugly, but don't know why just don't work without it
-        class FakeModule(object):
-            urlpatterns = self.get_urls()
-        return FakeModule()
+        return self.get_urls()
 
     def get_urls(self):
         urlpatterns = patterns('',
@@ -71,16 +68,15 @@ class Api(object):
         return urlpatterns
 
     def autodiscover(self):
-        """ Auto-discover INSTALLED_APPS serializers.py and api.py modules """
+        """ Auto-discover INSTALLED_APPS api.py modules """
         for app in settings.INSTALLED_APPS:
             mod = import_module(app)
-            try: 
-                import_module('%s.api' % app)
+            try: import_module('%s.api' % app)
             except ImportError: pass
     
     def aggregate(self, model, field, name):
         """ Dynamically add new fields to an existing serializer """
-        # TODO provide support for hooking into nested serializers
+        # TODO provide support for hooking with nested serializers
         if model in self._registry:
             self._registry[model][0].serializer_class.base_fields.update({name: field()})
             self._registry[model][1].serializer_class.base_fields.update({name: field()})

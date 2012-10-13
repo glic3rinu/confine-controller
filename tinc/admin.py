@@ -44,7 +44,6 @@ admin.site.register(Host, HostAdmin)
 admin.site.register(TincAddress, TincAddressAdmin)
 admin.site.register(Island, IslandAdmin)
 admin.site.register(Gateway, GatewayAdmin)
-admin.site.register(TincServer)
 
 
 class HostInline(admin.TabularInline):

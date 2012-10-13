@@ -21,10 +21,13 @@ class AuthorizedOfficial(models.Model):
     second_surname = models.CharField(max_length=30, blank=True)
     national_id = models.CharField(max_length=16)
     address = models.CharField(max_length=50, blank=True)
-    city = models.CharField(max_length=20, default=settings.DEFAULT_AUTHORIZED_OFFICIAL_CITY, blank=True)
+    city = models.CharField(max_length=20,  blank=True, 
+        default=settings.DEFAULT_AUTHORIZED_OFFICIAL_CITY)
     zipcode = models.PositiveIntegerField(blank=True, null=True)
-    province = models.CharField(max_length=20, default=settings.DEFAULT_AUTHORIZED_OFFICIAL_PROVINCE, blank=True)
-    country = models.CharField(max_length=20, default=settings.DEFAULT_AUTHORIZED_OFFICIAL_COUNTRY)
+    province = models.CharField(max_length=20, blank=True, 
+        default=settings.DEFAULT_AUTHORIZED_OFFICIAL_PROVINCE)
+    country = models.CharField(max_length=20, 
+        default=settings.DEFAULT_AUTHORIZED_OFFICIAL_COUNTRY)
 
     def __unicode__(self):
         return "%s %s %s" % (self.name, self.surname, self.second_surname)
@@ -32,9 +35,12 @@ class AuthorizedOfficial(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    uuid = UUIDField(auto=True, unique=True)
-    description = models.TextField(blank=True)
-    pubkey = models.TextField(unique=True, null=True, blank=True, verbose_name="Public Key")
+    uuid = UUIDField(auto=True, unique=True, help_text="""A universally unique 
+        identifier (UUID, RFC 4122) provided for the user on registration.""")
+    description = models.TextField(blank=True, help_text="""An optional free-form 
+        textual description of this user, it can include URLs and other information.""")
+    pubkey = models.TextField(unique=True, null=True, blank=True, 
+        help_text="""A PEM-encoded RSA public key for this user (used by SFA).""")
     research_groups = models.ManyToManyField(ResearchGroup, blank=True)
 
     def __unicode__(self):
@@ -47,7 +53,7 @@ class UserProfile(models.Model):
 
 
 # FIXME how to ensure that a userprofile is created each time a new user is added 
-#       at a model level (no admin)
+#       at a model level (no admin) is there a way?
 @receiver(post_save, sender=User, dispatch_uid="auth_extension.create_user_profile")
 def create_user_profile(sender, instance, created, **kwargs):
     profile, created = UserProfile.objects.get_or_create(user=instance)
@@ -75,9 +81,21 @@ class TestbedPermission(models.Model):
 
 
 class AuthToken(models.Model):
+    """ 
+        A list of authentication tokens like SSH or other kinds of public keys 
+        or X.509 certificates to be used for slivers or experiments. The exact 
+        valid format depends on the type of token as long as it is non-empty and
+        only contains ASCII characters.
+        (e.g. by using PEM encoding or other ASCII armour).
+    """
     user = models.ForeignKey(User)
     data = models.CharField(max_length=256)
 
     def __unicode__(self):
         return str(self.pk)
 
+
+@property
+def authtokens(self):
+    return self.authtoken_set.all().values_list('data')
+User.authtokens = authtokens

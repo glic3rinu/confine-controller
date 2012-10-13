@@ -19,12 +19,12 @@ class Node(models.Model):
     priv_ipv4_prefix = models.GenericIPAddressField(protocol='IPv4', null=True, 
         blank=True, help_text="""IPv4 /24 network in CIDR notation used as a node 
         private IPv4 prefix. See <a href="http://wiki.confine-project.eu/arch:addressing">
-        addressing</a> for legal values. %s When null.""" % settings.PRIV_IPV4_PREFIX)
+        addressing</a> for legal values. %s When null.""" % settings.PRIV_IPV4_PREFIX_DFLT)
     sliver_mac_prefix = models.PositiveSmallIntegerField(max_length=16, null=True,
         blank=True, help_text="""A 16-bit integer number in 0x-prefixed hexadecimal 
         notation used as the node sliver MAC prefix. See 
         <a href="http://wiki.confine-project.eu/arch:addressing">addressing</a> 
-        for legal values. %s when null.</a>.""" % settings.SLIVER_MAC_PREFIX)
+        for legal values. %s when null.</a>.""" % settings.SLIVER_MAC_PREFIX_DFLT)
     sliver_pub_ipv4_total = models.IntegerField(default=0, help_text="""Total number 
         of public (from the point of view of the CN) IPv4 addresses available in 
         this node's local network to be allocated to slivers' public interfaces (see 

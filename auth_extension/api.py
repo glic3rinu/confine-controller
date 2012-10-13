@@ -14,4 +14,4 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 
-api.register((UserList, UserDetail))
+api.register(UserList, UserDetail)

@@ -30,7 +30,7 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Template
 
 
-api.register((SliceList, SliceDetail))
-api.register((SliverList, SliverDetail))
-api.register((TemplateList, TemplateDetail))
+api.register(SliceList, SliceDetail)
+api.register(SliverList, SliverDetail)
+api.register(TemplateList, TemplateDetail)
 

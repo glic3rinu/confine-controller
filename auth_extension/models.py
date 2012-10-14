@@ -52,11 +52,25 @@ class UserProfile(models.Model):
         super(UserProfile, self).clean()
 
 
-# FIXME how to ensure that a userprofile is created each time a new user is added 
-#       at a model level (no admin) is there a way?
+# FIXME Ensure a userprofile is created each time a new user is added 
+#       at a model level (no admin).
 @receiver(post_save, sender=User, dispatch_uid="auth_extension.create_user_profile")
 def create_user_profile(sender, instance, created, **kwargs):
-    profile, created = UserProfile.objects.get_or_create(user=instance)
+    if created:
+        profile, created = UserProfile.objects.get_or_create(user=instance)
+
+
+# Make UserProfile fields visible at User model as properties
+for field in ['pubkey', 'uuid', 'description']:
+    def getter(self, field=field):
+        return getattr(self.userprofile, field)
+    
+    def setter(self, value, field=field):
+        setattr(self.userprofile, field, value)
+        self.userprofile.save()
+    
+    prop = property(getter, setter)
+    setattr(User, field, prop)
 
 
 class TestbedPermission(models.Model):

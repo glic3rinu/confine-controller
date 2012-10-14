@@ -9,7 +9,7 @@ from django.dispatch import receiver
 
 class ResearchGroup(models.Model):
     name = models.CharField(max_length=256)
-
+    
     def __unicode__(self):
         return self.name
 
@@ -28,7 +28,7 @@ class AuthorizedOfficial(models.Model):
         default=settings.DEFAULT_AUTHORIZED_OFFICIAL_PROVINCE)
     country = models.CharField(max_length=20, 
         default=settings.DEFAULT_AUTHORIZED_OFFICIAL_COUNTRY)
-
+    
     def __unicode__(self):
         return "%s %s %s" % (self.name, self.surname, self.second_surname)
 
@@ -42,10 +42,10 @@ class UserProfile(models.Model):
     pubkey = models.TextField(unique=True, null=True, blank=True, 
         help_text="""A PEM-encoded RSA public key for this user (used by SFA).""")
     research_groups = models.ManyToManyField(ResearchGroup, blank=True)
-
+    
     def __unicode__(self):
         return self.user.username
-
+    
     def clean(self):
         """ Empty pubkey and cert as NULL instead of empty string """
         if self.pubkey is u'': self.pubkey = None
@@ -79,17 +79,17 @@ class TestbedPermission(models.Model):
                (3, "Update"),
                (4, "Delete"),
                (5, "Access"),)
-
+    
     action = MultiSelectField(max_length=250, blank=True, choices=ACTIONS)
     research_group = models.ForeignKey(ResearchGroup, null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
     slice = models.ForeignKey('slices.Slice', null=True, blank=True)
     node = models.ForeignKey('nodes.Node', null=True, blank=True)
-
+    
     class Meta:
         verbose_name = 'Permission'
         verbose_name_plural = 'Permissions'
-
+    
     def __unicode__(self):
         return str(self.pk)
 
@@ -104,7 +104,7 @@ class AuthToken(models.Model):
     """
     user = models.ForeignKey(User)
     data = models.CharField(max_length=256)
-
+    
     def __unicode__(self):
         return str(self.pk)
 

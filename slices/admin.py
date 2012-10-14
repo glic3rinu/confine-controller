@@ -60,6 +60,7 @@ class TemplateAdmin(admin.ModelAdmin):
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']
 
+
 admin.site.register(Sliver, SliverAdmin)
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Template, TemplateAdmin)

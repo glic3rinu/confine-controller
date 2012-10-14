@@ -12,6 +12,8 @@ from rest_framework.reverse import reverse
 # TODO Reimplement resource with rest_framework.ModelResource and urls with Routers
 #      when they become available in the final release of rest_framework2
 # TODO Make this more generic, for now only works with Model based resources
+# TODO Support for nested resources on urls /api/nodes/1111/ctl
+
 
 class RestApi(object):
     def __init__(self):
@@ -20,7 +22,7 @@ class RestApi(object):
     def register(self, *args):
         model = args[0].model
         self._registry.update({model: args})
-
+    
     def base(self):
         class Base(APIView):
             """ 
@@ -33,7 +35,7 @@ class RestApi(object):
                     "mgmt_ipv6_prefix": nodes_settings.MGMT_IPV6_PREFIX,
                     "priv_ipv4_prefix_dflt": nodes_settings.PRIV_IPV4_PREFIX_DFLT,
                     "sliver_mac_prefix_dflt": nodes_settings.SLIVER_MAC_PREFIX_DFLT, }
-
+                
                 output = {"testbed_params": testbed_params}
                 for model in self._registry:
                     name = force_unicode(model._meta.verbose_name)
@@ -41,17 +43,17 @@ class RestApi(object):
                     output.update({'%s_href' % name_plural: reverse('%s-list' % name,
                         args=[], request=request)})
                 return Response(output)
-
+        
         return Base.as_view()
-
+    
     @property
     def urls(self):
         return self.get_urls()
-
+    
     def get_urls(self):
         urlpatterns = patterns('',
             url(r'^$', self.base(), name='base'),)
-
+        
         for model, resource in six.iteritems(self._registry):
             name = force_unicode(model._meta.verbose_name)
             name_plural = force_unicode(model._meta.verbose_name_plural)
@@ -64,7 +66,7 @@ class RestApi(object):
                     name="%s-detail" % name),
             )
         return urlpatterns
-
+    
     def autodiscover(self):
         """ Auto-discover INSTALLED_APPS api.py modules """
         for app in settings.INSTALLED_APPS:

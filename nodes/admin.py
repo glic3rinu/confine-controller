@@ -58,10 +58,10 @@ class NodeAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
-
+    
     # TODO override save_related() in order to autocreate a RD. Or maybe this
     #      will not be necessary with the new node definition, so wait!
-
+    
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
@@ -94,9 +94,9 @@ class ServerAdmin(SingletonModelAdmin):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
-
+        
         info = self.model._meta.app_label, self.model._meta.module_name
-
+        
         urlpatterns = patterns('',
             url(r'^history/$', wrap(self.history_view), {'object_id': '1'},
                 name='%s_%s_history' % info),
@@ -107,7 +107,7 @@ class ServerAdmin(SingletonModelAdmin):
                 wrap(self.change_view), {'object_id': '1'}, 
                 name='%s_%s_changelist' % info),
         )
-
+        
         return urlpatterns
 
 

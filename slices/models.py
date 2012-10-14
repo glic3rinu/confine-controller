@@ -13,7 +13,7 @@ class Template(models.Model):
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH)
     is_active = models.BooleanField(default=True)
     data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR)
-
+    
     def __unicode__(self):
         return self.name
 
@@ -25,7 +25,7 @@ class Slice(models.Model):
     STATES = ((REGISTER, 'Register'),
               (INSTANTIATE, 'Instantiate'),
               (ACTIVATE, 'Activate'),)
-
+    
     name = models.CharField(max_length=64)
     uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField(null=True, blank=True, help_text="""A PEM-encoded 
@@ -48,23 +48,23 @@ class Slice(models.Model):
     template = models.ForeignKey(Template)
     users = models.ManyToManyField(User, help_text="""A ist of users able to login
         as root in slivers using their authentication tokens (usually an SSH key).""")
-
+    
     def __unicode__(self):
         return self.name
-
+    
     def save(self, *args, **kwargs):
         if self.vlan_nr == -1 and self.set_state == self.INSTANTIATE:
             self.vlan_nr = self._get_vlan_nr()
         super(Slice, self).save(*args, **kwargs)
-
+    
     @property
     def slivers(self):
         return self.sliver_set.all()
-
+    
     @property
     def properties(self):
         return dict(self.sliceprop_set.all().values_list('name', 'value'))
-
+    
     def _get_vlan_nr(self):
         last_nr = Slice.objects.order_by('-vlan_nr')[0]
         if last_nr < 2: return 2
@@ -74,7 +74,7 @@ class Slice(models.Model):
                     return new_nr
             raise self.VlanAllocationError("No vlan address space left")
         return last_nr + 1
-
+    
     class VlanAllocationError(Exception): pass
 
 
@@ -97,11 +97,11 @@ class Sliver(models.Model):
     
     def __unicode__(self):
         return self.description
-
+    
     @property
     def properties(self):
         return dict(self.sliverprop_set.all().values_list('name', 'value'))
-
+    
     @property
     def interfaces(self):
         ifaces = [self.privateiface]
@@ -121,17 +121,17 @@ class SliverProp(models.Model):
 
 class SliverIface(models.Model):
     name = models.CharField(max_length=16)
-
+    
     class Meta:
         abstract = True
-
+    
     def __unicode__(self):
         return str(self.pk)
-
+    
     @property
     def type(self):
         return self._meta.verbose_name.split(' ')[0]
-
+    
     @property
     def parent_name(self):
         if hasattr(self, 'parent'): 
@@ -142,10 +142,10 @@ class SliverIface(models.Model):
 class IsolatedIface(SliverIface):
     sliver = models.ForeignKey(Sliver)
     parent = models.ForeignKey('nodes.RdDirectIface', null=True, blank=True)
-
+    
     class Meta:
         unique_together = ['sliver', 'parent']
-
+    
     @property
     def use_default_gw(self):
         return None

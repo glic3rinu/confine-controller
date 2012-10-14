@@ -10,23 +10,23 @@ class QueueQuerySet(models.query.QuerySet):
 class Queue(models.Model):
     name = models.CharField(max_length=128, unique=True)
     default = models.BooleanField(default=False)
-
+    
     objects = generate_chainer_manager(QueueQuerySet)
-
+    
     def __unicode__(self):
         return self.name
-
+    
     def save(self, *args, **kwargs):
         if self.default:
             Queue.objects.filter(default=True).update(default=False)
         elif not Queue.objects.count():
             self.default = True
         super(Queue, self).save(*args, **kwargs)
-
+    
     @property
     def number_of_tickets(self):
         return self.ticket_set.all().count()
-
+    
     @property
     def number_of_messages(self):
         return Message.objects.filter(ticket__queue=self).count()
@@ -35,13 +35,13 @@ class Queue(models.Model):
 class TicketQuerySet(models.query.QuerySet):
     def resolve(self):
         return self.update(state='RESOLVED')
-
+    
     def open(self):
         return self.update(state='OPEN')
         
     def reject(self):
         return self.update(state='REJECTED')
-
+    
     def take(self, owner):
         return self.update(owner=owner)
 
@@ -50,12 +50,12 @@ class Ticket(models.Model):
     PRIORITIES = (('HIGH', "High"),
                   ('MEDIUM', "Medium"),
                   ('LOW', "Low"),)
-
+    
     STATES = (('NEW', "New"),
               ('OPEN', "Open"),
               ('RESOLVED', "Resolved"),
               ('REJECTED', "Rejected"),)
-
+    
     created_by = models.ForeignKey('auth.User')
     owner = models.ForeignKey('auth.User', null=True, blank=True,
         related_name='owned_tickets_set')
@@ -66,15 +66,15 @@ class Ticket(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified_on = models.DateTimeField(auto_now=True)
     cc = models.TextField(blank=True, verbose_name="CC")
-
+    
     objects = generate_chainer_manager(TicketQuerySet)
-
+    
     class Meta:
         ordering = ["-last_modified_on"]
-
+    
     def __unicode__(self):
         return str(self.id)
-
+    
     @property
     def number_of_messages(self):
         return self.message_set.all().count()
@@ -84,7 +84,7 @@ class Message(models.Model):
     VISIBILITY_CHOICES = (('INTERNAL', "Internal"),
                           ('PUBLIC',  "Public"),
                           ('PRIVATE', "Private"),)
-
+    
     ticket = models.ForeignKey('issues.Ticket')
     author = models.ForeignKey('auth.User')
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default='PUBLIC')
@@ -93,3 +93,5 @@ class Message(models.Model):
 
     def __unicode__(self):
         return str(self.id)
+
+

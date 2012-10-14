@@ -12,7 +12,7 @@ class Node(models.Model):
               ('failure', 'Failure'),
               ('safe', 'Safe'),
               ('production', 'Production'),)
-
+    
     description = models.CharField(max_length=256)
     admin = models.ForeignKey(User, help_text="""The user who administrates this 
         node (its creator by default).""")
@@ -36,14 +36,14 @@ class Node(models.Model):
         help_text="""An optional URI for this node in its CN's CNDB REST API.""")
     cndb_cached_on = models.DateTimeField(null=True, blank=True)
     set_state = models.CharField(max_length=16, choices=STATES, default='install_conf')
-
+    
     def __unicode__(self):
         return self.description
-
+    
     @property
     def properties(self):
         return dict(self.nodeprop_set.all().values_list('name', 'value'))
-
+    
     @property
     def slivers(self):
         return self.sliver_set.all()
@@ -53,7 +53,7 @@ class NodeProp(models.Model):
     node = models.ForeignKey(Node)
     name = models.CharField(max_length=32, unique=True)
     value = models.CharField(max_length=256)
-
+    
     def __unicode__(self):
         return self.name
 
@@ -62,10 +62,10 @@ class CnHost(models.Model):
     cn_url = models.URLField(blank=True)
     cndb_uri = models.CharField(max_length=256, blank=True)
     cndb_cached_on = models.DateTimeField(null=True, blank=True)
-
+    
     class Meta:
         abstract = True
-
+    
     def __unicode__(self):
         return str(self.pk)
 
@@ -88,10 +88,10 @@ class ResearchDevice(CnHost):
     local_iface = models.CharField(verbose_name="Local Interface", max_length=16, 
         default='eth0', help_text="""Name of the interface used as a local interface. 
         See <a href="wiki.confine-project.eu/arch:node">node architecture</a>.""")
-
+    
     def __unicode__(self):
         return str(self.uuid)
-
+    
     def clean(self):
         """ Empty pubkey and cert as NULL instead of empty string """
         if self.pubkey is u'': self.pubkey = None
@@ -114,6 +114,6 @@ class Server(SingletonModel, CnHost):
     class Meta:
         verbose_name = "server"
         verbose_name_plural = "server"
-
+    
     def __unicode__(self):
         return 'Server'

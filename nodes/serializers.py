@@ -10,7 +10,6 @@ class ServerSerializer(serializers.HyperlinkedModelSerializer):
         model = Server
 
 class ResearchDeviceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ResearchDevice
         exclude = ('node',)
@@ -20,7 +19,7 @@ class NodeSerializer(serializers.HyperlinkedModelSerializer):
     researchdevice = ResearchDeviceSerializer()
     properties = serializers.Field()
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
-
+    
     class Meta:
         model = Node
 

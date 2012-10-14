@@ -20,7 +20,7 @@ class IfaceSerializer(serializers.Serializer):
 class SliverSerializer(serializers.HyperlinkedModelSerializer):
     interfaces = IfaceSerializer()
     properties = serializers.Field()
-
+    
     class Meta:
         model = Sliver
 
@@ -28,7 +28,7 @@ class SliverSerializer(serializers.HyperlinkedModelSerializer):
 class SliceSerializer(serializers.HyperlinkedModelSerializer):
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
     properties = serializers.Field()
-
+    
     class Meta:
         model = Slice
 

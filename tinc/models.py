@@ -19,6 +19,10 @@ class TincHost(models.Model):
     
     class Meta:
         abstract = True
+    
+    @property
+    def name(self):
+        return str(self)
 
 
 class Gateway(CnHost):
@@ -28,13 +32,9 @@ class Gateway(CnHost):
 
 class TincServer(TincHost):
     gateway = models.OneToOneField(Gateway)
-
+    
     def __unicode__(self):
         return "gateway_%s" % self.id
-
-    @property
-    def name(self):
-        return str(self)
 
 
 class Island(models.Model):
@@ -61,7 +61,7 @@ class TincAddress(models.Model):
     
     def __unicode__(self):
         return str(self.ip_addr)
-
+    
     @property
     def pubkey(self):
         return self.server.pubkey
@@ -73,16 +73,12 @@ class TincClient(TincHost):
     # we use a CharField instead of a PositiveIntegerField because of rd.uuid pk
     object_id = models.CharField(max_length=36)
     content_object = generic.GenericForeignKey()
-
+    
     class Meta:
         unique_together = ('content_type', 'object_id')
-
+    
     def __unicode__(self):
         return "%s_%s" % (self.content_type.model, self.object_id)
-
-    @property
-    def name(self):
-        return str(self)
 
 
 # Hook TincClient support for related models

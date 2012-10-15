@@ -1,12 +1,19 @@
 from django.contrib import admin
+from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.utils.html import escape
 from utils import get_field_value
 
+
+def get_modeladmin(model):
+    for k,v in admin.site._registry.iteritems():
+        if k is model: return v
+
+
 def insert_inline(model, inline, head=False):
     """ Insert model inline into an existing model_admin """
     
-    model_admin = admin.site._registry[model]
+    model_admin = get_modeladmin(model)
     if hasattr(inline, 'inline_identify'):
         delete_inline(model, inline.inline_identify)
     # Avoid inlines defined on parent class be shared between subclasses
@@ -20,19 +27,19 @@ def insert_inline(model, inline, head=False):
 
 
 def insert_list_filter(model, filter):
-    model_admin = admin.site._registry[model]
+    model_admin = get_modeladmin(model)
     if not model_admin.list_filter: model_admin.__class__.list_filter = []
     model_admin.list_filter += (filter,)
 
 
 def insert_list_display(model, field):
-    model_admin = admin.site._registry[model]
+    model_admin = get_modeladmin(model)
     if not model_admin.list_display: model_admin.__class__.list_display = []
     model_admin.list_display += (field,)    
 
 
 def insert_action(model, action):
-    model_admin = admin.site._registry[model]
+    model_admin = get_modeladmin(model)
     if not model_admin.actions: model_admin.__class__.actions = [action]
     else: model_admin.actions.append(action)
 
@@ -84,7 +91,6 @@ class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
             add_form = AddSystemUserInlineForm
             change_form = ChangeSystemUserInlineForm
     """
-
     def get_formset(self, request, obj=None, **kwargs):
         # Determine if we need to use add_form or change_form
         field_name = self.model._meta.module_name
@@ -96,6 +102,55 @@ class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
         else:
             if hasattr(self, 'change_form'):
                 self.form = self.change_form
-
+        
         return super(AddOrChangeInlineFormMixin, self).get_formset(request, obj=obj, **kwargs)
+
+
+class DynamicChangeViewLinksMixin(admin.options.ModelAdmin):
+    """
+        Dynamically hooks new links on the objet-tools-item block.
+        usage 1:
+            change_view_links = [('reboot', reboot_view, 'Reboot', 'historylink'), 
+                                 ('reboot', 'reboot_view', '', '')]
+        Usage 2: 
+            modeladmin.set_change_view_link('reboot', reboot_view, '', '')
+    """
+    def __init__(self, *args, **kwargs):
+        super(DynamicChangeViewLinksMixin, self).__init__(*args, **kwargs)
+        if not hasattr(self, 'change_view_links'): self.change_view_links = []
+        else:
+            links = [ self._prepare_change_view_link(*link) for link in self.change_view_links ]
+            self.change_view_links = links
+        if not self.change_list_template:
+            self.change_form_template = "admin/common/change_form.html"
+    
+    def get_urls(self):
+        """Returns the additional urls for the change view links"""
+        urls = super(DynamicChangeViewLinksMixin, self).get_urls()
+        admin_site = self.admin_site
+        opts = self.model._meta
+        new_urls = patterns("")
+        for link in self.change_view_links:
+            new_urls += patterns("", url("^(?P<object_id>\d+)/%s/$" % link[0], admin_site.admin_view(link[1]), 
+                name='%s_%s_%s' % (opts.app_label, opts.module_name, link[0])))
+        return new_urls + urls
+    
+    def get_change_view_links(self):
+        return self.change_view_links
+    
+    def set_change_view_link(self, name, view, description, css_class):
+        self.change_view_links.append(self._prepare_change_view_link(name, view, description, css_class))
+    
+    def _prepare_change_view_link(self, name, view, description, css_class):
+        if isinstance(view, str) or isinstance(view, unicode):
+            view = getattr(self, view)
+        if description == '': description = name.capitalize()
+        if css_class == '': css_class = 'historylink' 
+        return (name, view, description, css_class)
+    
+    def change_view(self, *args, **kwargs):
+        extra_context = kwargs['extra_context'] if 'extra_context' in kwargs else {}
+        extra_context.update({'object_tools_items': self.get_change_view_links()})
+        kwargs['extra_context'] = extra_context
+        return super(DynamicChangeViewLinksMixin, self).change_view(*args, **kwargs)
 

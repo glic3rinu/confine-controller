@@ -1,4 +1,4 @@
-from common.admin import insert_inline, admin_link, insert_action
+from common.admin import insert_inline, admin_link, insert_action, get_modeladmin
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
@@ -58,3 +58,10 @@ insert_inline(User, HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincClientInline)
 insert_action(Node, set_islands)
+
+
+def set_island_view(modeladmin, request, object_id):
+    pass
+
+node_modeladmin = get_modeladmin(Node)
+node_modeladmin.set_change_view_link('set-island', set_island_view, 'Set Island', '')

@@ -19,16 +19,13 @@ def reboot_selected(modeladmin, request, queryset):
     
     using = router.db_for_write(modeladmin.model)
     
-    # The user has already confirmed the deletion.
-    # Do the deletion and return a None to display the change list view again.
+    # The user has already confirmed the reboot.
     if request.POST.get('post'):
-        if perms_needed:
-            raise PermissionDenied
         n = queryset.count()
         if n:
             for obj in queryset:
                 modeladmin.log_change(request, obj, "Instructed to reboot")
-                node.reboot()
+                obj.reboot()
             msg = "%s selected nodes are instructed to reboot." % queryset.count()
             modeladmin.message_user(request, msg)
         # Return None to display the change list page again.
@@ -41,7 +38,7 @@ def reboot_selected(modeladmin, request, queryset):
     
     context = {
         "title": "Are you sure?",
-        "content_message": "Are you sure you want to reboot the selected bjects_name? All of the following objects will be rebooted:",
+        "content_message": "Are you sure you want to reboot the selected nodes?",
         "action_name": 'Reboot',
         "deletable_objects": queryset,
         'queryset': queryset,

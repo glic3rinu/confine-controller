@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block object-tools-items %}
+{% for item in object_tools_items %}
+    <li><a href="{{item.0}}/" class="{{item.3}}">{{item.2}}</a></li>
+{% endfor %}
+<li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+{% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+{% endblock %}
+

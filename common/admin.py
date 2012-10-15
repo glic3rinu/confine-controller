@@ -31,6 +31,12 @@ def insert_list_display(model, field):
     model_admin.list_display += (field,)    
 
 
+def insert_action(model, action):
+    model_admin = admin.site._registry[model]
+    if not model_admin.actions: model_admin.__class__.actions = [action]
+    else: model_admin.actions.append(action)
+
+
 def link(attribute, description='', admin_order_field=True, base_url=''):
     def admin_link(obj, attr=attribute):
         url = get_field_value(obj, attr)

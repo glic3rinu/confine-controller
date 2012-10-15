@@ -1,8 +1,9 @@
-from common.admin import insert_inline, admin_link
+from common.admin import insert_inline, admin_link, insert_action
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from nodes.models import Node, Server
+from tinc.actions import set_islands
 from tinc.forms import HostInlineAdminForm
 from tinc.models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
@@ -55,3 +56,4 @@ class HostInline(admin.TabularInline):
 insert_inline(User, HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincClientInline)
+insert_action(Node, set_islands)

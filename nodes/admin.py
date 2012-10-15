@@ -3,6 +3,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
+from nodes.actions import request_cert, reboot
 from nodes.forms import NodeInlineAdminForm
 from nodes.models import Node, NodeProp, Server, DirectIface
 from singleton_models.admin import SingletonModelAdmin
@@ -32,7 +33,7 @@ class NodeAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'uuid', 'description')
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
-    readonly_fields = ['cndb_cached_on']
+    readonly_fields = ['cndb_cached_on', 'boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
@@ -47,6 +48,7 @@ class NodeAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
+    actions = [request_cert, reboot]
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """

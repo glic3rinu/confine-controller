@@ -77,6 +77,10 @@ class Node(CnHost):
     @property
     def slivers(self):
         return self.sliver_set.all()
+    
+    def reboot(self):
+        self.boot_sn += 1
+        self.save()
 
 
 class NodeProp(models.Model):

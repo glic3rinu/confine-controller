@@ -7,6 +7,7 @@ NODE_ARCHS = getattr(settings, 'NODE_ARCHS', (
     ('x86', 'x86'),
     ('x86_64', 'x86_64'),
     ('ar71xx', 'ar71xx'),
+    ('i586', 'i586'),
 ))
 
 DEFAULT_NODE_ARCH = getattr(settings, 'DEFAULT_NODE_ARCH', 'x86_64')

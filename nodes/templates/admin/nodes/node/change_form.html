@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block object-tools-items %}
 <!-- TODO dinamically hook firmware and set-island from their corresponding apps-->
-<li><a href="/admin/nodes/{{ original.id }}/firmware" class="historylink">{% trans "Download Firmware" %}</a></li>
-<li><a href="/admin/nodes/{{ original.id }}/reboot" class="historylink">{% trans "Reboot" %}</a></li>
-<li><a href="/admin/nodes/{{ original.id }}/request-cert" class="historylink">{% trans "Request Certificate" %}</a></li>
-<li><a href="/admin/nodes/{{ original.id }}/set-island" class="historylink">{% trans "Set Island" %}</a></li>
+<li><a href="/admin/nodes/node/{{ original.id }}/firmware" class="viewsitelink">{% trans "Download Firmware" %}</a></li>
+<li><a href="/admin/nodes/node/{{ original.id }}/reboot" class="historylink">{% trans "Reboot" %}</a></li>
+<li><a href="/admin/nodes/node/{{ original.id }}/request-cert" class="historylink">{% trans "Request Certificate" %}</a></li>
+<li><a href="/admin/nodes/node/{{ original.id }}/set-island" class="historylink">{% trans "Set Island" %}</a></li>
 <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
 {% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
 {% endblock %}

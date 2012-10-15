@@ -1,11 +1,61 @@
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
-from django.db import transaction
+from django.contrib.admin import helpers
+from django.contrib.admin.util import get_deleted_objects, model_ngettext
+from django.db import router, transaction
+from django.template.response import TemplateResponse
+from django.utils.encoding import force_text
+from django.utils.translation import ugettext_lazy, ugettext as _
 
 
 @transaction.commit_on_success
-def reboot(modeladmin, request, queryset):
-    message = "Not implemented!"
-    messages.warning(request, message)
+def reboot_selected(modeladmin, request, queryset):
+    opts = modeladmin.model._meta
+    app_label = opts.app_label
+    
+    # Check that the user has change permission for the actual model
+    if not modeladmin.has_change_permission(request):
+        raise PermissionDenied
+    
+    using = router.db_for_write(modeladmin.model)
+    
+    # The user has already confirmed the deletion.
+    # Do the deletion and return a None to display the change list view again.
+    if request.POST.get('post'):
+        if perms_needed:
+            raise PermissionDenied
+        n = queryset.count()
+        if n:
+            for obj in queryset:
+                modeladmin.log_change(request, obj, "Instructed to reboot")
+                node.reboot()
+            msg = "%s selected nodes are instructed to reboot." % queryset.count()
+            modeladmin.message_user(request, msg)
+        # Return None to display the change list page again.
+        return None
+    
+    if len(queryset) == 1:
+        objects_name = force_text(opts.verbose_name)
+    else:
+        objects_name = force_text(opts.verbose_name_plural)
+    
+    context = {
+        "title": "Are you sure?",
+        "content_message": "Are you sure you want to reboot the selected bjects_name? All of the following objects will be rebooted:",
+        "action_name": 'Reboot',
+        "deletable_objects": queryset,
+        'queryset': queryset,
+        "opts": opts,
+        "app_label": app_label,
+        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+    }
+    
+    # Display the confirmation page
+    return TemplateResponse(request, modeladmin.reboot_selected_template, 
+        context, current_app=modeladmin.admin_site.name)
+
+reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
+
 
 
 @transaction.commit_on_success

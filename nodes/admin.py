@@ -3,7 +3,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.functional import update_wrapper
-from nodes.actions import request_cert, reboot
+from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
 from nodes.models import Node, NodeProp, Server, DirectIface
 from singleton_models.admin import SingletonModelAdmin
@@ -48,13 +48,31 @@ class NodeAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
-    actions = [request_cert, reboot]
+    actions = [request_cert, reboot_selected]
+    reboot_selected_template = 'admin/generic_confirmation_template.html'
+    
+    def get_urls(self):
+        """Returns the additional urls for performing actions on nodes"""
+        urls = super(NodeAdmin, self).get_urls()
+        admin_site = self.admin_site
+        opts = self.model._meta
+        info = opts.app_label, opts.module_name,
+        node_urls = patterns("",
+            url("^(?P<object_id>\d+)/reboot/$", admin_site.admin_view(self.reboot_view), name='%s_%s_reboot' % info),
+#            url("^request-cert/$", admin_site.admin_view(self.request_cert_view), name='%s_%s_request-cert' % info),
+            )
+        return node_urls + urls
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
         form.base_fields['admin'].initial = request.user
         return form
+    
+    def reboot_view(self, request, object_id):
+        queryset = Node.objects.filter(pk=1)
+        return reboot_selected(self, request, queryset)
+
 
 
 class ServerAdmin(SingletonModelAdmin):

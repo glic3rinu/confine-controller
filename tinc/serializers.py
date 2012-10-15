@@ -1,6 +1,5 @@
 from apis import rest
-from nodes.models import Server
-from nodes.serializers import ServerSerializer, ResearchDeviceSerializer
+from nodes.models import Server, Node
 from rest_framework import serializers
 from tinc.models import Island, TincAddress, TincHost, TincClient, Host
 
@@ -41,5 +40,4 @@ class HostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 rest.api.aggregate(Server, TincClientSerializer, name='tinc')
-# TODO hook it to a nested research device or wait until there is no more nesting
-#api.aggregate(Node, TincClientSerializer, name='tinc')
+rest.api.aggregate(Node, TincClientSerializer, name='tinc')

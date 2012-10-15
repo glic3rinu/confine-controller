@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from nodes.models import CnHost, Server, ResearchDevice
+from nodes.models import CnHost, Server, Node
 from tinc import settings
 
 
@@ -12,7 +12,6 @@ class Host(models.Model):
 
 
 class TincHost(models.Model):
-    #name = models.CharField(max_length=64, unique=True)
     pubkey = models.TextField(unique=True, help_text="""PEM-encoded RSA public 
         key used on tinc management network.""")
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True)
@@ -70,8 +69,7 @@ class TincAddress(models.Model):
 class TincClient(TincHost):
     island = models.ForeignKey(Island)
     content_type = models.ForeignKey(ContentType)
-    # we use a CharField instead of a PositiveIntegerField because of rd.uuid pk
-    object_id = models.CharField(max_length=36)
+    object_id = models.PositiveIntegerField(max_length=36)
     content_object = generic.GenericForeignKey()
     
     class Meta:
@@ -82,7 +80,7 @@ class TincClient(TincHost):
 
 
 # Hook TincClient support for related models
-related_models = [Host, ResearchDevice, Server]
+related_models = [Host, Node, Server]
 
 @property
 def tinc(self):

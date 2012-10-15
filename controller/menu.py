@@ -13,7 +13,6 @@ class CustomMenu(Menu):
         self.children.append(items.MenuItem('Nodes', '/admin/nodes/',
             children=[
                 items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')),
-                items.MenuItem('Research Devices', reverse('admin:nodes_researchdevice_changelist')),
                 items.MenuItem('Server', reverse('admin:nodes_server_changelist')),
             ]))
 

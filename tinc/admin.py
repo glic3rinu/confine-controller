@@ -39,6 +39,7 @@ class GatewayAdmin(admin.ModelAdmin):
 class HostAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
+    actions = [set_islands]
 
 
 admin.site.register(Host, HostAdmin)

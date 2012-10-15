@@ -88,7 +88,6 @@ def tinc(self):
     except TincClient.DoesNotExist: return {}
 
 for model in related_models:
-    related_tincclient = generic.GenericRelation('tinc.TincClient', 
-        related_name="%(app_label)s_%(class)s_related")
+    related_tincclient = generic.GenericRelation('tinc.TincClient')
     related_tincclient.contribute_to_class(model, 'related_tincclient')
     model.tinc = tinc

@@ -146,13 +146,14 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Confine
+    'common',
     'apis',
     'nodes',
     'slices',
     'issues',
     'auth_extension',
     'tinc',
-
+    'firmware',
     # Third party apps that should load last
     'rest_framework',
 )

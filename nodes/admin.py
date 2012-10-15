@@ -1,7 +1,10 @@
-from common.admin import link, insert_inline, admin_link, colored
+from common.admin import link, insert_inline, admin_link, colored, DynamicChangeViewLinksMixin
 from django.conf.urls.defaults import patterns, url
+from django.core.urlresolvers import reverse
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.utils.functional import update_wrapper
 from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
@@ -27,7 +30,7 @@ class DirectIfaceInline(admin.TabularInline):
     extra = 0
 
 
-class NodeAdmin(admin.ModelAdmin):
+class NodeAdmin(DynamicChangeViewLinksMixin):
     list_display = ['id', 'uuid', 'description', link('cn_url', description='CN URL'), 
         'arch', colored('set_state', STATES_COLORS), admin_link('admin')]
     list_display_links = ('id', 'uuid', 'description')
@@ -50,18 +53,8 @@ class NodeAdmin(admin.ModelAdmin):
         }),)
     actions = [request_cert, reboot_selected]
     reboot_selected_template = 'admin/generic_confirmation_template.html'
-    
-    def get_urls(self):
-        """Returns the additional urls for performing actions on nodes"""
-        urls = super(NodeAdmin, self).get_urls()
-        admin_site = self.admin_site
-        opts = self.model._meta
-        info = opts.app_label, opts.module_name,
-        node_urls = patterns("",
-            url("^(?P<object_id>\d+)/reboot/$", admin_site.admin_view(self.reboot_view), name='%s_%s_reboot' % info),
-#            url("^request-cert/$", admin_site.admin_view(self.request_cert_view), name='%s_%s_request-cert' % info),
-            )
-        return node_urls + urls
+    change_view_links = [('reboot', 'reboot_view', 'Reboot', 'historylink'),
+                         ('request-cert', 'request_cert_view', 'Request Certificate', 'historylink') ]
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
@@ -70,9 +63,18 @@ class NodeAdmin(admin.ModelAdmin):
         return form
     
     def reboot_view(self, request, object_id):
-        queryset = Node.objects.filter(pk=1)
-        return reboot_selected(self, request, queryset)
-
+        queryset = Node.objects.filter(pk=object_id)
+        response = reboot_selected(self, request, queryset)
+        if not response: 
+            return HttpResponseRedirect(reverse('admin:nodes_node_change', args=[object_id]))
+        return response
+    
+    def request_cert_view(self, request, object_id):
+        queryset = Node.objects.filter(pk=object_id)
+        response = reboot_selected(self, request, queryset)
+        if not response: 
+            return HttpResponseRedirect(reverse('admin:nodes_node_change', args=[object_id]))
+        return response
 
 
 class ServerAdmin(SingletonModelAdmin):

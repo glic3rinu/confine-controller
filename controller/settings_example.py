@@ -134,7 +134,7 @@ INSTALLED_APPS = (
     'admin_tools.menu',
     'admin_tools.dashboard',
     'singleton_models',
-#    'django_extensions',
+    'django_extensions',
 
     # Django.contrib
     'django.contrib.auth',

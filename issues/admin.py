@@ -1,4 +1,4 @@
-from common.admin import admin_link, colored, DynamicChangeViewLinksMixin, action_as_view
+from common.admin import admin_link, colored, ChangeViewActionsMixin
 from django.contrib import admin
 from issues.actions import (reject_tickets, resolve_tickets, open_tickets, 
     take_tickets, mark_as_unread)
@@ -38,7 +38,7 @@ def messages(self):
     return self.number_of_messages
 
 
-class TicketAdmin(DynamicChangeViewLinksMixin):
+class TicketAdmin(ChangeViewActionsMixin):
     #TODO: Bold (id, subject) when tickets are unread for request.user
     #TODO: create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), 
@@ -52,10 +52,10 @@ class TicketAdmin(DynamicChangeViewLinksMixin):
         'queue', 'owner__username']
     inlines = [MessageInline]
     actions = [reject_tickets, resolve_tickets, open_tickets, take_tickets, mark_as_unread]
-    change_view_links = [('reject', 'reject_view', '', ''),
-                         ('resolve', 'resolve_view', '', ''),
-                         ('open', 'open_view', '', ''),
-                         ('take', 'take_view', '', ''),]
+    change_view_actions = [('reject', reject_tickets, '', ''),
+                           ('resolve', resolve_tickets, '', ''),
+                           ('open', open_tickets, '', ''),
+                           ('take', take_tickets, '', ''),]
     readonly_fields = ('created_by',)
     fieldsets = (
         (None, {
@@ -90,17 +90,17 @@ class TicketAdmin(DynamicChangeViewLinksMixin):
         else:  request.META['QUERY_STRING'] = query_string
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
     
-    def reject_view(self, request, object_id):
-        return action_as_view(reject_tickets, self, request, object_id)
-    
-    def resolve_view(self, request, object_id):
-        return action_as_view(resolve_tickets, self, request, object_id)
-    
-    def open_view(self, request, object_id):
-        return action_as_view(open_tickets, self, request, object_id)
-    
-    def take_view(self, request, object_id):
-        return action_as_view(take_tickets, self, request, object_id)
+#    def reject_view(self, request, object_id):
+#        return action_as_view(reject_tickets, self, request, object_id)
+#    
+#    def resolve_view(self, request, object_id):
+#        return action_as_view(resolve_tickets, self, request, object_id)
+#    
+#    def open_view(self, request, object_id):
+#        return action_as_view(open_tickets, self, request, object_id)
+#    
+#    def take_view(self, request, object_id):
+#        return action_as_view(take_tickets, self, request, object_id)
 
 
 def tickets(queue):

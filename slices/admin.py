@@ -1,4 +1,4 @@
-from common.admin import DynamicChangeViewLinksMixin, action_as_view
+from common.admin import ChangeViewActionsMixin
 from django.contrib import admin
 from slices.actions import renew_selected_slices, reset_selected_slices, reset_selected_slivers
 from slices.forms import SliverInlineAdminForm
@@ -26,7 +26,7 @@ class PrivateIfaceInline(admin.TabularInline):
     extra = 0
 
 
-class SliverAdmin(DynamicChangeViewLinksMixin):
+class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['description', 'id', 'instance_sn', 'node', 'slice']
     list_filter = ['slice__name']
     readonly_fields = ['instance_sn']
@@ -51,7 +51,7 @@ class SlicePropInline(admin.TabularInline):
     extra = 0
 
 
-class SliceAdmin(DynamicChangeViewLinksMixin):
+class SliceAdmin(ChangeViewActionsMixin):
     list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', 'set_state',
         'template', 'expires_on']
     list_filter = ['set_state']
@@ -71,8 +71,8 @@ class SliceAdmin(DynamicChangeViewLinksMixin):
             'fields': ('pubkey',)
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
-    change_view_links = [('renew', 'renew_slice_view', 'Renew', ''),
-                         ('reset', 'reset_slice_view', 'Reset', '') ]
+    change_view_actions = [('renew', renew_selected_slices, 'Renew', ''),
+                           ('reset', reset_selected_slices, 'Reset', '') ]
 
     def renew_slice_view(self, request, object_id):
         return action_as_view(renew_selected_slices, self, request, object_id)

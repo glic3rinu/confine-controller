@@ -1,5 +1,4 @@
-from common.admin import (insert_inline, admin_link, insert_action, get_modeladmin, 
-    action_as_view, DynamicChangeViewLinksMixin)
+from common.admin import insert_inline, admin_link, insert_action, get_modeladmin, ChangeViewActionsMixin
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
@@ -43,11 +42,11 @@ class GatewayAdmin(admin.ModelAdmin):
     inlines = [TincServerInline]
 
 
-class HostAdmin(DynamicChangeViewLinksMixin):
+class HostAdmin(ChangeViewActionsMixin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
     actions = [set_island]
-    change_view_links = [('set-island', 'set_island_view', 'Set Island', ''),]
+    change_view_actions = [('set-island', set_island, 'Set Island', ''),]
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """
@@ -78,8 +77,4 @@ insert_action(Node, set_island)
 
 
 node_modeladmin = get_modeladmin(Node)
-
-def set_island_view(request, object_id, modeladmin=node_modeladmin):
-    return action_as_view(set_island, modeladmin, request, object_id)
-
-node_modeladmin.set_change_view_link('set-island', set_island_view, 'Set Island', '')
+node_modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')

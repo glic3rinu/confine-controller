@@ -77,9 +77,9 @@ insert_inline(Server, TincClientInline)
 insert_action(Node, set_island)
 
 
-# FIXME set_island_view() takes exactly 3 non-keyword arguments (1 given)
-def set_island_view(modeladmin, request, object_id):
+node_modeladmin = get_modeladmin(Node)
+
+def set_island_view(request, object_id, modeladmin=node_modeladmin):
     return action_as_view(set_island, modeladmin, request, object_id)
 
-node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_link('set-island', set_island_view, 'Set Island', '')

@@ -1,6 +1,6 @@
 from common.admin import ChangeViewActionsMixin
 from django.contrib import admin
-from slices.actions import renew_selected_slices, reset_selected_slices, reset_selected_slivers
+from slices.actions import renew_selected_slices, reset_selected
 from slices.forms import SliverInlineAdminForm
 from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
     PrivateIface, Slice, SliceProp, Template)
@@ -33,13 +33,12 @@ class SliverAdmin(ChangeViewActionsMixin):
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
                PrivateIfaceInline]
-    actions = [reset_selected_slivers]
-
-    def reset_sliver_view(self, request, object_id):
-        return action_as_view(reset_selected_slivers, self, request, object_id)
+    actions = [reset_selected]
+    change_view_actions = [('reset', reset_selected, '', ''),]
 
 
 class SliverInline(admin.TabularInline):
+    # TODO nested inlines: https://code.djangoproject.com/ticket/9025
     model = Sliver
     form = SliverInlineAdminForm
     max_num = 0
@@ -59,7 +58,7 @@ class SliceAdmin(ChangeViewActionsMixin):
     date_hierarchy = 'expires_on'
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline,SliverInline]
-    actions = [reset_selected_slices, renew_selected_slices]
+    actions = [reset_selected, renew_selected_slices]
     fieldsets = (
         (None, {
             'fields': ('name', 'description', ('template', 'exp_data'), 
@@ -71,14 +70,8 @@ class SliceAdmin(ChangeViewActionsMixin):
             'fields': ('pubkey',)
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
-    change_view_actions = [('renew', renew_selected_slices, 'Renew', ''),
-                           ('reset', reset_selected_slices, 'Reset', '') ]
-
-    def renew_slice_view(self, request, object_id):
-        return action_as_view(renew_selected_slices, self, request, object_id)
-
-    def reset_slice_view(self, request, object_id):
-        return action_as_view(reset_selected_slices, self, request, object_id)
+    change_view_actions = [('renew', renew_selected_slices, '', ''),
+                           ('reset', reset_selected, '', '')]
 
 
 class TemplateAdmin(admin.ModelAdmin):

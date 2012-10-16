@@ -13,18 +13,10 @@ def renew_selected_slices(modeladmin, request, queryset):
 
 
 @transaction.commit_on_success
-def reset_selected_slices(modeladmin, request, queryset):
-    for slice in queryset:
-        slice.reset()
-        modeladmin.log_change(request, slice, "Instructed to reset")
-    msg = "%s selected slices has been reseted" % queryset.count()
+def reset_selected(modeladmin, request, queryset):
+    for obj in queryset:
+        obj.reset()
+        modeladmin.log_change(request, obj, "Instructed to reset")
+    msg = "%s selected has been reseted" % (obj._meta.verbose_name_plural, queryset.count())
     modeladmin.message_user(request, msg)
 
-
-@transaction.commit_on_success
-def reset_selected_slivers(modeladmin, request, queryset):
-    for sliver in queryset:
-        sliver.reset()
-        modeladmin.log_change(request, sliver, "Instructed to reset")
-    msg = "%s selected slices has been reseted" % queryset.count()
-    modeladmin.message_user(request, msg)

@@ -39,8 +39,8 @@ def messages(self):
 
 
 class TicketAdmin(ChangeViewActionsMixin):
-    #TODO: Bold (id, subject) when tickets are unread for request.user
-    #TODO: create a list filter for 'owner__username'
+    # TODO Bold (id, subject) when tickets are unread for request.user
+    # TODO Create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), 
         admin_link('owner'), admin_link('queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 

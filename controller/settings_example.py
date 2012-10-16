@@ -147,13 +147,13 @@ INSTALLED_APPS = (
 
     # Confine
     'common',
-#    'apis',
     'nodes',
     'slices',
     'issues',
     'auth_extension',
     'tinc',
     'firmware',
+
     # Third party apps that should load last
     'rest_framework',
 )

@@ -6,7 +6,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     uuid = serializers.CharField()
     pubkey = serializers.CharField()
     description = serializers.CharField()
-    authtokens = serializers.Field()
+    auth_tokens = serializers.Field()
     
     class Meta:
         model = User

@@ -110,6 +110,6 @@ class AuthToken(models.Model):
 
 
 @property
-def authtokens(self):
+def auth_tokens(self):
     return self.authtoken_set.all().values_list('data')
-User.authtokens = authtokens
+User.auth_tokens = auth_tokens

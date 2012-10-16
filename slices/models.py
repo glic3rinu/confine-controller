@@ -115,7 +115,8 @@ class Sliver(models.Model):
     
     @property
     def interfaces(self):
-        ifaces = [self.privateiface]
+        try: ifaces = [self.privateiface] 
+        except PrivateIface.DoesNotExist: ifaces = []
         ifaces += list(self.publiciface_set.all())
         ifaces += list(self.isolatediface_set.all())
         return ifaces

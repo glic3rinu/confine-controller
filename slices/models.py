@@ -69,7 +69,7 @@ class Slice(models.Model):
         return dict(self.sliceprop_set.all().values_list('name', 'value'))
     
     def renew(self):
-        self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+        self.expires_on += datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         self.save()
     
     def reset(self):

@@ -89,18 +89,6 @@ class TicketAdmin(ChangeViewActionsMixin):
         except Queue.DoesNotExist: pass
         else:  request.META['QUERY_STRING'] = query_string
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
-    
-#    def reject_view(self, request, object_id):
-#        return action_as_view(reject_tickets, self, request, object_id)
-#    
-#    def resolve_view(self, request, object_id):
-#        return action_as_view(resolve_tickets, self, request, object_id)
-#    
-#    def open_view(self, request, object_id):
-#        return action_as_view(open_tickets, self, request, object_id)
-#    
-#    def take_view(self, request, object_id):
-#        return action_as_view(take_tickets, self, request, object_id)
 
 
 def tickets(queue):

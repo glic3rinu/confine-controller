@@ -1,10 +1,8 @@
 from common.admin import link, insert_inline, admin_link, colored, ChangeViewActionsMixin
 from django.conf.urls.defaults import patterns, url
-
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import transaction
-
 from django.utils.functional import update_wrapper
 from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
@@ -59,13 +57,6 @@ class NodeAdmin(ChangeViewActionsMixin):
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
         form.base_fields['admin'].initial = request.user
         return form
-    
-#    def reboot_view(self, request, object_id):
-#        return action_as_view(reboot_selected, self, request, object_id)
-#    
-#    def request_cert_view(self, request, object_id):
-#        return action_as_view(request_cert, self, request, object_id)
-
 
 
 class ServerAdmin(SingletonModelAdmin):

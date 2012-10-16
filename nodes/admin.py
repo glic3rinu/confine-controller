@@ -1,10 +1,11 @@
-from common.admin import link, insert_inline, admin_link, colored, DynamicChangeViewLinksMixin
+from common.admin import (link, insert_inline, admin_link, colored, action_as_view,
+    DynamicChangeViewLinksMixin)
 from django.conf.urls.defaults import patterns, url
-from django.core.urlresolvers import reverse
+
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.http import HttpResponseRedirect
+
 from django.utils.functional import update_wrapper
 from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
@@ -29,7 +30,6 @@ class DirectIfaceInline(admin.TabularInline):
     model = DirectIface
     extra = 0
 
-
 class NodeAdmin(DynamicChangeViewLinksMixin):
     list_display = ['id', 'uuid', 'description', link('cn_url', description='CN URL'), 
         'arch', colored('set_state', STATES_COLORS), admin_link('admin')]
@@ -52,9 +52,8 @@ class NodeAdmin(DynamicChangeViewLinksMixin):
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
     actions = [request_cert, reboot_selected]
-    reboot_selected_template = 'admin/generic_confirmation_template.html'
-    change_view_links = [('reboot', 'reboot_view', 'Reboot', 'historylink'),
-                         ('request-cert', 'request_cert_view', 'Request Certificate', 'historylink') ]
+    change_view_links = [('reboot', 'reboot_view', '', ''),
+                         ('request-cert', 'request_cert_view', 'Request Certificate', ''),]
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
@@ -63,18 +62,11 @@ class NodeAdmin(DynamicChangeViewLinksMixin):
         return form
     
     def reboot_view(self, request, object_id):
-        queryset = Node.objects.filter(pk=object_id)
-        response = reboot_selected(self, request, queryset)
-        if not response: 
-            return HttpResponseRedirect(reverse('admin:nodes_node_change', args=[object_id]))
-        return response
+        return action_as_view(reboot_selected, self, request, object_id)
     
     def request_cert_view(self, request, object_id):
-        queryset = Node.objects.filter(pk=object_id)
-        response = reboot_selected(self, request, queryset)
-        if not response: 
-            return HttpResponseRedirect(reverse('admin:nodes_node_change', args=[object_id]))
-        return response
+        return action_as_view(request_cert, self, request, object_id)
+
 
 
 class ServerAdmin(SingletonModelAdmin):

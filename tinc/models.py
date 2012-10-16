@@ -78,6 +78,9 @@ class TincClient(TincHost):
     def __unicode__(self):
         return "%s_%s" % (self.content_type.model, self.object_id)
 
+    def set_island(self):
+        self.connect_to = self.island.tincaddress_set.all()
+        self.save()
 
 # Hook TincClient support for related models
 related_models = [Host, Node, Server]
@@ -91,3 +94,5 @@ for model in related_models:
     related_tincclient = generic.GenericRelation('tinc.TincClient')
     related_tincclient.contribute_to_class(model, 'related_tincclient')
     model.tinc = tinc
+
+

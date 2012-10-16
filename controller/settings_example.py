@@ -147,7 +147,7 @@ INSTALLED_APPS = (
 
     # Confine
     'common',
-    'apis',
+#    'apis',
     'nodes',
     'slices',
     'issues',

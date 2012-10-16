@@ -7,6 +7,8 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy, ugettext as _
 
+#TODO make this a generic pattern for reusing accros all actions that needs this
+#     kind of confirmation
 
 @transaction.commit_on_success
 def reboot_selected(modeladmin, request, queryset):
@@ -48,11 +50,10 @@ def reboot_selected(modeladmin, request, queryset):
     }
     
     # Display the confirmation page
-    return TemplateResponse(request, modeladmin.reboot_selected_template, 
+    return TemplateResponse(request, 'admin/node_reboot_confirmation.html', 
         context, current_app=modeladmin.admin_site.name)
 
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
-
 
 
 @transaction.commit_on_success

@@ -4,3 +4,5 @@ try:
     psycopg2.extras.register_uuid()
 except (ImportError, AttributeError):
     pass
+
+from common.api import api

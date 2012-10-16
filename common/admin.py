@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.utils.html import escape
 from utils import get_field_value
 
@@ -108,8 +109,10 @@ class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
 
 class DynamicChangeViewLinksMixin(admin.options.ModelAdmin):
     """
-        Dynamically hooks new links on the objet-tools-item block.
-        usage 1:
+        Dynamically hooks new links on the change form template objet-tools-item block
+        Note: If you want to provide a custom change form template then you should
+            specify it with modeladmin.change_form_template = "your template"
+        Usage 1:
             change_view_links = [('reboot', reboot_view, 'Reboot', 'historylink'), 
                                  ('reboot', 'reboot_view', '', '')]
         Usage 2: 
@@ -121,7 +124,7 @@ class DynamicChangeViewLinksMixin(admin.options.ModelAdmin):
         else:
             links = [ self._prepare_change_view_link(*link) for link in self.change_view_links ]
             self.change_view_links = links
-        if not self.change_list_template:
+        if not self.change_form_template:
             self.change_form_template = "admin/common/change_form.html"
     
     def get_urls(self):
@@ -154,3 +157,12 @@ class DynamicChangeViewLinksMixin(admin.options.ModelAdmin):
         kwargs['extra_context'] = extra_context
         return super(DynamicChangeViewLinksMixin, self).change_view(*args, **kwargs)
 
+
+def action_as_view(action, modeladmin, request, object_id):
+    """ Call a modeladmin action as if was a view in order to reuse it's code """
+    queryset = modeladmin.model.objects.filter(pk=object_id)
+    response = action(modeladmin, request, queryset)
+    if not response:
+        opts = modeladmin.model._meta
+        return HttpResponseRedirect(reverse('admin:%s_%s_change' % (opts.app_label, opts.module_name), args=[object_id]))
+    return response

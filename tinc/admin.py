@@ -1,9 +1,9 @@
-from common.admin import insert_inline, admin_link, insert_action, get_modeladmin
+from common.admin import insert_inline, admin_link, insert_action, get_modeladmin, action_as_view
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from nodes.models import Node, Server
-from tinc.actions import set_islands
+from tinc.actions import set_island
 from tinc.forms import HostInlineAdminForm
 from tinc.models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
@@ -19,6 +19,11 @@ class TincServerInline(admin.TabularInline):
     max_num = 1
 
 
+class TincAddressInline(admin.TabularInline):
+    model = TincAddress
+    max_num = 1
+
+
 class TincAddressAdmin(admin.ModelAdmin):
     list_display = ['ip_addr', 'port', 'island', 'server']
     list_filter = ['island__name', 'port', 'server']
@@ -29,6 +34,7 @@ class TincAddressAdmin(admin.ModelAdmin):
 class IslandAdmin(admin.ModelAdmin):
     list_display = ['name', 'id', 'description']
     search_fields = ['name', 'description']
+    inlines = [TincAddressInline]
 
 
 class GatewayAdmin(admin.ModelAdmin):
@@ -39,7 +45,7 @@ class GatewayAdmin(admin.ModelAdmin):
 class HostAdmin(admin.ModelAdmin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
-    actions = [set_islands]
+    actions = [set_island]
 
 
 admin.site.register(Host, HostAdmin)
@@ -57,11 +63,12 @@ class HostInline(admin.TabularInline):
 insert_inline(User, HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincClientInline)
-insert_action(Node, set_islands)
+insert_action(Node, set_island)
 
 
-def set_island_view(modeladmin, request, object_id):
-    pass
-
-node_modeladmin = get_modeladmin(Node)
-node_modeladmin.set_change_view_link('set-island', set_island_view, 'Set Island', '')
+# FIXME set_island_view() takes exactly 3 non-keyword arguments (1 given)
+#def set_island_view(modeladmin, request, object_id):
+#    return action_as_view(set_island, modeladmin, request, object_id)
+#
+#node_modeladmin = get_modeladmin(Node)
+#node_modeladmin.set_change_view_link('set-island', set_island_view, 'Set Island', '')

@@ -10,6 +10,9 @@ class Host(models.Model):
     description = models.CharField(max_length=256)
     admin = models.ForeignKey(User)
 
+    def __unicode__(self):
+        return self.description
+
 
 class TincHost(models.Model):
     pubkey = models.TextField(unique=True, help_text="""PEM-encoded RSA public 

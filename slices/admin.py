@@ -60,6 +60,16 @@ class SliceAdmin(DynamicChangeViewLinksMixin):
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline,SliverInline]
     actions = [reset_selected_slices, renew_selected_slices]
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', ('template', 'exp_data'), 
+                       'vlan_nr', 'set_state', 'users', 'instance_sn', 
+                       'new_sliver_instance_sn', 'expires_on'),
+        }),
+        ('Public key', {
+            'classes': ('collapse',),
+            'fields': ('pubkey',)
+        }),)
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_links = [('renew', 'renew_slice_view', 'Renew', ''),
                          ('reset', 'reset_slice_view', 'Reset', '') ]

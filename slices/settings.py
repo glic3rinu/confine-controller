@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.conf import settings
 
 ugettext = lambda s: s
@@ -23,3 +24,7 @@ DEFAULT_TEMPLATE_ARCH = getattr(settings, 'DEFAULT_TEMPLATE_ARCH', 'amd64')
 
 TEMPLATE_DATA_DIR = getattr(settings, 'TEMPLATE_DATA_DIR', 'templates/')
 SLICE_EXP_DATA_DIR = getattr(settings, 'SLICE_EXP_DATA_DIR', 'exp_data/')
+
+
+# 30 days expiration interval
+SLICE_EXPIRATION_INTERVAL = getattr(settings, 'SLICE_EXPIRATION_INTERVAL', timedelta(30))

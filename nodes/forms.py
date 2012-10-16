@@ -12,7 +12,7 @@ class NodeInlineAdminForm(forms.ModelForm):
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
     pk = forms.CharField(label="ID", widget=ShowText(bold=True))
     cn_url = forms.CharField(label="Node CN URL", widget=ShowText(bold=True))
-    rd_arch = forms.CharField(label="RD Arch", widget=ShowText())
+    arch = forms.CharField(label="Arch", widget=ShowText())
     set_state = forms.CharField(label="Set State", widget=ShowText(bold=True))
 
     class Meta:
@@ -28,6 +28,6 @@ class NodeInlineAdminForm(forms.ModelForm):
             self.initial['pk'] = instance.pk
             self.initial['cn_url'] = mark_safe("<a href='%s'>%s</a>" % (instance.cn_url, 
                 instance.cn_url))
-            self.initial['rd_arch'] = instance.researchdevice.arch
+            self.initial['arch'] = instance.arch
             self.initial['set_state'] = instance.set_state
 

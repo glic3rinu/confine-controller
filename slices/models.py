@@ -1,3 +1,4 @@
+from datetime import datetime
 from django_extensions.db import fields
 from django.contrib.auth.models import User
 from django.db import models
@@ -55,6 +56,8 @@ class Slice(models.Model):
     def save(self, *args, **kwargs):
         if self.vlan_nr == -1 and self.set_state == self.INSTANTIATE:
             self.vlan_nr = self._get_vlan_nr()
+        if not self.pk:
+            self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         super(Slice, self).save(*args, **kwargs)
     
     @property
@@ -64,6 +67,14 @@ class Slice(models.Model):
     @property
     def properties(self):
         return dict(self.sliceprop_set.all().values_list('name', 'value'))
+    
+    def renew(self):
+        self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+        self.save()
+    
+    def reset(self):
+        self.instance_sn += 1
+        self.save()
     
     def _get_vlan_nr(self):
         last_nr = Slice.objects.order_by('-vlan_nr')[0]
@@ -108,7 +119,10 @@ class Sliver(models.Model):
         ifaces += list(self.publiciface_set.all())
         ifaces += list(self.isolatediface_set.all())
         return ifaces
-
+    
+    def reset(self):
+        self.instance_sn += 1
+        self.save()
 
 class SliverProp(models.Model):
     sliver = models.ForeignKey(Sliver)

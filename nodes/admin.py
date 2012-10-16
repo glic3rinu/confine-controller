@@ -1,5 +1,4 @@
-from common.admin import (link, insert_inline, admin_link, colored, action_as_view,
-    DynamicChangeViewLinksMixin)
+from common.admin import link, insert_inline, admin_link, colored, ChangeViewActionsMixin
 from django.conf.urls.defaults import patterns, url
 
 from django.contrib import admin
@@ -30,7 +29,7 @@ class DirectIfaceInline(admin.TabularInline):
     model = DirectIface
     extra = 0
 
-class NodeAdmin(DynamicChangeViewLinksMixin):
+class NodeAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'uuid', 'description', link('cn_url', description='CN URL'), 
         'arch', colored('set_state', STATES_COLORS), admin_link('admin')]
     list_display_links = ('id', 'uuid', 'description')
@@ -52,8 +51,8 @@ class NodeAdmin(DynamicChangeViewLinksMixin):
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),)
     actions = [request_cert, reboot_selected]
-    change_view_links = [('reboot', 'reboot_view', '', ''),
-                         ('request-cert', 'request_cert_view', 'Request Certificate', ''),]
+    change_view_actions = [('reboot', reboot_selected, '', ''),
+                           ('request-cert', request_cert, 'Request Certificate', ''),]
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
@@ -61,11 +60,11 @@ class NodeAdmin(DynamicChangeViewLinksMixin):
         form.base_fields['admin'].initial = request.user
         return form
     
-    def reboot_view(self, request, object_id):
-        return action_as_view(reboot_selected, self, request, object_id)
-    
-    def request_cert_view(self, request, object_id):
-        return action_as_view(request_cert, self, request, object_id)
+#    def reboot_view(self, request, object_id):
+#        return action_as_view(reboot_selected, self, request, object_id)
+#    
+#    def request_cert_view(self, request, object_id):
+#        return action_as_view(request_cert, self, request, object_id)
 
 
 

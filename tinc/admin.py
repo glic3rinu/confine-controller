@@ -38,7 +38,6 @@ class IslandAdmin(admin.ModelAdmin):
 
 
 class GatewayAdmin(admin.ModelAdmin):
-#    list_display = ['tinc_name', 'id' ]
     inlines = [TincServerInline]
 
 

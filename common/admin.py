@@ -109,7 +109,7 @@ class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
 
 class ChangeViewActionsMixin(admin.options.ModelAdmin):
     """
-        Dynamically hooks new links on the change form template objet-tools-item block
+        Make actions visible on the admin change view page.
         Note: If you want to provide a custom change form template then you should
             specify it with modeladmin.change_form_template = "your template"
         Usage 1:
@@ -160,7 +160,7 @@ class ChangeViewActionsMixin(admin.options.ModelAdmin):
 
 
 def action_to_view(action, modeladmin):
-    """ Call a modeladmin action as if was a view in order to reuse it's code """
+    """ Convert modeladmin action as to view function """
     def action_view(request, object_id, modeladmin=modeladmin, action=action):
         queryset = modeladmin.model.objects.filter(pk=object_id)
         response = action(modeladmin, request, queryset)

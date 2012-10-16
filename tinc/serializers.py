@@ -1,4 +1,4 @@
-from apis import rest
+from common.api import api
 from nodes.models import Server, Node
 from rest_framework import serializers
 from tinc.models import Island, TincAddress, TincHost, TincClient, Host
@@ -39,5 +39,5 @@ class HostSerializer(serializers.HyperlinkedModelSerializer):
         model = Host
 
 
-rest.api.aggregate(Server, TincClientSerializer, name='tinc')
-rest.api.aggregate(Node, TincClientSerializer, name='tinc')
+api.aggregate(Server, TincClientSerializer, name='tinc')
+api.aggregate(Node, TincClientSerializer, name='tinc')

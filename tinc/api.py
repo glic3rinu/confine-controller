@@ -1,4 +1,4 @@
-from apis import rest
+from common.api import api
 from rest_framework import generics
 from tinc.models import Island, Host
 from tinc.serializers import IslandSerializer, HostSerializer
@@ -24,5 +24,5 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = HostSerializer
 
 
-rest.api.register(IslandList, IslandDetail)
-rest.api.register(HostList, HostDetail)
+api.register(IslandList, IslandDetail)
+api.register(HostList, HostDetail)

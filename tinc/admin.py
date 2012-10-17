@@ -75,5 +75,7 @@ insert_inline(Server, TincClientInline)
 insert_action(Node, set_island)
 
 
-node_modeladmin = get_modeladmin(Node)
-node_modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')
+for model in [Node, Server]:
+    modeladmin = get_modeladmin(model)
+    modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')
+

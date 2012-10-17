@@ -59,7 +59,10 @@ class NodeAdmin(ChangeViewActionsMixin):
         return form
 
 
-class ServerAdmin(SingletonModelAdmin):
+class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
+    readonly_fields = ['cndb_cached_on']
+    change_form_template = 'admin/nodes/server/change_form.html'
+    
     def get_urls(self):
         def wrap(view):
             def wrapper(*args, **kwargs):
@@ -71,15 +74,15 @@ class ServerAdmin(SingletonModelAdmin):
         urlpatterns = patterns('',
             url(r'^history/$', wrap(self.history_view), {'object_id': '1'},
                 name='%s_%s_history' % info),
-            url(r'^$',
-                wrap(self.change_view), {'object_id': '1'}, 
+            url(r'^(?P<object_id>\d+)$',
+                wrap(self.change_view), 
                 name='%s_%s_change' % info),
             url(r'^$',
                 wrap(self.change_view), {'object_id': '1'}, 
                 name='%s_%s_changelist' % info),
         )
-        
-        return urlpatterns
+        urls = super(ServerAdmin, self).get_urls()
+        return urlpatterns + urls
 
 
 admin.site.register(Node, NodeAdmin)

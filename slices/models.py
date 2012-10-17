@@ -110,15 +110,15 @@ class SliceProp(models.Model):
 
 
 class Sliver(models.Model):
-    description = models.CharField(max_length=256)
-    instance_sn = models.PositiveIntegerField(default=0, blank=True, 
+    description = models.CharField(max_length=256, blank=True)
+    instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text="""The number of times this sliver has been instructed to be 
         reset (instance sequence number).""")
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey('nodes.Node')
     
     def __unicode__(self):
-        return self.description
+        return self.description if self.description else str(self.id)
     
     @property
     def properties(self):

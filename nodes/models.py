@@ -62,7 +62,7 @@ class Node(CnHost):
         node (its creator by default).""")
     
     def __unicode__(self):
-        return str(self.id)
+        return self.description
     
     def clean(self):
         """ Empty pubkey and cert as NULL instead of empty string """

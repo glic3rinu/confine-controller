@@ -37,7 +37,7 @@ class PrivateIfaceInline(admin.TabularInline):
 
 
 class SliverAdmin(ChangeViewActionsMixin):
-    list_display = ['id', 'description', 'instance_sn', 'node', admin_link('slice')]
+    list_display = ['id', 'description', 'instance_sn', admin_link('node'), admin_link('slice')]
     list_filter = ['slice__name']
     readonly_fields = ['instance_sn']
     search_fields = ['description', 'node__description', 'slice__name']

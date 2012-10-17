@@ -35,11 +35,13 @@ class CustomMenu(Menu):
         def api_link():
             if 'opts' in context: opts = context['opts']
             elif 'cl' in context: opts = context['cl'].opts
-            else: return '/api'
+            else: return reverse('base')
             if 'object_id' in context: 
                 object_id = context['object_id']
-                return reverse('%s-detail' % opts.module_name, args=[object_id])
-            return reverse('%s-list' % opts.module_name)
+                try: return reverse('%s-detail' % opts.module_name, args=[object_id])
+                except: return reverse('base')
+            try: return reverse('%s-list' % opts.module_name)
+            except: return reverse('base')
         
         self.children += [
                     items.MenuItem('API', api_link),

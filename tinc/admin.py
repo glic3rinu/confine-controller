@@ -1,4 +1,4 @@
-from common.admin import insert_inline, admin_link, insert_action, get_modeladmin, ChangeViewActionsMixin
+from common.admin import insert_inline, admin_link, insert_action, get_modeladmin, ChangeViewActionsMixin, link
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
@@ -15,6 +15,7 @@ class TincClientInline(generic.GenericTabularInline):
 
 
 class TincServerInline(admin.TabularInline):
+    # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     model = TincServer
     max_num = 1
 
@@ -22,6 +23,13 @@ class TincServerInline(admin.TabularInline):
 class TincAddressInline(admin.TabularInline):
     model = TincAddress
     max_num = 1
+
+
+class ReadOnlyTincAddressInline(admin.TabularInline):
+    model = TincAddress
+    readonly_fields = ['ip_addr', 'port', 'server']
+    can_delete = False
+    max_num = 0
 
 
 class TincAddressAdmin(admin.ModelAdmin):
@@ -34,10 +42,12 @@ class TincAddressAdmin(admin.ModelAdmin):
 class IslandAdmin(admin.ModelAdmin):
     list_display = ['name', 'id', 'description']
     search_fields = ['name', 'description']
-    inlines = [TincAddressInline]
+    inlines = [ReadOnlyTincAddressInline]
 
 
 class GatewayAdmin(admin.ModelAdmin):
+    list_display = ['id', link('cn_url'), link('cndb_url')]
+    readonly_fields = ['cndb_cached_on']
     inlines = [TincServerInline]
 
 

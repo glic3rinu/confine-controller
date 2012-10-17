@@ -13,7 +13,7 @@ class Template(models.Model):
     arch = models.CharField(verbose_name="Architecture", max_length=32, 
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH)
     is_active = models.BooleanField(default=True)
-    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR)
+    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, blank=True)
     
     def __unicode__(self):
         return self.name

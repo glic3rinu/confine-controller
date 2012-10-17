@@ -88,6 +88,9 @@ class NodeProp(models.Model):
     name = models.CharField(max_length=32, unique=True)
     value = models.CharField(max_length=256)
     
+    class Meta:
+        unique_together = ('node', 'name')
+    
     def __unicode__(self):
         return self.name
 

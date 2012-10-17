@@ -28,7 +28,7 @@ class DirectIfaceInline(admin.TabularInline):
     extra = 0
 
 class NodeAdmin(ChangeViewActionsMixin):
-    list_display = ['id', 'uuid', 'description', link('cn_url', description='CN URL'), 
+    list_display = ['description', 'id', 'uuid', link('cn_url', description='CN URL'), 
         'arch', colored('set_state', STATES_COLORS), admin_link('admin')]
     list_display_links = ('id', 'uuid', 'description')
     list_filter = ['arch', 'set_state']

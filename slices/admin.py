@@ -60,11 +60,13 @@ class NodeListAdmin(admin.ModelAdmin):
     actions = None
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
+    change_list_template = 'admin/slices/slice/list_nodes.html'
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id
         slice = Slice.objects.get(pk=slice_id)
-        context = {'title': 'Select a node for slice "%s"' % slice.name,}
+        context = {'title': 'Select a node for slice "%s"' % slice.name,
+                   'slice': slice, }
         context.update(extra_context or {})
         return super(NodeListAdmin, self).changelist_view(request, context)
     
@@ -80,13 +82,15 @@ class NodeListAdmin(admin.ModelAdmin):
 
 class AddSliverAdmin(SliverAdmin):
     fields = ['description']
+    add_form_template = 'admin/slices/slice/add_sliver.html'
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
         self.slice_id = slice_id
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
         node = Node.objects.get(pk=node_id)
-        context = {'title': 'Add sliver in node "%s" (slice "%s")' % (node.description, slice.name),}
+        context = {'title': 'Add sliver in node "%s" (slice "%s")' % (node.description, slice.name),
+                   'slice': slice,}
         context.update(extra_context or {})
         return super(AddSliverAdmin, self).add_view(request, form_url='', extra_context=context)
     

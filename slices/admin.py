@@ -64,7 +64,7 @@ class NodeListAdmin(admin.ModelAdmin):
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id
         slice = Slice.objects.get(pk=slice_id)
-        context = {'title': 'Select a node for the new sliver to add on slice "%s"' % slice.name,}
+        context = {'title': 'Select a node for slice "%s"' % slice.name,}
         context.update(extra_context or {})
         return super(NodeListAdmin, self).changelist_view(request, context)
     
@@ -86,7 +86,7 @@ class AddSliverAdmin(SliverAdmin):
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
         node = Node.objects.get(pk=node_id)
-        context = {'title': 'Add sliver to Slice "%s" at node "%s"' % (slice.name, node.description),}
+        context = {'title': 'Add sliver in node "%s" (slice "%s")' % (node.description, slice.name),}
         context.update(extra_context or {})
         return super(AddSliverAdmin, self).add_view(request, form_url='', extra_context=context)
     

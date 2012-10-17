@@ -17,9 +17,11 @@
 {% block content %}
 
     <p>{{ content_message }}</p>
+    <ul>
     {% for deletable_object in deletable_objects %}
-        <ul>{{ deletable_object.uuid}}</ul>
+        <li> <a href="{% url 'admin:nodes_node_change' deletable_object.id %}">{{ deletable_object.description }} ({{ deletable_object.uuid}})</a></li>
     {% endfor %}
+    </ul>
     <form action="" method="post">{% csrf_token %}
     <div>
     {% for obj in queryset %}

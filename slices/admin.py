@@ -56,7 +56,7 @@ add_sliver_link.allow_tags = True
 class NodeListAdmin(admin.ModelAdmin):
     """ Provides a list of nodes for helping adding slivers to an slice"""
     
-    list_display = [add_sliver_link, 'uuid', 'arch']
+    list_display = [add_sliver_link, 'uuid', 'arch', 'set_state']
     actions = None
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']

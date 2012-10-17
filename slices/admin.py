@@ -1,4 +1,4 @@
-from common.admin import ChangeViewActionsMixin, colored, admin_link
+from common.admin import ChangeViewActionsMixin, colored, admin_link, insert_list_display
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -173,3 +173,9 @@ class TemplateAdmin(admin.ModelAdmin):
 admin.site.register(Sliver, SliverAdmin)
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Template, TemplateAdmin)
+
+
+def slivers(self):
+    return self.num_slivers
+
+insert_list_display(Node, slivers)

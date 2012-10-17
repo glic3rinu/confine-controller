@@ -2,6 +2,7 @@ from datetime import datetime
 from django_extensions.db import fields
 from django.contrib.auth.models import User
 from django.db import models
+from nodes.models import Node
 from slices import settings
 
 
@@ -115,7 +116,7 @@ class Sliver(models.Model):
         help_text="""The number of times this sliver has been instructed to be 
         reset (instance sequence number).""")
     slice = models.ForeignKey(Slice)
-    node = models.ForeignKey('nodes.Node')
+    node = models.ForeignKey(Node)
     
     def __unicode__(self):
         return self.description if self.description else str(self.id)
@@ -135,6 +136,13 @@ class Sliver(models.Model):
     def reset(self):
         self.instance_sn += 1
         self.save()
+
+
+@property
+def num_slivers(self):
+    return self.sliver_set.all().count()
+Node.num_slivers = num_slivers
+
 
 class SliverProp(models.Model):
     sliver = models.ForeignKey(Sliver)

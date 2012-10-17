@@ -11,15 +11,6 @@ def resolve_tickets(modeladmin, request, queryset):
 
 
 @transaction.commit_on_success
-def open_tickets(modeladmin, request, queryset):
-    queryset.open()
-    for obj in queryset:
-        modeladmin.log_change(request, obj, "Marked as Open")
-    msg = "%s selected tickets are now open" % queryset.count()
-    modeladmin.message_user(request, msg)
-
-
-@transaction.commit_on_success
 def reject_tickets(modeladmin, request, queryset):
     queryset.reject()
     for obj in queryset:

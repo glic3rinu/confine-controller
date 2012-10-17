@@ -1,7 +1,6 @@
 from common.admin import admin_link, colored, ChangeViewActionsMixin
 from django.contrib import admin
-from issues.actions import (reject_tickets, resolve_tickets, open_tickets, 
-    take_tickets, mark_as_unread)
+from issues.actions import (reject_tickets, resolve_tickets, take_tickets, mark_as_unread)
 from issues.forms import MessageInlineForm, TicketInlineForm
 from issues.models import Ticket, Queue, Message
 
@@ -35,7 +34,7 @@ class TicketInline(admin.TabularInline):
 
 
 def messages(self):
-    return self.number_of_messages
+    return self.num_messages
 
 
 class TicketAdmin(ChangeViewActionsMixin):
@@ -51,10 +50,9 @@ class TicketAdmin(ChangeViewActionsMixin):
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email', 
         'queue', 'owner__username']
     inlines = [MessageInline]
-    actions = [reject_tickets, resolve_tickets, open_tickets, take_tickets, mark_as_unread]
+    actions = [reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
     change_view_actions = [('reject', reject_tickets, '', ''),
                            ('resolve', resolve_tickets, '', ''),
-                           ('open', open_tickets, '', ''),
                            ('take', take_tickets, '', ''),]
     readonly_fields = ('created_by',)
     fieldsets = (
@@ -92,7 +90,7 @@ class TicketAdmin(ChangeViewActionsMixin):
 
 
 def tickets(queue):
-    return queue.number_of_tickets
+    return queue.num_tickets
 
 
 class QueueAdmin(admin.ModelAdmin):

@@ -24,11 +24,11 @@ class Queue(models.Model):
         super(Queue, self).save(*args, **kwargs)
     
     @property
-    def number_of_tickets(self):
+    def num_tickets(self):
         return self.ticket_set.all().count()
     
     @property
-    def number_of_messages(self):
+    def num_messages(self):
         return Message.objects.filter(ticket__queue=self).count()
 
 
@@ -75,8 +75,14 @@ class Ticket(models.Model):
     def __unicode__(self):
         return str(self.id)
     
+    def save(self, *args, **kwargs):
+        # FIXME only set to open when an staff operator has replyed
+        if self.state == 'NEW' and self.num_messages > 1:
+            self.state = 'OPEN'
+        super(Ticket, self).save(*args, **kwargs)
+    
     @property
-    def number_of_messages(self):
+    def num_messages(self):
         return self.message_set.all().count()
 
 

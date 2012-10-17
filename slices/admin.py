@@ -104,23 +104,8 @@ class AddSliverAdmin(SliverAdmin):
         """ Determines the HttpResponse for the add_view stage. """
         opts = obj._meta
         pk_value = obj._get_pk_val()
-        
         msg = 'The %(name)s "%(obj)s" was added successfully.' % {'name': force_text(opts.verbose_name), 'obj': force_text(obj)}
-        # Here, we distinguish between different save types by checking for
-        # the presence of keys in request.POST.
-        if "_continue" in request.POST:
-            # FIXME this doesn't work
-            self.message_user(request, msg + ' ' + "You may edit it again below.")
-            if "_popup" in request.POST:
-                post_url_continue += "?_popup=1"
-            return HttpResponseRedirect(post_url_continue % pk_value)
-        
-        if "_popup" in request.POST:
-            return HttpResponse(
-                '<!DOCTYPE html><html><head><title></title></head><body>'
-                '<script type="text/javascript">opener.dismissAddAnotherPopup(window, "%s", "%s");</script></body></html>' % \
-                (escape(pk_value), escapejs(obj)))
-        elif "_addanother" in request.POST:
+        if "_addanother" in request.POST:
             self.message_user(request, msg + ' ' + ("You may add another %s below.") % force_text(opts.verbose_name))
             return HttpResponseRedirect('.')
         else:

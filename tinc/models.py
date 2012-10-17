@@ -80,7 +80,14 @@ class TincClient(TincHost):
     
     def __unicode__(self):
         return "%s_%s" % (self.content_type.model, self.object_id)
-
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            super(TincClient, self).save(*args, **kwargs)
+            self.connect_to = self.island.tincaddress_set.all()
+        else:
+            super(TincClient, self).save(*args, **kwargs)
+    
     def set_island(self):
         self.connect_to = self.island.tincaddress_set.all()
         self.save()

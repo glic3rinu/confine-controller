@@ -19,6 +19,10 @@ class Template(models.Model):
         return self.name
 
 
+def get_expires_on():
+    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+
+
 class Slice(models.Model):
     REGISTER = 'register'
     INSTANTIATE = 'instantiate'
@@ -32,8 +36,8 @@ class Slice(models.Model):
     pubkey = models.TextField(null=True, blank=True, help_text="""A PEM-encoded 
         RSA public key for this slice (used by SFA).""")
     description = models.TextField(blank=True)
-    expires_on = models.DateField(null=True, blank=True, help_text="""Expiration 
-        date of this slice. Automatically deleted once expires.""")
+    expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
+        help_text="""Expiration date of this slice. Automatically deleted once expires.""")
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text="""The number of times this slice has been instructed to be 
         reset (instance sequence number).""")
@@ -43,7 +47,7 @@ class Slice(models.Model):
         number allocated to this slice by the server. The only values that can 
         be /set/ are null (no VLAN wanted) and -1 (asks the server to allocate a 
         new VLAN number (2 <= vlan_nr < 0xFFF) on slice instantiation).""")
-    exp_data = models.FileField(help_text="Experiment Data",
+    exp_data = models.FileField(help_text="Experiment Data", blank=True,
         upload_to=settings.SLICE_EXP_DATA_DIR)
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template)
@@ -68,8 +72,12 @@ class Slice(models.Model):
     def properties(self):
         return dict(self.sliceprop_set.all().values_list('name', 'value'))
     
+    @property
+    def num_slivers(self):
+        return self.sliver_set.all().count()
+    
     def renew(self):
-        self.expires_on += datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+        self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         self.save()
     
     def reset(self):
@@ -93,6 +101,9 @@ class SliceProp(models.Model):
     slice = models.ForeignKey(Slice)
     name = models.CharField(max_length=64, unique=True)
     value = models.CharField(max_length=256)
+    
+    class Meta:
+        unique_together = ('slice', 'name')
     
     def __unicode__(self):
         return self.name
@@ -127,8 +138,11 @@ class Sliver(models.Model):
 
 class SliverProp(models.Model):
     sliver = models.ForeignKey(Sliver)
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64)
     value = models.CharField(max_length=256)
+    
+    class Meta:
+        unique_together = ('sliver', 'name')
     
     def __unicode__(self):
         return self.name

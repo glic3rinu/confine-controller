@@ -1,5 +1,10 @@
 from common.admin import ChangeViewActionsMixin
+from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.utils.encoding import force_text
+from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
 from slices.forms import SliverInlineAdminForm
 from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
@@ -37,15 +42,14 @@ class SliverAdmin(ChangeViewActionsMixin):
     change_view_actions = [('reset', reset_selected, '', ''),]
 
 
-from django.core.urlresolvers import reverse
-from nodes.models import Node
-
 def add_sliver_link(self):
     return '<a href="%s">%s</a>' % (self.id, self.description)
 add_sliver_link.short_description = 'Node'
 add_sliver_link.allow_tags = True
 
 class NodeListAdmin(admin.ModelAdmin):
+    """ Provides a list of nodes for helping adding slivers to an slice"""
+    
     list_display = [add_sliver_link, 'uuid', 'arch']
     actions = None
     list_filter = ['arch', 'set_state']
@@ -68,9 +72,6 @@ class NodeListAdmin(admin.ModelAdmin):
         return qs
 
 
-from django.http import HttpResponseRedirect
-from django.utils.encoding import force_text
-
 class AddSliverAdmin(SliverAdmin):
     fields = ['description']
 
@@ -83,10 +84,13 @@ class AddSliverAdmin(SliverAdmin):
         context.update(extra_context or {})
         return super(AddSliverAdmin, self).add_view(request, form_url='', extra_context=context)
 
+    def save_model(self, request, obj, *args, **kwargs):
+        obj.node = Node.objects.get(pk=self.node_id)
+        obj.slice = Slice.objects.get(pk=self.slice_id)
+        super(AddSliverAdmin, self).save_model(request, obj, *args, **kwargs)
+
     def response_add(self, request, obj, post_url_continue='../%s/'):
-        """
-        Determines the HttpResponse for the add_view stage.
-        """
+        """ Determines the HttpResponse for the add_view stage. """
         opts = obj._meta
         pk_value = obj._get_pk_val()
 
@@ -104,29 +108,18 @@ class AddSliverAdmin(SliverAdmin):
             return HttpResponse(
                 '<!DOCTYPE html><html><head><title></title></head><body>'
                 '<script type="text/javascript">opener.dismissAddAnotherPopup(window, "%s", "%s");</script></body></html>' % \
-                # escape() calls force_text.
                 (escape(pk_value), escapejs(obj)))
         elif "_addanother" in request.POST:
             self.message_user(request, msg + ' ' + ("You may add another %s below.") % force_text(opts.verbose_name))
             return HttpResponseRedirect('.')
         else:
             self.message_user(request, msg)
-
-            # Figure out where to redirect. If the user has change permission,
-            # redirect to the change-list page for this object. Otherwise,
-            # redirect to the admin index.
             if self.has_change_permission(request, None):
                 post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
             else:
                 post_url = reverse('admin:index',
                                    current_app=self.admin_site.name)
             return HttpResponseRedirect(post_url)
-
-
-    def save_model(self, request, obj, *args, **kwargs):
-        obj.node = Node.objects.get(pk=self.node_id)
-        obj.slice = Slice.objects.get(pk=self.slice_id)
-        super(AddSliverAdmin, self).save_model(request, obj, *args, **kwargs)
 
 
 class SliverInline(admin.TabularInline):
@@ -142,8 +135,6 @@ class SlicePropInline(admin.TabularInline):
     extra = 0
 
 
-from django.conf.urls.defaults import patterns, url
-from django.conf.urls.defaults import include
 class SliceAdmin(ChangeViewActionsMixin):
     list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', 'set_state',
         'template', 'expires_on']

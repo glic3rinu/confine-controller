@@ -4,9 +4,9 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
-from slices.forms import SliverInlineAdminForm
 from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
     PrivateIface, Slice, SliceProp, Template)
 
@@ -47,20 +47,23 @@ class SliverAdmin(ChangeViewActionsMixin):
     change_view_actions = [('reset', reset_selected, '', ''),]
 
 
-def add_sliver_link(self):
-    return '<a href="%s">%s</a>' % (self.id, self.description)
-add_sliver_link.short_description = 'Node'
-add_sliver_link.allow_tags = True
+def slivers(self):
+    return self.num_slivers
 
 
 class NodeListAdmin(admin.ModelAdmin):
-    """ Provides a list of nodes for helping adding slivers to an slice"""
+    """ Provides a list of nodes for adding slivers to an slice"""
     
-    list_display = [add_sliver_link, 'uuid', 'arch', 'set_state']
+    list_display = ['add_sliver_link', 'uuid', 'arch', 'set_state', slivers]
     actions = None
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
     change_list_template = 'admin/slices/slice/list_nodes.html'
+    
+    def add_sliver_link(self, instance):
+        return '<a href="%s">%s</a>' % (instance.id, instance.description)
+    add_sliver_link.short_description = 'Node'
+    add_sliver_link.allow_tags = True
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id
@@ -80,7 +83,7 @@ class NodeListAdmin(admin.ModelAdmin):
         return qs
 
 
-class AddSliverAdmin(SliverAdmin):
+class SliceSliversAdmin(SliverAdmin):
     fields = ['description']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     show_save_and_continue = False
@@ -93,17 +96,26 @@ class AddSliverAdmin(SliverAdmin):
         context = {'title': 'Add sliver in node "%s" (slice "%s")' % (node.description, slice.name),
                    'slice': slice,}
         context.update(extra_context or {})
-        return super(AddSliverAdmin, self).add_view(request, form_url='', extra_context=context)
+        return super(SliceSliversAdmin, self).add_view(request, form_url='', extra_context=context)
+    
+    def change_view(self, request, slice_id, object_id, form_url='', extra_context=None):
+        slice = Slice.objects.get(pk=slice_id)
+        sliver = self.get_object(request, object_id)
+        self.slice_id = slice_id
+        self.node_id = sliver.node.pk
+        context = {'title': 'Change sliver in node "%s" (slice "%s")' % (sliver.node.description, slice.name),
+                   'slice': slice,}
+        context.update(extra_context or {})
+        return super(SliceSliversAdmin, self).change_view(request, object_id, form_url=form_url, extra_context=context)
     
     def save_model(self, request, obj, *args, **kwargs):
         obj.node = Node.objects.get(pk=self.node_id)
         obj.slice = Slice.objects.get(pk=self.slice_id)
-        super(AddSliverAdmin, self).save_model(request, obj, *args, **kwargs)
+        super(SliceSliversAdmin, self).save_model(request, obj, *args, **kwargs)
     
     def response_add(self, request, obj, post_url_continue='../%s/'):
         """ Determines the HttpResponse for the add_view stage. """
         opts = obj._meta
-        pk_value = obj._get_pk_val()
         msg = 'The %(name)s "%(obj)s" was added successfully.' % {'name': force_text(opts.verbose_name), 'obj': force_text(obj)}
         if "_addanother" in request.POST:
             self.message_user(request, msg + ' ' + ("You may add another %s below.") % force_text(opts.verbose_name))
@@ -113,17 +125,38 @@ class AddSliverAdmin(SliverAdmin):
             if self.has_change_permission(request, None):
                 post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
             else:
-                post_url = reverse('admin:index',
-                                   current_app=self.admin_site.name)
+                post_url = reverse('admin:index', current_app=self.admin_site.name)
             return HttpResponseRedirect(post_url)
+
+    def response_change(self, request, obj):
+        opts = obj._meta
+        verbose_name = opts.verbose_name
+        msg = 'The %(name)s "%(obj)s" was changed successfully.' % {'name': force_text(verbose_name), 'obj': force_text(obj)}
+        self.message_user(request, msg)
+        if self.has_change_permission(request, None):
+            post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
+        else:
+            post_url = reverse('admin:index', current_app=self.admin_site.name)
+        return HttpResponseRedirect(post_url)
 
 
 class SliverInline(admin.TabularInline):
-    # TODO nested inlines: https://code.djangoproject.com/ticket/9025
     model = Sliver
-    form = SliverInlineAdminForm
     max_num = 0
-    readonly_fields = ['instance_sn']
+    fields = ['sliver_link', 'node_link', 'cn_url', 'instance_sn']
+    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'instance_sn']
+
+    def sliver_link(self, instance):
+        url = reverse('admin:slices_slice_slivers', 
+            kwargs={'slice_id': instance.slice.pk, 'object_id': instance.pk})
+        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance))
+
+    def node_link(self, instance):
+        url = reverse('admin:nodes_node_change', args=[instance.node.pk])
+        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.node))
+
+    def cn_url(self, instance):
+        return mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, instance.node.cn_url))
 
 
 class SlicePropInline(admin.TabularInline):
@@ -160,7 +193,9 @@ class SliceAdmin(ChangeViewActionsMixin):
         opts = self.model._meta
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", NodeListAdmin(Node, admin_site).changelist_view),
-            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", AddSliverAdmin(Sliver, admin_site).add_view),)
+            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", SliceSliversAdmin(Sliver, admin_site).add_view),
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", SliceSliversAdmin(Sliver, admin_site).change_view, name='slices_slice_slivers'),
+            )
         return extra_urls + urls
 
 
@@ -174,8 +209,5 @@ admin.site.register(Sliver, SliverAdmin)
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Template, TemplateAdmin)
 
-
-def slivers(self):
-    return self.num_slivers
 
 insert_list_display(Node, slivers)

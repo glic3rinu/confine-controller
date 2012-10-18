@@ -35,6 +35,7 @@ class NodeAdmin(ChangeViewActionsMixin):
     search_fields = ['description', 'id', 'uuid']
     readonly_fields = ['cndb_cached_on', 'boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
+
     fieldsets = (
         (None, {
             'fields': ('description', 'cn_url', ('cndb_uri', 'cndb_cached_on'), 'admin', 

@@ -34,7 +34,7 @@ class TincAddressSerializer(serializers.ModelSerializer):
         exclude = ('id', 'server')
 
 
-class TincClientSerializer(serializers.HyperlinkedModelSerializer):
+class TincClientSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     connect_to = TincConnectToSerializer()
     island = IslandSerializer()

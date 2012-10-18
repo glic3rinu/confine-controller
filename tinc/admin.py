@@ -73,17 +73,17 @@ admin.site.register(Island, IslandAdmin)
 admin.site.register(Gateway, GatewayAdmin)
 
 
+# Monkey-Patching Section
+
 class HostInline(admin.TabularInline):
     model = Host
     form = HostInlineAdminForm
     max_num = 0
 
-
 insert_inline(User, HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincServerInline)
 insert_action(Node, set_island)
-
 
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')

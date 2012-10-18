@@ -96,7 +96,7 @@ class Message(models.Model):
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default='PUBLIC')
     content = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
-
+    
     def __unicode__(self):
         return str(self.id)
 

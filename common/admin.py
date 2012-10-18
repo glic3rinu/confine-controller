@@ -52,10 +52,10 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
         return '<a href="%s">%s' % (link_url, url)
     admin_link.short_description = description if description else attribute.capitalize()
     admin_link.allow_tags = True
-
+    
     if admin_order_field:
         admin_link.admin_order_field = attribute
-
+    
     return admin_link
 
 

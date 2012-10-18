@@ -103,10 +103,11 @@ admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)
 
 
+# Monkey-Patching Section
+
 class NodeInline(admin.TabularInline):
     model = Node
     form = NodeInlineAdminForm
     max_num = 0
-
 
 insert_inline(User, NodeInline)

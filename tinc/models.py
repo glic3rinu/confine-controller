@@ -85,7 +85,7 @@ class TincAddress(models.Model):
     @property
     def pubkey(self):
         return self.server.pubkey
-    
+
 
 class TincClient(TincHost):
     island = models.ForeignKey(Island)
@@ -109,6 +109,9 @@ class TincClient(TincHost):
     def set_island(self):
         self.connect_to = self.island.tincaddress_set.all()
         self.save()
+
+
+# Monkey-Patching Section
 
 # Hook TincClient support for related models
 related_models = [Host, Node]

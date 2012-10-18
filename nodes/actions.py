@@ -7,6 +7,7 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy, ugettext as _
 
+
 #TODO make this a generic pattern for reusing accros all actions that needs 
 #     confirmation step
 

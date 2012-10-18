@@ -6,10 +6,10 @@ from django import forms
 class MessageInlineForm(forms.ModelForm):
     author = forms.CharField(label="Author", widget=ShowText(bold=True), required=False)
     created_on = forms.CharField(label="Created On", widget=ShowText(), required=False)
-
+    
     class Meta:
         fields = ('content', 'visibility',)
-
+    
     def __init__(self, *args, **kwargs):
         try: self.user = kwargs.pop('user')
         except KeyError: pass
@@ -22,7 +22,7 @@ class MessageInlineForm(forms.ModelForm):
         else: 
             self.initial['author'] = ''
             self.initial['created_on'] = ''
-
+    
     def save(self, *args, **kwargs):
         if self.instance.pk is None:
             self.instance.author = self.user

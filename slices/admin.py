@@ -115,6 +115,8 @@ class NodeListAdmin(admin.ModelAdmin):
 
 
 class SliceSliversAdmin(SliverAdmin):
+    """ Slivers management (add and change) directly from the Slice """
+    
     fields = ['description', 'instance_sn']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
@@ -185,16 +187,16 @@ class SliverInline(admin.TabularInline):
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
     readonly_fields = ['sliver_link', 'node_link', 'cn_url']
-
+    
     def sliver_link(self, instance):
         url = reverse('admin:slices_slice_slivers', 
             kwargs={'slice_id': instance.slice.pk, 'object_id': instance.pk})
         return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance))
-
+    
     def node_link(self, instance):
         url = reverse('admin:nodes_node_change', args=[instance.node.pk])
         return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.node))
-
+    
     def cn_url(self, instance):
         node = instance.node
         return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
@@ -273,6 +275,8 @@ admin.site.register(Sliver, SliverAdmin)
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Template, TemplateAdmin)
 
+
+# Monkey-Patching Section
 
 def num_slivers(node):
     return node.num_slivers

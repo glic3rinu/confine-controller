@@ -60,19 +60,6 @@ class UserProfile(models.Model):
 #        profile, created = UserProfile.objects.get_or_create(user=instance)
 
 
-# Make UserProfile fields visible at User model as properties
-for field in ['pubkey', 'uuid', 'description']:
-    def getter(self, field=field):
-        return getattr(self.userprofile, field)
-    
-    def setter(self, value, field=field):
-        setattr(self.userprofile, field, value)
-        self.userprofile.save()
-    
-    prop = property(getter, setter)
-    setattr(User, field, prop)
-
-
 class TestbedPermission(models.Model):
     ACTIONS = ((1, "Create"),
                (2, "Read"),
@@ -108,6 +95,20 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return str(self.pk)
 
+
+# Monkey-Patching Section
+
+# Make UserProfile fields visible at User model as properties
+for field in ['pubkey', 'uuid', 'description']:
+    def getter(self, field=field):
+        return getattr(self.userprofile, field)
+    
+    def setter(self, value, field=field):
+        setattr(self.userprofile, field, value)
+        self.userprofile.save()
+    
+    prop = property(getter, setter)
+    setattr(User, field, prop)
 
 @property
 def auth_tokens(self):

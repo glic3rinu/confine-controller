@@ -26,22 +26,24 @@ class AuthorizedOfficialInline(admin.StackedInline):
     model = AuthorizedOfficial
 
 
-def action(testbdepermission):
-    return str(testbdepermission.action)
-
-
 class TestbedPermissionAdmin(admin.ModelAdmin):
-    list_display = (action, 'user', 'research_group', 'node', 'slice')
+    list_display = ('action', 'user', 'research_group', 'node', 'slice')
+    
+    def action(self, instance):
+        return str(instance.action)
 
 
 class ResearchGroupAdmin(admin.ModelAdmin):
     inlines = [AuthorizedOfficialInline, TestbedPermissionInline]
 
 
-insert_inline(User, UserProfileInline)
-insert_inline(User, AuthTokenInline)
-insert_inline(User, TestbedPermissionInline)
-
 admin.site.register(ResearchGroup, ResearchGroupAdmin)
 admin.site.register(TestbedPermission, TestbedPermissionAdmin)
 admin.site.register(AuthorizedOfficial)
+
+
+# Monkey-Patching Section
+
+insert_inline(User, UserProfileInline)
+insert_inline(User, AuthTokenInline)
+insert_inline(User, TestbedPermissionInline)

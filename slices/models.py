@@ -6,6 +6,10 @@ from nodes.models import Node
 from slices import settings
 
 
+def get_expires_on():
+    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+
+
 class Template(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField(blank=True)
@@ -18,10 +22,6 @@ class Template(models.Model):
     
     def __unicode__(self):
         return self.name
-
-
-def get_expires_on():
-    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
 
 
 class Slice(models.Model):
@@ -145,11 +145,6 @@ class Sliver(models.Model):
         self.instance_sn += 1
         self.save()
 
-@property
-def num_slivers(self):
-    return self.sliver_set.all().count()
-Node.num_slivers = num_slivers
-
 
 class SliverProp(models.Model):
     sliver = models.ForeignKey(Sliver)
@@ -210,3 +205,9 @@ class PrivateIface(IpSliverIface):
     sliver = models.OneToOneField(Sliver)
 
 
+# Monkey-Patching Section
+
+@property
+def num_slivers(self):
+    return self.sliver_set.all().count()
+Node.num_slivers = num_slivers

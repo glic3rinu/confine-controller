@@ -3,6 +3,7 @@ from common.admin import (ChangeViewActionsMixin, colored, admin_link,
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
@@ -40,7 +41,8 @@ class PrivateIfaceInline(admin.TabularInline):
 
 
 class SliverAdmin(ChangeViewActionsMixin):
-    list_display = ['id', 'description', admin_link('node'), admin_link('slice')]
+    list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
+        'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
     list_filter = ['slice__name']
     readonly_fields = ['instance_sn']
     search_fields = ['description', 'node__description', 'slice__name']
@@ -48,20 +50,45 @@ class SliverAdmin(ChangeViewActionsMixin):
                PrivateIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
-
-
-def slivers(self):
-    return self.num_slivers
+    
+    def has_private_iface(self, instance):
+        try: instance.privateiface
+        except PrivateIface.DoesNotExist: return False
+        else: return True
+    has_private_iface.short_description = 'PrivateIface'
+    has_private_iface.boolean = True
+    has_private_iface.admin_order_field = 'privateiface'
+    
+    def num_isolated_ifaces(self, node):
+        return node.isolatediface__count
+    num_isolated_ifaces.short_description = 'IsolatedIfaces'
+    num_isolated_ifaces.admin_order_field = 'isolatediface__count'
+    
+    def num_public_ifaces(self, node):
+        return node.isolatediface__count
+    num_public_ifaces.short_description = 'PublicIfaces'
+    num_public_ifaces.admin_order_field = 'publiciface__count'
+    
+    def queryset(self, request):
+        qs = super(SliverAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('isolatediface'))
+        qs = qs.annotate(models.Count('publiciface'))
+        return qs
 
 
 class NodeListAdmin(admin.ModelAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     
-    list_display = ['add_sliver_link', 'uuid', 'arch', 'set_state', slivers]
+    list_display = ['add_sliver_link', 'uuid', 'arch', 'set_state', 'num_slivers']
     actions = None
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
     change_list_template = 'admin/slices/slice/list_nodes.html'
+    
+    def num_slivers(self, slice):
+        return slice.sliver__count
+    num_slivers.short_description = 'Slivers'
+    num_slivers.admin_order_field = 'sliver__count'
     
     def add_sliver_link(self, instance):
         return '<a href="%s">%s</a>' % (instance.id, instance.description)
@@ -83,6 +110,7 @@ class NodeListAdmin(admin.ModelAdmin):
         if ordering:
             qs = qs.order_by(*ordering)
         qs = qs.exclude(pk__in=Node.objects.filter(sliver__slice=self.slice_id))
+        qs = qs.annotate(models.Count('sliver'))
         return qs
 
 
@@ -134,7 +162,7 @@ class SliceSliversAdmin(SliverAdmin):
             else:
                 post_url = reverse('admin:index', current_app=self.admin_site.name)
             return HttpResponseRedirect(post_url)
-
+    
     def response_change(self, request, obj):
         opts = obj._meta
         verbose_name = force_text(opts.verbose_name)
@@ -230,4 +258,9 @@ admin.site.register(Sliver, SliverAdmin)
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Template, TemplateAdmin)
 
-insert_list_display(Node, slivers)
+
+def num_slivers(node):
+    return node.num_slivers
+num_slivers.short_description = 'Slivers'
+
+insert_list_display(Node, num_slivers)

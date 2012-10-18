@@ -1,5 +1,6 @@
 from common.admin import admin_link, colored, ChangeViewActionsMixin
 from django.contrib import admin
+from django.db import models
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets, mark_as_unread)
 from issues.forms import MessageInlineForm, TicketInlineForm
 from issues.models import Ticket, Queue, Message
@@ -33,17 +34,13 @@ class TicketInline(admin.TabularInline):
     max_num = 0
 
 
-def messages(self):
-    return self.num_messages
-
-
 class TicketAdmin(ChangeViewActionsMixin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     # TODO Create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), 
         admin_link('owner'), admin_link('queue'),
         colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
-        messages, 'created_on', 'last_modified_on']
+        'num_messages', 'created_on', 'last_modified_on']
     list_display_links = ('id', 'subject')
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
@@ -72,6 +69,16 @@ class TicketAdmin(ChangeViewActionsMixin):
             'fields': ('cc',)
         }),)
     
+    def num_messages(self, ticket):
+        return ticket.message__count
+    num_messages.short_description = 'Messages'
+    num_messages.admin_order_field = 'message__count'
+    
+    def queryset(self, request):
+        qs = super(TicketAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('message'))
+        return qs
+    
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
@@ -89,14 +96,20 @@ class TicketAdmin(ChangeViewActionsMixin):
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
 
 
-def tickets(queue):
-    return queue.num_tickets
-
-
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'default', tickets, messages)
+    list_display = ('name', 'default', 'num_tickets')
     list_editable = ('default', )
     inlines = [TicketInline]
+    
+    def num_tickets(self, queue):
+        return queue.ticket__count
+    num_tickets.short_description = 'Tickets'
+    num_tickets.admin_order_field = 'ticket__count'
+    
+    def queryset(self, request):
+        qs = super(QueueAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('ticket'))
+        return qs
 
 
 admin.site.register(Ticket, TicketAdmin)

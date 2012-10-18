@@ -2,7 +2,7 @@ from common.admin import link, insert_inline, admin_link, colored, ChangeViewAct
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.db import transaction
+from django.db import transaction, models
 from django.utils.functional import update_wrapper
 from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
@@ -27,9 +27,10 @@ class DirectIfaceInline(admin.TabularInline):
     model = DirectIface
     extra = 0
 
+
 class NodeAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', 'uuid', link('cn_url', description='CN URL'), 
-        'arch', colored('set_state', STATES_COLORS), admin_link('admin')]
+        'arch', colored('set_state', STATES_COLORS), admin_link('admin'), 'num_ifaces']
     list_display_links = ('id', 'uuid', 'description')
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
@@ -53,11 +54,21 @@ class NodeAdmin(ChangeViewActionsMixin):
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]
     
+    def num_ifaces(self, node):
+        return node.directiface__count
+    num_ifaces.short_description = 'Ifaces'
+    num_ifaces.admin_order_field = 'directiface__count'
+    
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
         form.base_fields['admin'].initial = request.user
         return form
+    
+    def queryset(self, request):
+        qs = super(NodeAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('directiface'))
+        return qs
 
 
 class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):

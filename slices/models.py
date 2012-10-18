@@ -144,7 +144,6 @@ class Sliver(models.Model):
         self.instance_sn += 1
         self.save()
 
-
 @property
 def num_slivers(self):
     return self.sliver_set.all().count()

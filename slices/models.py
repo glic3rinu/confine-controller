@@ -59,8 +59,12 @@ class Slice(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-        if self.vlan_nr == -1 and self.set_state == self.INSTANTIATE:
-            self.vlan_nr = self._get_vlan_nr()
+        # TODO prevent modifications on vlan_nr once is seted
+        if self.vlan_nr == -1:
+            if self.set_state == self.INSTANTIATE:
+                self.vlan_nr = self._get_vlan_nr()
+            elif not self.set_state == self.REGISTER:
+                raise self.VlanAllocationError('You Cannot set this vlan')
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         super(Slice, self).save(*args, **kwargs)

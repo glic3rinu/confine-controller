@@ -39,8 +39,7 @@ class PrivateIfaceInline(admin.TabularInline):
 
 
 class SliverAdmin(ChangeViewActionsMixin):
-    list_display = ['id', 'description', 'instance_sn', admin_link('node'), 
-        admin_link('slice')]
+    list_display = ['id', 'description', admin_link('node'), admin_link('slice')]
     list_filter = ['slice__name']
     readonly_fields = ['instance_sn']
     search_fields = ['description', 'node__description', 'slice__name']
@@ -87,10 +86,10 @@ class NodeListAdmin(admin.ModelAdmin):
 
 
 class SliceSliversAdmin(SliverAdmin):
-    fields = ['description']
+    fields = ['description', 'instance_sn']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
-    show_save_and_continue = False
+    readonly_fields = ['instance_sn']
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
         self.slice_id = slice_id
@@ -150,8 +149,8 @@ class SliceSliversAdmin(SliverAdmin):
 class SliverInline(admin.TabularInline):
     model = Sliver
     max_num = 0
-    fields = ['sliver_link', 'node_link', 'cn_url', 'instance_sn']
-    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'instance_sn']
+    fields = ['sliver_link', 'node_link', 'cn_url']
+    readonly_fields = ['sliver_link', 'node_link', 'cn_url']
 
     def sliver_link(self, instance):
         url = reverse('admin:slices_slice_slivers', 
@@ -173,9 +172,9 @@ class SlicePropInline(admin.TabularInline):
 
 
 class SliceAdmin(ChangeViewActionsMixin):
-    list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', 
-        colored('set_state', STATE_COLORS), 'num_slivers',admin_link('template'), 
-        'expires_on', ]
+    list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
+        'num_slivers',admin_link('template'), 'expires_on', ]
+    list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
     date_hierarchy = 'expires_on'
@@ -201,6 +200,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
+        # TODO include SliceSliversAdmin.urls to make sure actions work
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
                 NodeListAdmin(Node, admin_site).changelist_view, 

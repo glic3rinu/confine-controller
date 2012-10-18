@@ -7,6 +7,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
+from slices.forms import SliceAdminForm
 from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
     PrivateIface, Slice, SliceProp, Template)
 
@@ -173,10 +174,11 @@ class SliceAdmin(ChangeViewActionsMixin):
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline,SliverInline]
     actions = [reset_selected, renew_selected_slices]
+    form = SliceAdminForm
     fieldsets = (
         (None, {
             'fields': ('name', 'description', ('template', 'exp_data'), 
-                       'vlan_nr', 'set_state', 'users', 'instance_sn', 
+                       'set_state', 'users', 'vlan_nr', 'instance_sn',
                        'new_sliver_instance_sn', 'expires_on'),
         }),
         ('Public key', {
@@ -192,10 +194,9 @@ class SliceAdmin(ChangeViewActionsMixin):
         admin_site = self.admin_site
         opts = self.model._meta
         extra_urls = patterns("", 
-            url("^(?P<slice_id>\d+)/add_sliver/$", NodeListAdmin(Node, admin_site).changelist_view),
-            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", SliceSliversAdmin(Sliver, admin_site).add_view),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", SliceSliversAdmin(Sliver, admin_site).change_view, name='slices_slice_slivers'),
-            )
+            url("^(?P<slice_id>\d+)/add_sliver/$", NodeListAdmin(Node, admin_site).changelist_viewname='slices_slice_add_sliver'),
+            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", SliceSliversAdmin(Sliver, admin_site).add_view, name='slices_slice_add_sliver'),
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", SliceSliversAdmin(Sliver, admin_site).change_view, name='slices_slice_slivers'),)
         return extra_urls + urls
 
 

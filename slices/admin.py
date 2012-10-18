@@ -125,7 +125,8 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
         node = Node.objects.get(pk=node_id)
-        context = {'title': 'Add sliver in node "%s" (slice "%s")' % (node.description, slice.name),
+        context = {'title': 'Add sliver in node "%s" (slice "%s")' % \
+                            (node.description, slice.name),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).add_view(request, form_url='', 
@@ -136,7 +137,8 @@ class SliceSliversAdmin(SliverAdmin):
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
         self.node_id = sliver.node.pk
-        context = {'title': 'Change sliver in node "%s" (slice "%s")' % (sliver.node.description, slice.name),
+        context = {'title': 'Change sliver in node "%s" (slice "%s")' % \
+                            (sliver.node.description, slice.name),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).change_view(request, object_id, 
@@ -147,7 +149,8 @@ class SliceSliversAdmin(SliverAdmin):
         slice = Slice.objects.get(pk=self.slice_id)
         obj.slice = slice
         super(SliceSliversAdmin, self).save_model(request, obj, *args, **kwargs)
-        SliceAdmin(slice, self.admin_site).log_change(request, slice, 'Added sliver "%s"' % obj)
+        slice_modeladmin = SliceAdmin(slice, self.admin_site)
+        slice_modeladmin.log_change(request, slice, 'Added sliver "%s"' % obj)
         
     def response_add(self, request, obj, post_url_continue='../%s/'):
         opts = obj._meta
@@ -210,7 +213,7 @@ class SliceAdmin(ChangeViewActionsMixin):
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
     date_hierarchy = 'expires_on'
     search_fields = ['name', 'uuid']
-    inlines = [SlicePropInline,SliverInline]
+    inlines = [SlicePropInline, SliverInline]
     actions = [reset_selected, renew_selected_slices]
     form = SliceAdminForm
     fieldsets = (
@@ -241,7 +244,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
-        # TODO think in a clever way of hooking SliceSliversAdmin
+        # TODO Refactor: Hook SliceSliversAdmin in a more clever way
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
                 NodeListAdmin(Node, admin_site).changelist_view, 

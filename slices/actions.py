@@ -9,8 +9,10 @@ from slices import settings
 def renew_selected_slices(modeladmin, request, queryset):
     for slice in queryset:
         slice.renew()
-        modeladmin.log_change(request, slice, "Renewed for %s" % settings.SLICE_EXPIRATION_INTERVAL)
-    msg = "%s selected slices has been renewed for %s on" % (queryset.count(), settings.SLICE_EXPIRATION_INTERVAL)
+        msg = "Renewed for %s" % settings.SLICE_EXPIRATION_INTERVAL
+        modeladmin.log_change(request, slice, msg)
+    msg = "%s selected slices has been renewed for %s on" % (queryset.count(), \
+        settings.SLICE_EXPIRATION_INTERVAL)
     modeladmin.message_user(request, msg)
 
 

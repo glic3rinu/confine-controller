@@ -38,7 +38,8 @@ class Slice(models.Model):
         RSA public key for this slice (used by SFA).""")
     description = models.TextField(blank=True)
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
-        help_text="""Expiration date of this slice. Automatically deleted once expires.""")
+        help_text="""Expiration date of this slice. Automatically deleted once 
+        expires.""")
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text="""The number of times this slice has been instructed to be 
         reset (instance sequence number).""")

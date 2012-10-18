@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
     uuid = serializers.CharField()
     pubkey = serializers.CharField()
     description = serializers.CharField()

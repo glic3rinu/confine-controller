@@ -7,6 +7,7 @@ class ServerSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class NodeSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
     properties = serializers.Field()
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
     # TODO interfaces

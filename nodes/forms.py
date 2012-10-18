@@ -5,10 +5,6 @@ from django.utils.safestring import mark_safe
 
 
 class NodeInlineAdminForm(forms.ModelForm):
-    """ 
-    Read-only form for displaying slivers in slice admin change form.
-    Also it provides popup links to each Node admin change form.
-    """
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
     pk = forms.CharField(label="ID", widget=ShowText(bold=True))
     cn_url = forms.CharField(label="Node CN URL", widget=ShowText(bold=True))

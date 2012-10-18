@@ -4,6 +4,8 @@ from slices.models import Slice
 
 
 class SliceAdminForm(forms.ModelForm):
+    # TODO this is not coding, this is hacking, please refactor this shit.
+    # FIXME look at Slice.vlan_nr model definition for more TODOs
     """ Provide vlan_nr as a request checkbox """
     request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False, 
         help_text="""A VLAN number allocated to this slice by the server.""")

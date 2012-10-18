@@ -1,4 +1,5 @@
-from common.admin import ChangeViewActionsMixin, colored, admin_link, insert_list_display
+from common.admin import (ChangeViewActionsMixin, colored, admin_link, 
+    insert_list_display)
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -38,7 +39,8 @@ class PrivateIfaceInline(admin.TabularInline):
 
 
 class SliverAdmin(ChangeViewActionsMixin):
-    list_display = ['id', 'description', 'instance_sn', admin_link('node'), admin_link('slice')]
+    list_display = ['id', 'description', 'instance_sn', admin_link('node'), 
+        admin_link('slice')]
     list_filter = ['slice__name']
     readonly_fields = ['instance_sn']
     search_fields = ['description', 'node__description', 'slice__name']
@@ -98,7 +100,8 @@ class SliceSliversAdmin(SliverAdmin):
         context = {'title': 'Add sliver in node "%s" (slice "%s")' % (node.description, slice.name),
                    'slice': slice,}
         context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).add_view(request, form_url='', extra_context=context)
+        return super(SliceSliversAdmin, self).add_view(request, form_url='', 
+            extra_context=context)
     
     def change_view(self, request, slice_id, object_id, form_url='', extra_context=None):
         slice = Slice.objects.get(pk=slice_id)
@@ -108,7 +111,8 @@ class SliceSliversAdmin(SliverAdmin):
         context = {'title': 'Change sliver in node "%s" (slice "%s")' % (sliver.node.description, slice.name),
                    'slice': slice,}
         context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).change_view(request, object_id, form_url=form_url, extra_context=context)
+        return super(SliceSliversAdmin, self).change_view(request, object_id, 
+            form_url=form_url, extra_context=context)
     
     def save_model(self, request, obj, *args, **kwargs):
         obj.node = Node.objects.get(pk=self.node_id)
@@ -116,11 +120,12 @@ class SliceSliversAdmin(SliverAdmin):
         super(SliceSliversAdmin, self).save_model(request, obj, *args, **kwargs)
     
     def response_add(self, request, obj, post_url_continue='../%s/'):
-        """ Determines the HttpResponse for the add_view stage. """
         opts = obj._meta
-        msg = 'The %(name)s "%(obj)s" was added successfully.' % {'name': force_text(opts.verbose_name), 'obj': force_text(obj)}
+        verbose_name = force_text(opts.verbose_name)
+        msg = 'The %s "%s" was added successfully.' % (verbose_name, force_text(obj))
         if "_addanother" in request.POST:
-            self.message_user(request, msg + ' ' + ("You may add another %s below.") % force_text(opts.verbose_name))
+            msg += ' ' + ("You may add another %s below.") % verbose_name
+            self.message_user(request, msg)
             return HttpResponseRedirect('.')
         else:
             self.message_user(request, msg)
@@ -132,8 +137,8 @@ class SliceSliversAdmin(SliverAdmin):
 
     def response_change(self, request, obj):
         opts = obj._meta
-        verbose_name = opts.verbose_name
-        msg = 'The %(name)s "%(obj)s" was changed successfully.' % {'name': force_text(verbose_name), 'obj': force_text(obj)}
+        verbose_name = force_text(opts.verbose_name)
+        msg = 'The %s "%s" was changed successfully.' % (verbose_name, force_text(obj))
         self.message_user(request, msg)
         if self.has_change_permission(request, None):
             post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
@@ -158,7 +163,8 @@ class SliverInline(admin.TabularInline):
         return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.node))
 
     def cn_url(self, instance):
-        return mark_safe("<a href='%s'>%s</a>" % (instance.node.cn_url, instance.node.cn_url))
+        node = instance.node
+        return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
 
 
 class SlicePropInline(admin.TabularInline):
@@ -167,8 +173,9 @@ class SlicePropInline(admin.TabularInline):
 
 
 class SliceAdmin(ChangeViewActionsMixin):
-    list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', colored('set_state', STATE_COLORS), 'num_slivers',
-        admin_link('template'), 'expires_on', ]
+    list_display = ['name', 'uuid', 'instance_sn', 'vlan_nr', 
+        colored('set_state', STATE_COLORS), 'num_slivers',admin_link('template'), 
+        'expires_on', ]
     list_filter = ['set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
     date_hierarchy = 'expires_on'
@@ -195,9 +202,15 @@ class SliceAdmin(ChangeViewActionsMixin):
         admin_site = self.admin_site
         opts = self.model._meta
         extra_urls = patterns("", 
-            url("^(?P<slice_id>\d+)/add_sliver/$", NodeListAdmin(Node, admin_site).changelist_view, name='slices_slice_add_sliver'),
-            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", SliceSliversAdmin(Sliver, admin_site).add_view, name='slices_slice_add_sliver'),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", SliceSliversAdmin(Sliver, admin_site).change_view, name='slices_slice_slivers'),)
+            url("^(?P<slice_id>\d+)/add_sliver/$", 
+                NodeListAdmin(Node, admin_site).changelist_view, 
+                name='slices_slice_add_sliver'),
+            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", 
+                SliceSliversAdmin(Sliver, admin_site).add_view, 
+                name='slices_slice_add_sliver'),
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", 
+                SliceSliversAdmin(Sliver, admin_site).change_view, 
+                name='slices_slice_slivers'),)
         return extra_urls + urls
 
 
@@ -210,6 +223,5 @@ class TemplateAdmin(admin.ModelAdmin):
 admin.site.register(Sliver, SliverAdmin)
 admin.site.register(Slice, SliceAdmin)
 admin.site.register(Template, TemplateAdmin)
-
 
 insert_list_display(Node, slivers)

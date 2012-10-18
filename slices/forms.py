@@ -30,6 +30,5 @@ class SliceAdminForm(forms.ModelForm):
     def clean_vlan_nr(self):
         vlan_nr = self.cleaned_data['vlan_nr']
         if vlan_nr == True: return -1
-        elif vlan_nr == False: return None
         return vlan_nr
 

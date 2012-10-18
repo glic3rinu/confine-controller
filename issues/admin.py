@@ -1,7 +1,8 @@
 from common.admin import admin_link, colored, ChangeViewActionsMixin
 from django.contrib import admin
 from django.db import models
-from issues.actions import (reject_tickets, resolve_tickets, take_tickets, mark_as_unread)
+from issues.actions import (reject_tickets, resolve_tickets, take_tickets, 
+    mark_as_unread)
 from issues.forms import MessageInlineForm, TicketInlineForm
 from issues.models import Ticket, Queue, Message
 
@@ -54,7 +55,8 @@ class TicketAdmin(ChangeViewActionsMixin):
     readonly_fields = ('created_by',)
     fieldsets = (
         (None, {
-            'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority', 'state'))
+            'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority', 
+                       'state'))
         }),
         ('CC', {
             'classes': ('collapse',),

@@ -7,8 +7,9 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy, ugettext as _
 
-#TODO make this a generic pattern for reusing accros all actions that needs this
-#     kind of confirmation
+#TODO make this a generic pattern for reusing accros all actions that needs 
+#     confirmation step
+
 
 @transaction.commit_on_success
 def reboot_selected(modeladmin, request, queryset):

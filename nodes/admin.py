@@ -1,4 +1,5 @@
-from common.admin import link, insert_inline, admin_link, colored, ChangeViewActionsMixin
+from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
+    admin_link)
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -36,11 +37,12 @@ class NodeAdmin(ChangeViewActionsMixin):
     search_fields = ['description', 'id', 'uuid']
     readonly_fields = ['cndb_cached_on', 'boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
-
+    
     fieldsets = (
         (None, {
-            'fields': ('description', 'cn_url', ('cndb_uri', 'cndb_cached_on'), 'admin', 
-                       'sliver_pub_ipv4_total', 'arch', 'local_iface', 'boot_sn', 'set_state',),
+            'fields': ('description', 'cn_url', ('cndb_uri', 'cndb_cached_on'), 
+                       'admin', 'sliver_pub_ipv4_total', 'arch', 'local_iface', 
+                       'boot_sn', 'set_state',),
         }),
         ('Keys', {
             'classes': ('collapse',),

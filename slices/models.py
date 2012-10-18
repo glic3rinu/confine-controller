@@ -82,7 +82,7 @@ class Slice(models.Model):
         return self.sliver_set.all().count()
     
     def renew(self):
-        self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+        self.expires_on = get_expires_on()
         self.save()
     
     def reset(self):

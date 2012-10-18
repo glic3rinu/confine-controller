@@ -87,6 +87,7 @@ class NodeListAdmin(admin.ModelAdmin):
 class SliceSliversAdmin(SliverAdmin):
     fields = ['description']
     add_form_template = 'admin/slices/slice/add_sliver.html'
+    change_form_template = 'admin/slices/slice/change_sliver.html'
     show_save_and_continue = False
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):

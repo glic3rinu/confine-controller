@@ -194,7 +194,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         admin_site = self.admin_site
         opts = self.model._meta
         extra_urls = patterns("", 
-            url("^(?P<slice_id>\d+)/add_sliver/$", NodeListAdmin(Node, admin_site).changelist_viewname='slices_slice_add_sliver'),
+            url("^(?P<slice_id>\d+)/add_sliver/$", NodeListAdmin(Node, admin_site).changelist_view, name='slices_slice_add_sliver'),
             url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", SliceSliversAdmin(Sliver, admin_site).add_view, name='slices_slice_add_sliver'),
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", SliceSliversAdmin(Sliver, admin_site).change_view, name='slices_slice_slivers'),)
         return extra_urls + urls

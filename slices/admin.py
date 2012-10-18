@@ -5,11 +5,11 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
-from django.utils.functional import update_wrapper
 from django.utils.safestring import mark_safe
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
 from slices.forms import SliceAdminForm
+from slices.helpers import wrap_action, remove_slice_id
 from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
     PrivateIface, Slice, SliceProp, Template)
 
@@ -146,10 +146,6 @@ class SliceSliversAdmin(SliverAdmin):
             post_url = reverse('admin:index', current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
 
-    def response_action(self, request, queryset):
-        post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
-        return HttpResponseRedirect(post_url)
-
 
 class SliverInline(admin.TabularInline):
     model = Sliver
@@ -202,15 +198,10 @@ class SliceAdmin(ChangeViewActionsMixin):
                            ('reset', reset_selected, '', '')]
     
     def get_urls(self):
-        def remove_slice_id(view):
-            def wrapper(*args, **kwargs):
-                kwargs.pop('slice_id')
-                return view(*args, **kwargs)
-            return update_wrapper(wrapper, view)
-        
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
+        # TODO think in a clever way of hooking SliceSliversAdmin
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
                 NodeListAdmin(Node, admin_site).changelist_view, 
@@ -224,7 +215,7 @@ class SliceAdmin(ChangeViewActionsMixin):
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/history", 
                 remove_slice_id(SliceSliversAdmin(Sliver, admin_site).history_view),),
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/reset", 
-                remove_slice_id(action_to_view(reset_selected, SliceSliversAdmin(Sliver, admin_site))),)
+                wrap_action(reset_selected, SliceSliversAdmin(Sliver, admin_site)),)
             )
         return extra_urls + urls
 

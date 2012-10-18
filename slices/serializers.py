@@ -26,6 +26,7 @@ class SliverSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SliceSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
     properties = serializers.Field()
     
@@ -34,6 +35,8 @@ class SliceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TemplateSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
+    
     class Meta:
         model = Template
 

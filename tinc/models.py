@@ -85,7 +85,7 @@ class TincAddress(models.Model):
     @property
     def pubkey(self):
         return self.server.pubkey
-
+    
 
 class TincClient(TincHost):
     island = models.ForeignKey(Island)

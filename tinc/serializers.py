@@ -20,6 +20,8 @@ class TincConnectToSerializer(serializers.ModelSerializer):
 
 
 class IslandSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
+    
     class Meta:
         model = Island
 
@@ -32,7 +34,7 @@ class TincAddressSerializer(serializers.ModelSerializer):
         exclude = ('id', 'server')
 
 
-class TincClientSerializer(serializers.ModelSerializer):
+class TincClientSerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
     connect_to = TincConnectToSerializer()
     island = IslandSerializer()
@@ -54,12 +56,14 @@ class TincServerSerializer(serializers.ModelSerializer):
 
 class GatewaySerializer(serializers.HyperlinkedModelSerializer):
     tinc = TincServerSerializer()
+    id = serializers.Field()
     
     class Meta:
         model = Gateway
 
 
 class HostSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
     tinc = TincClientSerializer()
     
     class Meta:

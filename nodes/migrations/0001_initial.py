@@ -158,13 +158,6 @@ class Migration(SchemaMigration):
             'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        'tinc.gateway': {
-            'Meta': {'object_name': 'Gateway'},
-            'cn_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
         'tinc.island': {
             'Meta': {'object_name': 'Island'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -189,10 +182,11 @@ class Migration(SchemaMigration):
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         },
         'tinc.tincserver': {
-            'Meta': {'object_name': 'TincServer'},
+            'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincServer'},
             'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
-            'gateway': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['tinc.Gateway']", 'unique': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '36'}),
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         }
     }

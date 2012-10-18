@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.db import router, transaction
-from slices import settings
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy, ugettext as _
+from slices import settings
 
 
 @transaction.commit_on_success
@@ -18,6 +19,7 @@ def reset_selected(modeladmin, request, queryset):
     for obj in queryset:
         obj.reset()
         modeladmin.log_change(request, obj, "Instructed to reset")
-    msg = "%s selected has been reseted" % (obj._meta.verbose_name_plural, queryset.count())
+    verbose_name_plural = force_text(obj._meta.verbose_name_plural)
+    msg = "%s selected %s has been reseted" % (queryset.count(), verbose_name_plural)
     modeladmin.message_user(request, msg)
 reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_plural)s")

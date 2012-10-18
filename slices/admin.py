@@ -1,10 +1,11 @@
 from common.admin import (ChangeViewActionsMixin, colored, admin_link, 
-    insert_list_display)
+    insert_list_display, action_to_view)
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
+from django.utils.functional import update_wrapper
 from django.utils.safestring import mark_safe
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
@@ -102,7 +103,7 @@ class SliceSliversAdmin(SliverAdmin):
         return super(SliceSliversAdmin, self).add_view(request, form_url='', 
             extra_context=context)
     
-    def change_view(self, request, slice_id, object_id, form_url='', extra_context=None):
+    def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
         slice = Slice.objects.get(pk=slice_id)
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
@@ -143,6 +144,10 @@ class SliceSliversAdmin(SliverAdmin):
             post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
         else:
             post_url = reverse('admin:index', current_app=self.admin_site.name)
+        return HttpResponseRedirect(post_url)
+
+    def response_action(self, request, queryset):
+        post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
         return HttpResponseRedirect(post_url)
 
 
@@ -197,20 +202,30 @@ class SliceAdmin(ChangeViewActionsMixin):
                            ('reset', reset_selected, '', '')]
     
     def get_urls(self):
+        def remove_slice_id(view):
+            def wrapper(*args, **kwargs):
+                kwargs.pop('slice_id')
+                return view(*args, **kwargs)
+            return update_wrapper(wrapper, view)
+        
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
-        # TODO include SliceSliversAdmin.urls to make sure actions work
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
                 NodeListAdmin(Node, admin_site).changelist_view, 
                 name='slices_slice_add_sliver'),
-            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)", 
+            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)/$", 
                 SliceSliversAdmin(Sliver, admin_site).add_view, 
                 name='slices_slice_add_sliver'),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)", 
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/$", 
                 SliceSliversAdmin(Sliver, admin_site).change_view, 
-                name='slices_slice_slivers'),)
+                name='slices_slice_slivers'),
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/history", 
+                remove_slice_id(SliceSliversAdmin(Sliver, admin_site).history_view),),
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/reset", 
+                remove_slice_id(action_to_view(reset_selected, SliceSliversAdmin(Sliver, admin_site))),)
+            )
         return extra_urls + urls
 
 

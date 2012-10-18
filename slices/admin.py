@@ -59,13 +59,13 @@ class SliverAdmin(ChangeViewActionsMixin):
     has_private_iface.boolean = True
     has_private_iface.admin_order_field = 'privateiface'
     
-    def num_isolated_ifaces(self, node):
-        return node.isolatediface__count
+    def num_isolated_ifaces(self, instance):
+        return instance.isolatediface__count
     num_isolated_ifaces.short_description = 'IsolatedIfaces'
     num_isolated_ifaces.admin_order_field = 'isolatediface__count'
     
-    def num_public_ifaces(self, node):
-        return node.isolatediface__count
+    def num_public_ifaces(self, instance):
+        return instance.isolatediface__count
     num_public_ifaces.short_description = 'PublicIfaces'
     num_public_ifaces.admin_order_field = 'publiciface__count'
     
@@ -85,8 +85,8 @@ class NodeListAdmin(admin.ModelAdmin):
     search_fields = ['description', 'id', 'uuid']
     change_list_template = 'admin/slices/slice/list_nodes.html'
     
-    def num_slivers(self, slice):
-        return slice.sliver__count
+    def num_slivers(self, instance):
+        return instance.sliver__count
     num_slivers.short_description = 'Slivers'
     num_slivers.admin_order_field = 'sliver__count'
     
@@ -224,6 +224,16 @@ class SliceAdmin(ChangeViewActionsMixin):
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_actions = [('renew', renew_selected_slices, '', ''),
                            ('reset', reset_selected, '', '')]
+
+    def num_slivers(self, instance):
+        return instance.sliver__count
+    num_slivers.short_description = 'Slivers'
+    num_slivers.admin_order_field = 'sliver__count'
+    
+    def queryset(self, request):
+        qs = super(SliceAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('sliver'))
+        return qs
     
     def get_urls(self):
         urls = super(SliceAdmin, self).get_urls()

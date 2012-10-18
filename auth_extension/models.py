@@ -52,12 +52,12 @@ class UserProfile(models.Model):
         super(UserProfile, self).clean()
 
 
-# FIXME Ensure a userprofile is created each time a new user is added 
-#       at a model level (no admin).
-@receiver(post_save, sender=User, dispatch_uid="auth_extension.create_user_profile")
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        profile, created = UserProfile.objects.get_or_create(user=instance)
+## TODO Ensure a userprofile is created each time a new user is added 
+##       at a model level (no admin).
+#@receiver(post_save, sender=User, dispatch_uid="auth_extension.create_user_profile")
+#def create_user_profile(sender, instance, created, **kwargs):
+#    if created:
+#        profile, created = UserProfile.objects.get_or_create(user=instance)
 
 
 # Make UserProfile fields visible at User model as properties

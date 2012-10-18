@@ -192,7 +192,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Slice'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'exp_data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2012, 11, 16, 0, 0)', 'null': 'True', 'blank': 'True'}),
+            'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2012, 11, 17, 0, 0)', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
@@ -207,19 +207,12 @@ class Migration(SchemaMigration):
         'slices.template': {
             'Meta': {'object_name': 'Template'},
             'arch': ('django.db.models.fields.CharField', [], {'default': "'amd64'", 'max_length': '32'}),
-            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
+            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'type': ('django.db.models.fields.CharField', [], {'default': "'debian6'", 'max_length': '32'})
-        },
-        'tinc.gateway': {
-            'Meta': {'object_name': 'Gateway'},
-            'cn_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'tinc.island': {
             'Meta': {'object_name': 'Island'},
@@ -245,10 +238,11 @@ class Migration(SchemaMigration):
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         },
         'tinc.tincserver': {
-            'Meta': {'object_name': 'TincServer'},
+            'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincServer'},
             'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
-            'gateway': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['tinc.Gateway']", 'unique': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '36'}),
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         }
     }

@@ -29,9 +29,13 @@ class Migration(SchemaMigration):
         db.create_table('tinc_tincserver', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('pubkey', self.gf('django.db.models.fields.TextField')(unique=True)),
-            ('gateway', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['tinc.Gateway'], unique=True)),
+            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
+            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=36)),
         ))
         db.send_create_signal('tinc', ['TincServer'])
+
+        # Adding unique constraint on 'TincServer', fields ['content_type', 'object_id']
+        db.create_unique('tinc_tincserver', ['content_type_id', 'object_id'])
 
         # Adding M2M table for field connect_to on 'TincServer'
         db.create_table('tinc_tincserver_connect_to', (
@@ -84,6 +88,9 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Removing unique constraint on 'TincClient', fields ['content_type', 'object_id']
         db.delete_unique('tinc_tincclient', ['content_type_id', 'object_id'])
+
+        # Removing unique constraint on 'TincServer', fields ['content_type', 'object_id']
+        db.delete_unique('tinc_tincserver', ['content_type_id', 'object_id'])
 
         # Deleting model 'Host'
         db.delete_table('tinc_host')
@@ -184,10 +191,11 @@ class Migration(SchemaMigration):
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         },
         'tinc.tincserver': {
-            'Meta': {'object_name': 'TincServer'},
+            'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincServer'},
             'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
-            'gateway': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['tinc.Gateway']", 'unique': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '36'}),
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         }
     }

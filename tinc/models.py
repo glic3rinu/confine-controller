@@ -28,15 +28,29 @@ class TincHost(models.Model):
 
 
 class Gateway(CnHost):
-    #TODO: ID >= 2
-    pass
+    related_tincserver = generic.GenericRelation('tinc.TincServer')
+    
+    @property
+    def tinc(self):
+        try: return self.related_tincserver.get()
+        except TincServer.DoesNotExist: return {}
 
 
 class TincServer(TincHost):
-    gateway = models.OneToOneField(Gateway)
-    
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField(max_length=36)
+    content_object = generic.GenericForeignKey()
+
+    class Meta:
+        unique_together = ('content_type', 'object_id')
+
     def __unicode__(self):
-        return "gateway_%s" % self.id
+        if self.content_type.model == 'server': return 'server'
+        return "%s_%s" % (self.content_type.model, self.object_id)
+
+    @property
+    def addresses(self):
+        return self.tincaddress_set.all()
 
 
 class Island(models.Model):
@@ -63,6 +77,10 @@ class TincAddress(models.Model):
     
     def __unicode__(self):
         return str(self.ip_addr)
+    
+    @property
+    def name(self):
+        return self.server.name
     
     @property
     def pubkey(self):
@@ -93,7 +111,7 @@ class TincClient(TincHost):
         self.save()
 
 # Hook TincClient support for related models
-related_models = [Host, Node, Server]
+related_models = [Host, Node]
 
 @property
 def tinc(self):
@@ -105,4 +123,13 @@ for model in related_models:
     related_tincclient.contribute_to_class(model, 'related_tincclient')
     model.tinc = tinc
 
+# Hook TincServer support to Server
+@property
+def tinc(self):
+    try: return self.related_tincserver.get()
+    except TincServer.DoesNotExist: return {}
+
+related_tincserver = generic.GenericRelation('tinc.TincServer')
+related_tincserver.contribute_to_class(Server, 'related_tincserver')
+Server.tinc = tinc
 

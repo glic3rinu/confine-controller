@@ -1,7 +1,7 @@
 from common.api import api
 from rest_framework import generics
-from tinc.models import Island, Host
-from tinc.serializers import IslandSerializer, HostSerializer
+from tinc.models import Island, Host, Gateway
+from tinc.serializers import IslandSerializer, HostSerializer, GatewaySerializer
 
 
 class IslandList(generics.ListCreateAPIView):
@@ -24,5 +24,16 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = HostSerializer
 
 
+class GatewayList(generics.ListCreateAPIView):
+    model = Gateway
+    serializer_class = GatewaySerializer
+
+
+class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Gateway
+    serializer_class = GatewaySerializer
+
+
 api.register(IslandList, IslandDetail)
 api.register(HostList, HostDetail)
+api.register(GatewayList, GatewayDetail)

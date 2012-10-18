@@ -14,7 +14,7 @@ class TincClientInline(generic.GenericTabularInline):
     readonly_fields = ['connect_to']
 
 
-class TincServerInline(admin.TabularInline):
+class TincServerInline(generic.GenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     model = TincServer
     max_num = 1
@@ -81,11 +81,10 @@ class HostInline(admin.TabularInline):
 
 insert_inline(User, HostInline)
 insert_inline(Node, TincClientInline)
-insert_inline(Server, TincClientInline)
+insert_inline(Server, TincServerInline)
 insert_action(Node, set_island)
 
 
-for model in [Node, Server]:
-    modeladmin = get_modeladmin(model)
-    modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')
+node_modeladmin = get_modeladmin(Node)
+node_modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')
 

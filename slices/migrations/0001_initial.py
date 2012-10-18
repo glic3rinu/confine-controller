@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
             ('type', self.gf('django.db.models.fields.CharField')(default='debian6', max_length=32)),
             ('arch', self.gf('django.db.models.fields.CharField')(default='amd64', max_length=32)),
             ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('data', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
+            ('data', self.gf('django.db.models.fields.files.FileField')(max_length=100, blank=True)),
         ))
         db.send_create_signal('slices', ['Template'])
 
@@ -27,7 +27,7 @@ class Migration(SchemaMigration):
             ('uuid', self.gf('django.db.models.fields.CharField')(unique=True, max_length=36, blank=True)),
             ('pubkey', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('expires_on', self.gf('django.db.models.fields.DateField')(default=datetime.datetime(2012, 11, 16, 0, 0), null=True, blank=True)),
+            ('expires_on', self.gf('django.db.models.fields.DateField')(default=datetime.datetime(2012, 11, 17, 0, 0), null=True, blank=True)),
             ('instance_sn', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
             ('new_sliver_instance_sn', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
             ('vlan_nr', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
@@ -60,7 +60,7 @@ class Migration(SchemaMigration):
         # Adding model 'Sliver'
         db.create_table('slices_sliver', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=256)),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=256, blank=True)),
             ('instance_sn', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
             ('slice', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['slices.Slice'])),
             ('node', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['nodes.Node'])),
@@ -235,7 +235,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Slice'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'exp_data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2012, 11, 16, 0, 0)', 'null': 'True', 'blank': 'True'}),
+            'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2012, 11, 17, 0, 0)', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
@@ -256,7 +256,7 @@ class Migration(SchemaMigration):
         },
         'slices.sliver': {
             'Meta': {'object_name': 'Sliver'},
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['nodes.Node']"}),
@@ -272,19 +272,12 @@ class Migration(SchemaMigration):
         'slices.template': {
             'Meta': {'object_name': 'Template'},
             'arch': ('django.db.models.fields.CharField', [], {'default': "'amd64'", 'max_length': '32'}),
-            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
+            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'type': ('django.db.models.fields.CharField', [], {'default': "'debian6'", 'max_length': '32'})
-        },
-        'tinc.gateway': {
-            'Meta': {'object_name': 'Gateway'},
-            'cn_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'cndb_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'tinc.island': {
             'Meta': {'object_name': 'Island'},
@@ -310,10 +303,11 @@ class Migration(SchemaMigration):
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         },
         'tinc.tincserver': {
-            'Meta': {'object_name': 'TincServer'},
+            'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincServer'},
             'connect_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tinc.TincAddress']", 'symmetrical': 'False', 'blank': 'True'}),
-            'gateway': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['tinc.Gateway']", 'unique': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '36'}),
             'pubkey': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         }
     }

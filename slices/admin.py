@@ -105,10 +105,7 @@ class NodeListAdmin(admin.ModelAdmin):
     
     def queryset(self, request):
         """ Filter the node list to nodes where there are no slivers of this slice """
-        qs = self.model._default_manager.get_query_set()
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
+        qs = super(NodeListAdmin, self).queryset(request)
         qs = qs.exclude(pk__in=Node.objects.filter(sliver__slice=self.slice_id))
         qs = qs.annotate(models.Count('sliver'))
         return qs

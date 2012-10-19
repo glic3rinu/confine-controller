@@ -214,7 +214,7 @@ class SliceSliversAdmin(SliverAdmin):
         node_id = request.path.split('/')[-2]
         node = Node.objects.get(pk=node_id)
         request._node_ = node
-        return super(SliceSliversAdmin, self).get_form(request, obj, **kwargs)
+        return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 
 class SliverInline(admin.TabularInline):

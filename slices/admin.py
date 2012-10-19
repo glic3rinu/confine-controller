@@ -87,8 +87,14 @@ class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     
     # fixing breadcrumbs
+    list_display = NodeAdmin.list_display + [num_slivers, 'custom_sliver_pub_ipv4_total']
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = None
+    
+    def custom_sliver_pub_ipv4_total(self, instance):
+        return instance.sliver_pub_ipv4_total
+    custom_sliver_pub_ipv4_total.short_description = 'Total IPv4'
+    custom_sliver_pub_ipv4_total.admin_order_field = 'sliver_pub_ipv4_total'
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id
@@ -102,6 +108,7 @@ class NodeListAdmin(NodeAdmin):
         """ Filter the node list to nodes where there are no slivers of this slice """
         qs = super(NodeListAdmin, self).queryset(request)
         qs = qs.exclude(pk__in=Node.objects.filter(sliver__slice=self.slice_id))
+        qs = qs.annotate(models.Count('sliver'))
         return qs
 
     def has_add_permission(self, *args, **kwargs):

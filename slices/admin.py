@@ -186,7 +186,7 @@ class SliceSliversAdmin(SliverAdmin):
         if "_addanother" in request.POST:
             msg += ' ' + ("You may add another %s below.") % verbose_name
             self.message_user(request, msg)
-            return HttpResponseRedirect('.')
+            return HttpResponseRedirect('../')
         else:
             self.message_user(request, msg)
             if self.has_change_permission(request, None):

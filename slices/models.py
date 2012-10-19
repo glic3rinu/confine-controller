@@ -81,10 +81,6 @@ class Slice(models.Model):
     def properties(self):
         return dict(self.sliceprop_set.all().values_list('name', 'value'))
     
-    @property
-    def num_slivers(self):
-        return self.sliver_set.all().count()
-    
     def renew(self):
         self.expires_on = get_expires_on()
         self.save()
@@ -205,9 +201,3 @@ class PrivateIface(IpSliverIface):
     sliver = models.OneToOneField(Sliver)
 
 
-# Monkey-Patching Section
-
-@property
-def num_slivers(self):
-    return self.sliver_set.all().count()
-Node.num_slivers = num_slivers

@@ -1,5 +1,5 @@
-from common.admin import (ChangeViewActionsMixin, colored, admin_link, 
-    insert_list_display, action_to_view)
+from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
+    insert_list_display, action_to_view, get_modeladmin)
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -7,6 +7,7 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
+from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
 from slices.forms import SliceAdminForm
@@ -60,12 +61,12 @@ class SliverAdmin(ChangeViewActionsMixin):
     has_private_iface.admin_order_field = 'privateiface'
     
     def num_isolated_ifaces(self, instance):
-        return instance.isolatediface__count
+        return instance.isolatediface_set.count()
     num_isolated_ifaces.short_description = 'IsolatedIfaces'
     num_isolated_ifaces.admin_order_field = 'isolatediface__count'
     
     def num_public_ifaces(self, instance):
-        return instance.isolatediface__count
+        return instance.isolatediface_set.count()
     num_public_ifaces.short_description = 'PublicIfaces'
     num_public_ifaces.admin_order_field = 'publiciface__count'
     
@@ -76,22 +77,23 @@ class SliverAdmin(ChangeViewActionsMixin):
         return qs
 
 
-class NodeListAdmin(admin.ModelAdmin):
+def num_slivers(instance):
+    return instance.sliver_set.count()
+num_slivers.short_description = 'Slivers'
+num_slivers.admin_order_field = 'sliver__count'
+
+
+class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     
-    list_display = ['add_sliver_link', 'uuid', 'arch', 'set_state', 'num_slivers']
+    list_display = ['add_sliver_link', 'uuid', link('cn_url', description='CN URL'), 
+        'arch', colored('set_state', STATES_COLORS), 'num_ifaces', num_slivers]
     actions = None
-    list_filter = ['arch', 'set_state']
-    search_fields = ['description', 'id', 'uuid']
+    # fix breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
     
-    def num_slivers(self, instance):
-        return instance.sliver__count
-    num_slivers.short_description = 'Slivers'
-    num_slivers.admin_order_field = 'sliver__count'
-    
     def add_sliver_link(self, instance):
-        return '<a href="%s">%s</a>' % (instance.id, instance.description)
+        return '<b><a href="%s">%s</a></b>' % (instance.id, instance.description)
     add_sliver_link.short_description = 'Node'
     add_sliver_link.allow_tags = True
     
@@ -107,8 +109,10 @@ class NodeListAdmin(admin.ModelAdmin):
         """ Filter the node list to nodes where there are no slivers of this slice """
         qs = super(NodeListAdmin, self).queryset(request)
         qs = qs.exclude(pk__in=Node.objects.filter(sliver__slice=self.slice_id))
-        qs = qs.annotate(models.Count('sliver'))
         return qs
+
+    def has_add_permission(self, *args, **kwargs):
+        return False
 
 
 class SliceSliversAdmin(SliverAdmin):
@@ -230,7 +234,7 @@ class SliceAdmin(ChangeViewActionsMixin):
                            ('reset', reset_selected, '', '')]
 
     def num_slivers(self, instance):
-        return instance.sliver__count
+        return instance.sliver_set.count()
     num_slivers.short_description = 'Slivers'
     num_slivers.admin_order_field = 'sliver__count'
     
@@ -275,8 +279,14 @@ admin.site.register(Template, TemplateAdmin)
 
 # Monkey-Patching Section
 
-def num_slivers(node):
-    return node.num_slivers
-num_slivers.short_description = 'Slivers'
+node_modeladmin = get_modeladmin(Node)
+old_queryset = node_modeladmin.queryset
+
+def queryset(request):
+    qs = old_queryset(request)
+    qs = qs.annotate(models.Count('sliver'))
+    return qs
+
+node_modeladmin.queryset = queryset
 
 insert_list_display(Node, num_slivers)

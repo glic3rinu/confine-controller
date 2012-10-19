@@ -176,7 +176,7 @@ class SliverIface(models.Model):
 
 class IsolatedIface(SliverIface):
     sliver = models.ForeignKey(Sliver)
-    parent = models.ForeignKey('nodes.DirectIface')
+    parent = models.ForeignKey('nodes.DirectIface', unique=True)
     
     class Meta:
         unique_together = ['sliver', 'parent']

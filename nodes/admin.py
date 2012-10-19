@@ -57,7 +57,7 @@ class NodeAdmin(ChangeViewActionsMixin):
                            ('request-cert', request_cert, 'Request Certificate', ''),]
     
     def num_ifaces(self, node):
-        return node.directiface__count
+        return node.directiface_set.count()
     num_ifaces.short_description = 'Ifaces'
     num_ifaces.admin_order_field = 'directiface__count'
     

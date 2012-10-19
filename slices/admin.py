@@ -39,7 +39,9 @@ class IsolatedIfaceInline(admin.TabularInline):
         """ Limit parent choices to those available on the current node """
         field = super(IsolatedIfaceInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'parent':
-            field.queryset = field.queryset.filter(node=request._node_)
+            node = request._node_
+            ifaces_in_use = node.sliver_set.all().filter(isolatediface__isnull=False).values_list('isolatediface__parent', flat=True)
+            field.queryset = field.queryset.filter(node=node).exclude(pk__in=ifaces_in_use)
         return field
 
 

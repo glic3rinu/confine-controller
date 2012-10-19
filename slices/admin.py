@@ -86,9 +86,9 @@ class SliverAdmin(ChangeViewActionsMixin):
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     
-    actions = None
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
+    actions = None
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id

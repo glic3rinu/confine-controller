@@ -69,7 +69,7 @@ class Ticket(models.Model):
     
     def save(self, *args, **kwargs):
         # FIXME only set to open when an staff operator has replyed
-        if self.state == 'NEW' and self.message_set.count() > 1:
+        if self.state == 'NEW' and self.message_set.all().count() > 1:
             self.state = 'OPEN'
         super(Ticket, self).save(*args, **kwargs)
 

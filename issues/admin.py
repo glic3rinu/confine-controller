@@ -72,7 +72,7 @@ class TicketAdmin(ChangeViewActionsMixin):
         }),)
     
     def num_messages(self, ticket):
-        return ticket.message__count
+        return ticket.message_set.count()
     num_messages.short_description = 'Messages'
     num_messages.admin_order_field = 'message__count'
     
@@ -104,7 +104,7 @@ class QueueAdmin(admin.ModelAdmin):
     inlines = [TicketInline]
     
     def num_tickets(self, queue):
-        return queue.ticket__count
+        return queue.ticket_set.count()
     num_tickets.short_description = 'Tickets'
     num_tickets.admin_order_field = 'ticket__count'
     

@@ -31,10 +31,19 @@ class SliverPropInline(admin.TabularInline):
     model = SliverProp
     extra = 0
 
-
 class IsolatedIfaceInline(admin.TabularInline):
     model = IsolatedIface
     extra = 0
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        """ Limit parent choices to those available on the current node """
+        field = super(IsolatedIfaceInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'parent':
+            node_id = request.path.split('/')[-2]
+            node = Node.objects.get(pk=node_id)
+            field.queryset = field.queryset.filter(node=node)
+
+        return field
 
 
 class PublicIfaceInline(admin.TabularInline):
@@ -81,6 +90,9 @@ class SliverAdmin(ChangeViewActionsMixin):
         qs = qs.annotate(models.Count('isolatediface'))
         qs = qs.annotate(models.Count('publiciface'))
         return qs
+    
+    def has_add_permission(self, *args, **kwargs):
+        return False
 
 
 class NodeListAdmin(NodeAdmin):
@@ -181,6 +193,9 @@ class SliceSliversAdmin(SliverAdmin):
         else:
             post_url = reverse('admin:index', current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
+    
+    def has_add_permission(self, *args, **kwargs):
+        return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
 
 
 class SliverInline(admin.TabularInline):
@@ -232,7 +247,7 @@ class SliceAdmin(ChangeViewActionsMixin):
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_actions = [('renew', renew_selected_slices, '', ''),
                            ('reset', reset_selected, '', '')]
-
+    
     def queryset(self, request):
         qs = super(SliceAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('sliver'))

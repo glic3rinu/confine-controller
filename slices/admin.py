@@ -86,8 +86,6 @@ class SliverAdmin(ChangeViewActionsMixin):
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     
-    list_display = ['description', 'uuid', link('cn_url', description='CN URL'), 
-        'arch', colored('set_state', STATES_COLORS), 'num_ifaces', num_slivers]
     actions = None
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'

@@ -34,15 +34,12 @@ class SliverPropInline(admin.TabularInline):
 class IsolatedIfaceInline(admin.TabularInline):
     model = IsolatedIface
     extra = 0
-
+    
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         """ Limit parent choices to those available on the current node """
         field = super(IsolatedIfaceInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'parent':
-            node_id = request.path.split('/')[-2]
-            node = Node.objects.get(pk=node_id)
-            field.queryset = field.queryset.filter(node=node)
-
+            field.queryset = field.queryset.filter(node=request._node_)
         return field
 
 
@@ -60,7 +57,8 @@ class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
         'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
     list_filter = ['slice__name']
-    readonly_fields = ['instance_sn']
+    fields = ['description', 'slice_link', 'node_link', 'instance_sn']
+    readonly_fields = ['instance_sn', 'slice_link', 'node_link']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
                PrivateIfaceInline]
@@ -85,6 +83,16 @@ class SliverAdmin(ChangeViewActionsMixin):
     num_public_ifaces.short_description = 'PublicIfaces'
     num_public_ifaces.admin_order_field = 'publiciface__count'
     
+    def slice_link(self, instance):
+        url = reverse('admin:slices_slice_change', args=[instance.slice.pk])
+        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.slice))
+    slice_link.short_description = 'Slice'
+    
+    def node_link(self, instance):
+        url = reverse('admin:nodes_node_change', args=[instance.node.pk])
+        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.node))
+    node_link.short_description = 'Node'
+    
     def queryset(self, request):
         qs = super(SliverAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('isolatediface'))
@@ -93,7 +101,11 @@ class SliverAdmin(ChangeViewActionsMixin):
     
     def has_add_permission(self, *args, **kwargs):
         return False
-
+    
+    def get_form(self, request, obj=None, **kwargs):
+        # just save node reference for future processing in IsolatedIfaceInline
+        request._node_ = obj.node
+        return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
@@ -196,6 +208,13 @@ class SliceSliversAdmin(SliverAdmin):
     
     def has_add_permission(self, *args, **kwargs):
         return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
+
+    def get_form(self, request, obj=None, **kwargs):
+        # just save node reference for future processing in IsolatedIfaceInline
+        node_id = request.path.split('/')[-2]
+        node = Node.objects.get(pk=node_id)
+        request._node_ = node
+        return super(SliceSliversAdmin, self).get_form(request, obj, **kwargs)
 
 
 class SliverInline(admin.TabularInline):

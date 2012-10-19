@@ -21,6 +21,12 @@ STATE_COLORS = { 'register': 'grey',
                  'activate': 'green' }
 
 
+def num_slivers(instance):
+    return instance.sliver_set.count()
+num_slivers.short_description = 'Slivers'
+num_slivers.admin_order_field = 'sliver__count'
+
+
 class SliverPropInline(admin.TabularInline):
     model = SliverProp
     extra = 0
@@ -77,25 +83,14 @@ class SliverAdmin(ChangeViewActionsMixin):
         return qs
 
 
-def num_slivers(instance):
-    return instance.sliver_set.count()
-num_slivers.short_description = 'Slivers'
-num_slivers.admin_order_field = 'sliver__count'
-
-
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     
-    list_display = ['add_sliver_link', 'uuid', link('cn_url', description='CN URL'), 
+    list_display = ['description', 'uuid', link('cn_url', description='CN URL'), 
         'arch', colored('set_state', STATES_COLORS), 'num_ifaces', num_slivers]
     actions = None
-    # fix breadcrumbs
+    # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
-    
-    def add_sliver_link(self, instance):
-        return '<b><a href="%s">%s</a></b>' % (instance.id, instance.description)
-    add_sliver_link.short_description = 'Node'
-    add_sliver_link.allow_tags = True
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id
@@ -210,7 +205,7 @@ class SlicePropInline(admin.TabularInline):
 
 class SliceAdmin(ChangeViewActionsMixin):
     list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
-        'num_slivers',admin_link('template'), 'expires_on', ]
+        num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
@@ -233,11 +228,6 @@ class SliceAdmin(ChangeViewActionsMixin):
     change_view_actions = [('renew', renew_selected_slices, '', ''),
                            ('reset', reset_selected, '', '')]
 
-    def num_slivers(self, instance):
-        return instance.sliver_set.count()
-    num_slivers.short_description = 'Slivers'
-    num_slivers.admin_order_field = 'sliver__count'
-    
     def queryset(self, request):
         qs = super(SliceAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('sliver'))
@@ -247,7 +237,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
-        # TODO Refactor: Hook SliceSliversAdmin in a more clever way
+        # TODO Refactor: Hook SliceSliversAdmin in a clever way
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
                 NodeListAdmin(Node, admin_site).changelist_view, 

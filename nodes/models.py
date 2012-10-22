@@ -85,7 +85,7 @@ class Node(CnHost):
 
 class NodeProp(models.Model):
     node = models.ForeignKey(Node)
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=32)
     value = models.CharField(max_length=256)
     
     class Meta:

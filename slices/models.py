@@ -104,7 +104,7 @@ class Slice(models.Model):
 
 class SliceProp(models.Model):
     slice = models.ForeignKey(Slice)
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64)
     value = models.CharField(max_length=256)
     
     class Meta:

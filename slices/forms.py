@@ -34,3 +34,15 @@ class SliceAdminForm(forms.ModelForm):
         if vlan_nr == True: return -1
         return vlan_nr
 
+
+class IsolatedIfaceInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(IsolatedIfaceInlineForm, self).__init__(*args, **kwargs)
+        ifaces_in_use = self.node.sliver_set.all().filter(isolatediface__isnull=False\
+                ).values_list('isolatediface__parent', flat=True)
+        if 'instance' in kwargs:
+            instance = kwargs['instance']
+            ifaces_in_use = list(ifaces_in_use)
+            ifaces_in_use.remove(instance.parent.pk)
+        qs = self.fields['parent'].queryset.filter(node=self.node).exclude(pk__in=ifaces_in_use)
+        self.fields['parent'].queryset = qs

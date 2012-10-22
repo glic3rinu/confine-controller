@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
-from slices.forms import SliceAdminForm
+from slices.forms import SliceAdminForm, IsolatedIfaceInlineForm
 from slices.helpers import wrap_action, remove_slice_id
 from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
     PrivateIface, Slice, SliceProp, Template)
@@ -31,19 +31,16 @@ class SliverPropInline(admin.TabularInline):
     model = SliverProp
     extra = 0
 
+
 class IsolatedIfaceInline(admin.TabularInline):
     model = IsolatedIface
     extra = 0
-    
-    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
-        """ Limit parent choices to those available on the current node """
-        field = super(IsolatedIfaceInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
-        if db_field.name == 'parent':
-            node = request._node_
-            ifaces_in_use = node.sliver_set.all().filter(isolatediface__isnull=False\
-                ).values_list('isolatediface__parent', flat=True)
-            field.queryset = field.queryset.filter(node=node).exclude(pk__in=ifaces_in_use)
-        return field
+    form = IsolatedIfaceInlineForm
+
+    def get_formset(self, request, obj=None, **kwargs):
+        """ Provides contact_id for future usage on add/change form contact filtering """
+        self.form.node = request._node_
+        return super(IsolatedIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class PublicIfaceInline(admin.TabularInline):
@@ -109,6 +106,7 @@ class SliverAdmin(ChangeViewActionsMixin):
         # just save node reference for future processing in IsolatedIfaceInline
         request._node_ = obj.node
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
+
 
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
@@ -214,9 +212,12 @@ class SliceSliversAdmin(SliverAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         # just save node reference for future processing in IsolatedIfaceInline
-        node_id = request.path.split('/')[-2]
-        node = Node.objects.get(pk=node_id)
-        request._node_ = node
+        if obj: 
+            request._node_ = obj.node
+        else:
+            node_id = request.path.split('/')[-2]
+            node = Node.objects.get(pk=node_id)
+            request._node_ = node
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 

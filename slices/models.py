@@ -63,7 +63,7 @@ class Slice(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-        # TODO prevent modifications on vlan_nr once is seted
+        # FIXME prevent modifications on vlan_nr once is seted
         if self.vlan_nr == -1:
             if self.set_state == self.INSTANTIATE:
                 self.vlan_nr = self._get_vlan_nr()

@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'admin_tools.dashboard',
     'singleton_models',
     'django_extensions',
+    'djcelery',
 
     # Django.contrib
     'django.contrib.auth',
@@ -245,4 +246,22 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/host': "computer-dell-dimension-E521.svg",
     'issues/ticket': "Ticket.svg",
 }
+
+
+## django-celery
+import djcelery
+djcelery.setup_loader()
+# Broker
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "guest"
+BROKER_PASSWORD = "guest"
+BROKER_VHOST = "/"
+CELERY_SEND_EVENTS = True
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERY_DISABLE_RATE_LIMITS = True
+# Use controller logging system instead of celer
+#CELERYD_HIJACK_ROOT_LOGGER = False
+#CELERY_SEND_TASK_ERROR_EMAILS = True
+## end
 

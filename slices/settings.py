@@ -1,5 +1,7 @@
+from celery.task.schedules import crontab
 from datetime import timedelta
 from django.conf import settings
+
 
 ugettext = lambda s: s
 
@@ -28,3 +30,7 @@ SLICE_EXP_DATA_DIR = getattr(settings, 'SLICE_EXP_DATA_DIR', 'exp_data/')
 
 # 30 days expiration interval
 SLICE_EXPIRATION_INTERVAL = getattr(settings, 'SLICE_EXPIRATION_INTERVAL', timedelta(30))
+
+# Clean expired slices everyday at midnigth
+CLEAN_EXPIRED_SLICES_CRONTAB = getattr(settings, 'CLEAN_EXPIRED_SLICES_CRONTAB',
+    crontab(minute=0, hour=0))

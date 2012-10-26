@@ -119,7 +119,6 @@ ROOT_URLCONF = 'controller.urls'
 WSGI_APPLICATION = 'controller.wsgi.application'
 
 TEMPLATE_DIRS = (
-#    '/home/confine/controller/controller/templates',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -247,7 +246,6 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/host': "computer-dell-dimension-E521.svg",
     'issues/ticket': "Ticket.svg",
     'djcelery/taskstate': "taskstate.png",
-
 }
 
 

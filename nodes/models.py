@@ -2,6 +2,7 @@ from django_extensions.db import fields
 from django.contrib.auth.models import User
 from django.db import models
 from nodes import settings
+from nodes.tasks import cache_node_db
 from singleton_models.models import SingletonModel
 
 
@@ -81,7 +82,11 @@ class Node(CnHost):
     def reboot(self):
         self.boot_sn += 1
         self.save()
-
+    
+    def cache_node_db(self, async=False):
+        if async: cache_node_db.delay(self.pk)
+        else: cache_node_db(self.pk)
+    
 
 class NodeProp(models.Model):
     node = models.ForeignKey(Node)

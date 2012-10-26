@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from nodes.models import Node
 from slices import settings
+from slices.tasks import force_slice_update, force_sliver_update
 
 
 def get_expires_on():
@@ -100,6 +101,10 @@ class Slice(models.Model):
         return last_nr + 1
     
     class VlanAllocationError(Exception): pass
+    
+    def force_update(self, async=False):
+        if async: force_slice_update.delay(self.pk)
+        else: force_slice_update(self.pk)
 
 
 class SliceProp(models.Model):
@@ -140,6 +145,10 @@ class Sliver(models.Model):
     def reset(self):
         self.instance_sn += 1
         self.save()
+    
+    def force_update(self, async=False):
+        if async: force_sliver_update.delay(self.pk)
+        else: force_sliver_update(self.pk)
 
 
 class SliverProp(models.Model):

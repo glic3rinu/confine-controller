@@ -214,9 +214,10 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('Administration', {
         'models': (
-            'django.contrib.auth.*.User',
+            'django.contrib.auth.models.User',
             'auth_extension.*',
-            'issues.*Ticket',
+            'issues.models.Ticket',
+            'djcelery.models.TaskState',
         ),
         'collapsible': True,
     }),
@@ -245,6 +246,8 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/tincaddress': "X-office-address-book.svg",
     'tinc/host': "computer-dell-dimension-E521.svg",
     'issues/ticket': "Ticket.svg",
+    'djcelery/taskstate': "taskstate.png",
+
 }
 
 

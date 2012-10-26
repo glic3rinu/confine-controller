@@ -29,7 +29,7 @@ class CustomMenu(Menu):
         
         self.children.append(items.AppList(
             'Administration',
-            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*')
+            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*', 'djcelery.*')
             ))
         
         def api_link():

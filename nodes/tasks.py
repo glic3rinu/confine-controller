@@ -2,11 +2,11 @@ from celery.task import periodic_task, task
 from nodes.settings import CACHE_NODE_DB_CRONTAB
 
 
-@periodic_task(name="Cache NodeDB", run_every=CACHE_NODE_DB_CRONTAB)
+@periodic_task(name="Periodic Cache NodeDB", run_every=CACHE_NODE_DB_CRONTAB)
 def periodic_cache_node_db():
     # Avoid circular import
     from nodes.models import Node
-    for node in Node.objects.filter(nodedb_uri__not=""):
+    for node in Node.objects.exclude(cndb_uri=""):
         node.cache_node_db()
 
 

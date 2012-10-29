@@ -8,7 +8,7 @@ from slices.settings import CLEAN_EXPIRED_SLICES_CRONTAB
 def clean_expired_slices():
     from slices.models import Slice
     now = datetime.now()
-    deletable_slices = Slice.objects.filter(exp_date__lte=now)
+    deletable_slices = Slice.objects.filter(expires_on__lte=now)
     for slice in deletable_slices:
         with transaction.commit_on_success():
             slice.delete()

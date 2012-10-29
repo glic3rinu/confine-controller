@@ -79,6 +79,10 @@ class Node(CnHost):
     def slivers(self):
         return self.sliver_set.all()
     
+    @property
+    def direct_ifaces(self):
+        return self.directiface_set.all()
+    
     def reboot(self):
         self.boot_sn += 1
         self.save()

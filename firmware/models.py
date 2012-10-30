@@ -28,6 +28,7 @@ class FirmwareConfig(SingletonModel):
         return 'Current Firmware Config'
     
     def build(self, node):
+        # TODO how to get public_ipv4_avail ?
         from confw import confw
         arch_regex = "(^|\s)%s(,|$)" % node.arch
         base_image = BaseImage.objects.get(architectures__regex=arch_regex).image

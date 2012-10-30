@@ -101,6 +101,16 @@ class Node(CnHost):
         ])
         return string.join(ipv6_words, ':')
 
+    def get_sliver_mac_prefix(self):
+        if self.sliver_mac_prefix: 
+            return self.sliver_mac_prefix
+        return settings.SLIVER_MAC_PREFIX_DFLT
+    
+    def get_priv_ipv4_prefix(self):
+        if self.priv_ipv4_prefix:
+            return self.priv_ipv4_prefix
+        return settings.PRIV_IPV4_PREFIX_DFLT
+
 
 class NodeProp(models.Model):
     node = models.ForeignKey(Node)

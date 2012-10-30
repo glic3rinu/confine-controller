@@ -2,8 +2,10 @@ from common.admin import get_modeladmin
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.utils.functional import update_wrapper
+from django.utils.safestring import mark_safe
 from firmware.actions import get_firmware
-from firmware.models import BaseImage, FirmwareConfig, FirmwareConfigUCI
+from firmware.models import (BaseImage, Config, ConfigUCI, 
+    Build, BuildUCI)
 from nodes.models import Node
 from singleton_models.admin import SingletonModelAdmin
 
@@ -13,14 +15,36 @@ class BaseImageInline(admin.TabularInline):
     extra = 0
 
 
-class FirmwareConfigUCIInline(admin.TabularInline):
-    model = FirmwareConfigUCI
+class ConfigUCIInline(admin.TabularInline):
+    model = ConfigUCI
     extra = 0
 
 
+class BuildUCIInline(admin.TabularInline):
+    model = BuildUCI
+    max_num = 0
+    readonly_fields = ['section', 'option', 'value']
+    can_delete = False
 
-class FirmwareConfigAdmin(SingletonModelAdmin):
-    inlines = [BaseImageInline, FirmwareConfigUCIInline]
+class BuildAdmin(admin.ModelAdmin):
+    list_display = ['node', 'version', 'build_date', 'image_link']
+    fields = ['node', 'image_link', 'version', 'build_date']
+    inlines = [BuildUCIInline]
+    readonly_fields = ['node', 'image_link', 'version', 'build_date']
+    
+    def build_date(self, build):
+        return build.date.strftime("%Y-%m-%d %H:%M:%S")
+    
+    def image_link(self, build):
+        return mark_safe('<a href=%s>%s</a>' % (build.image.url, build.image))
+    image_link.allow_tags = True
+    
+    def has_add_permission(self, *args, **kwargs):
+        return False
+    
+
+class ConfigAdmin(SingletonModelAdmin):
+    inlines = [BaseImageInline, ConfigUCIInline]
     
     def get_urls(self):
         def wrap(view):
@@ -40,12 +64,12 @@ class FirmwareConfigAdmin(SingletonModelAdmin):
                 wrap(self.change_view), {'object_id': '1'}, 
                 name='%s_%s_changelist' % info),
         )
-        urls = super(FirmwareConfigAdmin, self).get_urls()
+        urls = super(ConfigAdmin, self).get_urls()
         return urlpatterns + urls
 
 
-admin.site.register(FirmwareConfig, FirmwareConfigAdmin)
-
+admin.site.register(Config, ConfigAdmin)
+admin.site.register(Build, BuildAdmin)
 
 # Monkey-Patching
 node_modeladmin = get_modeladmin(Node)

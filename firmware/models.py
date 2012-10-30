@@ -6,17 +6,16 @@ from firmware import settings
 from nodes.settings import NODE_ARCHS
 from singleton_models.models import SingletonModel
 
+
 class QueueQuerySet(models.query.QuerySet):
     def get_current(self, node):
-        build = FirmwareBuild.objects.get(node=node)
-        config = FirmwareConfig.objects.get()
-        if build.match(config): 
-            return build
-        else: 
-            raise FirmwareBuild.DoesNotExist()
+        build = Build.objects.get(node=node)
+        config = Config.objects.get()
+        if build.match(config): return build
+        else: raise Build.DoesNotExist()
 
 
-class FirmwareBuild(models.Model):
+class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
@@ -29,10 +28,14 @@ class FirmwareBuild(models.Model):
     
     @classmethod
     def build(cls, node):
-        FirmwareConfig.objects.get().build(node)
+        try: old_build = cls.objects.get(node=node)
+        except cls.DoesNotExist: pass
+        else: old_build.delete()
+        # TODO delete image file
+        Config.objects.get().build(node)
     
     def get_uci(self):
-        return self.firmwarebuilduci_set.all()
+        return self.builduci_set.all()
     
     def match(self, config):
         if self.version != config.version: 
@@ -43,20 +46,20 @@ class FirmwareBuild(models.Model):
         return ucis == config_ucis
 
 
-class FirmwareConfig(SingletonModel):
+class Config(SingletonModel):
     description = models.CharField(max_length=255)
     version = models.CharField(max_length=64)
     date = models.DateTimeField(auto_now=True)
     
     class Meta:
-        verbose_name = "firmware config"
-        verbose_name_plural = "firmware config"
+        verbose_name = "Firmware Config"
+        verbose_name_plural = "Firmware Config"
     
     def __unicode__(self):
         return 'Current Firmware Config'
     
     def get_uci(self):
-        return self.firmwareconfiguci_set.all()
+        return self.configuci_set.all()
     
     def build(self, node):
         # TODO how to get public_ipv4_avail ?
@@ -76,15 +79,15 @@ class FirmwareConfig(SingletonModel):
 #        image.build(base_image.path, gzip=True)
 #        image.clean()
         # TODO iamge.path
-        # Create FirmwareBuild object
-        build = FirmwareBuild.objects.create(node=node, version=self.version,
+        # Create Build object
+        build = Build.objects.create(node=node, version=self.version,
             image='firmwares/openwrt-x86-generic-combined-ext4-40.img.gz')
         for uci in build_uci:
-            FirmwareBuildUCI.objects.create(build=build, **uci)
+            BuildUCI.objects.create(build=build, **uci)
 
 
 class BaseImage(models.Model):
-    config = models.ForeignKey(FirmwareConfig)
+    config = models.ForeignKey(Config)
     architectures = MultiSelectField(max_length=250, choices=NODE_ARCHS)
     image = models.FileField(upload_to=settings.FIRMWARE_DIR)
     
@@ -103,8 +106,8 @@ class BaseImage(models.Model):
         super(BaseImage, self).clean()
 
 
-class FirmwareConfigUCI(models.Model):
-    config = models.ForeignKey(FirmwareConfig)
+class ConfigUCI(models.Model):
+    config = models.ForeignKey(Config)
     section = models.CharField(max_length=32, help_text="UCI config statement",
         default='node')
     option = models.CharField(max_length=32, help_text="UCI option statement")
@@ -122,12 +125,15 @@ class FirmwareConfigUCI(models.Model):
         return unicode(eval(self.value))
 
 
-class FirmwareBuildUCI(models.Model):
-    build = models.ForeignKey(FirmwareBuild)
+class BuildUCI(models.Model):
+    build = models.ForeignKey(Build)
     section = models.CharField(max_length=32, help_text="UCI config statement")
     option = models.CharField(max_length=32, help_text="UCI option statement")
     value = models.CharField(max_length=255)
     
     class Meta:
         unique_together = ['build', 'section', 'option']
+    
+    def __unicode__(self):
+        return "%s.%s" % (self.section, self.option)
 

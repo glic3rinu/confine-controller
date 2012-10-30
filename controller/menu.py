@@ -3,6 +3,18 @@ from django.core.urlresolvers import reverse
 from controller import settings
 
 
+def api_link():
+    if 'opts' in context: opts = context['opts']
+    elif 'cl' in context: opts = context['cl'].opts
+    else: return reverse('base')
+    if 'object_id' in context: 
+        object_id = context['object_id']
+        try: return reverse('%s-detail' % opts.module_name, args=[object_id])
+        except: return reverse('base')
+    try: return reverse('%s-list' % opts.module_name)
+    except: return reverse('base')
+
+
 class CustomMenu(Menu):
     def init_with_context(self, context):
         self.children += [
@@ -27,21 +39,18 @@ class CustomMenu(Menu):
                     items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
                 ]))
         
+        administration_models = ('django.contrib.auth.*', 'auth_extensions.*', 'djcelery.*')
+        
+        if 'issues' in settings.INSTALLED_APPS:
+            administration_models += ('issues.*',)
+            
+        if 'firmware' in settings.INSTALLED_APPS:
+            administration_models += ('firmware.*',)
+            
         self.children.append(items.AppList(
             'Administration',
-            models=('django.contrib.auth.*', 'auth_extensions.*', 'issues.*', 'djcelery.*')
+            models=administration_models
             ))
-        
-        def api_link():
-            if 'opts' in context: opts = context['opts']
-            elif 'cl' in context: opts = context['cl'].opts
-            else: return reverse('base')
-            if 'object_id' in context: 
-                object_id = context['object_id']
-                try: return reverse('%s-detail' % opts.module_name, args=[object_id])
-                except: return reverse('base')
-            try: return reverse('%s-list' % opts.module_name)
-            except: return reverse('base')
         
         self.children += [
                     items.MenuItem('API', api_link),

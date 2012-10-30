@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'change' node.pk %}">{{ node.description|capfirst }}</a>
+&rsaquo; {{ action_name }} multiple objects
+</div>
+{% endblock %}
+
+
+
+{% block content %}
+
+    <p>{{ content_message }}</p>
+    <ul>
+    {% if build %}
+        <li><b>Download:</b> <a href={{ build.image.url }}>{{build.image}}</a> </li>
+            <ul>
+            <li>Buil Date: {{build.date}}</li>
+            <li>Version: {{build.version}}</li>
+            </ul>
+    {% else %}
+    </ul>
+    <form action="" method="post">{% csrf_token %}
+    <div>
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+    {% endfor %}
+    <input type="hidden" name="action" value="get_firmware" />
+    <input type="hidden" name="post" value="yes" />
+    <input type="submit" value="{% trans "Yes, sure" %}" />
+    </div>
+    </form>
+    {% endif %}
+{% endblock %}
+

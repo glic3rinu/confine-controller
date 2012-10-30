@@ -4,17 +4,9 @@ from django.contrib.admin import helpers
 from django.db import router, transaction
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy, ugettext as _
-#from firmware.tasks import generate_firmware
-from firmware.models import FirmwareBuild, FirmwareConfig
-
-
-#@transaction.commit_on_success
-#def get_firmware(modeladmin, request, queryset):
-#    message = "Not implemented!"
-#    for node in queryset:
-#        generate_firmware.delay(node)
-#    messages.warning(request, message)
+from firmware.models import Build, Config
 
 
 @transaction.commit_on_success
@@ -26,25 +18,20 @@ def get_firmware(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    # Check that the user has change permission for the actual model
+    # Check if the user has change permission for the actual model
     if not modeladmin.has_change_permission(request):
         raise PermissionDenied
     
     using = router.db_for_write(modeladmin.model)
-    
     node = queryset[0]
     
     # User has requested a firmware build
     if request.POST.get('post'):
-        FirmwareBuild.build(node)
+        Build.build(node)
         modeladmin.log_change(request, node, "Build firmware")
-        msg = 'Building firmware for your node "%s", this may take some time' % node.description
+        msg = 'Building firmware for node "%s", this may take some time' % node.description
         modeladmin.message_user(request, msg)
-        # Return None to display the change list page again.
         return None
-    
-    objects_name = force_text(opts.verbose_name)
-    
     
     context = {
         "action_name": 'Firmware',
@@ -55,24 +42,24 @@ def get_firmware(modeladmin, request, queryset):
         'node': node,
     }
     
-    try: build = FirmwareBuild.objects.get_current(node=node)
-    except FirmwareBuild.DoesNotExist:
+    try: build = Build.objects.get_current(node=node)
+    except Build.DoesNotExist:
         context.update({
-            "title": "Do you want to build a new firmware for your RD?",
-            "content_message": """There is no available up-to-date firmware for 
-                download, but I can build one for you and only will take a few seconds.
-                Do you want me to build a new firwmare?""",
+            "title": 'Build firmware for "%s" Research Device?' % node.description,
+            "content_message": mark_safe("""There is no pre-build up-to-date firmware for 
+                this research device, but you can instruct the system to build a 
+                fresh one for you, it will take only a few seconds. 
+                <p> Do you want me to build a new firwmare?</p>"""),
         })
     else:
         context.update({
-            "title": "You can download a firmware for your research device",
+            "title": 'Research Device Firmware for "%s"' % node.description,
             "content_message": "",
             "build": build
         })
     
-    
     # Display the confirmation page
-    return TemplateResponse(request, 'admin/get_firmware.html', 
-        context, current_app=modeladmin.admin_site.name)
+    return TemplateResponse(request, 'admin/get_firmware.html', context, 
+        current_app=modeladmin.admin_site.name)
 
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name_plural)s")

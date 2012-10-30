@@ -1,0 +1,109 @@
+[
+  {
+    "model": "firmware.firmwareconfig",
+    "pk": 1,
+    "fields": {
+      "description": "Confine Firmware",
+      "version": "0.1",
+    }
+  },
+  {
+    "model": "firmware.baseimage",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "architectures": "x86, x86_64",
+      "image": "firmwares/openwrt-x86-generic-combined-ext4-40.img.gz"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "id",
+      "value": "node.id"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "cn_url",
+      "value": "node.cn_url"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "mac_prefix16",
+      "value": "node.get_sliver_mac_prefix()"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "priv_ipv4_prefix24",
+      "value": "node.get_priv_ipv4_prefix()"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "public_ipv4_avail",
+      "value": "node.sliver_pub_ipv4_total"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "rd_public_ipv4_proto",
+      "value": "'dhcp'"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "sl_public_ipv4_proto",
+      "value": "'dhcp'"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "rd_if_iso_parents",
+      "value": "', '.join(node.direct_ifaces.values_list('name', flat=True))"
+    }
+  },
+  {
+    "model": "firmware.firmwareconfiguci",
+    "pk": 1,
+    "fields": {
+      "config": 1,
+      "section": "node",
+      "option": "rd_pubkey",
+      "value": "node.tinc.pubkey"
+    }
+  },
+]

@@ -1,10 +1,10 @@
 [
   {
-    "model": "firmware.firmwareconfig",
+    "model": "firmware.config",
     "pk": 1,
     "fields": {
       "description": "Confine Firmware",
-      "version": "0.1",
+      "version": "0.1"
     }
   },
   {
@@ -12,12 +12,12 @@
     "pk": 1,
     "fields": {
       "config": 1,
-      "architectures": "x86, x86_64",
+      "architectures": "x86,x86_64,i586",
       "image": "firmwares/openwrt-x86-generic-combined-ext4-40.img.gz"
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
+    "model": "firmware.configuci",
     "pk": 1,
     "fields": {
       "config": 1,
@@ -27,8 +27,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 2,
     "fields": {
       "config": 1,
       "section": "node",
@@ -37,8 +37,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 3,
     "fields": {
       "config": 1,
       "section": "node",
@@ -47,8 +47,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 4,
     "fields": {
       "config": 1,
       "section": "node",
@@ -57,8 +57,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 5,
     "fields": {
       "config": 1,
       "section": "node",
@@ -67,8 +67,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 6,
     "fields": {
       "config": 1,
       "section": "node",
@@ -77,8 +77,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 7,
     "fields": {
       "config": 1,
       "section": "node",
@@ -87,8 +87,8 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 8,
     "fields": {
       "config": 1,
       "section": "node",
@@ -97,13 +97,13 @@
     }
   },
   {
-    "model": "firmware.firmwareconfiguci",
-    "pk": 1,
+    "model": "firmware.configuci",
+    "pk": 9,
     "fields": {
       "config": 1,
       "section": "node",
       "option": "rd_pubkey",
       "value": "node.tinc.pubkey"
     }
-  },
+  }
 ]

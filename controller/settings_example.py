@@ -217,7 +217,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'auth_extension.*',
             'issues.models.Ticket',
             'djcelery.models.TaskState',
-            'firmware.models.FirmwareConfig',
+            'firmware.models.Config',
         ),
         'collapsible': True,
     }),
@@ -247,7 +247,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/host': "computer-dell-dimension-E521.svg",
     'issues/ticket': "Ticket.svg",
     'djcelery/taskstate': "taskstate.png",
-    'firmware/firmwareconfig': "Firmware.svg",
+    'firmware/config': "Firmware.svg",
 }
 
 

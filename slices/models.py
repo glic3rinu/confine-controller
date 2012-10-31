@@ -1,5 +1,6 @@
 from datetime import datetime
 from django_extensions.db import fields
+from django_transaction_signals import defer
 from django.contrib.auth.models import User
 from django.db import models
 from nodes.models import Node
@@ -103,7 +104,7 @@ class Slice(models.Model):
     class VlanAllocationError(Exception): pass
     
     def force_update(self, async=False):
-        if async: force_slice_update.delay(self.pk)
+        if async: defer(force_slice_update.delay, self.pk)
         else: force_slice_update(self.pk)
 
 
@@ -147,7 +148,7 @@ class Sliver(models.Model):
         self.save()
     
     def force_update(self, async=False):
-        if async: force_sliver_update.delay(self.pk)
+        if async: defer(force_sliver_update.delay, self.pk)
         else: force_sliver_update(self.pk)
 
 

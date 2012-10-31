@@ -3,3 +3,4 @@
 *.pyc
 *~
 controller/settings.py
+celerybeat-schedule

@@ -1,4 +1,5 @@
 from django_extensions.db import fields
+from django_transaction_signals import defer
 from django.contrib.auth.models import User
 from django.db import models
 from nodes import settings
@@ -88,7 +89,7 @@ class Node(CnHost):
         self.save()
     
     def cache_node_db(self, async=False):
-        if async: cache_node_db.delay(self.pk)
+        if async: defer(cache_node_db.delay, self.pk)
         else: cache_node_db(self.pk)
     
     @property

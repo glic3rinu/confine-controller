@@ -2,7 +2,9 @@ from common.fields import MultiSelectField
 from common.models import generate_chainer_manager
 from django.core.exceptions import ValidationError
 from django.db import models
+from django_transaction_signals import defer
 from firmware import settings
+from firmware.tasks import build
 from nodes.settings import NODE_ARCHS
 from singleton_models.models import SingletonModel
 
@@ -26,24 +28,46 @@ class Build(models.Model):
     def __unicode__(self):
         return self.node.description
     
+    def delete(self, *args, **kwargs):
+        # TODO delete image file
+        super(Build, self).delete(*args, **kwargs)
+    
     @classmethod
-    def build(cls, node):
+    def build(cls, node, async=False):
         try: old_build = cls.objects.get(node=node)
         except cls.DoesNotExist: pass
         else: old_build.delete()
-        # TODO delete image file
-        Config.objects.get().build(node)
+        config = Config.objects.get()
+        if async:
+            defer(build.delay, config.pk, node.pk)
+        else:
+            build(config.pk, node.pk)
     
     def get_uci(self):
         return self.builduci_set.all()
     
     def match(self, config):
-        if self.version != config.version: 
-            return False
+        if self.version != config.version: return False
         ucis = set(self.get_uci().values_list('section', 'option', 'value'))
-        get = lambda u: (u.section, u.option, u.get_value(self.node))
+        get = lambda uci: (uci.section, uci.option, uci.get_value(self.node))
         config_ucis = set(map(get, config.get_uci()))
         return ucis == config_ucis
+    
+    def add_uci(self, **kwargs):
+        BuildUCI.objects.create(build=self, **kwargs)
+
+
+class BuildUCI(models.Model):
+    build = models.ForeignKey(Build)
+    section = models.CharField(max_length=32, help_text="UCI config statement")
+    option = models.CharField(max_length=32, help_text="UCI option statement")
+    value = models.CharField(max_length=255)
+    
+    class Meta:
+        unique_together = ['build', 'section', 'option']
+    
+    def __unicode__(self):
+        return "%s.%s" % (self.section, self.option)
 
 
 class Config(SingletonModel):
@@ -61,29 +85,9 @@ class Config(SingletonModel):
     def get_uci(self):
         return self.configuci_set.all()
     
-    def build(self, node):
-        # TODO how to get public_ipv4_avail ?
-        from confw import confw
+    def get_image(self, node):
         arch_regex = "(^|,)%s(,|$)" % node.arch
-        base_image = BaseImage.objects.get(architectures__regex=arch_regex).image
-#        template = confw.template('generic', 'confine', basedir='/tmp/templates/')
-#        files = confw.files('generic', basedir='/tmp/files/')
-        build_uci = []
-        for uci in self.get_uci():
-            value = uci.get_value(node)
-#            template.set(uci.section, uci.option, value)
-            build_uci.append({'section': uci.section, 
-                'option': uci.option, 
-                'value': value})
-#        image = confw.image(template, files)
-#        image.build(base_image.path, gzip=True)
-#        image.clean()
-        # TODO iamge.path
-        # Create Build object
-        build = Build.objects.create(node=node, version=self.version,
-            image='firmwares/openwrt-x86-generic-combined-ext4-40.img.gz')
-        for uci in build_uci:
-            BuildUCI.objects.create(build=build, **uci)
+        return BaseImage.objects.get(architectures__regex=arch_regex).image
 
 
 class BaseImage(models.Model):
@@ -95,7 +99,7 @@ class BaseImage(models.Model):
         return ", ".join(self.architectures)
     
     def clean(self):
-        """ prevent repeated architectures """
+        """ Prevent repeated architectures """
         for arch in self.architectures:
             arch_regex = "(^|\s)%s(,|$)" % arch
             try: existing = BaseImage.objects.get(architectures__regex=arch_regex)
@@ -113,7 +117,7 @@ class ConfigUCI(models.Model):
     option = models.CharField(max_length=32, help_text="UCI option statement")
     value = models.CharField(max_length=255, help_text="""Python code for obtining 
         the value. i.e. node.properties['ip']""")
-    # TODO Add validation field
+    # TODO Add validation field ?
     
     class Meta:
         unique_together = ['config', 'section', 'option']
@@ -123,17 +127,4 @@ class ConfigUCI(models.Model):
     
     def get_value(self, node):
         return unicode(eval(self.value))
-
-
-class BuildUCI(models.Model):
-    build = models.ForeignKey(Build)
-    section = models.CharField(max_length=32, help_text="UCI config statement")
-    option = models.CharField(max_length=32, help_text="UCI option statement")
-    value = models.CharField(max_length=255)
-    
-    class Meta:
-        unique_together = ['build', 'section', 'option']
-    
-    def __unicode__(self):
-        return "%s.%s" % (self.section, self.option)
 

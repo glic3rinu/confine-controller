@@ -12,7 +12,7 @@ from firmware.models import Build, Config
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:
-        message.warning(request, "One node at a time")
+        messages.warning(request, "One node at a time")
         return
     
     opts = modeladmin.model._meta
@@ -62,4 +62,4 @@ def get_firmware(modeladmin, request, queryset):
     return TemplateResponse(request, 'admin/get_firmware.html', context, 
         current_app=modeladmin.admin_site.name)
 
-get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name_plural)s")
+get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")

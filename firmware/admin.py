@@ -1,4 +1,4 @@
-from common.admin import get_modeladmin, admin_link
+from common.admin import get_modeladmin, admin_link, insert_action
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.utils.safestring import mark_safe
@@ -71,5 +71,7 @@ admin.site.register(Build, BuildAdmin)
 
 
 # Monkey-Patching
+insert_action(Node, get_firmware)
+
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action('firmware', get_firmware, 'Download Firmware', 'viewsitelink')

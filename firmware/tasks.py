@@ -1,17 +1,21 @@
 from celery.task import task
 from confw import confw
+from django.db import transaction
 
 
-# TODO transaction wrapper?
+#TODO cleanup build.image file if fails ¿How to? celery.task.on_failure? django.db.transaction failure?
+# TODO one at a time: http://ask.github.com/celery/cookbook/tasks.html
 
 @task(name="firmware.build")
+@transaction.commit_on_success
 def build(config_id, node_id):
     from firmware.models import Config, Build
     from nodes.models import Node
 
     config = Config.objects.get(pk=config_id)
     node = Node.objects.get(pk=node_id)
-
+    build = Build.objects.create(node=node, version=config.version)
+    
     # TODO how to get public_ipv4_avail ?
     base_image = config.get_image(node)
 #   template = confw.template('generic', 'confine', basedir='/tmp/templates/')
@@ -28,9 +32,8 @@ def build(config_id, node_id):
 #   image.build(base_image.path, gzip=True)
 #   image.clean()
     # TODO iamge.path
-    # Create Build object
-    build = Build.objects.create(node=node, version=config.version,
-        image='firmwares/openwrt-x86-generic-combined-ext4-40.img.gz')
+    build.image = base_image.name.replace('.img.', '-%s.img.' % build.pk)
+    build.save()
     for uci in build_uci:
         build.add_uci(**uci)
 

@@ -84,13 +84,11 @@ class SliverAdmin(ChangeViewActionsMixin):
     num_public_ifaces.admin_order_field = 'publiciface__count'
     
     def slice_link(self, instance):
-        url = reverse('admin:slices_slice_change', args=[instance.slice.pk])
-        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.slice))
+        return mark_safe("<b>%s</b>" % admin_link('slice')(instance))
     slice_link.short_description = 'Slice'
     
     def node_link(self, instance):
-        url = reverse('admin:nodes_node_change', args=[instance.node.pk])
-        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.node))
+        return mark_safe("<b>%s</b>" % admin_link('node')(instance))
     node_link.short_description = 'Node'
     
     def queryset(self, request):
@@ -231,10 +229,11 @@ class SliverInline(admin.TabularInline):
         url = reverse('admin:slices_slice_slivers', 
             kwargs={'slice_id': instance.slice.pk, 'object_id': instance.pk})
         return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance))
+    sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):
-        url = reverse('admin:nodes_node_change', args=[instance.node.pk])
-        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance.node))
+        return mark_safe(admin_link('node')(instance))
+    node_link.short_description = 'Node'
     
     def cn_url(self, instance):
         node = instance.node

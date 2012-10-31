@@ -1,4 +1,4 @@
-from common.admin import get_modeladmin
+from common.admin import get_modeladmin, admin_link
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.utils.functional import update_wrapper
@@ -26,14 +26,19 @@ class BuildUCIInline(admin.TabularInline):
     readonly_fields = ['section', 'option', 'value']
     can_delete = False
 
+
 class BuildAdmin(admin.ModelAdmin):
     list_display = ['node', 'version', 'build_date', 'image_link']
-    fields = ['node', 'image_link', 'version', 'build_date']
+    fields = ['node_link', 'image_link', 'version', 'build_date']
     inlines = [BuildUCIInline]
-    readonly_fields = ['node', 'image_link', 'version', 'build_date']
+    readonly_fields = ['node_link', 'image_link', 'version', 'build_date']
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")
+    
+    def node_link(self, build):
+        return mark_safe(admin_link('node')(build))
+    node_link.short_description = "Node"
     
     def image_link(self, build):
         return mark_safe('<a href=%s>%s</a>' % (build.image.url, build.image))

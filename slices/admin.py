@@ -226,9 +226,7 @@ class SliverInline(admin.TabularInline):
     readonly_fields = ['sliver_link', 'node_link', 'cn_url']
     
     def sliver_link(self, instance):
-        url = reverse('admin:slices_slice_slivers', 
-            kwargs={'slice_id': instance.slice.pk, 'object_id': instance.pk})
-        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance))
+        return mark_safe("<b>%s</b>" % admin_link('')(instance))
     sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):

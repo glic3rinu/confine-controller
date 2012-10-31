@@ -61,7 +61,9 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
 
 def admin_link(field_name, app_model=''):
     def link(obj, field=field_name, app_model=app_model):
-        rel = get_field_value(obj, field)
+        if field == '': rel = obj
+        else:
+            rel = get_field_value(obj, field)
         if not rel: return ''
         if not app_model: app_model = rel._meta.db_table
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))

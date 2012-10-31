@@ -38,7 +38,6 @@ def build(config_id, node_id):
     # TODO iamge.path
     build.image = base_image.name.replace('.img.', '-%s.img.' % build.pk)
     build.save()
-    raise Exception('rata')
     for uci in build_uci:
         build.add_uci(**uci)
 

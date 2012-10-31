@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from controller import settings
 
 
-def api_link():
+def api_link(context):
     if 'opts' in context: opts = context['opts']
     elif 'cl' in context: opts = context['cl'].opts
     else: return reverse('base')
@@ -53,5 +53,5 @@ class CustomMenu(Menu):
             ))
         
         self.children += [
-                    items.MenuItem('API', api_link),
+                    items.MenuItem('API', api_link(context)),
                     items.MenuItem('Documentation', 'http://wiki.confine-project.eu/soft:server'),]

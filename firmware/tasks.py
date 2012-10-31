@@ -3,12 +3,16 @@ from confw import confw
 from django.db import transaction
 
 
-#TODO cleanup build.image file if fails ¿How to? celery.task.on_failure? django.db.transaction failure?
-# TODO one at a time: http://ask.github.com/celery/cookbook/tasks.html
+def clean_files(self, *args, **kwargs):
+    # TODO cleanup build.image file if fails
+    pass
 
-@task(name="firmware.build")
+
+@task(name="firmware.build", on_failure=clean_files)
 @transaction.commit_on_success
 def build(config_id, node_id):
+    # TODO one at a time: http://ask.github.com/celery/cookbook/tasks.html
+    
     from firmware.models import Config, Build
     from nodes.models import Node
 
@@ -34,6 +38,7 @@ def build(config_id, node_id):
     # TODO iamge.path
     build.image = base_image.name.replace('.img.', '-%s.img.' % build.pk)
     build.save()
+    raise Exception('rata')
     for uci in build_uci:
         build.add_uci(**uci)
 

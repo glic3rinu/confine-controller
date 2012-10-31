@@ -1,11 +1,9 @@
 from common.admin import get_modeladmin, admin_link
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
-from django.utils.functional import update_wrapper
 from django.utils.safestring import mark_safe
 from firmware.actions import get_firmware
-from firmware.models import (BaseImage, Config, ConfigUCI, 
-    Build, BuildUCI)
+from firmware.models import BaseImage, Config, ConfigUCI, Build, BuildUCI
 from nodes.models import Node
 from singleton_models.admin import SingletonModelAdmin
 
@@ -46,27 +44,22 @@ class BuildAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, *args, **kwargs):
         return False
-    
+
 
 class ConfigAdmin(SingletonModelAdmin):
     inlines = [BaseImageInline, ConfigUCIInline]
     
     def get_urls(self):
-        def wrap(view):
-            def wrapper(*args, **kwargs):
-                return self.admin_site.admin_view(view)(*args, **kwargs)
-            return update_wrapper(wrapper, view)
-        
         info = self.model._meta.app_label, self.model._meta.module_name
-        
         urlpatterns = patterns('',
-            url(r'^history/$', wrap(self.history_view), {'object_id': '1'},
+            url(r'^history/$', 
+                self.history_view, {'object_id': '1'},
                 name='%s_%s_history' % info),
             url(r'^(?P<object_id>\d+)$',
-                wrap(self.change_view), 
+                self.change_view, 
                 name='%s_%s_change' % info),
             url(r'^$',
-                wrap(self.change_view), {'object_id': '1'}, 
+                self.change_view, {'object_id': '1'}, 
                 name='%s_%s_changelist' % info),
         )
         urls = super(ConfigAdmin, self).get_urls()
@@ -75,6 +68,7 @@ class ConfigAdmin(SingletonModelAdmin):
 
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Build, BuildAdmin)
+
 
 # Monkey-Patching
 node_modeladmin = get_modeladmin(Node)

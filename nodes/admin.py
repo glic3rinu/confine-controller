@@ -4,7 +4,6 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import transaction, models
-from django.utils.functional import update_wrapper
 from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
 from nodes.models import Node, NodeProp, Server, DirectIface
@@ -75,24 +74,18 @@ class NodeAdmin(ChangeViewActionsMixin):
 
 class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
     readonly_fields = ['cndb_cached_on']
-    change_form_template = 'admin/nodes/server/change_form.html'
     
     def get_urls(self):
-        def wrap(view):
-            def wrapper(*args, **kwargs):
-                return self.admin_site.admin_view(view)(*args, **kwargs)
-            return update_wrapper(wrapper, view)
-        
         info = self.model._meta.app_label, self.model._meta.module_name
-        
         urlpatterns = patterns('',
-            url(r'^history/$', wrap(self.history_view), {'object_id': '1'},
+            url(r'^history/$', 
+                self.history_view, {'object_id': '1'},
                 name='%s_%s_history' % info),
             url(r'^(?P<object_id>\d+)$',
-                wrap(self.change_view), 
+                self.change_view, 
                 name='%s_%s_change' % info),
             url(r'^$',
-                wrap(self.change_view), {'object_id': '1'}, 
+                self.change_view, {'object_id': '1'}, 
                 name='%s_%s_changelist' % info),
         )
         urls = super(ServerAdmin, self).get_urls()

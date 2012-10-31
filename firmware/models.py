@@ -7,6 +7,7 @@ from firmware import settings
 from firmware.tasks import build
 from nodes.settings import NODE_ARCHS
 from singleton_models.models import SingletonModel
+import os
 
 
 class QueueQuerySet(models.query.QuerySet):
@@ -29,8 +30,9 @@ class Build(models.Model):
         return self.node.description
     
     def delete(self, *args, **kwargs):
-        # TODO delete image file
         super(Build, self).delete(*args, **kwargs)
+        try: os.remove(self.image.path)
+        except OSError: pass
     
     @classmethod
     def build(cls, node, async=False):

@@ -4,7 +4,7 @@ from django.db import transaction
 from slices.settings import CLEAN_EXPIRED_SLICES_CRONTAB
 
 
-@periodic_task(name="Clean Expired Slices", run_every=CLEAN_EXPIRED_SLICES_CRONTAB)
+@periodic_task(name="slices.clean_expired_slices", run_every=CLEAN_EXPIRED_SLICES_CRONTAB)
 def clean_expired_slices():
     from slices.models import Slice
     now = datetime.now()
@@ -16,7 +16,7 @@ def clean_expired_slices():
     return ', '.join(map(format, deletable_slices))
 
 
-@task(name="Force Slice Update")
+@task(name="slices.force_slice_update")
 def force_slice_update(slice_id):
     from slices.models import Slice
     slice = Slice.objects.get(pk=slice_id)
@@ -24,7 +24,7 @@ def force_slice_update(slice_id):
         force_sliver_update(seliver.pk)
 
 
-@task(name="Force Sliver Update")
+@task(name="slices.force_sliver_update")
 def force_sliver_update(sliver_id):
     from slices.models import Sliver
     sliver = Sliver.objects.get(pk=sliver_id)

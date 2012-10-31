@@ -4,7 +4,7 @@ from confw import confw
 
 # TODO transaction wrapper?
 
-@task(name="Build Firmware")
+@task(name="firmware.build")
 def build(config_id, node_id):
     from firmware.models import Config, Build
     from nodes.models import Node

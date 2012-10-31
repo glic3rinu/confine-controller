@@ -27,7 +27,7 @@ def get_firmware(modeladmin, request, queryset):
     
     # User has requested a firmware build
     if request.POST.get('post'):
-        Build.build(node)
+        Build.build(node, async=True)
         modeladmin.log_change(request, node, "Build firmware")
         msg = 'Building firmware for node "%s", this may take some time' % node.description
         modeladmin.message_user(request, msg)

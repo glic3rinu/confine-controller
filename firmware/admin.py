@@ -93,13 +93,14 @@ admin.site.register(Config, ConfigAdmin)
 admin.site.register(Build, BuildAdmin)
 
 
-# Monkey-Patching
+# Monkey-Patching Section
+
 insert_action(Node, get_firmware)
 
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action('firmware', get_firmware, 'Download Firmware', 'viewsitelink')
 
-old_urls = node_modeladmin.get_urls
+old_get_urls = node_modeladmin.get_urls
 
 def get_urls(self):
     """ Hook JSON representation of a Build to NodeModeladmin """
@@ -114,10 +115,10 @@ def get_urls(self):
         return HttpResponse(simplejson.dumps(build_dict), mimetype="application/json")
     
     extra_urls = patterns("", 
-        url("^(?P<node_id>\d+)/build_info/$", 
+        url("^(?P<node_id>\d+)/firmware/build_info/$", 
         wrap_admin_view(self, build_info), 
         name='build_info'),
     )
-    return extra_urls + old_urls()
+    return extra_urls + old_get_urls()
 
 node_modeladmin.__class__.get_urls = get_urls

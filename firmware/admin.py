@@ -37,9 +37,14 @@ class BuildUCIInline(admin.TabularInline):
 class BuildAdmin(admin.ModelAdmin):
     list_display = ['node', 'version', 'date', colored('state', STATE_COLORS), 
         'task_link', 'image_link']
-    fields = ['node_link', 'image_link', 'version', 'build_date', 'state']
+    search_fields = ['node__description', 'node__id']
+    date_hierarchy = 'date'
+    list_filter = ['version']
+    fields = ['node_link', 'image_link', 'version', 'build_date', 'state', 
+        'task_link']
+    readonly_fields = ['node_link', 'state', 'image_link', 'version', 
+        'build_date', 'task_link']
     inlines = [BuildUCIInline]
-    readonly_fields = ['node_link', 'state', 'image_link', 'version', 'build_date']
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")
@@ -54,8 +59,7 @@ class BuildAdmin(admin.ModelAdmin):
     task_link.short_description = "Task"
     
     def image_link(self, build):
-        href_name = build.image.name.split('/')[-1]
-        return '<a href=%s>%s</a>' % (build.image.url, href_name)
+        return '<a href=%s>%s</a>' % (build.image.url, build.image)
     image_link.allow_tags = True
     
     def has_add_permission(self, *args, **kwargs):

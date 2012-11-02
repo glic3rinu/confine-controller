@@ -18,7 +18,7 @@ def build(config_id, node_id):
 
     config = Config.objects.get(pk=config_id)
     node = Node.objects.get(pk=node_id)
-    build = Build.objects.create(node=node, version=config.version)
+    build_obj = Build.objects.create(node=node, version=config.version, task_id=build.request.id)
     
     # TODO how to get public_ipv4_avail ?
     base_image = config.get_image(node)
@@ -36,8 +36,8 @@ def build(config_id, node_id):
 #   image.build(base_image.path, gzip=True)
 #   image.clean()
     # TODO iamge.path
-    build.image = base_image.name.replace('.img.', '-%s.img.' % build.pk)
-    build.save()
+    build_obj.image = base_image.name.replace('.img.', '-%s.img.' % build_obj.pk)
+    build_obj.save()
     for uci in build_uci:
-        build.add_uci(**uci)
+        build_obj.add_uci(**uci)
 

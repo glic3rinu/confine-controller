@@ -14,17 +14,29 @@ class QueueQuerySet(models.query.QuerySet):
     def get_current(self, node):
         build = Build.objects.get(node=node)
         config = Config.objects.get()
+        # TODO: if DELETED ?
         if build.match(config): return build
         else: raise Build.DoesNotExist()
 
 
 class Build(models.Model):
+    REQUESTED = 'REQUESTED'
+    QUEUED = 'QUEUED'
+    BUILDING = 'BUILDING'
+    AVAILABLE = 'AVAILABLE'
+    OUTDATED = 'OUTDATED'
+    DELETED = 'DELETED'
+    
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = models.FileField(upload_to=settings.FIRMWARE_DIR)
+    task_id = models.CharField(max_length=36, unique=True)
     
     objects = generate_chainer_manager(QueueQuerySet)
+    
+    class Meta:
+        ordering = ['-date']
     
     def __unicode__(self):
         return self.node.description
@@ -33,6 +45,28 @@ class Build(models.Model):
         super(Build, self).delete(*args, **kwargs)
         try: os.remove(self.image.path)
         except OSError: pass
+    
+    @property
+    def task(self):
+        from djcelery.models import TaskState
+        if not self.task_id: return None
+        try: return TaskState.objects.get(task_id=self.task_id)
+        except TaskState.DoesNotExist: return None
+    
+    @property
+    def state(self):
+        if self.image: 
+            try: self.image.file
+            except IOError: return self.DELETED
+            else: 
+                config = Config.objects.get()
+                if self.match(config): return self.AVAILABLE
+                else: return self.OUTDATED
+        if not self.task_id: return self.REQUESTED
+        if self.task and self.task.state == 'RECEIVED': return self.QUEUED
+        if self.task and self.task.state == 'STARTED': return self.BUILDING
+        if self.task: return self.task.state
+        return 'UNKNOWN'
     
     @classmethod
     def build(cls, node, async=False):
@@ -89,7 +123,7 @@ class Config(SingletonModel):
     
     def get_image(self, node):
         arch_regex = "(^|,)%s(,|$)" % node.arch
-        return BaseImage.objects.get(architectures__regex=arch_regex).image
+        return self.baseimage_set.get(architectures__regex=arch_regex).image
 
 
 class BaseImage(models.Model):

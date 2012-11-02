@@ -230,7 +230,7 @@ class SliverInline(admin.TabularInline):
     sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):
-        return mark_safe(admin_link('node')(instance))
+        return admin_link('node')(instance)
     node_link.short_description = 'Node'
     
     def cn_url(self, instance):

@@ -27,7 +27,8 @@ class SliverSerializer(serializers.HyperlinkedModelSerializer):
 
 class SliceSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field()
-    slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
+    slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail',
+        read_only=True)
     properties = serializers.Field()
     
     class Meta:

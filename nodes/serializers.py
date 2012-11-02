@@ -9,7 +9,8 @@ class ServerSerializer(serializers.HyperlinkedModelSerializer):
 class NodeSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field()
     properties = serializers.Field()
-    slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail')
+    slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail',
+        read_only=True)
     direct_ifaces = serializers.Field()
     
     class Meta:

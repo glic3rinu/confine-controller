@@ -1,11 +1,20 @@
-from common.admin import get_modeladmin, admin_link, insert_action
+from common.admin import get_modeladmin, admin_link, insert_action, colored
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 from firmware.actions import get_firmware
 from firmware.models import BaseImage, Config, ConfigUCI, Build, BuildUCI
 from nodes.models import Node
 from singleton_models.admin import SingletonModelAdmin
+
+
+STATE_COLORS = {
+    Build.REQUESTED: 'blue',
+    Build.QUEUED: 'magenta',
+    Build.BUILDING: 'orange',
+    Build.AVAILABLE: 'green',
+    Build.OUTDATED: 'red',
+    Build.DELETED: 'red',
+}
 
 
 class BaseImageInline(admin.TabularInline):
@@ -26,20 +35,27 @@ class BuildUCIInline(admin.TabularInline):
 
 
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['node', 'version', 'build_date', 'image_link']
-    fields = ['node_link', 'image_link', 'version', 'build_date']
+    list_display = ['node', 'version', 'date', colored('state', STATE_COLORS), 
+        'task_link', 'image_link']
+    fields = ['node_link', 'image_link', 'version', 'build_date', 'state']
     inlines = [BuildUCIInline]
-    readonly_fields = ['node_link', 'image_link', 'version', 'build_date']
+    readonly_fields = ['node_link', 'state', 'image_link', 'version', 'build_date']
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")
     
     def node_link(self, build):
-        return mark_safe(admin_link('node')(build))
+        return admin_link('node')(build)
     node_link.short_description = "Node"
     
+    def task_link(self, build):
+        return admin_link('')(build.task, href_name=build.task.task_id)
+    task_link.allow_tags = True
+    task_link.short_description = "Task"
+    
     def image_link(self, build):
-        return mark_safe('<a href=%s>%s</a>' % (build.image.url, build.image))
+        href_name = build.image.name.split('/')[-1]
+        return '<a href=%s>%s</a>' % (build.image.url, href_name)
     image_link.allow_tags = True
     
     def has_add_permission(self, *args, **kwargs):

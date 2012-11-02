@@ -3,6 +3,7 @@ from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from utils import get_field_value
 
 
@@ -59,15 +60,16 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
     return admin_link
 
 
-def admin_link(field_name, app_model=''):
-    def link(obj, field=field_name, app_model=app_model):
+def admin_link(field_name, app_model='', href_name=''):
+    def link(obj, field=field_name, app_model=app_model, href_name=href_name):
         if field == '': rel = obj
         else:
             rel = get_field_value(obj, field)
         if not rel: return ''
         if not app_model: app_model = rel._meta.db_table
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
-        return '<a href="%s">%s</a>' % (url, rel)
+        if not href_name: href_name = rel
+        return mark_safe('<a href="%s">%s</a>' % (url, href_name))
     link.short_description = field_name.capitalize()
     link.allow_tags = True
     link.admin_order_field = field_name

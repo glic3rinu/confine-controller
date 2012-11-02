@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.utils.functional import update_wrapper
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from utils import get_field_value
@@ -173,3 +174,10 @@ def action_to_view(action, modeladmin):
             return HttpResponseRedirect(reverse('admin:%s_%s_change' % (opts.app_label, opts.module_name), args=[object_id]))
         return response
     return action_view
+
+
+def wrap_admin_view(modeladmin, view):
+    """ Add admin authentication to views """
+    def wrapper(*args, **kwargs):
+        return modeladmin.admin_site.admin_view(view)(*args, **kwargs)
+    return update_wrapper(wrapper, view)

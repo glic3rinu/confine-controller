@@ -1,5 +1,5 @@
 from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
-    insert_list_display, action_to_view, get_modeladmin)
+    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -280,19 +280,21 @@ class SliceAdmin(ChangeViewActionsMixin):
         # TODO Refactor: Hook SliceSliversAdmin in a clever way
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
-                NodeListAdmin(Node, admin_site).changelist_view, 
+                wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view), 
                 name='slices_slice_add_sliver'),
             url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)/$", 
-                SliceSliversAdmin(Sliver, admin_site).add_view, 
+                wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).add_view), 
                 name='slices_slice_add_sliver'),
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/$", 
-                SliceSliversAdmin(Sliver, admin_site).change_view, 
+                wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).change_view), 
                 name='slices_slice_slivers'),
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/history", 
-                remove_slice_id(SliceSliversAdmin(Sliver, admin_site).history_view),),
+                wrap_admin_view(self, remove_slice_id(SliceSliversAdmin(Sliver,
+                    admin_site).history_view)),),
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/reset", 
-                wrap_action(reset_selected, SliceSliversAdmin(Sliver, admin_site)),)
-            )
+                wrap_admin_view(self, wrap_action(reset_selected, 
+                    SliceSliversAdmin(Sliver, admin_site))),)
+        )
         return extra_urls + urls
 
 

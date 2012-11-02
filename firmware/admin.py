@@ -1,6 +1,9 @@
-from common.admin import get_modeladmin, admin_link, insert_action, colored
+from common.admin import (get_modeladmin, admin_link, insert_action, colored, 
+    wrap_admin_view)
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.http import HttpResponse
+from django.utils import simplejson
 from firmware.actions import get_firmware
 from firmware.models import BaseImage, Config, ConfigUCI, Build, BuildUCI
 from nodes.models import Node
@@ -95,3 +98,26 @@ insert_action(Node, get_firmware)
 
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action('firmware', get_firmware, 'Download Firmware', 'viewsitelink')
+
+old_urls = node_modeladmin.get_urls
+
+def get_urls(self):
+    """ Hook JSON representation of a Build to NodeModeladmin """
+    def build_info(request, node_id):
+        build = Build.objects.get(node=node_id)
+        build_dict = {
+            'state': build.state,
+            'date': build.date.strftime("%Y-%m-%d %H:%M:%S"),
+            'image': build.image.name,
+            'id': build.pk,
+            'version': build.version,}
+        return HttpResponse(simplejson.dumps(build_dict), mimetype="application/json")
+    
+    extra_urls = patterns("", 
+        url("^(?P<node_id>\d+)/build_info/$", 
+        wrap_admin_view(self, build_info), 
+        name='build_info'),
+    )
+    return extra_urls + old_urls()
+
+node_modeladmin.__class__.get_urls = get_urls

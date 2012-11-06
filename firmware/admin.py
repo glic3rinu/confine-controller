@@ -105,13 +105,14 @@ old_get_urls = node_modeladmin.get_urls
 def get_urls(self):
     """ Hook JSON representation of a Build to NodeModeladmin """
     def build_info(request, node_id):
-        build = Build.objects.get(node=node_id)
-        build_dict = {
-            'state': build.state,
-            'date': build.date.strftime("%Y-%m-%d %H:%M:%S"),
-            'image': build.image.name,
-            'id': build.pk,
-            'version': build.version,}
+        try: build = Build.objects.get(node=node_id)
+        except Build.DoesNotExist: build_dict = {}
+        else: build_dict = {
+                'state': build.state,
+                'date': build.date.strftime("%Y-%m-%d %H:%M:%S"),
+                'image': build.image.name,
+                'id': build.pk,
+                'version': build.version,}
         return HttpResponse(simplejson.dumps(build_dict), mimetype="application/json")
     
     extra_urls = patterns("", 

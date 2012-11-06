@@ -19,6 +19,10 @@ h2, h3 {
     padding-right: 0.25em;
 }
 
+.version {
+  font-size: 70%;
+}
+
 .format-option {
     font-family: Menlo, Consolas, "Andale Mono", "Lucida Console", monospace;
 }
@@ -26,6 +30,10 @@ h2, h3 {
 .button-form {
     float: right;
     margin-right: 1em;
+}
+
+ul.breadcrumb {
+  margin: 58px 0 0 0;
 }
 
 /* To allow tooltips to work on disabled elements */
@@ -51,8 +59,8 @@ pre {
 .page-header {
     border-bottom: none;
     padding-bottom: 0px;
+    margin-bottom: 20px;
 }
-
 
 
 /*=== dabapps bootstrap styles ====*/
@@ -62,9 +70,9 @@ html{
   background: none;
 }
 
-body, .navbar .navbar-inner .container-fluid{
+body, .navbar .navbar-inner .container-fluid {
   max-width: 1150px;
-  margin: 1 auto;
+  margin: 0 auto;
 }
 
 body{
@@ -73,13 +81,14 @@ body{
 }
 
 #content{
-    margin: 40px 0 0 0;
+    margin: 0;
 }
 /* custom navigation styles */
 .wrapper .navbar{
-  width:100%;
+  width: 100%;
   position: absolute;
-  left:0;
+  left: 0;
+  top: 0;
 }
 
 .navbar .navbar-inner{

@@ -177,7 +177,7 @@ def action_to_view(action, modeladmin):
 
 
 def wrap_admin_view(modeladmin, view):
-    """ Add admin authentication to views """
+    """ Add admin authentication to view """
     def wrapper(*args, **kwargs):
         return modeladmin.admin_site.admin_view(view)(*args, **kwargs)
     return update_wrapper(wrapper, view)

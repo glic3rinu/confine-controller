@@ -250,7 +250,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'tinc/island': "Weather-overcast.svg",
     'tinc/tincaddress': "X-office-address-book.svg",
     'tinc/host': "computer-dell-dimension-E521.svg",
-    'issues/ticket': "Ticket.svg",
+    'issues/ticket': "Ticket.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.svg",
 }

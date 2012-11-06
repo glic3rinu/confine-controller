@@ -29,8 +29,6 @@ def get_firmware(modeladmin, request, queryset):
     if request.POST.get('post'):
         build = Build.build(node, async=True)
         modeladmin.log_change(request, node, "Build firmware")
-        msg = 'Building firmware for node "%s", this may take some time' % node.description
-        modeladmin.message_user(request, msg)
     
     context = {
         "action_name": 'Firmware',
@@ -40,6 +38,10 @@ def get_firmware(modeladmin, request, queryset):
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
     }
+    from django.core.urlresolvers import reverse
+
+    node_url = reverse("admin:nodes_node_change", args=[node.pk])
+    node_link = '<a href="%s">%s</a>' % (node_url, node.description)
     
     try: build
     except NameError:
@@ -47,6 +49,7 @@ def get_firmware(modeladmin, request, queryset):
         except Build.DoesNotExist:
             context.update({
                 "title": 'Build firmware for "%s" Research Device?' % node.description,
+                "content_title":  mark_safe('Build firmware for "%s" Research Device?' % node_link),
                 "content_message": mark_safe("""There is no pre-build up-to-date firmware for 
                     this research device, but you can instruct the system to build a 
                     fresh one for you, it will take only a few seconds. 
@@ -66,6 +69,7 @@ def get_firmware(modeladmin, request, queryset):
     }
     context.update({
         "title": 'Research Device Firmware for "%s"' % node.description,
+        "content_title": mark_safe('Research Device Firmware for "%s"' % node_link),
         "content_message": description_allow_build[build.state][0],
         "build": build,
         "allow_build": description_allow_build[build.state][1],

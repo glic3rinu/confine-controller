@@ -64,7 +64,8 @@ def get_firmware(modeladmin, request, queryset):
         Build.QUEUED: ["Building task queued for building.", False],
         Build.BUILDING: ["Building...", False],
         Build.AVAILABLE: ["Firmware available for download.", False],
-        Build.DELETED: ["This firmware is no longer available. De you want to build again?", True],
+        Build.DELETED: ["""This firmware is no longer available. Do you want to 
+            build it again?""", True],
         Build.FAILED: ["The last building has failed. Do you want to try again?", True]
     }
     context.update({

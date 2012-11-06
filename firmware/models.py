@@ -14,7 +14,7 @@ class QueueQuerySet(models.query.QuerySet):
     def get_current(self, node):
         build = Build.objects.get(node=node)
         config = Config.objects.get()
-        # TODO: if DELETED ?
+        if build.state != Build.AVAILABLE: return build
         if build.match(config): return build
         else: raise Build.DoesNotExist()
 
@@ -26,6 +26,7 @@ class Build(models.Model):
     AVAILABLE = 'AVAILABLE'
     OUTDATED = 'OUTDATED'
     DELETED = 'DELETED'
+    FAILED = 'FAILED'
     
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
@@ -44,7 +45,7 @@ class Build(models.Model):
     def delete(self, *args, **kwargs):
         super(Build, self).delete(*args, **kwargs)
         try: os.remove(self.image.path)
-        except OSError: pass
+        except: pass
     
     @property
     def task(self):
@@ -65,8 +66,7 @@ class Build(models.Model):
         if not self.task_id: return self.REQUESTED
         if self.task and self.task.state == 'RECEIVED': return self.QUEUED
         if self.task and self.task.state == 'STARTED': return self.BUILDING
-        if self.task: return self.task.state
-        return 'UNKNOWN'
+        return self.FAILED
     
     @classmethod
     def build(cls, node, async=False):
@@ -74,10 +74,12 @@ class Build(models.Model):
         except cls.DoesNotExist: pass
         else: old_build.delete()
         config = Config.objects.get()
+        build_obj = Build.objects.create(node=node, version=config.version)
         if async:
-            defer(build.delay, config.pk, node.pk)
+            defer(build.delay, build_obj.pk)
         else:
-            build(config.pk, node.pk)
+            build_obj = build(build_obj.pk)
+        return build_obj
     
     def get_uci(self):
         return self.builduci_set.all()

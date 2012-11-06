@@ -3,6 +3,12 @@
 {% load url from future %}
 {% load admin_urls %}
 
+{% block extrahead %}
+    {% if not allow_build %}
+        <meta http-equiv="refresh" content="2">
+    {% endif %}
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
 <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
@@ -18,23 +24,29 @@
     <p>{{ content_message }}</p>
     <ul>
     {% if build %}
-        <li><b>Download:</b> <a href={{ build.image.url }}>{{build.image}}</a> </li>
+        {% if allow_build %}
+            <li><b>Download:</b> <a href={{ build.image.url }}>{{ build.image }}</a> </li>
+        {% endif %}
             <ul>
-            <li>Buil Date: {{build.date}}</li>
-            <li>Version: {{build.version}}</li>
+                <li>Buil Date: {{ build.date }}</li>
+                <li>Version: {{ build.version }}</li>
+                <li>State: {{ build.state }}</li>
             </ul>
-    {% else %}
+    {% endif %}
     </ul>
-    <form action="" method="post">{% csrf_token %}
-    <div>
-    {% for obj in queryset %}
-    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
-    {% endfor %}
-    <input type="hidden" name="action" value="get_firmware" />
-    <input type="hidden" name="post" value="yes" />
-    <input type="submit" value="{% trans "Yes, sure" %}" />
-    </div>
-    </form>
+    {% if allow_build %}
+        <form action="" method="post">{% csrf_token %}
+        <div>
+        {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+        {% endfor %}
+        <input type="hidden" name="action" value="get_firmware" />
+        <input type="hidden" name="post" value="yes" />
+        <input type="submit" value="{% trans "Yes, sure" %}" />
+        </div>
+        </form>
+    {% else %}
+        <img src="/static/load.gif">
     {% endif %}
 {% endblock %}
 

@@ -27,11 +27,10 @@ def get_firmware(modeladmin, request, queryset):
     
     # User has requested a firmware build
     if request.POST.get('post'):
-        Build.build(node, async=True)
+        build = Build.build(node, async=True)
         modeladmin.log_change(request, node, "Build firmware")
         msg = 'Building firmware for node "%s", this may take some time' % node.description
         modeladmin.message_user(request, msg)
-        return None
     
     context = {
         "action_name": 'Firmware',
@@ -42,21 +41,35 @@ def get_firmware(modeladmin, request, queryset):
         'node': node,
     }
     
-    try: build = Build.objects.get_current(node=node)
-    except Build.DoesNotExist:
-        context.update({
-            "title": 'Build firmware for "%s" Research Device?' % node.description,
-            "content_message": mark_safe("""There is no pre-build up-to-date firmware for 
-                this research device, but you can instruct the system to build a 
-                fresh one for you, it will take only a few seconds. 
-                <p> Do you want me to build a new firwmare?</p>"""),
-        })
-    else:
-        context.update({
-            "title": 'Research Device Firmware for "%s"' % node.description,
-            "content_message": "",
-            "build": build
-        })
+    try: build
+    except NameError:
+        try: build = Build.objects.get_current(node=node)
+        except Build.DoesNotExist:
+            context.update({
+                "title": 'Build firmware for "%s" Research Device?' % node.description,
+                "content_message": mark_safe("""There is no pre-build up-to-date firmware for 
+                    this research device, but you can instruct the system to build a 
+                    fresh one for you, it will take only a few seconds. 
+                    <p> Do you want me to build a new firwmare?</p>"""),
+                "allow_build": True,
+            })
+            return TemplateResponse(request, 'admin/get_firmware.html', context, 
+                current_app=modeladmin.admin_site.name)
+    
+    description_allow_build = {
+        Build.REQUESTED: ["Building request received.", False],
+        Build.QUEUED: ["Building task queued for building.", False],
+        Build.BUILDING: ["Building...", False],
+        Build.AVAILABLE: ["Firmware available for download.", False],
+        Build.DELETED: ["This firmware is no longer available. De you want to build again?", True],
+        Build.FAILED: ["The last building has failed. Do you want to try again?", True]
+    }
+    context.update({
+        "title": 'Research Device Firmware for "%s"' % node.description,
+        "content_message": description_allow_build[build.state][0],
+        "build": build,
+        "allow_build": description_allow_build[build.state][1],
+    })
     
     # Display the confirmation page
     return TemplateResponse(request, 'admin/get_firmware.html', context, 

@@ -68,11 +68,25 @@ class Build(models.Model):
         if self.task and self.task.state == 'STARTED': return self.BUILDING
         return self.FAILED
     
+    @property
+    def is_processing(self):
+        return self.state in [self.REQUESTED, self.QUEUED, self.BUILDING]
+    
+    @property
+    def is_available(self):
+        return self.state == self.AVAILABLE
+    
+    @property
+    def is_unavailable(self):
+        return self.state in [self.OUTDATED, self.DELETED, self.FAILED]
+    
     @classmethod
     def build(cls, node, async=False):
         try: old_build = cls.objects.get(node=node)
         except cls.DoesNotExist: pass
-        else: old_build.delete()
+        else: 
+            #TODO: kill existing task if it is running
+            old_build.delete()
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
         if async:

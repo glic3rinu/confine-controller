@@ -4,7 +4,7 @@
 {% load admin_urls %}
 
 {% block extrahead %}
-    {% if not allow_build and build.state != build.AVAILABLE %}
+    {% if build and build.is_processing %}
         <meta http-equiv="refresh" content="2">
     {% endif %}
 {% endblock %}
@@ -27,7 +27,7 @@
     <p>{{ content_message }}</p>
     <ul>
     {% if build %}
-        {% if build.state == build.AVAILABLE %}
+        {% if build.is_available %}
             <li><b>Download:</b> <a href={{ build.image.url }}>{{ build.image }}</a> </li>
         {% endif %}
             <ul>
@@ -37,7 +37,7 @@
             </ul>
     {% endif %}
     </ul>
-    {% if allow_build %}
+    {% if not build or build.is_unavailable %}
         <form action="" method="post">{% csrf_token %}
         <div>
         {% for obj in queryset %}
@@ -48,10 +48,9 @@
         <input type="submit" value="{% trans "Yes, sure" %}" />
         </div>
         </form>
-    {% else %}
-        {% if build.state != build.AVAILABLE %}
-            <img src="/static/firmware/load.gif">
-        {% endif %}
+    {% endif %}
+    {% if build and build.is_processing %}
+        <img src="/static/firmware/load.gif">
     {% endif %}
 {% endblock %}
 

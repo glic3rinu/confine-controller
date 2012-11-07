@@ -48,8 +48,8 @@ def get_firmware(modeladmin, request, queryset):
         try: build = Build.objects.get_current(node=node)
         except Build.DoesNotExist:
             context.update({
-                "title": 'Build firmware for "%s" Research Device?' % node.description,
-                "content_title":  mark_safe('Build firmware for "%s" Research Device?' % node_link),
+                "title": "Build firmware for '%s' Research Device?" % node.description,
+                "content_title":  mark_safe("Build firmware for '%s' Research Device?" % node_link),
                 "content_message": mark_safe("""There is no pre-build up-to-date firmware for 
                     this research device, but you can instruct the system to build a 
                     fresh one for you, it will take only a few seconds. 
@@ -69,8 +69,8 @@ def get_firmware(modeladmin, request, queryset):
         Build.FAILED: ["The last building has failed. Do you want to try again?", True]
     }
     context.update({
-        "title": 'Research Device Firmware for "%s"' % node.description,
-        "content_title": mark_safe('Research Device Firmware for "%s"' % node_link),
+        "title": "Research Device Firmware for '%s'" % node.description,
+        "content_title": mark_safe("Research Device Firmware for '%s'" % node_link),
         "content_message": description_allow_build[build.state][0],
         "build": build,
         "allow_build": description_allow_build[build.state][1],

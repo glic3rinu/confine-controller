@@ -10,9 +10,9 @@ from django.utils.translation import ugettext_lazy
 from firmware.models import Build
 
 
-# TODO download_firmware view with permissions instead of media
-# TODO implement feedback with ajax(maybe triggering a refresh when there is an
-#      state change is enough
+# TODO implement an AJAX based feedback (triggering a refresh when there is an
+#      state change should be enough)
+#      build info in JSON format is available at <node_id>/firmware/build_info
 
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
@@ -54,10 +54,10 @@ def get_firmware(modeladmin, request, queryset):
             context.update({
                 "title": "Build firmware for '%s' Research Device?" % node.description,
                 "content_title":  mark_safe("Build firmware for '%s' Research Device?" % node_link),
-                "content_message": mark_safe("""There is no pre-build up-to-date firmware for 
-                    this research device, but you can instruct the system to build a 
-                    fresh one for you, it will take only a few seconds. 
-                    <p> Do you want me to build a new firwmare?</p>"""),
+                "content_message": mark_safe("There is no pre-build up-to-date \
+                    firmware for this research device, but you can instruct the \
+                    system to build a fresh one for you, it will take only a few \
+                    seconds. <p> Do you want me to build a new firwmare?</p>"),
             })
             return TemplateResponse(request, 'admin/get_firmware.html', context, 
                 current_app=modeladmin.admin_site.name)
@@ -67,11 +67,10 @@ def get_firmware(modeladmin, request, queryset):
         Build.QUEUED: "Building task queued for building.",
         Build.BUILDING: "Building...",
         Build.AVAILABLE: "Firmware available for download.",
-        Build.DELETED: """This firmware is no longer available. Do you want to 
-            build it again?""",
-        Build.FAILED: """The last building has failed. The error logs are 
-            monitored and this issue will be fixed. But you can try again anyway. 
-            <p>Do you want to build again?</p>""",
+        Build.DELETED: "This firmware is no longer available. Do you want to build it again?",
+        Build.FAILED: "The last building has failed. The error logs are monitored \
+            and this issue will be fixed. But you can try again anyway.\
+            <p>Do you want to build again?</p>",
     }
     context.update({
         "title": "Research Device Firmware for '%s'" % node.description,

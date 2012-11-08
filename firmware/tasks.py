@@ -25,15 +25,16 @@ def build(build_id):
             'value': value})
     
     image = confw.image(template=template)
-    path = base_image.path.replace('.img.gz', '-%s.img' % build_obj.pk)
-    try: image_path = image.build(base_image.path, userspace=True, output=path, gzip=True)
+    image_name = base_image.name.replace('.img.gz', '-%s.img' % build_obj.pk)
+    image_path = os.path.join(build_obj.image.storage.location, image_name)
+    try: image_path = image.build(base_image.path, userspace=True, output=image_path, gzip=True)
     except: 
         image.clean()
         raise
     image.clean()
-    build_obj.image = os.path.relpath(image_path, start=base_image.storage.base_location)
+    build_obj.image = image_name + '.gz'
     build_obj.save()
     for uci in build_uci:
         build_obj.add_uci(**uci)
     
-    return typrimage_file
+    return image_path

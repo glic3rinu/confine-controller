@@ -57,8 +57,9 @@ class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
         'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
     list_filter = ['slice__name']
-    fields = ['description', 'slice_link', 'node_link', 'instance_sn']
-    readonly_fields = ['instance_sn', 'slice_link', 'node_link']
+    fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'exp_data',
+        'exp_data_sha256']
+    readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
                PrivateIfaceInline]
@@ -248,7 +249,8 @@ class SliceAdmin(ChangeViewActionsMixin):
         num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
-    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
+        'exp_data_sha256']
     date_hierarchy = 'expires_on'
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline, SliverInline]
@@ -256,9 +258,9 @@ class SliceAdmin(ChangeViewActionsMixin):
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', ('template', 'exp_data'), 
-                       'set_state', 'users', 'vlan_nr', 'instance_sn',
-                       'new_sliver_instance_sn', 'expires_on'),
+            'fields': ('name', 'description', ('template', 'exp_data', 
+                       'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
+                       'instance_sn', 'new_sliver_instance_sn', 'expires_on'),
         }),
         ('Public key', {
             'classes': ('collapse',),
@@ -302,6 +304,8 @@ class TemplateAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'type', 'arch', 'data', 'is_active']
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']
+    fields = ['name', 'description', 'type', 'arch', 'data', 'data_sha256', 'is_active']
+    readonly_fields = ['data_sha256']
 
 
 admin.site.register(Sliver, SliverAdmin)

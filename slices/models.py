@@ -6,7 +6,10 @@ from django.db import models
 from nodes.models import Node
 from slices import settings
 from slices.tasks import force_slice_update, force_sliver_update
+import hashlib
 
+
+# TODO protect exp_data and data files (like in firmware.build.image)
 
 def get_expires_on():
     return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
@@ -20,10 +23,15 @@ class Template(models.Model):
     arch = models.CharField(verbose_name="Architecture", max_length=32, 
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH)
     is_active = models.BooleanField(default=True)
-    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, blank=True)
+    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR)
     
     def __unicode__(self):
         return self.name
+    
+    @property
+    def data_sha256(self):
+        if self.data: return hashlib.sha256(self.data.file.read()).hexdigest()
+        return ''
 
 
 class Slice(models.Model):
@@ -83,6 +91,10 @@ class Slice(models.Model):
     def properties(self):
         return dict(self.sliceprop_set.all().values_list('name', 'value'))
     
+    @property
+    def exp_data_sha256(self):
+        return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+    
     def renew(self):
         self.expires_on = get_expires_on()
         self.save()
@@ -121,15 +133,23 @@ class SliceProp(models.Model):
 
 
 class Sliver(models.Model):
+    slice = models.ForeignKey(Slice)
+    node = models.ForeignKey(Node)
     description = models.CharField(max_length=256, blank=True)
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text="""The number of times this sliver has been instructed to be 
         reset (instance sequence number).""")
-    slice = models.ForeignKey(Slice)
-    node = models.ForeignKey(Node)
+    exp_data = models.FileField(help_text="Experiment Data", blank=True,
+        upload_to=settings.SLICE_EXP_DATA_DIR)
+    template = models.ForeignKey(Template, null=True, blank=True)
     
     def __unicode__(self):
         return self.description if self.description else str(self.id)
+    
+    @property
+    def exp_data_sha256(self):
+        if self.exp_data: return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+        return ''
     
     @property
     def properties(self):

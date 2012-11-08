@@ -1,13 +1,19 @@
 from common.fields import MultiSelectField
 from common.models import generate_chainer_manager
+from django.conf import settings as project_settings
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django_transaction_signals import defer
 from firmware import settings
 from firmware.tasks import build
 from nodes.settings import NODE_ARCHS
+from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
 import os
+
+
+private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
 
 class QueueQuerySet(models.query.QuerySet):
@@ -31,7 +37,9 @@ class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
-    image = models.FileField(upload_to=settings.FIRMWARE_DIR)
+    # TODO: write condition method for preventing downloads from unauthorized users
+    # http://django-private-files.readthedocs.org/en/latest/usage.html
+    image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage)
     task_id = models.CharField(max_length=36, unique=True)
     
     objects = generate_chainer_manager(QueueQuerySet)
@@ -85,7 +93,7 @@ class Build(models.Model):
         try: old_build = cls.objects.get(node=node)
         except cls.DoesNotExist: pass
         else: 
-            #TODO: kill existing task if it is running
+            #TODO: kill or prevent existing task if its running
             old_build.delete()
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)

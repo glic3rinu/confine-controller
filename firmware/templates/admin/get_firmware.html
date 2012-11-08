@@ -5,7 +5,7 @@
 
 {% block extrahead %}
     {% if build and build.is_processing %}
-        <meta http-equiv="refresh" content="2">
+        <meta http-equiv="refresh" content="3">
     {% endif %}
 {% endblock %}
 
@@ -33,7 +33,6 @@
             <ul>
                 <li>Buil Date: {{ build.date }}</li>
                 <li>Version: {{ build.version }}</li>
-                <li>State: {{ build.state }}</li>
             </ul>
     {% endif %}
     </ul>

@@ -37,7 +37,7 @@ class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
-    # TODO: write condition method for preventing downloads from unauthorized users
+    # TODO: write condition method for preventing unauthorized downloads
     # http://django-private-files.readthedocs.org/en/latest/usage.html
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage)
     task_id = models.CharField(max_length=36, unique=True)

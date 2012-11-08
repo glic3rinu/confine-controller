@@ -33,8 +33,8 @@ class Template(models.Model):
     
     @property
     def data_sha256(self):
-        if self.data: return hashlib.sha256(self.data.file.read()).hexdigest()
-        return ''
+        try: return hashlib.sha256(self.data.file.read()).hexdigest()
+        except: return None
 
 
 class Slice(models.Model):
@@ -96,7 +96,8 @@ class Slice(models.Model):
     
     @property
     def exp_data_sha256(self):
-        return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+        try: return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+        except: return None
     
     def renew(self):
         self.expires_on = get_expires_on()
@@ -151,8 +152,8 @@ class Sliver(models.Model):
     
     @property
     def exp_data_sha256(self):
-        if self.exp_data: return hashlib.sha256(self.exp_data.file.read()).hexdigest()
-        return ''
+        try: return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+        except: return None
     
     @property
     def properties(self):

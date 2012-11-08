@@ -10,6 +10,10 @@ from django.utils.translation import ugettext_lazy
 from firmware.models import Build
 
 
+# TODO download_firmware view with permissions instead of media
+# TODO implement feedback with ajax(maybe triggering a refresh when there is an
+#      state change is enough
+
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:
@@ -65,7 +69,9 @@ def get_firmware(modeladmin, request, queryset):
         Build.AVAILABLE: "Firmware available for download.",
         Build.DELETED: """This firmware is no longer available. Do you want to 
             build it again?""",
-        Build.FAILED: "The last building has failed. Do you want to try again?",
+        Build.FAILED: """The last building has failed. The error logs are 
+            monitored and this issue will be fixed. But you can try again anyway. 
+            <p>Do you want to build again?</p>""",
     }
     context.update({
         "title": "Research Device Firmware for '%s'" % node.description,

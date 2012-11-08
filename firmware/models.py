@@ -13,6 +13,7 @@ from singleton_models.models import SingletonModel
 import os
 
 
+# TODO make this accessible in a common place: settings? controller? common? ..?
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
 

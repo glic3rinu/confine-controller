@@ -57,8 +57,8 @@ class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
         'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
     list_filter = ['slice__name']
-    fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'exp_data',
-        'exp_data_sha256']
+    fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
+        'exp_data', 'exp_data_sha256']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 

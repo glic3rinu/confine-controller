@@ -66,7 +66,6 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-print os.path.join(SITE_ROOT, 'static')
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static/')
 
 # URL prefix for static files.
@@ -140,6 +139,7 @@ INSTALLED_APPS = (
     'singleton_models',
     'django_extensions',
     'djcelery',
+    'private_files',
 
     # Django.contrib
     'django.contrib.auth',
@@ -273,3 +273,7 @@ CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_SEND_TASK_ERROR_EMAILS = True
 ## end
 
+
+# django-private-files
+FILE_PROTECTION_METHOD = 'basic'
+PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private_media')

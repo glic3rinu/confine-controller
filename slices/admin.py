@@ -142,10 +142,10 @@ class NodeListAdmin(NodeAdmin):
 class SliceSliversAdmin(SliverAdmin):
     """ Slivers management (add and change) directly from the Slice """
     
-    fields = ['description', 'instance_sn']
+    fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_sha256']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
-    readonly_fields = ['instance_sn']
+    readonly_fields = ['instance_sn', 'exp_data_sha256']
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
         self.slice_id = slice_id

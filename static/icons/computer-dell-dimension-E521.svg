@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
@@ -13,14 +14,13 @@
    height="48"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.45.1"
+   inkscape:version="0.48.3.1 r9886"
    version="1.0"
-   sodipodi:docname="computer-dell-dimension-e521.svg"
+   sodipodi:docname="computer-dell-dimension-E521.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
-   inkscape:export-filename="/home/bellaich/Desktop/computer-dell-dimension-e521.png"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/computer-dell-dimension-E521.png"
    inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90"
-   sodipodi:docbase="/home/bellaich/Desktop">
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <linearGradient
@@ -302,9 +302,10 @@
      inkscape:window-width="1071"
      inkscape:window-height="958"
      inkscape:window-x="374"
-     inkscape:window-y="236"
+     inkscape:window-y="92"
      showguides="true"
-     inkscape:guide-bbox="true" />
+     inkscape:guide-bbox="true"
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -470,7 +471,7 @@
        transform="translate(-0.473217,0)">
       <path
          transform="translate(19.5,15.5)"
-         d="M 7 15 A 2 2 0 1 1  3,15 A 2 2 0 1 1  7 15 z"
+         d="m 7,15 c 0,1.104569 -0.8954305,2 -2,2 -1.1045695,0 -2,-0.895431 -2,-2 0,-1.104569 0.8954305,-2 2,-2 1.1045695,0 2,0.895431 2,2 z"
          sodipodi:ry="2"
          sodipodi:rx="2"
          sodipodi:cy="15"
@@ -486,7 +487,7 @@
          sodipodi:cy="15"
          sodipodi:rx="2"
          sodipodi:ry="2"
-         d="M 7 15 A 2 2 0 1 1  3,15 A 2 2 0 1 1  7 15 z"
+         d="m 7,15 c 0,1.104569 -0.8954305,2 -2,2 -1.1045695,0 -2,-0.895431 -2,-2 0,-1.104569 0.8954305,-2 2,-2 1.1045695,0 2,0.895431 2,2 z"
          transform="matrix(1.0090067,0,0,1.009007,19.43695,15.34688)" />
     </g>
     <rect

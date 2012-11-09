@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
@@ -11,14 +12,14 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    inkscape:export-ydpi="90"
    inkscape:export-xdpi="90"
-   inkscape:export-filename="/home/avian/src/geda/my_icons/application-x-gerber-48.png"
-   sodipodi:docname="application-x-gerber.svg"
-   sodipodi:docbase="/home/avian/src/geda/my_icons"
-   inkscape:version="0.44.1"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/Application-x-gerber.png"
+   sodipodi:docname="Application-x-gerber.svg"
+   inkscape:version="0.48.3.1 r9886"
    sodipodi:version="0.32"
    id="svg249"
    height="48.000000px"
-   width="48.000000px">
+   width="48.000000px"
+   version="1.1">
   <defs
      id="defs3">
     <linearGradient
@@ -317,9 +318,9 @@
      inkscape:grid-bbox="false"
      showgrid="true"
      inkscape:current-layer="layer1"
-     inkscape:cy="24.809699"
-     inkscape:cx="21.894649"
-     inkscape:zoom="15.999999"
+     inkscape:cy="-8.1797986"
+     inkscape:cx="2.3466641"
+     inkscape:zoom="3.9999998"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1"
@@ -333,8 +334,20 @@
      guidetolerance="50"
      gridtolerance="10000"
      showguides="false"
-     gridoriginx="0.5px"
-     gridoriginy="0.5px" />
+     inkscape:window-maximized="0">
+    <inkscape:grid
+       id="GridFromPre046Settings"
+       type="xygrid"
+       originx="0.5px"
+       originy="0.5px"
+       spacingx="1px"
+       spacingy="1px"
+       color="#3f3fff"
+       empcolor="#3f3fff"
+       opacity="0.15"
+       empopacity="0.38"
+       empspacing="5" />
+  </sodipodi:namedview>
   <metadata
      id="metadata4">
     <rdf:RDF>

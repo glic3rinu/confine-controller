@@ -17,7 +17,10 @@
    width="48"
    version="1.0"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="Tux_box3.svg">
+   sodipodi:docname="LXCBox2.svg"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/LXCBox2.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <svg:metadata
      id="metadata52">
     <rdf:RDF>
@@ -39,8 +42,8 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1280"
-     inkscape:window-height="744"
+     inkscape:window-width="1920"
+     inkscape:window-height="1024"
      id="namedview50"
      showgrid="false"
      inkscape:zoom="6.9532167"

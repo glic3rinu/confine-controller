@@ -6,9 +6,11 @@ from tinc.serializers import IslandSerializer, HostSerializer, GatewaySerializer
 
 class IslandList(generics.ListCreateAPIView):
     """
-    **Media type:** `application/vnd.confine.server.IslandList.v0+json`
+    **Media type:** [`application/vnd.confine.server.IslandList.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#islandlist_at_server)
     
-    This resource lists the network islands supported by the testbed and provides 
+    This resource lists the network [islands](http://wiki.confine-project.eu/
+    arch:rest-api?&#island_at_server) supported by the testbed and provides 
     API URIs to navigate to them.
     """
     model = Island
@@ -17,12 +19,15 @@ class IslandList(generics.ListCreateAPIView):
 
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** `application/vnd.confine.server.Island.v0+json`
+    **Media type:** [`application/vnd.confine.server.Island.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#island_at_server)
     
     This resource describes a network island (i.e. a disconnected part of a 
     community network) where the testbed is reachable from. A testbed is reachable 
-    from an island when there is a gateway that gives access to the testbed server 
-    (possibly through other gateways), or when the server itself is in that island.
+    from an island when there is a [gateway](http://wiki.confine-project.eu/arch
+    :rest-api?&#gateway_at_server) that gives access to the testbed server 
+    (possibly through other gateways), or when the [server](https://wiki.confine
+    -project.eu/arch:rest-api?&#server_at_server) itself is in that island.
     """
     model = Island
     serializer_class = IslandSerializer
@@ -30,9 +35,11 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class HostList(generics.ListCreateAPIView):
     """
-    **Media type:** `application/vnd.confine.server.HostList.v0+json`
+    **Media type:** [`application/vnd.confine.server.HostList.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#hostlist_at_server)
     
-    This resource lists odd hosts connected to the testbed (through the management 
+    This resource lists odd [hosts](http://wiki.confine-project.eu/arch:rest-
+    api?&#host_at_server) connected to the testbed (through the management 
     network) and provides API URIs to navigate to them.
     """
     model = Host
@@ -41,7 +48,8 @@ class HostList(generics.ListCreateAPIView):
 
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** `application/vnd.confine.server.Host.v0+json`
+    **Media type:** [`application/vnd.confine.server.Host.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#host_at_server)
     
     This resource describes an odd host computer connected to the testbed (through 
     the management network) with a known administrator.
@@ -52,9 +60,11 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class GatewayList(generics.ListCreateAPIView):
     """
-    **Media type:** `application/vnd.confine.server.GatewayList.v0+json`
+    **Media type:** [`application/vnd.confine.server.GatewayList.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#gatewaylist_at_server)
     
-    This resource lists testbed gateways and provides API URIs to navigate to them.
+    This resource lists testbed [gateways](http://wiki.confine-project.eu/arch:
+    rest-api?&#gateway_at_server) and provides API URIs to navigate to them.
     """
     model = Gateway
     serializer_class = GatewaySerializer
@@ -62,11 +72,14 @@ class GatewayList(generics.ListCreateAPIView):
 
 class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** `application/vnd.confine.server.Gateway.v0+json`
+    **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)
     
     This resource describes a network gateway providing access to the testbed 
-    server and listening on tinc addresses on one or more community network 
-    islands. The gateway connects to other gateways or the testbed server in 
+    [server](http://wiki.confine-project.eu/arch:rest-api?&#server_at_server) 
+    and listening on tinc addresses on one or more community network 
+    [islands](http://wiki.confine-project.eu/arch:rest-api?&#island_at_server). 
+    The gateway connects to other gateways or the testbed server in 
     order to reach the later.
     """
     model = Gateway

@@ -167,6 +167,7 @@ class BaseImage(models.Model):
     
     def clean(self):
         """ Prevent repeated architectures """
+        #TODO: move this logic to formset validation
         for arch in self.architectures:
             arch_regex = "(^|\s)%s(,|$)" % arch
             try: existing = BaseImage.objects.get(architectures__regex=arch_regex)

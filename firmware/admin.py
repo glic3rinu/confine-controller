@@ -43,10 +43,10 @@ class BuildAdmin(admin.ModelAdmin):
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
-    fields = ['node_link', 'image_link', 'version', 'build_date', 'state', 
-        'task_link']
-    readonly_fields = ['node_link', 'state', 'image_link', 'version', 
-        'build_date', 'task_link']
+    fields = ['node_link', 'image_link', 'image_sha256', 'version', 'build_date',
+        'state', 'task_link']
+    readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 
+        'version', 'build_date', 'task_link']
     inlines = [BuildUCIInline]
     
     def build_date(self, build):
@@ -112,6 +112,7 @@ def get_urls(self):
                 'state': build.state,
                 'date': build.date.strftime("%Y-%m-%d %H:%M:%S"),
                 'image': build.image.name,
+                'sha256': build.image_sha256,
                 'id': build.pk,
                 'version': build.version,}
         return HttpResponse(simplejson.dumps(build_dict), mimetype="application/json")

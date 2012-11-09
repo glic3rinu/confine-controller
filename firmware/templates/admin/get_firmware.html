@@ -29,10 +29,11 @@
     {% if build %}
         {% if build.is_available %}
             <li><b>Download:</b> <a href={{ build.image.url }}>{{ build.image }}</a> </li>
-        {% endif %}
             <ul>
                 <li>Buil Date: {{ build.date }}</li>
                 <li>Version: {{ build.version }}</li>
+                <li>SHA256: {{ build.image_sha256 }}</li>
+        {% endif %}
             </ul>
     {% endif %}
     </ul>

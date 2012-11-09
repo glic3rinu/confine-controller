@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="header.svg">
+   sodipodi:docname="header.svg"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/header.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <linearGradient
@@ -138,13 +141,13 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="209.23871"
-     inkscape:cy="-86.911506"
+     inkscape:cx="204.6974"
+     inkscape:cy="-99.350668"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1280"
-     inkscape:window-height="744"
+     inkscape:window-width="1920"
+     inkscape:window-height="1024"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1" />
@@ -234,6 +237,6 @@
          sodipodi:role="line"
          x="40.303661"
          y="1042.7031"
-         id="tspan3944">Confine Testbed Management</tspan></text>
+         id="tspan3944">Community-Lab Testbed Management</tspan></text>
   </g>
 </svg>

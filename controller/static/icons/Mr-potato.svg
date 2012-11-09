@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg:svg
    xmlns:ns2="http://ns.adobe.com/Extensibility/1.0/"
    xmlns:ns1="http://ns.adobe.com/Flows/1.0/"
    xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -15,12 +16,11 @@
    height="48"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.45+devel"
+   inkscape:version="0.48.3.1 r9886"
    version="1.0"
-   sodipodi:docbase="/home/bellaich"
-   sodipodi:docname="mr-potato.svg"
+   sodipodi:docname="Mr-potato.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
-   inkscape:export-filename="/home/bellaich/mr-potato.png"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/Mr-potato.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <svg:defs
@@ -3689,12 +3689,13 @@
      width="48px"
      height="48px"
      inkscape:window-width="1580"
-     inkscape:window-height="1214"
-     inkscape:window-x="363"
-     inkscape:window-y="343"
+     inkscape:window-height="1023"
+     inkscape:window-x="338"
+     inkscape:window-y="27"
      showgrid="true"
      showguides="true"
-     inkscape:guide-bbox="true" />
+     inkscape:guide-bbox="true"
+     inkscape:window-maximized="0" />
   <svg:metadata
      id="metadata7">
     <rdf:RDF>

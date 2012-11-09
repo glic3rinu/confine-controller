@@ -7,6 +7,7 @@ from rest_framework import generics
 class SliceList(generics.ListCreateAPIView):
     model = Slice
     serializer_class = SliceSerializer
+    filter_fields = ('set_state', )
 
 
 class SliceDetail(generics.RetrieveUpdateDestroyAPIView):

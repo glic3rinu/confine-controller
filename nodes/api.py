@@ -10,9 +10,9 @@ class NodeList(generics.ListCreateAPIView):
     """
         List of the nodes available in the testbed.
     """
-
     model = Node
     serializer_class = NodeSerializer
+    filter_fields = ('arch', 'set_state', 'admin')
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -21,7 +21,6 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
         research device or RD), as well as listing the slivers intended to run 
         on it with API URIs to navigate to them.
     """
-
     model = Node
     serializer_class = NodeSerializer
 

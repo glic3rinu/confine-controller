@@ -17,14 +17,27 @@ def get_expires_on():
 
 
 class Template(models.Model):
-    name = models.CharField(max_length=32)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=32, unique=True, help_text="""The unique
+        name of this template. A single line of free-form text with no whitespace
+        surrounding it, it can include version numbers and other information.""",
+        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
+            'Enter a valid name.', 'invalid')])
+    description = models.TextField(blank=True, help_text="""An optional free-form
+        textual description of this template.""")
     type = models.CharField(max_length=32, choices=settings.TEMPLATE_TYPES,
-        default=settings.DEFAULT_TEMPLATE_TYPE)
+        default=settings.DEFAULT_TEMPLATE_TYPE, help_text="""The system type of
+        this template. Roughly equivalent to the distribution the template is 
+        based on, e.g. debian (Debian, Ubuntu...), fedora (Fedora, RHEL...), suse
+        (openSUSE, SUSE Linux Enterprise...). To instantiate a sliver based on a
+        template, the research device must support its type.""")
     arch = models.CharField(verbose_name="Architecture", max_length=32, 
-        choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH)
+        choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
+        help_text="""The architecture of this template (as reported by uname -m).
+            Slivers using this template should run on nodes that match this 
+            architecture.""")
     is_active = models.BooleanField(default=True)
-    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR)
+    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, help_text="""
+        template's image file.""")
     
     def __unicode__(self):
         return self.name
@@ -147,7 +160,8 @@ class SliceProp(models.Model):
 class Sliver(models.Model):
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    description = models.CharField(max_length=256, blank=True)
+    description = models.CharField(max_length=256, blank=True, help_text="""An
+        optional free-form textual description of this sliver.""")
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text="""The number of times this sliver has been instructed to be 
         reset (instance sequence number).""")

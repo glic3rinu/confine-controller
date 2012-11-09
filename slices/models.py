@@ -47,14 +47,15 @@ class Slice(models.Model):
               (ACTIVATE, 'Activate'),)
     
     name = models.CharField(max_length=64, unique=True, 
-        help_text="""An optional, unique name for this slice matching the regular
-            expression ^[a-z][_0-9a-z]*[0-9a-z]$.""", 
+        help_text="""A unique name for this slice matching the regular expression
+            ^[a-z][_0-9a-z]*[0-9a-z]$.""", 
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
             'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField(null=True, blank=True, help_text="""A PEM-encoded 
         RSA public key for this slice (used by SFA).""")
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, help_text="""An optional free-form
+        textual description of this slice.""")
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
         help_text="""Expiration date of this slice. Automatically deleted once 
         expires.""")
@@ -70,12 +71,17 @@ class Slice(models.Model):
         to allocate for the slice a new VLAN number (2 <= vlan_nr < 0xFFF) 
         while the slice is instantiated (or active). It cannot be changed on an 
         instantiated slice with slivers having isolated interfaces.""")
-    exp_data = models.FileField(help_text="Experiment Data", blank=True,
-        upload_to=settings.SLICE_EXP_DATA_DIR)
+    exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
+        help_text=""".tar.gz archive containing experiment data for slivers (if
+            they do not explicitly indicate one)""", 
+        validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
+            'Upload a valid .tar.gz file', 'invalid')])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
-    template = models.ForeignKey(Template)
-    users = models.ManyToManyField(User, help_text="""A ist of users able to login
-        as root in slivers using their authentication tokens (usually an SSH key).""")
+    template = models.ForeignKey(Template, help_text="""The template to be used 
+        by the slivers of this slice (if they do not explicitly indicate one).""")
+    users = models.ManyToManyField(User, help_text="""A ist of users able to 
+        login as root in slivers using their authentication tokens (usually an 
+        SSH key).""")
     
     def __unicode__(self):
         return self.name
@@ -148,8 +154,10 @@ class Sliver(models.Model):
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text="""The number of times this sliver has been instructed to be 
         reset (instance sequence number).""")
-    exp_data = models.FileField(help_text="Experiment Data", blank=True,
-        upload_to=settings.SLICE_EXP_DATA_DIR)
+    exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
+        help_text=".tar.gz archive containing experiment data for this sliver.", 
+        validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
+            'Upload a valid .tar.gz file', 'invalid')]))
     template = models.ForeignKey(Template, null=True, blank=True, help_text="""
         If present, the template to be used by this sliver, instead of the one
         specified by the slice.""")

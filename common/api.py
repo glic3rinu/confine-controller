@@ -26,9 +26,11 @@ class RestApi(object):
         # TODO Move definition to controller/api.py ?
         class Base(APIView):
             """ 
-                This resource is located at the base URI of the server API. It 
-                describes testbed-wide parameters and provides the API URIs to 
-                navigate to other resources in the testbed.
+            **Media type:** `application/vnd.confine.server.Base.v0+json`
+            
+            This resource is located at the base URI of the server API. It 
+            describes testbed-wide parameters and provides the API URIs to 
+            navigate to other resources in the testbed.
             """
             def get(base_view, request, format=None):
                 testbed_params = {

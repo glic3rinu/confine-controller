@@ -7,6 +7,7 @@ from rest_framework import generics
 class UserList(generics.ListCreateAPIView):
     model = User
     serializer_class = UserSerializer
+    filter_fields = ('username',)
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):

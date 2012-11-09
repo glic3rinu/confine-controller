@@ -278,3 +278,9 @@ CELERY_DISABLE_RATE_LIMITS = True
 # django-private-files
 FILE_PROTECTION_METHOD = 'basic'
 PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
+
+
+REST_FRAMEWORK = {
+    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend'
+}
+

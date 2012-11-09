@@ -258,7 +258,7 @@ class SliceAdmin(ChangeViewActionsMixin):
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', ('template', 'exp_data', 
+            'fields': ('name', 'description', 'template', ('exp_data', 
                        'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on'),
         }),

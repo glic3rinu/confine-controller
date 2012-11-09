@@ -38,8 +38,8 @@ class BuildUCIInline(admin.TabularInline):
 
 
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['node', 'version', 'date', colored('state', STATE_COLORS), 
-        'task_link', 'image_link']
+    list_display = ['id', admin_link('node'), 'version', colored('state', STATE_COLORS), 
+        'task_link', 'image_link', 'date']
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']

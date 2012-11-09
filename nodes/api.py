@@ -7,8 +7,11 @@ from rest_framework import generics
 # TODO refactor this with a ModelResource when they are stable 
 
 class NodeList(generics.ListCreateAPIView):
-    """
-        List of the nodes available in the testbed.
+    """ 
+    **Media type:** `application/vnd.confine.server.NodeList.v0+json`
+    
+    This resource lists the nodes available in the testbed and provides API URIs
+    to navigate to them.
     """
     model = Node
     serializer_class = NodeSerializer
@@ -16,17 +19,22 @@ class NodeList(generics.ListCreateAPIView):
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
-    """ 
-        A Node resource describes a node in the testbed (including its associated 
-        research device or RD), as well as listing the slivers intended to run 
-        on it with API URIs to navigate to them.
+    """
+    **Media type:** `application/vnd.confine.server.Node.v0+json`
+    
+    This resource describes a node in the testbed as well as listing the 
+    slivers intended to run on it with API URIs to navigate to them.
     """
     model = Node
     serializer_class = NodeSerializer
 
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
-    """ This resource describes the testbed server (controller)."""
+    """ 
+    **Media type:** `application/vnd.confine.server.Server.v0+json`
+    
+    This resource describes the testbed server (controller).
+    """
     model = Server
     serializer_class = ServerSerializer
     

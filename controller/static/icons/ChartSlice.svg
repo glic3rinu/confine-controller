@@ -15,7 +15,10 @@
    id="svg3140"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="Chart.svg">
+   sodipodi:docname="ChartSlice.svg"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/ChartSlice.png"
+   inkscape:export-xdpi="67.5"
+   inkscape:export-ydpi="67.5">
   <defs
      id="defs3142">
     <radialGradient
@@ -187,8 +190,8 @@
      showgrid="true"
      inkscape:document-units="px"
      inkscape:grid-bbox="true"
-     inkscape:window-width="1280"
-     inkscape:window-height="744"
+     inkscape:window-width="1920"
+     inkscape:window-height="1024"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1" />
@@ -200,7 +203,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>

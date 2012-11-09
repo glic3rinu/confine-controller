@@ -13,14 +13,17 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   sodipodi:docname="gnome-mime-application-x-jar.svg"
+   sodipodi:docname="LXCBox.svg"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:version="0.32"
    id="svg2963"
    height="48px"
    width="48px"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
-   version="1.1">
+   version="1.1"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/LXCBox.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs3">
     <inkscape:perspective
@@ -1007,8 +1010,8 @@
   <sodipodi:namedview
      inkscape:window-y="27"
      inkscape:window-x="0"
-     inkscape:window-height="744"
-     inkscape:window-width="1280"
+     inkscape:window-height="1024"
+     inkscape:window-width="1920"
      stroke="#c17d11"
      fill="#e9b96e"
      inkscape:showpageshadow="false"
@@ -1036,7 +1039,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
         <dc:creator>
           <cc:Agent>
             <dc:title>Jakub Steiner</dc:title>

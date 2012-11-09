@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    inkscape:export-ydpi="90.000000"
    inkscape:export-xdpi="90.000000"
-   inkscape:export-filename="/home/jimmac/Desktop/wi-fi.png"
+   inkscape:export-filename="/home/glic3rinu/controller/controller/static/icons/Contact-new.png"
    width="48px"
    height="48px"
    id="svg11300"
    sodipodi:version="0.32"
-   inkscape:version="0.43+devel"
-   sodipodi:docbase="/home/tigert/cvs/freedesktop.org/tango-icon-theme/scalable/actions"
-   sodipodi:docname="contact-new.svg"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="Contact-new.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
   <defs
      id="defs3">
     <linearGradient
@@ -231,7 +232,8 @@
      inkscape:window-width="740"
      inkscape:window-height="676"
      inkscape:window-x="234"
-     inkscape:window-y="216" />
+     inkscape:window-y="216"
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata4">
     <rdf:RDF>
@@ -341,10 +343,10 @@
          sodipodi:cy="19.008621"
          sodipodi:rx="8.6620579"
          sodipodi:ry="8.6620579"
-         d="M 39.774755 19.008621 A 8.6620579 8.6620579 0 1 1  22.45064,19.008621 A 8.6620579 8.6620579 0 1 1  39.774755 19.008621 z" />
+         d="m 39.774755,19.008621 c 0,4.783923 -3.878135,8.662058 -8.662057,8.662058 -4.783923,0 -8.662058,-3.878135 -8.662058,-8.662058 0,-4.783922 3.878135,-8.662058 8.662058,-8.662058 4.783922,0 8.662057,3.878136 8.662057,8.662058 z" />
       <path
          transform="translate(6.637314,-0.329669)"
-         d="M 39.774755 19.008621 A 8.6620579 8.6620579 0 1 1  22.45064,19.008621 A 8.6620579 8.6620579 0 1 1  39.774755 19.008621 z"
+         d="m 39.774755,19.008621 c 0,4.783923 -3.878135,8.662058 -8.662057,8.662058 -4.783923,0 -8.662058,-3.878135 -8.662058,-8.662058 0,-4.783922 3.878135,-8.662058 8.662058,-8.662058 4.783922,0 8.662057,3.878136 8.662057,8.662058 z"
          sodipodi:ry="8.6620579"
          sodipodi:rx="8.6620579"
          sodipodi:cy="19.008621"
@@ -361,7 +363,7 @@
          sodipodi:cy="19.008621"
          sodipodi:rx="8.6620579"
          sodipodi:ry="8.6620579"
-         d="M 39.774755 19.008621 A 8.6620579 8.6620579 0 1 1  22.45064,19.008621 A 8.6620579 8.6620579 0 1 1  39.774755 19.008621 z" />
+         d="m 39.774755,19.008621 c 0,4.783923 -3.878135,8.662058 -8.662057,8.662058 -4.783923,0 -8.662058,-3.878135 -8.662058,-8.662058 0,-4.783922 3.878135,-8.662058 8.662058,-8.662058 4.783922,0 8.662057,3.878136 8.662057,8.662058 z" />
       <path
          id="path4173"
          d="M 42.346208,33.704972 L 46.588848,33.704972 L 44.113975,31.406875 L 43.583645,32.113982 L 43.053314,31.583652 L 42.346208,33.704972 z "

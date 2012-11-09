@@ -3,10 +3,10 @@ from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.contrib.auth.models import User
 from django.db import models
+from hashlib import sha256
 from nodes.models import Node
 from slices import settings
 from slices.tasks import force_slice_update, force_sliver_update
-import hashlib
 
 
 # TODO protect exp_data and data files (like in firmware.build.image)
@@ -30,7 +30,7 @@ class Template(models.Model):
     
     @property
     def data_sha256(self):
-        try: return hashlib.sha256(self.data.file.read()).hexdigest()
+        try: return sha256(self.data.file.read()).hexdigest()
         except: return None
 
 
@@ -93,7 +93,7 @@ class Slice(models.Model):
     
     @property
     def exp_data_sha256(self):
-        try: return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+        try: return sha256(self.exp_data.file.read()).hexdigest()
         except: return None
     
     def renew(self):
@@ -149,7 +149,7 @@ class Sliver(models.Model):
     
     @property
     def exp_data_sha256(self):
-        try: return hashlib.sha256(self.exp_data.file.read()).hexdigest()
+        try: return sha256(self.exp_data.file.read()).hexdigest()
         except: return None
     
     @property

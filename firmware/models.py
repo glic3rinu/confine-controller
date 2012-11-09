@@ -7,6 +7,7 @@ from django.db import models
 from django_transaction_signals import defer
 from firmware import settings
 from firmware.tasks import build
+from hashlib import sha256
 from nodes.settings import NODE_ARCHS
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
@@ -88,6 +89,11 @@ class Build(models.Model):
     @property
     def is_unavailable(self):
         return self.state in [self.OUTDATED, self.DELETED, self.FAILED]
+    
+    @property
+    def image_sha256(self):
+        try: return sha256(self.image.file.read()).hexdigest()
+        except: return None
     
     @classmethod
     def build(cls, node, async=False):

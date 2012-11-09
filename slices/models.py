@@ -2,12 +2,13 @@ from datetime import datetime
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.contrib.auth.models import User
+from django.core import validators
 from django.db import models
 from hashlib import sha256
 from nodes.models import Node
 from slices import settings
 from slices.tasks import force_slice_update, force_sliver_update
-
+import re
 
 # TODO protect exp_data and data files (like in firmware.build.image)
 
@@ -42,7 +43,11 @@ class Slice(models.Model):
               (INSTANTIATE, 'Instantiate'),
               (ACTIVATE, 'Activate'),)
     
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True, 
+        help_text="""An optional, unique name for this slice matching the regular
+            expression ^[a-z][_0-9a-z]*[0-9a-z]$.""", 
+        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
+            'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField(null=True, blank=True, help_text="""A PEM-encoded 
         RSA public key for this slice (used by SFA).""")
@@ -54,7 +59,7 @@ class Slice(models.Model):
         help_text="""The number of times this slice has been instructed to be 
         reset (instance sequence number).""")
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
-        help_text="""Instance sequence number that newly created slivers will get.""")
+        help_text="""Instance sequence number for newly created slivers.""")
     # TODO: implement what vlan_nr.help_text says.
     vlan_nr = models.IntegerField(null=True, blank=True, help_text="""A VLAN number 
         allocated to this slice. The only values that can be set are null which 
@@ -142,7 +147,9 @@ class Sliver(models.Model):
         reset (instance sequence number).""")
     exp_data = models.FileField(help_text="Experiment Data", blank=True,
         upload_to=settings.SLICE_EXP_DATA_DIR)
-    template = models.ForeignKey(Template, null=True, blank=True)
+    template = models.ForeignKey(Template, null=True, blank=True, help_text="""
+        If present, the template to be used by this sliver, instead of the one
+        specified by the slice.""")
     
     def __unicode__(self):
         return self.description if self.description else str(self.id)

@@ -154,7 +154,7 @@ class Sliver(models.Model):
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
         help_text=".tar.gz archive containing experiment data for this sliver.", 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-            'Upload a valid .tar.gz file', 'invalid')]))
+            'Upload a valid .tar.gz file', 'invalid')])
     template = models.ForeignKey(Template, null=True, blank=True, help_text="""
         If present, the template to be used by this sliver, instead of the one
         specified by the slice.""")

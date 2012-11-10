@@ -29,6 +29,10 @@ num_slivers.short_description = 'Slivers'
 num_slivers.admin_order_field = 'sliver__count'
 
 
+def template_link(instance):
+    return admin_link('template')(instance)
+
+
 class SliverPropInline(admin.TabularInline):
     model = SliverProp
     extra = 0
@@ -38,7 +42,7 @@ class IsolatedIfaceInline(admin.TabularInline):
     model = IsolatedIface
     extra = 0
     form = IsolatedIfaceInlineForm
-
+    
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
         self.form.node = request._node_
@@ -60,8 +64,9 @@ class SliverAdmin(ChangeViewActionsMixin):
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
     list_filter = ['slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
-              'exp_data', 'exp_data_sha256']
-    readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256']
+              template_link, 'exp_data', 'exp_data_sha256']
+    readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256',
+                       template_link]
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
                PrivateIfaceInline]
@@ -93,6 +98,10 @@ class SliverAdmin(ChangeViewActionsMixin):
     def node_link(self, instance):
         return mark_safe("<b>%s</b>" % admin_link('node')(instance))
     node_link.short_description = 'Node'
+    
+    def exp_data_sha256(self, instance):
+        return instance.exp_data_sha256
+    exp_data_sha256.short_description = 'Experiment Data SHA256'
     
     def queryset(self, request):
         qs = super(SliverAdmin, self).queryset(request)
@@ -252,7 +261,7 @@ class SliceAdmin(ChangeViewActionsMixin):
     list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
-                       'exp_data_sha256']
+                       'exp_data_sha256', template_link]
     date_hierarchy = 'expires_on'
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline, SliverInline]
@@ -260,7 +269,7 @@ class SliceAdmin(ChangeViewActionsMixin):
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'template', ('exp_data', 
+            'fields': ('name', 'description', ('template', template_link), ('exp_data', 
                        'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on'),
         }),
@@ -271,6 +280,10 @@ class SliceAdmin(ChangeViewActionsMixin):
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_actions = [('renew', renew_selected_slices, '', ''),
                            ('reset', reset_selected, '', '')]
+    
+    def exp_data_sha256(self, instance):
+        return instance.exp_data_sha256
+    exp_data_sha256.short_description = 'Experiment Data SHA256'
     
     def queryset(self, request):
         qs = super(SliceAdmin, self).queryset(request)
@@ -308,6 +321,10 @@ class TemplateAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description', 'type', 'arch']
     fields = ['name', 'description', 'type', 'arch', 'data', 'data_sha256', 'is_active']
     readonly_fields = ['data_sha256']
+    
+    def data_sha256(self, instance):
+        return instance.data_sha256
+    data_sha256.short_description = 'Data SHA256'
 
 
 admin.site.register(Sliver, SliverAdmin)

@@ -134,7 +134,7 @@ class NodeListAdmin(NodeAdmin):
         qs = qs.exclude(pk__in=Node.objects.filter(sliver__slice=self.slice_id))
         qs = qs.annotate(models.Count('sliver'))
         return qs
-
+    
     def has_add_permission(self, *args, **kwargs):
         return False
 
@@ -208,7 +208,7 @@ class SliceSliversAdmin(SliverAdmin):
     
     def has_add_permission(self, *args, **kwargs):
         return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
-
+    
     def get_form(self, request, obj=None, **kwargs):
         # just save node reference for future processing in IsolatedIfaceInline
         if obj: 

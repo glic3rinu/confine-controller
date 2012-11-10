@@ -11,11 +11,9 @@ class CnHost(models.Model):
     """
     Describes a host in the Community Network.
     """
-    cn_url = models.URLField(blank=True, verbose_name='Community Network URL')
-    cndb_uri = models.CharField(max_length=256, blank=True, 
-        verbose_name='Community Network Database URI')
-    cndb_cached_on = models.DateTimeField(null=True, blank=True, 
-        verbose_name='CNDB cached on')
+    cn_url = models.URLField('Community Network URL', blank=True)
+    cndb_uri = models.CharField('Community Network Database URI', max_length=256, blank=True)
+    cndb_cached_on = models.DateTimeField('CNDB cached on', null=True, blank=True)
     
     class Meta:
         abstract = True
@@ -46,37 +44,34 @@ class Node(CnHost):
                   'by clients and services accessing the node API.')
     description = models.CharField(max_length=256,
         help_text='Free-form textual description of this host/device.')
-    arch = models.CharField(verbose_name='Architecture', max_length=16,
+    arch = models.CharField('Architecture', max_length=16,
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
         help_text='Architecture of this RD (as reported by uname -m).',)
-    local_iface = models.CharField(verbose_name="Local Interface", max_length=16,
+    local_iface = models.CharField('Local Interface', max_length=16, default='eth0',
         help_text='Name of the interface used as a local interface. See <a href='
-                  '"wiki.confine-project.eu/arch:node">node architecture</a>.',
-        default='eth0')
-    priv_ipv4_prefix = models.GenericIPAddressField(protocol='IPv4', null=True,
-        blank=True, verbose_name='Private IPv4 Prefix', 
+                  '"wiki.confine-project.eu/arch:node">node architecture</a>.')
+    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 
+        protocol='IPv4', null=True, blank=True,
         help_text='IPv4 /24 network in CIDR notation used as a node private IPv4'
                   ' prefix. See <a href="http://wiki.confine-project.eu/arch:'
                   'addressing">addressing</a> for legal values. %s When null.' 
                   % settings.PRIV_IPV4_PREFIX_DFLT)
     # TODO restric this according the data model
-    sliver_mac_prefix = models.PositiveSmallIntegerField(max_length=16, null=True,
-        blank=True, verbose_name='Sliver MAC Prefix', 
+    sliver_mac_prefix = models.PositiveSmallIntegerField('Sliver MAC Prefix',
+        max_length=16, null=True, blank=True,
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
                   'values. %s when null.</a>.' % settings.SLIVER_MAC_PREFIX_DFLT)
-    sliver_pub_ipv4_total = models.IntegerField(default=0, 
-        verbose_name='Sliver Public IPv4 Total', 
+    sliver_pub_ipv4_total = models.IntegerField('Sliver Public IPv4 Total', default=0,
         help_text='Total number of public (from the point of view of the CN) '
                   'IPv4 addresses available in this node\'s local network to be '
                   'allocated to slivers\' public interfaces (see <a href="http:'
                   '//wiki.confine-project.eu/arch:node">node</a> architecture). '
                   'If the local network uses private addresses the value should '
                   'be 0.')
-    boot_sn = models.IntegerField(default=0, blank=True, 
-        help_text='Number of times this RD has been instructed to be rebooted.', 
-        verbose_name='Boot Sequence Number')
+    boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
+        help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, 
         default='install_conf')
     admin = models.ForeignKey(User, 

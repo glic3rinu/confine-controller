@@ -9,7 +9,7 @@ class SliceAdminForm(forms.ModelForm):
     # FIXME look at Slice.vlan_nr model definition for more TODOs
     """ Provide vlan_nr as a request checkbox """
     request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False, 
-        help_text="""A VLAN number allocated to this slice by the server.""")
+        help_text='VLAN number allocated to this slice by the server.')
     
     class Meta:
         model = Slice
@@ -20,10 +20,10 @@ class SliceAdminForm(forms.ModelForm):
             self.fields['vlan_nr'] = self.fields['request_vlan'] 
         else:
             instance = kwargs['instance']
-            if instance.set_state == 'register' and instance.vlan_nr == -1:
+            if instance.set_state == Slice.REGISTER and instance.vlan_nr == -1:
                 self.fields['vlan_nr'] = self.fields['request_vlan']
                 self.initial['vlan_nr'] = True
-            elif instance.set_state == 'register':
+            elif instance.set_state == Slice.REGISTER:
                 self.fields['vlan_nr'] = self.fields['request_vlan']
                 self.initial['vlan_nr'] = False
             else:
@@ -32,7 +32,7 @@ class SliceAdminForm(forms.ModelForm):
         
     def clean_vlan_nr(self):
         vlan_nr = self.cleaned_data['vlan_nr']
-        if vlan_nr == True: return -1
+        if vlan_nr: return -1
         return vlan_nr
 
 

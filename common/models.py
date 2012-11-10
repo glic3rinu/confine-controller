@@ -14,7 +14,7 @@ def generate_chainer_manager(qs_class):
 
         def __getattr__(self, attr, *args):
             try:
-                return getattr(self.__class__, attr, *args)
+                return getattr(type(self), attr, *args)
             except AttributeError:
                 return getattr(self.get_query_set(), attr, *args)
     return ChainerManager()

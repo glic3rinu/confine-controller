@@ -64,9 +64,9 @@ class Node(CnHost):
     
     uuid = fields.UUIDField(auto=True, 
         help_text='Universally unique identifier (UUID, RFC 4122).')
-    pubkey = models.TextField(unique=True, null=True, blank=True, 
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).')
-    cert = models.TextField(unique=True, null=True, blank=True, 
+    cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
                   'by clients and services accessing the node API.')
@@ -75,7 +75,8 @@ class Node(CnHost):
     arch = models.CharField('Architecture', max_length=16,
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
         help_text='Architecture of this RD (as reported by uname -m).',)
-    local_iface = models.CharField('Local Interface', max_length=16, default='eth0',
+    local_iface = models.CharField('Local Interface', max_length=16, 
+        default=settings.DEFAULT_NODE_LOCAL_IFACE,
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 def generate_chainer_manager(qs_class):
     # Allow chained managers
     # Based on http://djangosnippets.org/snippets/562/#c2486

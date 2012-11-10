@@ -1,5 +1,6 @@
-from common.widgets import ShowText
 from django import forms
+
+from common.widgets import ShowText
 from slices.models import Slice
 
 

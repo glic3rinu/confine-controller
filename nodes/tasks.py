@@ -1,5 +1,7 @@
-from celery.task import periodic_task, task
 from datetime import datetime
+
+from celery.task import periodic_task, task
+
 from nodes.settings import CACHE_NODE_DB_CRONTAB
 
 

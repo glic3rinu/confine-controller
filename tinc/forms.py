@@ -1,7 +1,8 @@
-from common.widgets import ShowText
 from django import forms
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
+
+from common.widgets import ShowText
 
 
 class HostInlineAdminForm(forms.ModelForm):

@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from nodes.models import Server, Node
+
 
 class ServerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

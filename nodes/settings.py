@@ -13,6 +13,7 @@ NODE_ARCHS = getattr(settings, 'NODE_ARCHS', (
 
 DEFAULT_NODE_ARCH = getattr(settings, 'DEFAULT_NODE_ARCH', 'x86_64')
 
+DEFAULT_NODE_LOCAL_IFACE = getattr(settings, 'DEFAULT_NODE_LOCAL_IFACE', 'eth0')
 
 #TODO should the following options go into controller.settings ?
 

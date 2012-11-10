@@ -1,13 +1,14 @@
-from common.admin import (get_modeladmin, admin_link, insert_action, colored, 
-    wrap_admin_view)
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils import simplejson
+from singleton_models.admin import SingletonModelAdmin
+
+from common.admin import (get_modeladmin, admin_link, insert_action, colored, 
+    wrap_admin_view)
 from firmware.actions import get_firmware
 from firmware.models import BaseImage, Config, ConfigUCI, Build, BuildUCI
 from nodes.models import Node
-from singleton_models.admin import SingletonModelAdmin
 
 
 STATE_COLORS = {

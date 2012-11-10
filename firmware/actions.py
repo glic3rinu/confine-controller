@@ -7,6 +7,7 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
+
 from firmware.models import Build
 
 

@@ -1,7 +1,8 @@
-from auth_extension.serializers import UserSerializer
-from common.api import api
 from django.contrib.auth.models import User
 from rest_framework import generics
+
+from auth_extension.serializers import UserSerializer
+from common.api import api
 
 
 class UserList(generics.ListCreateAPIView):

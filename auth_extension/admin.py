@@ -1,9 +1,10 @@
+from django.contrib import admin
+from django.contrib.auth.models import User
+
 from auth_extension.models import (UserProfile, AuthToken, ResearchGroup, 
     TestbedPermission, AuthorizedOfficial)
 from auth_extension.forms import UserProfileChangeForm
 from common.admin import insert_inline, AddOrChangeInlineFormMixin
-from django.contrib import admin
-from django.contrib.auth.models import User
 
 
 class UserProfileInline(admin.StackedInline, AddOrChangeInlineFormMixin):

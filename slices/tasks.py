@@ -1,6 +1,8 @@
-from celery.task import task, periodic_task
 from datetime import datetime
+
+from celery.task import task, periodic_task
 from django.db import transaction
+
 from slices.settings import CLEAN_EXPIRED_SLICES_CRONTAB
 
 

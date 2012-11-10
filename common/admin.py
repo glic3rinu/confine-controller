@@ -5,7 +5,8 @@ from django.http import HttpResponseRedirect
 from django.utils.functional import update_wrapper
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from utils import get_field_value
+
+from common.utils import get_field_value
 
 
 def get_modeladmin(model):

@@ -1,13 +1,14 @@
-from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
-    admin_link)
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import transaction, models
+from singleton_models.admin import SingletonModelAdmin
+
+from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
+    admin_link)
 from nodes.actions import request_cert, reboot_selected
 from nodes.forms import NodeInlineAdminForm
 from nodes.models import Node, NodeProp, Server, DirectIface
-from singleton_models.admin import SingletonModelAdmin
 
 
 STATES_COLORS = { 

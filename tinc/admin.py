@@ -1,7 +1,9 @@
-from common.admin import insert_inline, admin_link, insert_action, get_modeladmin, ChangeViewActionsMixin, link
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
+
+from common.admin import (insert_inline, admin_link, insert_action, 
+    get_modeladmin, ChangeViewActionsMixin, link)
 from nodes.models import Node, Server
 from tinc.actions import set_island
 from tinc.forms import HostInlineAdminForm

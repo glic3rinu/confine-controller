@@ -1,5 +1,6 @@
-from common.models import generate_chainer_manager
 from django.db import models
+
+from common.models import generate_chainer_manager
 
 
 class QueueQuerySet(models.query.QuerySet):

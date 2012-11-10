@@ -1,6 +1,7 @@
+import os
+
 from celery.task import task
 from confw import confw
-import os
 
 
 @task(name="firmware.build")

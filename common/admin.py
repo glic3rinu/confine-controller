@@ -23,7 +23,7 @@ def insert_inline(model, inline, head=False):
     # Avoid inlines defined on parent class be shared between subclasses
     # Seems that if we use tuples they are lost in some conditions like changing
     # the tuple in modeladmin.__init__ 
-    if not model_admin.inlines: model_admin.__class__.inlines = []
+    if not model_admin.inlines: type(model_admin).inlines = []
     if head:
         model_admin.inlines = [inline] + model_admin.inlines
     else:
@@ -32,19 +32,19 @@ def insert_inline(model, inline, head=False):
 
 def insert_list_filter(model, filter):
     model_admin = get_modeladmin(model)
-    if not model_admin.list_filter: model_admin.__class__.list_filter = []
+    if not model_admin.list_filter: type(model_admin).list_filter = []
     model_admin.list_filter += (filter,)
 
 
 def insert_list_display(model, field):
     model_admin = get_modeladmin(model)
-    if not model_admin.list_display: model_admin.__class__.list_display = []
+    if not model_admin.list_display: type(model_admin).list_display = []
     model_admin.list_display += (field,)    
 
 
 def insert_action(model, action):
     model_admin = get_modeladmin(model)
-    if not model_admin.actions: model_admin.__class__.actions = [action]
+    if not model_admin.actions: type(model_admin).actions = [action]
     else: model_admin.actions.append(action)
 
 

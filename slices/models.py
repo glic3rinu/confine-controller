@@ -155,12 +155,11 @@ class Slice(models.Model):
             raise self.VlanAllocationError("No VLAN address space left")
         return last_nr + 1
     
-    class VlanAllocationError(Exception): pass
-    
     def force_update(self, async=False):
         if async: defer(force_slice_update.delay, self.pk)
         else: force_slice_update(self.pk)
-
+    
+    class VlanAllocationError(Exception): pass
 
 class SliceProp(models.Model):
     """

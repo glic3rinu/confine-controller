@@ -125,4 +125,4 @@ def get_urls(self):
     )
     return extra_urls + old_get_urls()
 
-node_modeladmin.__class__.get_urls = get_urls
+type(node_modeladmin).get_urls = get_urls

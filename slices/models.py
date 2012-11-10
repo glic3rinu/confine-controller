@@ -10,11 +10,8 @@ from slices import settings
 from slices.tasks import force_slice_update, force_sliver_update
 import re
 
+
 # TODO protect exp_data and data files (like in firmware.build.image)
-
-def get_expires_on():
-    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
-
 
 class Template(models.Model):
     """
@@ -35,7 +32,7 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.DEFAULT_TEMPLATE_TYPE)
-    arch = models.CharField(verbose_name="Architecture", max_length=32, 
+    arch = models.CharField(max_length=32, verbose_name="Architecture", 
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
         help_text='Architecture of this template (as reported by uname -m). '
                   'Slivers using this template should run on nodes that match '
@@ -75,7 +72,8 @@ class Slice(models.Model):
         help_text='PEM-encoded RSA public key for this slice (used by SFA).')
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
-    expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
+    expires_on = models.DateField(null=True, blank=True, 
+        default=lambda:datetime.now() + settings.SLICE_EXPIRATION_INTERVAL,
         help_text='Expiration date of this slice. Automatically deleted once '
                   'expires.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 

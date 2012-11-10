@@ -22,7 +22,7 @@ STATES_COLORS = {
 
 def cndb_cached_on(instance):
     date = instance.cndb_cached_on
-    if date is None: return 'Never'
+    if not date: return 'Never'
     return date
 cndb_cached_on.short_description=Node._meta.get_field_by_name('cndb_cached_on')[0].verbose_name
 

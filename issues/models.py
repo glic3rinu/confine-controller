@@ -81,7 +81,8 @@ class Message(models.Model):
     
     ticket = models.ForeignKey('issues.Ticket')
     author = models.ForeignKey('auth.User')
-    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default='PUBLIC')
+    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, 
+        default='PUBLIC')
     content = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     

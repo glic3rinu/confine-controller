@@ -188,7 +188,7 @@ class ConfigUCI(models.Model):
     option = models.CharField(max_length=32, help_text='UCI option statement')
     value = models.CharField(max_length=255, 
         help_text='Python code that will be evaluated for obtining the value '
-            'from the node. For example: node.properties[\'ip\']')
+                  'from the node. For example: node.properties[\'ip\']')
     # TODO Add validation field ?
     
     class Meta:

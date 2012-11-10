@@ -11,9 +11,11 @@ class CnHost(models.Model):
     """
     Describes a host in the Community Network.
     """
-    cn_url = models.URLField(blank=True)
-    cndb_uri = models.CharField(max_length=256, blank=True)
-    cndb_cached_on = models.DateTimeField(null=True, blank=True)
+    cn_url = models.URLField(blank=True, verbose_name='Community Network URL')
+    cndb_uri = models.CharField(max_length=256, blank=True, 
+        verbose_name='Community Network Database URI')
+    cndb_cached_on = models.DateTimeField(null=True, blank=True, 
+        verbose_name='CNDB cached on')
     
     class Meta:
         abstract = True
@@ -43,7 +45,7 @@ class Node(CnHost):
         'may be signed by a CA recognised in the testbed and required by clients'
         ' and services accessing the node API.')
     description = models.CharField(max_length=256,
-        help_text='Optional free-form textual description of this host/device.')
+        help_text='Free-form textual description of this host/device.')
     arch = models.CharField(verbose_name='Architecture', max_length=16, 
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH, 
         help_text='Architecture of this RD (as reported by uname -m).',)
@@ -70,7 +72,8 @@ class Node(CnHost):
         'http://wiki.confine-project.eu/arch:node">node</a> architecture). If '
         'the local network uses private addresses the value should be 0.')
     boot_sn = models.IntegerField(default=0, blank=True, help_text='Number of '
-        'times this RD has been instructed to be rebooted.')
+        'times this RD has been instructed to be rebooted.', verbose_name='Boot'
+        ' Sequence Number')
     set_state = models.CharField(max_length=16, choices=STATES, 
         default='install_conf')
     admin = models.ForeignKey(User, help_text='User who administrates this node'

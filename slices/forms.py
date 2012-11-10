@@ -9,10 +9,10 @@ class SliceAdminForm(forms.ModelForm):
     """ Provide vlan_nr as a request checkbox """
     request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False, 
         help_text="""A VLAN number allocated to this slice by the server.""")
-
+    
     class Meta:
         model = Slice
-
+    
     def __init__(self, *args, **kwargs):
         super(SliceAdminForm, self).__init__(*args, **kwargs)
         if not 'instance' in kwargs:
@@ -38,8 +38,9 @@ class SliceAdminForm(forms.ModelForm):
 class IsolatedIfaceInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(IsolatedIfaceInlineForm, self).__init__(*args, **kwargs)
-        ifaces_in_use = self.node.sliver_set.all().filter(isolatediface__isnull=False\
-                ).values_list('isolatediface__parent', flat=True)
+        ifaces = self.node.sliver_set.all()
+        ifaces_in_use = ifaces.filter(isolatediface__isnull=False)
+        ifaces_in_use = ifaces_in_use.values_list('isolatediface__parent', flat=True)
         if 'instance' in kwargs:
             instance = kwargs['instance']
             ifaces_in_use = list(ifaces_in_use)

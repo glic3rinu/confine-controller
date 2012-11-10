@@ -166,7 +166,11 @@ class SliceProp(models.Model):
     values.
     """
     slice = models.ForeignKey(Slice)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,
+        help_text='Per slice unique single line of free-form text with no '
+                  'whitespace surrounding it',
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+                   'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -233,7 +237,11 @@ class SliverProp(models.Model):
     values.
     """
     sliver = models.ForeignKey(Sliver)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64,
+        help_text='Per slice unique single line of free-form text with no '
+                  'whitespace surrounding it',
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+                   'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
     
     class Meta:

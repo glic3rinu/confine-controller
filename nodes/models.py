@@ -1,10 +1,12 @@
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.contrib.auth.models import User
+from django.core import validators
 from django.db import models
 from nodes import settings
 from nodes.tasks import cache_node_db
 from singleton_models.models import SingletonModel
+import re
 
 
 class CnHost(models.Model):
@@ -133,7 +135,11 @@ class NodeProp(models.Model):
     values.
     """
     node = models.ForeignKey(Node)
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32,
+        help_text='Per node unique single line of free-form text with no '
+                  'whitespace surrounding it',
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+                   'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
     
     class Meta:

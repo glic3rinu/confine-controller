@@ -41,7 +41,7 @@ class UserProfile(models.Model):
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this user, it '
                   'can include URLs and other information.')
-    pubkey = models.TextField(unique=True, null=True, blank=True, 
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='A PEM-encoded RSA public key for this user (used by SFA).')
     research_groups = models.ManyToManyField(ResearchGroup, blank=True)
     

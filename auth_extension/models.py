@@ -35,12 +35,14 @@ class AuthorizedOfficial(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    uuid = UUIDField(auto=True, unique=True, help_text="""A universally unique 
-        identifier (UUID, RFC 4122) provided for the user on registration.""")
-    description = models.TextField(blank=True, help_text="""An optional free-form 
-        textual description of this user, it can include URLs and other information.""")
+    uuid = UUIDField(auto=True, unique=True, 
+        help_text='A universally unique identifier (UUID, RFC 4122) provided for'
+                  ' the user on registration.')
+    description = models.TextField(blank=True, 
+        help_text='An optional free-form textual description of this user, it '
+                  'can include URLs and other information.')
     pubkey = models.TextField(unique=True, null=True, blank=True, 
-        help_text="""A PEM-encoded RSA public key for this user (used by SFA).""")
+        help_text='A PEM-encoded RSA public key for this user (used by SFA).')
     research_groups = models.ManyToManyField(ResearchGroup, blank=True)
     
     def __unicode__(self):
@@ -83,11 +85,10 @@ class TestbedPermission(models.Model):
 
 class AuthToken(models.Model):
     """ 
-        A list of authentication tokens like SSH or other kinds of public keys 
-        or X.509 certificates to be used for slivers or experiments. The exact 
-        valid format depends on the type of token as long as it is non-empty and
-        only contains ASCII characters.
-        (e.g. by using PEM encoding or other ASCII armour).
+    A list of authentication tokens like SSH or other kinds of public keys or 
+    X.509 certificates to be used for slivers or experiments. The exact valid 
+    format depends on the type of token as long as it is non-empty and only 
+    contains ASCII characters. (e.g. by using PEM encoding or other ASCII armour).
     """
     user = models.ForeignKey(User)
     data = models.CharField(max_length=256)

@@ -26,7 +26,7 @@ class TincHost(models.Model):
     A Tinc Host could be a Server or a Client.
     """
     pubkey = models.TextField(unique=True, help_text='PEM-encoded RSA public '
-        'key used on tinc management network.')
+        'key used on tinc management network.', verbose_name='Public Key')
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
         help_text='A list of tinc addresses this host connects to.')
     
@@ -95,7 +95,8 @@ class TincAddress(models.Model):
     Describes an IP Address of a Tinc Server.
     """
     ip_addr = models.GenericIPAddressField(protocol='IPv6', 
-        help_text='The IPv6 address of this tinc address.')
+        help_text='The IPv6 address of this tinc address.',
+        verbose_name='IP Address')
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='The TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,

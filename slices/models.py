@@ -73,7 +73,7 @@ class Slice(models.Model):
             'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField(null=True, blank=True, help_text='PEM-encoded RSA '
-        'public key for this slice (used by SFA).')
+        'public key for this slice (used by SFA).', verbose_name='Public Key')
     description = models.TextField(blank=True, help_text='An optional free-form'
         'textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
@@ -81,21 +81,24 @@ class Slice(models.Model):
         'expires.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text='Number of times this slice has been instructed to be reset '
-        '(instance sequence number).')
+        '(instance sequence number).', verbose_name='Instanse Sequence Number')
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
-        help_text="""Instance sequence number for newly created slivers.""")
+        help_text='Instance sequence number for newly created slivers.',
+        verbose_name='New Sliver Instance Sequence Number')
     # TODO: implement what vlan_nr.help_text says.
     vlan_nr = models.IntegerField(null=True, blank=True, help_text='VLAN number' 
         ' allocated to this slice. The only values that can be set are null which '
         'means that no VLAN is wanted for the slice, and -1 which asks the server'
         'to allocate for the slice a new VLAN number (2 <= vlan_nr < 0xFFF) '
         'while the slice is instantiated (or active). It cannot be changed on an' 
-        ' instantiated slice with slivers having isolated interfaces.')
+        ' instantiated slice with slivers having isolated interfaces.',
+        verbose_name='VLAN Number')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
         help_text='.tar.gz archive containing experiment data for slivers (if'
             'they do not explicitly indicate one)', 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-            'Upload a valid .tar.gz file', 'invalid')])
+            'Upload a valid .tar.gz file', 'invalid')],
+        verbose_name='Experiment Data')
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template, help_text='The template to be used ' 
         'by the slivers of this slice (if they do not explicitly indicate one).')
@@ -112,7 +115,7 @@ class Slice(models.Model):
             if self.set_state == self.INSTANTIATE:
                 self.vlan_nr = self._get_vlan_nr()
             elif not self.set_state == self.REGISTER:
-                raise self.VlanAllocationError('You Cannot set this vlan')
+                raise self.VlanAllocationError('This value can not be setted')
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         super(Slice, self).save(*args, **kwargs)
@@ -145,7 +148,7 @@ class Slice(models.Model):
             for new_nr in range(2, int('FFFF', 16)):
                 if not Slice.objects.filter(vlan_nr=new_nr):
                     return new_nr
-            raise self.VlanAllocationError("No vlan address space left")
+            raise self.VlanAllocationError("No VLAN address space left")
         return last_nr + 1
     
     class VlanAllocationError(Exception): pass
@@ -182,11 +185,12 @@ class Sliver(models.Model):
         help_text='An optional free-form textual description of this sliver.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The number of times this sliver has been instructed to be '
-        'reset (instance sequence number).')
+        'reset (instance sequence number).', verbose_name='Instance Sequence Number')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
-        help_text='.tar.gz archive containing experiment data for this sliver.', 
+        help_text='.tar.gz archive containing experiment data for this sliver.',
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-            'Upload a valid .tar.gz file', 'invalid')])
+            'Upload a valid .tar.gz file', 'invalid')],
+        verbose_name='Experiment Data',)
     template = models.ForeignKey(Template, null=True, blank=True, 
         help_text='If present, the template to be used by this sliver, instead '
         'of the one specified by the slice.')
@@ -300,7 +304,10 @@ class IpSliverIface(SliverIface):
     Base class for IP based sliver interfaces. IP Interfaces might have assigned
     either a public or a private address.
     """
-    use_default_gw = models.BooleanField(default=True)
+    use_default_gw = models.BooleanField(default=True, 
+        help_text='Whether to use a host (provided by the research device) in '
+            'the network connected to this interface as a default gateway.', 
+        verbose_name='Use Default Gateway')
     
     class Meta:
         abstract = True

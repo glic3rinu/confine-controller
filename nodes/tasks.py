@@ -7,17 +7,19 @@ from nodes.settings import CACHE_NODE_DB_CRONTAB
 
 @periodic_task(name="nodes.periodic_cache_node_db", run_every=CACHE_NODE_DB_CRONTAB)
 def periodic_cache_node_db():
-    from nodes.models import Node
-    for node in Node.objects.exclude(cndb_uri=""):
+    from nodes.models import Node, Server
+    for host in Node.objects.exclude(cndb_uri=""):
         node.cache_node_db()
+    Server.objects.get().cache_node_db()
+    return "NOT IMPLEMENTED"
 
 
 @task(name="nodes.cache_node_db")
-def cache_node_db(node_id):
-    from nodes.models import Node
-    node = Node.objects.get(pk=node_id)
-    if node.cndb_uri:
-        node.cndb_cached_on = datetime.now()
-        node.save()
+def cache_node_db(obj):
+    from nodes.models import Node, Server
+    fresh_obj = type(obj).objects.get(pk=obj.pk)
+    if fresh_obj.cndb_uri:
+        fresh_obj.cndb_cached_on = datetime.now()
+        fresh_obj.save()
     return "NOT IMPLEMENTED"
 

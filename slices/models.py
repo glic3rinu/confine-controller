@@ -20,24 +20,24 @@ def get_expires_on():
 
 
 class Template(models.Model):
-    name = models.CharField(max_length=32, unique=True, help_text="""The unique
-        name of this template. A single line of free-form text with no whitespace
-        surrounding it, it can include version numbers and other information.""",
+    name = models.CharField(max_length=32, unique=True, help_text='The unique '
+        'name of this template. A single line of free-form text with no whitespace'
+        ' surrounding it, it can include version numbers and other information.',
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
             'Enter a valid name.', 'invalid')])
-    description = models.TextField(blank=True, help_text="""An optional free-form
-        textual description of this template.""")
+    description = models.TextField(blank=True, help_text='An optional free-form'
+        ' textual description of this template.')
     type = models.CharField(max_length=32, choices=settings.TEMPLATE_TYPES,
-        default=settings.DEFAULT_TEMPLATE_TYPE, help_text="""The system type of
-        this template. Roughly equivalent to the distribution the template is 
-        based on, e.g. debian (Debian, Ubuntu...), fedora (Fedora, RHEL...), suse
-        (openSUSE, SUSE Linux Enterprise...). To instantiate a sliver based on a
-        template, the research device must support its type.""")
+        default=settings.DEFAULT_TEMPLATE_TYPE, help_text='The system type of '
+        'this template. Roughly equivalent to the distribution the template is '
+        'based on, e.g. debian (Debian, Ubuntu...), fedora (Fedora, RHEL...), '
+        'suse (openSUSE, SUSE Linux Enterprise...). To instantiate a sliver '
+        'based on a template, the research device must support its type.')
     arch = models.CharField(verbose_name="Architecture", max_length=32, 
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
-        help_text="""The architecture of this template (as reported by uname -m).
-            Slivers using this template should run on nodes that match this 
-            architecture.""")
+        help_text='The architecture of this template (as reported by uname -m). '
+            'Slivers using this template should run on nodes that match this '
+            'architecture.')
     is_active = models.BooleanField(default=True)
     data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, help_text="""
         template's image file.""")
@@ -78,23 +78,23 @@ class Slice(models.Model):
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text="""Instance sequence number for newly created slivers.""")
     # TODO: implement what vlan_nr.help_text says.
-    vlan_nr = models.IntegerField(null=True, blank=True, help_text="""A VLAN number 
-        allocated to this slice. The only values that can be set are null which 
-        means that no VLAN is wanted for the slice, and -1 which asks the server 
-        to allocate for the slice a new VLAN number (2 <= vlan_nr < 0xFFF) 
-        while the slice is instantiated (or active). It cannot be changed on an 
-        instantiated slice with slivers having isolated interfaces.""")
+    vlan_nr = models.IntegerField(null=True, blank=True, help_text='A VLAN number' 
+        ' allocated to this slice. The only values that can be set are null which '
+        'means that no VLAN is wanted for the slice, and -1 which asks the server'
+        'to allocate for the slice a new VLAN number (2 <= vlan_nr < 0xFFF) '
+        'while the slice is instantiated (or active). It cannot be changed on an' 
+        ' instantiated slice with slivers having isolated interfaces.')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
         help_text=""".tar.gz archive containing experiment data for slivers (if
             they do not explicitly indicate one)""", 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
             'Upload a valid .tar.gz file', 'invalid')])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
-    template = models.ForeignKey(Template, help_text="""The template to be used 
-        by the slivers of this slice (if they do not explicitly indicate one).""")
-    users = models.ManyToManyField(User, help_text="""A ist of users able to 
-        login as root in slivers using their authentication tokens (usually an 
-        SSH key).""")
+    template = models.ForeignKey(Template, help_text='The template to be used ' 
+        'by the slivers of this slice (if they do not explicitly indicate one).')
+    users = models.ManyToManyField(User, help_text='A list of users able to '
+        'login as root in slivers using their authentication tokens (usually an'
+        ' SSH key).')
     
     def __unicode__(self):
         return self.name

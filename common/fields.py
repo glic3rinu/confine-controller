@@ -92,8 +92,6 @@ class MultiSelectField(Field):
         return self.get_db_prep_value(value)
 
 
-try:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^common\.fields\.MultiSelectField"])
-except ImportError:
-    pass
+try: from south.modelsinspector import add_introspection_rules
+except ImportError: pass
+else: add_introspection_rules([], ["^common\.fields\.MultiSelectField"])

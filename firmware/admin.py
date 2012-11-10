@@ -39,14 +39,14 @@ class BuildUCIInline(admin.TabularInline):
 
 class BuildAdmin(admin.ModelAdmin):
     list_display = ['id', admin_link('node'), 'version', colored('state', STATE_COLORS), 
-        'task_link', 'image_link', 'date']
+                    'task_link', 'image_link', 'date']
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
     fields = ['node_link', 'image_link', 'image_sha256', 'version', 'build_date',
-        'state', 'task_link']
+              'state', 'task_link']
     readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 
-        'version', 'build_date', 'task_link']
+                       'version', 'build_date', 'task_link']
     inlines = [BuildUCIInline]
     
     def build_date(self, build):

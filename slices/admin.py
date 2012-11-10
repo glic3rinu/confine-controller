@@ -38,7 +38,7 @@ class IsolatedIfaceInline(admin.TabularInline):
     form = IsolatedIfaceInlineForm
 
     def get_formset(self, request, obj=None, **kwargs):
-        """ Provides contact_id for future usage on add/change form contact filtering """
+        """ Hook node for future usage in the inline form """
         self.form.node = request._node_
         return super(IsolatedIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
@@ -55,10 +55,10 @@ class PrivateIfaceInline(admin.TabularInline):
 
 class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
-        'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
+                    'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
     list_filter = ['slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
-        'exp_data', 'exp_data_sha256']
+              'exp_data', 'exp_data_sha256']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
@@ -246,11 +246,11 @@ class SlicePropInline(admin.TabularInline):
 
 class SliceAdmin(ChangeViewActionsMixin):
     list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
-        num_slivers, admin_link('template'), 'expires_on', ]
+                    num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
-        'exp_data_sha256']
+                       'exp_data_sha256']
     date_hierarchy = 'expires_on'
     search_fields = ['name', 'uuid']
     inlines = [SlicePropInline, SliverInline]

@@ -109,9 +109,8 @@ class SliverAdmin(ChangeViewActionsMixin):
 
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
-    
-    # fixing breadcrumbs
     list_display = NodeAdmin.list_display + [num_slivers, 'custom_sliver_pub_ipv4_total']
+    # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = None
     
@@ -140,8 +139,9 @@ class NodeListAdmin(NodeAdmin):
 
 
 class SliceSliversAdmin(SliverAdmin):
-    """ Slivers management (add and change) directly from the Slice """
-    
+    """ 
+    Slivers management (add and change) directly from the Slice 
+    """
     fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_sha256']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'

@@ -1,12 +1,14 @@
+import re
+
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.contrib.auth.models import User
 from django.core import validators
 from django.db import models
+from singleton_models.models import SingletonModel
+
 from nodes import settings
 from nodes.tasks import cache_node_db
-from singleton_models.models import SingletonModel
-import re
 
 
 class CnHost(models.Model):
@@ -49,7 +51,6 @@ class Node(CnHost):
     FAILURE = 'failure'
     SAFE = 'safe'
     PRODUCTION = 'production'
-    
     STATES = ((INSTALL_CONF, 'Install Configuration'),
               (INSTALL_CERT, 'Install Certificate'),
               (DEBUG, 'Debug'),

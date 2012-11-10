@@ -1,7 +1,8 @@
+from rest_framework import generics
+
 from common.api import api
 from slices.models import Slice, Sliver, Template
 from slices.serializers import SliceSerializer, SliverSerializer, TemplateSerializer
-from rest_framework import generics
 
 
 class SliceList(generics.ListCreateAPIView):

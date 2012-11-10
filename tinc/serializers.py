@@ -1,6 +1,7 @@
+from rest_framework import serializers
+
 from common.api import api
 from nodes.models import Server, Node
-from rest_framework import serializers
 from tinc.models import (Island, TincAddress, TincHost, TincClient, TincServer, 
     Gateway, Host)
 

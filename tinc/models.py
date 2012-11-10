@@ -1,11 +1,13 @@
+import re
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
+
 from nodes.models import CnHost, Server, Node
 from tinc import settings
-import re
 
 
 class Host(models.Model):

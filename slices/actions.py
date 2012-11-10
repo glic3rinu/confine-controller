@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.db import router, transaction
 from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy, ugettext as _
+from django.utils.translation import ugettext_lazy
+
 from slices import settings
 
 

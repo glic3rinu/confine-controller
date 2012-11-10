@@ -1,10 +1,11 @@
-from auth_extension import settings
-from common.fields import MultiSelectField
 from django_extensions.db.fields import UUIDField
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from auth_extension import settings
+from common.fields import MultiSelectField
 
 
 class ResearchGroup(models.Model):

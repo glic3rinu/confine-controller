@@ -1,18 +1,20 @@
+from hashlib import sha256
+import os
+
 from celery import states as celery_states
-from common.fields import MultiSelectField
-from common.models import generate_chainer_manager
 from django.conf import settings as project_settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django_transaction_signals import defer
-from firmware import settings
-from firmware.tasks import build
-from hashlib import sha256
-from nodes.settings import NODE_ARCHS
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
-import os
+
+from common.fields import MultiSelectField
+from common.models import generate_chainer_manager
+from firmware import settings
+from firmware.tasks import build
+from nodes.settings import NODE_ARCHS
 
 
 # TODO make this accessible in a common place: settings? controller? common? ..?

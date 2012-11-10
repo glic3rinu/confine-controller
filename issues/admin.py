@@ -7,14 +7,16 @@ from issues.forms import MessageInlineForm, TicketInlineForm
 from issues.models import Ticket, Queue, Message
 
 
-PRIORITY_COLORS = { 'HIGH': 'red',
-                    'MEDIUM': 'darkorange',
-                    'LOW': 'green',}
+PRIORITY_COLORS = { 
+    Ticket.HIGH: 'red',
+    Ticket.MEDIUM: 'darkorange',
+    Ticket.LOW: 'green',}
 
-STATE_COLORS = { 'NEW': 'grey',
-                 'OPEN': 'darkorange',
-                 'RESOLVED': 'green',
-                 'REJECTED': 'yellow' }
+STATE_COLORS = { 
+    Ticket.NEW: 'grey',
+    Ticket.OPEN: 'darkorange',
+    Ticket.RESOLVED: 'green',
+    Ticket.REJECTED: 'yellow' }
 
 
 class MessageInline(admin.TabularInline):

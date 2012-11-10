@@ -26,38 +26,44 @@ class Queue(models.Model):
 
 class TicketQuerySet(models.query.QuerySet):
     def resolve(self):
-        return self.update(state='RESOLVED')
+        return self.update(state=Ticket.RESOLVED)
     
     def open(self):
-        return self.update(state='OPEN')
+        return self.update(state=Ticket.OPEN)
         
     def reject(self):
-        return self.update(state='REJECTED')
+        return self.update(state=Ticket.REJECTED)
     
     def take(self, owner):
         return self.update(owner=owner)
 
 
 class Ticket(models.Model):
-    PRIORITIES = (('HIGH', "High"),
-                  ('MEDIUM', "Medium"),
-                  ('LOW', "Low"),)
-    
-    STATES = (('NEW', "New"),
-              ('OPEN', "Open"),
-              ('RESOLVED', "Resolved"),
-              ('REJECTED', "Rejected"),)
+    HIGH = 'HIGH'
+    MEDIUM = 'MEDIUM'
+    LOW = 'LOW'
+    PRIORITIES = ((HIGH, "High"),
+                  (MEDIUM, "Medium"),
+                  (LOW, "Low"),)
+    NEW = 'NEW'
+    OPEN = 'OPEN'
+    RESOLVED = 'RESOLVED'
+    REJECTED = 'REJECTED'
+    STATES = ((NEW, "New"),
+              (OPEN, "Open"),
+              (RESOLVED, "Resolved"),
+              (REJECTED, "Rejected"),)
     
     created_by = models.ForeignKey('auth.User')
     owner = models.ForeignKey('auth.User', null=True, blank=True,
         related_name='owned_tickets_set')
     queue = models.ForeignKey(Queue)
     subject = models.CharField(max_length=256)
-    priority = models.CharField(max_length=32, choices=PRIORITIES, default='MEDIUM')
-    state = models.CharField(max_length=32, choices=STATES, default='NEW')
+    priority = models.CharField(max_length=32, choices=PRIORITIES, default=MEDIUM)
+    state = models.CharField(max_length=32, choices=STATES, default=NEW)
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified_on = models.DateTimeField(auto_now=True)
-    cc = models.TextField(blank=True, verbose_name="CC")
+    cc = models.TextField('CC', blank=True)
     
     objects = generate_chainer_manager(TicketQuerySet)
     
@@ -69,20 +75,23 @@ class Ticket(models.Model):
     
     def save(self, *args, **kwargs):
         # FIXME only set to open when an staff operator has replyed
-        if self.state == 'NEW' and self.message_set.all().count() > 1:
-            self.state = 'OPEN'
+        if self.state == self.NEW and self.message_set.all().count() > 1:
+            self.state = self.OPEN
         super(Ticket, self).save(*args, **kwargs)
 
 
 class Message(models.Model):
-    VISIBILITY_CHOICES = (('INTERNAL', "Internal"),
-                          ('PUBLIC',  "Public"),
-                          ('PRIVATE', "Private"),)
+    INTERNAL = 'INTERNAL'
+    PUBLIC = 'PUBLIC'
+    PRIVATE = 'PRIVATE'
+    VISIBILITY_CHOICES = ((INTERNAL, "Internal"),
+                          (PUBLIC,  "Public"),
+                          (PRIVATE, "Private"),)
     
     ticket = models.ForeignKey('issues.Ticket')
     author = models.ForeignKey('auth.User')
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, 
-        default='PUBLIC')
+        default=PUBLIC)
     content = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     

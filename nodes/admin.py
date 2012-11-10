@@ -20,6 +20,13 @@ STATES_COLORS = {
     Node.PRODUCTION: 'green', }
 
 
+def cndb_cached_on(instance):
+    date = instance.cndb_cached_on
+    if date is None: return 'Never'
+    return date
+cndb_cached_on.short_description=Node._meta.get_field_by_name('cndb_cached_on')[0].verbose_name
+
+
 class NodePropInline(admin.TabularInline):
     model = NodeProp
     extra = 0
@@ -37,11 +44,11 @@ class NodeAdmin(ChangeViewActionsMixin):
     list_display_links = ('id', 'uuid', 'description')
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
-    readonly_fields = ['cndb_cached_on', 'boot_sn']
+    readonly_fields = [cndb_cached_on, 'boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('description', 'cn_url', ('cndb_uri', 'cndb_cached_on'), 
+            'fields': ('description', 'cn_url', ('cndb_uri', cndb_cached_on), 
                        'admin', 'sliver_pub_ipv4_total', 'arch', 'local_iface', 
                        'boot_sn', 'set_state',),
         }),
@@ -75,7 +82,8 @@ class NodeAdmin(ChangeViewActionsMixin):
 
 
 class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
-    readonly_fields = ['cndb_cached_on']
+    fields = ['cn_url', 'cndb_uri', cndb_cached_on]
+    readonly_fields = [cndb_cached_on]
     
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name

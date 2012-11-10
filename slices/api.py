@@ -40,7 +40,6 @@ class SliverList(generics.ListCreateAPIView):
     api?&#sliver_at_server) present in the testbed and provides API URIs to 
     navigate to them.
     """
-    
     model = Sliver
     serializer_class = SliverSerializer
 

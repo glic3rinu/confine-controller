@@ -33,14 +33,14 @@ class CnHost(models.Model):
     def save(self, *args, **kwargs):
         """ Setting cndb_uri resets cndb_cached_on to null. """
         if self.pk:
-            db_host = self.__class__.objects.get(pk=self.pk)
+            db_host = type(self).objects.get(pk=self.pk)
             if self.cndb_uri != db_host.cndb_uri:
                 self.cndb_cached_on = None
         super(CnHost, self).save(*args, **kwargs)
     
     def cache_node_db(self, async=False):
-        if async: defer(cache_node_db.delay, self.pk)
-        else: cache_node_db(self.pk)
+        if async: defer(cache_node_db.delay, self)
+        else: cache_node_db(self)
 
 
 class Node(CnHost):
@@ -109,8 +109,8 @@ class Node(CnHost):
     
     def clean(self):
         """ Empty pubkey and cert as NULL instead of empty string """
-        if self.pubkey is u'': self.pubkey = None
-        if self.cert is u'': self.cert = None
+        if self.pubkey == u'': self.pubkey = None
+        if self.cert == u'': self.cert = None
         super(Node, self).clean()
     
     @property

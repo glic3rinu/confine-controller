@@ -13,6 +13,7 @@ def wrap_action(action, modeladmin):
         return response
     return wrapper
 
+
 def remove_slice_id(view):
     def wrapper(*args, **kwargs):
         kwargs.pop('slice_id')

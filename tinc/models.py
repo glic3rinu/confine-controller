@@ -7,17 +7,28 @@ from tinc import settings
 
 
 class Host(models.Model):
-    description = models.CharField(max_length=256)
-    admin = models.ForeignKey(User)
+    """
+    Describes an odd host computer connected to the testbed (through the 
+    management network) with a known administrator.
+    """
+    description = models.CharField(max_length=256, help_text='An optional '
+        'free-form textual description of this host.')
+    admin = models.ForeignKey(User, help_text='The user who administrates this '
+        'host (its creator by default).')
 
     def __unicode__(self):
         return self.description
 
 
 class TincHost(models.Model):
-    pubkey = models.TextField(unique=True, help_text="""PEM-encoded RSA public 
-        key used on tinc management network.""")
-    connect_to = models.ManyToManyField('tinc.TincAddress', blank=True)
+    """
+    Base class that describes the basic attributs of a Tinc Host. 
+    A Tinc Host could be a Server or a Client.
+    """
+    pubkey = models.TextField(unique=True, help_text='PEM-encoded RSA public '
+        'key used on tinc management network.')
+    connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
+        help_text='A list of tinc addresses this host connects to.')
     
     class Meta:
         abstract = True
@@ -28,6 +39,12 @@ class TincHost(models.Model):
 
 
 class Gateway(CnHost):
+    """
+    Describes a Gateway in the testbed. A machine giving entry to the testbed's 
+    management network from a set of network islands. It can help connect 
+    different parts of a management network located at different islands over 
+    some link external to them (e.g. the Internet).
+    """
     related_tincserver = generic.GenericRelation('tinc.TincServer')
     
     @property
@@ -37,10 +54,15 @@ class Gateway(CnHost):
 
 
 class TincServer(TincHost):
+    """
+    Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
+    the testbed server itself.
+    """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField(max_length=36)
+    
     content_object = generic.GenericForeignKey()
-
+    
     class Meta:
         unique_together = ('content_type', 'object_id')
 
@@ -54,22 +76,31 @@ class TincServer(TincHost):
 
 
 class Island(models.Model):
+    """
+    Describes a network island (i.e. a disconnected part of a community network)
+    where the testbed is reachable from. A testbed is reachable from an island
+    when there is a gateway that gives access to the testbed server (possibly
+    through other gateways), or when the server itself is in that island.
+    """
     name = models.CharField(max_length=64)
-    description = models.TextField(blank=True, help_text="""An optional free-form 
-        textual description of this island.""")
+    description = models.TextField(blank=True, help_text='An optional free-form'
+        ' textual description of this island.')
     
     def __unicode__(self):
         return self.name
 
 
 class TincAddress(models.Model):
+    """
+    Describes an IP Address of a Tinc Server.
+    """
     ip_addr = models.GenericIPAddressField(protocol='IPv6', 
-        help_text="The IPv6 address of this tinc address.")
+        help_text='The IPv6 address of this tinc address.')
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
-        help_text="The TCP/UDP port of this tinc address.")
-    island = models.ForeignKey(Island, help_text="""The <a 
-        href="http://wiki.confine-project.eu/arch:rest-api#island_at_server">island</a> 
-        this tinc address is reachable from.""")
+        help_text='The TCP/UDP port of this tinc address.')
+    island = models.ForeignKey(Island,
+        help_text='The <a href="http://wiki.confine-project.eu/arch:rest-api#'
+            'island_at_server">island</a> this tinc address is reachable from.')
     server = models.ForeignKey(TincServer)
     
     class Meta:
@@ -88,7 +119,12 @@ class TincAddress(models.Model):
 
 
 class TincClient(TincHost):
-    island = models.ForeignKey(Island)
+    """
+    Describes a Tinc Client in the testbed. A tinc client can be a testbed node
+    or a host.
+    """
+    island = models.ForeignKey(Island, 
+        help_text='The island this client reaches to.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField(max_length=36)
     content_object = generic.GenericForeignKey()

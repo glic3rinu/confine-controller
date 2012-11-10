@@ -17,11 +17,14 @@ def get_expires_on():
 
 
 class Template(models.Model):
+    """
+    Describes a template available in the testbed for slices and slivers to use.
+    """
     name = models.CharField(max_length=32, unique=True, help_text='The unique '
         'name of this template. A single line of free-form text with no whitespace'
         ' surrounding it, it can include version numbers and other information.',
-        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
-            'Enter a valid name.', 'invalid')])
+        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 'Enter'
+        ' a valid name.', 'invalid')])
     description = models.TextField(blank=True, help_text='An optional free-form'
         ' textual description of this template.')
     type = models.CharField(max_length=32, choices=settings.TEMPLATE_TYPES,
@@ -32,12 +35,12 @@ class Template(models.Model):
         'based on a template, the research device must support its type.')
     arch = models.CharField(verbose_name="Architecture", max_length=32, 
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
-        help_text='The architecture of this template (as reported by uname -m). '
-            'Slivers using this template should run on nodes that match this '
-            'architecture.')
+        help_text='Architecture of this template (as reported by uname -m). '
+        'Slivers using this template should run on nodes that match this '
+        'architecture.')
     is_active = models.BooleanField(default=True)
-    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, help_text="""
-        template's image file.""")
+    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, 
+        help_text="template's image file.")
     
     def __unicode__(self):
         return self.name
@@ -49,6 +52,10 @@ class Template(models.Model):
 
 
 class Slice(models.Model):
+    """
+    Describes a slice in the testbed. An slice is a set of resources spread over
+    several nodes in a testbed which allows researchers to run experiments over it.
+    """
     REGISTER = 'register'
     INSTANTIATE = 'instantiate'
     ACTIVATE = 'activate'
@@ -57,33 +64,33 @@ class Slice(models.Model):
               (ACTIVATE, 'Activate'),)
     
     name = models.CharField(max_length=64, unique=True, 
-        help_text="""A unique name for this slice matching the regular expression
-            ^[a-z][_0-9a-z]*[0-9a-z]$.""", 
+        help_text='A unique name for this slice matching the regular expression'
+            '^[a-z][_0-9a-z]*[0-9a-z]$.', 
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
             'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
-    pubkey = models.TextField(null=True, blank=True, help_text="""A PEM-encoded 
-        RSA public key for this slice (used by SFA).""")
-    description = models.TextField(blank=True, help_text="""An optional free-form
-        textual description of this slice.""")
+    pubkey = models.TextField(null=True, blank=True, help_text='PEM-encoded RSA '
+        'public key for this slice (used by SFA).')
+    description = models.TextField(blank=True, help_text='An optional free-form'
+        'textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
-        help_text="""Expiration date of this slice. Automatically deleted once 
-        expires.""")
+        help_text='Expiration date of this slice. Automatically deleted once '
+        'expires.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 
-        help_text="""The number of times this slice has been instructed to be 
-        reset (instance sequence number).""")
+        help_text='Number of times this slice has been instructed to be reset '
+        '(instance sequence number).')
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text="""Instance sequence number for newly created slivers.""")
     # TODO: implement what vlan_nr.help_text says.
-    vlan_nr = models.IntegerField(null=True, blank=True, help_text='A VLAN number' 
+    vlan_nr = models.IntegerField(null=True, blank=True, help_text='VLAN number' 
         ' allocated to this slice. The only values that can be set are null which '
         'means that no VLAN is wanted for the slice, and -1 which asks the server'
         'to allocate for the slice a new VLAN number (2 <= vlan_nr < 0xFFF) '
         'while the slice is instantiated (or active). It cannot be changed on an' 
         ' instantiated slice with slivers having isolated interfaces.')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
-        help_text=""".tar.gz archive containing experiment data for slivers (if
-            they do not explicitly indicate one)""", 
+        help_text='.tar.gz archive containing experiment data for slivers (if'
+            'they do not explicitly indicate one)', 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
             'Upload a valid .tar.gz file', 'invalid')])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
@@ -146,6 +153,10 @@ class Slice(models.Model):
 
 
 class SliceProp(models.Model):
+    """
+    A mapping of (non-empty) arbitrary slice property names to their (string) 
+    values.
+    """
     slice = models.ForeignKey(Slice)
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=256)
@@ -158,20 +169,24 @@ class SliceProp(models.Model):
 
 
 class Sliver(models.Model):
+    """
+    Describes a sliver in the testbed, an sliver is a partition of a node's 
+    resources assigned to a specific slice.
+    """
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    description = models.CharField(max_length=256, blank=True, help_text="""An
-        optional free-form textual description of this sliver.""")
+    description = models.CharField(max_length=256, blank=True, 
+        help_text='An optional free-form textual description of this sliver.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
-        help_text="""The number of times this sliver has been instructed to be 
-        reset (instance sequence number).""")
+        help_text='The number of times this sliver has been instructed to be '
+        'reset (instance sequence number).')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
-        help_text=".tar.gz archive containing experiment data for this sliver.", 
+        help_text='.tar.gz archive containing experiment data for this sliver.', 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
             'Upload a valid .tar.gz file', 'invalid')])
-    template = models.ForeignKey(Template, null=True, blank=True, help_text="""
-        If present, the template to be used by this sliver, instead of the one
-        specified by the slice.""")
+    template = models.ForeignKey(Template, null=True, blank=True, 
+        help_text='If present, the template to be used by this sliver, instead '
+        'of the one specified by the slice.')
     
     def __unicode__(self):
         return self.description if self.description else str(self.id)
@@ -203,6 +218,10 @@ class Sliver(models.Model):
 
 
 class SliverProp(models.Model):
+    """
+    A mapping of (non-empty) arbitrary sliver property names to their (string) 
+    values.
+    """
     sliver = models.ForeignKey(Sliver)
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=256)
@@ -215,6 +234,9 @@ class SliverProp(models.Model):
 
 
 class SliverIface(models.Model):
+    """
+    Base class for sliver network interfaces
+    """
     name = models.CharField(max_length=16)
     
     class Meta:
@@ -235,6 +257,13 @@ class SliverIface(models.Model):
 
 
 class IsolatedIface(SliverIface):
+    """
+    Describes an Isolated interface of an sliver: It is used for sharing the 
+    same physical interface but isolated at L3, by means of tagging all the 
+    outgoing traffic with a VLAN tag per slice. By means of using an isolated 
+    interface, the researcher will be able to configure it at L3, but several 
+    slices may share the same physical interface.
+    """
     sliver = models.ForeignKey(Sliver)
     parent = models.ForeignKey('nodes.DirectIface', unique=True)
     
@@ -247,6 +276,10 @@ class IsolatedIface(SliverIface):
 
 
 class IpSliverIface(SliverIface):
+    """
+    Base class for IP based sliver interfaces. IP Interfaces might have assigned
+    either a public or a private address.
+    """
     use_default_gw = models.BooleanField(default=True)
     
     class Meta:
@@ -254,10 +287,19 @@ class IpSliverIface(SliverIface):
 
 
 class PublicIface(IpSliverIface):
+    """
+    Describes a Public Interface for an sliver. Traffic from a public interface 
+    will be bridged to the community network.
+    """
     sliver = models.ForeignKey(Sliver)
 
 
 class PrivateIface(IpSliverIface):
+    """
+    Describes a Private Interface of an sliver. 
+    Traffic from a private interface will be forwarded to the community network 
+    by means of NAT. Every sliver will have at least a private interface.
+    """
     sliver = models.OneToOneField(Sliver)
 
 

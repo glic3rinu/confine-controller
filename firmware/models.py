@@ -126,8 +126,8 @@ class Build(models.Model):
 
 class BuildUCI(models.Model):
     build = models.ForeignKey(Build)
-    section = models.CharField(max_length=32, help_text="UCI config statement")
-    option = models.CharField(max_length=32, help_text="UCI option statement")
+    section = models.CharField(max_length=32, help_text='UCI config statement')
+    option = models.CharField(max_length=32, help_text='UCI option statement')
     value = models.CharField(max_length=255)
     
     class Meta:
@@ -158,6 +158,9 @@ class Config(SingletonModel):
 
 
 class BaseImage(models.Model):
+    """
+    Describes the image used for generating per node customized images.
+    """
     config = models.ForeignKey(Config)
     architectures = MultiSelectField(max_length=250, choices=NODE_ARCHS)
     image = models.FileField(upload_to=settings.FIRMWARE_DIR)
@@ -180,11 +183,12 @@ class BaseImage(models.Model):
 
 class ConfigUCI(models.Model):
     config = models.ForeignKey(Config)
-    section = models.CharField(max_length=32, help_text="UCI config statement",
+    section = models.CharField(max_length=32, help_text='UCI config statement',
         default='node')
-    option = models.CharField(max_length=32, help_text="UCI option statement")
-    value = models.CharField(max_length=255, help_text="""Python code for obtining 
-        the value. i.e. node.properties['ip']""")
+    option = models.CharField(max_length=32, help_text='UCI option statement')
+    value = models.CharField(max_length=255, 
+        help_text='Python code that will be evaluated for obtining the value '
+            'from the node. For example: node.properties[\'ip\']')
     # TODO Add validation field ?
     
     class Meta:

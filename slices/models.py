@@ -200,6 +200,9 @@ class Sliver(models.Model):
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')
     
+    class Meta:
+        unique_together = ('slice', 'node')
+    
     def __unicode__(self):
         return self.description if self.description else str(self.id)
     
@@ -254,6 +257,7 @@ class SliverIface(models.Model):
     Base class for sliver network interfaces
     """
     name = models.CharField(max_length=16)
+    # TODO unique name per sliver
     
     class Meta:
         abstract = True

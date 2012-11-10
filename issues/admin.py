@@ -38,15 +38,15 @@ class TicketInline(admin.TabularInline):
 class TicketAdmin(ChangeViewActionsMixin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     # TODO Create a list filter for 'owner__username'
-    list_display = ['id', 'subject', admin_link('created_by'), 
-        admin_link('owner'), admin_link('queue'),
-        colored('priority', PRIORITY_COLORS), colored('state', STATE_COLORS), 
-        'num_messages', 'created_on', 'last_modified_on']
+    list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'), 
+                    admin_link('queue'), colored('priority', PRIORITY_COLORS),
+                    colored('state', STATE_COLORS), 'num_messages', 'created_on', 
+                    'last_modified_on']
     list_display_links = ('id', 'subject')
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email', 
-        'queue', 'owner__username']
+                     'queue', 'owner__username']
     inlines = [MessageInline]
     actions = [reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
     change_view_actions = [('reject', reject_tickets, '', ''),
@@ -99,8 +99,8 @@ class TicketAdmin(ChangeViewActionsMixin):
 
 
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('name', 'default', 'num_tickets')
-    list_editable = ('default', )
+    list_display = ['name', 'default', 'num_tickets']
+    list_editable = ['default']
     inlines = [TicketInline]
     
     def num_tickets(self, queue):

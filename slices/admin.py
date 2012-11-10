@@ -16,9 +16,10 @@ from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface,
     PrivateIface, Slice, SliceProp, Template)
 
 
-STATE_COLORS = { 'register': 'grey',
-                 'instantiate': 'darkorange',
-                 'activate': 'green' }
+STATE_COLORS = { 
+    Slice.REGISTER: 'grey',
+    Slice.INSTANTIATE: 'darkorange',
+    Slice.ACTIVATE: 'green' }
 
 
 def num_slivers(instance):

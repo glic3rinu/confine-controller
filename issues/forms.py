@@ -12,8 +12,7 @@ class MessageInlineForm(forms.ModelForm):
         fields = ('content', 'visibility',)
     
     def __init__(self, *args, **kwargs):
-        try: self.user = kwargs.pop('user')
-        except KeyError: pass
+        self.user = kwargs.pop('user', None)
         super(MessageInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             instance = kwargs['instance']

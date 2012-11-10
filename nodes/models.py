@@ -37,6 +37,10 @@ class CnHost(models.Model):
             if self.cndb_uri != db_host.cndb_uri:
                 self.cndb_cached_on = None
         super(CnHost, self).save(*args, **kwargs)
+    
+    def cache_node_db(self, async=False):
+        if async: defer(cache_node_db.delay, self.pk)
+        else: cache_node_db(self.pk)
 
 
 class Node(CnHost):
@@ -124,10 +128,6 @@ class Node(CnHost):
     def reboot(self):
         self.boot_sn += 1
         self.save()
-    
-    def cache_node_db(self, async=False):
-        if async: defer(cache_node_db.delay, self.pk)
-        else: cache_node_db(self.pk)
     
     def get_sliver_mac_prefix(self):
         if self.sliver_mac_prefix: 

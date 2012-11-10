@@ -10,12 +10,13 @@ from nodes.models import Node, NodeProp, Server, DirectIface
 from singleton_models.admin import SingletonModelAdmin
 
 
-STATES_COLORS = { 'install_conf': 'black',
-                  'install_cert': 'grey',
-                  'debug': 'darkorange',
-                  'failure': 'red',
-                  'safe': 'grey',
-                  'production': 'green', }
+STATES_COLORS = { 
+    Node.INSTALL_CONF: 'black',
+    Node.INSTALL_CERT: 'grey',
+    Node.DEBUG: 'darkorange',
+    Node.FAILURE: 'red',
+    Node.SAFE: 'grey',
+    Node.PRODUCTION: 'green', }
 
 
 class NodePropInline(admin.TabularInline):

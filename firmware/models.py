@@ -1,3 +1,4 @@
+from celery import states as celery_states
 from common.fields import MultiSelectField
 from common.models import generate_chainer_manager
 from django.conf import settings as project_settings
@@ -74,8 +75,8 @@ class Build(models.Model):
                 if self.match(config): return self.AVAILABLE
                 else: return self.OUTDATED
         if not self.task_id: return self.REQUESTED
-        if self.task and self.task.state == 'RECEIVED': return self.QUEUED
-        if self.task and self.task.state == 'STARTED': return self.BUILDING
+        if self.task and self.task.state == celery_states.RECEIVED: return self.QUEUED
+        if self.task and self.task.state == celery_states.STARTED: return self.BUILDING
         return self.FAILED
     
     @property

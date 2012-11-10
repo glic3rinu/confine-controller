@@ -35,14 +35,14 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.DEFAULT_TEMPLATE_TYPE)
-    arch = models.CharField(max_length=32, verbose_name="Architecture", 
+    arch = models.CharField(max_length=32, verbose_name='Architecture', 
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
         help_text='Architecture of this template (as reported by uname -m). '
                   'Slivers using this template should run on nodes that match '
                   'this architecture.')
     is_active = models.BooleanField(default=True)
     data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, 
-        help_text="template's image file.")
+        help_text='Template\'s image file.')
     
     def __unicode__(self):
         return self.name
@@ -67,7 +67,7 @@ class Slice(models.Model):
     
     name = models.CharField(max_length=64, unique=True, 
         help_text='A unique name for this slice matching the regular expression'
-            '^[a-z][_0-9a-z]*[0-9a-z]$.', 
+                  '^[a-z][_0-9a-z]*[0-9a-z]$.', 
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
                    'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
@@ -87,14 +87,13 @@ class Slice(models.Model):
         help_text='Instance sequence number for newly created slivers.',
         verbose_name='New Sliver Instance Sequence Number')
     # TODO: implement what vlan_nr.help_text says.
-    vlan_nr = models.IntegerField(null=True, blank=True, 
+    vlan_nr = models.IntegerField(null=True, blank=True, verbose_name='VLAN Number'
         help_text='VLAN number allocated to this slice. The only values that can'
                   ' be set are null which means that no VLAN is wanted for the '
                   'slice, and -1 which asks the server to allocate for the slice'
                   ' a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
-                  'instantiated slice with slivers having isolated interfaces.',
-        verbose_name='VLAN Number')
+                  'instantiated slice with slivers having isolated interfaces.')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
         help_text='.tar.gz archive containing experiment data for slivers (if'
                   'they do not explicitly indicate one)', 
@@ -102,8 +101,9 @@ class Slice(models.Model):
                    'Upload a valid .tar.gz file', 'invalid')],
         verbose_name='Experiment Data')
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
-    template = models.ForeignKey(Template, help_text='The template to be used ' 
-        'by the slivers of this slice (if they do not explicitly indicate one).')
+    template = models.ForeignKey(Template, 
+        help_text='The template to be used by the slivers of this slice (if they'
+                  ' do not explicitly indicate one).')
     users = models.ManyToManyField(User,
         help_text='A list of users able to login as root in slivers using their '
                   'authentication tokens (usually an SSH key).')

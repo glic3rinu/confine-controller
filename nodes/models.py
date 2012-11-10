@@ -39,15 +39,23 @@ class CnHost(models.Model):
 
 class Node(CnHost):
     """
-    Describes a node in the testbed. 
+    Describes a node in the testbed.
+    
     See Node architecture: http://wiki.confine-project.eu/arch:node
     """
-    STATES = (('install_conf', 'Install Configuration'),
-              ('install_cert', 'Install Certificate'),
-              ('debug', 'Debug'),
-              ('failure', 'Failure'),
-              ('safe', 'Safe'),
-              ('production', 'Production'),)
+    INSTALL_CONF = 'install_conf'
+    INSTALL_CERT = 'install_cert'
+    DEBUG = 'debug'
+    FAILURE = 'failure'
+    SAFE = 'safe'
+    PRODUCTION = 'production'
+    
+    STATES = ((INSTALL_CONF, 'Install Configuration'),
+              (INSTALL_CERT, 'Install Certificate'),
+              (DEBUG, 'Debug'),
+              (FAILURE, 'Failure'),
+              (SAFE, 'Safe'),
+              (PRODUCTION, 'Production'),)
     
     uuid = fields.UUIDField(auto=True, 
         help_text='Universally unique identifier (UUID, RFC 4122).')
@@ -87,8 +95,7 @@ class Node(CnHost):
                   'be 0.')
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
-    set_state = models.CharField(max_length=16, choices=STATES, 
-        default='install_conf')
+    set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
     admin = models.ForeignKey(User, 
         help_text='User who administrates this node (its creator by default).')
     
@@ -165,6 +172,7 @@ class NodeProp(models.Model):
 class DirectIface(models.Model):
     """
     Interfaces used as direct interfaces. 
+    
     See node architecture: http://wiki.confine-project.eu/arch:node
     """
     name = models.CharField(max_length=16)

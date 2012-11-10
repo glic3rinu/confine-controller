@@ -35,7 +35,7 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.DEFAULT_TEMPLATE_TYPE)
-    arch = models.CharField(max_length=32, verbose_name='Architecture', 
+    arch = models.CharField('Architecture', max_length=32,
         choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
         help_text='Architecture of this template (as reported by uname -m). '
                   'Slivers using this template should run on nodes that match '
@@ -71,7 +71,7 @@ class Slice(models.Model):
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
                    'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
-    pubkey = models.TextField(null=True, blank=True, verbose_name='Public Key',
+    pubkey = models.TextField('Public Key', null=True, blank=True,
         help_text='PEM-encoded RSA public key for this slice (used by SFA).')
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
@@ -87,7 +87,7 @@ class Slice(models.Model):
         help_text='Instance sequence number for newly created slivers.',
         verbose_name='New Sliver Instance Sequence Number')
     # TODO: implement what vlan_nr.help_text says.
-    vlan_nr = models.IntegerField(null=True, blank=True, verbose_name='VLAN Number'
+    vlan_nr = models.IntegerField('VLAN Number', null=True, blank=True,
         help_text='VLAN number allocated to this slice. The only values that can'
                   ' be set are null which means that no VLAN is wanted for the '
                   'slice, and -1 which asks the server to allocate for the slice'
@@ -307,10 +307,9 @@ class IpSliverIface(SliverIface):
     Base class for IP based sliver interfaces. IP Interfaces might have assigned
     either a public or a private address.
     """
-    use_default_gw = models.BooleanField(default=True, 
+    use_default_gw = models.BooleanField('Use Default Gateway', default=True, 
         help_text='Whether to use a host (provided by the research device) in '
-                  'the network connected to this interface as a default gateway.', 
-        verbose_name='Use Default Gateway')
+                  'the network connected to this interface as a default gateway.')
     
     class Meta:
         abstract = True

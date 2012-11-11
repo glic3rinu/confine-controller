@@ -81,8 +81,8 @@ class Node(CnHost):
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 
         protocol='IPv4', null=True, blank=True,
-        help_text='IPv4 /24 network in CIDR notation used as a node private IPv4'
-                  ' prefix. See <a href="http://wiki.confine-project.eu/arch:'
+        help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
+                  'prefix. See <a href="http://wiki.confine-project.eu/arch:'
                   'addressing">addressing</a> for legal values. %s When null.' 
                   % settings.PRIV_IPV4_PREFIX_DFLT)
     # TODO restric this according the data model

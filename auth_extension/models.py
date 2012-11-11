@@ -37,8 +37,8 @@ class AuthorizedOfficial(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     uuid = UUIDField(auto=True, unique=True, 
-        help_text='A universally unique identifier (UUID, RFC 4122) provided for'
-                  ' the user on registration.')
+        help_text='A universally unique identifier (UUID, RFC 4122) provided for '
+                  'the user on registration.')
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this user, it '
                   'can include URLs and other information.')

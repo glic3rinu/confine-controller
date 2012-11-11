@@ -32,6 +32,12 @@ class RestApi(object):
             This resource is located at the base URI of the server API. It 
             describes testbed-wide parameters and provides the API URIs to 
             navigate to other resources in the testbed.
+            
+            Note that you can also explore the API from the command line, for 
+            instance using the curl command-line tool.
+            
+            For example: `curl -X GET https://controller.confine-project.eu/api/
+            -H "Accept: application/json; indent=4"`
             """
             def get(base_view, request, format=None):
                 testbed_params = {

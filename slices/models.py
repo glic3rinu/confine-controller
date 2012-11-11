@@ -20,8 +20,8 @@ class Template(models.Model):
     Describes a template available in the testbed for slices and slivers to use.
     """
     name = models.CharField(max_length=32, unique=True, 
-        help_text='The unique name of this template. A single line of free-form'
-                  ' text with no whitespace surrounding it, it can include '
+        help_text='The unique name of this template. A single line of free-form '
+                  'text with no whitespace surrounding it, it can include '
                   'version numbers and other information.',
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
                    'Enter a valid name.', 'invalid')])
@@ -87,10 +87,10 @@ class Slice(models.Model):
         verbose_name='New Sliver Instance Sequence Number')
     # TODO: implement what vlan_nr.help_text says.
     vlan_nr = models.IntegerField('VLAN Number', null=True, blank=True,
-        help_text='VLAN number allocated to this slice. The only values that can'
-                  ' be set are null which means that no VLAN is wanted for the '
-                  'slice, and -1 which asks the server to allocate for the slice'
-                  ' a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
+        help_text='VLAN number allocated to this slice. The only values that can '
+                  'be set are null which means that no VLAN is wanted for the '
+                  'slice, and -1 which asks the server to allocate for the slice '
+                  'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
     exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
@@ -101,8 +101,8 @@ class Slice(models.Model):
         verbose_name='Experiment Data')
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template, 
-        help_text='The template to be used by the slivers of this slice (if they'
-                  ' do not explicitly indicate one).')
+        help_text='The template to be used by the slivers of this slice (if they '
+                  'do not explicitly indicate one).')
     users = models.ManyToManyField(User,
         help_text='A list of users able to login as root in slivers using their '
                   'authentication tokens (usually an SSH key).')

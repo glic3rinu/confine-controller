@@ -1,3 +1,5 @@
+from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
+    insert_list_display, action_to_view, get_modeladmin)
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -5,9 +7,6 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
-
-from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
-    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected
@@ -52,16 +51,22 @@ class IsolatedIfaceInline(admin.TabularInline):
 class PublicIfaceInline(admin.TabularInline):
     model = PublicIface
     extra = 0
-
+    readonly_fields = ('ipv6_addr',)
 
 class PrivateIfaceInline(admin.TabularInline):
     model = PrivateIface
     extra = 0
+    readonly_fields = ('ipv4_addr', 'ipv6_addr')
 
 
 class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
+<<<<<<< HEAD
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
+=======
+        'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
+        'public_ifaces_ips']
+>>>>>>> Slices schema addresses
     list_filter = ['slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
@@ -72,7 +77,12 @@ class SliverAdmin(ChangeViewActionsMixin):
                PrivateIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
-    
+
+    def public_ifaces_ips(self, instance):
+        get_ipv6 = lambda iface: iface.ipv6_addr
+        return "<br/> ".join(map(get_ipv6, instance.publiciface_set.all()))
+    public_ifaces_ips.allow_tags = True
+
     def has_private_iface(self, instance):
         try: instance.privateiface
         except PrivateIface.DoesNotExist: return False
@@ -87,7 +97,7 @@ class SliverAdmin(ChangeViewActionsMixin):
     num_isolated_ifaces.admin_order_field = 'isolatediface__count'
     
     def num_public_ifaces(self, instance):
-        return instance.isolatediface_set.count()
+        return instance.publiciface_set.count()
     num_public_ifaces.short_description = 'PublicIfaces'
     num_public_ifaces.admin_order_field = 'publiciface__count'
     

@@ -130,6 +130,7 @@ class NodeListAdmin(NodeAdmin):
     list_display = NodeAdmin.list_display[1:]
     list_display.insert(0, 'add_sliver_link')
     list_display.extend([num_slivers, 'custom_sliver_pub_ipv4_total'])
+    list_display_links = ['add_sliver_link', 'id', 'uuid']
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = None
@@ -137,9 +138,9 @@ class NodeListAdmin(NodeAdmin):
     def add_sliver_link(self, instance):
         url = reverse('admin:slices_slice_add_sliver', 
                       kwargs={'slice_id':self.slice_id, 'node_id':instance.pk})
-        return '<a href="%s"><b>%s</b><a>' % (url, instance.description)
+        return '<a href="%s">%s<a>' % (url, instance.description)
     add_sliver_link.allow_tags = True
-    add_sliver_link.description = 'Node'
+    add_sliver_link.short_description = 'Add on Node'
     
     def custom_sliver_pub_ipv4_total(self, instance):
         return instance.sliver_pub_ipv4_total

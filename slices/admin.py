@@ -316,15 +316,15 @@ class SliceAdmin(ChangeViewActionsMixin):
 
 
 class TemplateAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description', 'type', 'arch', 'data', 'is_active']
+    list_display = ['name', 'description', 'type', 'arch', 'image', 'is_active']
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']
-    fields = ['name', 'description', 'type', 'arch', 'data', 'data_sha256', 'is_active']
-    readonly_fields = ['data_sha256']
+    fields = ['name', 'description', 'type', 'arch', 'image', 'image_sha256', 'is_active']
+    readonly_fields = ['image_sha256']
     
-    def data_sha256(self, instance):
-        return instance.data_sha256
-    data_sha256.short_description = 'Data SHA256'
+    def image_sha256(self, instance):
+        return instance.image_sha256
+    image_sha256.short_description = 'Image SHA256'
 
 
 admin.site.register(Sliver, SliverAdmin)

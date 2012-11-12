@@ -24,7 +24,7 @@ TEMPLATE_ARCHS = getattr(settings, 'TEMPLATE_ARCHS', (
 DEFAULT_TEMPLATE_ARCH = getattr(settings, 'DEFAULT_TEMPLATE_ARCH', 'amd64')
 
 
-TEMPLATE_DATA_DIR = getattr(settings, 'TEMPLATE_DATA_DIR', 'templates/')
+TEMPLATE_IMAGE_DIR = getattr(settings, 'TEMPLATE_IMAGE_DIR', 'templates/')
 SLICE_EXP_DATA_DIR = getattr(settings, 'SLICE_EXP_DATA_DIR', 'exp_data/')
 
 

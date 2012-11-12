@@ -61,12 +61,8 @@ class PrivateIfaceInline(admin.TabularInline):
 
 class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
-<<<<<<< HEAD
-                    'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces']
-=======
         'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
         'public_ifaces_ips']
->>>>>>> Slices schema addresses
     list_filter = ['slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']

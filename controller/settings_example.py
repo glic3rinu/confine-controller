@@ -281,4 +281,4 @@ REST_FRAMEWORK = {
 
 
 # common.api
-COMMON_API_ROOT = 'controller.api.CustomApiRoot'
+COMMON_API_ROOT = 'controller.api.Base'

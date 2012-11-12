@@ -2,7 +2,7 @@ from common.api import ApiRoot
 from nodes import settings as nodes_settings
 
 
-class CustomApiRoot(ApiRoot):
+class Base(ApiRoot):
     """ 
     **Media type:** [`application/vnd.confine.server.Base.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#base_at_server)
@@ -18,7 +18,7 @@ class CustomApiRoot(ApiRoot):
     -H "Accept: application/json; indent=4"`
     """
     def get(self, *args, **kwargs):
-        response = super(CustomApiRoot, self).get(*args, **kwargs)
+        response = super(Base, self).get(*args, **kwargs)
         testbed_params = {
             "mgmt_ipv6_prefix": nodes_settings.MGMT_IPV6_PREFIX,
             "priv_ipv4_prefix_dflt": nodes_settings.PRIV_IPV4_PREFIX_DFLT,

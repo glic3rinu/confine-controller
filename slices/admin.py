@@ -62,8 +62,8 @@ class PrivateIfaceInline(admin.TabularInline):
 
 class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
-        'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
-        'public_ifaces_ips']
+                    'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
+                    'public_ifaces_ips']
     list_filter = ['slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
@@ -127,9 +127,9 @@ class SliverAdmin(ChangeViewActionsMixin):
 
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
-    list_display = NodeAdmin.list_display[1:]
-    list_display.insert(0, 'add_sliver_link')
-    list_display.extend([num_slivers, 'custom_sliver_pub_ipv4_total'])
+    list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
+                    'arch', colored('set_state', STATES_COLORS), admin_link('admin'), 
+                    'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_total']
     list_display_links = ['add_sliver_link', 'id', 'uuid']
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'

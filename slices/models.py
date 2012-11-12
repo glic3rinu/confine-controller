@@ -206,9 +206,14 @@ class Sliver(models.Model):
     class Meta:
         unique_together = ('slice', 'node')
     
+
     def __unicode__(self):
         return self.description if self.description else str(self.id)
-    
+
+    @property
+    def nr(self):
+        return self.pk # TODO use automatic id? generate?
+
     @property
     def exp_data_sha256(self):
         try: return sha256(self.exp_data.file.read()).hexdigest()
@@ -335,7 +340,10 @@ class PublicIface(IpSliverIface):
     """
     sliver = models.ForeignKey(Sliver)
 
-    # https://wiki.confine-project.eu/arch:addressing
+    @property
+    def nr(self): # 1 >= nr >= 256
+        return self.pk # % 256 ) + 1 ?? #FIXME
+
     @property
     def ipv6_addr(self): #Testbed management IPv6 network (local bridge)
     #<node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
@@ -361,28 +369,41 @@ class PrivateIface(IpSliverIface):
     """
     sliver = models.OneToOneField(Sliver)
 
-    # https://wiki.confine-project.eu/arch:addressing
+    @property
+    def nr(self):
+        self.nr = 0
+
     @property
     def ipv6_addr(self):
         # <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
-        priv_ipv6_prefix = node_settings.PRIV_IPV6_PREFIX.split(':')
-
-        ip_words = priv_ipv6_prefix[:3] #'fd5f:eee5:a6ad::/48'
-        ip_words.extend(['0:1000', int_to_ipv6(self.sliver.slice.id)])
+        ip_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
+        ip_words.extend([
+            '0:1000',
+            int_to_ipv6(self.sliver.slice.id)
+        ])
         return string.join(ip_words, ':')
 
     @property
     def ipv4_addr(self):
+        """
+           X.Y.Z.S is the address of sliver #S during its lifetime (called the
+           sliver's private IPv4 address).
+           - X.Y.Z == prefix
+           - S = sliver #number
+        """
+        
+        if not self.sliver.node.priv_ipv4_prefix:
+            prefix = node_settings.PRIV_IPV4_PREFIX_DFLT
+        else:
+            prefix = self.sliver.node.priv_ipv4_prefix
 
-        ## X.Y.Z.S is the address of sliver #S during its lifetime (called the sliver's private IPv4 address).
-        # X.Y.Z == prefix
-        # S = sliver #nubmber
-        self.sliver.node.priv_ipv4_prefix
-        self.sliver.nr #u8
-        # build ip in string mode
-        return 'TODO'
+        prefix_words = prefix.split('.')[:3]
+        prefix_words.append('%d' % self.sliver.nr)
+        
+        return '.'.join(prefix_words)
 
 
+## auxiliar functions for getting confine address
 def less_significant_bits(u16):
     return '%.2x' % (u16 & 0xff)
 

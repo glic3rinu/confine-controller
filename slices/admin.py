@@ -1,5 +1,3 @@
-from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
-    insert_list_display, action_to_view, get_modeladmin)
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -7,6 +5,9 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
+
+from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
+    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from slices.actions import renew_selected_slices, reset_selected

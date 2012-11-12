@@ -149,6 +149,11 @@ class Node(CnHost):
             return self.sliver_mac_prefix
         return settings.SLIVER_MAC_PREFIX_DFLT
     
+    def get_sliver_mac_prefix(self):
+        if self.sliver_mac_prefix: 
+            return self.sliver_mac_prefix
+        return settings.SLIVER_MAC_PREFIX_DFLT
+    
     def get_priv_ipv4_prefix(self):
         if self.priv_ipv4_prefix:
             return self.priv_ipv4_prefix

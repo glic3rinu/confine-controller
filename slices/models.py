@@ -1,3 +1,5 @@
+import string
+#from common.utils import less_significant_bits, more_significant_bits
 from datetime import datetime
 from hashlib import sha256
 import re
@@ -9,6 +11,7 @@ from django.core import validators
 from django.db import models
 
 from nodes.models import Node
+from nodes import settings as node_settings
 from slices import settings
 from slices.tasks import force_slice_update, force_sliver_update
 
@@ -203,8 +206,18 @@ class Sliver(models.Model):
     class Meta:
         unique_together = ('slice', 'node')
     
+
     def __unicode__(self):
         return self.description if self.description else str(self.id)
+
+    @property
+    def nr(self):
+        return self.pk # TODO use automatic id? generate?
+
+    @property
+    def exp_data_sha256(self):
+        try: return sha256(self.exp_data.file.read()).hexdigest()
+        except: return None
     
     @property
     def exp_data_sha256(self):
@@ -275,6 +288,23 @@ class SliverIface(models.Model):
             return self.parent.name
         return None
 
+    #<mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
+    # example 06:ab:04:d2:05:00
+    # operations works properly (FIXME: check if access to info works!)
+    @property
+    def mac_addr(self):
+        node = self.parent.node
+
+        words = [
+            more_significant_bits(node.sliver_mac_prefix),
+            less_significant_bits(node.sliver_mac_prefix),
+            more_significant_bits(node.id),
+            less_significant_bits(node.id),
+            number_to_hex_str(self.sliver.nr, 2),
+            number_to_hex_str(self.nr, 2)
+        ]
+        
+        return string.join(words, ':')
 
 class IsolatedIface(SliverIface):
     """
@@ -289,7 +319,7 @@ class IsolatedIface(SliverIface):
     
     class Meta:
         unique_together = ['sliver', 'parent']
-    
+
     @property
     def use_default_gw(self):
         return None
@@ -315,6 +345,26 @@ class PublicIface(IpSliverIface):
     """
     sliver = models.ForeignKey(Sliver)
 
+    @property
+    def nr(self): # 1 >= nr >= 256
+        return self.pk # % 256 ) + 1 ?? #FIXME
+
+    @property
+    def ipv6_addr(self): #Testbed management IPv6 network (local bridge)
+    #<node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
+        ipv6_prefix = node_settings.MGMT_IPV6_PREFIX.split(':')
+        ipv6_words = ipv6_prefix[:3]
+        ipv6_words.extend([
+            number_to_hex_str(self.sliver.node.id, 4), # Node.id
+            '10' + number_to_hex_str(self.nr, 2), # Iface.nr
+            number_to_hex_str(self.sliver.slice.id, 4) # Slice.id
+        ])
+        return string.join(ipv6_words, ':')
+
+    @property
+    def ipv4_addr(self):
+        return 'TODO'
+
 
 class PrivateIface(IpSliverIface):
     """
@@ -324,4 +374,55 @@ class PrivateIface(IpSliverIface):
     """
     sliver = models.OneToOneField(Sliver)
 
+    @property
+    def nr(self):
+        self.nr = 0
 
+    @property
+    def ipv6_addr(self):
+        # <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
+        ip_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
+        ip_words.extend([
+            '0:1000',
+            int_to_ipv6(self.sliver.slice.id)
+        ])
+        return string.join(ip_words, ':')
+
+    @property
+    def ipv4_addr(self):
+        """
+           X.Y.Z.S is the address of sliver #S during its lifetime (called the
+           sliver's private IPv4 address).
+           - X.Y.Z == prefix
+           - S = sliver #number
+        """
+        
+        if not self.sliver.node.priv_ipv4_prefix:
+            prefix = node_settings.PRIV_IPV4_PREFIX_DFLT
+        else:
+            prefix = self.sliver.node.priv_ipv4_prefix
+
+        prefix_words = prefix.split('.')[:3]
+        prefix_words.append('%d' % self.sliver.nr)
+        
+        return '.'.join(prefix_words)
+
+
+## auxiliar functions for getting confine address
+def less_significant_bits(u16):
+    return '%.2x' % (u16 & 0xff)
+
+def more_significant_bits(u16):
+    return '%.2x' % (u16 >> 8)
+
+def number_to_hex_str(number, digits):
+    assert digits <= 8, "Precision %d too large? (max 8)" % digits
+    return ('%.' + str(digits) + 'x') % number
+
+def int_to_ipv6(number):
+    words = [
+        number_to_hex_str(number >> 32, 4),
+        number_to_hex_str((number >> 16) & 0xffff, 4),
+        number_to_hex_str(number & 0xffff, 4)
+        ]
+    return string.join(words, ':')

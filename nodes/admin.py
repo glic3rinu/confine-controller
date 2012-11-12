@@ -88,9 +88,12 @@ class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
-            url(r'^history/$', 
-                self.history_view, {'object_id': '1'},
+            url(r'^(?P<object_id>\d+)/history/$', 
+                self.history_view,
                 name='%s_%s_history' % info),
+            url(r'^(?P<object_id>\d+)/delete/$', 
+                self.delete_view, 
+                name='%s_%s_delete' % info),
             url(r'^(?P<object_id>\d+)$',
                 self.change_view, 
                 name='%s_%s_change' % info),

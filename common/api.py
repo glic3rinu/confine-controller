@@ -15,12 +15,15 @@ from rest_framework.reverse import reverse
 
 class ApiRoot(APIView):
     """ 
-    This is the entry point for the Confine REST API.
+    **Media type:** [`application/vnd.confine.server.Base.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#base_at_server)
     
-    Follow the hyperinks each resource offers to explore the API.
+    This resource is located at the base URI of the server API. It 
+    describes testbed-wide parameters and provides the API URIs to 
+    navigate to other resources in the testbed.
     
-    Note that you can also explore the API from the command line, for instance 
-    using the curl command-line tool.
+    Note that you can also explore the API from the command line, for 
+    instance using the curl command-line tool.
     
     For example: `curl -X GET https://controller.domain.net/api/ -H 
     "Accept: application/json; indent=4"`

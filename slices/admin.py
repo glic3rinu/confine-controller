@@ -74,12 +74,13 @@ class SliverAdmin(ChangeViewActionsMixin):
                PrivateIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
-
+    
     def public_ifaces_ips(self, instance):
         get_ipv6 = lambda iface: iface.ipv6_addr
         return "<br/> ".join(map(get_ipv6, instance.publiciface_set.all()))
     public_ifaces_ips.allow_tags = True
-
+    public_ifaces_ips.short_description = 'Public IPs'
+    
     def has_private_iface(self, instance):
         try: instance.privateiface
         except PrivateIface.DoesNotExist: return False

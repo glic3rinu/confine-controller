@@ -142,7 +142,7 @@ class Node(CnHost):
             '%.4x' % self.id, # N (Node.id in hexadecimal)
             '0000::2'
         ])
-        return string.join(ipv6_words, ':')
+        return ':'.join(ipv6_words)
 
     def get_sliver_mac_prefix(self):
         if self.sliver_mac_prefix: 

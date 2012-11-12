@@ -220,6 +220,11 @@ class Sliver(models.Model):
         except: return None
     
     @property
+    def exp_data_sha256(self):
+        try: return sha256(self.exp_data.file.read()).hexdigest()
+        except: return None
+    
+    @property
     def properties(self):
         return dict(self.sliverprop_set.all().values_list('name', 'value'))
     

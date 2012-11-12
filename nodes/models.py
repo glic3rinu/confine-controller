@@ -143,7 +143,7 @@ class Node(CnHost):
             '0000::2'
         ])
         return ':'.join(ipv6_words)
-
+    
     def get_sliver_mac_prefix(self):
         if self.sliver_mac_prefix: 
             return self.sliver_mac_prefix

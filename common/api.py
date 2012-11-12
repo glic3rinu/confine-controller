@@ -3,7 +3,6 @@ from django.conf.urls import patterns, url
 from django.utils import six
 from django.utils.encoding import smart_str, force_unicode
 from django.utils.importlib import import_module
-from nodes import settings as nodes_settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -12,6 +11,28 @@ from rest_framework.reverse import reverse
 # TODO Reimplement resource with rest_framework.ModelResource and urls with Routers
 #      when they become available in the final release of rest_framework2
 # TODO Make this more generic, for now only works with Model based resources
+
+
+class ApiRoot(APIView):
+    """ 
+    This is the entry point for the Confine REST API.
+    
+    Follow the hyperinks each resource offers to explore the API.
+    
+    Note that you can also explore the API from the command line, for instance 
+    using the curl command-line tool.
+    
+    For example: `curl -X GET https://controller.domain.net/api/ -H 
+    "Accept: application/json; indent=4"`
+    """
+    def get(base_view, request, format=None):
+        output = {}
+        for model in api._registry:
+            name = force_unicode(model._meta.verbose_name)
+            name_plural = force_unicode(model._meta.verbose_name_plural)
+            output.update({'%s_href' % name_plural: reverse('%s-list' % name,
+                args=[], request=request)})
+        return Response(output)
 
 
 class RestApi(object):
@@ -24,36 +45,13 @@ class RestApi(object):
     
     def base(self):
         # TODO Move definition to controller/api.py ?
-        class Base(APIView):
-            """ 
-            **Media type:** [`application/vnd.confine.server.Base.v0+json`](http://
-            wiki.confine-project.eu/arch:rest-api?&#base_at_server)
-            
-            This resource is located at the base URI of the server API. It 
-            describes testbed-wide parameters and provides the API URIs to 
-            navigate to other resources in the testbed.
-            
-            Note that you can also explore the API from the command line, for 
-            instance using the curl command-line tool.
-            
-            For example: `curl -X GET https://controller.confine-project.eu/api/
-            -H "Accept: application/json; indent=4"`
-            """
-            def get(base_view, request, format=None):
-                testbed_params = {
-                    "mgmt_ipv6_prefix": nodes_settings.MGMT_IPV6_PREFIX,
-                    "priv_ipv4_prefix_dflt": nodes_settings.PRIV_IPV4_PREFIX_DFLT,
-                    "sliver_mac_prefix_dflt": nodes_settings.SLIVER_MAC_PREFIX_DFLT, }
-                
-                output = {"testbed_params": testbed_params}
-                for model in self._registry:
-                    name = force_unicode(model._meta.verbose_name)
-                    name_plural = force_unicode(model._meta.verbose_name_plural)
-                    output.update({'%s_href' % name_plural: reverse('%s-list' % name,
-                        args=[], request=request)})
-                return Response(output)
-        
-        return Base.as_view()
+        try: api_root = settings.COMMON_API_ROOT
+        except AttributeError: api_root = ApiRoot
+        else: 
+            mod, inst = api_root.rsplit('.', 1)
+            mod = import_module(mod)
+            api_root = getattr(mod, inst)
+        return api_root.as_view()
     
     @property
     def urls(self):

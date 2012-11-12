@@ -54,6 +54,7 @@ class PublicIfaceInline(admin.TabularInline):
     extra = 0
     readonly_fields = ('ipv6_addr',)
 
+
 class PrivateIfaceInline(admin.TabularInline):
     model = PrivateIface
     extra = 0
@@ -337,7 +338,8 @@ class TemplateAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'type', 'arch', 'image', 'is_active']
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']
-    fields = ['name', 'description', 'type', 'arch', 'image', 'image_sha256', 'is_active']
+    fields = ['name', 'description', 'type', 'arch', 'image', 'image_sha256', 
+              'is_active']
     readonly_fields = ['image_sha256']
     
     def image_sha256(self, instance):

@@ -191,7 +191,7 @@ LOGGING = {
 }
 
 
-#Admin Tools
+# Admin Tools
 ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
 
 # Fluent dashboard
@@ -274,7 +274,11 @@ FILE_PROTECTION_METHOD = 'basic'
 PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
 
 
+# rest_framework
 REST_FRAMEWORK = {
     'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend'
 }
 
+
+# common.api
+COMMON_API_ROOT = 'controller.api.CustomApiRoot'

@@ -1,5 +1,3 @@
-import string
-#from common.utils import less_significant_bits, more_significant_bits
 from datetime import datetime
 from hashlib import sha256
 import re
@@ -13,6 +11,8 @@ from django.db import models
 from nodes.models import Node
 from nodes import settings as node_settings
 from slices import settings
+from slices.utils import (less_significant_bits, more_significant_bits, int_to_ipv6, 
+    number_to_hex_str)
 from slices.tasks import force_slice_update, force_sliver_update
 
 
@@ -161,6 +161,7 @@ class Slice(models.Model):
     
     class VlanAllocationError(Exception): pass
 
+
 class SliceProp(models.Model):
     """
     A mapping of (non-empty) arbitrary slice property names to their (string) 
@@ -206,14 +207,14 @@ class Sliver(models.Model):
     class Meta:
         unique_together = ('slice', 'node')
     
-
+    
     def __unicode__(self):
         return self.description if self.description else str(self.id)
-
+    
     @property
     def nr(self):
         return self.pk # TODO use automatic id? generate?
-
+    
     @property
     def exp_data_sha256(self):
         try: return sha256(self.exp_data.file.read()).hexdigest()
@@ -287,14 +288,13 @@ class SliverIface(models.Model):
         if hasattr(self, 'parent'): 
             return self.parent.name
         return None
-
+    
     #<mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
     # example 06:ab:04:d2:05:00
     # operations works properly (FIXME: check if access to info works!)
     @property
     def mac_addr(self):
         node = self.parent.node
-
         words = [
             more_significant_bits(node.sliver_mac_prefix),
             less_significant_bits(node.sliver_mac_prefix),
@@ -304,7 +304,7 @@ class SliverIface(models.Model):
             number_to_hex_str(self.nr, 2)
         ]
         
-        return string.join(words, ':')
+        return ':'.join(words)
 
 class IsolatedIface(SliverIface):
     """
@@ -344,11 +344,11 @@ class PublicIface(IpSliverIface):
     will be bridged to the community network.
     """
     sliver = models.ForeignKey(Sliver)
-
+    
     @property
     def nr(self): # 1 >= nr >= 256
         return self.pk # % 256 ) + 1 ?? #FIXME
-
+    
     @property
     def ipv6_addr(self): #Testbed management IPv6 network (local bridge)
     #<node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
@@ -359,8 +359,8 @@ class PublicIface(IpSliverIface):
             '10' + number_to_hex_str(self.nr, 2), # Iface.nr
             number_to_hex_str(self.sliver.slice.id, 4) # Slice.id
         ])
-        return string.join(ipv6_words, ':')
-
+        return ':'.join(ipv6_words)
+    
     @property
     def ipv4_addr(self):
         return 'TODO'
@@ -373,11 +373,11 @@ class PrivateIface(IpSliverIface):
     will have at least a private interface.
     """
     sliver = models.OneToOneField(Sliver)
-
+    
     @property
     def nr(self):
         self.nr = 0
-
+    
     @property
     def ipv6_addr(self):
         # <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
@@ -386,43 +386,23 @@ class PrivateIface(IpSliverIface):
             '0:1000',
             int_to_ipv6(self.sliver.slice.id)
         ])
-        return string.join(ip_words, ':')
-
+        return ':'.join(ip_words)
+    
     @property
     def ipv4_addr(self):
         """
-           X.Y.Z.S is the address of sliver #S during its lifetime (called the
-           sliver's private IPv4 address).
-           - X.Y.Z == prefix
-           - S = sliver #number
+        X.Y.Z.S is the address of sliver #S during its lifetime (called the
+        sliver's private IPv4 address).
+            - X.Y.Z == prefix
+            - S = sliver #number
         """
-        
         if not self.sliver.node.priv_ipv4_prefix:
             prefix = node_settings.PRIV_IPV4_PREFIX_DFLT
         else:
             prefix = self.sliver.node.priv_ipv4_prefix
-
+        
         prefix_words = prefix.split('.')[:3]
         prefix_words.append('%d' % self.sliver.nr)
         
         return '.'.join(prefix_words)
 
-
-## auxiliar functions for getting confine address
-def less_significant_bits(u16):
-    return '%.2x' % (u16 & 0xff)
-
-def more_significant_bits(u16):
-    return '%.2x' % (u16 >> 8)
-
-def number_to_hex_str(number, digits):
-    assert digits <= 8, "Precision %d too large? (max 8)" % digits
-    return ('%.' + str(digits) + 'x') % number
-
-def int_to_ipv6(number):
-    words = [
-        number_to_hex_str(number >> 32, 4),
-        number_to_hex_str((number >> 16) & 0xffff, 4),
-        number_to_hex_str(number & 0xffff, 4)
-        ]
-    return string.join(words, ':')

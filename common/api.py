@@ -3,7 +3,6 @@ from django.conf.urls import patterns, url
 from django.utils import six
 from django.utils.encoding import smart_str, force_unicode
 from django.utils.importlib import import_module
-from nodes import settings as nodes_settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -89,6 +88,7 @@ class RestApi(object):
         if model in self._registry:
             self._registry[model][0].serializer_class.base_fields.update({name: field()})
             self._registry[model][1].serializer_class.base_fields.update({name: field()})
+
 
 # singleton
 api = RestApi()

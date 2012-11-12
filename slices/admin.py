@@ -127,10 +127,19 @@ class SliverAdmin(ChangeViewActionsMixin):
 
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
-    list_display = NodeAdmin.list_display + [num_slivers, 'custom_sliver_pub_ipv4_total']
+    list_display = NodeAdmin.list_display[1:]
+    list_display.insert(0, 'add_sliver_link')
+    list_display.extend([num_slivers, 'custom_sliver_pub_ipv4_total'])
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = None
+    
+    def add_sliver_link(self, instance):
+        url = reverse('admin:slices_slice_add_sliver', 
+                      kwargs={'slice_id':self.slice_id, 'node_id':instance.pk})
+        return '<a href="%s"><b>%s</b><a>' % (url, instance.description)
+    add_sliver_link.allow_tags = True
+    add_sliver_link.description = 'Node'
     
     def custom_sliver_pub_ipv4_total(self, instance):
         return instance.sliver_pub_ipv4_total

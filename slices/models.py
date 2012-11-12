@@ -40,15 +40,15 @@ class Template(models.Model):
                   'Slivers using this template should run on nodes that match '
                   'this architecture.')
     is_active = models.BooleanField(default=True)
-    data = models.FileField(upload_to=settings.TEMPLATE_DATA_DIR, 
+    image = models.FileField(upload_to=settings.TEMPLATE_IMAGE_DIR, 
         help_text='Template\'s image file.')
     
     def __unicode__(self):
         return self.name
     
     @property
-    def data_sha256(self):
-        try: return sha256(self.data.file.read()).hexdigest()
+    def image_sha256(self):
+        try: return sha256(self.image.file.read()).hexdigest()
         except: return None
 
 

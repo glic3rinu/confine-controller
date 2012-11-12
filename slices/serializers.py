@@ -34,7 +34,7 @@ class SliceSerializer(serializers.HyperlinkedModelSerializer):
 
 class TemplateSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field()
-    data_sha256 = serializers.CharField(read_only=True)
+    image_sha256 = serializers.CharField(read_only=True)
     
     class Meta:
         model = Template

@@ -58,7 +58,8 @@ class BuildAdmin(admin.ModelAdmin):
     node_link.short_description = "Node"
     
     def task_link(self, build):
-        return admin_link('')(build.task, href_name=build.task.task_id)
+        if build.task:
+            return admin_link('')(build.task, href_name=build.task.task_id)
     task_link.allow_tags = True
     task_link.short_description = "Task"
     

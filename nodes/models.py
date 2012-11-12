@@ -91,6 +91,16 @@ class Node(CnHost):
         if async: cache_node_db.delay(self.pk)
         else: cache_node_db(self.pk)
     
+    @property
+    def ipv6_local_addr(self):
+        # X:Y:Z:N:0000::2/64
+        ipv6_words = settings.MGMT_IPV6_PREFIX.split(':')[:3] # X:Y:Z
+        ipv6_words.extend([
+            '%.4x' % self.id, # N (Node.id in hexadecimal)
+            '0000::2'
+        ])
+        return string.join(ipv6_words, ':')
+
 
 class NodeProp(models.Model):
     node = models.ForeignKey(Node)

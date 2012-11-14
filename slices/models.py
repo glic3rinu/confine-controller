@@ -355,9 +355,9 @@ class PublicIface(IpSliverIface):
         ipv6_prefix = node_settings.MGMT_IPV6_PREFIX.split(':')
         ipv6_words = ipv6_prefix[:3]
         ipv6_words.extend([
-            number_to_hex_str(self.sliver.node.id, 4), # Node.id
+            number_to_hex_str(self.sliver.node_id, 4), # Node.id
             '10' + number_to_hex_str(self.nr, 2), # Iface.nr
-            number_to_hex_str(self.sliver.slice.id, 4) # Slice.id
+            number_to_hex_str(self.sliver.slice_id, 4) # Slice.id
         ])
         return ':'.join(ipv6_words)
     
@@ -384,7 +384,7 @@ class PrivateIface(IpSliverIface):
         ip_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
         ip_words.extend([
             '0:1000',
-            int_to_ipv6(self.sliver.slice.id)
+            int_to_ipv6(self.sliver.slice_id)
         ])
         return ':'.join(ip_words)
     

@@ -50,7 +50,8 @@ def insert_action(model, action):
 
 def link(attribute, description='', admin_order_field=True, base_url=''):
     def admin_link(obj, attr=attribute):
-        url = get_field_value(obj, attr)
+        try: url = get_field_value(obj, attr)
+        except AttributeError: return ''
         link_url = "%s%s" % (base_url,url) if base_url else url
         return '<a href="%s">%s' % (link_url, url)
     admin_link.short_description = description if description else attribute.capitalize()

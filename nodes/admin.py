@@ -20,13 +20,6 @@ STATES_COLORS = {
     Node.PRODUCTION: 'green', }
 
 
-def cndb_cached_on(instance):
-    date = instance.cndb_cached_on
-    if not date: return 'Never'
-    return date
-cndb_cached_on.short_description=Node._meta.get_field_by_name('cndb_cached_on')[0].verbose_name
-
-
 class NodePropInline(admin.TabularInline):
     model = NodeProp
     extra = 0
@@ -38,19 +31,18 @@ class DirectIfaceInline(admin.TabularInline):
 
 
 class NodeAdmin(ChangeViewActionsMixin):
-    list_display = ['description', 'id', 'uuid', link('cn_url', description='CN URL'), 
-                    'arch', colored('set_state', STATES_COLORS), admin_link('admin'), 
+    list_display = ['description', 'id', 'uuid', 'arch', 
+                    colored('set_state', STATES_COLORS), admin_link('admin'), 
                     'num_ifaces']
     list_display_links = ('id', 'uuid', 'description')
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'id', 'uuid']
-    readonly_fields = [cndb_cached_on, 'boot_sn']
+    readonly_fields = ['boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('description', 'cn_url', ('cndb_uri', cndb_cached_on), 
-                       'admin', 'sliver_pub_ipv4_total', 'arch', 'local_iface', 
-                       'boot_sn', 'set_state',),
+            'fields': ('description', 'admin', 'sliver_pub_ipv4_total', 'arch', 
+                       'local_iface', 'boot_sn', 'set_state',),
         }),
         ('Keys', {
             'classes': ('collapse',),
@@ -82,8 +74,7 @@ class NodeAdmin(ChangeViewActionsMixin):
 
 
 class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
-    fields = ['cn_url', 'cndb_uri', cndb_cached_on]
-    readonly_fields = [cndb_cached_on]
+    fields = []
     
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name

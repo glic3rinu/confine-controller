@@ -48,8 +48,7 @@ class IslandAdmin(admin.ModelAdmin):
 
 
 class GatewayAdmin(admin.ModelAdmin):
-    list_display = ['id', link('cn_url'), link('cndb_url')]
-    readonly_fields = ['cndb_cached_on']
+    list_display = ['id']
     inlines = [TincServerInline]
 
 

@@ -8,42 +8,9 @@ from django.db import models
 from singleton_models.models import SingletonModel
 
 from nodes import settings
-from nodes.tasks import cache_node_db
 
 
-class CnHost(models.Model):
-    """
-    Describes a host in the Community Network.
-    """
-    cn_url = models.URLField('Community Network URL', blank=True,
-        help_text='Optional URL pointing to a description of this host/device '
-                  'in its CN\'s node DB web application.')
-    cndb_uri = models.URLField('Community Network Database URI', blank=True,
-        help_text='Optional URI for this host/device in its CN\'s CNDB REST API')
-    cndb_cached_on = models.DateTimeField('CNDB cached on', null=True, blank=True,
-        help_text='Last date that CNDB information for this host/device was '
-                  'successfully retrieved.')
-    
-    class Meta:
-        abstract = True
-    
-    def __unicode__(self):
-        return str(self.pk)
-    
-    def save(self, *args, **kwargs):
-        """ Setting cndb_uri resets cndb_cached_on to null. """
-        if self.pk:
-            db_host = type(self).objects.get(pk=self.pk)
-            if self.cndb_uri != db_host.cndb_uri:
-                self.cndb_cached_on = None
-        super(CnHost, self).save(*args, **kwargs)
-    
-    def cache_node_db(self, async=False):
-        if async: defer(cache_node_db.delay, self)
-        else: cache_node_db(self)
-
-
-class Node(CnHost):
+class Node(models.Model):
     """
     Describes a node in the testbed.
     
@@ -130,10 +97,6 @@ class Node(CnHost):
         self.boot_sn += 1
         self.save()
     
-    def cache_node_db(self, async=False):
-        if async: defer(cache_node_db.delay, self.pk)
-        else: cache_node_db(self.pk)
-    
     @property
     def ipv6_local_addr(self):
         # X:Y:Z:N:0000::2/64
@@ -196,10 +159,13 @@ class DirectIface(models.Model):
         return self.name
 
 
-class Server(SingletonModel, CnHost):
+class Server(SingletonModel):
     """
     Describes the testbed server (controller).
     """
+    description = models.CharField(max_length=256,
+        help_text='Free-form textual description of the server.')
+    
     class Meta:
         verbose_name = "server"
         verbose_name_plural = "server"

@@ -1,4 +1,3 @@
-from celery.task.schedules import crontab
 from django.conf import settings
 
 ugettext = lambda s: s
@@ -27,6 +26,3 @@ MGMT_IPV6_PREFIX = getattr(settings, 'MGMT_IPV6_PREFIX', '2001:db8:cafe::/48')
 PRIV_IPV4_PREFIX_DFLT = getattr(settings, 'PRIV_IPV4_PREFIX_DFLT', '192.168.157.0/24')
 SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'SLIVER_MAC_PREFIX_DFLT', '0x06ab')
 
-
-# Cache node_db every day at 2 AM
-CACHE_NODE_DB_CRONTAB = getattr(settings, 'CACHE_NODE_DB_CRONTAB', crontab(minute=0, hour=2))

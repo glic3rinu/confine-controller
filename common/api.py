@@ -76,10 +76,12 @@ class RestApi(object):
         return urlpatterns
     
     def autodiscover(self):
-        """ Auto-discover INSTALLED_APPS api.py modules """
+        """ Auto-discover INSTALLED_APPS api.py and serializers.py modules """
         for app in settings.INSTALLED_APPS:
             mod = import_module(app)
             try: import_module('%s.api' % app)
+            except ImportError: pass
+            try: import_module('%s.serializers' % app)
             except ImportError: pass
     
     def aggregate(self, model, field, name):

@@ -2,12 +2,12 @@ from datetime import datetime
 
 from celery.task import periodic_task, task
 
-from nodes.settings import CACHE_NODE_DB_CRONTAB
+from .settings import CACHE_NODE_DB_CRONTAB
 
 
 @periodic_task(name="nodes.periodic_cache_node_db", run_every=CACHE_NODE_DB_CRONTAB)
 def periodic_cache_node_db():
-    from nodes.models import Node, Server
+    from .models import CnHost
     for host in Node.objects.exclude(cndb_uri=""):
         node.cache_node_db()
     Server.objects.get().cache_node_db()
@@ -16,7 +16,7 @@ def periodic_cache_node_db():
 
 @task(name="nodes.cache_node_db")
 def cache_node_db(obj):
-    from nodes.models import Node, Server
+    from .models import CnHost
     fresh_obj = type(obj).objects.get(pk=obj.pk)
     if fresh_obj.cndb_uri:
         fresh_obj.cndb_cached_on = datetime.now()

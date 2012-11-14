@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
 
-from nodes.models import CnHost, Server, Node
+from nodes.models import Server, Node
 from tinc import settings
 
 
@@ -42,7 +42,7 @@ class TincHost(models.Model):
         return str(self)
 
 
-class Gateway(CnHost):
+class Gateway(models.Model):
     """
     Describes a Gateway in the testbed. A machine giving entry to the testbed's 
     management network from a set of network islands. It can help connect 
@@ -50,6 +50,8 @@ class Gateway(CnHost):
     some link external to them (e.g. the Internet).
     """
     related_tincserver = generic.GenericRelation('tinc.TincServer')
+    description = models.CharField(max_length=256,
+        help_text='Free-form textual description of this gateway.')
     
     @property
     def tinc(self):

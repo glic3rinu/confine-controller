@@ -9,6 +9,7 @@ from .models import CnHost
 class CnHostSerializer(serializers.ModelSerializer):
     class Meta:
         model = CnHost
+        exclude = ['id', 'content_type', 'object_id']
 
 
 api.aggregate(Node, CnHostSerializer, name='cn')

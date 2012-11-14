@@ -125,7 +125,7 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     # Third Party APPS
-    'south',
+#    'south',
     'fluent_dashboard',
     'admin_tools',
     'admin_tools.theming',
@@ -151,8 +151,8 @@ INSTALLED_APPS = (
     'slices',
     'issues',
     'auth_extension',
-    'community_network',
     'tinc',
+    'community_network',
     'firmware',
 
     # Third party apps that should load last

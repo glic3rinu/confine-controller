@@ -1,6 +1,9 @@
+from django.conf import settings as project_settings
+from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from nodes.models import Node, Server
 from .tasks import cache_node_db
 
 class CnHost(models.Model):
@@ -39,3 +42,19 @@ class CnHost(models.Model):
         if async: defer(cache_node_db.delay, self)
         else: cache_node_db(self)
 
+
+# Hook Community Network support for related models
+related_models = [Node, Server]
+if 'tinc' in project_settings.INSTALLED_APPS:
+    from tinc.models import Gateway
+    related_models.append(Gateway)
+
+@property
+def cn(self):
+    try: return self.related_cnhost.get()
+    except CnHost.DoesNotExist: return {}
+
+for model in related_models:
+    related_cnhost = generic.GenericRelation('community_network.CnHost')
+    related_cnhost.contribute_to_class(model, 'related_cnhost')
+    model.cn = cn

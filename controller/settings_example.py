@@ -125,7 +125,7 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     # Third Party APPS
-#    'south',
+    'south',
     'fluent_dashboard',
     'admin_tools',
     'admin_tools.theming',

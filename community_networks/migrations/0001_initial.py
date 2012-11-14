@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'CnHost'
-        db.create_table(u'community_network_cnhost', (
+        db.create_table(u'community_networks_cnhost', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('app_url', self.gf('django.db.models.fields.URLField')(max_length=200, blank=True)),
             ('cndb_uri', self.gf('django.db.models.fields.URLField')(max_length=200, blank=True)),
@@ -17,22 +17,22 @@ class Migration(SchemaMigration):
             ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
             ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=36)),
         ))
-        db.send_create_signal(u'community_network', ['CnHost'])
+        db.send_create_signal(u'community_networks', ['CnHost'])
 
         # Adding unique constraint on 'CnHost', fields ['content_type', 'object_id']
-        db.create_unique(u'community_network_cnhost', ['content_type_id', 'object_id'])
+        db.create_unique(u'community_networks_cnhost', ['content_type_id', 'object_id'])
 
 
     def backwards(self, orm):
         # Removing unique constraint on 'CnHost', fields ['content_type', 'object_id']
-        db.delete_unique(u'community_network_cnhost', ['content_type_id', 'object_id'])
+        db.delete_unique(u'community_networks_cnhost', ['content_type_id', 'object_id'])
 
         # Deleting model 'CnHost'
-        db.delete_table(u'community_network_cnhost')
+        db.delete_table(u'community_networks_cnhost')
 
 
     models = {
-        u'community_network.cnhost': {
+        u'community_networks.cnhost': {
             'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'CnHost'},
             'app_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
             'cndb_cached_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
@@ -50,4 +50,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['community_network']
+    complete_apps = ['community_networks']

@@ -255,11 +255,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
 import djcelery
 djcelery.setup_loader()
 # Broker
-BROKER_HOST = "localhost"
-BROKER_PORT = 5672
-BROKER_USER = "guest"
-BROKER_PASSWORD = "guest"
-BROKER_VHOST = "/"
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_SEND_EVENTS = True
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_DISABLE_RATE_LIMITS = True

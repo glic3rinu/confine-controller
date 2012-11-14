@@ -143,7 +143,6 @@ class BuildUCI(models.Model):
 class Config(SingletonModel):
     description = models.CharField(max_length=255)
     version = models.CharField(max_length=64)
-    date = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = "Firmware Config"

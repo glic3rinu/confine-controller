@@ -193,7 +193,7 @@ class SliceSliversAdmin(SliverAdmin):
         slice = Slice.objects.get(pk=slice_id)
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
-        self.node_id = sliver.node.pk
+        self.node_id = sliver.node_id
         context = {'title': 'Change sliver in node "%s" (slice "%s")' % \
                             (sliver.node.description, slice.name),
                    'slice': slice,}

@@ -14,17 +14,20 @@ class TincClientInline(generic.GenericTabularInline):
     model = TincClient
     max_num = 1
     readonly_fields = ['connect_to']
+    verbose_name_plural = 'Tinc client'
 
 
 class TincServerInline(generic.GenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     model = TincServer
     max_num = 1
+    verbose_name_plural = 'Tinc server'
 
 
 class TincAddressInline(admin.TabularInline):
     model = TincAddress
     max_num = 1
+    verbose_name_plural = 'Tinc address'
 
 
 class ReadOnlyTincAddressInline(admin.TabularInline):

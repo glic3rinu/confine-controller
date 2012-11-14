@@ -152,7 +152,7 @@ INSTALLED_APPS = (
     'issues',
     'auth_extension',
     'tinc',
-    'community_networks',
+    'communitynetworks',
     'firmware',
 
     # Third party apps that should load last

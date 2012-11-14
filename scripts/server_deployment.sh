@@ -3,7 +3,6 @@
 set -u
 
 prepare_image() {
-
     # USAGE: prepare_image file size
     
     local FILE=$1
@@ -15,13 +14,12 @@ prepare_image() {
 
 
 custom_mount() {
-
     # USAGE: custom_mount -ldps [ src ] mount_point
     
     local SRC_POS=$(($#-1))
     local SRC=${!SRC_POS}
     local POINT="${!#}"
-
+    
     while getopts ":ldps" opt; do
         case $opt in
             l) mountpoint -q $POINT || mount $SRC $POINT ;;
@@ -38,11 +36,10 @@ custom_mount() {
 
 
 custom_umount() {
-
     # USAGE: custom_umount -spdl mount_point
     
     local POINT="${!#}"
-
+    
     # wait half a second, otherwise it will fail, sometimes
     sleep 0.5
     
@@ -67,9 +64,9 @@ container_customization () {
     
     local MOUNT_POINT=$1
     local DEV=$MOUNT_POINT/dev
-
+    
     #TODO: use MAKEDEV?
-
+    
     rm -rf ${DEV}
     mkdir ${DEV}
     mknod -m 666 ${DEV}/null c 1 3
@@ -106,7 +103,7 @@ container_customization () {
 		c3:12345:respawn:/sbin/getty 38400 tty3 linux
 		c4:12345:respawn:/sbin/getty 38400 tty4 linux
 		EOF
-
+    
     ln -s /proc/mounts $MOUNT_POINT/etc/mtab
    
     # Turn off doing sync() on every write for syslog's log files
@@ -124,7 +121,6 @@ container_customization () {
 
 
 basic_strap_configuration() {
-    
     local PASSWORD=$1
     local KEYBOARD_LAYOUT=$2
     
@@ -132,7 +128,7 @@ basic_strap_configuration() {
     locale-gen
     echo "root:$PASSWORD"|chpasswd
     echo confine-server > /etc/hostname
-
+    
     #TODO: only useful for bootable?
     case $KEYBOARD_LAYOUT in
         'spanish') 
@@ -148,40 +144,38 @@ basic_strap_configuration() {
     
     # at least provide loopback interface
     echo -e "auto lo\niface lo inet loopback\n" > /etc/network/interfaces
-
 }
 export -f basic_strap_configuration
 
 
 install_kernel_and_grub() {
-
     local DEVICE=$1
     
     apt-get update
     apt-get install -y linux-image-amd64 
-    apt-get install -y dmsetup gettext-base grub-common libdevmapper1.02.1 libfreetype6 os-prober ucf
+    apt-get install -y dmsetup gettext-base grub-common libdevmapper1.02.1 \
+                       libfreetype6 os-prober ucf
     # Download grub and manually install it in order to avoid interactive questions.
     apt-get -dy install grub-pc
     local GRUB_PKG=$(find /var/cache/apt/archives/ -type f -name grub-pc*.deb)
     dpkg -x $GRUB_PKG /
-
+    
     mkdir -p /boot/grub
     echo "(hd0) $DEVICE" > /boot/grub/device.map
     grub-mkconfig -o /boot/grub/grub.cfg
     sed -i "s/timeout=5/timeout=0/" /boot/grub/grub.cfg
-
+    
     grub-install --no-floppy --grub-mkdevicemap=/boot/grub/device.map $DEVICE --force
 }
 export -f install_kernel_and_grub
 
 
 try_create_system_user() {
-    
     # USAGE: try_create_system_user user password
     
     local USER=$1
     local PASSWORD=$2
-
+    
     if ( ! $(id $USER &> /dev/null) ); then 
         useradd $USER -p '' -s "/bin/bash"
         echo "$USER:$PASSWORD"| chpasswd
@@ -193,8 +187,8 @@ export -f try_create_system_user
 
 
 install_portal() {
-    
-    #USAGE: install_portal dir username userpassword create_db db_name db_user db_password db_host db_port
+    # USAGE: install_portal dir username userpassword create_db db_name db_user \
+    #                       db_password db_host db_port
     
     local USER=$2
     local PASSWORD=$3
@@ -202,29 +196,29 @@ install_portal() {
     try_create_system_user $USER $PASSWORD
     # user must exists befor evaluate ~user
     local DIR=$(eval echo $1)
-
+    
     local DB_NAME=$5
     local DB_USER=$6
     local DB_PASSWORD=$7
     local DB_HOST=$8
     local DB_PORT=$9
-
+    
     # Install dependencies
     apt-get update
-    apt-get install -y libapache2-mod-wsgi rabbitmq-server git python-paramiko \
-        screen python-pip python-psycopg2 openssh-server tinc
-
+    apt-get install -y libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2 \
+                       screen python-pip python-psycopg2 openssh-server tinc
+    
     # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
     sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
     update-rc.d rabbitmq-server defaults
-
+    
     if ( $install_db ); then 
         apt-get install -y postgresql
         # make sure that postgres will start at port $DB_PORT
         sed -i "s/port = .*/port = $DB_PORT/" /etc/postgresql/*/main/postgresql.conf
     fi
-
+    
     # Install Django
     python -c "import django" 2> /dev/null || { 
         mkdir -p /usr/local/share /usr/lib/${PYVERSION##*' '}/dist-packages /usr/local/bin
@@ -233,11 +227,18 @@ install_portal() {
         ln -s /usr/local/share/django-trunk/django /usr/local/lib/${PYVERSION##*' '}/dist-packages/
         ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
     }
-    pip install django-admin-tools django-fluent-dashboard south
-
+    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin_tools
+    python /tmp/admin_tools/setup.py install
+    rm -fr /tmp/admin_tools
+    pip install django-fluent-dashboard south djangorestframework markdown \
+                -e git+https://github.com/alex/django-filter.git#egg=django-filter \
+                django-singletons django-extensions django_transaction_signals \
+                django-private-files
+    
     # Installing and configuring MQ
     pip install django-celery
-    wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' -O /etc/init.d/celeryd
+    wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' \
+         -O /etc/init.d/celeryd
     cat <<- EOF > /etc/default/celeryd
 		# Name of nodes to start, here we have a single node
 		CELERYD_NODES="w1"
@@ -276,29 +277,35 @@ install_portal() {
 
 		# Celerybeat
 		#CELERY_OPTS="\$CELERY_OPTS -B -S djcelery.schedulers.DatabaseScheduler"
+		
 		# Persistent revokes
 		CELERYD_STATE_DB="\$CELERYD_CHDIR/persistent_revokes"
 		EOF
     chmod +x /etc/init.d/celeryd
     update-rc.d celeryd defaults
-    wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam" -O /etc/init.d/celeryevcam
+    wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam"\
+         -O /etc/init.d/celeryevcam
     chmod +x /etc/init.d/celeryevcam
     update-rc.d celeryevcam defaults
-
+    
+    # Install ConFw
+    git clone http://git.confine-project.eu/confine/confw.git /usr/local/lib/python2.6/dist-packages/
+    [ $(grep "^fuse:" /etc/group &> /dev/null) ] || addgroup fuse
+    adduser $USER fuse
+    
     # Install the portal
     su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
+    su $USER -c "echo 'from controller.settings_example import *' > $DIR/controller/settings.py"
+    sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $DIR/controller/settings.py
+    sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $DIR/controller/settings.py
+    sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $DIR/controller/settings.py
+    sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $DIR/controller/settings.py
+    sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $DIR/controller/settings.py
     
-    su $USER -c "cp $DIR/confine/settings.example.py $DIR/confine/settings.py"
-    sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $DIR/confine/settings.py
-    sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $DIR/confine/settings.py
-    sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $DIR/confine/settings.py
-    sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $DIR/confine/settings.py
-    sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $DIR/confine/settings.py
-
     cat <<- EOF > /etc/apache2/httpd.conf
-		WSGIScriptAlias / $DIR/confine/wsgi.py
+		WSGIScriptAlias / $DIR/controller/wsgi.py
 		WSGIPythonPath $DIR
-		<Directory $DIR/confine/>
+		<Directory $DIR/controller/>
 		    <Files wsgi.py>
 		        Order deny,allow
 		        Allow from all
@@ -312,9 +319,8 @@ export -f install_portal
 
 
 echo_generate_ssh_keys () {
-    
     local USER=$1
-
+    
     cat <<- EOF
 		# Generate host keys
 		ssh-keygen -f /etc/ssh/ssh_host_rsa_key -t rsa -N ""
@@ -333,9 +339,8 @@ echo_generate_ssh_keys () {
 export -f echo_generate_ssh_keys
 
 generate_ssh_keys_postponed () {
-
     local USER=$1
-
+    
     rm -f /etc/ssh/ssh_host_*
     cat <<- EOF > /etc/init.d/generate_ssh_keys
 		#!/bin/sh
@@ -354,7 +359,7 @@ generate_ssh_keys_postponed () {
 		insserv -r /etc/init.d/generate_ssh_keys
 		rm -f \$0
 		EOF
-
+    
     chmod a+x /etc/init.d/generate_ssh_keys
     insserv /etc/init.d/generate_ssh_keys
 }
@@ -362,21 +367,21 @@ export -f generate_ssh_keys_postponed
 
 
 echo_portal_configuration_script () {
-
-    # USAGE: echo_portal_configuration_steps install_path user create_db db_name db_user db_password
-
+    # USAGE: echo_portal_configuration_steps install_path user create_db \
+    #                                        db_name db_user db_password
+    
     local DIR=$(eval echo $1)
     local USER=$2
     local create_db=$3
     local DB_NAME=$4
     local DB_USER=$5
     local DB_PASSWORD=$6
-
+    
     $create_db && cat <<- EOF 
 		su postgres -c "psql -c \"CREATE USER $DB_USER PASSWORD '$DB_PASSWORD';\""
 		su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\""
 		EOF
-
+    
     cat <<- EOF 
 		su $USER -c "python $DIR/manage.py syncdb --noinput"
 		su $USER -c "python $DIR/manage.py migrate --noinput"
@@ -387,7 +392,6 @@ echo_portal_configuration_script () {
 export -f echo_portal_configuration_script
 
 configure_portal_postponed () {
-    
     # USAGE: echo_portal_configuration_steps dir user db_name db_user db_password
     
     # Some configuration commands should run when the database is online, 
@@ -398,7 +402,7 @@ configure_portal_postponed () {
     local DB_NAME=$3
     local DB_USER=$4
     local DB_PASSWORD=$5
-
+    
     cat <<- EOF > /etc/init.d/setup_portal_db
 		#!/bin/sh
 		### BEGIN INIT INFO
@@ -420,12 +424,11 @@ configure_portal_postponed () {
 }
 export -f configure_portal_postponed
 
-  
-print_help () {
 
+print_help () {
     local bold=$(tput bold)
     local normal=$(tput sgr0)
-
+    
     cat <<- EOF 
 		
 		${bold}NAME${normal}
@@ -529,20 +532,20 @@ DB_HOST="localhost"
 DB_PORT="5432"
 KEYBOARD_LAYOUT=''
 
-while [ $# -gt 0 ]; do  
+while [ $# -gt 0 ]; do
     case $1 in
         -t|--type) TYPE="${2:1:-1}"; type=true; shift ;;
         -i|--image) IMAGE="${2:1:-1}"; image=true; shift ;;
-        -S|--image_size) IMAGE_SIZE="${2:1:-1}"; image_size=true; shift ;;        
+        -S|--image_size) IMAGE_SIZE="${2:1:-1}"; image_size=true; shift ;;
         -d|--directory) DIRECTORY="${2:1:-1}"; directory=true; shift ;;
         -u|--user) USER="${2:1:-1}"; shift ;;
         -I|--install_path) INSTALL_PATH="${2:1:-1}"; shift ;;
         -p|--password) PASSWORD="${2:1:-1}"; shift ;;
         -a|--arch) ARCH="${2:1:-1}"; shift ;;
-        -s|--suite) SUITE="${2:1:-1}"; shift ;; 
-        -U|--db_name) DB_NAME="${2:1:-1}"; shift ;;         
-        -U|--db_user) DB_USER="${2:1:-1}"; shift ;; 
-        -W|--db_password) DB_PASSWORD="${2:1:-1}"; shift ;; 
+        -s|--suite) SUITE="${2:1:-1}"; shift ;;
+        -U|--db_name) DB_NAME="${2:1:-1}"; shift ;;
+        -U|--db_user) DB_USER="${2:1:-1}"; shift ;;
+        -W|--db_password) DB_PASSWORD="${2:1:-1}"; shift ;;
         -S|--db_host) DB_HOST="${2:1:-1}"; create_db=false; shift ;;
         -P|--dp_port) DB_PORT="${2:1:-1}"; shift ;;
         -k|--keyboard_layout) KEYBOARD_LAYOUT="${2:1:-1}"; shift ;;
@@ -590,11 +593,11 @@ if [[ $TYPE != 'local' ]]; then
     
     [ $TYPE == 'bootable' ] && EXCLUDE='' || EXCLUDE='--exclude=udev'
     debootstrap --include=locales --arch=$ARCH $EXCLUDE $SUITE $DIRECTORY || exit 1
-
+    
     custom_mount -s $DIRECTORY
     trap "custom_umount -sl $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
     chroot $DIRECTORY /bin/bash -c "basic_strap_configuration confine $KEYBOARD_LAYOUT"
-
+    
     if [ $TYPE == 'bootable' ]; then 
         custom_mount -d $DIRECTORY
         trap "custom_umount -sdl $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT
@@ -603,7 +606,6 @@ if [[ $TYPE != 'local' ]]; then
     elif [ $TYPE == 'container' ]; then
         container_customization $DIRECTORY
     fi
-    
     # Prevent apt-get from starting daemons
     if [[ $TYPE != 'chroot' ]]; then 
         cat <<- EOF > $DIRECTORY/usr/sbin/policy-rc.d
@@ -614,20 +616,19 @@ if [[ $TYPE != 'local' ]]; then
     fi
     chroot $DIRECTORY /bin/bash -c "install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD $DB_HOST $DB_PORT"
     rm -fr $DIRECTORY/usr/sbin/policy-rc.d
-
+    
     chroot $DIRECTORY /bin/bash -c "configure_portal_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
     chroot $DIRECTORY /bin/bash -c "generate_ssh_keys_postponed $USER"
-
+    
     # Clean up
     custom_umount -s $DIRECTORY
     [ $TYPE == 'bootable' ] && custom_umount -d $DIRECTORY
     $image && custom_umount -l $DIRECTORY
     trap - INT TERM EXIT
     $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
-
 else
     install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD $DB_HOST $DB_PORT
-    try_create_system_user $USER $PASSWORD
+#    try_create_system_user $USER $PASSWORD
     /bin/bash -c "$(echo_portal_configuration_script $INSTALL_PATH $USER $create_db $DB_NAME $DB_USER $DB_PASSWORD)"
 fi
 

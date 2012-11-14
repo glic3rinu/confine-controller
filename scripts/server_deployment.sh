@@ -534,21 +534,21 @@ KEYBOARD_LAYOUT=''
 
 while [ $# -gt 0 ]; do
     case $1 in
-        -t|--type) TYPE="${2:1:-1}"; type=true; shift ;;
-        -i|--image) IMAGE="${2:1:-1}"; image=true; shift ;;
-        -S|--image_size) IMAGE_SIZE="${2:1:-1}"; image_size=true; shift ;;
-        -d|--directory) DIRECTORY="${2:1:-1}"; directory=true; shift ;;
-        -u|--user) USER="${2:1:-1}"; shift ;;
-        -I|--install_path) INSTALL_PATH="${2:1:-1}"; shift ;;
-        -p|--password) PASSWORD="${2:1:-1}"; shift ;;
-        -a|--arch) ARCH="${2:1:-1}"; shift ;;
-        -s|--suite) SUITE="${2:1:-1}"; shift ;;
-        -U|--db_name) DB_NAME="${2:1:-1}"; shift ;;
-        -U|--db_user) DB_USER="${2:1:-1}"; shift ;;
-        -W|--db_password) DB_PASSWORD="${2:1:-1}"; shift ;;
-        -S|--db_host) DB_HOST="${2:1:-1}"; create_db=false; shift ;;
-        -P|--dp_port) DB_PORT="${2:1:-1}"; shift ;;
-        -k|--keyboard_layout) KEYBOARD_LAYOUT="${2:1:-1}"; shift ;;
+        -t|--type) TYPE="${2:1:${#2}-2}"; type=true; shift ;;
+        -i|--image) IMAGE="${2:1:${#2}-2}"; image=true; shift ;;
+        -S|--image_size) IMAGE_SIZE="${2:1:${#2}-2}"; image_size=true; shift ;;
+        -d|--directory) DIRECTORY="${2:1:${#2}-2}"; directory=true; shift ;;
+        -u|--user) USER="${2:1:${#2}-2}"; shift ;;
+        -I|--install_path) INSTALL_PATH="${2:1:${#2}-2}"; shift ;;
+        -p|--password) PASSWORD="${2:1:${#2}-2}"; shift ;;
+        -a|--arch) ARCH="${2:1:${#2}-2}"; shift ;;
+        -s|--suite) SUITE="${2:1:${#2}-2}"; shift ;;
+        -U|--db_name) DB_NAME="${2:1:${#2}-2}"; shift ;;
+        -U|--db_user) DB_USER="${2:1:${#2}-2}"; shift ;;
+        -W|--db_password) DB_PASSWORD="${2:1:${#2}-2}"; shift ;;
+        -S|--db_host) DB_HOST="${2:1:${#2}-2}"; create_db=false; shift ;;
+        -P|--dp_port) DB_PORT="${2:1:${#2}-2}"; shift ;;
+        -k|--keyboard_layout) KEYBOARD_LAYOUT="${2:1:${#2}-2}"; shift ;;
         -h|--help) print_help; exit 0 ;;
         (--) shift; break;;
         (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;

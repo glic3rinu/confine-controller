@@ -13,7 +13,8 @@ class CnHostInline(generic.GenericTabularInline):
     fields = ['app_url', 'cndb_uri', 'cndb_cached']
     readonly_fields = ['cndb_cached']
     verbose_name_plural = 'Community Host'
-    
+    can_delete = False
+     
     def cndb_cached(self, instance):
         date = instance.cndb_cached_on
         if not date: return 'Never'

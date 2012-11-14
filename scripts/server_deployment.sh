@@ -289,7 +289,8 @@ install_portal() {
     update-rc.d celeryevcam defaults
     
     # Install ConFw
-    git clone http://git.confine-project.eu/confine/confw.git /usr/local/lib/python2.6/dist-packages/
+    git clone http://git.confine-project.eu/confine/confw.git \
+              /usr/local/lib/python2.6/dist-packages/confw
     [ $(grep "^fuse:" /etc/group &> /dev/null) ] || addgroup fuse
     adduser $USER fuse
     

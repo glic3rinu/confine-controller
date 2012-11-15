@@ -1,4 +1,3 @@
-
 ## auxiliar functions for getting confine address
 def less_significant_bits(u16):
     return '%.2x' % (u16 & 0xff)

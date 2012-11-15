@@ -2,8 +2,9 @@ from django.http import Http404
 from rest_framework import generics
 
 from common.api import api
-from nodes.models import Node, Server
-from nodes.serializers import ServerSerializer, NodeSerializer
+
+from .models import Node, Server
+from .serializers import ServerSerializer, NodeSerializer
 
 # TODO refactor this with a ModelResource when they are stable 
 

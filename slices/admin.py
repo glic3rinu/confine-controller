@@ -10,11 +10,12 @@ from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
-from slices.actions import renew_selected_slices, reset_selected
-from slices.forms import SliceAdminForm, IsolatedIfaceInlineForm
-from slices.helpers import wrap_action, remove_slice_id
-from slices.models import (Sliver, SliverProp, IsolatedIface, PublicIface, 
-    PrivateIface, Slice, SliceProp, Template)
+
+from .actions import renew_selected_slices, reset_selected
+from .forms import SliceAdminForm, IsolatedIfaceInlineForm
+from .helpers import wrap_action, remove_slice_id
+from .models import (Sliver, SliverProp, IsolatedIface, PublicIface, PrivateIface, 
+    Slice, SliceProp, Template)
 
 
 STATE_COLORS = { 

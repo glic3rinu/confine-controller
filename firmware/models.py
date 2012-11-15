@@ -12,9 +12,10 @@ from singleton_models.models import SingletonModel
 
 from common.fields import MultiSelectField
 from common.models import generate_chainer_manager
-from firmware import settings
-from firmware.tasks import build
 from nodes.settings import NODE_ARCHS
+
+from . import settings
+from .tasks import build
 
 
 # TODO make this accessible in a common place: settings? controller? common? ..?

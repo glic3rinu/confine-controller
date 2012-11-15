@@ -4,8 +4,9 @@ from django.db import models
 from common.admin import admin_link, colored, ChangeViewActionsMixin
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets, 
     mark_as_unread)
-from issues.forms import MessageInlineForm, TicketInlineForm
-from issues.models import Ticket, Queue, Message
+
+from .forms import MessageInlineForm, TicketInlineForm
+from .models import Ticket, Queue, Message
 
 
 PRIORITY_COLORS = { 

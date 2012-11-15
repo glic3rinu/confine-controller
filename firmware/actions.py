@@ -8,7 +8,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from firmware.models import Build
+from .models import Build
 
 
 # TODO implement an AJAX based feedback (triggering a refresh when there is an

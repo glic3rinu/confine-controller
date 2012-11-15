@@ -4,6 +4,7 @@ from django.contrib.contenttypes import generic
 
 from common.admin import insert_inline, insert_list_display, link
 from nodes.models import Server, Node
+
 from .models import CnHost
 
 

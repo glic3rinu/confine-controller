@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from slices.models import Slice, Sliver, Template
+from .models import Slice, Sliver, Template
 
 
 class IfaceSerializer(serializers.Serializer):

@@ -6,9 +6,10 @@ from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
     admin_link)
-from nodes.actions import request_cert, reboot_selected
-from nodes.forms import NodeInlineAdminForm
-from nodes.models import Node, NodeProp, Server, DirectIface
+
+from .actions import request_cert, reboot_selected
+from .forms import NodeInlineAdminForm
+from .models import Node, NodeProp, Server, DirectIface
 
 
 STATES_COLORS = { 

@@ -26,7 +26,7 @@ class Template(models.Model):
         help_text='The unique name of this template. A single line of free-form '
                   'text with no whitespace surrounding it, it can include '
                   'version numbers and other information.',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this template.')
@@ -70,7 +70,7 @@ class Slice(models.Model):
     name = models.CharField(max_length=64, unique=True, 
         help_text='A unique name for this slice matching the regular expression'
                   '^[a-z][_0-9a-z]*[0-9a-z]$.', 
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
     pubkey = models.TextField('Public Key', null=True, blank=True,
@@ -171,7 +171,7 @@ class SliceProp(models.Model):
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
     
@@ -255,7 +255,7 @@ class SliverProp(models.Model):
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
     
@@ -406,3 +406,6 @@ class PrivateIface(IpSliverIface):
         
         return '.'.join(prefix_words)
 
+# used by slice.renew
+def get_expires_on():
+    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL

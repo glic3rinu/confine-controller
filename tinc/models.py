@@ -19,7 +19,7 @@ class Host(models.Model):
         help_text='Free-form textual description of this host.')
     admin = models.ForeignKey(User, 
         help_text='The user who administrates this host (its creator by default)')
-
+    
     def __unicode__(self):
         return self.description
 
@@ -71,11 +71,11 @@ class TincServer(TincHost):
     
     class Meta:
         unique_together = ('content_type', 'object_id')
-
+    
     def __unicode__(self):
         if self.content_type.model == 'server': return 'server'
         return "%s_%s" % (self.content_type.model, self.object_id)
-
+    
     @property
     def addresses(self):
         return self.tincaddress_set.all()

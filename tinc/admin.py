@@ -5,9 +5,10 @@ from django.contrib.contenttypes import generic
 from common.admin import (insert_inline, admin_link, insert_action, 
     get_modeladmin, ChangeViewActionsMixin, link)
 from nodes.models import Node, Server
-from tinc.actions import set_island
-from tinc.forms import HostInlineAdminForm
-from tinc.models import Host, TincClient, TincAddress, TincServer, Island, Gateway
+
+from .actions import set_island
+from .forms import HostInlineAdminForm
+from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
 
 class TincClientInline(generic.GenericTabularInline):

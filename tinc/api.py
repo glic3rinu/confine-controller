@@ -1,8 +1,9 @@
 from rest_framework import generics
 
 from common.api import api
-from tinc.models import Island, Host, Gateway
-from tinc.serializers import IslandSerializer, HostSerializer, GatewaySerializer
+
+from .models import Island, Host, Gateway
+from .serializers import IslandSerializer, HostSerializer, GatewaySerializer
 
 
 class IslandList(generics.ListCreateAPIView):

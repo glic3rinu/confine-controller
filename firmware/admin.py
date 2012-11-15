@@ -6,10 +6,10 @@ from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (get_modeladmin, admin_link, insert_action, colored, 
     wrap_admin_view)
-from firmware.actions import get_firmware
-from firmware.models import BaseImage, Config, ConfigUCI, Build, BuildUCI
 from nodes.models import Node
 
+from .actions import get_firmware
+from .models import BaseImage, Config, ConfigUCI, Build, BuildUCI
 
 STATE_COLORS = {
     Build.REQUESTED: 'blue',

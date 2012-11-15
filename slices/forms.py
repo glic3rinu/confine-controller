@@ -1,7 +1,8 @@
 from django import forms
 
 from common.widgets import ShowText
-from slices.models import Slice
+
+from .models import Slice
 
 
 class SliceAdminForm(forms.ModelForm):

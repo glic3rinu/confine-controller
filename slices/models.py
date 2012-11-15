@@ -10,13 +10,19 @@ from django.db import models
 
 from nodes.models import Node
 from nodes import settings as node_settings
-from slices import settings
-from slices.utils import (less_significant_bits, more_significant_bits, int_to_ipv6, 
+
+from . import settings
+from .utils import (less_significant_bits, more_significant_bits, int_to_ipv6, 
     number_to_hex_str)
-from slices.tasks import force_slice_update, force_sliver_update
+from .tasks import force_slice_update, force_sliver_update
 
 
 # TODO protect exp_data and data files (like in firmware.build.image)
+
+def get_expires_on():
+    """ Used by slice.renew and Slice.expires_on """
+    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+
 
 class Template(models.Model):
     """
@@ -78,7 +84,7 @@ class Slice(models.Model):
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, 
-        default=lambda:datetime.now() + settings.SLICE_EXPIRATION_INTERVAL,
+        default=get_expires_on,
         help_text='Expiration date of this slice. Automatically deleted once '
                   'expires.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True, 
@@ -405,7 +411,3 @@ class PrivateIface(IpSliverIface):
         prefix_words.append('%d' % self.sliver.nr)
         
         return '.'.join(prefix_words)
-
-# used by slice.renew
-def get_expires_on():
-    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL

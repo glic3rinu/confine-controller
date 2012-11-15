@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from nodes.models import Node, Server
+
 from .tasks import cache_node_db
 
 class CnHost(models.Model):

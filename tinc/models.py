@@ -7,7 +7,8 @@ from django.core import validators
 from django.db import models
 
 from nodes.models import Server, Node
-from tinc import settings
+
+from . import settings
 
 
 class Host(models.Model):

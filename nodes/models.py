@@ -7,7 +7,7 @@ from django.core import validators
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from nodes import settings
+from . import settings
 
 
 class Node(models.Model):

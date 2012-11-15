@@ -3,7 +3,7 @@ from datetime import datetime
 from celery.task import task, periodic_task
 from django.db import transaction
 
-from slices.settings import CLEAN_EXPIRED_SLICES_CRONTAB
+from .settings import CLEAN_EXPIRED_SLICES_CRONTAB
 
 
 @periodic_task(name="slices.clean_expired_slices", run_every=CLEAN_EXPIRED_SLICES_CRONTAB)

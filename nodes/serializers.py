@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from nodes.models import Server, Node
+from .models import Server, Node
 
 
 class ServerSerializer(serializers.HyperlinkedModelSerializer):

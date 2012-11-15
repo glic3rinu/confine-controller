@@ -132,7 +132,7 @@ class NodeProp(models.Model):
     name = models.CharField(max_length=32,
         help_text='Per node unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$.'), 
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
     

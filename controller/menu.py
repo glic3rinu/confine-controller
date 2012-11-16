@@ -40,7 +40,7 @@ class CustomMenu(Menu):
                     items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
                 ]))
         
-        administration_models = ('django.contrib.auth.*', 'auth_extensions.*', 'djcelery.*')
+        administration_models = ('users.*', 'djcelery.*')
         
         if 'issues' in settings.INSTALLED_APPS:
             administration_models += ('issues.*',)

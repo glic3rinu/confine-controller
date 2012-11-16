@@ -17,17 +17,21 @@ class Permission(models.Model):
     
     content_type = models.ForeignKey(ContentType, related_name='testbedpermission_set')
     action = models.CharField(max_length=16, choices=ACTIONS)
-    evaluation = models.CharField(max_length=256)
+    eval = models.CharField(max_length=256)
+    eval_description = models.CharField(max_length=64, blank=True)
     
     def __unicode__(self):
-        return "%s | %s | %s" % (
+        name =  "%s | %s | %s " % (
             six.text_type(self.content_type.app_label),
             six.text_type(self.content_type),
-            six.text_type(self.action))
-
+            six.text_type(self.action),)
+        if self.eval_description:
+            name += "| %s " % self.eval_description
+        return name
 
 class Role(models.Model):
     name = models.CharField(max_length=32)
+    description = models.CharField(max_length=256, blank=True)
     permissions = models.ManyToManyField(Permission)
     
     def __unicode__(self):

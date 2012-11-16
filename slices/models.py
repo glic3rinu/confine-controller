@@ -4,7 +4,7 @@ import re
 
 from django_extensions.db import fields
 from django_transaction_signals import defer
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 
@@ -111,7 +111,7 @@ class Slice(models.Model):
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
-    users = models.ManyToManyField(User,
+    users = models.ManyToManyField(get_user_model(),
         help_text='A list of users able to login as root in slivers using their '
                   'authentication tokens (usually an SSH key).')
     

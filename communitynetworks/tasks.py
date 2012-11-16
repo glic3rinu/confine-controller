@@ -8,9 +8,8 @@ from .settings import CACHE_NODE_DB_CRONTAB
 @periodic_task(name="communitynetworks.periodic_cache_node_db", run_every=CACHE_NODE_DB_CRONTAB)
 def periodic_cache_node_db():
     from .models import CnHost
-    for host in Node.objects.exclude(cndb_uri=""):
-        node.cache_node_db()
-    Server.objects.get().cache_node_db()
+    for host in CnHost.objects.exclude(cndb_uri=""):
+        host.cache_node_db()
     return "NOT IMPLEMENTED"
 
 

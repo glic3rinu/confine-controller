@@ -33,7 +33,8 @@ class SliceAdminForm(forms.ModelForm):
         
     def clean_vlan_nr(self):
         vlan_nr = self.cleaned_data['vlan_nr']
-        if vlan_nr: return -1
+        if isinstance(vlan_nr, bool):
+            if vlan_nr: return -1
         return vlan_nr
 
 

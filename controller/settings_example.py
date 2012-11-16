@@ -215,8 +215,9 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('Administration', {
         'models': (
-            'django.contrib.auth.models.User',
-            'auth_extension.*',
+            'users.models.User',
+            'users.models.Permission',
+            'users.models.ResearchGroup',
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
@@ -232,11 +233,9 @@ FLUENT_DASHBOARD_APP_GROUPS = (
 )
 
 FLUENT_DASHBOARD_APP_ICONS = {
-    'auth/user': "Mr-potato.png",
-    'auth/group': "System-users.png",
-    'auth_extension/testbedpermission': "Locked.png",
-    'auth_extension/researchgroup': "research_group.png",
-    'auth_extension/authorizedofficial': "Contact-new.png",
+    'users/user': "Mr-potato.png",
+    'users/permission': "Locked.png",
+    'users/researchgroup': "research_group.png",
     'nodes/node': "linksys-WRT54G.png",
     'nodes/server': "poweredge_r510.png",
     'nodes/researchdevice': "western-digital-mybook-pro.png",

@@ -5,7 +5,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
-from django.utils import timezone
+from django.utils import timezone, six
 
 
 class Permission(models.Model):
@@ -18,11 +18,20 @@ class Permission(models.Model):
     content_type = models.ForeignKey(ContentType, related_name='testbedpermission_set')
     action = models.CharField(max_length=16, choices=ACTIONS)
     evaluation = models.CharField(max_length=256)
+    
+    def __unicode__(self):
+        return "%s | %s | %s" % (
+            six.text_type(self.content_type.app_label),
+            six.text_type(self.content_type),
+            six.text_type(self.action))
 
 
 class Role(models.Model):
     name = models.CharField(max_length=32)
     permissions = models.ManyToManyField(Permission)
+    
+    def __unicode__(self):
+        return self.name
 
 
 class ResearchGroup(models.Model):
@@ -42,7 +51,13 @@ class ResearchGroup(models.Model):
 class UserResearchGroup(models.Model):
     user = models.ForeignKey('users.User')
     research_group = models.ForeignKey(ResearchGroup)
-    role = models.ForeignKey(Role)
+    roles = models.ManyToManyField(Role)
+    
+    class Meta:
+        unique_together = ('user', 'research_group')
+    
+    def __unicode__(self):
+        return self.research_group
 
 
 class UserManager(BaseUserManager):
@@ -122,7 +137,7 @@ class User(AbstractBaseUser):
         Empty pubkey as NULL instead of empty string 
         """
         if self.pubkey is u'': self.pubkey = None
-        super(TestbedUser, self).clean()
+        super(User, self).clean()
     
     def get_full_name(self):
         full_name = '%s %s' % (self.first_name, self.last_name)
@@ -177,7 +192,11 @@ class AuthToken(models.Model):
     contains ASCII characters. (e.g. by using PEM encoding or other ASCII armour).
     """
     user = models.ForeignKey('users.User')
-    data = models.CharField(max_length=256)
+    data = models.TextField(help_text='Authentication token like SSH or other '
+        'kinds of public keys or X.509 certificates to be used for slivers or '
+        'experiments. The exact valid format depends on the type of token as '
+        'long as it is non-empty and only contains ASCII characters '
+        '(e.g. by using PEM encoding or other ASCII armour).')
     
     def __unicode__(self):
         return str(self.pk)

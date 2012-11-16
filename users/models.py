@@ -29,10 +29,14 @@ class Permission(models.Model):
             name += "| %s " % self.eval_description
         return name
 
+
 class Role(models.Model):
     name = models.CharField(max_length=32)
     description = models.CharField(max_length=256, blank=True)
     permissions = models.ManyToManyField(Permission)
+    
+    # TODO each Research Group must have at least one PI.
+    #       Add generic support like required=True
     
     def __unicode__(self):
         return self.name

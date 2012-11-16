@@ -26,7 +26,7 @@ class UserAdmin(UserAdmin):
                                       'description',)}),
         ('Permissions', {'fields': ('is_active', 'is_superuser',)}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
-        ('SFA', {'fields': ('uuid', 'pubkey')}),
+        ('SFA', {'classes': ('collapse',), 'fields': ('uuid', 'pubkey')}),
         )
     add_fieldsets = (
         (None, {

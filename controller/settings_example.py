@@ -147,6 +147,7 @@ INSTALLED_APPS = (
 
     # Confine
     'common',
+#    'users',
     'nodes',
     'slices',
     'issues',
@@ -159,7 +160,7 @@ INSTALLED_APPS = (
     'rest_framework',
 )
 
-AUTH_PROFILE_MODULE = 'auth_extension.UserProfile'
+#AUTH_USER_MODEL = 'users.User'
 
 
 # A sample logging configuration. The only tangible logging

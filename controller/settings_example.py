@@ -147,11 +147,11 @@ INSTALLED_APPS = (
 
     # Confine
     'common',
-#    'users',
+    'users',
     'nodes',
     'slices',
     'issues',
-    'auth_extension',
+#    'auth_extension',
     'tinc',
     'communitynetworks',
     'firmware',
@@ -160,7 +160,7 @@ INSTALLED_APPS = (
     'rest_framework',
 )
 
-#AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
 
 
 # A sample logging configuration. The only tangible logging

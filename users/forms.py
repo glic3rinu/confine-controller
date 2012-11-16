@@ -1,7 +1,18 @@
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.forms.widgets import CheckboxSelectMultiple
 
-from users.models import User
+from users.models import User, UserResearchGroup, Role
+
+
+class UserResearchGroupInlineForm(forms.ModelForm):
+    # TODO unique user-group validation
+    # TODO at least select one reole validation
+    roles = forms.ModelMultipleChoiceField(label='Roles', queryset=Role.objects,
+        widget=CheckboxSelectMultiple)
+    
+    class Meta:
+        model = UserResearchGroup
 
 
 class UserCreationForm(forms.ModelForm):

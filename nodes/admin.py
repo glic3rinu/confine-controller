@@ -108,4 +108,4 @@ class NodeInline(admin.TabularInline):
     form = NodeInlineAdminForm
     max_num = 0
 
-insert_inline(get_user_model(), NodeInline)
+#insert_inline(get_user_model(), NodeInline)

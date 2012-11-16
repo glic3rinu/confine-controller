@@ -85,7 +85,7 @@ class HostInline(admin.TabularInline):
     form = HostInlineAdminForm
     max_num = 0
 
-insert_inline(get_user_model(), HostInline)
+#insert_inline(get_user_model(), HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincServerInline)
 insert_action(Node, set_island)

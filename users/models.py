@@ -176,7 +176,7 @@ class AuthToken(models.Model):
     format depends on the type of token as long as it is non-empty and only 
     contains ASCII characters. (e.g. by using PEM encoding or other ASCII armour).
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey('users.User')
     data = models.CharField(max_length=256)
     
     def __unicode__(self):

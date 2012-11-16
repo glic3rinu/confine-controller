@@ -94,7 +94,6 @@ class Slice(models.Model):
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
         help_text='Instance sequence number for newly created slivers.',
         verbose_name='New Sliver Instance Sequence Number')
-    # TODO: implement what vlan_nr.help_text says.
     vlan_nr = models.IntegerField('VLAN Number', null=True, blank=True,
         help_text='VLAN number allocated to this slice. The only values that can '
                   'be set are null which means that no VLAN is wanted for the '

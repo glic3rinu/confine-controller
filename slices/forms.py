@@ -6,9 +6,12 @@ from .models import Slice
 
 
 class SliceAdminForm(forms.ModelForm):
+    """ 
+    Provide vlan_nr form field in two flavours, depending on slice state:
+        1) If state is register: checkbox
+        2) If state is not register: read only integer
+    """
     # TODO this is not coding, this is hacking, please refactor this shit.
-    # FIXME look at Slice.vlan_nr model definition for more TODOs
-    """ Provide vlan_nr as a request checkbox """
     request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False, 
         help_text='VLAN number allocated to this slice by the server.')
     
@@ -32,6 +35,7 @@ class SliceAdminForm(forms.ModelForm):
                 self.fields['vlan_nr'].widget.attrs['readonly'] = True
         
     def clean_vlan_nr(self):
+        """ Return -1 if user requests vlan_nr """
         vlan_nr = self.cleaned_data['vlan_nr']
         if isinstance(vlan_nr, bool):
             if vlan_nr: return -1

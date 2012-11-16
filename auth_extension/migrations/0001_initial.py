@@ -7,6 +7,12 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+
+    depends_on = (
+        ("slices", "0001_initial"),
+    )
+
+
     def forwards(self, orm):
         # Adding model 'ResearchGroup'
         db.create_table('auth_extension_researchgroup', (

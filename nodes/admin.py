@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import transaction, models
 from singleton_models.admin import SingletonModelAdmin
 
@@ -108,4 +108,4 @@ class NodeInline(admin.TabularInline):
     form = NodeInlineAdminForm
     max_num = 0
 
-insert_inline(User, NodeInline)
+insert_inline(get_user_model(), NodeInline)

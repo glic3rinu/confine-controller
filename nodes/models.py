@@ -2,7 +2,7 @@ import re
 
 from django_extensions.db import fields
 from django_transaction_signals import defer
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 from singleton_models.models import SingletonModel
@@ -69,7 +69,7 @@ class Node(models.Model):
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
-    admin = models.ForeignKey(User, 
+    admin = models.ForeignKey(get_user_model(), 
         help_text='User who administrates this node (its creator by default).')
     
     def __unicode__(self):

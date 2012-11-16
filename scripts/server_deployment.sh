@@ -386,7 +386,8 @@ echo_portal_configuration_script () {
     cat <<- EOF 
 		su $USER -c "python $DIR/manage.py syncdb --noinput"
 		su $USER -c "python $DIR/manage.py migrate --noinput"
-		su $USER -c "echo \"from django.contrib.auth.models import User; \\
+		su $USER -c "echo \"from django.contrib.auth import get_user_model; \\
+		             User = get_user_model(); \\
 		             User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
 		EOF
 }

@@ -1,6 +1,6 @@
 import re
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
@@ -18,7 +18,7 @@ class Host(models.Model):
     """
     description = models.CharField(max_length=256, 
         help_text='Free-form textual description of this host.')
-    admin = models.ForeignKey(User, 
+    admin = models.ForeignKey(get_user_model(), 
         help_text='The user who administrates this host (its creator by default)')
     
     def __unicode__(self):

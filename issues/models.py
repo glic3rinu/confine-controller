@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from common.models import generate_chainer_manager
@@ -55,8 +56,8 @@ class Ticket(models.Model):
               (RESOLVED, "Resolved"),
               (REJECTED, "Rejected"),)
     
-    created_by = models.ForeignKey('auth.User')
-    owner = models.ForeignKey('auth.User', null=True, blank=True,
+    created_by = models.ForeignKey(get_user_model())
+    owner = models.ForeignKey(get_user_model(), null=True, blank=True,
         related_name='owned_tickets_set')
     queue = models.ForeignKey(Queue)
     subject = models.CharField(max_length=256)
@@ -90,7 +91,7 @@ class Message(models.Model):
                           (PRIVATE, "Private"),)
     
     ticket = models.ForeignKey('issues.Ticket')
-    author = models.ForeignKey('auth.User')
+    author = models.ForeignKey(get_user_model())
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, 
         default=PUBLIC)
     content = models.TextField(blank=True)

@@ -16,6 +16,7 @@ class AuthTokenInline(admin.TabularInline):
 class UserResearchGroupInline(admin.TabularInline):
     model = UserResearchGroup
     extra = 0
+    verbose_name_plural = 'Research Groups'
     
     def get_formset(self, *args, **kwargs):
         """ Change default M2M widget for CheckboxSelectMultiple """

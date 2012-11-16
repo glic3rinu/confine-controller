@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin
+from django.forms.widgets import CheckboxSelectMultiple
 
-from users.forms import UserCreationForm, UserChangeForm, UserResearchGroupInlineForm
+from users.forms import UserCreationForm, UserChangeForm
 from users.models import (User, AuthToken, Role, Permission, ResearchGroup,
     UserResearchGroup)
 
@@ -15,7 +16,12 @@ class AuthTokenInline(admin.TabularInline):
 class UserResearchGroupInline(admin.TabularInline):
     model = UserResearchGroup
     extra = 0
-    form = UserResearchGroupInlineForm
+    
+    def get_formset(self, *args, **kwargs):
+        """ Change default M2M widget for CheckboxSelectMultiple """
+        formset = super(UserResearchGroupInline, self).get_formset(*args, **kwargs)
+        formset.form.base_fields['roles'].widget = CheckboxSelectMultiple()
+        return formset
 
 
 class RoleAdmin(admin.ModelAdmin):

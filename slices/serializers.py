@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from common.serializers import UriHyperlinkedModelSerializer
+from common.serializers import UriHyperlinkedModelSerializer, HyperlinkedFileField
 
 from .models import Slice, Sliver, Template
 
@@ -37,7 +37,8 @@ class SliceSerializer(UriHyperlinkedModelSerializer):
 class TemplateSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     image_sha256 = serializers.CharField(read_only=True)
-    
+    image_uri = HyperlinkedFileField(source='image')
+
     class Meta:
         model = Template
 

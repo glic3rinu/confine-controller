@@ -16,11 +16,12 @@ class SliverSerializer(UriHyperlinkedModelSerializer):
     interfaces = IfaceSerializer()
     properties = serializers.Field()
     exp_data_sha256 = serializers.CharField(read_only=True)
+    exp_data_uri = HyperlinkedFileField(source='exp_data')
     
     class Meta:
         model = Sliver
         # FIXME bug in rest_framework2 HyperLinkedRelations with null=True blowup
-        exclude = ['template']
+        exclude = ['exp_data']
 
 
 class SliceSerializer(UriHyperlinkedModelSerializer):
@@ -29,9 +30,11 @@ class SliceSerializer(UriHyperlinkedModelSerializer):
         read_only=True)
     properties = serializers.Field()
     exp_data_sha256 = serializers.CharField(read_only=True)
-    
+    exp_data_uri = HyperlinkedFileField(source='exp_data')
+
     class Meta:
         model = Slice
+        exclude = ['exp_data']
 
 
 class TemplateSerializer(UriHyperlinkedModelSerializer):
@@ -41,5 +44,5 @@ class TemplateSerializer(UriHyperlinkedModelSerializer):
 
     class Meta:
         model = Template
-
+        exclude = ['image']
 

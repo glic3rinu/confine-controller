@@ -10,8 +10,8 @@ from .serializers import ServerSerializer, NodeSerializer
 
 class NodeList(generics.ListCreateAPIView):
     """ 
-    **Media type:** [`application/vnd.confine.server.NodeList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#nodelist_at_server)
+    **Media type:** [`application/vnd.confine.server.Node.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#node_at_server)
     
     This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
     api?&#node_at_server) available in the testbed and provides API URIs to 

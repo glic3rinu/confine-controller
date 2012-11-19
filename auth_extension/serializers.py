@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from common.serializers import UriHyperlinkedModelSerializer
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+
+class UserSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     uuid = serializers.CharField()
     pubkey = serializers.CharField()

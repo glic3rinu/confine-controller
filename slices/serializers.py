@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from common.serializers import UriHyperlinkedModelSerializer
+
 from .models import Slice, Sliver, Template
 
 
@@ -10,7 +12,7 @@ class IfaceSerializer(serializers.Serializer):
     parent_name = serializers.CharField()
 
 
-class SliverSerializer(serializers.HyperlinkedModelSerializer):
+class SliverSerializer(UriHyperlinkedModelSerializer):
     interfaces = IfaceSerializer()
     properties = serializers.Field()
     exp_data_sha256 = serializers.CharField(read_only=True)
@@ -21,7 +23,7 @@ class SliverSerializer(serializers.HyperlinkedModelSerializer):
         exclude = ['template']
 
 
-class SliceSerializer(serializers.HyperlinkedModelSerializer):
+class SliceSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail',
         read_only=True)
@@ -32,7 +34,7 @@ class SliceSerializer(serializers.HyperlinkedModelSerializer):
         model = Slice
 
 
-class TemplateSerializer(serializers.HyperlinkedModelSerializer):
+class TemplateSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     image_sha256 = serializers.CharField(read_only=True)
     

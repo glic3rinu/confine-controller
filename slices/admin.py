@@ -348,7 +348,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         Returns True if the given request has permission to create the given object.
         """
         opts = self.opts
-        return request.user.has_perm(opts.app_label + '.create_' + opts.module_name, obj)
+        return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission(), obj)
     
     def has_change_permission(self, request, obj=None):
         """

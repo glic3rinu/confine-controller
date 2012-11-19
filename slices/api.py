@@ -44,6 +44,7 @@ class SliverList(generics.ListCreateAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
+    filter_fields = ['slice__name']
 
 
 class SliverDetail(generics.RetrieveUpdateDestroyAPIView):

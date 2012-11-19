@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from common.api import api
+from common.serializers import UriHyperlinkedModelSerializer
 from nodes.models import Server, Node
 
 from .models import (Island, TincAddress, TincHost, TincClient, TincServer, 
@@ -21,7 +22,7 @@ class TincConnectToSerializer(serializers.ModelSerializer):
         exclude = ('id', 'server', 'island')
 
 
-class IslandSerializer(serializers.HyperlinkedModelSerializer):
+class IslandSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     
     class Meta:
@@ -56,7 +57,7 @@ class TincServerSerializer(serializers.ModelSerializer):
         exclude = ('object_id', 'content_type', 'id')
 
 
-class GatewaySerializer(serializers.HyperlinkedModelSerializer):
+class GatewaySerializer(UriHyperlinkedModelSerializer):
     tinc = TincServerSerializer()
     id = serializers.Field()
     
@@ -64,7 +65,7 @@ class GatewaySerializer(serializers.HyperlinkedModelSerializer):
         model = Gateway
 
 
-class HostSerializer(serializers.HyperlinkedModelSerializer):
+class HostSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     tinc = TincClientSerializer()
     

@@ -30,7 +30,7 @@ class ApiRoot(APIView):
         for model in api._registry:
             name = force_unicode(model._meta.verbose_name)
             name_plural = force_unicode(model._meta.verbose_name_plural)
-            output.update({'%s_href' % name_plural: reverse('%s-list' % name,
+            output.update({'%s_uri' % name_plural: reverse('%s-list' % name,
                 args=[], request=request)})
         return Response(output)
 

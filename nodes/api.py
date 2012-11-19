@@ -19,7 +19,7 @@ class NodeList(generics.ListCreateAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
-    filter_fields = ('arch', 'set_state', 'admin')
+    filter_fields = ('arch', 'set_state', 'admin', 'admin__username')
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -8,8 +8,8 @@ from .serializers import SliceSerializer, SliverSerializer, TemplateSerializer
 
 class SliceList(generics.ListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.SliceList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#slicelist_at_server)
+    **Media type:** [`application/vnd.confine.server.Slice.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
     
     This resource lists the [slices](http://wiki.confine-project.eu/arch:rest-
     api?&#slice_at_server) present in the testbed and provides API URIs to 
@@ -35,8 +35,8 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class SliverList(generics.ListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.SliverList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#sliverlist_at_server)
+    **Media type:** [`application/vnd.confine.server.Sliver.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
     
     This resource lists the  [slivers](http://wiki.confine-project.eu/arch:rest-
     api?&#sliver_at_server) present in the testbed and provides API URIs to 
@@ -63,8 +63,8 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class TemplateList(generics.ListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.TemplateList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#templatelist_at_server)
+    **Media type:** [`application/vnd.confine.server.Template.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#template_at_server)
     
     This resource lists the sliver [templates](http://wiki.confine-project.eu/
     arch:rest-api?&#template_at_server) available in the testbed and provides 

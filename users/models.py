@@ -28,7 +28,20 @@ class Permission(models.Model):
         if self.eval_description:
             name += "| %s " % self.eval_description
         return name
-
+    
+    @classmethod
+    def evaluate(cls, perm, user, obj):
+        app_label = perm[:perm.index('.')]
+        model = perm[perm.index('_')+1:]
+        action = perm[perm.index('.')+1:perm.index('_')]
+        perms = cls.objects.filter(role__userresearchgroup__user=user,
+                                   content_type__app_label=app_label,
+                                   content_type__model=model,
+                                   action=action).distinct()
+        for perm in perms:
+            if eval(perm.eval):
+                return  True
+        return False
 
 class Role(models.Model):
     name = models.CharField(max_length=32)
@@ -119,9 +132,10 @@ class User(AbstractBaseUser):
         help_text='Designates that this user has all permissions without '
                     'explicitly assigning them.')
     date_joined = models.DateTimeField(default=timezone.now)
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
         help_text='A PEM-encoded RSA public key for this user (used by SFA).')
-    uuid = models.CharField(max_length=36, unique=True, blank=True,
+    # TODO add validator
+    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this '
                   'user (used by SFA). This is optional, but once set to a valid '
                   'UUID it can not be changed.')
@@ -154,16 +168,22 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.first_name
     
+    @property
+    def roles(self):
+        return self.research_groups.all()
+    
     def has_perm(self, perm, obj=None):
-        #TODO implemet
         """
         Returns True if the user has the specified permission. This method
         queries all available auth backends, but returns immediately if any
         backend returns True. 
         """
-        if self.is_active and self.is_superuser:
+        # TODO: add and create special cases
+        if not self.is_active: 
+            return False
+        if self.is_superuser:
             return True
-        return self.is_active
+        return Permission.evaluate(perm, self, obj)
     
     def has_perms(self, perm_list, obj=None):
         """
@@ -177,14 +197,16 @@ class User(AbstractBaseUser):
         return True
     
     def has_module_perms(self, app_label):
-        #TODO implemet
         """
         Returns True if the user has any permissions in the given app label.
         Uses pretty much the same logic as has_perm, above.
         """
-        if self.is_active and self.is_superuser:
+        if not self.is_active:
+            return False
+        if self.is_superuser:
             return True
-        return self.is_active
+        return Permission.objects.filter(role__userresearchgroup__user=self,
+                                         content_type__app_label=app_label).exists()
     
     @property
     def is_staff(self):

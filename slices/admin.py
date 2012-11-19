@@ -292,7 +292,8 @@ class SliceAdmin(ChangeViewActionsMixin):
         (None, {
             'fields': ('name', 'description', ('template', template_link), ('exp_data', 
                        'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
-                       'instance_sn', 'new_sliver_instance_sn', 'expires_on'),
+                       'instance_sn', 'new_sliver_instance_sn', 'expires_on',
+                       'research_group'),
         }),
         ('Public key', {
             'classes': ('collapse',),
@@ -334,6 +335,37 @@ class SliceAdmin(ChangeViewActionsMixin):
                     SliceSliversAdmin(Sliver, admin_site))),)
         )
         return extra_urls + urls
+    
+    def has_add_permission(self, request):
+        """
+        Returns True if the given request has permission to add a new object.
+        """
+        opts = self.opts
+        return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission())
+    
+    def has_create_permission(self, request, obj=None):
+        """
+        Returns True if the given request has permission to create the given object.
+        """
+        opts = self.opts
+        return request.user.has_perm(opts.app_label + '.create_' + opts.module_name, obj)
+    
+    def has_change_permission(self, request, obj=None):
+        """
+        Returns True if the given request has permission to change the given
+        Django model instance.
+        """
+        opts = self.opts
+        return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
+    
+    def has_delete_permission(self, request, obj=None):
+        """
+        Returns True if the given request has permission to change the given
+        Django model instance.
+        """
+        opts = self.opts
+        return request.user.has_perm(opts.app_label + '.' + opts.get_delete_permission(), obj)
+
 
 
 class TemplateAdmin(admin.ModelAdmin):

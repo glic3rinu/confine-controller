@@ -138,7 +138,7 @@ class User(AbstractBaseUser):
     date_joined = models.DateTimeField(default=timezone.now)
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
         help_text='A PEM-encoded RSA public key for this user (used by SFA).')
-    # TODO add validator
+    # TODO add validator or custom UUID field?
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this '
                   'user (used by SFA). This is optional, but once set to a valid '
@@ -160,9 +160,10 @@ class User(AbstractBaseUser):
     
     def clean(self):
         """ 
-        Empty pubkey as NULL instead of empty string 
+        Empty pubkey and uuid as NULL instead of empty string 
         """
-        if self.pubkey is u'': self.pubkey = None
+        if self.pubkey == '': self.pubkey = None
+        if self.uuid == '': self.uuid = None
         super(User, self).clean()
     
     def get_full_name(self):

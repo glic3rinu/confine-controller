@@ -7,8 +7,8 @@ from users.serializers import UserSerializer
 
 class UserList(generics.ListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.UserList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#userlist_at_server)
+    **Media type:** [`application/vnd.confine.server.User.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#user_at_server)
     
     This resource lists the [users](http://wiki.confine-project.eu/arch:rest-api
     ?&#user_at_server) present in the testbed and provides API URIs to navigate 

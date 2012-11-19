@@ -1,0 +1,368 @@
+[
+  {
+    "model": "users.permission",
+    "pk": 1,
+    "fields": {
+      "content_type": ["tinc","host"],
+      "action": "add",
+      "eval": "True"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 2,
+    "fields": {
+      "content_type": ["tinc","host"],
+      "action": "change",
+      "eval": "obj.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 3,
+    "fields": {
+      "content_type": ["tinc","host"],
+      "action": "view",
+      "eval": "obj.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 4,
+    "fields": {
+      "content_type": ["tinc","host"],
+      "action": "delete",
+      "eval": "obj.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 5,
+    "fields": {
+      "content_type": ["tinc","tincclient"],
+      "action": "add",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 6,
+    "fields": {
+      "content_type": ["tinc","tincclient"],
+      "action": "change",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 7,
+    "fields": {
+      "content_type": ["tinc","tincclient"],
+      "action": "view",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 8,
+    "fields": {
+      "content_type": ["tinc","tincclient"],
+      "action": "delete",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 9,
+    "fields": {
+      "content_type": ["nodes","node"],
+      "action": "add",
+      "eval": "True"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 10,
+    "fields": {
+      "content_type": ["nodes","node"],
+      "action": "change",
+      "eval": "obj.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 11,
+    "fields": {
+      "content_type": ["nodes","node"],
+      "action": "view",
+      "eval": "obj.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 12,
+    "fields": {
+      "content_type": ["nodes","node"],
+      "action": "delete",
+      "eval": "obj.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 13,
+    "fields": {
+      "content_type": ["nodes","nodeprop"],
+      "action": "add",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 14,
+    "fields": {
+      "content_type": ["nodes","nodeprop"],
+      "action": "change",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 15,
+    "fields": {
+      "content_type": ["nodes","nodeprop"],
+      "action": "view",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 16,
+    "fields": {
+      "content_type": ["nodes","nodeprop"],
+      "action": "delete",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 17,
+    "fields": {
+      "content_type": ["nodes","directiface"],
+      "action": "add",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 18,
+    "fields": {
+      "content_type": ["nodes","directiface"],
+      "action": "view",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 19,
+    "fields": {
+      "content_type": ["nodes","directiface"],
+      "action": "change",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 20,
+    "fields": {
+      "content_type": ["nodes","directiface"],
+      "action": "delete",
+      "eval": "obj.node.admin == user",
+      "eval_description": "Node admin"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 21,
+    "fields": {
+      "content_type": ["slices","slice"],
+      "action": "add",
+      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 22,
+    "fields": {
+      "content_type": ["slices","slice"],
+      "action": "view",
+      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 23,
+    "fields": {
+      "content_type": ["slices","slice"],
+      "action": "change",
+      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 24,
+    "fields": {
+      "content_type": ["slices","slice"],
+      "action": "delete",
+      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 25,
+    "fields": {
+      "content_type": ["slices","sliceprop"],
+      "action": "add",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 26,
+    "fields": {
+      "content_type": ["slices","sliceprop"],
+      "action": "view",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 27,
+    "fields": {
+      "content_type": ["slices","sliceprop"],
+      "action": "change",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 28,
+    "fields": {
+      "content_type": ["slices","sliceprop"],
+      "action": "delete",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 29,
+    "fields": {
+      "content_type": ["slices","sliver"],
+      "action": "add",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 30,
+    "fields": {
+      "content_type": ["slices","sliver"],
+      "action": "view",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 31,
+    "fields": {
+      "content_type": ["slices","sliver"],
+      "action": "change",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 32,
+    "fields": {
+      "content_type": ["slices","sliver"],
+      "action": "delete",
+      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+
+  {
+    "model": "users.permission",
+    "pk": 33,
+    "fields": {
+      "content_type": ["slices","sliverprop"],
+      "action": "add",
+      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 34,
+    "fields": {
+      "content_type": ["slices","sliverprop"],
+      "action": "view",
+      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 35,
+    "fields": {
+      "content_type": ["slices","sliverprop"],
+      "action": "change",
+      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 36,
+    "fields": {
+      "content_type": ["slices","sliverprop"],
+      "action": "delete",
+      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval_description": "Research Group"
+    }
+  }
+]

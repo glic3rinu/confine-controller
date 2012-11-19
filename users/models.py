@@ -8,6 +8,8 @@ from django.db import models
 from django.utils import timezone, six
 
 
+# TODO add permission caching
+
 class Permission(models.Model):
     ACTIONS = (
         ('view', 'View'),
@@ -38,6 +40,8 @@ class Permission(models.Model):
                                    content_type__app_label=app_label,
                                    content_type__model=model,
                                    action=action).distinct()
+        if not obj:
+            return perms.exists()
         for perm in perms:
             if eval(perm.eval):
                 return  True
@@ -178,7 +182,6 @@ class User(AbstractBaseUser):
         queries all available auth backends, but returns immediately if any
         backend returns True. 
         """
-        # TODO: add and create special cases
         if not self.is_active: 
             return False
         if self.is_superuser:

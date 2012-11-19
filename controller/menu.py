@@ -24,14 +24,15 @@ class CustomMenu(Menu):
         
         self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')))
         
-        self.children.append(items.MenuItem('Slices', '/admin/slices/',
-            children=[
-                items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
-                items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
-                items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
-            ]))
+        if context['user'].has_module_perms('slices'):
+            self.children.append(items.MenuItem('Slices', '/admin/slices/',
+                children=[
+                    items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
+                    items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
+                    items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
+                ]))
         
-        if 'tinc' in settings.INSTALLED_APPS:
+        if 'tinc' in settings.INSTALLED_APPS and context['user'].has_module_perms('tinc'):
             self.children.append(items.MenuItem('Tinc', '/admin/tinc/',
                 children=[
                     items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),

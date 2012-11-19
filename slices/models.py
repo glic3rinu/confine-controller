@@ -114,6 +114,7 @@ class Slice(models.Model):
     users = models.ManyToManyField(get_user_model(),
         help_text='A list of users able to login as root in slivers using their '
                   'authentication tokens (usually an SSH key).')
+    research_group = models.ForeignKey('users.ResearchGroup')
     
     def __unicode__(self):
         return self.name

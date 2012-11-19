@@ -8,8 +8,8 @@ from .serializers import IslandSerializer, HostSerializer, GatewaySerializer
 
 class IslandList(generics.ListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.IslandList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#islandlist_at_server)
+    **Media type:** [`application/vnd.confine.server.Island.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#island_at_server)
     
     This resource lists the network [islands](http://wiki.confine-project.eu/
     arch:rest-api?&#island_at_server) supported by the testbed and provides 
@@ -62,8 +62,8 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class GatewayList(generics.ListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.GatewayList.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#gatewaylist_at_server)
+    **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)
     
     This resource lists testbed [gateways](http://wiki.confine-project.eu/arch:
     rest-api?&#gateway_at_server) and provides API URIs to navigate to them.

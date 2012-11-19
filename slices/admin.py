@@ -365,6 +365,17 @@ class SliceAdmin(ChangeViewActionsMixin):
         """
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + opts.get_delete_permission(), obj)
+    
+    user_can_access_owned_objects_only = True
+    user_owned_objects_field = 'research_group__user'
+
+    def queryset(self, request):
+        qs = super(SliceAdmin, self).queryset(request)
+        if self.user_can_access_owned_objects_only and \
+            not request.user.is_superuser:
+            filters = {self.user_owned_objects_field: request.user}
+            qs = qs.filter(**filters)
+        return qs
 
 
 

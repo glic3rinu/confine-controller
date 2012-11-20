@@ -22,12 +22,24 @@ class Node(models.Model):
     FAILURE = 'failure'
     SAFE = 'safe'
     PRODUCTION = 'production'
-    STATES = ((INSTALL_CONF, 'Install Configuration'),
-              (INSTALL_CERT, 'Install Certificate'),
-              (DEBUG, 'Debug'),
-              (FAILURE, 'Failure'),
-              (SAFE, 'Safe'),
-              (PRODUCTION, 'Production'),)
+    STATES = (
+        (INSTALL_CONF, 'Install Configuration'),
+        (INSTALL_CERT, 'Install Certificate'),
+        (DEBUG, 'Debug'),
+        (FAILURE, 'Failure'),
+        (SAFE, 'Safe'),
+        (PRODUCTION, 'Production'),
+    )
+    IPV6_METHODS = (
+        ('none', 'none'),
+        ('dhcp', 'dhcp'),
+        ('auto', 'auto'),
+    )
+    IPV4_METHODS = (
+        ('none', 'none'),
+        ('dhcp', 'dhcp'),
+        ('range', 'range'),
+    )
     
     uuid = fields.UUIDField(auto=True, 
         help_text='Universally unique identifier (UUID, RFC 4122).')
@@ -46,26 +58,44 @@ class Node(models.Model):
         default=settings.DEFAULT_NODE_LOCAL_IFACE,
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
-    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 
-        protocol='IPv4', null=True, blank=True,
-        help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
-                  'prefix. See <a href="http://wiki.confine-project.eu/arch:'
-                  'addressing">addressing</a> for legal values. %s When null.' 
-                  % settings.PRIV_IPV4_PREFIX_DFLT)
-    # TODO restric this according the data model
+    sliver_pub_ipv6 = models.CharField(max_length=8, choices=IPV6_METHODS,
+        help_text='Indicates IPv6 support for public sliver interfaces in the '
+                  'local network (see <a href="https://wiki.confine-project.eu/'
+                  'arch:node">node architecture</a>). Possible values: none (no '
+                  'public IPv6 support), dhcp (addresses configured using DHCPv6), '
+                  'auto (addresses configured using NDP stateless autoconfiguration).',
+        default='none')
+    sliver_pub_ipv4 = models.CharField(max_length=8, choices=IPV4_METHODS,
+        help_text='Indicates IPv4 support for public sliver interfaces in the '
+                  'local network (see <a href="https://wiki.confine-project.eu/'
+                  'arch:node">node architecture</a>). Possible values: none (no '
+                  'public IPv4 support), dhcp (addresses configured using DHCP), '
+                  'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
+        default='none')
+    sliver_pub_ipv4_range = models.CharField(max_length=256, blank=True, null=True,
+        help_text='Describes the public IPv4 range that can be used by sliver '
+                  'public interfaces. If sliver_pub_ipv4 is none, its value is '
+                  'null. If sliver_pub_ipv4 is dhcp, its value is #N, where N '
+                  'is the decimal integer number of DHCP addresses reserved for '
+                  'slivers. If sliver_pub_ipv4 is range, its value can be either '
+                  'BASE_IP#N or +BASE_OFF#N, where N is the decimal integer number '
+                  'of consecutive addresses reserved for slivers after and including '
+                  'the range\'s base address, given as an IP address in the local '
+                  'network (BASE_IP) or as an decimal positive integer offset '
+                  'over the local network\'s base address (e.g. in 10.241.17.16/28 '
+                  'the value +10#5 means 10.241.17.26 to 10.241.17.30).')
     sliver_mac_prefix = models.PositiveSmallIntegerField('Sliver MAC Prefix',
         max_length=16, null=True, blank=True,
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
                   'values. %s when null.</a>.' % settings.SLIVER_MAC_PREFIX_DFLT)
-    sliver_pub_ipv4_total = models.IntegerField('Sliver Public IPv4 Total', default=0,
-        help_text='Total number of public (from the point of view of the CN) '
-                  'IPv4 addresses available in this node\'s local network to be '
-                  'allocated to slivers\' public interfaces (see <a href="http:'
-                  '//wiki.confine-project.eu/arch:node">node</a> architecture). '
-                  'If the local network uses private addresses the value should '
-                  'be 0.')
+    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 
+        protocol='IPv4', null=True, blank=True,
+        help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
+                  'prefix. See <a href="http://wiki.confine-project.eu/arch:'
+                  'addressing">addressing</a> for legal values. %s When null.' 
+                  % settings.PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
@@ -76,9 +106,12 @@ class Node(models.Model):
         return self.description
     
     def clean(self):
-        """ Empty pubkey and cert as NULL instead of empty string """
-        if self.pubkey == u'': self.pubkey = None
-        if self.cert == u'': self.cert = None
+        """ 
+        Empty pubkey, cert and sliver_pub_ipv4_range as NULL instead of empty string.
+        """
+        if self.pubkey == '': self.pubkey = None
+        if self.cert == '': self.cert = None
+        if self.sliver_pub_ipv4 == 'none': self.sliver_pub_ipv4_range = None
         super(Node, self).clean()
     
     @property

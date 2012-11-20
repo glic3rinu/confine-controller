@@ -42,8 +42,9 @@ class NodeAdmin(ChangeViewActionsMixin):
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('description', 'admin', 'sliver_pub_ipv4_total', 'arch', 
-                       'local_iface', 'boot_sn', 'set_state',),
+            'fields': ('description', 'admin', 'arch', 'local_iface', 
+                       'sliver_pub_ipv6', 'sliver_pub_ipv4', 
+                       'sliver_pub_ipv4_range', 'boot_sn', 'set_state',),
         }),
         ('Keys', {
             'classes': ('collapse',),

@@ -33,7 +33,7 @@
       "config": 1,
       "section": "node",
       "option": "cn_url",
-      "value": "node.cn_url"
+      "value": "node.cn"
     }
   },
   {
@@ -63,7 +63,7 @@
       "config": 1,
       "section": "node",
       "option": "public_ipv4_avail",
-      "value": "node.sliver_pub_ipv4_total"
+      "value": "node.sliver_pub_ipv4_range"
     }
   },
   {
@@ -83,7 +83,7 @@
       "config": 1,
       "section": "node",
       "option": "sl_public_ipv4_proto",
-      "value": "'dhcp'"
+      "value": "node.sliver_pub_ipv4"
     }
   },
   {

@@ -24,6 +24,9 @@ private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT
 
 class BuildQuerySet(models.query.QuerySet):
     def get_current(self, node):
+        """
+        Given an node returns an up-to-date builded image, if exists.
+        """
         build = Build.objects.get(node=node)
         config = Config.objects.get()
         if build.state != Build.AVAILABLE: return build

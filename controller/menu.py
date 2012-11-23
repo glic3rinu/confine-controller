@@ -24,7 +24,7 @@ class CustomMenu(Menu):
         
         self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')))
         
-        self.children.append(items.MenuItem('Slices', '/admin/slices/',
+        self.children.append(items.MenuItem('Slices', reverse('admin:app_list', args=['slices']),
             children=[
                 items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
                 items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
@@ -32,7 +32,7 @@ class CustomMenu(Menu):
             ]))
         
         if 'tinc' in settings.INSTALLED_APPS:
-            self.children.append(items.MenuItem('Tinc', '/admin/tinc/',
+            self.children.append(items.MenuItem('Tinc', reverse('admin:app_list', args=['tinc']),
                 children=[
                     items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
                     items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),

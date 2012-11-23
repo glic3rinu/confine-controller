@@ -238,10 +238,11 @@ class Sliver(models.Model):
     def interfaces(self):
         try: ifaces = [self.privateiface] 
         except PrivateIface.DoesNotExist: ifaces = []
-        ifaces += list(self.publiciface_set.all())
-        ifaces += list(self.isolatediface_set.all())
+#        ifaces += list(self.publiciface_set.all())
+#        ifaces += list(self.isolatediface_set.all())
+        ifaces += list(self.researchiface_set.all())
         return ifaces
-    
+
     def reset(self):
         self.instance_sn += 1
         self.save()
@@ -299,6 +300,10 @@ class SliverIface(models.Model):
     # operations works properly (FIXME: check if access to info works!)
     @property
     def mac_addr(self):
+        """
+        Expected address calculated in the server (can be different from the
+        one showed in the node, which is the real address)
+        """
         node = self.parent.node
         words = [
             more_significant_bits(node.sliver_mac_prefix),
@@ -311,7 +316,17 @@ class SliverIface(models.Model):
         
         return ':'.join(words)
 
-class IsolatedIface(SliverIface):
+class ResearchIface(SliverIface):
+    sliver = models.ForeignKey(Sliver)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def nr(self): # 1 >= nr >= 256
+        return self.pk # % 256 ) + 1 ?? #FIXME
+
+class IsolatedIface(ResearchIface):
     """
     Describes an Isolated interface of an sliver: It is used for sharing the 
     same physical interface but isolated at L3, by means of tagging all the 
@@ -319,43 +334,40 @@ class IsolatedIface(SliverIface):
     interface, the researcher will be able to configure it at L3, but several 
     slices may share the same physical interface.
     """
-    sliver = models.ForeignKey(Sliver)
     parent = models.ForeignKey('nodes.DirectIface', unique=True)
-    
-    class Meta:
-        unique_together = ['sliver', 'parent']
-
-    @property
-    def use_default_gw(self):
-        return None
 
 
-class IpSliverIface(SliverIface):
+#    class Meta:
+#       """slices.isolatediface: "unique_together" refers to sliver. This is
+#        not in the same model as the unique_together statement."""
+#        TODO: check if the pair <sliver> and <directiface> are unique
+#        unique_together = ['sliver', 'parent']
+
+
+class IpIface(ResearchIface):
     """
     Base class for IP based sliver interfaces. IP Interfaces might have assigned
     either a public or a private address.
     """
-    use_default_gw = models.BooleanField('Use Default Gateway', default=True, 
-        help_text='Whether to use a host (provided by the research device) in '
-                  'the network connected to this interface as a default gateway.')
+#    use_default_gw = models.BooleanField('Use Default Gateway', default=True,
+#        help_text='Whether to use a host (provided by the research device) in '
+#                  'the network connected to this interface as a default gateway.')
     
     class Meta:
         abstract = True
 
 
-class PublicIface(IpSliverIface):
+class MgmtIface(IpIface):
     """
-    Describes a Public Interface for an sliver. Traffic from a public interface 
-    will be bridged to the community network.
+    Describes the management network interface for an sliver.
     """
-    sliver = models.ForeignKey(Sliver)
-    
-    @property
-    def nr(self): # 1 >= nr >= 256
-        return self.pk # % 256 ) + 1 ?? #FIXME
-    
+        
     @property
     def ipv6_addr(self): #Testbed management IPv6 network (local bridge)
+        """
+        Expected address calculated in the server (can be different from the
+        one showed in the node, which is the real address)
+        """
     #<node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
         ipv6_prefix = node_settings.MGMT_IPV6_PREFIX.split(':')
         ipv6_words = ipv6_prefix[:3]
@@ -365,13 +377,54 @@ class PublicIface(IpSliverIface):
             number_to_hex_str(self.sliver.slice_id, 4) # Slice.id
         ])
         return ':'.join(ipv6_words)
-    
+
+class Pub6Iface(IpIface):
+    """
+    Local network interface: assigned by stateless autoconf or DHCPv6
+    Describes an IPv6 Public Interface for an sliver. Traffic from a public
+    interface will be bridged to the community network.
+    """
+
+    @property
+    def ipv6_addr(self):
+        #TODO: REMOVE | RAISE exception | RETURN message
+        return 'state address (only available from nodes)'
+
+
+class Pub4Iface(IpIface):
+    """
+    Local network interface: assigned by DHCP or using a configuration range
+    Describes an IPv4 Public Interface for an sliver. Traffic from a public
+    interface will be bridged to the community network.
+    """
+
     @property
     def ipv4_addr(self):
-        return 'TODO'
+        #TODO: REMOVE | RAISE exception | RETURN message
+        return 'state address (only available from nodes)'
 
+    # Node.sliver_pub_ipv4_range
+    
+    @classmethod
+    def max_num_ifaces(self):
+        """
+        Obtains the number of availables IPs type 4 for the sliver
+          + When Node.sliver_pub_ipv4 is dhcp, its value is #N, meaning there
+          are N total public IPv4 addresses for slivers.
+          + When Node.sliver_pub_ipv4 is range, its value is IP#N or +B#N,
+          meaning there are N total public IPv4 addresses for slivers after and
+          including IP or B.
+          + When Node.sliver_pub_ipv4 is none there are not support for public ipv4
+        """
+        node = self.sliver.node
+        if node.sliver_pub_ipv4 == 'none':
+            max_num = 0
+        else: # dhcp | range
+            max_num = int(node.sliver_pub_ipv4_range.split('#')[1])
 
-class PrivateIface(IpSliverIface):
+        return max_num
+
+class PrivateIface(SliverIface):
     """
     Describes a Private Interface of an sliver.Traffic from a private interface 
     will be forwarded to the community network by means of NAT. Every sliver 
@@ -385,6 +438,10 @@ class PrivateIface(IpSliverIface):
     
     @property
     def ipv6_addr(self):
+        """
+        Expected address calculated in the server (can be different from the
+        one showed in the node, which is the real address)
+        """
         # <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
         ip_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
         ip_words.extend([
@@ -400,13 +457,16 @@ class PrivateIface(IpSliverIface):
         sliver's private IPv4 address).
             - X.Y.Z == prefix
             - S = sliver #number
+        NOTE: this is the expected address calculated in the server (can be
+        different from the one showed in the node, which is the real address)
         """
         if not self.sliver.node.priv_ipv4_prefix:
             prefix = node_settings.PRIV_IPV4_PREFIX_DFLT
         else:
             prefix = self.sliver.node.priv_ipv4_prefix
-        
+
         prefix_words = prefix.split('.')[:3]
         prefix_words.append('%d' % self.sliver.nr)
         
         return '.'.join(prefix_words)
+

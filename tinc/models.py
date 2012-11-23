@@ -105,8 +105,8 @@ class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
     """
-    ip_addr = models.GenericIPAddressField('IP Address', protocol='IPv6', 
-        help_text='IPv6 address of this tinc address.')
+    ip_addr = models.GenericIPAddressField('IP Address', protocol='IPv4', 
+        help_text='The tinc IP address of the host this one connects to.')
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,

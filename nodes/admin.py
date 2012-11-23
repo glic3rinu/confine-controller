@@ -46,9 +46,9 @@ class NodeAdmin(ChangeViewActionsMixin):
                        'sliver_pub_ipv6', 'sliver_pub_ipv4', 
                        'sliver_pub_ipv4_range', 'boot_sn', 'set_state',),
         }),
-        ('Keys', {
+        ('SFA', {
             'classes': ('collapse',),
-            'fields': ('pubkey', 'cert')
+            'fields': ('pubkey', 'cert', 'uuid')
         }),
         ('Optional Prefixes', {
             'classes': ('collapse',),

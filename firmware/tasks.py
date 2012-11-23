@@ -9,7 +9,7 @@ def build(build_id):
     from firmware.models import Build, Config
 
     build_obj = Build.objects.get(pk=build_id)
-    build_obj.task_id=build.request_id
+    build_obj.task_id=build.request.id
     build_obj.save()
     config = Config.objects.get()
     base_image = config.get_image(build_obj.node)

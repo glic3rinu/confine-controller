@@ -132,7 +132,7 @@ class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
                     'arch', colored('set_state', STATES_COLORS), admin_link('admin'), 
-                    'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_total']
+                    'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id', 'uuid']
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
@@ -145,10 +145,10 @@ class NodeListAdmin(NodeAdmin):
     add_sliver_link.allow_tags = True
     add_sliver_link.short_description = 'Add on Node'
     
-    def custom_sliver_pub_ipv4_total(self, instance):
-        return instance.sliver_pub_ipv4_total
-    custom_sliver_pub_ipv4_total.short_description = 'Total IPv4'
-    custom_sliver_pub_ipv4_total.admin_order_field = 'sliver_pub_ipv4_total'
+    def custom_sliver_pub_ipv4_range(self, instance):
+        return instance.sliver_pub_ipv4_range
+    custom_sliver_pub_ipv4_range.short_description = 'Total IPv4'
+    custom_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id

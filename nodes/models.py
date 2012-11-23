@@ -41,8 +41,11 @@ class Node(models.Model):
         ('range', 'range'),
     )
     
-    uuid = fields.UUIDField(auto=True, 
-        help_text='Universally unique identifier (UUID, RFC 4122).')
+    # TODO add validator or custom UUID field?
+    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
+        help_text='A universally unique identifier (UUID, RFC 4122) for this node '
+                  '(used by SFA). This is optional, but once set to a valid UUID '
+                  'it can not be changed.')
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).')
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
@@ -111,6 +114,7 @@ class Node(models.Model):
         """
         if self.pubkey == '': self.pubkey = None
         if self.cert == '': self.cert = None
+        if self.uuid == '': self.uuid = None
         if self.sliver_pub_ipv4 == 'none': self.sliver_pub_ipv4_range = None
         super(Node, self).clean()
     

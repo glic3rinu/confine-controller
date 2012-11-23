@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
     """ 
-    HyperlinkedRelatedField field providing a relational object rather than flat URL 
+    HyperlinkedRelatedField field providing a relation object rather than flat URL 
     """
     def to_native(self, obj):
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
@@ -14,13 +14,15 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
 
 class RelManyHyperlinkedRelatedField(serializers.ManyRelatedMixin, RelHyperlinkedRelatedField):
     """
-    Represents a to-many relationship, using hyperlinking inside a relational object.
+    Represents a to-many relationship, using hyperlinking inside a relation object
     """
     pass
 
 
 class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
-    """ Like HyperlinkedModelSerializer but swapping url for uri field name """
+    """ 
+    Like HyperlinkedModelSerializer but swapping url for uri field name 
+    """
     uri = serializers.HyperlinkedIdentityField()
     
     def __init__(self, *args, **kwargs):
@@ -29,7 +31,7 @@ class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
     
     def get_related_field(self, model_field, to_many):
         """
-        Creates a default instance of a flat relational field.
+        Creates a default instance of an object relational field.
         """
         rel = model_field.rel.to
         queryset = rel._default_manager

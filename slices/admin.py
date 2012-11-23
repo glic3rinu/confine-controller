@@ -14,8 +14,8 @@ from nodes.models import Node
 from .actions import renew_selected_slices, reset_selected
 from .forms import SliceAdminForm, IsolatedIfaceInlineForm
 from .helpers import wrap_action, remove_slice_id
-from .models import (Sliver, SliverProp, IsolatedIface, PublicIface, PrivateIface, 
-    Slice, SliceProp, Template)
+from .models import (Sliver, SliverProp, IsolatedIface, MgmtIface, PrivateIface,
+    Pub6Iface, Pub4Iface, Slice, SliceProp, Template)
 
 
 STATE_COLORS = { 
@@ -49,9 +49,8 @@ class IsolatedIfaceInline(admin.TabularInline):
         self.form.node = request._node_
         return super(IsolatedIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
-
-class PublicIfaceInline(admin.TabularInline):
-    model = PublicIface
+class MgmtIfaceInline(admin.TabularInline):
+    model = MgmtIface
     extra = 0
     readonly_fields = ('ipv6_addr',)
 
@@ -61,27 +60,37 @@ class PrivateIfaceInline(admin.TabularInline):
     extra = 0
     readonly_fields = ('ipv4_addr', 'ipv6_addr')
 
+class Pub6IfaceInline(admin.TabularInline):
+    model = Pub6Iface
+    extra = 0
+
+class Pub4IfaceInline(admin.TabularInline):
+    model = Pub4Iface
+    extra = 0
+    max_num = Pub4Iface.max_num_ifaces()
 
 class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
-                    'public_ifaces_ips']
+                    'num_mgmt_ifaces']
     list_filter = ['slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256',
                        template_link]
     search_fields = ['description', 'node__description', 'slice__name']
-    inlines = [SliverPropInline, IsolatedIfaceInline, PublicIfaceInline, 
-               PrivateIfaceInline]
+    inlines = [SliverPropInline, PrivateIfaceInline, IsolatedIfaceInline,
+        Pub6IfaceInline, Pub4IfaceInline, MgmtIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
-    
-    def public_ifaces_ips(self, instance):
-        get_ipv6 = lambda iface: iface.ipv6_addr
-        return "<br/> ".join(map(get_ipv6, instance.publiciface_set.all()))
-    public_ifaces_ips.allow_tags = True
-    public_ifaces_ips.short_description = 'Public IPs'
+
+    #TODO: how many mgmt ifaces can have a sliver? Have sense more than one?
+    def num_mgmt_ifaces(self, instance):
+        #get_ipv6 = lambda iface: iface.ipv6_addr
+        #return "<br/> ".join(map(get_ipv6, instance.mgmtiface_set.all()))
+        return instance.mgmtiface_set.count()
+    num_mgmt_ifaces.short_description = 'ManagementIfaces'
+    num_mgmt_ifaces.admin_order_field = 'mgmtiface__count'
     
     def has_private_iface(self, instance):
         try: instance.privateiface
@@ -97,9 +106,9 @@ class SliverAdmin(ChangeViewActionsMixin):
     num_isolated_ifaces.admin_order_field = 'isolatediface__count'
     
     def num_public_ifaces(self, instance):
-        return instance.publiciface_set.count()
+        return instance.pub6iface_set.count() + instance.pub4iface_set.count()
     num_public_ifaces.short_description = 'PublicIfaces'
-    num_public_ifaces.admin_order_field = 'publiciface__count'
+    #num_public_ifaces.admin_order_field = 'pub6iface__count'
     
     def slice_link(self, instance):
         return mark_safe("<b>%s</b>" % admin_link('slice')(instance))
@@ -116,7 +125,7 @@ class SliverAdmin(ChangeViewActionsMixin):
     def queryset(self, request):
         qs = super(SliverAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('isolatediface'))
-        qs = qs.annotate(models.Count('publiciface'))
+        qs = qs.annotate(models.Count('pub6iface'))
         return qs
     
     def has_add_permission(self, *args, **kwargs):
@@ -132,7 +141,7 @@ class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
                     'arch', colored('set_state', STATES_COLORS), admin_link('admin'), 
-                    'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_total']
+                    'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id', 'uuid']
     # fixing breadcrumbs
     change_list_template = 'admin/slices/slice/list_nodes.html'
@@ -145,10 +154,10 @@ class NodeListAdmin(NodeAdmin):
     add_sliver_link.allow_tags = True
     add_sliver_link.short_description = 'Add on Node'
     
-    def custom_sliver_pub_ipv4_total(self, instance):
-        return instance.sliver_pub_ipv4_total
-    custom_sliver_pub_ipv4_total.short_description = 'Total IPv4'
-    custom_sliver_pub_ipv4_total.admin_order_field = 'sliver_pub_ipv4_total'
+    def custom_sliver_pub_ipv4_range(self, instance):
+        return instance.sliver_pub_ipv4_range
+    custom_sliver_pub_ipv4_range.short_description = 'IPv4 Range'
+    custom_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
     
     def changelist_view(self, request, slice_id, extra_context=None):
         self.slice_id = slice_id

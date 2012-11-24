@@ -9,6 +9,8 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
     """
     def to_native(self, obj):
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
+        if url is None: 
+             return None
         return {'uri': url}
 
 

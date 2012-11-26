@@ -23,7 +23,7 @@ class TestbedPermissionBackend(ModelBackend):
             is_authorized = perm_manager.has_permission(user, perm_type)
         except AttributeError:
             is_authorized = False
-        else: print perm
+        
         return is_authorized
     
     def has_module_perms(self, user, app_label):

@@ -17,14 +17,6 @@ class AuthTokenInline(admin.TabularInline):
 class RolesInline(admin.TabularInline):
     model = Roles
     extra = 0
-    
-#    def get_formset(self, *args, **kwargs):
-#        """ 
-#        Change default M2M widget for CheckboxSelectMultiple
-#        """
-#        formset = super(RolesInline, self).get_formset(*args, **kwargs)
-#        formset.form.base_fields['roles'].widget = CheckboxSelectMultiple()
-#        return formset
 
 
 class UserAdmin(UserAdmin):
@@ -66,3 +58,54 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.unregister(AuthGroup)
 
+
+from django.contrib.admin.options import ModelAdmin
+from .models import get_view_permission
+
+def has_view_permission(self, request, obj=None):
+    """
+    Returns True if the given request has permission to view the given Django 
+    model instance.
+    
+    If `obj` is None, this should return True if the given request has
+    permission to change *any* object of the given type.
+    """
+    opts = self.opts
+    return self.has_change_permission(request, obj) or \
+        request.user.has_perm(opts.app_label + '.' + get_view_permission(opts))
+
+def has_change_permission(self, request, obj=None):
+    """
+    Returns True if the given request has permission to change the given
+    Django model instance, the default implementation doesn't examine the
+    `obj` parameter.
+
+    Can be overriden by the user in subclasses. In such case it should
+    return True if the given request has permission to change the `obj`
+    model instance. If `obj` is None, this should return True if the given
+    request has permission to change *any* object of the given type.
+    """
+    opts = self.opts
+    if request.POST:
+        # Change permission
+        return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission())
+    else:
+        # View permission
+        return request.user.has_perm(opts.app_label + '.' + get_view_permission(opts))
+
+def get_model_perms(self, request):
+        """
+        Returns a dict of all perms for this model. This dict has the keys
+        ``add``, ``change``, and ``delete`` and ``view`` mapping to the True/False
+        for each of those actions.
+        """
+        return {
+            'add': self.has_add_permission(request),
+            'change': self.has_change_permission(request),
+            'delete': self.has_delete_permission(request),
+            'view': self.has_view_permission(request),
+        }
+
+ModelAdmin.has_view_permission = has_view_permission
+ModelAdmin.has_change_permission = has_change_permission
+ModelAdmin.get_model_perms = get_model_perms

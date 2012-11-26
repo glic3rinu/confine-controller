@@ -42,7 +42,7 @@ class NodeAdmin(ChangeViewActionsMixin):
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('description', 'admin', 'arch', 'local_iface', 
+            'fields': ('description', 'group', 'arch', 'local_iface', 
                        'sliver_pub_ipv6', 'sliver_pub_ipv4', 
                        'sliver_pub_ipv4_range', 'boot_sn', 'set_state',),
         }),
@@ -66,7 +66,8 @@ class NodeAdmin(ChangeViewActionsMixin):
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
-        form.base_fields['admin'].initial = request.user
+        try: form.base_fields['group'].initial = request.user.groups.all()[0]
+        except IndexError: pass
         return form
     
     def queryset(self, request):

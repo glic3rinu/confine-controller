@@ -1,6 +1,6 @@
 import re
 
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth import models as auth_models
 from django.core import validators
 from django.db import models
 from django.utils import timezone
@@ -52,6 +52,7 @@ class Roles(models.Model):
     
     class Meta:
         unique_together = ('user', 'group')
+        verbose_name_plural = 'roles'
     
     def __unicode__(self):
         return self.group
@@ -64,7 +65,7 @@ class Roles(models.Model):
         return attr_map[role]
 
 
-class UserManager(BaseUserManager):
+class UserManager(auth_models.BaseUserManager):
     def create_user(self, username, email=None, password=None, **extra_fields):
         """
         Creates and saves a User with the given username, email and password.
@@ -89,7 +90,7 @@ class UserManager(BaseUserManager):
         return u
 
 
-class User(AbstractBaseUser):
+class User(auth_models.AbstractBaseUser):
     """
     Describes a person using the testbed.
     
@@ -155,15 +156,18 @@ class User(AbstractBaseUser):
         """
         Returns True if the user has the specified permission. This method
         queries all available auth backends, but returns immediately if any
-        backend returns True. 
+        backend returns True. Thus, a user who has permission from a single
+        auth backend is assumed to have permission in general. If an object is
+        provided, permissions for this specific object are checked.
         """
-        print perm
-        if not self.is_active: 
-            return False
-        if self.is_superuser:
+        
+        # Active superusers have all permissions.
+        if self.is_active and self.is_superuser:
             return True
-        return Permission.evaluate(perm, self, obj)
-    
+        
+        # Otherwise we need to check the backends.
+        return auth_models._user_has_perm(self, perm, obj)
+
     def has_perms(self, perm_list, obj=None):
         """
         Returns True if the user has each of the specified permissions. If
@@ -174,23 +178,39 @@ class User(AbstractBaseUser):
             if not self.has_perm(perm, obj):
                 return False
         return True
-    
+
     def has_module_perms(self, app_label):
         """
         Returns True if the user has any permissions in the given app label.
         Uses pretty much the same logic as has_perm, above.
         """
-        if not self.is_active:
-            return False
-        if self.is_superuser:
+        # Active superusers have all permissions.
+        if self.is_active and self.is_superuser:
             return True
-        return Permission.objects.filter(role__userresearchgroup__user=self,
-                                         content_type__app_label=app_label).exists()
+        
+        return auth_models._user_has_module_perms(self, app_label)
     
     @property
     def is_staff(self):
         """ All users can loggin to the admin interface """
         return True
+    
+    @property
+    def roles(self):
+        roles = set()
+        for role in Roles.objects.filter(user=self):
+            if role.is_admin:
+                roles.update(['admin'])
+            if role.is_technician:
+                roles.update(['technician'])
+            if role.is_researcher:
+                roles.update(['researcher'])
+            if len(roles) > 3:
+                break
+        if self.is_superuser:
+            roles.update(['superuser'])
+        
+        return roles
 
 
 class AuthToken(models.Model):

@@ -293,7 +293,7 @@ class SliceAdmin(ChangeViewActionsMixin):
             'fields': ('name', 'description', ('template', template_link), ('exp_data', 
                        'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on',
-                       'research_group'),
+                       'group'),
         }),
         ('Public key', {
             'classes': ('collapse',),
@@ -367,7 +367,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         return request.user.has_perm(opts.app_label + '.' + opts.get_delete_permission(), obj)
     
     user_can_access_owned_objects_only = True
-    user_owned_objects_field = 'research_group__user'
+    user_owned_objects_field = 'group__user'
 
     def queryset(self, request):
         qs = super(SliceAdmin, self).queryset(request)

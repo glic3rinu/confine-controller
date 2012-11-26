@@ -25,7 +25,7 @@ class CnHostInline(generic.GenericTabularInline):
 
 # Monkey-Patching Section
 
-app_url_link = link('cn__app_url', description='CN URL')
+app_url_link = link('related_cnhost__app_url', description='CN URL')
 
 insert_inline(Node, CnHostInline)
 insert_inline(Server, CnHostInline)

@@ -11,7 +11,7 @@ from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
 
-class TincClientInline(generic.GenericTabularInline):
+class TincClientInline(PermExtensionMixin, generic.GenericTabularInline):
     model = TincClient
     max_num = 1
     readonly_fields = ['connect_to']

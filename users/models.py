@@ -45,6 +45,7 @@ class Group(models.Model):
 
 
 class Roles(models.Model):
+    # TODO prevent groups without admins
     user = models.ForeignKey('users.User')
     group = models.ForeignKey(Group)
     is_admin = models.BooleanField(default=False)
@@ -63,8 +64,7 @@ class Roles(models.Model):
             'technician': 'is_technician',
             'admin': 'is_admin',
             'researcher': 'is_researche'}
-        hola = getattr(self, attr_map[role])
-        return hola
+        return getattr(self, attr_map[role])
 
 
 class UserManager(auth_models.BaseUserManager):
@@ -236,12 +236,3 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return str(self.pk)
 
-
-# Monkey patch django.db.modles.options to provide get_view_permission
-
-from django.db.models import options
-
-def get_view_permission(self):
-    return 'view_%s' % self.object_name.lower()
-
-options.get_view_permission = get_view_permission

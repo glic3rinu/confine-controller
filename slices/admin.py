@@ -10,6 +10,7 @@ from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
+from users.admin import PermExtensionMixin
 
 from .actions import renew_selected_slices, reset_selected
 from .forms import SliceAdminForm, IsolatedIfaceInlineForm
@@ -251,7 +252,7 @@ class SliceSliversAdmin(SliverAdmin):
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 
-class SliverInline(admin.TabularInline):
+class SliverInline(PermExtensionMixin, admin.TabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
@@ -270,12 +271,12 @@ class SliverInline(admin.TabularInline):
         return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
 
 
-class SlicePropInline(admin.TabularInline):
+class SlicePropInline(PermExtensionMixin, admin.TabularInline):
     model = SliceProp
     extra = 0
 
 
-class SliceAdmin(ChangeViewActionsMixin):
+class SliceAdmin(PermExtensionMixin, ChangeViewActionsMixin):
     list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
                     num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
@@ -335,48 +336,6 @@ class SliceAdmin(ChangeViewActionsMixin):
                     SliceSliversAdmin(Sliver, admin_site))),)
         )
         return extra_urls + urls
-    
-    def has_add_permission(self, request):
-        """
-        Returns True if the given request has permission to add a new object.
-        """
-        opts = self.opts
-        return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission())
-    
-    def has_create_permission(self, request, obj=None):
-        """
-        Returns True if the given request has permission to create the given object.
-        """
-        opts = self.opts
-        return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission(), obj)
-    
-    def has_change_permission(self, request, obj=None):
-        """
-        Returns True if the given request has permission to change the given
-        Django model instance.
-        """
-        opts = self.opts
-        return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
-    
-    def has_delete_permission(self, request, obj=None):
-        """
-        Returns True if the given request has permission to change the given
-        Django model instance.
-        """
-        opts = self.opts
-        return request.user.has_perm(opts.app_label + '.' + opts.get_delete_permission(), obj)
-    
-    user_can_access_owned_objects_only = True
-    user_owned_objects_field = 'group__user'
-
-    def queryset(self, request):
-        qs = super(SliceAdmin, self).queryset(request)
-        if self.user_can_access_owned_objects_only and \
-            not request.user.is_superuser:
-            filters = {self.user_owned_objects_field: request.user}
-            qs = qs.filter(**filters)
-        return qs
-
 
 
 class TemplateAdmin(admin.ModelAdmin):

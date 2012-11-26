@@ -67,7 +67,12 @@ class Pub6IfaceInline(admin.TabularInline):
 class Pub4IfaceInline(admin.TabularInline):
     model = Pub4Iface
     extra = 0
-    max_num = Pub4Iface.max_num_ifaces()
+    #max_num = max_num_ifaces()
+
+    def get_formset(self, request, obj=None, **kwargs):
+        # limit the number of interfaces can be created (by configuration)
+        self.max_num = request._max_pub4ifaces_
+        return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 class SliverAdmin(ChangeViewActionsMixin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
@@ -134,6 +139,8 @@ class SliverAdmin(ChangeViewActionsMixin):
     def get_form(self, request, obj=None, **kwargs):
         # just save node reference for future processing in IsolatedIfaceInline
         request._node_ = obj.node
+        # get the max number of pub4ifaces
+        request._max_pub4ifaces_ = obj.max_pub4ifaces
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 

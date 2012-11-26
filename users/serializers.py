@@ -1,17 +1,27 @@
 from rest_framework import serializers
 
-from common.serializers import UriHyperlinkedModelSerializer
+from common.serializers import UriHyperlinkedModelSerializer, RelHyperlinkedRelatedField
 from users.models import User, Group, Roles
 
 
-class RolesSerializer(serializers.ModelSerializer):
+class GroupRolesSerializer(serializers.ModelSerializer):
+    group = RelHyperlinkedRelatedField(view_name='group-detail')
+    
     class Meta:
         model = Roles
-        exclude = ['user', 'id']
+        exclude = ['id']
+
+
+class UserRolesSerializer(serializers.ModelSerializer):
+    user = RelHyperlinkedRelatedField(view_name='user-detail')
+    
+    class Meta:
+        model = Roles
+        exclude = ['id']
 
 
 class UserSerializer(UriHyperlinkedModelSerializer):
-    group_roles = RolesSerializer(source='roles_set')
+    group_roles = GroupRolesSerializer(source='roles_set')
     
     class Meta:
         model = User
@@ -19,7 +29,8 @@ class UserSerializer(UriHyperlinkedModelSerializer):
 
 
 class GroupSerializer(UriHyperlinkedModelSerializer):
-    user_roles = RolesSerializer(source='roles_set')
+    user_roles = UserRolesSerializer(source='roles_set')
     
     class Meta:
         model = Group
+

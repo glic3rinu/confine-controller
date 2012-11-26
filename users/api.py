@@ -1,8 +1,8 @@
 from rest_framework import generics
 
 from common.api import api
-from users.models import User
-from users.serializers import UserSerializer
+from users.models import User, Group
+from users.serializers import UserSerializer, GroupSerializer
 
 
 class UserList(generics.ListCreateAPIView):
@@ -30,4 +30,28 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 
+class GroupList(generics.ListCreateAPIView):
+    """
+    **Media type:** [`application/vnd.confine.server.Group.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#group_at_server)
+    
+    This resource describes a group of users using the testbed.
+    """
+    model = Group
+    serializer_class = GroupSerializer
+#    filter_fields = ('username',)
+
+
+class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    **Media type:** [`application/vnd.confine.server.Group.v0+json`](http://
+    wiki.confine-project.eu/arch:rest-api?&#group_at_server)
+    
+    This resource describes a group of users using the testbed.
+    """
+    model = Group
+    serializer_class = GroupSerializer
+
+
 api.register(UserList, UserDetail)
+api.register(GroupList, GroupDetail)

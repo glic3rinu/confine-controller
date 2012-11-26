@@ -1,9 +1,13 @@
-from rest_framework import serializers
+from common.serializers import UriHyperlinkedModelSerializer
+from users.models import User, Group
 
-from users.models import User
 
-
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(UriHyperlinkedModelSerializer):
     class Meta:
         model = User
         exclude = ['password']
+
+
+class GroupSerializer(UriHyperlinkedModelSerializer):
+    class Meta:
+        model = Group

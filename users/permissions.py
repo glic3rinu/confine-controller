@@ -1,8 +1,5 @@
 import inspect, functools
 
-from django.conf import settings
-from django.utils.importlib import import_module
-
 
 class Permission(object):
     """ 
@@ -41,10 +38,3 @@ class Permission(object):
             setattr(call, func[0], functools.partial(func[1], self, caller))
         return call
 
-
-def autodiscover():
-    """ Auto-discover INSTALLED_APPS permission.py module """
-    for app in settings.INSTALLED_APPS:
-        mod = import_module(app)
-        try: import_module('%s.permissions' % app)
-        except ImportError: pass

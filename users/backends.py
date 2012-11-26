@@ -11,7 +11,6 @@ class TestbedPermissionBackend(ModelBackend):
             return False
         
         perm_type = perm.split('.')[1].split('_')[0]
-        
         if obj is None:
             app_label = perm.split('.')[0]
             model_label = perm.split('_')[1]
@@ -23,8 +22,8 @@ class TestbedPermissionBackend(ModelBackend):
         try: 
             is_authorized = perm_manager.has_permission(user, perm_type)
         except AttributeError:
-            return False
-        
+            is_authorized = False
+        else: print perm
         return is_authorized
     
     def has_module_perms(self, user, app_label):

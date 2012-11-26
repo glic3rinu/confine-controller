@@ -131,7 +131,7 @@ class SliverAdmin(ChangeViewActionsMixin):
 class NodeListAdmin(NodeAdmin):
     """ Provides a list of nodes for adding slivers to an slice"""
     list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
-                    'arch', colored('set_state', STATES_COLORS), admin_link('admin'), 
+                    'arch', colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id', 'uuid']
     # fixing breadcrumbs

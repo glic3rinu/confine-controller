@@ -12,24 +12,20 @@ class NodePermission(Permission):
     def add(self, caller, user):
         """ Admins and techs can add """
         if inspect.isclass(caller):
-            if user.roles.intersection(('admin', 'tech')): 
-                return True
-            return False
-        elif caller.group.has_roles(user, roles=['admin', 'tech']):
-                return True
+            return user.has_roles(('admin', 'technician'))
+        elif caller.group.has_roles(user, roles=['admin', 'technician']):
+            return True
         return False
     
     def change(self, caller, user):
         """ group admins and techs can change """
         if inspect.isclass(caller):
-            if user.roles.intersection(('admin', 'tech')): 
-                return True
-            return False
-        return caller.group.has_roles(user, roles=['admin', 'tech'])
+            return user.has_roles(('admin', 'technician'))
+        return caller.group.has_roles(user, roles=['admin', 'technician'])
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
-        return caller.group.has_roles(user, roles=['admin', 'tech'])
+        return caller.group.has_roles(user, roles=['admin', 'technician'])
 
 
 class NodePropPermission(Permission):
@@ -39,24 +35,20 @@ class NodePropPermission(Permission):
     def add(self, caller, user):
         """ Admins and techs can add """
         if inspect.isclass(caller):
-            if user.roles.intersection(('admin', 'tech')): 
-                return True
-            return False
-        elif caller.node.group.has_roles(user, roles=['admin', 'tech']):
-                return True
+            return user.has_roles(('admin', 'tech'))
+        elif caller.node.group.has_roles(user, roles=['admin', 'technician']):
+            return True
         return False
     
     def change(self, caller, user):
         """ group admins and techs can change """
         if inspect.isclass(caller):
-            if user.roles.intersection(('admin', 'tech')): 
-                return True
-            return False
-        return caller.node.group.has_role(user, roles=['admin', 'tech'])
+            return user.has_roles(('admin', 'technician'))
+        return caller.node.group.has_role(user, roles=['admin', 'technician'])
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
-        return caller.node.group.has_roles(user, roles=['admin', 'tech'])
+        return caller.node.group.has_roles(user, roles=['admin', 'technician'])
 
 
 class DirectIfacePermission(NodePropPermission):

@@ -140,7 +140,6 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-#    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -151,7 +150,6 @@ INSTALLED_APPS = (
     'nodes',
     'slices',
     'issues',
-#    'auth_extension',
     'tinc',
     'communitynetworks',
     'firmware',
@@ -161,6 +159,11 @@ INSTALLED_APPS = (
 )
 
 AUTH_USER_MODEL = 'users.User'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'users.backends.TestbedPermissionBackend',
+]
 
 
 # A sample logging configuration. The only tangible logging

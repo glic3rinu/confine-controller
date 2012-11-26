@@ -105,8 +105,8 @@ class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
     """
-    ip_addr = models.GenericIPAddressField('IP Address', protocol='IPv6', 
-        help_text='IPv6 address of this tinc address.')
+    ip_addr = models.GenericIPAddressField('IP Address', protocol='IPv4', 
+        help_text='The tinc IP address of the host this one connects to.')
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,
@@ -157,6 +157,13 @@ class TincClient(TincHost):
         self.save()
 
 
+def add_to_class(cls, name, value):  
+    if hasattr(value, 'contribute_to_class'):
+        value.contribute_to_class(cls, name)
+    else:
+        setattr(cls, name, value)
+
+
 # Monkey-Patching Section
 
 # Hook TincClient support for related models
@@ -168,9 +175,8 @@ def tinc(self):
     except TincClient.DoesNotExist: return {}
 
 for model in related_models:
-    related_tincclient = generic.GenericRelation('tinc.TincClient')
-    related_tincclient.contribute_to_class(model, 'related_tincclient')
-    model.tinc = tinc
+    model.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
+    model.add_to_class('tinc', tinc)
 
 # Hook TincServer support to Server
 @property
@@ -178,7 +184,6 @@ def tinc(self):
     try: return self.related_tincserver.get()
     except TincServer.DoesNotExist: return {}
 
-related_tincserver = generic.GenericRelation('tinc.TincServer')
-related_tincserver.contribute_to_class(Server, 'related_tincserver')
-Server.tinc = tinc
+Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
+Server.add_to_class('tinc', tinc)
 

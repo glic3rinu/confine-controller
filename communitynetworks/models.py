@@ -56,6 +56,5 @@ def cn(self):
     except CnHost.DoesNotExist: return {}
 
 for model in related_models:
-    related_cnhost = generic.GenericRelation('communitynetworks.CnHost')
-    related_cnhost.contribute_to_class(model, 'related_cnhost')
-    model.cn = cn
+    model.add_to_class('related_cnhost', generic.GenericRelation('communitynetworks.CnHost'))
+    model.add_to_class('cn', cn)

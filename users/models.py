@@ -1,88 +1,67 @@
 import re
 
-from django_extensions.db.fields import UUIDField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
-from django.utils import timezone, six
+from django.utils import timezone
 
 
-# TODO add permission caching
-
-class Permission(models.Model):
-    ACTIONS = (
-        ('view', 'View'),
-        ('add', 'Add'),
-        ('change', 'Change'),
-        ('delete', 'Delete'),)
-    
-    content_type = models.ForeignKey(ContentType, related_name='testbedpermission_set')
-    action = models.CharField(max_length=16, choices=ACTIONS)
-    eval = models.CharField(max_length=256)
-    eval_description = models.CharField(max_length=64, blank=True)
-    
-    def __unicode__(self):
-        name =  "%s | %s | %s " % (
-            six.text_type(self.content_type.app_label),
-            six.text_type(self.content_type),
-            six.text_type(self.action),)
-        if self.eval_description:
-            name += "| %s " % self.eval_description
-        return name
-    
-    @classmethod
-    def evaluate(cls, perm, user, obj):
-        app_label = perm[:perm.index('.')]
-        model = perm[perm.index('_')+1:]
-        action = perm[perm.index('.')+1:perm.index('_')]
-        perms = cls.objects.filter(role__userresearchgroup__user=user,
-                                   content_type__app_label=app_label,
-                                   content_type__model=model,
-                                   action=action).distinct()
-        if not obj:
-            return perms.exists()
-        for perm in perms:
-            if eval(perm.eval):
-                return  True
-        return False
-
-class Role(models.Model):
-    name = models.CharField(max_length=32)
-    description = models.CharField(max_length=256, blank=True)
-    permissions = models.ManyToManyField(Permission)
-    
-    # TODO each Research Group must have at least one PI.
-    #       Add generic support like required=True
-    
-    def __unicode__(self):
-        return self.name
-
-
-class ResearchGroup(models.Model):
+class Group(models.Model):
     name = models.CharField(max_length=32, unique=True)
     description = models.CharField(max_length=256, blank=True)
-    address = models.TextField()
-    city = models.CharField(max_length=32)
-    state = models.CharField(max_length=32)
-    postal_code = models.PositiveIntegerField(blank=True, null=True)
-    country = models.CharField(max_length=32) 
-    url = models.URLField(blank=True)
+#    address = models.TextField()
+#    city = models.CharField(max_length=32)
+#    state = models.CharField(max_length=32)
+#    postal_code = models.PositiveIntegerField(blank=True, null=True)
+#    country = models.CharField(max_length=32) 
+#    url = models.URLField(blank=True)
+    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
+        help_text='A universally unique identifier (UUID, RFC 4122) for this '
+                  'user (used by SFA). This is optional, but once set to a valid '
+                  'UUID it can not be changed.')
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
+        help_text='A PEM-encoded RSA public key for this user (used by SFA).')
+    allow_nodes = models.BooleanField(default=False)
+    allow_slices = models.BooleanField(default=False)
     
     def __unicode__(self):
         return self.name
+    
+    def is_member(self, user):
+        return Roles.objects.get(group=self, user=user).exists()
+    
+    def has_role(self, user, role):
+        try: roles = Roles.objects.get(group=self, user=user)
+        except Roles.DoesNotExists: return False
+        return roles.has_role(role)
+    
+    def has_roles(self, user, roles):
+        try: group_roles = Roles.objects.get(group=self, user=user)
+        except Roles.DoesNotExists: return False
+        for role in roles:
+            if group_roles.has_role(role): return True
+        return False
 
 
-class UserResearchGroup(models.Model):
+class Roles(models.Model):
     user = models.ForeignKey('users.User')
-    research_group = models.ForeignKey(ResearchGroup)
-    roles = models.ManyToManyField(Role)
+    group = models.ForeignKey(Group)
+    is_admin = models.BooleanField(default=False)
+    is_technician = models.BooleanField(default=False)
+    is_researcher = models.BooleanField(default=False)
     
     class Meta:
-        unique_together = ('user', 'research_group')
+        unique_together = ('user', 'group')
     
     def __unicode__(self):
-        return self.research_group
+        return self.group
+    
+    def has_role(self, role):
+        attr_map = {
+            'tech': getattr(self, 'is_tech'),
+            'admin': getattr(self, 'is_admin'),
+            'researcher': getattr(self, 'is_researche')}
+        return attr_map[role]
 
 
 class UserManager(BaseUserManager):
@@ -128,7 +107,7 @@ class User(AbstractBaseUser):
                   'can include URLs and other information.')
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
-    phone = models.CharField(max_length=30, blank=True)
+#    phone = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True,
         help_text='Designates whether this user should be treated as '
                   'active. Unselect this instead of deleting accounts.')
@@ -143,8 +122,7 @@ class User(AbstractBaseUser):
         help_text='A universally unique identifier (UUID, RFC 4122) for this '
                   'user (used by SFA). This is optional, but once set to a valid '
                   'UUID it can not be changed.')
-    research_groups = models.ManyToManyField(ResearchGroup, blank=True, 
-        through=UserResearchGroup)
+    groups = models.ManyToManyField(Group, blank=True, through=Roles)
     
     objects = UserManager()
     
@@ -173,16 +151,13 @@ class User(AbstractBaseUser):
     def get_short_name(self):
         return self.first_name
     
-    @property
-    def roles(self):
-        return self.research_groups.all()
-    
     def has_perm(self, perm, obj=None):
         """
         Returns True if the user has the specified permission. This method
         queries all available auth backends, but returns immediately if any
         backend returns True. 
         """
+        print perm
         if not self.is_active: 
             return False
         if self.is_superuser:

@@ -73,5 +73,23 @@ class RolesPermission(Permission):
         return self.add(caller, user)
 
 
+class GroupPermission(Permission):
+    def view(self, caller, user):
+        return True
+    
+    def add(self, caller, user):
+        return True
+    
+    def change(self, caller, user):
+        return caller.has_role(user, 'admin')
+    
+    def delete(self, caller, user):
+        if inspect.isclass(caller):
+            return True
+        else:
+            return caller.has_role(user, 'admin')
+
+
 User.has_permission = UserPermission()
 Roles.has_permission = RolesPermission()
+Group.has_permission = GroupPermission()

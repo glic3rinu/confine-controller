@@ -3,15 +3,16 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 
 from common.admin import (insert_inline, admin_link, insert_action, 
-    get_modeladmin, ChangeViewActionsMixin, link)
+    get_modeladmin, ChangeViewActionsModelAdmin, link)
 from nodes.models import Node, Server
+#from users.admin import PermExtensionMixin
 
 from .actions import set_island
 from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
 
-class TincClientInline(PermExtensionMixin, generic.GenericTabularInline):
+class TincClientInline(generic.GenericTabularInline):
     model = TincClient
     max_num = 1
     readonly_fields = ['connect_to']
@@ -56,7 +57,7 @@ class GatewayAdmin(admin.ModelAdmin):
     inlines = [TincServerInline]
 
 
-class HostAdmin(ChangeViewActionsMixin):
+class HostAdmin(ChangeViewActionsModelAdmin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
     actions = [set_island]

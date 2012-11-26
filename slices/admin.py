@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
-from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
+from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
@@ -63,7 +63,7 @@ class PrivateIfaceInline(admin.TabularInline):
     readonly_fields = ('ipv4_addr', 'ipv6_addr')
 
 
-class SliverAdmin(ChangeViewActionsMixin):
+class SliverAdmin(ChangeViewActionsModelAdmin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
                     'public_ifaces_ips']
@@ -276,7 +276,7 @@ class SlicePropInline(PermExtensionMixin, admin.TabularInline):
     extra = 0
 
 
-class SliceAdmin(PermExtensionMixin, ChangeViewActionsMixin):
+class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
     list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
                     num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
@@ -338,7 +338,7 @@ class SliceAdmin(PermExtensionMixin, ChangeViewActionsMixin):
         return extra_urls + urls
 
 
-class TemplateAdmin(admin.ModelAdmin):
+class TemplateAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['name', 'description', 'type', 'arch', 'image', 'is_active']
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']

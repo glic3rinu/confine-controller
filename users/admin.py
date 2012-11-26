@@ -119,7 +119,7 @@ class UserAdmin(PermExtensionMixin, UserAdmin):
     group_links.short_description = 'Groups'
 
 
-class GroupAdmin(admin.ModelAdmin):
+class GroupAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['name', 'uuid', 'description']
 
 

@@ -114,7 +114,7 @@ class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
         return super(AddOrChangeInlineFormMixin, self).get_formset(request, obj=obj, **kwargs)
 
 
-class ChangeViewActionsMixin(admin.options.ModelAdmin):
+class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
     """
         Make actions visible on the admin change view page.
         Note: If you want to provide a custom change form template then you should
@@ -126,7 +126,7 @@ class ChangeViewActionsMixin(admin.options.ModelAdmin):
             modeladmin.set_change_view_action('reboot', reboot_view, '', '')
     """
     def __init__(self, *args, **kwargs):
-        super(ChangeViewActionsMixin, self).__init__(*args, **kwargs)
+        super(ChangeViewActionsModelAdmin, self).__init__(*args, **kwargs)
         if not hasattr(self, 'change_view_actions'): self.change_view_actions = []
         else:
             links = [ self._prepare_change_view_action(*link) for link in self.change_view_actions ]
@@ -136,7 +136,7 @@ class ChangeViewActionsMixin(admin.options.ModelAdmin):
     
     def get_urls(self):
         """Returns the additional urls for the change view links"""
-        urls = super(ChangeViewActionsMixin, self).get_urls()
+        urls = super(ChangeViewActionsModelAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
         new_urls = patterns("")
@@ -163,7 +163,7 @@ class ChangeViewActionsMixin(admin.options.ModelAdmin):
         extra_context = kwargs['extra_context'] if 'extra_context' in kwargs else {}
         extra_context.update({'object_tools_items': self.get_change_view_actions()})
         kwargs['extra_context'] = extra_context
-        return super(ChangeViewActionsMixin, self).change_view(*args, **kwargs)
+        return super(ChangeViewActionsModelAdmin, self).change_view(*args, **kwargs)
 
 
 def action_to_view(action, modeladmin):

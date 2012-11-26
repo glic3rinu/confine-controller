@@ -6,6 +6,7 @@ from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
     admin_link)
+from users.admin import PermExtensionMixin
 
 from .actions import request_cert, reboot_selected
 from .forms import NodeInlineAdminForm
@@ -21,17 +22,17 @@ STATES_COLORS = {
     Node.PRODUCTION: 'green', }
 
 
-class NodePropInline(admin.TabularInline):
+class NodePropInline(PermExtensionMixin, admin.TabularInline):
     model = NodeProp
     extra = 0
 
 
-class DirectIfaceInline(admin.TabularInline):
+class DirectIfaceInline(PermExtensionMixin, admin.TabularInline):
     model = DirectIface
     extra = 0
 
 
-class NodeAdmin(ChangeViewActionsMixin):
+class NodeAdmin(PermExtensionMixin, ChangeViewActionsMixin):
     list_display = ['description', 'id', 'uuid', 'arch', 
                     colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces']
@@ -76,7 +77,7 @@ class NodeAdmin(ChangeViewActionsMixin):
         return qs
 
 
-class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
+class ServerAdmin(PermExtensionMixin, ChangeViewActionsMixin, SingletonModelAdmin):
     fields = []
     
     def get_urls(self):
@@ -101,13 +102,3 @@ class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)
-
-
-# Monkey-Patching Section
-
-class NodeInline(admin.TabularInline):
-    model = Node
-    form = NodeInlineAdminForm
-    max_num = 0
-
-#insert_inline(get_user_model(), NodeInline)

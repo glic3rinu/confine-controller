@@ -1,5 +1,7 @@
 import inspect, functools
 
+from .models import User, AuthToken, Group, Roles
+
 
 class Permission(object):
     """ 
@@ -38,3 +40,38 @@ class Permission(object):
             setattr(call, func[0], functools.partial(func[1], self, caller))
         return call
 
+
+class UserPermission(Permission):
+    def view(self, caller, user):
+        return True
+    
+    def add(self, caller, user):
+        if inspect.isclass(caller):
+            return True
+        return caller == user
+    
+    def change(self, caller, user):
+        return self.add(caller, user)
+    
+    def delete(self, caller, user):
+        return self.add(caller, user)
+
+
+class RolesPermission(Permission):
+    def view(self, caller, user):
+        return True
+    
+    def add(self, caller, user):
+        if inspect.isclass(caller):
+            return user.has_roles(('admin',))
+        return caller.group.has_role(user, 'admin')
+    
+    def change(self, caller, user):
+        return self.add(caller, user)
+    
+    def delete(self, caller, user):
+        return self.add(caller, user)
+
+
+User.has_permission = UserPermission()
+Roles.has_permission = RolesPermission()

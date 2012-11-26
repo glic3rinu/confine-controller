@@ -208,7 +208,7 @@
     "fields": {
       "content_type": ["slices","slice"],
       "action": "add",
-      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval": "obj.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -218,7 +218,7 @@
     "fields": {
       "content_type": ["slices","slice"],
       "action": "view",
-      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval": "obj.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -228,7 +228,7 @@
     "fields": {
       "content_type": ["slices","slice"],
       "action": "change",
-      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval": "obj.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -238,7 +238,7 @@
     "fields": {
       "content_type": ["slices","slice"],
       "action": "delete",
-      "eval": "obj.research_group in user.research_group_set.all()",
+      "eval": "obj.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -249,7 +249,7 @@
     "fields": {
       "content_type": ["slices","sliceprop"],
       "action": "add",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -259,7 +259,7 @@
     "fields": {
       "content_type": ["slices","sliceprop"],
       "action": "view",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -269,7 +269,7 @@
     "fields": {
       "content_type": ["slices","sliceprop"],
       "action": "change",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -279,7 +279,7 @@
     "fields": {
       "content_type": ["slices","sliceprop"],
       "action": "delete",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -290,7 +290,7 @@
     "fields": {
       "content_type": ["slices","sliver"],
       "action": "add",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -300,7 +300,7 @@
     "fields": {
       "content_type": ["slices","sliver"],
       "action": "view",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -310,7 +310,7 @@
     "fields": {
       "content_type": ["slices","sliver"],
       "action": "change",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -320,7 +320,7 @@
     "fields": {
       "content_type": ["slices","sliver"],
       "action": "delete",
-      "eval": "obj.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -331,7 +331,7 @@
     "fields": {
       "content_type": ["slices","sliverprop"],
       "action": "add",
-      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.sliver.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -341,7 +341,7 @@
     "fields": {
       "content_type": ["slices","sliverprop"],
       "action": "view",
-      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.sliver.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -351,7 +351,7 @@
     "fields": {
       "content_type": ["slices","sliverprop"],
       "action": "change",
-      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.sliver.slice.research_group in user.research_groups.all()",
       "eval_description": "Research Group"
     }
   },
@@ -361,7 +361,7 @@
     "fields": {
       "content_type": ["slices","sliverprop"],
       "action": "delete",
-      "eval": "obj.sliver.slice.research_group in user.research_group_set.all()",
+      "eval": "obj.sliver.slice.research_group in user.research_groups.exists()",
       "eval_description": "Research Group"
     }
   }

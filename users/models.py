@@ -32,7 +32,8 @@ class Group(models.Model):
     
     def has_role(self, user, role):
         try: roles = Roles.objects.get(group=self, user=user)
-        except Roles.DoesNotExists: return False
+        except Roles.DoesNotExists: 
+            return False
         return roles.has_role(role)
     
     def has_roles(self, user, roles):
@@ -59,10 +60,11 @@ class Roles(models.Model):
     
     def has_role(self, role):
         attr_map = {
-            'technician': getattr(self, 'is_technician'),
-            'admin': getattr(self, 'is_admin'),
-            'researcher': getattr(self, 'is_researche')}
-        return attr_map[role]
+            'technician': 'is_technician',
+            'admin': 'is_admin',
+            'researcher': 'is_researche'}
+        hola = getattr(self, attr_map[role])
+        return hola
 
 
 class UserManager(auth_models.BaseUserManager):
@@ -233,3 +235,13 @@ class AuthToken(models.Model):
     
     def __unicode__(self):
         return str(self.pk)
+
+
+# Monkey patch django.db.modles.options to provide get_view_permission
+
+from django.db.models import options
+
+def get_view_permission(self):
+    return 'view_%s' % self.object_name.lower()
+
+options.get_view_permission = get_view_permission

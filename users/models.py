@@ -59,7 +59,7 @@ class Roles(models.Model):
     
     def has_role(self, role):
         attr_map = {
-            'tech': getattr(self, 'is_tech'),
+            'technician': getattr(self, 'is_technician'),
             'admin': getattr(self, 'is_admin'),
             'researcher': getattr(self, 'is_researche')}
         return attr_map[role]
@@ -212,6 +212,10 @@ class User(auth_models.AbstractBaseUser):
         
         return roles
 
+    def has_roles(self, roles):
+        if self.roles.intersection(roles): 
+            return True
+        return False
 
 class AuthToken(models.Model):
     """ 

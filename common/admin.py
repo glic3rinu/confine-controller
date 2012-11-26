@@ -93,9 +93,9 @@ def colored(field_name, colours, description=''):
     return colored_field
 
 
-class AddOrChangeInlineFormMixin(admin.options.InlineModelAdmin):
+class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
     """ 
-        Mixin class providing support for independent change and add inline forms
+        Inline class providing support for independent change and add inline forms
             add_form = AddSystemUserInlineForm
             change_form = ChangeSystemUserInlineForm
     """

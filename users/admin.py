@@ -120,25 +120,12 @@ class UserAdmin(PermExtensionMixin, UserAdmin):
 
 
 class GroupAdmin(PermExtensionMixin, admin.ModelAdmin):
-    list_display = ['name', 'uuid', 'description']
+    list_display = ['name', 'uuid', 'description', 'allow_slices', 'allow_nodes']
+    list_filter = ['allow_slices', 'allow_nodes']
+    search_fields = ['name', 'description']
 
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.unregister(AuthGroup)
 
-
-
-
-
-#admin.ModelAdmin.has_view_permission = has_view_permission
-#admin.ModelAdmin.has_add_permission = has_add_permission
-#admin.ModelAdmin.has_change_permission = has_change_permission
-#admin.ModelAdmin.has_delete_permission = has_delete_permission
-#admin.ModelAdmin.get_model_perms = get_model_perms
-
-#admin.TabularInline.has_view_permission = has_view_permission
-#admin.TabularInline.has_add_permission = has_add_permission
-#admin.TabularInline.has_change_permission = has_change_permission
-#admin.TabularInline.has_delete_permission = has_delete_permission
-#admin.TabularInline.get_model_perms = get_model_perms

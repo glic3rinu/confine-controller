@@ -218,8 +218,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     ('Administration', {
         'models': (
             'users.models.User',
-            'users.models.Permission',
-            'users.models.ResearchGroup',
+            'users.models.Group',
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
@@ -237,7 +236,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
 FLUENT_DASHBOARD_APP_ICONS = {
     'users/user': "Mr-potato.png",
     'users/permission': "Locked.png",
-    'users/researchgroup': "research_group.png",
+    'users/group': "research_group.png",
     'nodes/node': "linksys-WRT54G.png",
     'nodes/server': "poweredge_r510.png",
     'nodes/researchdevice': "western-digital-mybook-pro.png",

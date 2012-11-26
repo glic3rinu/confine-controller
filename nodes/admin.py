@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction, models
 from singleton_models.admin import SingletonModelAdmin
 
-from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
+from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
     admin_link)
 from users.admin import PermExtensionMixin
 
@@ -32,7 +32,7 @@ class DirectIfaceInline(PermExtensionMixin, admin.TabularInline):
     extra = 0
 
 
-class NodeAdmin(PermExtensionMixin, ChangeViewActionsMixin):
+class NodeAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
     list_display = ['description', 'id', 'uuid', 'arch', 
                     colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces']
@@ -77,7 +77,7 @@ class NodeAdmin(PermExtensionMixin, ChangeViewActionsMixin):
         return qs
 
 
-class ServerAdmin(PermExtensionMixin, ChangeViewActionsMixin, SingletonModelAdmin):
+class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin):
     fields = []
     
     def get_urls(self):
@@ -102,3 +102,4 @@ class ServerAdmin(PermExtensionMixin, ChangeViewActionsMixin, SingletonModelAdmi
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)
+

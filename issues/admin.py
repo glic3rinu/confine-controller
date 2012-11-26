@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db import models
 
-from common.admin import admin_link, colored, ChangeViewActionsMixin
+from common.admin import admin_link, colored, ChangeViewActionsModelAdmin
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets, 
     mark_as_unread)
 
@@ -39,7 +39,7 @@ class TicketInline(admin.TabularInline):
     max_num = 0
 
 
-class TicketAdmin(ChangeViewActionsMixin):
+class TicketAdmin(ChangeViewActionsModelAdmin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     # TODO Create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'), 

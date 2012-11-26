@@ -24,7 +24,6 @@ class CustomMenu(Menu):
         
         self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')))
         
-<<<<<<< HEAD
         if context['user'].has_module_perms('slices'):
             self.children.append(items.MenuItem('Slices', reverse('admin:app_list', args=['slices']),
                 children=[

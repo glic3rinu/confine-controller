@@ -75,7 +75,7 @@ class Slice(models.Model):
     
     name = models.CharField(max_length=64, unique=True, 
         help_text='A unique name for this slice matching the regular expression'
-                  '^[a-z][_0-9a-z]*[0-9a-z]$.', 
+                  '^[a-z][_0-9a-z]*[0-9a-z]$', 
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)
@@ -111,9 +111,10 @@ class Slice(models.Model):
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
-    users = models.ManyToManyField(get_user_model(),
-        help_text='A list of users able to login as root in slivers using their '
-                  'authentication tokens (usually an SSH key).')
+#    users = models.ManyToManyField(get_user_model(),
+#        help_text='A list of users able to login as root in slivers using their '
+#                  'authentication tokens (usually an SSH key).')
+    group = models.ForeignKey('users.Group')
     
     def __unicode__(self):
         return self.name

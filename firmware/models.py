@@ -22,8 +22,11 @@ from .tasks import build
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
 
-class QueueQuerySet(models.query.QuerySet):
+class BuildQuerySet(models.query.QuerySet):
     def get_current(self, node):
+        """
+        Given an node returns an up-to-date builded image, if exists.
+        """ 
         build = Build.objects.get(node=node)
         config = Config.objects.get()
         if build.state != Build.AVAILABLE: return build
@@ -32,6 +35,9 @@ class QueueQuerySet(models.query.QuerySet):
 
 
 class Build(models.Model):
+    """
+    Represents a builded image for a research device.
+    """
     REQUESTED = 'REQUESTED'
     QUEUED = 'QUEUED'
     BUILDING = 'BUILDING'
@@ -48,7 +54,7 @@ class Build(models.Model):
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage)
     task_id = models.CharField(max_length=36, unique=True)
     
-    objects = generate_chainer_manager(QueueQuerySet)
+    objects = generate_chainer_manager(BuildQuerySet)
     
     class Meta:
         ordering = ['-date']
@@ -57,12 +63,18 @@ class Build(models.Model):
         return self.node.description
     
     def delete(self, *args, **kwargs):
+        """
+        Deletes the build and also the image file stored on the file system
+        """
         super(Build, self).delete(*args, **kwargs)
         try: os.remove(self.image.path)
         except: pass
     
     @property
     def task(self):
+        """
+        Returns the celery task responsible for 'self' image build.
+        """
         from djcelery.models import TaskState
         if not self.task_id: return None
         try: return TaskState.objects.get(task_id=self.task_id)
@@ -101,6 +113,10 @@ class Build(models.Model):
     
     @classmethod
     def build(cls, node, async=False):
+        """
+        This method handles the building image,
+        if async is True the building task will be executed with Celery
+        """
         try: old_build = cls.objects.get(node=node)
         except cls.DoesNotExist: pass
         else: 
@@ -118,6 +134,10 @@ class Build(models.Model):
         return self.builduci_set.all()
     
     def match(self, config):
+        """
+        Compare the existing image with the current state of the node in order
+        to detect changes.
+        """
         if self.version != config.version: return False
         ucis = set(self.get_uci().values_list('section', 'option', 'value'))
         get = lambda uci: (uci.section, uci.option, uci.get_value(self.node))
@@ -129,6 +149,9 @@ class Build(models.Model):
 
 
 class BuildUCI(models.Model):
+    """
+    Stores the UCI options that build image has
+    """
     build = models.ForeignKey(Build)
     section = models.CharField(max_length=32, help_text='UCI config statement')
     option = models.CharField(max_length=32, help_text='UCI option statement')
@@ -142,6 +165,9 @@ class BuildUCI(models.Model):
 
 
 class Config(SingletonModel):
+    """
+    Describes the configuration used for building images
+    """
     description = models.CharField(max_length=255)
     version = models.CharField(max_length=64)
     
@@ -156,6 +182,9 @@ class Config(SingletonModel):
         return self.configuci_set.all()
     
     def get_image(self, node):
+        """
+        Returns the correct base image file according to the node architecture
+        """
         arch_regex = "(^|,)%s(,|$)" % node.arch
         return self.baseimage_set.get(architectures__regex=arch_regex).image
 
@@ -185,6 +214,11 @@ class BaseImage(models.Model):
 
 
 class ConfigUCI(models.Model):
+    """
+    UCI options that will be used for generating new images.
+    value contains a python code that will be evaluated during the firmware build,
+    that way we can get attributes in a dynamic way.
+    """
     config = models.ForeignKey(Config)
     section = models.CharField(max_length=32, help_text='UCI config statement',
         default='node')
@@ -201,5 +235,9 @@ class ConfigUCI(models.Model):
         return "%s.%s" % (self.section, self.option)
     
     def get_value(self, node):
+        """
+        Evaluates the 'value' as python code with node as a context in order to
+        get the current value for the given UCI option.
+        """
         return unicode(eval(self.value))
 

@@ -3,8 +3,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 
 from common.admin import (insert_inline, admin_link, insert_action, 
-    get_modeladmin, ChangeViewActionsMixin, link)
+    get_modeladmin, ChangeViewActionsModelAdmin, link)
 from nodes.models import Node, Server
+#from users.admin import PermExtensionMixin
 
 from .actions import set_island
 from .forms import HostInlineAdminForm
@@ -56,7 +57,7 @@ class GatewayAdmin(admin.ModelAdmin):
     inlines = [TincServerInline]
 
 
-class HostAdmin(ChangeViewActionsMixin):
+class HostAdmin(ChangeViewActionsModelAdmin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
     actions = [set_island]
@@ -85,7 +86,7 @@ class HostInline(admin.TabularInline):
     form = HostInlineAdminForm
     max_num = 0
 
-insert_inline(get_user_model(), HostInline)
+#insert_inline(get_user_model(), HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincServerInline)
 insert_action(Node, set_island)

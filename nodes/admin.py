@@ -4,8 +4,9 @@ from django.contrib.auth import get_user_model
 from django.db import transaction, models
 from singleton_models.admin import SingletonModelAdmin
 
-from common.admin import (link, insert_inline, colored, ChangeViewActionsMixin,
+from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
     admin_link)
+from users.admin import PermExtensionMixin
 
 from .actions import request_cert, reboot_selected
 from .forms import NodeInlineAdminForm
@@ -21,34 +22,34 @@ STATES_COLORS = {
     Node.PRODUCTION: 'green', }
 
 
-class NodePropInline(admin.TabularInline):
+class NodePropInline(PermExtensionMixin, admin.TabularInline):
     model = NodeProp
     extra = 0
 
 
-class DirectIfaceInline(admin.TabularInline):
+class DirectIfaceInline(PermExtensionMixin, admin.TabularInline):
     model = DirectIface
     extra = 0
 
 
-class NodeAdmin(ChangeViewActionsMixin):
-    list_display = ['description', 'id', 'uuid', 'arch', 
-                    colored('set_state', STATES_COLORS), admin_link('admin'), 
+class NodeAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
+    list_display = ['name', 'id', 'uuid', 'arch', 
+                    colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces']
-    list_display_links = ('id', 'uuid', 'description')
+    list_display_links = ('id', 'uuid', 'name')
     list_filter = ['arch', 'set_state']
-    search_fields = ['description', 'id', 'uuid']
+    search_fields = ['description', 'name', 'id', 'uuid']
     readonly_fields = ['boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('description', 'admin', 'arch', 'local_iface', 
+            'fields': ('name', 'description', 'group', 'arch', 'local_iface', 
                        'sliver_pub_ipv6', 'sliver_pub_ipv4', 
                        'sliver_pub_ipv4_range', 'boot_sn', 'set_state',),
         }),
-        ('Keys', {
+        ('SFA', {
             'classes': ('collapse',),
-            'fields': ('pubkey', 'cert')
+            'fields': ('pubkey', 'cert', 'uuid')
         }),
         ('Optional Prefixes', {
             'classes': ('collapse',),
@@ -66,7 +67,8 @@ class NodeAdmin(ChangeViewActionsMixin):
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
-        form.base_fields['admin'].initial = request.user
+        try: form.base_fields['group'].initial = request.user.groups.all()[0]
+        except IndexError: pass
         return form
     
     def queryset(self, request):
@@ -75,7 +77,7 @@ class NodeAdmin(ChangeViewActionsMixin):
         return qs
 
 
-class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
+class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin):
     fields = []
     
     def get_urls(self):
@@ -101,12 +103,3 @@ class ServerAdmin(ChangeViewActionsMixin, SingletonModelAdmin):
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)
 
-
-# Monkey-Patching Section
-
-class NodeInline(admin.TabularInline):
-    model = Node
-    form = NodeInlineAdminForm
-    max_num = 0
-
-insert_inline(get_user_model(), NodeInline)

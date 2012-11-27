@@ -24,15 +24,16 @@ class CustomMenu(Menu):
         
         self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')))
         
-        self.children.append(items.MenuItem('Slices', '/admin/slices/',
-            children=[
-                items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
-                items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
-                items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
-            ]))
+        if context['user'].has_module_perms('slices'):
+            self.children.append(items.MenuItem('Slices', reverse('admin:app_list', args=['slices']),
+                children=[
+                    items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
+                    items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
+                    items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
+                ]))
         
-        if 'tinc' in settings.INSTALLED_APPS:
-            self.children.append(items.MenuItem('Tinc', '/admin/tinc/',
+        if 'tinc' in settings.INSTALLED_APPS and context['user'].has_module_perms('tinc'):
+            self.children.append(items.MenuItem('Tinc', reverse('admin:app_list', args=['tinc']),
                 children=[
                     items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
                     items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
@@ -40,7 +41,7 @@ class CustomMenu(Menu):
                     items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
                 ]))
         
-        administration_models = ('django.contrib.auth.*', 'auth_extensions.*', 'djcelery.*')
+        administration_models = ('users.*', 'djcelery.*')
         
         if 'issues' in settings.INSTALLED_APPS:
             administration_models += ('issues.*',)

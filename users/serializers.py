@@ -9,7 +9,7 @@ class GroupRolesSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Roles
-        exclude = ['id']
+        exclude = ['id', 'user']
 
 
 class UserRolesSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class UserRolesSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Roles
-        exclude = ['id']
+        exclude = ['id', 'group']
 
 
 class UserSerializer(UriHyperlinkedModelSerializer):

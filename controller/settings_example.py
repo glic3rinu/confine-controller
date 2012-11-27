@@ -158,7 +158,7 @@ INSTALLED_APPS = (
     'rest_framework',
 )
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.user'
 
 AUTHENTICATION_BACKENDS = [
     'users.backends.TestbedPermissionBackend',

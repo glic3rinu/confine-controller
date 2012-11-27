@@ -13,7 +13,7 @@ class Group(models.Model):
                   'the regular expression',
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
-    description = models.CharField(max_length=256, blank=True)
+    description = models.TextField(blank=True)
 #    address = models.TextField()
 #    city = models.CharField(max_length=32)
 #    state = models.CharField(max_length=32)

@@ -7,7 +7,7 @@ def set_island(modeladmin, request, queryset):
     counter = 0
     for obj in queryset:
         if obj.tinc:
-            if not obj.tinc.has_permission.change(request.user):
+            if not request.user.has_perm('tinc.change_tinc', obj.tinc):
                 raise PermissionDenied
             counter += 1
             obj.tinc.set_island()

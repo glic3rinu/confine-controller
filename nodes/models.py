@@ -155,6 +155,24 @@ class Node(models.Model):
             return self.priv_ipv4_prefix
         return settings.PRIV_IPV4_PREFIX_DFLT
 
+    @property
+    def max_pub4ifaces(self):
+        """
+        Obtains the number of availables IPs type 4 for the sliver
+          + When Node.sliver_pub_ipv4 is dhcp, its value is #N, meaning there
+          are N total public IPv4 addresses for slivers.
+          + When Node.sliver_pub_ipv4 is range, its value is IP#N
+          meaning there are N total public IPv4 addresses for slivers after and
+          including IP or B.
+          + When Node.sliver_pub_ipv4 is none there are not support for public ipv4
+        """
+        if self.sliver_pub_ipv4 == 'none':
+            max_num = 0
+        else: # dhcp | range
+            max_num = int(self.sliver_pub_ipv4_range.split('#')[1])
+
+        return max_num
+
 
 class NodeProp(models.Model):
     """ 

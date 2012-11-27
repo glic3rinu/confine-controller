@@ -75,7 +75,7 @@ class Slice(models.Model):
     
     name = models.CharField(max_length=64, unique=True, 
         help_text='A unique name for this slice matching the regular expression'
-                  '^[a-z][_0-9a-z]*[0-9a-z]$.', 
+                  '^[a-z][_0-9a-z]*[0-9a-z]$', 
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid name.', 'invalid')])
     uuid = fields.UUIDField(auto=True, unique=True)

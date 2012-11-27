@@ -9,7 +9,6 @@ from .models import Slice, Sliver, Template
 class IfaceSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
-    use_default_gw = serializers.BooleanField()
     parent_name = serializers.CharField()
 
 

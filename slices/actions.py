@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.db import router, transaction
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy
@@ -8,10 +9,12 @@ from . import settings
 
 @transaction.commit_on_success
 def renew_selected_slices(modeladmin, request, queryset):
-    for slice in queryset:
-        slice.renew()
+    for obj in queryset:
+        if not obj.has_permission.change(request.user):
+            raise PermissionDenied
+        obj.renew()
         msg = "Renewed for %s" % settings.SLICE_EXPIRATION_INTERVAL
-        modeladmin.log_change(request, slice, msg)
+        modeladmin.log_change(request, obj, msg)
     msg = "%s selected slices has been renewed for %s on" % (queryset.count(), \
         settings.SLICE_EXPIRATION_INTERVAL)
     modeladmin.message_user(request, msg)
@@ -20,6 +23,8 @@ def renew_selected_slices(modeladmin, request, queryset):
 @transaction.commit_on_success
 def reset_selected(modeladmin, request, queryset):
     for obj in queryset:
+        if not obj.has_permission.change(request.user):
+            raise PermissionDenied
         obj.reset()
         modeladmin.log_change(request, obj, "Instructed to reset")
     verbose_name_plural = force_text(obj._meta.verbose_name_plural)

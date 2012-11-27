@@ -2,7 +2,8 @@ import inspect
 
 from users.permissions import Permission
 
-from .models import TincClient
+from .models import TincClient, Host
+
 
 class TincClientPermission(Permission):
     def view(self, caller, user):
@@ -27,4 +28,21 @@ class TincClientPermission(Permission):
         return caller.node.group.has_roles(user, roles=['admin', 'technician'])
 
 
+class HostPermission(Permission):
+    def view(self, caller, user):
+        return True
+    
+    def add(self, caller, user):
+        return True
+    
+    def change(self, caller, user):
+        if inspect.isclass(caller):
+            return True
+        return caller.admin == user
+    
+    def delete(self, caller, user):
+        return self.change(caller, user)
+
+
 TincClient.has_permission = TincClientPermission()
+Host.has_permission = HostPermission()

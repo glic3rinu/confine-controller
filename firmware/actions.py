@@ -28,7 +28,7 @@ def get_firmware(modeladmin, request, queryset):
     node = queryset[0]
     
     # Check if the user has permissions for download the image
-    if not node.has_permission.getfirmware(request.user):
+    if not request.user.has_perm('nodes.getfirmware_node', node):
         raise PermissionDenied
     
     # User has requested a firmware build
@@ -69,6 +69,7 @@ def get_firmware(modeladmin, request, queryset):
         Build.BUILDING: "Building...",
         Build.AVAILABLE: "Firmware available for download.",
         Build.DELETED: "This firmware is no longer available. Do you want to build it again?",
+        Build.OUTDATED: "This firmware is out-dated. Do you want to build it again?",
         Build.FAILED: "The last building has failed. The error logs are monitored \
             and this issue will be fixed. But you can try again anyway.\
             <p>Do you want to build again?</p>",

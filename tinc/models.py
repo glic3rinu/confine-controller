@@ -92,7 +92,7 @@ class Island(models.Model):
     name = models.CharField(max_length=32, unique=True, 
         help_text='The unique name of this island. A single line of free-form '
                   'text with no whitespace surrounding it.',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='Optional free-form textual description of this island.')

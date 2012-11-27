@@ -57,7 +57,7 @@ class Node(models.Model):
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
                   'by clients and services accessing the node API.')
-    description = models.CharField(max_length=256, blank=True,
+    description = models.TextField(blank=True,
         help_text='Free-form textual description of this host/device.')
     arch = models.CharField('Architecture', max_length=16,
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,

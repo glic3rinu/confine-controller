@@ -33,4 +33,3 @@ class GroupSerializer(UriHyperlinkedModelSerializer):
     
     class Meta:
         model = Group
-

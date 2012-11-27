@@ -14,6 +14,7 @@ class Group(models.Model):
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True)
+    # TODO Check these fields with Ivan
 #    address = models.TextField()
 #    city = models.CharField(max_length=32)
 #    state = models.CharField(max_length=32)

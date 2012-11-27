@@ -66,32 +66,30 @@ class Node(models.Model):
         default=settings.DEFAULT_NODE_LOCAL_IFACE,
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
-    sliver_pub_ipv6 = models.CharField(max_length=8, choices=IPV6_METHODS,
+    sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,
         help_text='Indicates IPv6 support for public sliver interfaces in the '
                   'local network (see <a href="https://wiki.confine-project.eu/'
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv6 support), dhcp (addresses configured using DHCPv6), '
                   'auto (addresses configured using NDP stateless autoconfiguration).',
-        default='none')
-    sliver_pub_ipv4 = models.CharField(max_length=8, choices=IPV4_METHODS,
+        default='none', choices=IPV6_METHODS)
+    sliver_pub_ipv4 = models.CharField('Sliver Public IPv4', max_length=8,
         help_text='Indicates IPv4 support for public sliver interfaces in the '
                   'local network (see <a href="https://wiki.confine-project.eu/'
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
-        default='none')
-    sliver_pub_ipv4_range = models.CharField(max_length=256, blank=True, null=True,
+        default='none', choices=IPV4_METHODS)
+    sliver_pub_ipv4_range = models.CharField('Sliver Public IPv4 Range', 
         help_text='Describes the public IPv4 range that can be used by sliver '
-                  'public interfaces. If sliver_pub_ipv4 is none, its value is '
-                  'null. If sliver_pub_ipv4 is dhcp, its value is #N, where N '
+                  'public interfaces. If /sliver_pub_ipv4 is none, its value is '
+                  'null. If /sliver_pub_ipv4 is dhcp, its value is #N, where N '
                   'is the decimal integer number of DHCP addresses reserved for '
-                  'slivers. If sliver_pub_ipv4 is range, its value can be either '
-                  'BASE_IP#N or +BASE_OFF#N, where N is the decimal integer number '
-                  'of consecutive addresses reserved for slivers after and including '
-                  'the range\'s base address, given as an IP address in the local '
-                  'network (BASE_IP) or as an decimal positive integer offset '
-                  'over the local network\'s base address (e.g. in 10.241.17.16/28 '
-                  'the value +10#5 means 10.241.17.26 to 10.241.17.30).')
+                  'slivers. If /sliver_pub_ipv4 is range, its value is BASE_IP#N, '
+                  'where N is the decimal integer number of consecutive addresses '
+                  'reserved for slivers after and including the range\'s base '
+                  'address BASE_IP (an IP address in the local network).',
+        max_length=256, blank=True, null=True)
     sliver_mac_prefix = models.PositiveSmallIntegerField('Sliver MAC Prefix',
         max_length=16, null=True, blank=True,
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '

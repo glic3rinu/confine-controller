@@ -137,7 +137,6 @@ INSTALLED_APPS = (
     'private_files',
 
     # Django.contrib
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',

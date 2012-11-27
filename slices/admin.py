@@ -6,10 +6,11 @@ from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
-from common.admin import (ChangeViewActionsMixin, colored, admin_link, link,
+from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
+from users.admin import PermExtensionMixin
 
 from .actions import renew_selected_slices, reset_selected
 from .forms import SliceAdminForm, IsolatedIfaceInlineForm
@@ -79,7 +80,7 @@ class Pub4IfaceInline(admin.TabularInline):
         self.max_num = request._node_.max_pub4ifaces
         return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
-class SliverAdmin(ChangeViewActionsMixin):
+class SliverAdmin(ChangeViewActionsModelAdmin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
                     'num_mgmt_ifaces']
@@ -275,7 +276,7 @@ class SliceSliversAdmin(SliverAdmin):
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 
-class SliverInline(admin.TabularInline):
+class SliverInline(PermExtensionMixin, admin.TabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
@@ -294,17 +295,17 @@ class SliverInline(admin.TabularInline):
         return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
 
 
-class SlicePropInline(admin.TabularInline):
+class SlicePropInline(PermExtensionMixin, admin.TabularInline):
     model = SliceProp
     extra = 0
 
 
-class SliceAdmin(ChangeViewActionsMixin):
+class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
     list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
                     num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
-    filter_horizontal = ['users']
+#    filter_horizontal = ['users']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
                        'exp_data_sha256', template_link]
     date_hierarchy = 'expires_on'
@@ -315,8 +316,9 @@ class SliceAdmin(ChangeViewActionsMixin):
     fieldsets = (
         (None, {
             'fields': ('name', 'description', ('template', template_link), ('exp_data', 
-                       'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
-                       'instance_sn', 'new_sliver_instance_sn', 'expires_on'),
+                       'exp_data_sha256'), 'set_state', 'vlan_nr', 
+                       'instance_sn', 'new_sliver_instance_sn', 'expires_on',
+                       'group'),
         }),
         ('Public key', {
             'classes': ('collapse',),
@@ -360,7 +362,7 @@ class SliceAdmin(ChangeViewActionsMixin):
         return extra_urls + urls
 
 
-class TemplateAdmin(admin.ModelAdmin):
+class TemplateAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['name', 'description', 'type', 'arch', 'image', 'is_active']
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']

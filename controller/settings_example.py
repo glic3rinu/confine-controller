@@ -140,26 +140,29 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-#    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
     # Confine
     'common',
+    'users',
     'nodes',
     'slices',
     'issues',
-    'auth_extension',
     'tinc',
     'communitynetworks',
     'firmware',
-
+    
     # Third party apps that should load last
     'rest_framework',
 )
 
-AUTH_PROFILE_MODULE = 'auth_extension.UserProfile'
+AUTH_USER_MODEL = 'users.User'
+
+AUTHENTICATION_BACKENDS = [
+    'users.backends.TestbedPermissionBackend',
+]
 
 
 # A sample logging configuration. The only tangible logging
@@ -214,8 +217,8 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('Administration', {
         'models': (
-            'django.contrib.auth.models.User',
-            'auth_extension.*',
+            'users.models.User',
+            'users.models.Group',
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
@@ -231,11 +234,9 @@ FLUENT_DASHBOARD_APP_GROUPS = (
 )
 
 FLUENT_DASHBOARD_APP_ICONS = {
-    'auth/user': "Mr-potato.png",
-    'auth/group': "System-users.png",
-    'auth_extension/testbedpermission': "Locked.png",
-    'auth_extension/researchgroup': "research_group.png",
-    'auth_extension/authorizedofficial': "Contact-new.png",
+    'users/user': "Mr-potato.png",
+    'users/permission': "Locked.png",
+    'users/group': "research_group.png",
     'nodes/node': "linksys-WRT54G.png",
     'nodes/server': "poweredge_r510.png",
     'nodes/researchdevice': "western-digital-mybook-pro.png",

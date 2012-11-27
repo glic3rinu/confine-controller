@@ -19,7 +19,12 @@ class NodeList(generics.ListCreateAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
-    filter_fields = ('arch', 'set_state', 'admin', 'admin__username')
+    filter_fields = ('arch', 'set_state', 'group', 'group__name')
+
+    def get_queryset(self):
+        # TODO remove this test
+        print self.request.QUERY_PARAMS
+        return super(NodeList, self).get_queryset()
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

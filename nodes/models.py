@@ -2,7 +2,6 @@ import re
 
 from django_extensions.db import fields
 from django_transaction_signals import defer
-from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 from singleton_models.models import SingletonModel
@@ -41,15 +40,24 @@ class Node(models.Model):
         ('range', 'range'),
     )
     
-    uuid = fields.UUIDField(auto=True, 
-        help_text='Universally unique identifier (UUID, RFC 4122).')
+    name = models.CharField(max_length=256, unique=True,
+        help_text='A unique name for this node. A single non-empty line of '
+                  'free-form text with no whitespace surrounding it. matching '
+                  'the regular expression',
+        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
+                   'Enter a valid name.', 'invalid')])
+    # TODO add validator or custom UUID field?
+    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
+        help_text='A universally unique identifier (UUID, RFC 4122) for this node '
+                  '(used by SFA). This is optional, but once set to a valid UUID '
+                  'it can not be changed.')
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).')
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
                   'by clients and services accessing the node API.')
-    description = models.CharField(max_length=256,
+    description = models.TextField(blank=True,
         help_text='Free-form textual description of this host/device.')
     arch = models.CharField('Architecture', max_length=16,
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
@@ -58,32 +66,30 @@ class Node(models.Model):
         default=settings.DEFAULT_NODE_LOCAL_IFACE,
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
-    sliver_pub_ipv6 = models.CharField(max_length=8, choices=IPV6_METHODS,
+    sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,
         help_text='Indicates IPv6 support for public sliver interfaces in the '
                   'local network (see <a href="https://wiki.confine-project.eu/'
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv6 support), dhcp (addresses configured using DHCPv6), '
                   'auto (addresses configured using NDP stateless autoconfiguration).',
-        default='none')
-    sliver_pub_ipv4 = models.CharField(max_length=8, choices=IPV4_METHODS,
+        default='none', choices=IPV6_METHODS)
+    sliver_pub_ipv4 = models.CharField('Sliver Public IPv4', max_length=8,
         help_text='Indicates IPv4 support for public sliver interfaces in the '
                   'local network (see <a href="https://wiki.confine-project.eu/'
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
-        default='none')
-    sliver_pub_ipv4_range = models.CharField(max_length=256, blank=True, null=True,
+        default='none', choices=IPV4_METHODS)
+    sliver_pub_ipv4_range = models.CharField('Sliver Public IPv4 Range', 
         help_text='Describes the public IPv4 range that can be used by sliver '
-                  'public interfaces. If sliver_pub_ipv4 is none, its value is '
-                  'null. If sliver_pub_ipv4 is dhcp, its value is #N, where N '
+                  'public interfaces. If /sliver_pub_ipv4 is none, its value is '
+                  'null. If /sliver_pub_ipv4 is dhcp, its value is #N, where N '
                   'is the decimal integer number of DHCP addresses reserved for '
-                  'slivers. If sliver_pub_ipv4 is range, its value can be either '
-                  'BASE_IP#N or +BASE_OFF#N, where N is the decimal integer number '
-                  'of consecutive addresses reserved for slivers after and including '
-                  'the range\'s base address, given as an IP address in the local '
-                  'network (BASE_IP) or as an decimal positive integer offset '
-                  'over the local network\'s base address (e.g. in 10.241.17.16/28 '
-                  'the value +10#5 means 10.241.17.26 to 10.241.17.30).')
+                  'slivers. If /sliver_pub_ipv4 is range, its value is BASE_IP#N, '
+                  'where N is the decimal integer number of consecutive addresses '
+                  'reserved for slivers after and including the range\'s base '
+                  'address BASE_IP (an IP address in the local network).',
+        max_length=256, blank=True, null=True)
     sliver_mac_prefix = models.PositiveSmallIntegerField('Sliver MAC Prefix',
         max_length=16, null=True, blank=True,
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
@@ -99,11 +105,11 @@ class Node(models.Model):
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
-    admin = models.ForeignKey(get_user_model(), 
+    group = models.ForeignKey('users.Group', 
         help_text='User who administrates this node (its creator by default).')
     
     def __unicode__(self):
-        return self.description
+        return self.name
     
     def clean(self):
         """ 
@@ -111,6 +117,7 @@ class Node(models.Model):
         """
         if self.pubkey == '': self.pubkey = None
         if self.cert == '': self.cert = None
+        if self.uuid == '': self.uuid = None
         if self.sliver_pub_ipv4 == 'none': self.sliver_pub_ipv4_range = None
         super(Node, self).clean()
     

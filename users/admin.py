@@ -123,7 +123,10 @@ class GroupAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['name', 'uuid', 'description', 'allow_slices', 'allow_nodes']
     list_filter = ['allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
-
+    fieldsets = (
+        (None, {'fields': ('name', 'description', 'allow_nodes', 'allow_slices')}),
+        ('SFA Options', {'classes': ('collapse',), 'fields': ('uuid', 'pubkey')}),
+        )
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)

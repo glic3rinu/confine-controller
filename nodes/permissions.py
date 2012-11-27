@@ -13,8 +13,9 @@ class NodePermission(Permission):
         """ Admins and techs can add """
         if inspect.isclass(caller):
             return user.has_roles(('admin', 'technician'))
-        elif caller.group.has_roles(user, roles=['admin', 'technician']):
-            return True
+        if caller.group.allow_nodes:
+            if caller.group.has_roles(user, roles=['admin', 'technician']):
+                return True
         return False
     
     def change(self, caller, user):

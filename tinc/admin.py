@@ -5,7 +5,6 @@ from django.contrib.contenttypes import generic
 from common.admin import (insert_inline, admin_link, insert_action, 
     get_modeladmin, ChangeViewActionsModelAdmin, link)
 from nodes.models import Node, Server
-#from users.admin import PermExtensionMixin
 
 from .actions import set_island
 from .forms import HostInlineAdminForm
@@ -68,7 +67,7 @@ class HostAdmin(ChangeViewActionsModelAdmin):
         form = super(HostAdmin, self).get_form(request, *args, **kwargs)
         form.base_fields['admin'].initial = request.user
         return form
-
+    
     def set_island_view(modeladmin, request, object_id):
         return action_as_view(set_island, modeladmin, request, object_id)
 
@@ -86,7 +85,6 @@ class HostInline(admin.TabularInline):
     form = HostInlineAdminForm
     max_num = 0
 
-#insert_inline(get_user_model(), HostInline)
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincServerInline)
 insert_action(Node, set_island)

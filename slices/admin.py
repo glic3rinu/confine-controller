@@ -86,7 +86,7 @@ class Pub4IfaceInline(admin.TabularInline):
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin):
-    list_display = ['id', 'description', admin_link('node'), admin_link('slice'),
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
                     'num_mgmt_ifaces']
     list_filter = ['slice__name']

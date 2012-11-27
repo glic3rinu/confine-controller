@@ -24,12 +24,12 @@ def get_firmware(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    # Check if the user has change permission for the actual model
-    if not modeladmin.has_change_permission(request):
-        raise PermissionDenied
-    
     using = router.db_for_write(modeladmin.model)
     node = queryset[0]
+    
+    # Check if the user has permissions for download the image
+    if not node.has_permission.getfirmware(request.user):
+        raise PermissionDenied
     
     # User has requested a firmware build
     if request.POST.get('post'):

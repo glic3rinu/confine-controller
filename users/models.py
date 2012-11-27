@@ -32,13 +32,13 @@ class Group(models.Model):
     
     def has_role(self, user, role):
         try: roles = Roles.objects.get(group=self, user=user)
-        except Roles.DoesNotExists: 
+        except Roles.DoesNotExist: 
             return False
         return roles.has_role(role)
     
     def has_roles(self, user, roles):
         try: group_roles = Roles.objects.get(group=self, user=user)
-        except Roles.DoesNotExists: return False
+        except Roles.DoesNotExist: return False
         for role in roles:
             if group_roles.has_role(role): return True
         return False

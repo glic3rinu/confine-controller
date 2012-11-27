@@ -27,18 +27,29 @@ class Permission(object):
         node.has_perm(user, 'change')
         node.has_perm.change(user)
     """
-    def __get__(self, instance, clas):
+    def __get__(self, instance, cls):
         if instance is not None:
             caller = instance
-        elif clas is not None:
-            caller = clas
+        elif cls is not None:
+            caller = cls
         else: 
             raise TypeError('WTF are you doing dude?')
         def call(user, perm):
             return getattr(self, perm)(caller, user)
         for func in inspect.getmembers(type(self), predicate=inspect.ismethod):
-            setattr(call, func[0], functools.partial(func[1], self, caller))
+            if func[1].im_class is not type(self):
+                # aggregated methods
+                setattr(call, func[0], functools.partial(func[1], caller))
+            else:
+                # self methods
+                setattr(call, func[0], functools.partial(func[1], self, caller))
         return call
+    
+    def _aggregate(self, caller, perm):
+        """ Aggregates cls methods to self class"""
+        for method in inspect.getmembers(perm, predicate=inspect.ismethod):
+            if not method[0].startswith('_'):
+                setattr(type(self), method[0], method[1])
 
 
 class UserPermission(Permission):
@@ -81,6 +92,8 @@ class GroupPermission(Permission):
         return True
     
     def change(self, caller, user):
+        if inspect.isclass(caller):
+            return False
         return caller.has_role(user, 'admin')
     
     def delete(self, caller, user):

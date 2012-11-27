@@ -54,6 +54,9 @@ class MgmtIfaceInline(admin.TabularInline):
     extra = 0
     readonly_fields = ('ipv6_addr',)
 
+    def get_formset(self, request, obj=None, **kwargs):
+        self.max_num = request._sliver_ifaces_avail_
+        return super(MgmtIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 class PrivateIfaceInline(admin.TabularInline):
     model = PrivateIface
@@ -64,14 +67,16 @@ class Pub6IfaceInline(admin.TabularInline):
     model = Pub6Iface
     extra = 0
 
+    def get_formset(self, request, obj=None, **kwargs):
+        self.max_num = request._sliver_ifaces_avail_
+        return super(Pub6IfaceInline, self).get_formset(request, obj=obj, **kwargs)
+
 class Pub4IfaceInline(admin.TabularInline):
     model = Pub4Iface
     extra = 0
-    #max_num = max_num_ifaces()
 
     def get_formset(self, request, obj=None, **kwargs):
-        # limit the number of interfaces can be created (by configuration)
-        self.max_num = request._max_pub4ifaces_
+        self.max_num = request._node_.max_pub4ifaces
         return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 class SliverAdmin(ChangeViewActionsMixin):
@@ -89,7 +94,9 @@ class SliverAdmin(ChangeViewActionsMixin):
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
 
-    #TODO: how many mgmt ifaces can have a sliver? Have sense more than one?
+    # Total Interfaces Per Sliver (TIPS) = 256  (unsigned 8)
+    #TODO: how many mgmt ifaces can have a sliver? limited by TIPS
+    # @url: http://www.grups.pangea.org/pipermail/confine-devel/2012-November/000537.html
     def num_mgmt_ifaces(self, instance):
         #get_ipv6 = lambda iface: iface.ipv6_addr
         #return "<br/> ".join(map(get_ipv6, instance.mgmtiface_set.all()))
@@ -139,8 +146,7 @@ class SliverAdmin(ChangeViewActionsMixin):
     def get_form(self, request, obj=None, **kwargs):
         # just save node reference for future processing in IsolatedIfaceInline
         request._node_ = obj.node
-        # get the max number of pub4ifaces
-        request._max_pub4ifaces_ = obj.max_pub4ifaces
+        request._sliver_ifaces_avail_ = obj.ifaces_avail
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 
@@ -260,10 +266,12 @@ class SliceSliversAdmin(SliverAdmin):
         # just save node reference for future processing in IsolatedIfaceInline
         if obj: 
             request._node_ = obj.node
+            request._sliver_ifaces_avail_ = obj.ifaces_avail
         else:
             node_id = request.path.split('/')[-2]
             node = Node.objects.get(pk=node_id)
             request._node_ = node
+            request._sliver_ifaces_avail_ = 256
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 

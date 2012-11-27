@@ -238,28 +238,16 @@ class Sliver(models.Model):
     def interfaces(self):
         try: ifaces = [self.privateiface] 
         except PrivateIface.DoesNotExist: ifaces = []
-#        ifaces += list(self.publiciface_set.all())
-#        ifaces += list(self.isolatediface_set.all())
-        ifaces += list(self.researchiface_set.all())
+        ifaces += list(self.isolatediface_set.all())
+        ifaces += list(self.mgmtiface_set.all())
+        ifaces += list(self.pub6iface_set.all())
+        ifaces += list(self.pub4iface_set.all())
         return ifaces
 
     @property
-    def max_pub4ifaces(self):
-        """
-        Obtains the number of availables IPs type 4 for the sliver
-          + When Node.sliver_pub_ipv4 is dhcp, its value is #N, meaning there
-          are N total public IPv4 addresses for slivers.
-          + When Node.sliver_pub_ipv4 is range, its value is IP#N or +B#N,
-          meaning there are N total public IPv4 addresses for slivers after and
-          including IP or B.
-          + When Node.sliver_pub_ipv4 is none there are not support for public ipv4
-        """
-        if self.node.sliver_pub_ipv4 == 'none':
-            max_num = 0
-        else: # dhcp | range
-            max_num = int(self.node.sliver_pub_ipv4_range.split('#')[1])
-
-        return max_num
+    def ifaces_avail(self):
+        TIPS = 256 #limited by design -> #nr: unsigned 8 bits
+        return TIPS - len(self.interfaces)
 
     def reset(self):
         self.instance_sn += 1

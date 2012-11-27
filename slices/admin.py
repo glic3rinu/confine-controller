@@ -281,7 +281,7 @@ class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
                     num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
     list_filter = ['set_state', 'template']
-    filter_horizontal = ['users']
+#    filter_horizontal = ['users']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
                        'exp_data_sha256', template_link]
     date_hierarchy = 'expires_on'
@@ -292,7 +292,7 @@ class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('name', 'description', ('template', template_link), ('exp_data', 
-                       'exp_data_sha256'), 'set_state', 'users', 'vlan_nr', 
+                       'exp_data_sha256'), 'set_state', 'vlan_nr', 
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on',
                        'group'),
         }),

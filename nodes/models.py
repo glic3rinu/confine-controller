@@ -40,13 +40,13 @@ class Node(models.Model):
         ('range', 'range'),
     )
     
-    # TODO add validator or custom UUID field?
     name = models.CharField(max_length=256, unique=True,
         help_text='A unique name for this node. A single non-empty line of '
                   'free-form text with no whitespace surrounding it. matching '
                   'the regular expression',
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
+    # TODO add validator or custom UUID field?
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node '
                   '(used by SFA). This is optional, but once set to a valid UUID '

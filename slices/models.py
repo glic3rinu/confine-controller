@@ -111,9 +111,9 @@ class Slice(models.Model):
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
-    users = models.ManyToManyField(get_user_model(),
-        help_text='A list of users able to login as root in slivers using their '
-                  'authentication tokens (usually an SSH key).')
+#    users = models.ManyToManyField(get_user_model(),
+#        help_text='A list of users able to login as root in slivers using their '
+#                  'authentication tokens (usually an SSH key).')
     group = models.ForeignKey('users.Group')
     
     def __unicode__(self):

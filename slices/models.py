@@ -215,7 +215,7 @@ class Sliver(models.Model):
     
     
     def __unicode__(self):
-        return self.description if self.description else str(self.id)
+        return "%s@%s" % (self.slice.name, self.node.name)
     
     @property
     def nr(self):

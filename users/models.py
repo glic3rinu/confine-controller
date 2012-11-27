@@ -169,7 +169,7 @@ class User(auth_models.AbstractBaseUser):
         
         # Otherwise we need to check the backends.
         return auth_models._user_has_perm(self, perm, obj)
-
+    
     def has_perms(self, perm_list, obj=None):
         """
         Returns True if the user has each of the specified permissions. If
@@ -213,11 +213,12 @@ class User(auth_models.AbstractBaseUser):
             roles.update(['superuser'])
         
         return roles
-
+    
     def has_roles(self, roles):
         if self.roles.intersection(roles): 
             return True
         return False
+
 
 class AuthToken(models.Model):
     """ 

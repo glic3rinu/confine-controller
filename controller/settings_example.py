@@ -153,7 +153,7 @@ INSTALLED_APPS = (
     'tinc',
     'communitynetworks',
     'firmware',
-
+    
     # Third party apps that should load last
     'rest_framework',
 )

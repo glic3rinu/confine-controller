@@ -52,6 +52,11 @@ class Permission(object):
                 setattr(type(self), method[0], method[1])
 
 
+class ReadOnlyPermission(Permission):
+    def view(self, caller, user):
+        return True
+
+
 class UserPermission(Permission):
     def view(self, caller, user):
         return True

@@ -1,9 +1,8 @@
 import inspect
 
-from users.permissions import Permission
+from users.permissions import Permission, ReadOnlyPermission
 
-from .models import TincClient, Host
-
+from .models import TincClient, Host, Gateway, Island, TincAddress
 
 class TincClientPermission(Permission):
     def view(self, caller, user):
@@ -46,3 +45,6 @@ class HostPermission(Permission):
 
 TincClient.has_permission = TincClientPermission()
 Host.has_permission = HostPermission()
+Gateway.has_permission = ReadOnlyPermission()
+Island.has_permission = ReadOnlyPermission()
+TincAddress.has_permission = ReadOnlyPermission()

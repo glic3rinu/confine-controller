@@ -50,35 +50,40 @@ class IsolatedIfaceInline(admin.TabularInline):
         self.form.node = request._node_
         return super(IsolatedIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
+
 class MgmtIfaceInline(admin.TabularInline):
     model = MgmtIface
     extra = 0
     readonly_fields = ('ipv6_addr',)
-
+    
     def get_formset(self, request, obj=None, **kwargs):
         self.max_num = request._sliver_ifaces_avail_
         return super(MgmtIfaceInline, self).get_formset(request, obj=obj, **kwargs)
+
 
 class PrivateIfaceInline(admin.TabularInline):
     model = PrivateIface
     extra = 0
     readonly_fields = ('ipv4_addr', 'ipv6_addr')
 
+
 class Pub6IfaceInline(admin.TabularInline):
     model = Pub6Iface
     extra = 0
-
+    
     def get_formset(self, request, obj=None, **kwargs):
         self.max_num = request._sliver_ifaces_avail_
         return super(Pub6IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
+
 class Pub4IfaceInline(admin.TabularInline):
     model = Pub4Iface
     extra = 0
-
+    
     def get_formset(self, request, obj=None, **kwargs):
         self.max_num = request._node_.max_pub4ifaces
         return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
+
 
 class SliverAdmin(ChangeViewActionsModelAdmin):
     list_display = ['id', 'description', admin_link('node'), admin_link('slice'),

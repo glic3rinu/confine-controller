@@ -33,7 +33,7 @@ class DirectIfaceInline(PermExtensionMixin, admin.TabularInline):
 
 
 class NodeAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
-    list_display = ['name', 'description', 'id', 'uuid', 'arch', 
+    list_display = ['name', 'id', 'uuid', 'arch', 
                     colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces']
     list_display_links = ('id', 'uuid', 'name')

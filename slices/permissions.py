@@ -1,8 +1,9 @@
 import inspect
 
-from users.permissions import Permission
+from users.permissions import Permission, ReadOnlyPermission
 
 from .models import Slice, Sliver, SliceProp, SliverProp, Template
+
 
 class SlicePermission(Permission):
     def view(self, caller, user):
@@ -77,13 +78,8 @@ class SliverPropPermission(Permission):
         return caller.sliver.slice.group.has_role(user, 'admin')
 
 
-class TemplatePermission(Permission):
-    def view(self, caller, user):
-        return True
-
-
 Slice.has_permission = SlicePermission()
 Sliver.has_permission = SliverPermission()
 SliceProp.has_permission = SlicePropPermission()
 SliverProp.has_permission = SliverPropPermission()
-Template.has_permission = TemplatePermission()
+Template.has_permission = ReadOnlyPermission()

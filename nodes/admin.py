@@ -33,17 +33,17 @@ class DirectIfaceInline(PermExtensionMixin, admin.TabularInline):
 
 
 class NodeAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
-    list_display = ['description', 'id', 'uuid', 'arch', 
+    list_display = ['name', 'description', 'id', 'uuid', 'arch', 
                     colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces']
-    list_display_links = ('id', 'uuid', 'description')
+    list_display_links = ('id', 'uuid', 'name')
     list_filter = ['arch', 'set_state']
-    search_fields = ['description', 'id', 'uuid']
+    search_fields = ['description', 'name', 'id', 'uuid']
     readonly_fields = ['boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('description', 'group', 'arch', 'local_iface', 
+            'fields': ('name', 'description', 'group', 'arch', 'local_iface', 
                        'sliver_pub_ipv6', 'sliver_pub_ipv4', 
                        'sliver_pub_ipv4_range', 'boot_sn', 'set_state',),
         }),

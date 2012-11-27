@@ -7,7 +7,11 @@ from django.utils import timezone
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=32, unique=True,
+        help_text='A unique name for this group matching the regular expression'
+                  '^[a-z][_0-9a-z]*[0-9a-z]$.', 
+        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+                   'Enter a valid name.', 'invalid')])
     description = models.CharField(max_length=256, blank=True)
 #    address = models.TextField()
 #    city = models.CharField(max_length=32)

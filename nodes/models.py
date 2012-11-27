@@ -41,10 +41,11 @@ class Node(models.Model):
     )
     
     # TODO add validator or custom UUID field?
-    name = models.CharField(max_length=256, unique=True
-        help_text='A unique name for this node matching the regular expression'
-                  '^[a-z][_0-9a-z]*[0-9a-z]$.', 
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+    name = models.CharField(max_length=256, unique=True,
+        help_text='A unique name for this node. A single non-empty line of '
+                  'free-form text with no whitespace surrounding it. matching '
+                  'the regular expression',
+        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node '
@@ -56,7 +57,7 @@ class Node(models.Model):
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
                   'by clients and services accessing the node API.')
-    description = models.CharField(max_length=256, blank=True
+    description = models.CharField(max_length=256, blank=True,
         help_text='Free-form textual description of this host/device.')
     arch = models.CharField('Architecture', max_length=16,
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,

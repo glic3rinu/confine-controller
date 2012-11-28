@@ -237,7 +237,7 @@ class SliceSliversAdmin(SliverAdmin):
         super(SliceSliversAdmin, self).save_model(request, obj, *args, **kwargs)
         slice_modeladmin = SliceAdmin(slice, self.admin_site)
         slice_modeladmin.log_change(request, slice, 'Added sliver "%s"' % obj)
-        
+    
     def response_add(self, request, obj, post_url_continue='../%s/'):
         opts = obj._meta
         verbose_name = force_text(opts.verbose_name)

@@ -66,7 +66,7 @@ class TincServer(TincHost):
     the testbed server itself.
     """
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField(max_length=36)
+    object_id = models.PositiveIntegerField()
     
     content_object = generic.GenericForeignKey()
     
@@ -136,7 +136,7 @@ class TincClient(TincHost):
     """
     island = models.ForeignKey(Island, help_text='Island this client reaches to.')
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField(max_length=36)
+    object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey()
     
     class Meta:

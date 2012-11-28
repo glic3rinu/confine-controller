@@ -330,10 +330,14 @@ class ResearchIface(SliverIface):
     
     class Meta:
         abstract = True
+        # FIXME: this unique constrain only takes into account The class from which
+        #       inherits, a different approach is needed for ensuring unique names
+        #       accross all interfaces of an sliver.
         unique_together = ['sliver', 'name']
     
     @property
     def nr(self): # 1 >= nr >= 256
+        # TODO how to predict what nr is used on a node?
         return self.pk # % 256 ) + 1 ?? #FIXME
 
 

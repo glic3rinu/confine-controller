@@ -6,6 +6,8 @@ from django.core import validators
 from django.db import models
 from singleton_models.models import SingletonModel
 
+from common.validators import UUIDValidator
+
 from . import settings
 
 
@@ -50,7 +52,7 @@ class Node(models.Model):
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node '
                   '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.')
+                  'it can not be changed.', validators=[UUIDValidator])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).')
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 

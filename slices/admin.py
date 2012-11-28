@@ -325,9 +325,9 @@ class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on',
                        'group'),
         }),
-        ('Public key', {
+        ('SFA', {
             'classes': ('collapse',),
-            'fields': ('pubkey',)
+            'fields': ('pubkey', 'uuid')
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_actions = [('renew', renew_selected_slices, '', ''),

@@ -2,12 +2,12 @@ from datetime import datetime
 from hashlib import sha256
 import re
 
-from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 
+from common.validators import UUIDValidator
 from nodes.models import Node
 from nodes import settings as node_settings
 
@@ -78,7 +78,10 @@ class Slice(models.Model):
                   '^[a-z][_0-9a-z]*[0-9a-z]$', 
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid name.', 'invalid')])
-    uuid = fields.UUIDField(auto=True, unique=True)
+    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
+        help_text='A universally unique identifier (UUID, RFC 4122) for this slice '
+                  '(used by SFA). This is optional, but once set to a valid UUID '
+                  'it can not be changed.', validators=[UUIDValidator])
     pubkey = models.TextField('Public Key', null=True, blank=True,
         help_text='PEM-encoded RSA public key for this slice (used by SFA).')
     description = models.TextField(blank=True, 
@@ -126,6 +129,14 @@ class Slice(models.Model):
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         super(Slice, self).save(*args, **kwargs)
+    
+    def clean(self):
+        """ 
+        Empty pubkey, cert and uuid as NULL instead of empty string.
+        """
+        if self.pubkey == '': self.pubkey = None
+        if self.uuid == '': self.uuid = None
+        super(Slice, self).clean()
     
     @property
     def slivers(self):

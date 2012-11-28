@@ -282,7 +282,7 @@ class SliverIface(models.Model):
     """
     name = models.CharField(max_length=10,
         help_text='The name of this interface. It must match the regular '
-                  'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.'
+                  'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
         validators=[validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'), 
                     'Enter a valid interface name.', 'invalid')])
     

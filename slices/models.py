@@ -111,9 +111,6 @@ class Slice(models.Model):
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
-#    users = models.ManyToManyField(get_user_model(),
-#        help_text='A list of users able to login as root in slivers using their '
-#                  'authentication tokens (usually an SSH key).')
     group = models.ForeignKey('users.Group')
     
     def __unicode__(self):
@@ -244,12 +241,12 @@ class Sliver(models.Model):
         ifaces += list(self.pub6iface_set.all())
         ifaces += list(self.pub4iface_set.all())
         return ifaces
-
+    
     @property
     def ifaces_avail(self):
         TIPS = 256 #limited by design -> #nr: unsigned 8 bits
         return TIPS - len(self.interfaces)
-
+    
     def reset(self):
         self.instance_sn += 1
         self.save()
@@ -283,8 +280,11 @@ class SliverIface(models.Model):
     """
     Base class for sliver network interfaces
     """
-    name = models.CharField(max_length=16)
-    # TODO unique name per sliver
+    name = models.CharField(max_length=10,
+        help_text='The name of this interface. It must match the regular '
+                  'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.'
+        validators=[validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'), 
+                    'Enter a valid interface name.', 'invalid')])
     
     class Meta:
         abstract = True
@@ -298,18 +298,19 @@ class SliverIface(models.Model):
     
     @property
     def parent_name(self):
-        if hasattr(self, 'parent'): 
+        if hasattr(self, 'parent'):
             return self.parent.name
         return None
     
-    #<mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
-    # example 06:ab:04:d2:05:00
-    # operations works properly (FIXME: check if access to info works!)
     @property
     def mac_addr(self):
         """
         Expected address calculated in the server (can be different from the
         one showed in the node, which is the real address)
+        
+        <mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
+            example 06:ab:04:d2:05:00
+            operations works properly (FIXME: check if access to info works!)
         """
         node = self.parent.node
         words = [
@@ -323,15 +324,18 @@ class SliverIface(models.Model):
         
         return ':'.join(words)
 
+
 class ResearchIface(SliverIface):
     sliver = models.ForeignKey(Sliver)
-
+    
     class Meta:
         abstract = True
-
+        unique_together = ['sliver', 'name']
+    
     @property
     def nr(self): # 1 >= nr >= 256
         return self.pk # % 256 ) + 1 ?? #FIXME
+
 
 class IsolatedIface(ResearchIface):
     """
@@ -344,21 +348,11 @@ class IsolatedIface(ResearchIface):
     parent = models.ForeignKey('nodes.DirectIface', unique=True)
 
 
-#    class Meta:
-#       """slices.isolatediface: "unique_together" refers to sliver. This is
-#        not in the same model as the unique_together statement."""
-#        TODO: check if the pair <sliver> and <directiface> are unique
-#        unique_together = ['sliver', 'parent']
-
-
 class IpIface(ResearchIface):
     """
     Base class for IP based sliver interfaces. IP Interfaces might have assigned
     either a public or a private address.
     """
-#    use_default_gw = models.BooleanField('Use Default Gateway', default=True,
-#        help_text='Whether to use a host (provided by the research device) in '
-#                  'the network connected to this interface as a default gateway.')
     
     class Meta:
         abstract = True
@@ -368,14 +362,16 @@ class MgmtIface(IpIface):
     """
     Describes the management network interface for an sliver.
     """
-        
     @property
-    def ipv6_addr(self): #Testbed management IPv6 network (local bridge)
+    def ipv6_addr(self): #
         """
+        Testbed management IPv6 network (local bridge)
+        
         Expected address calculated in the server (can be different from the
         one showed in the node, which is the real address)
+        
+        <node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
         """
-    #<node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
         ipv6_prefix = node_settings.MGMT_IPV6_PREFIX.split(':')
         ipv6_words = ipv6_prefix[:3]
         ipv6_words.extend([
@@ -385,13 +381,14 @@ class MgmtIface(IpIface):
         ])
         return ':'.join(ipv6_words)
 
+
 class Pub6Iface(IpIface):
     """
     Local network interface: assigned by stateless autoconf or DHCPv6
     Describes an IPv6 Public Interface for an sliver. Traffic from a public
     interface will be bridged to the community network.
     """
-
+    
     @property
     def ipv6_addr(self):
         #TODO: REMOVE | RAISE exception | RETURN message
@@ -404,11 +401,12 @@ class Pub4Iface(IpIface):
     Describes an IPv4 Public Interface for an sliver. Traffic from a public
     interface will be bridged to the community network.
     """
-
+    
     @property
     def ipv4_addr(self):
         #TODO: REMOVE | RAISE exception | RETURN message
         return 'state address (only available from nodes)'
+
 
 class PrivateIface(SliverIface):
     """
@@ -417,6 +415,10 @@ class PrivateIface(SliverIface):
     will have at least a private interface.
     """
     sliver = models.OneToOneField(Sliver)
+    
+    class Meta:
+        abstract = True
+        unique_together = ['sliver', 'name']
     
     @property
     def nr(self):
@@ -427,8 +429,8 @@ class PrivateIface(SliverIface):
         """
         Expected address calculated in the server (can be different from the
         one showed in the node, which is the real address)
+        <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
         """
-        # <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
         ip_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
         ip_words.extend([
             '0:1000',

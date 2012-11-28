@@ -9,6 +9,7 @@ from singleton_models.models import SingletonModel
 from common.validators import UUIDValidator
 
 from . import settings
+from .validators import sliver_mac_prefix_validator
 
 
 class Node(models.Model):
@@ -92,9 +93,8 @@ class Node(models.Model):
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
         max_length=256, blank=True, null=True)
-    # TODO: create a validator for this.
-    sliver_mac_prefix = models.PositiveSmallIntegerField('Sliver MAC Prefix',
-        null=True, blank=True,
+    sliver_mac_prefix = models.CharField('Sliver MAC Prefix', null=True,
+        blank=True, max_length=5, validators=[sliver_mac_prefix_validator],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '

@@ -21,7 +21,7 @@ class CnHost(models.Model):
         help_text='Last date that CNDB information for this host/device was '
                   'successfully retrieved.')
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField(max_length=36)
+    object_id = models.PositiveIntegerField()
     
     content_object = generic.GenericForeignKey()
     

@@ -92,8 +92,9 @@ class Node(models.Model):
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
         max_length=256, blank=True, null=True)
+    # TODO: create a validator for this.
     sliver_mac_prefix = models.PositiveSmallIntegerField('Sliver MAC Prefix',
-        max_length=16, null=True, blank=True,
+        null=True, blank=True,
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '

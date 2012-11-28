@@ -10,7 +10,7 @@ class NodeInlineAdminForm(forms.ModelForm):
     pk = forms.CharField(label="ID", widget=ShowText(bold=True))
     arch = forms.CharField(label="Arch", widget=ShowText())
     set_state = forms.CharField(label="Set State", widget=ShowText(bold=True))
-
+    
     class Meta:
         fields = []
     
@@ -24,4 +24,3 @@ class NodeInlineAdminForm(forms.ModelForm):
             self.initial['pk'] = instance.pk
             self.initial['arch'] = instance.arch
             self.initial['set_state'] = instance.set_state
-

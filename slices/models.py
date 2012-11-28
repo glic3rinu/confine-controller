@@ -422,7 +422,7 @@ class PrivateIface(SliverIface):
     
     @property
     def nr(self):
-        self.nr = 0
+        return 0
     
     @property
     def ipv6_addr(self):

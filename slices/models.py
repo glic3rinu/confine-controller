@@ -417,7 +417,6 @@ class PrivateIface(SliverIface):
     sliver = models.OneToOneField(Sliver)
     
     class Meta:
-        abstract = True
         unique_together = ['sliver', 'name']
     
     @property

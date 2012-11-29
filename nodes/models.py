@@ -108,7 +108,11 @@ class Node(models.Model):
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
     group = models.ForeignKey('users.Group', 
-        help_text='User who administrates this node (its creator by default).')
+        help_text='The group this node belongs to. The user creating this node '
+                  'must be an administrator or technician of this group, and the '
+                  'group must have node creation allowed (/allow_nodes=true). '
+                  'Administrators and technicians in this group are able to '
+                  'manage this node.')
     
     def __unicode__(self):
         return self.name

@@ -8,7 +8,6 @@ from api import api
 from .models import Node, Server
 from .serializers import ServerSerializer, NodeSerializer
 
-# TODO refactor this with a ModelResource when they are stable 
 
 class NodeList(generics.ListCreateAPIView):
     """ 
@@ -22,11 +21,6 @@ class NodeList(generics.ListCreateAPIView):
     model = Node
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
-
-    def get_queryset(self):
-        # TODO remove this test
-        print self.request.QUERY_PARAMS
-        return super(NodeList, self).get_queryset()
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

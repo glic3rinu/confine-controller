@@ -1,6 +1,7 @@
 import re
 
 from django.contrib.auth import models as auth_models
+from django.core.mail import send_mail
 from django.core import validators
 from django.db import models
 from django.utils import timezone
@@ -208,6 +209,12 @@ class User(auth_models.AbstractBaseUser):
         
         return auth_models._user_has_module_perms(self, app_label)
     
+    def email_user(self, subject, message, from_email=None):
+        """
+        Sends an email to this User.
+        """
+        send_mail(subject, message, from_email, [self.email])
+
     @property
     def is_staff(self):
         """ All users can loggin to the admin interface """

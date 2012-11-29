@@ -143,6 +143,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.sites',
 
     # Confine
     'common',
@@ -153,6 +155,7 @@ INSTALLED_APPS = (
     'tinc',
     'communitynetworks',
     'firmware',
+    'registration',
     
     # Third party apps that should load last
     'rest_framework',
@@ -164,6 +167,7 @@ AUTHENTICATION_BACKENDS = [
     'users.backends.TestbedPermissionBackend',
 ]
 
+ACCOUNT_ACTIVATION_DAYS = 7
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

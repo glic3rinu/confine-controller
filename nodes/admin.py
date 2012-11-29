@@ -68,7 +68,7 @@ class NodeAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
         try: form.base_fields['group'].initial = request.user.groups.all()[0]
-        except IndexError: pass
+        except (IndexError, KeyError): pass
         return form
     
     def queryset(self, request):

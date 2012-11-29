@@ -1,17 +1,30 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
+from django.forms.models import fields_for_model
 from django.forms.widgets import CheckboxSelectMultiple
 
 from common.admin import link, admin_link
 
 from .forms import UserCreationForm, UserChangeForm
+from .helpers import change_view, changelist_view
 from .models import User, AuthToken, Roles, Group
 
+
 class PermExtensionMixin(object):
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Make all fields read only if user doesn't have change permissions.
+        """
+        if not self.has_change_permission(request, obj=obj) and \
+            self.has_view_permission(request, obj=obj):
+                model_fields = fields_for_model(self.model).keys()
+                return list(self.readonly_fields) + model_fields
+        return self.readonly_fields
+    
     def get_view_permission(self, opts):
         return 'view_%s' % opts.object_name.lower()
-
+    
     def has_view_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to view the given Django 
@@ -22,7 +35,7 @@ class PermExtensionMixin(object):
         """
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + self.get_view_permission(opts), obj)
-
+    
     def has_add_permission(self, request):
         """
         Returns True if the given request has permission to add an object.
@@ -30,7 +43,7 @@ class PermExtensionMixin(object):
         """
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission())
-
+    
     def has_change_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to change the given
@@ -43,13 +56,8 @@ class PermExtensionMixin(object):
         request has permission to change *any* object of the given type.
         """
         opts = self.opts
-        if request.POST:
-            # Change permission
-            return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
-        else:
-            # View permission
-            return self.has_view_permission(request, obj)
-
+        return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
+    
     def has_delete_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to change the given
@@ -63,7 +71,7 @@ class PermExtensionMixin(object):
         """
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + opts.get_delete_permission(), obj)
-
+    
     def get_model_perms(self, request):
         """
         Returns a dict of all perms for this model. This dict has the keys
@@ -76,6 +84,16 @@ class PermExtensionMixin(object):
             'delete': self.has_delete_permission(request),
             'view': self.has_view_permission(request),
         }
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
+            raise PermissionDenied
+        return change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+    
+    def changelist_view(self, request, extra_context=None):
+        if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
+            raise PermissionDenied
+        return changelist_view(self, request, extra_context=None)
 
 
 class AuthTokenInline(PermExtensionMixin, admin.TabularInline):

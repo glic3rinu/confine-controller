@@ -146,6 +146,8 @@ INSTALLED_APPS = (
 
     # Confine
     'common',
+    'api',
+    'permissions',
     'users',
     'nodes',
     'slices',
@@ -273,9 +275,9 @@ PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
 
 
 # rest_framework
-REST_FRAMEWORK = {
-    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend'
-}
+#REST_FRAMEWORK = {
+#    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend'
+#}
 
 
 # common.api

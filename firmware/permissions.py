@@ -1,7 +1,8 @@
+from __future__ import absolute_import
 import inspect
 
 from nodes.models import Node
-from users.permissions import Permission
+from permissions import Permission
 
 
 class FirmwarePermission(Permission):

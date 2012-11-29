@@ -10,11 +10,6 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 
-# TODO Reimplement resource with rest_framework.ModelResource and urls with Routers
-#      when they become available in the final release of rest_framework2
-# TODO Make this more generic, for now only works with Model based resources
-
-
 class ApiRoot(APIView):
     """ 
     This is the entry point for the REST API.
@@ -46,7 +41,6 @@ class RestApi(object):
         self._registry.update({model: args})
     
     def base(self):
-        # TODO Move definition to controller/api.py ?
         try: api_root = settings.COMMON_API_ROOT
         except AttributeError: api_root = ApiRoot
         else: 

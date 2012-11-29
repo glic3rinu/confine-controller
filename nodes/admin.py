@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -6,7 +8,7 @@ from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
     admin_link)
-from users.admin import PermExtensionMixin
+from permissions.admin import PermExtensionMixin
 
 from .actions import request_cert, reboot_selected
 from .forms import NodeInlineAdminForm

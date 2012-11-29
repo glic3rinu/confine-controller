@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -10,7 +12,7 @@ from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
-from users.admin import PermExtensionMixin
+from permissions.admin import PermExtensionMixin
 
 from .actions import renew_selected_slices, reset_selected
 from .forms import SliceAdminForm, IsolatedIfaceInlineForm

@@ -49,7 +49,6 @@ class Node(models.Model):
                   'the regular expression',
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
-    # TODO add validator or custom UUID field?
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node '
                   '(used by SFA). This is optional, but once set to a valid UUID '

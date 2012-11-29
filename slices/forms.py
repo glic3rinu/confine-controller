@@ -20,19 +20,20 @@ class SliceAdminForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(SliceAdminForm, self).__init__(*args, **kwargs)
-        if not 'instance' in kwargs:
-            self.fields['vlan_nr'] = self.fields['request_vlan'] 
-        else:
-            instance = kwargs['instance']
-            if instance.set_state == Slice.REGISTER and instance.vlan_nr == -1:
-                self.fields['vlan_nr'] = self.fields['request_vlan']
-                self.initial['vlan_nr'] = True
-            elif instance.set_state == Slice.REGISTER:
-                self.fields['vlan_nr'] = self.fields['request_vlan']
-                self.initial['vlan_nr'] = False
+        if 'vlan_nr' in self.fields:
+            if not 'instance' in kwargs:
+                self.fields['vlan_nr'] = self.fields['request_vlan'] 
             else:
-                self.fields['vlan_nr'].widget = ShowText()
-                self.fields['vlan_nr'].widget.attrs['readonly'] = True
+                instance = kwargs['instance']
+                if instance.set_state == Slice.REGISTER and instance.vlan_nr == -1:
+                    self.fields['vlan_nr'] = self.fields['request_vlan']
+                    self.initial['vlan_nr'] = True
+                elif instance.set_state == Slice.REGISTER:
+                    self.fields['vlan_nr'] = self.fields['request_vlan']
+                    self.initial['vlan_nr'] = False
+                else:
+                    self.fields['vlan_nr'].widget = ShowText()
+                    self.fields['vlan_nr'].widget.attrs['readonly'] = True
         
     def clean_vlan_nr(self):
         """ Return -1 if user requests vlan_nr """

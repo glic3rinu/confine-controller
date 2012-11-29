@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
+from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
 from django.forms.widgets import CheckboxSelectMultiple
 
@@ -86,14 +87,50 @@ class PermExtensionMixin(object):
         }
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
-            raise PermissionDenied
+        if request.method == 'POST':
+            # User is trying to save
+            if not self.has_change_permission(request, None):
+                raise PermissionDenied
+        else:
+            if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
+                raise PermissionDenied
         return change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
         if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
             raise PermissionDenied
         return changelist_view(self, request, extra_context=None)
+
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = []
+        for inline_class in self.inlines:
+            inline = inline_class(self.model, self.admin_site)
+            if request:
+                try: inline.has_view_permission(request)
+                except AttributeError: continue
+                if not (inline.has_view_permission(request) or
+                        inline.has_add_permission(request) or
+                        inline.has_change_permission(request, obj) or
+                        inline.has_delete_permission(request, obj)):
+                    continue
+                if not inline.has_add_permission(request):
+                    inline.max_num = 0
+            inline_instances.append(inline)
+
+        return inline_instances
+
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be viewes or edited by the
+        admin site. This is used by changelist_view and inline change_view.
+        """
+        qs = self.model._default_manager.get_query_set()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        if not (self.has_view_permission(request) or self.has_change_permission(request)):
+            qs = qs.none()
+        return qs
 
 
 class AuthTokenInline(PermExtensionMixin, admin.TabularInline):

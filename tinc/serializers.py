@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+
 from rest_framework import serializers
 
-from common.api import api
-from common.serializers import UriHyperlinkedModelSerializer
+from api import api
+from api.serializers import UriHyperlinkedModelSerializer
 from nodes.models import Server, Node
 
 from .models import (Island, TincAddress, TincHost, TincClient, TincServer, 

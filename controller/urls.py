@@ -1,6 +1,9 @@
-from common.api import api
+from __future__ import absolute_import
+
 from django.contrib import admin
 from django.conf.urls import patterns, include, url
+
+from api import api
 
 admin.autodiscover()
 api.autodiscover()

@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+
 from django.conf import settings as project_settings
 from rest_framework import serializers
 
-from common.api import api
+from api import api
 from nodes.models import Server, Node
 
 from .models import CnHost

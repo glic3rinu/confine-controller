@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import inspect
 
-from users.permissions import Permission, ReadOnlyPermission
+from permissions import Permission, ReadOnlyPermission
 
 from .models import Slice, Sliver, SliceProp, SliverProp, Template
 

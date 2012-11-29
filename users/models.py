@@ -51,6 +51,14 @@ class Group(models.Model):
             if group_roles.has_role(role): return True
         return False
 
+    def clean(self):
+        """
+        Empty pubkey and uuid as NULL instead of empty string.
+        """
+        if not self.uuid: self.uuid = None
+        if not self.pubkey: self.pubkey = None
+
+        super(Group, self).clean()
 
 class Roles(models.Model):
     # TODO prevent groups without admins

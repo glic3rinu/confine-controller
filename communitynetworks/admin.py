@@ -1,14 +1,17 @@
+from __future__ import absolute_import
+
 from django.conf import settings as project_settings
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
 from common.admin import insert_inline, insert_list_display, link
 from nodes.models import Server, Node
+from permissions.admin import PermExtensionMixin
 
 from .models import CnHost
 
 
-class CnHostInline(generic.GenericTabularInline):
+class CnHostInline(PermExtensionMixin, generic.GenericTabularInline):
     model = CnHost
     max_num = 1
     fields = ['app_url', 'cndb_uri', 'cndb_cached']

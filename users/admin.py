@@ -19,8 +19,14 @@ class PermExtensionMixin(object):
         """
         if not self.has_change_permission(request, obj=obj) and \
             self.has_view_permission(request, obj=obj):
+                excluded_fields = ['object_id', 'content_type']
                 model_fields = fields_for_model(self.model).keys()
-                return list(self.readonly_fields) + model_fields
+                fields = []
+                # set.union() is not used for preserving order
+                for field in model_fields + list(self.readonly_fields):
+                    if field not in excluded_fields and field not in fields:
+                        fields.append(field)
+                return fields
         return self.readonly_fields
     
     def get_view_permission(self, opts):

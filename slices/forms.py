@@ -21,6 +21,7 @@ class SliceAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SliceAdminForm, self).__init__(*args, **kwargs)
         if 'vlan_nr' in self.fields:
+        # read only views doens't have fields
             if not 'instance' in kwargs:
                 self.fields['vlan_nr'] = self.fields['request_vlan'] 
             else:

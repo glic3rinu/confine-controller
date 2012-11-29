@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 from rest_framework import serializers
 
-from common.serializers import UriHyperlinkedModelSerializer, RelHyperlinkedRelatedField
+from api.serializers import UriHyperlinkedModelSerializer, RelHyperlinkedRelatedField
 from users.models import User, Group, Roles
 
 

@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+
 from django.http import Http404
 from rest_framework import generics
 
-from common.api import api
+from api import api
 
 from .models import Node, Server
 from .serializers import ServerSerializer, NodeSerializer

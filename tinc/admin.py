@@ -5,58 +5,59 @@ from django.contrib.contenttypes import generic
 from common.admin import (insert_inline, admin_link, insert_action, 
     get_modeladmin, ChangeViewActionsModelAdmin, link)
 from nodes.models import Node, Server
+from users.admin import PermExtensionMixin
 
 from .actions import set_island
 from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
 
-class TincClientInline(generic.GenericTabularInline):
+class TincClientInline(PermExtensionMixin, generic.GenericTabularInline):
     model = TincClient
     max_num = 1
     readonly_fields = ['connect_to']
     verbose_name_plural = 'Tinc client'
 
 
-class TincServerInline(generic.GenericTabularInline):
+class TincServerInline(PermExtensionMixin, generic.GenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     model = TincServer
     max_num = 1
     verbose_name_plural = 'Tinc server'
 
 
-class TincAddressInline(admin.TabularInline):
+class TincAddressInline(PermExtensionMixin, admin.TabularInline):
     model = TincAddress
     max_num = 1
     verbose_name_plural = 'Tinc address'
 
 
-class ReadOnlyTincAddressInline(admin.TabularInline):
+class ReadOnlyTincAddressInline(PermExtensionMixin, admin.TabularInline):
     model = TincAddress
     readonly_fields = ['ip_addr', 'port', 'server']
     can_delete = False
     max_num = 0
 
 
-class TincAddressAdmin(admin.ModelAdmin):
+class TincAddressAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['ip_addr', 'port', 'island', 'server']
     list_filter = ['island__name', 'port', 'server']
     search_fields = ['ip_addr', 'island__name', 'island__description', 
                      'server__tinc_name'] 
 
 
-class IslandAdmin(admin.ModelAdmin):
+class IslandAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['name', 'id', 'description']
     search_fields = ['name', 'description']
     inlines = [ReadOnlyTincAddressInline]
 
 
-class GatewayAdmin(admin.ModelAdmin):
+class GatewayAdmin(PermExtensionMixin, admin.ModelAdmin):
     list_display = ['id']
     inlines = [TincServerInline]
 
 
-class HostAdmin(ChangeViewActionsModelAdmin):
+class HostAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
     actions = [set_island]

@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 from rest_framework import generics
 
-from common.api import api
+from api import api
 
 from .models import Island, Host, Gateway
 from .serializers import IslandSerializer, HostSerializer, GatewaySerializer

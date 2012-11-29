@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import inspect
 
-from users.permissions import Permission
+from permissions import Permission
 
 from .models import CnHost
 

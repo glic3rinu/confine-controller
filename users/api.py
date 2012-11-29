@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 from rest_framework import generics
 
-from common.api import api
+from api import api
 from users.models import User, Group
 from users.serializers import UserSerializer, GroupSerializer
 

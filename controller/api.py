@@ -1,4 +1,6 @@
-from common.api import ApiRoot
+from __future__ import absolute_import
+
+from api import ApiRoot
 from nodes import settings as nodes_settings
 
 

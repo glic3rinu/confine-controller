@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
@@ -5,7 +7,7 @@ from django.contrib.contenttypes import generic
 from common.admin import (insert_inline, admin_link, insert_action, 
     get_modeladmin, ChangeViewActionsModelAdmin, link)
 from nodes.models import Node, Server
-from users.admin import PermExtensionMixin
+from permissions.admin import PermExtensionMixin
 
 from .actions import set_island
 from .forms import HostInlineAdminForm

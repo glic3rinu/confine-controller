@@ -142,7 +142,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def num_public_ifaces(self, instance):
         return instance.pub6iface_set.count() + instance.pub4iface_set.count()
     num_public_ifaces.short_description = 'PublicIfaces'
-    #num_public_ifaces.admin_order_field = 'pub6iface__count'
+    num_public_ifaces.admin_order_field = 'pub6iface__count'
     
     def slice_link(self, instance):
         return mark_safe("<b>%s</b>" % admin_link('slice')(instance))
@@ -157,12 +157,19 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     exp_data_sha256.short_description = 'Experiment Data SHA256'
     
     def queryset(self, request):
+        """ Annotate number of ifaces for sorting on the changelist """
         qs = super(SliverAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('isolatediface'))
         qs = qs.annotate(models.Count('pub6iface'))
+        qs = qs.annotate(models.Count('pub6iface'))
+        qs = qs.annotate(models.Count('isolatediface'))
+        qs = qs.annotate(models.Count('mgmtiface'))
         return qs
     
     def has_add_permission(self, *args, **kwargs):
+        """ 
+        Remove add button on change list. Slivers can only be added from slice change form 
+        """
         return False
     
     def get_form(self, request, obj=None, **kwargs):
@@ -173,7 +180,9 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 
 class NodeListAdmin(NodeAdmin):
-    """ Provides a list of nodes for adding slivers to an slice"""
+    """ 
+    Provides a list of available nodes for adding slivers to an existing slice
+    """
     list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
                     'arch', colored('set_state', STATES_COLORS), admin_link('group'), 
                     'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
@@ -215,7 +224,7 @@ class NodeListAdmin(NodeAdmin):
 
 class SliceSliversAdmin(SliverAdmin):
     """ 
-    Slivers management (add and change) directly from the Slice 
+    This ModelAdmin provides Slivers management capabilities on the Slice ModelAdmin
     """
     fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_sha256']
     add_form_template = 'admin/slices/slice/add_sliver.html'
@@ -298,6 +307,7 @@ class SliceSliversAdmin(SliverAdmin):
 
 
 class SliverInline(PermissionTabularInline):
+    """ Show slivers in read only fashion """
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
@@ -354,15 +364,18 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     exp_data_sha256.short_description = 'Experiment Data SHA256'
     
     def queryset(self, request):
+        """ 
+        Annotate number of slivers on the slice for sorting on changelist 
+        """
         qs = super(SliceAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('sliver'))
         return qs
     
     def get_urls(self):
+        """ Hook sliver management URLs on slice admin """
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
-        # TODO Refactor: Hook SliceSliversAdmin in a clever way
         extra_urls = patterns("", 
             url("^(?P<slice_id>\d+)/add_sliver/$", 
                 wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view), 

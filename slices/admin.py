@@ -59,13 +59,6 @@ class MgmtIfaceInline(PermissionTabularInline):
     extra = 0
     readonly_fields = ('ipv6_addr',)
     verbose_name_plural = 'Management Network Interfaces'
-    
-    def get_formset(self, request, obj=None, **kwargs):
-        # FIXME if max_num is defined then read only views shows '+add more' button
-        #       Since the order of magnitud is ~256 elements on the formset
-        #       maybe it is just ok to remove this limitation
-        kwargs.update({'max_num': request._sliver_ifaces_avail_})
-        return super(MgmtIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class PrivateIfaceInline(PermissionTabularInline):
@@ -79,26 +72,12 @@ class Pub6IfaceInline(PermissionTabularInline):
     model = Pub6Iface
     extra = 0
     verbose_name_plural = 'Public IPv6 Interfaces'
-    
-    def get_formset(self, request, obj=None, **kwargs):
-        # FIXME if max_num is defined then read only views shows '+add more' button
-        #       Since the order of magnitud is ~256 elements on the formset
-        #       maybe it is just ok to remove this limitation
-        kwargs.update({'max_num': request._sliver_ifaces_avail_})
-        return super(Pub6IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class Pub4IfaceInline(PermissionTabularInline):
     model = Pub4Iface
     extra = 0
     verbose_name_plural = 'Public IPv4 Interfaces'
-    
-    def get_formset(self, request, obj=None, **kwargs):
-        # FIXME if max_num is defined then read only views shows '+add more' button
-        #       Since the order of magnitud is ~256 elements on the formset
-        #       maybe it is just ok to remove this limitation
-        kwargs.update({'max_num': request._node_.max_pub4ifaces})
-        return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
@@ -175,7 +154,6 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         # just save node reference for future processing in IsolatedIfaceInline
         request._node_ = obj.node
-        request._sliver_ifaces_avail_ = obj.ifaces_avail
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 
@@ -297,12 +275,10 @@ class SliceSliversAdmin(SliverAdmin):
         # just save node reference for future processing in IsolatedIfaceInline
         if obj: 
             request._node_ = obj.node
-            request._sliver_ifaces_avail_ = obj.ifaces_avail
         else:
             node_id = request.path.split('/')[-2]
             node = Node.objects.get(pk=node_id)
             request._node_ = node
-            request._sliver_ifaces_avail_ = 256
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 

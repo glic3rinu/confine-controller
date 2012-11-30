@@ -93,8 +93,10 @@ def change_view(self, request, object_id, form_url='', extra_context=None):
         inline_admin_formsets.append(inline_admin_formset)
         media = media + inline_admin_formset.media
     
+    action = 'Change' if self.has_change_permission(request, obj) else 'View'
+    
     context = {
-        'title': _('Change %s') % force_text(opts.verbose_name),
+        'title': _('%s %s') % (action, force_text(opts.verbose_name)),
         'adminform': adminForm,
         'object_id': object_id,
         'original': obj,

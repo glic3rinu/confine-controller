@@ -257,6 +257,10 @@ class AuthToken(models.Model):
         'long as it is non-empty and only contains ASCII characters '
         '(e.g. by using PEM encoding or other ASCII armour).')
     
+    class Meta:
+        verbose_name = 'Authentication Token'
+        verbose_name_plural = 'Authentication Tokens'
+    
     def __unicode__(self):
         return str(self.pk)
 

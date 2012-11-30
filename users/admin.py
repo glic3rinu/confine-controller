@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
+from django.db import models
 from django.forms.widgets import CheckboxSelectMultiple
 
 from common.admin import link, admin_link
@@ -54,13 +55,29 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
 
 
 class GroupAdmin(PermissionModelAdmin):
-    list_display = ['name', 'uuid', 'description', 'allow_slices', 'allow_nodes']
+    list_display = ['name', 'uuid', 'description', 'allow_slices', 'allow_nodes',
+                    'num_users']
     list_filter = ['allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
+    inlines = [RolesInline]
     fieldsets = (
         (None, {'fields': ('name', 'description', 'allow_nodes', 'allow_slices')}),
         ('SFA Options', {'classes': ('collapse',), 'fields': ('uuid', 'pubkey')}),
         )
+    
+    def num_users(self, instance):
+        return instance.user_set.all().count()
+    num_users.short_description = 'Users'
+    num_users.admin_order_field = 'user__count'
+    
+    def queryset(self, request):
+        """ 
+        Annotate number of users on the slice for sorting on changelist 
+        """
+        qs = super(GroupAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('user'))
+        return qs
+
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)

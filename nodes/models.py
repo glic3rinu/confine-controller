@@ -202,6 +202,8 @@ class NodeProp(models.Model):
     
     class Meta:
         unique_together = ('node', 'name')
+        verbose_name = 'Node Property'
+        verbose_name_plural = 'Node Properties'
     
     def __unicode__(self):
         return self.name

@@ -46,6 +46,7 @@ class IsolatedIfaceInline(PermissionTabularInline):
     model = IsolatedIface
     extra = 0
     form = IsolatedIfaceInlineForm
+    verbose_name_plural = 'Isolated Network Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
@@ -53,37 +54,41 @@ class IsolatedIfaceInline(PermissionTabularInline):
         return super(IsolatedIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class MgmtIfaceInline(admin.TabularInline):
+class MgmtIfaceInline(PermissionTabularInline):
     model = MgmtIface
     extra = 0
     readonly_fields = ('ipv6_addr',)
+    verbose_name_plural = 'Management Network Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
-        self.max_num = request._sliver_ifaces_avail_
+        kwargs.update({'max_num': request._sliver_ifaces_avail_})
         return super(MgmtIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class PrivateIfaceInline(admin.TabularInline):
+class PrivateIfaceInline(PermissionTabularInline):
     model = PrivateIface
     extra = 0
     readonly_fields = ('ipv4_addr', 'ipv6_addr')
+    verbose_name_plural = 'Private Network Interface'
 
 
-class Pub6IfaceInline(admin.TabularInline):
+class Pub6IfaceInline(PermissionTabularInline):
     model = Pub6Iface
     extra = 0
+    verbose_name_plural = 'Public IPv6 Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
-        self.max_num = request._sliver_ifaces_avail_
+        kwargs.update({'max_num': request._sliver_ifaces_avail_})
         return super(Pub6IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class Pub4IfaceInline(admin.TabularInline):
+class Pub4IfaceInline(PermissionTabularInline):
     model = Pub4Iface
     extra = 0
+    verbose_name_plural = 'Public IPv4 Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
-        self.max_num = request._node_.max_pub4ifaces
+        kwargs.update({'max_num': request._node_.max_pub4ifaces})
         return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
@@ -98,7 +103,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                        template_link]
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, PrivateIfaceInline, IsolatedIfaceInline,
-        Pub6IfaceInline, Pub4IfaceInline, MgmtIfaceInline]
+               Pub6IfaceInline, Pub4IfaceInline, MgmtIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
 
@@ -171,7 +176,7 @@ class NodeListAdmin(NodeAdmin):
     def add_sliver_link(self, instance):
         url = reverse('admin:slices_slice_add_sliver', 
                       kwargs={'slice_id':self.slice_id, 'node_id':instance.pk})
-        return '<a href="%s">%s<a>' % (url, instance.description)
+        return '<a href="%s">%s<a>' % (url, instance.name)
     add_sliver_link.allow_tags = True
     add_sliver_link.short_description = 'Add on Node'
     

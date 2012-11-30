@@ -247,8 +247,10 @@ class Sliver(models.Model):
     
     @property
     def interfaces(self):
-        try: ifaces = [self.privateiface] 
-        except PrivateIface.DoesNotExist: ifaces = []
+        try: 
+            ifaces = [self.privateiface] 
+        except PrivateIface.DoesNotExist: 
+            ifaces = []
         ifaces += list(self.isolatediface_set.all())
         ifaces += list(self.mgmtiface_set.all())
         ifaces += list(self.pub6iface_set.all())
@@ -256,9 +258,8 @@ class Sliver(models.Model):
         return ifaces
     
     @property
-    def ifaces_avail(self):
-        TIPS = 256 #limited by design -> #nr: unsigned 8 bits
-        return TIPS - len(self.interfaces)
+    def max_ifaces(self):
+        return 256 #limited by design -> #nr: unsigned 8 bits
     
     def reset(self):
         self.instance_sn += 1
@@ -307,6 +308,11 @@ class SliverIface(models.Model):
     def __unicode__(self):
         return str(self.pk)
     
+    def save(self, *args, **kwargs):
+        if not self.pk and len(self.node.interfaces) >= self.node.max_ifaces:
+            raise self.IfaceAllocationError('No more space left for vlans')
+        super(SliverIface, self).save(*args, **kwargs)
+    
     @property
     def type(self):
         return self._meta.verbose_name.split(' ')[0]
@@ -338,6 +344,10 @@ class SliverIface(models.Model):
         ]
         
         return ':'.join(words)
+        
+    class IfaceAllocationError(Exception): pass
+    
+    class StateNotAvailable(Exception): pass
 
 
 class ResearchIface(SliverIface):
@@ -410,8 +420,7 @@ class Pub6Iface(IpIface):
     
     @property
     def ipv6_addr(self):
-        #TODO: REMOVE | RAISE exception | RETURN message
-        return 'state address (only available from nodes)'
+        raise StateNotAvailable('state address (only available from nodes)')
 
 
 class Pub4Iface(IpIface):
@@ -423,8 +432,7 @@ class Pub4Iface(IpIface):
     
     @property
     def ipv4_addr(self):
-        #TODO: REMOVE | RAISE exception | RETURN message
-        return 'state address (only available from nodes)'
+        raise StateNotAvailable('state address (only available from nodes)')
 
 
 class PrivateIface(SliverIface):

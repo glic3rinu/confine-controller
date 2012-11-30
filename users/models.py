@@ -29,8 +29,12 @@ class Group(models.Model):
                   'UUID it can not be changed.', validators=[UUIDValidator])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
         help_text='A PEM-encoded RSA public key for this user (used by SFA).')
-    allow_nodes = models.BooleanField(default=False)
-    allow_slices = models.BooleanField(default=False)
+    allow_nodes = models.BooleanField(default=False,
+        help_text='Whether nodes belonging to this group can be created (false by '
+                  'default). Its value can only be changed by testbed superusers.')
+    allow_slices = models.BooleanField(default=False,
+        help_text='Whether nodes belonging to this group can be created (false by '
+                  'default). Its value can only be changed by testbed superusers.')
     
     def __unicode__(self):
         return self.name
@@ -50,23 +54,30 @@ class Group(models.Model):
         for role in roles:
             if group_roles.has_role(role): return True
         return False
-
+    
     def clean(self):
         """
         Empty pubkey and uuid as NULL instead of empty string.
         """
         if not self.uuid: self.uuid = None
         if not self.pubkey: self.pubkey = None
-
         super(Group, self).clean()
+
 
 class Roles(models.Model):
     # TODO prevent groups without admins
     user = models.ForeignKey('users.User')
     group = models.ForeignKey(Group)
-    is_admin = models.BooleanField(default=False)
-    is_technician = models.BooleanField(default=False)
-    is_researcher = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False,
+        help_text='Whether that user is an administrator in this group. An '
+                  'administrator can manage slices and nodes belonging to the group'
+                  ', members in the group and their roles, and the group itself.')
+    is_technician = models.BooleanField(default=False,
+        help_text='Whether that user is a technician in this group. A technician '
+                  'can manage nodes belonging to the group.')
+    is_researcher = models.BooleanField(default=False,
+        help_text='Whether that user is a researcher in this group. A researcher '
+                  'can manage slices belonging to the group.')
     
     class Meta:
         unique_together = ('user', 'group')

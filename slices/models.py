@@ -191,6 +191,8 @@ class SliceProp(models.Model):
     
     class Meta:
         unique_together = ('slice', 'name')
+        verbose_name = 'Slice Property'
+        verbose_name_plural = 'Slice Properties'
     
     def __unicode__(self):
         return self.name
@@ -282,6 +284,8 @@ class SliverProp(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
+        verbose_name = 'Sliver Property'
+        verbose_name_plural = 'Sliver Properties'
     
     def __unicode__(self):
         return self.name

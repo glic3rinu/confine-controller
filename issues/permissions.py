@@ -12,6 +12,9 @@ class TicketPermission(Permission):
     def view(self, caller, user):
         return True
     
+    def add(self, caller, user):
+        return True
+    
     def change(self, caller, user):
         if inspect.isclass(caller):
             return True
@@ -27,6 +30,9 @@ class MessagePermission(Permission):
             elif caller.visibility == Message.INERNAL:
                 return caller.ticket.group in user.groups.all()
         return False
+    
+    def add(self, caller, user):
+        return True
 
 
 Ticket.has_permission = TicketPermission()

@@ -8,7 +8,7 @@ from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
     admin_link)
-from permissions.admin import PermExtensionMixin
+from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import request_cert, reboot_selected
 from .forms import NodeInlineAdminForm
@@ -24,20 +24,19 @@ STATES_COLORS = {
     Node.PRODUCTION: 'green', }
 
 
-class NodePropInline(PermExtensionMixin, admin.TabularInline):
+class NodePropInline(PermissionTabularInline):
     model = NodeProp
     extra = 0
 
 
-class DirectIfaceInline(PermExtensionMixin, admin.TabularInline):
+class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
     extra = 0
 
 
-class NodeAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
-    list_display = ['name', 'id', 'uuid', 'arch', 
-                    colored('set_state', STATES_COLORS), admin_link('group'), 
-                    'num_ifaces']
+class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
+    list_display = ['name', 'id', 'uuid', 'arch', colored('set_state', STATES_COLORS), 
+                    admin_link('group'), 'num_ifaces']
     list_display_links = ('id', 'uuid', 'name')
     list_filter = ['arch', 'set_state']
     search_fields = ['description', 'name', 'id', 'uuid']

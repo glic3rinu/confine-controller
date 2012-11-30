@@ -6,23 +6,23 @@ from django.contrib.auth.admin import UserAdmin
 from django.forms.widgets import CheckboxSelectMultiple
 
 from common.admin import link, admin_link
-from permissions.admin import PermExtensionMixin
+from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .forms import UserCreationForm, UserChangeForm
 from .models import User, AuthToken, Roles, Group
 
 
-class AuthTokenInline(PermExtensionMixin, admin.TabularInline):
+class AuthTokenInline(PermissionTabularInline):
     model = AuthToken
     extra = 0
 
 
-class RolesInline(PermExtensionMixin, admin.TabularInline):
+class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
 
 
-class UserAdmin(PermExtensionMixin, UserAdmin):
+class UserAdmin(UserAdmin, PermissionModelAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 
                     'group_links', 'is_superuser', 'is_active', )
     list_filter = ('is_superuser', 'is_active', 'groups')
@@ -53,7 +53,7 @@ class UserAdmin(PermExtensionMixin, UserAdmin):
     group_links.short_description = 'Groups'
 
 
-class GroupAdmin(PermExtensionMixin, admin.ModelAdmin):
+class GroupAdmin(PermissionModelAdmin):
     list_display = ['name', 'uuid', 'description', 'allow_slices', 'allow_nodes']
     list_filter = ['allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']

@@ -220,6 +220,8 @@ class DirectIface(models.Model):
     
     class Meta:
         unique_together = ['name', 'node']
+        verbose_name = 'Direct Network Interface'
+        verbose_name_plural = 'Direct Network Interfaces'
     
     def __unicode__(self):
         return self.name

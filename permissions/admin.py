@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin.util import unquote
 from django.contrib.contenttypes import generic
 from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
@@ -89,12 +90,13 @@ class PermExtensionMixin(object):
         }
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
+        obj = self.get_object(request, unquote(object_id))
         if request.method == 'POST':
             # User is trying to save
-            if not self.has_change_permission(request, None):
+            if not self.has_change_permission(request, obj):
                 raise PermissionDenied
         else:
-            if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
+            if not (self.has_change_permission(request, obj) or self.has_view_permission(request, obj)):
                 raise PermissionDenied
         return change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
     
@@ -138,6 +140,10 @@ class PermExtensionMixin(object):
 class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
     pass
 
-class PermissionTabularInline(PermExtensionMixin, admin.TabularInline): pass
 
-class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularInline): pass
+class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
+    pass
+
+
+class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularInline):
+    pass

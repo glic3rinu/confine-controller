@@ -53,10 +53,6 @@ class SliverPermission(Permission):
         return caller.slice.group.has_role(user, 'admin')
 
 
-class SlicePropPermission(SliverPermission):
-    pass
-
-
 class SliverPropPermission(Permission):
     def view(self, caller, user):
         return True
@@ -82,7 +78,7 @@ class SliverPropPermission(Permission):
 
 Slice.has_permission = SlicePermission()
 Sliver.has_permission = SliverPermission()
-SliceProp.has_permission = SlicePropPermission()
+SliceProp.has_permission = SliverPermission()
 SliverProp.has_permission = SliverPropPermission()
 IsolatedIface.has_permission = SliverPropPermission()
 MgmtIface.has_permission = SliverPropPermission()

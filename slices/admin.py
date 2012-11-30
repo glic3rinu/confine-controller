@@ -61,6 +61,9 @@ class MgmtIfaceInline(PermissionTabularInline):
     verbose_name_plural = 'Management Network Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
+        # FIXME if max_num is defined then read only views shows '+add more' button
+        #       Since the order of magnitud is ~256 elements on the formset
+        #       maybe it is just ok to remove this limitation
         kwargs.update({'max_num': request._sliver_ifaces_avail_})
         return super(MgmtIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
@@ -78,6 +81,9 @@ class Pub6IfaceInline(PermissionTabularInline):
     verbose_name_plural = 'Public IPv6 Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
+        # FIXME if max_num is defined then read only views shows '+add more' button
+        #       Since the order of magnitud is ~256 elements on the formset
+        #       maybe it is just ok to remove this limitation
         kwargs.update({'max_num': request._sliver_ifaces_avail_})
         return super(Pub6IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
@@ -88,6 +94,9 @@ class Pub4IfaceInline(PermissionTabularInline):
     verbose_name_plural = 'Public IPv4 Interfaces'
     
     def get_formset(self, request, obj=None, **kwargs):
+        # FIXME if max_num is defined then read only views shows '+add more' button
+        #       Since the order of magnitud is ~256 elements on the formset
+        #       maybe it is just ok to remove this limitation
         kwargs.update({'max_num': request._node_.max_pub4ifaces})
         return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 

@@ -89,7 +89,6 @@ class PermExtensionMixin(object):
         }
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        print 'permissions'
         if request.method == 'POST':
             # User is trying to save
             if not self.has_change_permission(request, None):

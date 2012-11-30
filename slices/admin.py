@@ -12,7 +12,7 @@ from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
-from permissions.admin import PermExtensionMixin
+from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import renew_selected_slices, reset_selected
 from .forms import SliceAdminForm, IsolatedIfaceInlineForm
@@ -37,12 +37,12 @@ def template_link(instance):
     return admin_link('template')(instance)
 
 
-class SliverPropInline(admin.TabularInline):
+class SliverPropInline(PermissionTabularInline):
     model = SliverProp
     extra = 0
 
 
-class IsolatedIfaceInline(admin.TabularInline):
+class IsolatedIfaceInline(PermissionTabularInline):
     model = IsolatedIface
     extra = 0
     form = IsolatedIfaceInlineForm
@@ -87,7 +87,7 @@ class Pub4IfaceInline(admin.TabularInline):
         return super(Pub4IfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class SliverAdmin(ChangeViewActionsModelAdmin):
+class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
                     'has_private_iface', 'num_isolated_ifaces', 'num_public_ifaces',
                     'num_mgmt_ifaces']
@@ -186,7 +186,7 @@ class NodeListAdmin(NodeAdmin):
         context = {'title': 'Select a node for slice "%s"' % slice.name,
                    'slice': slice, }
         context.update(extra_context or {})
-        return super(NodeListAdmin, self).changelist_view(request, context)
+        return super(NodeListAdmin, self).changelist_view(request, extra_context=context)
     
     def queryset(self, request):
         """ Filter the node list to nodes where there are no slivers of this slice """
@@ -283,7 +283,7 @@ class SliceSliversAdmin(SliverAdmin):
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 
-class SliverInline(PermExtensionMixin, admin.TabularInline):
+class SliverInline(PermissionTabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
@@ -302,12 +302,12 @@ class SliverInline(PermExtensionMixin, admin.TabularInline):
         return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
 
 
-class SlicePropInline(PermExtensionMixin, admin.TabularInline):
+class SlicePropInline(PermissionTabularInline):
     model = SliceProp
     extra = 0
 
 
-class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
+class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
                     num_slivers, admin_link('template'), 'expires_on', ]
     list_display_links = ('name', 'uuid')
@@ -369,7 +369,7 @@ class SliceAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
         return extra_urls + urls
 
 
-class TemplateAdmin(PermExtensionMixin, admin.ModelAdmin):
+class TemplateAdmin(PermissionModelAdmin):
     list_display = ['name', 'description', 'type', 'arch', 'image', 'is_active']
     list_filter = ['is_active', 'type', 'arch']
     search_fields = ['name', 'description', 'type', 'arch']

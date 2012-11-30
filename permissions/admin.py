@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.contenttypes import generic
 from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
 
@@ -6,6 +7,8 @@ from .helpers import change_view, changelist_view
 
 
 class PermExtensionMixin(object):
+    change_form_template = 'admin/permissions_change_form.html'
+    
     def get_readonly_fields(self, request, obj=None):
         """
         Make all fields read only if user doesn't have change permissions.
@@ -86,6 +89,7 @@ class PermExtensionMixin(object):
         }
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
+        print 'permissions'
         if request.method == 'POST':
             # User is trying to save
             if not self.has_change_permission(request, None):
@@ -98,7 +102,7 @@ class PermExtensionMixin(object):
     def changelist_view(self, request, extra_context=None):
         if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
             raise PermissionDenied
-        return changelist_view(self, request, extra_context=None)
+        return changelist_view(self, request, extra_context=extra_context)
     
     def get_inline_instances(self, request, obj=None):
         inline_instances = []
@@ -131,3 +135,10 @@ class PermExtensionMixin(object):
             qs = qs.none()
         return qs
 
+
+class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
+    pass
+
+class PermissionTabularInline(PermExtensionMixin, admin.TabularInline): pass
+
+class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularInline): pass

@@ -24,7 +24,7 @@ def no_show_save_and_continue(context):
                             not is_popup and (not save_as or context['add']),
         'show_save_and_continue': False,
         'is_popup': is_popup,
-        'show_save': True
+        'show_save': (change and context['has_change_permission']) or (context['add'] and context['has_add_permission'])
     }
     if context.get('original') is not None:
         ctx['original'] = context['original']
@@ -50,7 +50,7 @@ def only_show_save(context):
         'show_save_and_add_another': False,
         'show_save_and_continue': False,
         'is_popup': is_popup,
-        'show_save': True
+        'show_save': (change and context['has_change_permission']) or (context['add'] and context['has_add_permission'])
     }
     if context.get('original') is not None:
         ctx['original'] = context['original']

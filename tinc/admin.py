@@ -7,59 +7,60 @@ from django.contrib.contenttypes import generic
 from common.admin import (insert_inline, admin_link, insert_action, 
     get_modeladmin, ChangeViewActionsModelAdmin, link)
 from nodes.models import Node, Server
-from permissions.admin import PermExtensionMixin
+from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
+    PermissionModelAdmin)
 
 from .actions import set_island
 from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
 
-class TincClientInline(PermExtensionMixin, generic.GenericTabularInline):
+class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
     readonly_fields = ['connect_to']
     verbose_name_plural = 'Tinc client'
 
 
-class TincServerInline(PermExtensionMixin, generic.GenericTabularInline):
+class TincServerInline(PermissionGenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     model = TincServer
     max_num = 1
     verbose_name_plural = 'Tinc server'
 
 
-class TincAddressInline(PermExtensionMixin, admin.TabularInline):
+class TincAddressInline(PermissionTabularInline):
     model = TincAddress
     max_num = 1
     verbose_name_plural = 'Tinc address'
 
 
-class ReadOnlyTincAddressInline(PermExtensionMixin, admin.TabularInline):
+class ReadOnlyTincAddressInline(PermissionTabularInline):
     model = TincAddress
     readonly_fields = ['ip_addr', 'port', 'server']
     can_delete = False
     max_num = 0
 
 
-class TincAddressAdmin(PermExtensionMixin, admin.ModelAdmin):
+class TincAddressAdmin(PermissionModelAdmin):
     list_display = ['ip_addr', 'port', 'island', 'server']
     list_filter = ['island__name', 'port', 'server']
     search_fields = ['ip_addr', 'island__name', 'island__description', 
                      'server__tinc_name'] 
 
 
-class IslandAdmin(PermExtensionMixin, admin.ModelAdmin):
+class IslandAdmin(PermissionModelAdmin):
     list_display = ['name', 'id', 'description']
     search_fields = ['name', 'description']
     inlines = [ReadOnlyTincAddressInline]
 
 
-class GatewayAdmin(PermExtensionMixin, admin.ModelAdmin):
+class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id']
     inlines = [TincServerInline]
 
 
-class HostAdmin(PermExtensionMixin, ChangeViewActionsModelAdmin):
+class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['description', 'id', admin_link('admin')]
     inlines = [TincClientInline]
     actions = [set_island]
@@ -83,7 +84,7 @@ admin.site.register(Gateway, GatewayAdmin)
 
 # Monkey-Patching Section
 
-class HostInline(admin.TabularInline):
+class HostInline(PermissionTabularInline):
     model = Host
     form = HostInlineAdminForm
     max_num = 0

@@ -6,12 +6,12 @@ from django.contrib.contenttypes import generic
 
 from common.admin import insert_inline, insert_list_display, link
 from nodes.models import Server, Node
-from permissions.admin import PermExtensionMixin
+from permissions.admin import PermissionGenericTabularInline
 
 from .models import CnHost
 
 
-class CnHostInline(PermExtensionMixin, generic.GenericTabularInline):
+class CnHostInline(PermissionGenericTabularInline):
     model = CnHost
     max_num = 1
     fields = ['app_url', 'cndb_uri', 'cndb_cached']

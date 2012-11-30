@@ -37,7 +37,7 @@ class NodePropPermission(Permission):
     def add(self, caller, user):
         """ Admins and techs can add """
         if inspect.isclass(caller):
-            return user.has_roles(('admin', 'tech'))
+            return user.has_roles(('admin', 'technician'))
         elif caller.node.group.has_roles(user, roles=['admin', 'technician']):
             return True
         return False

@@ -1,10 +1,9 @@
 from django.contrib import admin
 from django.contrib.admin.util import unquote
 from django.contrib.contenttypes import generic
-from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
 
-from .helpers import change_view, changelist_view
+from .helpers import add_view, change_view, changelist_view
 
 
 class PermExtensionMixin(object):
@@ -40,13 +39,13 @@ class PermExtensionMixin(object):
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + self.get_view_permission(opts), obj)
     
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to add an object.
         Can be overriden by the user in subclasses.
         """
         opts = self.opts
-        return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission())
+        return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission(), obj)
     
     def has_change_permission(self, request, obj=None):
         """
@@ -89,20 +88,13 @@ class PermExtensionMixin(object):
             'view': self.has_view_permission(request),
         }
     
+    def add_view(self, request, form_url='', extra_context=None):
+        return add_view(self, request, form_url='', extra_context=extra_context)
+    
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        obj = self.get_object(request, unquote(object_id))
-        if request.method == 'POST':
-            # User is trying to save
-            if not self.has_change_permission(request, obj):
-                raise PermissionDenied
-        else:
-            if not (self.has_change_permission(request, obj) or self.has_view_permission(request, obj)):
-                raise PermissionDenied
         return change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
-        if not (self.has_change_permission(request, None) or self.has_view_permission(request, None)):
-            raise PermissionDenied
         return changelist_view(self, request, extra_context=extra_context)
     
     def get_inline_instances(self, request, obj=None):

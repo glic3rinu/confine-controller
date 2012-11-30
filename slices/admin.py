@@ -137,6 +137,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     
     def queryset(self, request):
         """ Annotate number of ifaces for sorting on the changelist """
+        # TODO not sure if this works with more than one annotation...
         qs = super(SliverAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('isolatediface'))
         qs = qs.annotate(models.Count('pub6iface'))
@@ -276,6 +277,7 @@ class SliceSliversAdmin(SliverAdmin):
         if obj: 
             request._node_ = obj.node
         else:
+            # TODO gatting node_id like this is really embarrassing...
             node_id = request.path.split('/')[-2]
             node = Node.objects.get(pk=node_id)
             request._node_ = node

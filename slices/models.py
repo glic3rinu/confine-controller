@@ -258,7 +258,7 @@ class Sliver(models.Model):
         return ifaces
     
     @property
-    def max_ifaces(self):
+    def max_num_ifaces(self):
         return 256 #limited by design -> #nr: unsigned 8 bits
     
     def reset(self):
@@ -266,6 +266,7 @@ class Sliver(models.Model):
         self.save()
     
     def force_update(self, async=False):
+        # TODO rename to pull request?
         if async: defer(force_sliver_update.delay, self.pk)
         else: force_sliver_update(self.pk)
 
@@ -309,8 +310,8 @@ class SliverIface(models.Model):
         return str(self.pk)
     
     def save(self, *args, **kwargs):
-        if not self.pk and len(self.node.interfaces) >= self.node.max_ifaces:
-            raise self.IfaceAllocationError('No more space left for vlans')
+        if not self.pk and len(self.node.interfaces) >= self.node.max_num_ifaces:
+            raise self.IfaceAllocationError('No more space left for interfaces')
         super(SliverIface, self).save(*args, **kwargs)
     
     @property
@@ -345,9 +346,10 @@ class SliverIface(models.Model):
         
         return ':'.join(words)
         
-    class IfaceAllocationError(Exception): pass
     
     class StateNotAvailable(Exception): pass
+    
+    class IfaceAllocationError(Exception): pass
 
 
 class ResearchIface(SliverIface):
@@ -478,7 +480,7 @@ class PrivateIface(SliverIface):
             prefix = node_settings.PRIV_IPV4_PREFIX_DFLT
         else:
             prefix = self.sliver.node.priv_ipv4_prefix
-
+        
         prefix_words = prefix.split('.')[:3]
         prefix_words.append('%d' % self.sliver.nr)
         

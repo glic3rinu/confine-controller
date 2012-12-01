@@ -310,7 +310,7 @@ class SliverIface(models.Model):
         return str(self.pk)
     
     def save(self, *args, **kwargs):
-        if not self.pk and len(self.node.interfaces) >= self.node.max_num_ifaces:
+        if not self.pk and len(self.sliver.interfaces) >= self.sliver.max_num_ifaces:
             raise self.IfaceAllocationError('No more space left for interfaces')
         super(SliverIface, self).save(*args, **kwargs)
     

@@ -11,6 +11,7 @@ from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAd
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import request_cert, reboot_selected
+from .filters import MyNodesListFilter
 from .forms import NodeInlineAdminForm
 from .models import Node, NodeProp, Server, DirectIface
 
@@ -38,7 +39,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['name', 'id', 'uuid', 'arch', colored('set_state', STATES_COLORS), 
                     admin_link('group'), 'num_ifaces']
     list_display_links = ('id', 'uuid', 'name')
-    list_filter = ['arch', 'set_state']
+    list_filter = ['arch', 'set_state', MyNodesListFilter]
     search_fields = ['description', 'name', 'id', 'uuid']
     readonly_fields = ['boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]

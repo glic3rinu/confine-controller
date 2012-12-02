@@ -80,10 +80,13 @@ def admin_link(field_name, app_model='', href_name=''):
     return link
 
 
-def colored(field_name, colours, description=''):
-    def colored_field(obj, field=field_name, colors=colours):
+def colored(field_name, colours, description='', verbose=False):
+    def colored_field(obj, field=field_name, colors=colours, verbose=verbose):
         value = escape(get_field_value(obj, field))
         color = colors.get(value, "black")
+        if verbose:
+            # Get the human-readable value of a choice field
+            value = getattr(obj, 'get_%s_display' % field)()
         return """<b><span style="color: %s;">%s</span></b>""" % (color, value)
     if not description: description = field_name.split('__').pop().replace('_', ' ').capitalize()
     colored_field.short_description = description

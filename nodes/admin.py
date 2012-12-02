@@ -36,10 +36,10 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['name', 'id', 'uuid', 'arch', colored('set_state', STATES_COLORS), 
+    list_display = ['name', 'id', 'uuid', 'arch', colored('set_state', STATES_COLORS, verbose=True), 
                     admin_link('group'), 'num_ifaces']
     list_display_links = ('id', 'uuid', 'name')
-    list_filter = ['arch', 'set_state', MyNodesListFilter]
+    list_filter = [MyNodesListFilter, 'arch', 'set_state']
     search_fields = ['description', 'name', 'id', 'uuid']
     readonly_fields = ['boot_sn']
     inlines = [NodePropInline, DirectIfaceInline]

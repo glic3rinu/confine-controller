@@ -85,7 +85,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
                     'has_private_iface', 'num_isolated_ifaces', 'num_pub4_ifaces',
                     'num_pub6_ifaces', 'num_mgmt_ifaces']
-    list_filter = ['slice__name', MySliversListFilter]
+    list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256',
@@ -168,7 +168,7 @@ class NodeListAdmin(NodeAdmin):
     Provides a list of available nodes for adding slivers to an existing slice
     """
     list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
-                    'arch', colored('set_state', STATES_COLORS), admin_link('group'), 
+                    'arch', colored('set_state', STATES_COLORS, verbose=True), admin_link('group'), 
                     'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id', 'uuid']
     # Template that fixes breadcrumbs for the new namespace
@@ -316,10 +316,10 @@ class SlicePropInline(PermissionTabularInline):
 
 
 class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS),
+    list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
     list_display_links = ('name', 'uuid')
-    list_filter = ['set_state', 'template', MySlicesListFilter]
+    list_filter = [MySlicesListFilter, 'set_state', 'template']
 #    filter_horizontal = ['users']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
                        'exp_data_sha256', template_link]

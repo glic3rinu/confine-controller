@@ -28,7 +28,8 @@ class NodePermission(Permission):
     def delete(self, caller, user):
         """ group admins and techs can delete """
         if inspect.isclass(caller):
-            raise Exception('fuck')
+            return user.has_roles(('admin', 'technician'))
+        print caller.group.has_roles(user, roles=['admin', 'technician'])
         return caller.group.has_roles(user, roles=['admin', 'technician'])
 
 
@@ -52,6 +53,8 @@ class NodePropPermission(Permission):
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
+        if inspect.isclass(caller):
+            return user.has_roles(('admin', 'technician'))
         return caller.node.group.has_roles(user, roles=['admin', 'technician'])
 
 

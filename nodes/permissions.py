@@ -27,6 +27,8 @@ class NodePermission(Permission):
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
+        if inspect.isclass(caller):
+            raise Exception('fuck')
         return caller.group.has_roles(user, roles=['admin', 'technician'])
 
 

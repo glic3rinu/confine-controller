@@ -8,6 +8,7 @@ Forms and validation code for user registration.
 from users.models import User, Group
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from M2Crypto import BIO, RSA
 
 
 # I put this on all required fields, because it's easier to pick up
@@ -17,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 attrs_dict = {'class': 'required'}
 
 
-class RegistrationForm(forms.Form):
+class RegistrationForm(forms.ModelForm):
     """
     Form for registering a new user account.
     
@@ -30,22 +31,38 @@ class RegistrationForm(forms.Form):
     registration backend.
     
     """
-    username = forms.RegexField(regex=r'^[\w.@+-]+$',
-                                max_length=30,
-                                widget=forms.TextInput(attrs=attrs_dict),
-                                label=_("Username"),
-                                error_messages={'invalid': _("This value may contain only letters, numbers and @/./+/-/_ characters.")})
-    email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict,
-                                                               maxlength=75)),
-                             label=_("E-mail"))
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
-                                label=_("Password"))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
-                                label=_("Password (again)"))
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'groups', 'pubkey')
+        widgets = {
+            'pubkey': forms.Textarea(attrs={'required':True, })#replace by FileField??
+        }
 
-    group = forms.ModelChoiceField(label=_("Join to a Research Group (optional)"),
-                              queryset=Group.objects.all(), required=False)
-    
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
+                                render_value=False), label=_("Password"))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
+                                render_value=False), label=_("Password (again)"))
+
+    def clean_pubkey(self):
+        """
+        Validate that the pubkey is a valid PEM-encoded RSA public key
+        -----BEGIN PUBLIC KEY-----
+        MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANQNY7RD9BarYRsmMazM1hd7a+u3QeMP
+        FZQ7Ic+BmmeWHvvVP4Yjyu1t6vAut7mKkaDeKbT3yiGVUgAEUaWMXqECAwEAAQ==
+        -----END PUBLIC KEY-----
+
+        """
+        try:
+            # server encode maybe unicode to proper working is necessary
+            # converting the key back to ascii
+            public = self.cleaned_data['pubkey'].encode('ascii')
+            bio = BIO.MemoryBuffer(public)
+            RSA.load_pub_key_bio(bio)
+        except Exception as e:
+            raise forms.ValidationError(_("Invalid public key: '%s'") % e.message)
+        else:
+            return self.cleaned_data['pubkey']
+
     def clean_username(self):
         """
         Validate that the username is alphanumeric and is not already

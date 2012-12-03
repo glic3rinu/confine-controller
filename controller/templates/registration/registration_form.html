@@ -1,15 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title></title>
-</head>
-<body>
-    <form action="." method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Sign up" />
-    </form>
-</body>
-</html>
+{% extends "registration/layout.html" %}
 
+{% block accounts %}
+    <form action="." method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-row">
+            {{ field.errors }}
+            {{ field.label_tag }}: {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+        </div>
+        {% endfor %}
+        <div class="form-row">
+            <label>&nbsp;</label>
+            <input type="submit" value="Sign up" />
+        </div>
+    </form>
+{% endblock %}

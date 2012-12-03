@@ -27,6 +27,8 @@ class SlicePermission(Permission):
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
+        if inspect.isclass(caller):
+            return user.has_roles(('admin',))
         return caller.group.has_role(user, 'admin')
 
 
@@ -50,6 +52,8 @@ class SliverPermission(Permission):
     
     def delete(self, caller, user):
         """ Group admins can delete """
+        if inspect.isclass(caller):
+            return user.has_roles(('admin',))
         return caller.slice.group.has_role(user, 'admin')
 
 
@@ -73,6 +77,8 @@ class SliverPropPermission(Permission):
     
     def delete(self, caller, user):
         """ Group admins can delete """
+        if inspect.isclass(caller):
+            return user.has_roles(('admin',))
         return caller.sliver.slice.group.has_role(user, 'admin')
 
 

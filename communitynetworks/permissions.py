@@ -25,6 +25,8 @@ class CnHostPermission(Permission):
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
+        if inspect.isclass(caller):
+            return user.has_roles(('admin', 'technician'))
         return caller.content_object.group.has_roles(user, roles=['admin', 'technician'])
 
 

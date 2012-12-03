@@ -4,6 +4,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.db import transaction, models
+from django.db.models import Q
 from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
@@ -69,8 +70,14 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
-        try: form.base_fields['group'].initial = request.user.groups.all()[0]
-        except (IndexError, KeyError): pass
+        user = request.user
+        groups = user.groups.filter(Q(roles__is_admin=True)|Q(roles__is_technician=True))
+        num_groups = groups.count()
+        if groups.count() == 1:
+            form.base_fields['group'].queryset = groups
+            form.base_fields['group'].initial = groups[0]
+        elif groups.count() > 1:
+            form.base_fields['group'].queryset = groups
         return form
     
     def queryset(self, request):

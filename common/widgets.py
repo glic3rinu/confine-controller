@@ -16,15 +16,8 @@ class ShowText(forms.Widget):
         return mark_safe(final_value)
             
     def __init__(self, *args, **kwargs):
-        if 'bold' in kwargs:
-            self.bold = kwargs.pop('bold')
-        else: self.bold = False
-        if 'warning' in kwargs:
-            self.warning = kwargs.pop('warning')
-        else: self.warning = False            
-        if 'hidden' in kwargs:
-            self.hidden = kwargs.pop('hidden')
-        else: self.hidden = True
+        for kwarg in ['bold', 'warning', 'hidden']:
+            setattr(self, kwarg, kwargs.pop(kwarg, False))
         super(ShowText, self).__init__(*args, **kwargs)
         
     def _has_changed(self, initial, data):

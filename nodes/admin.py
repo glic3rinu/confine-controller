@@ -73,11 +73,10 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         user = request.user
         groups = user.groups.filter(Q(roles__is_admin=True)|Q(roles__is_technician=True))
         num_groups = groups.count()
-        if groups.count() == 1:
+        if num_groups >= 1:
             form.base_fields['group'].queryset = groups
+        if num_groups == 1:
             form.base_fields['group'].initial = groups[0]
-        elif groups.count() > 1:
-            form.base_fields['group'].queryset = groups
         return form
     
     def queryset(self, request):

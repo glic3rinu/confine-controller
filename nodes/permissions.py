@@ -29,7 +29,6 @@ class NodePermission(Permission):
         """ group admins and techs can delete """
         if inspect.isclass(caller):
             return user.has_roles(('admin', 'technician'))
-        print caller.group.has_roles(user, roles=['admin', 'technician'])
         return caller.group.has_roles(user, roles=['admin', 'technician'])
 
 

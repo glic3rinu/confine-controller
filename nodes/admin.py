@@ -71,13 +71,15 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def get_form(self, request, *args, **kwargs):
         """ request.user as default node admin """
         form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
-        user = request.user
-        groups = user.groups.filter(Q(roles__is_admin=True)|Q(roles__is_technician=True))
-        num_groups = groups.count()
-        if num_groups >= 1:
-            form.base_fields['group'].queryset = groups
-        if num_groups == 1:
-            form.base_fields['group'].initial = groups[0]
+        if 'group' in form.base_fields:
+            # ronly forms doesn't have initial nor queryset
+            user = request.user
+            groups = user.groups.filter(Q(roles__is_admin=True)|Q(roles__is_technician=True))
+            num_groups = groups.count()
+            if num_groups >= 1:
+                form.base_fields['group'].queryset = groups
+            if num_groups == 1:
+                form.base_fields['group'].initial = groups[0]
         return form
     
     def queryset(self, request):

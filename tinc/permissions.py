@@ -5,6 +5,7 @@ from permissions import Permission, ReadOnlyPermission
 
 from .models import TincClient, TincServer, Host, Gateway, Island, TincAddress
 
+
 class TincClientPermission(Permission):
     def view(self, caller, user):
         return True

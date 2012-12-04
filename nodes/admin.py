@@ -9,6 +9,7 @@ from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
     admin_link)
+from common.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import request_cert, reboot_selected
@@ -79,7 +80,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             if num_groups >= 1:
                 form.base_fields['group'].queryset = groups
             if num_groups == 1:
-                form.base_fields['group'].initial = groups[0]
+                form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
+                form.base_fields['group'].required = False
         return form
     
     def queryset(self, request):

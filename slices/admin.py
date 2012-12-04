@@ -383,7 +383,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         """ request.user as default node admin """
         form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
         user = request.user
-        groups = user.groups.filter(Q(roles__is_admin=True)|Q(roles__is_technician=True))
+        groups = user.groups.filter(roles__is_admin=True)
         num_groups = groups.count()
         if num_groups >= 1:
             form.base_fields['group'].queryset = groups

@@ -5,10 +5,13 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
+from django_transaction_signals import defer
 
 from nodes.models import Server, Node
+from nodes.settings import MGMT_IPV6_PREFIX
 
 from . import settings
+from .tasks import update_tincd
 
 
 class Host(models.Model):
@@ -151,10 +154,23 @@ class TincClient(TincHost):
             self.connect_to = self.island.tincaddress_set.all()
         else:
             super(TincClient, self).save(*args, **kwargs)
+        self.update_tincd()
     
     def set_island(self):
         self.connect_to = self.island.tincaddress_set.all()
         self.save()
+    
+    @property
+    def subnet(self):
+        return MGMT_IPV6_PREFIX.replace('::', ':%s:0:0:0:2' % self.pk)
+    
+    def update_tincd(self, async=True):
+        if async:
+            defer(update_tincd.delay, self.pk)
+        else:
+            update_tincd(self.pk)
+    
+    class UpdateTincdError(Exception): pass
 
 
 def add_to_class(cls, name, value):  

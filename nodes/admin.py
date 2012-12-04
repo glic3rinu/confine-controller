@@ -61,6 +61,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     actions = [request_cert, reboot_selected]
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]
+    change_form_template = "admin/common/change_form.html"
     
     def num_ifaces(self, node):
         return node.directiface_set.count()

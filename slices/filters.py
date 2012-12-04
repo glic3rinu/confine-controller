@@ -1,4 +1,3 @@
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 
 
@@ -9,7 +8,7 @@ class MySlicesListFilter(SimpleListFilter):
     
     def lookups(self, request, model_admin):
         return (
-            ('True', _('My Slices')),
+            ('True', 'My Slices'),
         )
     
     def queryset(self, request, queryset):
@@ -24,7 +23,7 @@ class MySliversListFilter(SimpleListFilter):
     
     def lookups(self    , request, model_admin):
         return (
-            ('True', _('My Slivers')),
+            ('True', 'My Slivers'),
         )
     
     def queryset(self, request, queryset):

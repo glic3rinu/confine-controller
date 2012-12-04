@@ -3,7 +3,7 @@ import inspect
 
 from permissions import Permission, ReadOnlyPermission
 
-from .models import TincClient, Host, Gateway, Island, TincAddress
+from .models import TincClient, TincServer, Host, Gateway, Island, TincAddress
 
 class TincClientPermission(Permission):
     def view(self, caller, user):
@@ -49,6 +49,7 @@ class HostPermission(Permission):
 
 
 TincClient.has_permission = TincClientPermission()
+TincServer.has_permission = ReadOnlyPermission()
 Host.has_permission = HostPermission()
 Gateway.has_permission = ReadOnlyPermission()
 Island.has_permission = ReadOnlyPermission()

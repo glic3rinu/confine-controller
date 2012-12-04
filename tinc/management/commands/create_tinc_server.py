@@ -26,9 +26,8 @@ class Command(BaseCommand):
         tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server', 
                                                 content_type__app_label='nodes') 
         if tinc_server.exists():
-            # TODO be more descriptive
-            msg = ("\nSeems that You already have a server configured.\nThis will generate "
-                   "a new tinc public key and delete all the configuration under "
+            msg = ("\nSeems that you already have a tinc server configured.\nThis will "
+                   "generate a new tinc public key and delete all the configuration under "
                    "/etc/tinc/%s.\nDo you want to continue? (yes/no): " % TINC_NET_NAME)
             confirm = raw_input(msg)
             while 1:

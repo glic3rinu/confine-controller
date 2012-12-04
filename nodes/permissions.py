@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 import inspect
 
-from permissions import Permission
+from permissions import Permission, ReadOnlyPermission
 
-from .models import Node, NodeProp, DirectIface
+from .models import Node, NodeProp, DirectIface, Server
 
 
 class NodePermission(Permission):
@@ -64,3 +64,4 @@ class DirectIfacePermission(NodePropPermission):
 Node.has_permission = NodePermission()
 NodeProp.has_permission = NodePropPermission()
 DirectIface.has_permission = DirectIfacePermission()
+Server.has_permission = ReadOnlyPermission()

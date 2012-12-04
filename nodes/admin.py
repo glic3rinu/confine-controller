@@ -88,7 +88,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return qs
 
 
-class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin):
+class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):
     fields = []
     
     def get_urls(self):

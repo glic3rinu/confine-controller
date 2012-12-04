@@ -83,6 +83,11 @@ class TincServer(TincHost):
     @property
     def addresses(self):
         return self.tincaddress_set.all()
+    
+    @property
+    def subnet(self):
+        # TODO: support for multiple gateways !!
+        return MGMT_IPV6_PREFIX.replace('::/48', ':0:0:0:2/128')
 
 
 class Island(models.Model):
@@ -156,19 +161,24 @@ class TincClient(TincHost):
             super(TincClient, self).save(*args, **kwargs)
         self.update_tincd()
     
+    def delete(self, *args, **kwargs):
+        super(TincClient, self).delete(*args, **kwargs)
+        # TODO provide support for deleted clients on update_tincd
+        self.update_tincd()
+    
     def set_island(self):
         self.connect_to = self.island.tincaddress_set.all()
         self.save()
     
     @property
     def subnet(self):
-        return MGMT_IPV6_PREFIX.replace('::', ':%s:0:0:0:2' % self.pk)
+        return MGMT_IPV6_PREFIX.replace('::/48', ':%s:0:0:0:2/64' % self.pk)
     
     def update_tincd(self, async=True):
         if async:
-            defer(update_tincd.delay, self.pk)
+            defer(update_tincd.delay)
         else:
-            update_tincd(self.pk)
+            update_tincd()
     
     class UpdateTincdError(Exception): pass
 

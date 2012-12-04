@@ -65,6 +65,11 @@ class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     inlines = [TincClientInline]
     actions = [set_island]
     change_view_actions = [('set-island', set_island, 'Set Island', ''),]
+    change_form_template = "admin/common/change_form.html"
+    
+    def __init__(self, *args, **kwargs):
+        super(HostAdmin, self).__init__(*args, **kwargs)
+        print self.change_form_template
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """

@@ -21,15 +21,16 @@ class Command(BaseCommand):
             raise CommandError('Sorry, create_tinc_server must be executed as a superuser (root)')
         
         from tinc.models import TincServer
+        from tinc.settings import TINC_NET_NAME
         
-        cmd = "tinc/scripts/create_server.sh %s" % MGMT_IPV6_PREFIX.split('::')[0]
+        cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, MGMT_IPV6_PREFIX.split('::')[0])
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:
             raise CreateTincdError(stderr)
         
         pubkey = ''
-        for line in file('/etc/tinc/confine/hosts/server'):
+        for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
             pubkey += line
             if line == '-----BEGIN RSA PUBLIC KEY-----\n':
                 pubkey = line
@@ -41,8 +42,9 @@ class Command(BaseCommand):
         tinc_server.pubkey = pubkey
         tinc_server.save()
         
-        cmd = """chown confine /etc/tinc/confine/hosts;
-                 chmod o+x /etc/tinc/confine/tinc-{up,down}"""
+        # TODO get celery user
+        cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
+                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 'user': 'confine'}
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

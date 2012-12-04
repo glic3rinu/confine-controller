@@ -18,7 +18,7 @@ from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
-    readonly_fields = ['connect_to']
+    readonly_fields = ['connect_to', 'subnet']
     verbose_name_plural = 'Tinc client'
 
 
@@ -27,6 +27,7 @@ class TincServerInline(PermissionGenericTabularInline):
     model = TincServer
     max_num = 1
     verbose_name_plural = 'Tinc server'
+    readonly_fields = ['subnet']
 
 
 class TincAddressInline(PermissionTabularInline):
@@ -88,11 +89,6 @@ admin.site.register(Gateway, GatewayAdmin)
 
 
 # Monkey-Patching Section
-
-class HostInline(PermissionTabularInline):
-    model = Host
-    form = HostInlineAdminForm
-    max_num = 0
 
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincServerInline)

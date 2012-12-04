@@ -75,7 +75,9 @@ class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """
         form = super(HostAdmin, self).get_form(request, *args, **kwargs)
-        form.base_fields['admin'].initial = request.user
+        if 'admin' in form.base_fields:
+            # ronly forms doesn't have initial
+            form.base_fields['admin'].initial = request.user
         return form
     
     def set_island_view(modeladmin, request, object_id):

@@ -6,6 +6,7 @@ from django.contrib.contenttypes import generic
 
 from common.admin import (insert_inline, admin_link, insert_action, 
     get_modeladmin, ChangeViewActionsModelAdmin, link)
+from common.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
@@ -79,7 +80,12 @@ class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         form = super(HostAdmin, self).get_form(request, *args, **kwargs)
         if 'admin' in form.base_fields:
             # ronly forms doesn't have initial
-            form.base_fields['admin'].initial = request.user
+            user = request.user
+            if not user.is_superuser:
+                form.base_fields['admin'].widget = ReadOnlyWidget(user.id, user.username)
+                form.base_fields['admin'].required = False
+            else:
+                form.base_fields['admin'].initial = user
         return form
     
     def set_island_view(modeladmin, request, object_id):

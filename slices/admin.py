@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 
 from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
+from common.widgets import ReadOnlyWidget
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -390,7 +391,8 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             if num_groups >= 1:
                 form.base_fields['group'].queryset = groups
             if num_groups == 1:
-                form.base_fields['group'].initial = groups[0]
+                form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
+                form.base_fields['group'].required = False
         return form
 
 

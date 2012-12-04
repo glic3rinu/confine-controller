@@ -11,6 +11,7 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
     PermissionModelAdmin)
 
 from .actions import set_island
+from .filters import MyHostsListFilter
 from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 
@@ -62,15 +63,16 @@ class GatewayAdmin(PermissionModelAdmin):
 
 
 class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('admin')]
+    list_display = ['description', 'id', admin_link('admin'), 'subnet']
     inlines = [TincClientInline]
     actions = [set_island]
+    list_filter = [MyHostsListFilter]
     change_view_actions = [('set-island', set_island, 'Set Island', ''),]
     change_form_template = "admin/common/change_form.html"
     
-    def __init__(self, *args, **kwargs):
-        super(HostAdmin, self).__init__(*args, **kwargs)
-        print self.change_form_template
+    def subnet(self, instance):
+        return instance.tinc.subnet
+    subnet.admin_order_field = 'id'
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """

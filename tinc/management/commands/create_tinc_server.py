@@ -22,7 +22,24 @@ class Command(BaseCommand):
         
         from tinc.models import TincServer
         from tinc.settings import TINC_NET_NAME
-        
+        server = Server.objects.get_or_create(id=1)
+        tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server', 
+                                                content_type__app_label='nodes') 
+        if tinc_server.exists():
+            # TODO be more descriptive
+            msg = ("\nSeems that You already have a server configured.\nThis will generate "
+                   "a new tinc public key and delete all the configuration under "
+                   "/etc/tinc/%s.\nDo you want to continue? (yes/no): " % TINC_NET_NAME)
+            confirm = raw_input(msg)
+            while 1:
+                if confirm == 'no': return
+                if confirm == 'yes': break
+                confirm = raw_input('Please enter either "yes" or "no": ')
+            tinc_server = tinc_server[0]
+        else:
+            tinc_server = TincServer.objects.create(object_id=1, 
+                                                    content_type__model='server',
+                                                    content_type__app_label='nodes')
         cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, MGMT_IPV6_PREFIX.split('::')[0])
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
@@ -36,9 +53,7 @@ class Command(BaseCommand):
                 pubkey = line
             elif line == '-----END RSA PUBLIC KEY-----\n':
                 break
-        server = Server.objects.get_or_create(id=1)
-        tinc_server, created = TincServer.objects.get_or_create(object_id=1, 
-                    content_type__model='server', content_type__app_label='nodes')
+        
         tinc_server.pubkey = pubkey
         tinc_server.save()
         

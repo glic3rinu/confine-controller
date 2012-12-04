@@ -25,6 +25,8 @@ class TincClientPermission(Permission):
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
+        if inspect.isclass(caller):
+            return True
         return caller.node.group.has_roles(user, roles=['admin', 'technician'])
 
 
@@ -41,6 +43,8 @@ class HostPermission(Permission):
         return caller.admin == user
     
     def delete(self, caller, user):
+        if inspect.isclass(caller):
+            return True
         return self.change(caller, user)
 
 

@@ -7,6 +7,7 @@ from django.core import validators
 from django.db import models
 from django_transaction_signals import defer
 
+from common.ip import split_len, int_to_hex_str, simplify_ipv6
 from nodes.models import Server, Node
 from nodes.settings import MGMT_IPV6_PREFIX
 
@@ -85,10 +86,17 @@ class TincServer(TincHost):
         return self.tincaddress_set.all()
     
     @property
-    def subnet(self):
-        # TODO support for multiple gateways !!
-        # TODO autodiscover netmask
-        return MGMT_IPV6_PREFIX.replace('::/48', ':0:0:0:0:2/128')
+    def address(self):
+        if self.content_type.model == 'server':
+            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
+            ipv6_words = ipv6_prefix[:3]
+            return simplify_ipv6(':'.join(ipv6_words) + '::2') + '/128'
+        elif self.content_type.model == 'gateway':
+            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
+            ipv6_words = ipv6_prefix[:3]
+            ipv6_words.extend(['0', '0001'])
+            ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
+            return simplify_ipv6(':'.join(ipv6_words)) + '/128'
 
 
 class Island(models.Model):
@@ -139,6 +147,7 @@ class TincAddress(models.Model):
 
 
 class TincClient(TincHost):
+    # TODO autocreate tinc client when a related object is created
     """
     Describes a Tinc Client in the testbed. A tinc client can be a testbed node
     or a host.
@@ -172,12 +181,18 @@ class TincClient(TincHost):
         self.save()
     
     @property
-    def subnet(self):
-        # TODO autodiscover netmask
-        # TODO self.pk in hex
-        # TODO different addresses depending on host/node and gateway
-        #       https://wiki.confine-project.eu/arch:addressing
-        return MGMT_IPV6_PREFIX.replace('::/48', ':%s:0:0:0:0/64' % self.pk)
+    def address(self):
+        if self.content_type.model == 'node':
+            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
+            ipv6_words = ipv6_prefix[:3]
+            ipv6_words.append(int_to_hex_str(self.object_id, 4))
+            return simplify_ipv6(':'.join(ipv6_words) + '::2') + '/64'
+        elif self.content_type.model == 'host':
+            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
+            ipv6_words = ipv6_prefix[:3]
+            ipv6_words.extend(['0', '2000'])
+            ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
+            return simplify_ipv6(':'.join(ipv6_words)) + '/128'
     
     def update_tincd(self, async=True):
         if async:

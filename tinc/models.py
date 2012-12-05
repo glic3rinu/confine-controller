@@ -174,6 +174,9 @@ class TincClient(TincHost):
     @property
     def subnet(self):
         # TODO autodiscover netmask
+        # TODO self.pk in hex
+        # TODO different addresses depending on host/node and gateway
+        #       https://wiki.confine-project.eu/arch:addressing
         return MGMT_IPV6_PREFIX.replace('::/48', ':%s:0:0:0:0/64' % self.pk)
     
     def update_tincd(self, async=True):

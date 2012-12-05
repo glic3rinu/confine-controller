@@ -60,7 +60,8 @@ tincd <span style='color:#44aadd; '>-n</span> {{ net_name }} -K</pre>
 
 
 <h2>3. Upload the key to the server</h2>
-Upload your key on your <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a> host page.
+<p>Upload your public key on your <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a> host page. </p>
+<p>You can found the key at the end of <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.pk }}</span> file.</p>
 
 <h2>4. Start tinc daemon</h2>
 

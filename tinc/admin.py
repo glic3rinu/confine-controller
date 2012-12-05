@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
+from django.template.response import TemplateResponse
 
-from common.admin import (insert_inline, admin_link, insert_action, 
+from common.admin import (insert_inline, admin_link, insert_action, wrap_admin_view,
     get_modeladmin, ChangeViewActionsModelAdmin, link)
 from common.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
@@ -15,6 +17,7 @@ from .actions import set_island
 from .filters import MyHostsListFilter
 from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
+from . import settings
 
 
 class TincClientInline(PermissionGenericTabularInline):
@@ -69,11 +72,31 @@ class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     actions = [set_island]
     list_filter = [MyHostsListFilter]
     change_view_actions = [('set-island', set_island, 'Set Island', ''),]
-    change_form_template = "admin/common/change_form.html"
+    change_form_template = "admin/tinc/host/change_form.html"
     
     def subnet(self, instance):
-        return instance.tinc.subnet
+        return instance.tinc.subnet if instance.tinc else ''
     subnet.admin_order_field = 'id'
+    
+    def get_urls(self):
+        urls = super(HostAdmin, self).get_urls()
+        admin_site = self.admin_site
+        opts = self.model._meta
+        extra_urls = patterns("", 
+            url("^(?P<host_id>\d+)/help", wrap_admin_view(self, self.help_view), name='host-help'),
+        )
+        return extra_urls + urls
+    
+    def help_view(self, request, host_id):
+        host = self.get_object(request, host_id)
+        opts = self.model._meta
+        context = {'host': host,
+                   'server': Server.objects.get(),
+                   'net_name': settings.TINC_NET_NAME,
+                   'opts': opts,
+                   'app_label': opts.app_label}
+        return TemplateResponse(request, 'admin/tinc/host/help.html', context, 
+                                current_app=self.admin_site.name)
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """

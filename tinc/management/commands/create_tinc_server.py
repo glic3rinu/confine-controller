@@ -65,6 +65,6 @@ class Command(BaseCommand):
             raise self.CreateTincdError(stderr)
     
         self.stdout.write('Tincd server successfully created and configured.')
-        self.stdout.write(' * You may want to start it: /etc/init.d/tinc start')
+        self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')
     
     class CreateTincdError(Exception): pass

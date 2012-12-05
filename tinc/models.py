@@ -6,8 +6,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
 from django_transaction_signals import defer
+from IPy import IP
 
-from common.ip import split_len, int_to_hex_str, simplify_ipv6
+from common.ip import split_len, int_to_hex_str
 from nodes.models import Server, Node
 from nodes.settings import MGMT_IPV6_PREFIX
 
@@ -90,14 +91,13 @@ class TincServer(TincHost):
         if self.content_type.model == 'server':
             ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
             ipv6_words = ipv6_prefix[:3]
-            return simplify_ipv6(':'.join(ipv6_words) + '::2') + '/128'
+            return IP(':'.join(ipv6_words) + '::2/128').strNormal()
         elif self.content_type.model == 'gateway':
             ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
             ipv6_words = ipv6_prefix[:3]
             ipv6_words.extend(['0', '0001'])
             ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return simplify_ipv6(':'.join(ipv6_words)) + '/128'
-
+            return IP(':'.join(ipv6_words) + '/128').strNormal()
 
 class Island(models.Model):
     """
@@ -186,13 +186,13 @@ class TincClient(TincHost):
             ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
             ipv6_words = ipv6_prefix[:3]
             ipv6_words.append(int_to_hex_str(self.object_id, 4))
-            return simplify_ipv6(':'.join(ipv6_words) + '::2') + '/64'
+            return IP(':'.join(ipv6_words) + '::2/64').strNormal()
         elif self.content_type.model == 'host':
             ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
             ipv6_words = ipv6_prefix[:3]
             ipv6_words.extend(['0', '2000'])
             ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return simplify_ipv6(':'.join(ipv6_words)) + '/128'
+            return IP(':'.join(ipv6_words) + '/128').strNormal()
     
     def update_tincd(self, async=True):
         if async:

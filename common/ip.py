@@ -12,5 +12,3 @@ def int_to_hex_str(number, digits):
     return ('%.' + str(digits) + 'x') % number
 
 
-def simplify_ipv6(address):
-    return str(IP(address))

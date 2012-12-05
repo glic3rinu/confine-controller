@@ -88,7 +88,7 @@ class TincServer(TincHost):
     def subnet(self):
         # TODO support for multiple gateways !!
         # TODO autodiscover netmask
-        return MGMT_IPV6_PREFIX.replace('::/48', ':0:0:0:2/128')
+        return MGMT_IPV6_PREFIX.replace('::/48', ':0:0:0:0:2/128')
 
 
 class Island(models.Model):
@@ -174,7 +174,7 @@ class TincClient(TincHost):
     @property
     def subnet(self):
         # TODO autodiscover netmask
-        return MGMT_IPV6_PREFIX.replace('::/48', ':%s:0:0:0:2/64' % self.pk)
+        return MGMT_IPV6_PREFIX.replace('::/48', ':%s:0:0:0:0/64' % self.pk)
     
     def update_tincd(self, async=True):
         if async:

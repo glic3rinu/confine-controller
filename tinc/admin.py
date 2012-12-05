@@ -23,7 +23,7 @@ from . import settings
 class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
-    readonly_fields = ['connect_to', 'subnet']
+    readonly_fields = ['connect_to', 'address']
     verbose_name_plural = 'Tinc client'
 
 
@@ -32,7 +32,7 @@ class TincServerInline(PermissionGenericTabularInline):
     model = TincServer
     max_num = 1
     verbose_name_plural = 'Tinc server'
-    readonly_fields = ['subnet']
+    readonly_fields = ['address']
 
 
 class TincAddressInline(PermissionTabularInline):
@@ -67,16 +67,16 @@ class GatewayAdmin(PermissionModelAdmin):
 
 
 class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('admin'), 'subnet']
+    list_display = ['description', 'id', admin_link('admin'), 'address']
     inlines = [TincClientInline]
     actions = [set_island]
     list_filter = [MyHostsListFilter]
     change_view_actions = [('set-island', set_island, 'Set Island', ''),]
     change_form_template = "admin/tinc/host/change_form.html"
     
-    def subnet(self, instance):
-        return instance.tinc.subnet if instance.tinc else ''
-    subnet.admin_order_field = 'id'
+    def address(self, instance):
+        return instance.tinc.address if instance.tinc else ''
+    address.admin_order_field = 'id'
     
     def get_urls(self):
         urls = super(HostAdmin, self).get_urls()

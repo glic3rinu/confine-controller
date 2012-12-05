@@ -55,7 +55,7 @@ Name = {{ host.tinc.name }}
 ConnectTo = server
 
 # tinc-up and tinc-down
-Host address {{ host.tinc.address|cut:"0/64" }}2/48
+Host address {{ host.tinc.address|cut:"/128" }}/48
 
 # hosts/{{ host.tinc.name }}
 Subnet = {{ host.tinc.address }}
@@ -74,7 +74,8 @@ Subnet = {{ server.tinc.address }}
 <pre style='color:#000000;background:#ffffff;'>apt-get install tinc ip</pre>
 
 <h2>2. Create and configure the tinc network</h2>
-<pre style='color:#000000;background:#ffffff;'>mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}</span><span style='color:#40015a; '>/</span>
+<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Create and configure the {{ net_name }} network</span>
+mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}</span><span style='color:#40015a; '>/</span>
 
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"Name = {{ host.tinc.name }}"</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc.conf</span>
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"ConnectTo = server"</span> <span style='color:#e34adc; '>></span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc.conf</span>
@@ -93,28 +94,28 @@ mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts</span>
 <span style='color:#696969; '># Create scripts for setting up and down the network interface</span>
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'#!/bin/sh</span>
 <span style='color:#0000e6; '>ip -6 link set "$INTERFACE" up mtu 1400</span>
-<span style='color:#0000e6; '>ip -6 addr add {{ host.tinc.address|cut:"/128" }}/48 dev "$INTERFACE"'</span> 
-<span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-up</span>
-
+<span style='color:#0000e6; '>ip -6 addr add {{ host.tinc.address }}/48 dev "$INTERFACE"'</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-up</span>
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'#!/bin/sh</span>
-<span style='color:#0000e6; '>ip -6 addr del {{ host.tinc.address|cut:"/128" }}/48 dev "$INTERFACE"</span>
-<span style='color:#0000e6; '>ip -6 link set "$INTERFACE" down'</span> 
-<span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-down</span>
+<span style='color:#0000e6; '>ip -6 addr del {{ host.tinc.address }}/48 dev "$INTERFACE"</span>
+<span style='color:#0000e6; '>ip -6 link set "$INTERFACE" down'</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-down</span>
 
-<span style='color:#696969; '># Make the scripts executable:</span>
+<span style='color:#696969; '># Make the scripts executable</span>
 chmod a+rx <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-</span><span style='color:#800080; '>{</span>up,down<span style='color:#800080; '>}</span>
 </pre>
 
 
 <h2>3. Generate and upload the key to the server</h2>
-<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Generate the key pairs of your host</span>
+<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Generate the RSA key pair for your host</span>
 tincd <span style='color:#44aadd; '>-n</span> {{ net_name }} -K</pre>
 <p>Now you have to upload your public key on your <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a> host page. </p>
 <p>You can found the key at the end of <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}</span> file.</p>
 
 <h2>4. Start tinc daemon</h2>
 
-<pre style='color:#000000;background:#ffffff;'><span style='color:#bb7977; font-weight:bold; '>echo</span> {{ net_name }} <span style='color:#e34adc; '>></span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/nets.boot</span>
+<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Enable {{ net_name }} network to automatically start on boot</span>
+<span style='color:#bb7977; font-weight:bold; '>echo</span> {{ net_name }} <span style='color:#e34adc; '>></span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/nets.boot</span>
+
+<span style='color:#696969; '># Restart the tinc service for applying the new configuration</span>
 <span style='color:#40015a; '>/etc/init.d/tinc</span> restart
 
 <span style='color:#696969; '># Try if your connection is working by ping the server</span>

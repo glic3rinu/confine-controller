@@ -19,6 +19,7 @@ cat <<- EOF > /etc/tinc/$NET_NAME/tinc.conf
 	BindToAddress = 0.0.0.0
 	Port = 655
 	Name = server
+	StrictSubnets = True
 EOF
 
 # TODO autodiscover somhow the netmask

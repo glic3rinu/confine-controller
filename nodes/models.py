@@ -143,21 +143,6 @@ class Node(models.Model):
         self.boot_sn += 1
         self.save()
     
-    @property
-    def ipv6_local_addr(self):
-        # X:Y:Z:N:0000::2/64
-        ipv6_words = settings.MGMT_IPV6_PREFIX.split(':')[:3] # X:Y:Z
-        ipv6_words.extend([
-            '%.4x' % self.id, # N (Node.id in hexadecimal)
-            '0000::2'
-        ])
-        return ':'.join(ipv6_words)
-    
-    def get_sliver_mac_prefix(self):
-        if self.sliver_mac_prefix: 
-            return self.sliver_mac_prefix
-        return settings.SLIVER_MAC_PREFIX_DFLT
-    
     def get_sliver_mac_prefix(self):
         if self.sliver_mac_prefix: 
             return self.sliver_mac_prefix
@@ -167,7 +152,7 @@ class Node(models.Model):
         if self.priv_ipv4_prefix:
             return self.priv_ipv4_prefix
         return settings.PRIV_IPV4_PREFIX_DFLT
-
+    
     @property
     def max_pub4ifaces(self):
         """
@@ -183,7 +168,7 @@ class Node(models.Model):
             max_num = 0
         else: # dhcp | range
             max_num = int(self.sliver_pub_ipv4_range.split('#')[1])
-
+        
         return max_num
 
 

@@ -25,7 +25,7 @@ def int_to_hex_str(number, digits):
     """ Convert an integer number to a HEX string of length digits """
     hex_str = ('%.' + str(digits) + 'x') % number
     err_msg = "Hex representation of %d doesn't fit in %s digits" % (number, digits)
-    assret len(hex_str) <= digits, err_msg
+    assert len(hex_str) <= digits, err_msg
     return hex_str
 
 

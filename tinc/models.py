@@ -88,16 +88,20 @@ class TincServer(TincHost):
     
     @property
     def address(self):
+        ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'server':
-            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
-            ipv6_words = ipv6_prefix[:3]
-            return IP(':'.join(ipv6_words) + '::2/128').strNormal()
+            # MGMT_IPV6_PREFIX:0:0000::2/128
+            return IP(':'.join(ipv6_words) + '::2')
         elif self.content_type.model == 'gateway':
-            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
-            ipv6_words = ipv6_prefix[:3]
+            # MGMT_IPV6_PREFIX:0:0001:gggg:gggg:gggg/128
             ipv6_words.extend(['0', '0001'])
             ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return IP(':'.join(ipv6_words) + '/128').strNormal()
+            return IP(':'.join(ipv6_words))
+    
+    @property
+    def subnet(self):
+        return self.address
+
 
 class Island(models.Model):
     """
@@ -182,17 +186,23 @@ class TincClient(TincHost):
     
     @property
     def address(self):
+        ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'node':
-            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
-            ipv6_words = ipv6_prefix[:3]
+            # MGMT_IPV6_PREFIX:N:0000::2/64 i
             ipv6_words.append(int_to_hex_str(self.object_id, 4))
-            return IP(':'.join(ipv6_words) + '::2/64').strNormal()
+            return IP(':'.join(ipv6_words) + '::2')
         elif self.content_type.model == 'host':
-            ipv6_prefix = MGMT_IPV6_PREFIX.split(':')
-            ipv6_words = ipv6_prefix[:3]
+            # MGMT_IPV6_PREFIX:0:2000:hhhh:hhhh:hhhh/128
             ipv6_words.extend(['0', '2000'])
             ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return IP(':'.join(ipv6_words) + '/128').strNormal()
+            return IP(':'.join(ipv6_words))
+    
+    @property
+    def subnet(self):
+        if self.content_type.model == 'node':
+            return self.address.make_net(64)
+        elif self.content_type.model == 'host':
+            return self.address
     
     def update_tincd(self, async=True):
         if async:

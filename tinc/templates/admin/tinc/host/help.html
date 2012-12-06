@@ -116,7 +116,7 @@ tincd <span style='color:#44aadd; '>-n</span> {{ net_name }} -K</pre>
 <pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Enable {{ net_name }} network to automatically start on boot</span>
 <span style='color:#bb7977; font-weight:bold; '>echo</span> {{ net_name }} <span style='color:#e34adc; '>></span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/nets.boot</span>
 
-<span style='color:#696969; '># Restart the tinc service for applying the new configuration</span>
+<span style='color:#696969; '># Restart the tinc service in order to apply the new configuration</span>
 <span style='color:#40015a; '>/etc/init.d/tinc</span> restart
 
 <span style='color:#696969; '># Try if your connection is working by ping the server</span>

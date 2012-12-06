@@ -7,7 +7,7 @@ def lsb(u16):
 
 
 def msb(u16):
-    """ More ignificant bits """
+    """ More significant bits """
     return '%.2x' % (u16 >> 8)
 
 
@@ -22,7 +22,7 @@ def int_to_ipv6(number):
 
 
 def int_to_hex_str(number, digits):
-    """ Convert a integer number to a HEX string of length digits """
+    """ Convert an integer number to a HEX string of length digits """
     hex_str = ('%.' + str(digits) + 'x') % number
     err_msg = "Hex representation of %d doesn't fit in %s digits" % (number, digits)
     assret len(hex_str) <= digits, err_msg
@@ -30,5 +30,5 @@ def int_to_hex_str(number, digits):
 
 
 def split_len(seq, length):
-    """ Returns a seq string broken in a list of strings of length length """
+    """ Returns seq broken in a list of strings of length length """
     return [seq[i:i+length] for i in range(0, len(seq), length)]

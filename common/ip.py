@@ -2,12 +2,12 @@ import re
 
 
 def lsb(u16):
-    """ less significant bits """
+    """ Less significant bits """
     return '%.2x' % (u16 & 0xff)
 
 
 def msb(u16):
-    """ more ignificant bits """
+    """ More ignificant bits """
     return '%.2x' % (u16 >> 8)
 
 
@@ -21,13 +21,12 @@ def int_to_ipv6(number):
     return ':'.join(words, )
 
 
-def int_to_hex_str(number, length):
-    """ convert a integer number to a HEX string of length length """
-    # TODO Why ? 
-#    assert digits <= 8, "Precision %d too large? (max 8)" % digits
-    return ('%.' + str(length) + 'x') % number
+def int_to_hex_str(number, digits):
+    """ Convert a integer number to a HEX string of length digits """
+    hex_str = ('%.' + str(digits) + 'x') % number
+    assret len(hex_str) <= digits, "Hex value of %d doesn't fit in %s digits" % (number, digits)
 
 
 def split_len(seq, length):
-    """ returns a seq string broken in a list of strings of length length """
+    """ Returns a seq string broken in a list of strings of length length """
     return [seq[i:i+length] for i in range(0, len(seq), length)]

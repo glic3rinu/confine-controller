@@ -56,7 +56,7 @@ class Command(BaseCommand):
         tinc_server.pubkey = pubkey
         tinc_server.save()
         
-        # TODO get celery user
+        # TODO get celery user from input user or command parameter
         cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
                  chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 'user': 'confine'}
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)

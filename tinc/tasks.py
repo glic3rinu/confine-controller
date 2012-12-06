@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE
+import os, glob
 
 from celery.task import task
 
@@ -14,15 +15,22 @@ def update_tincd():
     """
     from .models import TincClient
     
-    # TODO delete deprectaed clients (tinc hosts)
     server = Server.objects.get().tinc
-    local_clients = TincClient.objects.filter(island__tincaddress__server=server)
+    db_clients = TincClient.objects.filter(island__tincaddress__server=server)
+    hosts_path = '/etc/tinc/%s/hosts/' % TINC_NET_NAME
     script = ''
-    for client in local_clients:
-        host_file = '/etc/tinc/%s/hosts/%s' % (TINC_NET_NAME, client.name)
+    for client in db_clients:
+        host_file = os.path.join(hosts_path, client.name)
         script += 'echo -e "Subnet = %s\n" > %s;' % (client.subnet.strNormal(), host_file)
         script += 'echo "%s" >> %s;' % (client.pubkey, host_file)
     
+    # delete clients
+    sys_clients = glob.glob(os.path.join(hosts_path, 'host_*'))
+    sys_clients.extend(glob.glob(os.path.join(hosts_path, 'node_*')))
+    for client in sys_clients:
+        os.remove(client)
+    
+    # create clients
     if script != '':
         script += "/etc/init.d/tinc reload"
         cmd = Popen(script, shell=True, stdout=PIPE, stderr=PIPE)

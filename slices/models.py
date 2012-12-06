@@ -6,14 +6,15 @@ from django_transaction_signals import defer
 from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
+from IPy import IP
 
+from common.ip import (less_significant_bits, more_significant_bits, int_to_hex_str,
+    split_len)
 from common.validators import UUIDValidator
 from nodes.models import Node
 from nodes import settings as node_settings
 
 from . import settings
-from .utils import (less_significant_bits, more_significant_bits, int_to_ipv6, 
-    number_to_hex_str)
 from .tasks import force_slice_update, force_sliver_update
 
 
@@ -310,6 +311,7 @@ class SliverIface(models.Model):
         return str(self.pk)
     
     def save(self, *args, **kwargs):
+        # TODO use max_pub4ifaces on pubipv4ifaces ?
         if not self.pk and len(self.sliver.interfaces) >= self.sliver.max_num_ifaces:
             raise self.IfaceAllocationError('No more space left for interfaces')
         super(SliverIface, self).save(*args, **kwargs)
@@ -332,16 +334,17 @@ class SliverIface(models.Model):
         
         <mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
             example 06:ab:04:d2:05:00
-            operations works properly (FIXME: check if access to info works!)
         """
         node = self.parent.node
+        node_id = int_to_hex_str(node.id, 4)
+        mac_prefix = node.get_sliver_mac_prefix()
         words = [
-            more_significant_bits(node.sliver_mac_prefix),
-            less_significant_bits(node.sliver_mac_prefix),
-            more_significant_bits(node.id),
-            less_significant_bits(node.id),
-            number_to_hex_str(self.sliver.nr, 2),
-            number_to_hex_str(self.nr, 2)
+            more_significant_bits(mac_prefix),
+            less_significant_bits(mac_prefix),
+            more_significant_bits(node_id),
+            less_significant_bits(node_id),
+            int_to_hex_str(self.sliver.nr, 2),
+            int_to_hex_str(self.nr, 2)
         ]
         
         return ':'.join(words)
@@ -401,16 +404,16 @@ class MgmtIface(IpIface):
         Expected address calculated in the server (can be different from the
         one showed in the node, which is the real address)
         
-        <node.mgmt_ipv6_prefix>:<Node.id in HEX>:10<Iface.nr in HEX>:<Slice.id in HEX>
+        MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64
         """
-        ipv6_prefix = node_settings.MGMT_IPV6_PREFIX.split(':')
-        ipv6_words = ipv6_prefix[:3]
+        ipv6_words = node_settings.MGMT_IPV6_PREFIX.split(':')[:3]
         ipv6_words.extend([
-            number_to_hex_str(self.sliver.node_id, 4), # Node.id
-            '10' + number_to_hex_str(self.nr, 2), # Iface.nr
-            number_to_hex_str(self.sliver.slice_id, 4) # Slice.id
+            int_to_hex_str(self.sliver.node_id, 4), # Node.id
+            '10' + int_to_hex_str(self.nr, 2), # Iface.nr
         ])
-        return ':'.join(ipv6_words)
+        # sliver id
+        ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))
+        return IP(':'.join(ipv6_words))
 
 
 class Pub6Iface(IpIface):
@@ -457,14 +460,13 @@ class PrivateIface(SliverIface):
         """
         Expected address calculated in the server (can be different from the
         one showed in the node, which is the real address)
-        <priv_ipv6_prefix>:0:1000:<Slice.id in HEX>
+        PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64
         """
-        ip_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
-        ip_words.extend([
-            '0:1000',
-            int_to_ipv6(self.sliver.slice_id)
-        ])
-        return ':'.join(ip_words)
+        ipv6_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
+        ipv6_words.extend(['0','1000'])
+        # sliver.id
+        ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))
+        return IP(':'.join(ipv4_words))
     
     @property
     def ipv4_addr(self):
@@ -476,13 +478,9 @@ class PrivateIface(SliverIface):
         NOTE: this is the expected address calculated in the server (can be
         different from the one showed in the node, which is the real address)
         """
-        if not self.sliver.node.priv_ipv4_prefix:
-            prefix = node_settings.PRIV_IPV4_PREFIX_DFLT
-        else:
-            prefix = self.sliver.node.priv_ipv4_prefix
+        prefix = self.sliver.node.get_priv_ipv4_prefix()
+        ipv4_words = prefix.split('.')[:3]
+        ipv4_words.append('%d' % self.sliver.nr)
         
-        prefix_words = prefix.split('.')[:3]
-        prefix_words.append('%d' % self.sliver.nr)
-        
-        return '.'.join(prefix_words)
+        return IP('.'.join(ipv4_words))
 

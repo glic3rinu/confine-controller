@@ -20,7 +20,7 @@ def update_tincd():
     script = ''
     for client in local_clients:
         host_file = '/etc/tinc/%s/hosts/%s' % (TINC_NET_NAME, client.name)
-        script += 'echo -e "Subnet = %s\n" > %s;' % (client.subnet, host_file)
+        script += 'echo -e "Subnet = %s\n" > %s;' % (client.subnet.strNormal(), host_file)
         script += 'echo "%s" >> %s;' % (client.pubkey, host_file)
     
     if script != '':

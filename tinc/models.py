@@ -88,6 +88,7 @@ class TincServer(TincHost):
     
     @property
     def address(self):
+        """ IPV6 management address """
         ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'server':
             # MGMT_IPV6_PREFIX:0:0000::2/128
@@ -186,6 +187,7 @@ class TincClient(TincHost):
     
     @property
     def address(self):
+        """ IPV6 management address """
         ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'node':
             # MGMT_IPV6_PREFIX:N:0000::2/64 i

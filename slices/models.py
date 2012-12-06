@@ -8,8 +8,7 @@ from django.core import validators
 from django.db import models
 from IPy import IP
 
-from common.ip import (less_significant_bits, more_significant_bits, int_to_hex_str,
-    split_len)
+from common.ip import lsb, msb, int_to_hex_str, split_len
 from common.validators import UUIDValidator
 from nodes.models import Node
 from nodes import settings as node_settings
@@ -163,8 +162,8 @@ class Slice(models.Model):
     def _get_vlan_nr(self):
         last_nr = Slice.objects.order_by('-vlan_nr')[0]
         if last_nr < 2: return 2
-        if last_nr >= int('FFFF', 16):
-            for new_nr in range(2, int('FFFF', 16)):
+        if last_nr >= int('ffff', 16):
+            for new_nr in range(2, int('ffff', 16)):
                 if not Slice.objects.filter(vlan_nr=new_nr):
                     return new_nr
             raise self.VlanAllocationError("No VLAN address space left")
@@ -339,16 +338,14 @@ class SliverIface(models.Model):
         node_id = int_to_hex_str(node.id, 4)
         mac_prefix = node.get_sliver_mac_prefix()
         words = [
-            more_significant_bits(mac_prefix),
-            less_significant_bits(mac_prefix),
-            more_significant_bits(node_id),
-            less_significant_bits(node_id),
+            msb(mac_prefix),
+            lsb(mac_prefix),
+            msb(node_id),
+            lsb(node_id),
             int_to_hex_str(self.sliver.nr, 2),
             int_to_hex_str(self.nr, 2)
         ]
-        
         return ':'.join(words)
-        
     
     class StateNotAvailable(Exception): pass
     
@@ -367,7 +364,7 @@ class ResearchIface(SliverIface):
     
     @property
     def nr(self): # 1 >= nr >= 256
-        # TODO how to predict what nr is used on a node?
+        # TODO how to predict what nr is used on the node?
         return self.pk # % 256 ) + 1 ?? #FIXME
 
 
@@ -481,6 +478,5 @@ class PrivateIface(SliverIface):
         prefix = self.sliver.node.get_priv_ipv4_prefix()
         ipv4_words = prefix.split('.')[:3]
         ipv4_words.append('%d' % self.sliver.nr)
-        
         return IP('.'.join(ipv4_words))
 

@@ -5,7 +5,7 @@ Forms and validation code for user registration.
 
 
 #from django.contrib.auth.models import User
-from users.models import User, Group
+from users.models import User
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from M2Crypto import BIO, RSA
@@ -35,7 +35,7 @@ class RegistrationForm(forms.ModelForm):
         model = User
         fields = ('username', 'email', 'groups', 'pubkey')
         widgets = {
-            'pubkey': forms.Textarea(attrs={'required':True, })#replace by FileField??
+            'pubkey': forms.Textarea(attrs={'required':True, })
         }
 
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
@@ -53,8 +53,8 @@ class RegistrationForm(forms.ModelForm):
 
         """
         try:
-            # server encode maybe unicode to proper working is necessary
-            # converting the key back to ascii
+            # the server encoding of may be unicode, to proper working is
+            # necessary convert back the key to ascii
             public = self.cleaned_data['pubkey'].encode('ascii')
             bio = BIO.MemoryBuffer(public)
             RSA.load_pub_key_bio(bio)

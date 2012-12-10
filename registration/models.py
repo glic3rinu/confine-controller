@@ -5,7 +5,7 @@ import re
 
 from django.conf import settings
 #from django.contrib.auth.models import User
-from users.models import User
+from users.models import User, Group
 from django.db import models
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -66,7 +66,7 @@ class RegistrationManager(models.Manager):
         return False
     
     def create_inactive_user(self, username, email, password,
-                             site, send_email=True):
+                             site, groups, send_email=True):
         """
         Create a new, inactive ``User``, generate a
         ``RegistrationProfile`` and email its activation key to the
@@ -90,9 +90,12 @@ class RegistrationManager(models.Manager):
         # + We send an email to the admin of the group which must approbe this request
         #    a. admin approbes
         #    b. admin refuses
-#        for group in new_user.groups:
-#            create_join_request(group)
-
+        for group in groups:
+            # TODO: call function from users app to create a new JoinRequest
+            # create_registration_group(new_user, group)
+            print group
+            pass
+            
         return new_user
     create_inactive_user = transaction.commit_on_success(create_inactive_user)
 
@@ -272,3 +275,61 @@ class RegistrationProfile(models.Model):
         
         self.user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
     
+class RegistrationGroup(models.Model):
+    """
+    This model's purpose is to store data temporaly for join the group.
+
+    An user can request to join into a group in two main scenaries:
+    1. While the registration: chooses the group(s)
+    2. A registered user: can request to join a group(s)
+
+    Once the request is created, the group's admin have to check it
+    accepting or refusing it.
+
+    """
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(Group)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('registration group')
+        verbose_name_plural = _('registration groups')
+
+    def __unicode__(self):
+        return u"Group registration request for user %s into group %s" % (self.user, self.group)
+
+    def refuse_join(self):
+        """
+        The admin refuse the user's request to join.
+        The request is deleted
+
+        """
+        self.delete()
+        # notify the user-applicant ??
+
+    def accept_join(self):
+        """
+        The admin accepts the user's request to join.
+        The user is added to the group and the request is deleted
+
+        """
+        self.user.groups.add(self.group.id)
+        # remove the request
+        self.delete()
+
+    def send_mail_to_admin(self, site):
+        """
+        Send an email to group admin to notify the new join group request
+
+        """
+        ctx_dict = {'group_name': self.group.name,
+                    'site': site} #TODO accept/refuse url??
+
+        # Email subject *must not* contain newlines
+        subject = 'Group join request (%s)' % self.group.name
+
+        message = render_to_string('registration/group_join_email.txt',
+                                   ctx_dict)
+
+        #TODO sent mail to the admin
+        #self.group.admin.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)

@@ -46,14 +46,14 @@ def get_firmware(modeladmin, request, queryset):
     }
 
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
-    node_link = '<a href="%s">%s</a>' % (node_url, node.description)
+    node_link = '<a href="%s">%s</a>' % (node_url, node)
     
     try: build
     except NameError:
         try: build = Build.objects.get_current(node=node)
         except Build.DoesNotExist:
             context.update({
-                "title": "Build firmware for '%s' Research Device?" % node.description,
+                "title": "Build firmware for '%s' Research Device?" % node,
                 "content_title":  mark_safe("Build firmware for '%s' Research Device?" % node_link),
                 "content_message": mark_safe("There is no pre-build up-to-date \
                     firmware for this research device, but you can instruct the \
@@ -75,7 +75,7 @@ def get_firmware(modeladmin, request, queryset):
             <p>Do you want to build again?</p>",
     }
     context.update({
-        "title": "Research Device Firmware for '%s'" % node.description,
+        "title": "Research Device Firmware for '%s'" % node,
         "content_title": mark_safe("Research Device Firmware for '%s'" % node_link),
         "content_message": description[build.state],
         "build": build,

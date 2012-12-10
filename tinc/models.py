@@ -35,7 +35,7 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host. 
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = models.TextField('Public Key', unique=True,
+    pubkey = models.TextField('Public Key', unique=True, blank=True,
         help_text='PEM-encoded RSA public key used on tinc management network.')
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
         help_text='A list of tinc addresses this host connects to.')
@@ -46,6 +46,11 @@ class TincHost(models.Model):
     @property
     def name(self):
         return str(self)
+    
+    def clean(self):
+        """ Empty pubkey as NULL instead of empty string """
+        if self.pubkey == '': self.pubkey = None
+        super(TincHost, self).clean()
 
 
 class Gateway(models.Model):
@@ -171,14 +176,13 @@ class TincClient(TincHost):
     def save(self, *args, **kwargs):
         if not self.pk:
             super(TincClient, self).save(*args, **kwargs)
-            self.connect_to = self.island.tincaddress_set.all()
+            self.set_island()
         else:
             super(TincClient, self).save(*args, **kwargs)
         self.update_tincd()
     
     def delete(self, *args, **kwargs):
         super(TincClient, self).delete(*args, **kwargs)
-        # TODO provide support for deleted clients on update_tincd
         self.update_tincd()
     
     def set_island(self):

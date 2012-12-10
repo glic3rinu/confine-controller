@@ -82,6 +82,7 @@ class Node(models.Model):
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
         default='none', choices=IPV4_METHODS)
+    # TODO validate BASE_IP#N 
     sliver_pub_ipv4_range = models.CharField('Sliver Public IPv4 Range', 
         help_text='Describes the public IPv4 range that can be used by sliver '
                   'public interfaces. If /sliver_pub_ipv4 is none, its value is '
@@ -168,8 +169,14 @@ class Node(models.Model):
             max_num = 0
         else: # dhcp | range
             max_num = int(self.sliver_pub_ipv4_range.split('#')[1])
-        
         return max_num
+    
+    @property
+    def sliver_pub_ipv4_avail(self):
+        if not self.sliver_pub_ipv4_range:
+            return 0
+        else:
+            return self.sliver_pub_ipv4_range.split('#')[1]
 
 
 class NodeProp(models.Model):

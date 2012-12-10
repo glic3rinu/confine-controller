@@ -18,6 +18,8 @@ def update_tincd():
     server = Server.objects.get().tinc
     db_clients = TincClient.objects.filter(island__tincaddress__server=server)
     hosts_path = '/etc/tinc/%s/hosts/' % TINC_NET_NAME
+    
+    # create bash script for generating clients host files
     script = ''
     for client in db_clients:
         host_file = os.path.join(hosts_path, client.name)
@@ -32,8 +34,14 @@ def update_tincd():
     
     # create clients
     if script != '':
-        script += "/etc/init.d/tinc reload"
         cmd = Popen(script, shell=True, stdout=PIPE, stderr=PIPE)
+        (stdout, stderr) = cmd.communicate()
+        if cmd.returncode > 0:
+            raise TincClient.UpdateTincdError(stderr)
+        
+        # reload tincd in a separated command to prevent clients from losing 
+        # its connection when something goes wrong
+        cmd = Popen("/etc/init.d/tinc reload", shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:
             raise TincClient.UpdateTincdError(stderr)

@@ -12,6 +12,7 @@ from singleton_models.models import SingletonModel
 
 from common.fields import MultiSelectField
 from common.models import generate_chainer_manager
+from nodes.models import Server
 from nodes.settings import NODE_ARCHS
 
 from . import settings
@@ -52,7 +53,7 @@ class Build(models.Model):
     # TODO: write condition method for preventing unauthorized downloads
     # http://django-private-files.readthedocs.org/en/latest/usage.html
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage)
-    task_id = models.CharField(max_length=36, unique=True)
+    task_id = models.CharField(max_length=36, unique=True, null=True)
     
     objects = generate_chainer_manager(BuildQuerySet)
     
@@ -155,7 +156,7 @@ class BuildUCI(models.Model):
     build = models.ForeignKey(Build)
     section = models.CharField(max_length=32, help_text='UCI config statement')
     option = models.CharField(max_length=32, help_text='UCI option statement')
-    value = models.CharField(max_length=255)
+    value = models.TextField()
     
     class Meta:
         unique_together = ['build', 'section', 'option']
@@ -239,5 +240,6 @@ class ConfigUCI(models.Model):
         Evaluates the 'value' as python code with node as a context in order to
         get the current value for the given UCI option.
         """
+        server = Server.objects.get()
         return unicode(eval(self.value))
 

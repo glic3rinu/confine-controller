@@ -14,7 +14,7 @@
 <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
 &rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
 &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-&rsaquo; <a href="{% url opts|admin_urlname:'change' node.pk %}">{{ node.description|capfirst }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'change' node.pk %}">{{ node|capfirst }}</a>
 &rsaquo; Download Firmware
 </div>
 {% endblock %}

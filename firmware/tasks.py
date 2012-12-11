@@ -13,18 +13,19 @@ def build(build_id):
     build_obj.save()
     config = Config.objects.get()
     base_image = config.get_image(build_obj.node)
-    template = confw.template('generic', 'confine', basedir='/tmp/templates/')
+    template = confw.template('generic', 'confine', basedir='/dev/null')
 #    files = confw.files()
 
     build_uci = []
     for config_uci in config.get_uci():
         value = config_uci.get_value(build_obj.node)
+        print config_uci.section, config_uci.option, value
         template.set(config_uci.section, config_uci.option, value)
         build_uci.append({
             'section': config_uci.section,
             'option': config_uci.option,
             'value': value})
-    
+    print template
     image = confw.image(template=template)
     image_name = base_image.name.replace('.img.gz', '-%s.img' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)

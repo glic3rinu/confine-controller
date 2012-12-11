@@ -1,12 +1,26 @@
-import getpass
+import getpass, pwd, re
 from subprocess import Popen, PIPE
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from nodes.models import Server
-from nodes.settings import MGMT_IPV6_PREFIX
 
 
+def get_default_celeryd_username():
+    """ Introspect celeryd defaults file in order to get default celeryd username """
+    user = None
+    try: 
+        celeryd_defaults = open('/etc/default/celeryd')
+    except IOError: pass
+    else:
+        for line in celeryd_defaults.readlines():
+            if 'CELERYD_USER=' in line:
+                user = re.findall('"([^"]*)"', line)[0]
+    return user
+
+
+@transaction.commit_on_success
 class Command(BaseCommand):
     """
     Creates the tincd config files and Server.tinc object.
@@ -21,7 +35,7 @@ class Command(BaseCommand):
             raise CommandError('Sorry, create_tinc_server must be executed as a superuser (root)')
         
         from tinc.models import TincServer
-        from tinc.settings import TINC_NET_NAME
+        from tinc.settings import TINC_NET_NAME, MGMT_IPV6_PREFIX
         server = Server.objects.get_or_create(id=1)
         tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server', 
                                                 content_type__app_label='nodes') 
@@ -53,12 +67,32 @@ class Command(BaseCommand):
             elif line == '-----END RSA PUBLIC KEY-----\n':
                 break
         
+        # Prompt for username/password, and any other required fields.
+        # Enclose this whole thing in a try/except to trap for a
+        # keyboard interrupt and exit gracefully.
+        default_username = get_default_celeryd_username()
+        username = None
+        while username is None:
+            if not username:
+                input_msg = "Celeryd username"
+                if default_username:
+                    input_msg += " (leave blank to use '%s')" % default_username
+                raw_value = input(input_msg + ': ')
+            
+            if default_username and raw_value == '':
+                raw_value = default_username
+            try:
+                username = pwd.getpwnam("glic3rinu").pw_name
+            except KeyError:
+                self.stderr.write("Error: %s" % '; '.join(e.messages))
+                username = None
+                continue
+        
         tinc_server.pubkey = pubkey
         tinc_server.save()
         
-        # TODO get celery user from input user or command parameter
         cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
-                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 'user': 'confine'}
+                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 'user': username}
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

@@ -1,0 +1,129 @@
+[
+{
+    "pk": 1, 
+    "model": "firmware.config", 
+    "fields": {
+        "version": "0.1", 
+        "description": "Confine Firmware"
+    }
+},
+{
+    "pk": 1, 
+    "model": "firmware.baseimage", 
+    "fields": {
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-40.img.gz", 
+        "config": 1, 
+        "architectures": "x86,x86_64,i586"
+    }
+},
+{
+    "pk": 1, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "id", 
+        "value": "node.id"
+    }
+},
+{
+    "pk": 2, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "local_ifname", 
+        "value": "node.local_iface"
+    }
+},
+{
+    "pk": 3, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "mac_prefix16", 
+        "value": "node.get_sliver_mac_prefix()"
+    }
+},
+{
+    "pk": 4, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "priv_ipv4_prefix24", 
+        "value": "node.get_priv_ipv4_prefix()"
+    }
+},
+{
+    "pk": 5, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "public_ipv4_avail", 
+        "value": "str(node.sliver_pub_ipv4_avail)"
+    }
+},
+{
+    "pk": 6, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "rd_public_ipv4_proto", 
+        "value": "'dhcp'"
+    }
+},
+{
+    "pk": 7, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "sl_public_ipv4_proto", 
+        "value": "'dhcp'"
+    }
+},
+{
+    "pk": 8, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "rd_if_iso_parents", 
+        "value": "' '.join(node.direct_ifaces.values_list('name', flat=True))"
+    }
+},
+{
+    "pk": 9, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node", 
+        "config": 1, 
+        "option": "rd_pubkey", 
+        "value": "node.tinc.pubkey"
+    }
+},
+{
+    "pk": 10, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "testbed", 
+        "config": 1, 
+        "option": "mgmt_ipv6_prefix48", 
+        "value": "'fdf5:5351:1dfd'"
+    }
+},
+{
+    "pk": 11, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "server", 
+        "config": 1, 
+        "option": "mgmt_pubkey", 
+        "value": "server.tinc.pubkey"
+    }
+}
+]

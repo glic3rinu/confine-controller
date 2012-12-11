@@ -10,9 +10,10 @@ from IPy import IP
 
 from common.ip import split_len, int_to_hex_str
 from nodes.models import Server, Node
-from nodes.settings import MGMT_IPV6_PREFIX
+
 
 from . import settings
+from .settings import MGMT_IPV6_PREFIX
 from .tasks import update_tincd
 
 

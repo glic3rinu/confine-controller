@@ -41,7 +41,7 @@ class RestApi(object):
         self._registry.update({model: args})
     
     def base(self):
-        try: api_root = settings.COMMON_API_ROOT
+        try: api_root = settings.CUSTOM_API_ROOT
         except AttributeError: api_root = ApiRoot
         else: 
             mod, inst = api_root.rsplit('.', 1)

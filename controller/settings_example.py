@@ -281,4 +281,4 @@ PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
 
 
 # common.api
-COMMON_API_ROOT = 'controller.api.Base'
+CUSTOM_API_ROOT = 'controller.api.Base'

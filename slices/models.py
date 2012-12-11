@@ -463,7 +463,7 @@ class PrivateIface(SliverIface):
         ipv6_words.extend(['0','1000'])
         # sliver.id
         ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))
-        return IP(':'.join(ipv4_words))
+        return IP(':'.join(ipv6_words))
     
     @property
     def ipv4_addr(self):

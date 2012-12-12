@@ -1,42 +1,42 @@
 import os
 
 from celery.task import task
-from confw import confw
 
+from .images import Image
 
 @task(name="firmware.build")
 def build(build_id):
     from firmware.models import Build, Config
-
+    
+    # retrieve the existing build option, used for user feedback
     build_obj = Build.objects.get(pk=build_id)
     build_obj.task_id = build.request.id
     build_obj.save()
+    
     config = Config.objects.get()
-    base_image = config.get_image(build_obj.node)
-    template = confw.template('generic', 'confine', basedir='/dev/null')
-#    files = confw.files()
-
-    build_uci = []
-    for config_uci in config.get_uci():
-        value = config_uci.get_value(build_obj.node)
-        print config_uci.section, config_uci.option, value
-        template.set(config_uci.section, config_uci.option, value)
-        build_uci.append({
-            'section': config_uci.section,
-            'option': config_uci.option,
-            'value': value})
-    print template
-    image = confw.image(template=template)
-    image_name = base_image.name.replace('.img.gz', '-%s.img' % build_obj.pk)
+    node = build_obj.node
+    base_image = config.get_image(node)
+    
+    # prepare the new image and copy the files in it
+    image = Image(base_image.path)
+    for f in config.get_files():
+        f.eval(node)
+        image.add_file(f)
+    
+    image_name = base_image.name.replace('.img.gz', '-%s.img.gz' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
-    try: image_path = image.build(base_image.path, userspace=True, output=image_path, gzip=True)
+    
+    # build the image
+    try: 
+        image.build(image_path+'2')
     except: 
         image.clean()
         raise
+    
     image.clean()
-    build_obj.image = image_name + '.gz'
+    build_obj.image = image_name
     build_obj.save()
-    for uci in build_uci:
-        build_obj.add_uci(**uci)
+#    for uci in build_uci:
+#        build_obj.add_uci(**uci)
     
     return image_path

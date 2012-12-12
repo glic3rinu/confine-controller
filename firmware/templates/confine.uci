@@ -1,0 +1,5 @@
+{% regroup uci by section as section_list %}
+{% for section in section_list %}
+config '{{ section.grouper }}' '{{ section.grouper }}' 
+    {% for item in section.list %} option '{{ item.option }}' '{{ item.value }}' 
+    {% endfor %}{% endfor %}

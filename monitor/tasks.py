@@ -3,29 +3,46 @@ import gevent
 from gevent import monkey
 
 
-# Requirements:
-# pip install requests
-# apt-get install python-gevent
+def async_get(nodes, faulty):
+    """
+    requests.get() using Gevent
 
-@task
-def monitor(monitor):
-
-    # create 200 grenlets.
-    # each on is a call to requests.get
+    Requirements:
+       pip install requests
+       apt-get install python-gevent
+    """
+    # enable async execution
     monkey.patch_all(thread=False, select=False)
-    url = 'http://www.google.com/%s'
-    glets = [ gevent.spawn(requests.get, url % i, prefetch=True) for i in range(200) ]
+    
+    # create greenlets, with requests.get as a callback function
+    glets = [ gevent.spawn(requests.get, 
+              'http://www.google.com/%s' % i, 
+              prefetch=True) for i in range(nodes) ]
 
-    # wait for all the greenlets to finish
+    glets.extend([ gevent.spawn(requests.get, 
+                   'http://12.2.21.2/%s' % i, 
+                   prefetch=True) for i in range(faulty) ])
+
+    # wait for all greenlets to finish
     gevent.joinall(glets)
 
-    # look at the results
+    # look at the results    
     for res in [glet.get() for glet in glets]:
-        print res.content
+        res.content
+    return 
 
 
-def normal_get():
-    url = 'http://www.google.com/%s'
-    
-    for url in [ url % i for i in range(200) ]:
-        print requests.get(url).content
+def normal_get(nodes, faulty):
+    """
+    traditional requests.get()
+    """
+
+    # generate urls
+    urls = [ 'http://www.google.com/%s' % i for i in range(nodes) ]
+    urls.extend([ 'http://12.2.21.2/%s' % i for i in range(faulty) ])
+
+    # make the requests
+    for url in urls:
+        try: requests.get(url).content
+        except requests.exceptions.ConnectionError: pass
+    return

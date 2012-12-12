@@ -1,6 +1,6 @@
 from django.contrib.contenttypes import generic
 from django.db import models
-from djcelery.models import INtervalSchedule, CrontabSchedule)
+from djcelery.models import IntervalSchedule, CrontabSchedule)
 
 
 class Metric(models.Model):

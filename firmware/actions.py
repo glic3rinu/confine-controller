@@ -15,6 +15,10 @@ from .models import Build
 #      state change should be enough)
 #      build info in JSON format is available at <node_id>/firmware/build_info
 
+# TODO offer to generate keys: show a warning unsecure 
+#      check if node.tinc.pub key exists: show a warning if so, do not sysupgrade
+#           and node will lose mgmt network connectivity
+
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:
@@ -64,9 +68,9 @@ def get_firmware(modeladmin, request, queryset):
                 current_app=modeladmin.admin_site.name)
     
     description = {
-        Build.REQUESTED: "Building request received.",
+        Build.REQUESTED: "Build request received.",
         Build.QUEUED: "Building task queued for building.",
-        Build.BUILDING: "Building...",
+        Build.BUILDING: "Building image ...",
         Build.AVAILABLE: "Firmware available for download.",
         Build.DELETED: "This firmware is no longer available. Do you want to build it again?",
         Build.OUTDATED: "This firmware is out-dated. Do you want to build it again?",

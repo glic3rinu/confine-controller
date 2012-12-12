@@ -8,7 +8,7 @@ from .images import Image
 def build(build_id):
     from firmware.models import Build, Config
     
-    # retrieve the existing build option, used for user feedback
+    # retrieve the existing build instance, used for user feedback
     build_obj = Build.objects.get(pk=build_id)
     build_obj.task_id = build.request.id
     build_obj.save()
@@ -23,12 +23,13 @@ def build(build_id):
         f.eval(node)
         image.add_file(f)
     
+    # calculating image destination path
     image_name = base_image.name.replace('.img.gz', '-%s.img.gz' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     
     # build the image
     try: 
-        image.build(image_path+'2')
+        image.build(path=image_path)
     except: 
         image.clean()
         raise

@@ -195,18 +195,21 @@ class Config(SingletonModel):
     def get_uci(self):
         return self.configuci_set.all()
     
-    def eval_uci(self, node):
+    def eval_uci(self, node, sections=None):
         uci = []
-        for config_uci in self.get_uci():
+        config_ucis = self.get_uci()
+        if sections is not None:
+            config_ucis.filter(section__in=sections)
+        for config_uci in config_ucis:
             uci.append({
                 'section': config_uci.section,
                 'option': config_uci.option,
                 'value': config_uci.eval_value(node)})
         return uci
     
-    def render_uci(self, node):
-        uci = template.loader.get_template('confine.uci')
-        context = template.Context({'uci': self.eval_uci(node)})
+    def render_uci(self, node, sections=None):
+        uci = template.loader.get_template('uci')
+        context = template.Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
     
     def get_image(self, node):
@@ -280,7 +283,9 @@ class ConfigFile(models.Model):
     path = models.CharField(max_length=256)
     value = models.CharField(max_length=256)
     optional = models.BooleanField(default=False)
+    mode = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=0)
+    # TODO one time file like priv keys.(ignore/volatile/private/...?)
     
     class Meta:
         unique_together = ['config', 'path']

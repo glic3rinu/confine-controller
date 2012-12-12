@@ -15,13 +15,13 @@ class Image(object):
         os.mkdir(self.mnt)
     
     def mount(self, part_nr=2):
-        args = '%s %s %s %s' % (self.image, self.mnt, self.tmp_part_file, part_nr)
-        mountimage = '%s/scripts/mountimage.sh -m %s' % (self.base_dir, args)
+        args = "'%s' %s %s %s" % (self.image, self.mnt, self.tmp_part_file, part_nr)
+        mountimage = "%s/scripts/mountimage.sh -m %s" % (self.base_dir, args)
         self._exec_cmd(mountimage)
     
     def umount(self, part_nr=2):
-        args = '%s %s %s %s' % (self.image, self.mnt, self.tmp_part_file, part_nr)
-        umountimage = '%s/scripts/mountimage.sh -u %s' % (self.base_dir, args)
+        args = "'%s' %s %s %s" % (self.image, self.mnt, self.tmp_part_file, part_nr)
+        umountimage = "%s/scripts/mountimage.sh -u %s" % (self.base_dir, args)
         self._exec_cmd(umountimage)
     
     def add_file(self, file):
@@ -32,8 +32,15 @@ class Image(object):
         except: pass
         shutil.rmtree(self.tmp)
     
-    def build(self, path):
-        extract = "cat \"%s\" | gunzip -c > %s" %(self.base_image, self.image)
+    def move(self, path):
+        shutil.move(self.image, path)
+    
+    def chmod(self, path, mode):
+        chmod = "chmod %s '%s'" % (mode, path) 
+        self._exec_cmd(chmod)
+    
+    def build(self, path=None):
+        extract = "cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image)
         self._exec_cmd(extract)
         self.mount()
         
@@ -42,17 +49,20 @@ class Image(object):
             dest_path = self.mnt + f.path
             dest_dir = os.path.dirname(dest_path)
             if not os.path.exists(dest_dir):
-                # TODO chmod priv_key
-                # TODO chmod tinc-up-down
                 os.makedirs(dest_dir)
             dest_file = open(dest_path, 'w+')
             dest_file.write(f.value)
             dest_file.close()
+            if f.mode:
+                self.chmod(dest_path, f.mode)
         
         self.umount()
         compress = "gzip " + self.image
         self._exec_cmd(compress)
-        shutil.move(self.image + '.gz', path)
+        self.image += '.gz'
+        
+        if path is not None:
+            self.move(path)
     
     def _exec_cmd(self, command, part_nr=2):
         mount_errors = {

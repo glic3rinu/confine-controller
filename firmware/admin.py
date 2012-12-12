@@ -11,7 +11,7 @@ from common.admin import (get_modeladmin, admin_link, insert_action, colored,
 from nodes.models import Node
 
 from .actions import get_firmware
-from .models import BaseImage, Config, ConfigUCI, Build, BuildUCI
+from .models import BaseImage, Config, ConfigUCI, Build, BuildUCI, ConfigFile
 
 STATE_COLORS = {
     Build.REQUESTED: 'blue',
@@ -30,6 +30,11 @@ class BaseImageInline(admin.TabularInline):
 
 class ConfigUCIInline(admin.TabularInline):
     model = ConfigUCI
+    extra = 0
+
+
+class ConfigFileInline(admin.TabularInline):
+    model = ConfigFile
     extra = 0
 
 
@@ -75,7 +80,7 @@ class BuildAdmin(admin.ModelAdmin):
 
 
 class ConfigAdmin(SingletonModelAdmin):
-    inlines = [BaseImageInline, ConfigUCIInline]
+    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline]
     
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name

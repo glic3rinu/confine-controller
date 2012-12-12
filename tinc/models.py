@@ -1,5 +1,6 @@
 import re
 
+from Crypto.PublicKey import RSA
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -108,6 +109,15 @@ class TincServer(TincHost):
     @property
     def subnet(self):
         return self.address
+    
+    def get_host(self):
+        host = ""
+        for addr in self.addresses:
+            host += "Address = %s\n" % addr.ip_addr
+        host += "Port = 655\n"
+        host += "Subnet = %s\n\n" % self.subnet.strNormal()
+        host += "%s" % self.pubkey
+        return host
 
 
 class Island(models.Model):
@@ -217,14 +227,34 @@ class TincClient(TincHost):
         else:
             update_tincd()
     
+    def get_host(self):
+        """ returns tincd hosts file content """
+        return "Subnet = %s\n\n%s" % (self.subnet.strNormal(), self.pubkey)
+    
+    def get_config(self):
+        """ returns client tinc.conf file content """
+        config = "Name = %s\n" % self.name
+        for server in self.connect_to.all():
+            config += "ConnectTo = %s\n" % server.name
+        return config
+    
+    def generate_key(self, commit=False):
+        private = RSA.generate(2048)
+        if commit:
+            public = private.publickey()
+            self.pubkey = public.exportKey()
+            self.save()
+        return private
+    
+    def get_tinc_up(self):
+        net = self.address.make_net(48).strNormal()
+        return '#!/bin/sh\nip -6 link set "$INTERFACE" up mtu 1400\nip -6 addr add %s dev "$INTERFACE"\n' % net
+    
+    def get_tinc_down(self):
+        net = self.address.make_net(48).strNormal()
+        return '#!/bin/sh\nip -6 addr del %s/48 dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % net
+    
     class UpdateTincdError(Exception): pass
-
-
-def add_to_class(cls, name, value):  
-    if hasattr(value, 'contribute_to_class'):
-        value.contribute_to_class(cls, name)
-    else:
-        setattr(cls, name, value)
 
 
 # Monkey-Patching Section

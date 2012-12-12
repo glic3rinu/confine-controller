@@ -23,8 +23,7 @@ def update_tincd():
     script = ''
     for client in db_clients:
         host_file = os.path.join(hosts_path, client.name)
-        script += 'echo -e "Subnet = %s\n" > %s;' % (client.subnet.strNormal(), host_file)
-        script += 'echo "%s" >> %s;' % (client.pubkey, host_file)
+        script += 'echo -e "%s" > %s;' % (client.get_config(), host_file)
     
     # delete clients
     sys_clients = glob.glob(os.path.join(hosts_path, 'host_*'))

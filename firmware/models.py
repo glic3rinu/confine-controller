@@ -6,6 +6,7 @@ from django.conf import settings as project_settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
+from django import template
 from django_transaction_signals import defer
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
@@ -141,7 +142,7 @@ class Build(models.Model):
         """
         if self.version != config.version: return False
         ucis = set(self.get_uci().values_list('section', 'option', 'value'))
-        get = lambda uci: (uci.section, uci.option, uci.get_value(self.node))
+        get = lambda uci: (uci.section, uci.option, uci.eval_value(self.node))
         config_ucis = set(map(get, config.get_uci()))
         return ucis == config_ucis
     
@@ -165,6 +166,18 @@ class BuildUCI(models.Model):
         return "%s.%s" % (self.section, self.option)
 
 
+class BuildFile(models.Model):
+    build = models.ForeignKey(Build)
+    path = models.CharField(max_length=256)
+    value = models.TextField()
+    
+    class Meta:
+        unique_together = ['build', 'path']
+    
+    def __unicode__(self):
+        return self.path
+
+
 class Config(SingletonModel):
     """
     Describes the configuration used for building images
@@ -182,12 +195,29 @@ class Config(SingletonModel):
     def get_uci(self):
         return self.configuci_set.all()
     
+    def eval_uci(self, node):
+        uci = []
+        for config_uci in self.get_uci():
+            uci.append({
+                'section': config_uci.section,
+                'option': config_uci.option,
+                'value': config_uci.eval_value(node)})
+        return uci
+    
+    def render_uci(self, node):
+        uci = template.loader.get_template('confine.uci')
+        context = template.Context({'uci': self.eval_uci(node)})
+        return uci.render(context)
+    
     def get_image(self, node):
         """
         Returns the correct base image file according to the node architecture
         """
         arch_regex = "(^|,)%s(,|$)" % node.arch
         return self.baseimage_set.get(architectures__regex=arch_regex).image
+    
+    def get_files(self):
+        return self.configfile_set.all().order_by('-priority')
 
 
 class BaseImage(models.Model):
@@ -230,12 +260,13 @@ class ConfigUCI(models.Model):
     # TODO Add validation field ?
     
     class Meta:
+        verbose_name_plural = "Config UCI"
         unique_together = ['config', 'section', 'option']
     
     def __unicode__(self):
         return "%s.%s" % (self.section, self.option)
     
-    def get_value(self, node):
+    def eval_value(self, node):
         """
         Evaluates the 'value' as python code with node as a context in order to
         get the current value for the given UCI option.
@@ -243,3 +274,22 @@ class ConfigUCI(models.Model):
         server = Server.objects.get()
         return unicode(eval(self.value))
 
+
+class ConfigFile(models.Model):
+    config = models.ForeignKey(Config)
+    path = models.CharField(max_length=256)
+    value = models.CharField(max_length=256)
+    optional = models.BooleanField(default=False)
+    priority = models.IntegerField(default=0)
+    
+    class Meta:
+        unique_together = ['config', 'path']
+    
+    def __unicode__(self):
+        return self.path
+    
+    def eval(self, node):
+        self.path = template.Template(self.path).render(template.Context({'node': node}))
+        # server is part of value context
+        server = Server.objects.get()
+        self.value = eval(self.value)

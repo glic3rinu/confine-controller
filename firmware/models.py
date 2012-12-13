@@ -20,6 +20,9 @@ from . import settings
 from .tasks import build
 
 
+# TODO create a pluggin system for add custom functions to be used in file 
+#       and uci evaluation fields.
+
 # TODO make this accessible in a common place: settings? controller? common? ..?
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
@@ -31,9 +34,12 @@ class BuildQuerySet(models.query.QuerySet):
         """ 
         build = Build.objects.get(node=node)
         config = Config.objects.get()
-        if build.state != Build.AVAILABLE: return build
-        if build.match(config): return build
-        else: raise Build.DoesNotExist()
+        if build.state != Build.AVAILABLE: 
+            return build
+        if build.match(config): 
+            return build
+        else: 
+            raise Build.DoesNotExist()
 
 
 class Build(models.Model):
@@ -114,7 +120,7 @@ class Build(models.Model):
         except: return None
     
     @classmethod
-    def build(cls, node, async=False):
+    def build(cls, node, async=False, options={}):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
@@ -127,55 +133,19 @@ class Build(models.Model):
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
         if async:
-            defer(build.delay, build_obj.pk)
+            defer(build.delay, build_obj.pk, options=options)
         else:
-            build_obj = build(build_obj.pk)
+            build_obj = build(build_obj.pk, options=options)
         return build_obj
     
     def get_uci(self):
         return self.builduci_set.all()
     
     def match(self, config):
-        """
-        Compare the existing image with the current state of the node in order
-        to detect changes.
-        """
-        if self.version != config.version: return False
-        ucis = set(self.get_uci().values_list('section', 'option', 'value'))
-        get = lambda uci: (uci.section, uci.option, uci.eval_value(self.node))
-        config_ucis = set(map(get, config.get_uci()))
-        return ucis == config_ucis
+        return False if self.version != config.version else True
     
     def add_uci(self, **kwargs):
         BuildUCI.objects.create(build=self, **kwargs)
-
-
-class BuildUCI(models.Model):
-    """
-    Stores the UCI options that build image has
-    """
-    build = models.ForeignKey(Build)
-    section = models.CharField(max_length=32, help_text='UCI config statement')
-    option = models.CharField(max_length=32, help_text='UCI option statement')
-    value = models.TextField()
-    
-    class Meta:
-        unique_together = ['build', 'section', 'option']
-    
-    def __unicode__(self):
-        return "%s.%s" % (self.section, self.option)
-
-
-class BuildFile(models.Model):
-    build = models.ForeignKey(Build)
-    path = models.CharField(max_length=256)
-    value = models.TextField()
-    
-    class Meta:
-        unique_together = ['build', 'path']
-    
-    def __unicode__(self):
-        return self.path
 
 
 class Config(SingletonModel):
@@ -199,7 +169,7 @@ class Config(SingletonModel):
         uci = []
         config_ucis = self.get_uci()
         if sections is not None:
-            config_ucis.filter(section__in=sections)
+            config_ucis = config_ucis.filter(section__in=sections)
         for config_uci in config_ucis:
             uci.append({
                 'section': config_uci.section,
@@ -285,7 +255,7 @@ class ConfigFile(models.Model):
     optional = models.BooleanField(default=False)
     mode = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=0)
-    # TODO one time file like priv keys.(ignore/volatile/private/...?)
+    # TODO one time file like priv keys.(ignore/volatile/private/...?) or optional field?
     
     class Meta:
         unique_together = ['config', 'path']

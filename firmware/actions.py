@@ -8,7 +8,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from .models import Build
+from .models import Build, Config
 
 
 # TODO implement an AJAX based feedback (triggering a refresh when there is an
@@ -18,6 +18,15 @@ from .models import Build
 # TODO offer to generate keys: show a warning unsecure 
 #      check if node.tinc.pub key exists: show a warning if so, do not sysupgrade
 #           and node will lose mgmt network connectivity
+
+from django import forms
+class GetFirmwareForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(GetFirmwareForm, self).__init__(*args, **kwargs)
+        config = Config.objects.get()
+        for f in config.configfile_set.filter(optional=True):
+            self.fields[f.pk] = forms.BooleanField(label=f.path, required=False)
+
 
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
@@ -37,8 +46,12 @@ def get_firmware(modeladmin, request, queryset):
     
     # User has requested a firmware build
     if request.POST.get('post'):
-        build = Build.build(node, async=True)
-        modeladmin.log_change(request, node, "Build firmware")
+        form = GetFirmwareForm(request.POST)
+        if form.is_valid():
+            optional_fields = form.cleaned_data
+            # TODO help_text on optional fields
+            build = Build.build(node, async=True, options=optional_fields)
+            modeladmin.log_change(request, node, "Build firmware")
     
     context = {
         "action_name": 'Firmware',
@@ -47,8 +60,9 @@ def get_firmware(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
+        'form': GetFirmwareForm(),
     }
-
+    
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     
@@ -69,7 +83,7 @@ def get_firmware(modeladmin, request, queryset):
     
     description = {
         Build.REQUESTED: "Build request received.",
-        Build.QUEUED: "Building task queued for building.",
+        Build.QUEUED: "Build task queued for building.",
         Build.BUILDING: "Building image ...",
         Build.AVAILABLE: "Firmware available for download.",
         Build.DELETED: "This firmware is no longer available. Do you want to build it again?",

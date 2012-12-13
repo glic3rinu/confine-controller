@@ -50,6 +50,8 @@ class Image(object):
             dest_dir = os.path.dirname(dest_path)
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
             dest_file = open(dest_path, 'w+')
             dest_file.write(f.value)
             dest_file.close()

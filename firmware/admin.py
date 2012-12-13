@@ -11,7 +11,7 @@ from common.admin import (get_modeladmin, admin_link, insert_action, colored,
 from nodes.models import Node
 
 from .actions import get_firmware
-from .models import BaseImage, Config, ConfigUCI, Build, BuildUCI, ConfigFile
+from .models import BaseImage, Config, ConfigUCI, Build, ConfigFile
 
 STATE_COLORS = {
     Build.REQUESTED: 'blue',
@@ -29,20 +29,15 @@ class BaseImageInline(admin.TabularInline):
 
 
 class ConfigUCIInline(admin.TabularInline):
+    # TODO box sizes
     model = ConfigUCI
     extra = 0
 
 
 class ConfigFileInline(admin.TabularInline):
+    # TODO box sizes
     model = ConfigFile
     extra = 0
-
-
-class BuildUCIInline(admin.TabularInline):
-    model = BuildUCI
-    max_num = 0
-    readonly_fields = ['section', 'option', 'value']
-    can_delete = False
 
 
 class BuildAdmin(admin.ModelAdmin):
@@ -55,7 +50,6 @@ class BuildAdmin(admin.ModelAdmin):
               'state', 'task_link']
     readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 
                        'version', 'build_date', 'task_link']
-    inlines = [BuildUCIInline]
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")

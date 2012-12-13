@@ -37,7 +37,7 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host. 
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = models.TextField('Public Key', unique=True, blank=True,
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key used on tinc management network.')
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
         help_text='A list of tinc addresses this host connects to.')
@@ -51,7 +51,8 @@ class TincHost(models.Model):
     
     def clean(self):
         """ Empty pubkey as NULL instead of empty string """
-        if self.pubkey == '': self.pubkey = None
+        if self.pubkey == '':
+            self.pubkey = None
         super(TincHost, self).clean()
 
 
@@ -116,7 +117,7 @@ class TincServer(TincHost):
             host += "Address = %s\n" % addr.ip_addr
         host += "Port = 655\n"
         host += "Subnet = %s\n\n" % self.subnet.strNormal()
-        host += "%s" % self.pubkey
+        host += "%s\n" % self.pubkey
         return host
 
 
@@ -252,7 +253,7 @@ class TincClient(TincHost):
     
     def get_tinc_down(self):
         net = self.address.make_net(48).strNormal()
-        return '#!/bin/sh\nip -6 addr del %s/48 dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % net
+        return '#!/bin/sh\nip -6 addr del %s dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % net
     
     class UpdateTincdError(Exception): pass
 

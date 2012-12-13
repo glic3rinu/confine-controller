@@ -15,9 +15,11 @@ from .models import Build, Config
 #      state change should be enough)
 #      build info in JSON format is available at <node_id>/firmware/build_info
 
-# TODO offer to generate keys: show a warning unsecure 
-#      check if node.tinc.pub key exists: show a warning if so, do not sysupgrade
-#           and node will lose mgmt network connectivity
+# TODO offer to generate keys: show a warning unsecure
+# Generate tinc Keys: if you chose this option, new tinc keys will be generated and
+#                     the node description will be updated accordingly
+#                     Your node will lose connectivity to the management network until you 
+#                     reflash your node with the generated image.
 
 from django import forms
 class GetFirmwareForm(forms.Form):

@@ -7,6 +7,15 @@ from nodes.models import Node, Server
 
 from .tasks import cache_node_db
 
+
+# Hook Community Network support for related models
+# This must be at the begining in order to avoid imports wired problems
+related_models = [Node, Server]
+if 'tinc' in project_settings.INSTALLED_APPS:
+    from tinc.models import Gateway
+    related_models.append(Gateway)
+
+
 class CnHost(models.Model):
     """
     Describes a host in the Community Network.
@@ -33,8 +42,9 @@ class CnHost(models.Model):
     
     def save(self, *args, **kwargs):
         """ Setting cndb_uri resets cndb_cached_on to null. """
+        # TODO what is wrong here, why we can't use CnHost? and we must use type(self)??!?!
         if self.pk:
-            db_host = type(self).objects.get(pk=self.pk)
+            db_host = CnHost.objects.get(pk=self.pk)
             if self.cndb_uri != db_host.cndb_uri:
                 self.cndb_cached_on = None
         super(CnHost, self).save(*args, **kwargs)
@@ -45,10 +55,6 @@ class CnHost(models.Model):
 
 
 # Hook Community Network support for related models
-related_models = [Node, Server]
-if 'tinc' in project_settings.INSTALLED_APPS:
-    from tinc.models import Gateway
-    related_models.append(Gateway)
 
 @property
 def cn(self):

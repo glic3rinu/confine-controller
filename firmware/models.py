@@ -143,7 +143,8 @@ class Build(models.Model):
     
     def match(self, config):
         return False if self.version != config.version else True
-    
+        # TODO check the files if they match    
+
     def add_uci(self, **kwargs):
         BuildUCI.objects.create(build=self, **kwargs)
 
@@ -252,9 +253,9 @@ class ConfigFile(models.Model):
     config = models.ForeignKey(Config)
     path = models.CharField(max_length=256)
     value = models.CharField(max_length=256)
-    optional = models.BooleanField(default=False)
     mode = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=0)
+    optional = models.BooleanField(default=False)
     # TODO one time file like priv keys.(ignore/volatile/private/...?) or optional field?
     
     class Meta:
@@ -268,3 +269,13 @@ class ConfigFile(models.Model):
         # server is part of value context
         server = Server.objects.get()
         self.value = eval(self.value)
+
+class ConfigHelpText(models.Model):
+    config = models.OneToOneField(Config)
+    text = models.TextField(blank=True)
+    
+    class Meta:
+        verbose_name_plural = 'Help Text'
+    
+    def __unicode__(self):
+        return str(self.config)

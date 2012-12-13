@@ -4,6 +4,7 @@
 {% load admin_urls %}
 
 {% block extrahead %}
+    {{ block.super }}
     {% if build and build.is_processing %}
         <meta http-equiv="refresh" content="3">
     {% endif %}
@@ -40,13 +41,22 @@
     {% if not build or build.is_unavailable %}
         <form action="" method="post">{% csrf_token %}
         <div>
-        {{ form.as_p }}
+        <div style="margin-left:20px; margin-bottom:20px; margin-top:20px;">
+        <fieldset class="module aligned">
+            <h2>Optional files</h2>
+                    <div class="form-row field-name">
+            {{ form.as_table }}
+            </div>
+        </fieldset>
+        </div>
         {% for obj in queryset %}
         <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
         {% endfor %}
         <input type="hidden" name="action" value="get_firmware" />
         <input type="hidden" name="post" value="yes" />
-        <input type="submit" value="{% trans "Yes, sure" %}" />
+        <div style="float:left;">
+        <input type="submit" class="default" value="{% trans "Build firmware !" %}" />
+        </div>
         </div>
         </form>
     {% endif %}

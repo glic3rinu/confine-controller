@@ -200,6 +200,7 @@ class BaseImage(models.Model):
     """
     config = models.ForeignKey(Config)
     architectures = MultiSelectField(max_length=250, choices=NODE_ARCHS)
+    # TODO validate image file name: must end in img.gz
     image = models.FileField(upload_to=settings.FIRMWARE_DIR)
     
     def __unicode__(self):

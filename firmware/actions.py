@@ -8,26 +8,13 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
+from .forms import GetFirmwareForm
 from .models import Build, Config
 
 
 # TODO implement an AJAX based feedback (triggering a refresh when there is an
 #      state change should be enough)
 #      build info in JSON format is available at <node_id>/firmware/build_info
-
-# TODO offer to generate keys: show a warning unsecure
-# Generate tinc Keys: if you chose this option, new tinc keys will be generated and
-#                     the node description will be updated accordingly
-#                     Your node will lose connectivity to the management network until you 
-#                     reflash your node with the generated image.
-
-from django import forms
-class GetFirmwareForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        super(GetFirmwareForm, self).__init__(*args, **kwargs)
-        config = Config.objects.get()
-        for f in config.configfile_set.filter(optional=True):
-            self.fields[f.pk] = forms.BooleanField(label=f.path, required=False)
 
 
 @transaction.commit_on_success
@@ -78,7 +65,7 @@ def get_firmware(modeladmin, request, queryset):
                 "content_message": mark_safe("There is no pre-build up-to-date \
                     firmware for this research device, but you can instruct the \
                     system to build a fresh one for you, it will take only a few \
-                    seconds. <p> Do you want me to build a new firwmare?</p>"),
+                    seconds."),
             })
             return TemplateResponse(request, 'admin/get_firmware.html', context, 
                 current_app=modeladmin.admin_site.name)
@@ -88,11 +75,10 @@ def get_firmware(modeladmin, request, queryset):
         Build.QUEUED: "Build task queued for building.",
         Build.BUILDING: "Building image ...",
         Build.AVAILABLE: "Firmware available for download.",
-        Build.DELETED: "This firmware is no longer available. Do you want to build it again?",
-        Build.OUTDATED: "This firmware is out-dated. Do you want to build it again?",
-        Build.FAILED: "The last building has failed. The error logs are monitored \
-            and this issue will be fixed. But you can try again anyway.\
-            <p>Do you want to build again?</p>",
+        Build.DELETED: "This firmware is no longer available.",
+        Build.OUTDATED: "This firmware is out-dated.",
+        Build.FAILED: "The last building has failed. The error logs are monitored"
+                      "and this issue will be fixed. But you can try again anyway.",
     }
     context.update({
         "title": "Research Device Firmware for '%s'" % node,

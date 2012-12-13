@@ -186,6 +186,9 @@ class TincClient(TincHost):
         return "%s_%s" % (self.content_type.model, self.object_id)
     
     def save(self, *args, **kwargs):
+        # FIXME bug in django, this is a workaround
+        # https://code.djangoproject.com/ticket/19467
+        if self.pubkey == '': self.pubkey = None
         if not self.pk:
             super(TincClient, self).save(*args, **kwargs)
             self.set_island()

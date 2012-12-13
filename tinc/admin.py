@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes import generic
 from django.template.response import TemplateResponse
 
 from common.admin import (insert_inline, admin_link, insert_action, wrap_admin_view,

@@ -19,13 +19,12 @@ def build(build_id, options={}):
     
     # prepare the new image and copy the files in it
     image = Image(base_image.path)
-    for f in config.get_files():
-        if options.pop(f.pk, True):
-            f.eval(node)
-            image.add_file(f)
+
+    for f in config.get_files(node):
+        image.add_file(f)
     
     # calculating image destination path
-    image_name = base_image.name.replace('.img.gz', '-%s.img.gz' % build_obj.pk)
+    image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     
     # build the image

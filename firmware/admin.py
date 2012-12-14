@@ -12,7 +12,7 @@ from common.admin import (get_modeladmin, admin_link, insert_action, colored,
 from nodes.models import Node
 
 from .actions import get_firmware
-from .models import BaseImage, Config, ConfigUCI, Build, ConfigFile, ConfigHelpText
+from .models import BaseImage, Config, ConfigUCI, Build, ConfigFile, ConfigFileHelpText
 
 
 STATE_COLORS = {
@@ -44,14 +44,16 @@ class ConfigFileInline(admin.TabularInline):
     extra = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'value': kwargs['widget'] = forms.TextInput(attrs={'size':'100'})
+        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'80'})
+        if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'110'})
         if db_field.name == 'mode': kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
         if db_field.name == 'priority': kwargs['widget'] = forms.TextInput(attrs={'size':'2'})
         return super(ConfigFileInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class ConfigHelpTextInline(admin.TabularInline):
-    model = ConfigHelpText
+class ConfigFileHelpTextInline(admin.TabularInline):
+    model = ConfigFileHelpText
+    extra = 0
 
 
 class BuildAdmin(admin.ModelAdmin):
@@ -88,7 +90,7 @@ class BuildAdmin(admin.ModelAdmin):
 
 
 class ConfigAdmin(SingletonModelAdmin):
-    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigHelpTextInline]
+    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline]
     
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name

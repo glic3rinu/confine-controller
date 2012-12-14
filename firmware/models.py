@@ -1,12 +1,14 @@
 from hashlib import sha256
+from StringIO import StringIO
 import os
 
 from celery import states as celery_states
+from django import template
 from django.conf import settings as project_settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django import template
+from django.template import Template, Context
 from django_transaction_signals import defer
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
@@ -180,7 +182,7 @@ class Config(SingletonModel):
     
     def render_uci(self, node, sections=None):
         uci = template.loader.get_template('uci')
-        context = template.Context({'uci': self.eval_uci(node, sections=sections)})
+        context = Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
     
     def get_image(self, node):
@@ -190,8 +192,11 @@ class Config(SingletonModel):
         arch_regex = "(^|,)%s(,|$)" % node.arch
         return self.baseimage_set.get(architectures__regex=arch_regex).image
     
-    def get_files(self):
-        return self.configfile_set.all().order_by('-priority')
+    def get_files(self, node, exclude=[]):
+        files = []
+        for config_file in self.configfile_set.active().exclude(pk__in=exclude):
+            files.extend(config_file.get_files(node))
+        return files
 
 
 class BaseImage(models.Model):
@@ -232,7 +237,6 @@ class ConfigUCI(models.Model):
     value = models.CharField(max_length=255, 
         help_text='Python code that will be evaluated for obtining the value '
                   'from the node. For example: node.properties[\'ip\']')
-    # TODO Add validation field ?
     
     class Meta:
         verbose_name_plural = "Config UCI"
@@ -250,14 +254,24 @@ class ConfigUCI(models.Model):
         return unicode(eval(self.value))
 
 
+class ConfigFileQuerySet(models.query.QuerySet):
+    def active(self, **kwargs):
+        return self.filter(is_active=True, **kwargs)
+    
+    def optional(self, **kwargs):
+        return self.filter(is_optional=True, **kwargs)
+
+
 class ConfigFile(models.Model):
     config = models.ForeignKey(Config)
     path = models.CharField(max_length=256)
-    value = models.CharField(max_length=256)
+    content = models.CharField(max_length=256)
     mode = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=0)
-    optional = models.BooleanField(default=False)
-    # TODO one time file like priv keys.(ignore/volatile/private/...?) or optional field?
+    is_optional = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    
+    objects = generate_chainer_manager(ConfigFileQuerySet)
     
     class Meta:
         unique_together = ['config', 'path']
@@ -265,18 +279,43 @@ class ConfigFile(models.Model):
     def __unicode__(self):
         return self.path
     
-    def eval(self, node):
-        self.path = template.Template(self.path).render(template.Context({'node': node}))
-        # server is part of value context
+    def get_files(self, node):
+        # server is part of the context
         server = Server.objects.get()
-        self.value = eval(self.value)
-
-class ConfigHelpText(models.Model):
-    config = models.OneToOneField(Config)
-    text = models.TextField(blank=True)
+        try: 
+            paths = eval(self.path)
+        except (NameError, SyntaxError):
+            paths = eval("self.path")
+        
+        # get contents
+        contents = eval(self.content)
+        
+        # path and contents can be or not an iterator (multiple files)
+        if not hasattr(paths, '__iter__'):
+            paths = [paths]
+            contents = [contents]
+        
+        # put all together as an in memory file (StringIO)
+        files = []
+        for (name, content) in zip(paths, contents):
+            f = StringIO()
+            f.name = name
+            f.config = self
+            f.write(content)
+            f.seek(0)
+            files.append(f)
+        return files
     
-    class Meta:
-        verbose_name_plural = 'Help Text'
+    @property
+    def help_text(self):
+        try: return self.configfilehelptext.help_text
+        except ConfigFileHelpText.DoesNotExist: return ''
+
+
+class ConfigFileHelpText(models.Model):
+    config = models.ForeignKey(Config)
+    file = models.OneToOneField(ConfigFile)
+    help_text = models.TextField()
     
     def __unicode__(self):
-        return str(self.config)
+        return str(self.file)

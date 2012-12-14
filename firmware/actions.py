@@ -8,7 +8,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from .forms import GetFirmwareForm
+from .forms import OptionalFilesForm
 from .models import Build, Config
 
 
@@ -35,10 +35,9 @@ def get_firmware(modeladmin, request, queryset):
     
     # User has requested a firmware build
     if request.POST.get('post'):
-        form = GetFirmwareForm(request.POST)
+        form = OptionalFilesForm(request.POST)
         if form.is_valid():
             optional_fields = form.cleaned_data
-            # TODO help_text on optional fields
             build = Build.build(node, async=True, options=optional_fields)
             modeladmin.log_change(request, node, "Build firmware")
     
@@ -49,7 +48,7 @@ def get_firmware(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
-        'form': GetFirmwareForm(),
+        'form': OptionalFilesForm(),
     }
     
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
@@ -60,8 +59,8 @@ def get_firmware(modeladmin, request, queryset):
         try: build = Build.objects.get_current(node=node)
         except Build.DoesNotExist:
             context.update({
-                "title": "Build firmware for '%s' Research Device?" % node,
-                "content_title":  mark_safe("Build firmware for '%s' Research Device?" % node_link),
+                "title": "Build firmware for '%s' Research Device" % node,
+                "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
                 "content_message": mark_safe("There is no pre-build up-to-date \
                     firmware for this research device, but you can instruct the \
                     system to build a fresh one for you, it will take only a few \

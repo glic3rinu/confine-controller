@@ -123,6 +123,7 @@ class TincServer(TincHost):
     
     def get_host(self):
         # FIXME this depends on each node(node.tinc.island)
+        #       maybe an optional node/tincclient argument and introspect islands=?
         host = ""
         for addr in self.addresses:
             host += "Address = %s\n" % addr.ip_addr

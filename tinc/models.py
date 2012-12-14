@@ -54,6 +54,16 @@ class TincHost(models.Model):
         if self.pubkey == '':
             self.pubkey = None
         super(TincHost, self).clean()
+    
+    def get_tinc_up(self):
+        """ tinc-up file content """
+        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
+        return '#!/bin/sh\nip -6 link set "$INTERFACE" up mtu 1400\nip -6 addr add %s dev "$INTERFACE"\n' % ip
+    
+    def get_tinc_down(self):
+        """ tinc-down file content """
+        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
+        return '#!/bin/sh\nip -6 addr del %s dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % ip
 
 
 class Gateway(models.Model):
@@ -112,6 +122,7 @@ class TincServer(TincHost):
         return self.address
     
     def get_host(self):
+        # FIXME this depends on each node(node.tinc.island)
         host = ""
         for addr in self.addresses:
             host += "Address = %s\n" % addr.ip_addr
@@ -189,6 +200,7 @@ class TincClient(TincHost):
         # FIXME bug in django, this is a workaround
         # https://code.djangoproject.com/ticket/19467
         if self.pubkey == '': self.pubkey = None
+        # end of workaround
         if not self.pk:
             super(TincClient, self).save(*args, **kwargs)
             self.set_island()
@@ -249,14 +261,6 @@ class TincClient(TincHost):
             self.pubkey = public.exportKey()
             self.save()
         return private
-    
-    def get_tinc_up(self):
-        net = self.address.make_net(48).strNormal()
-        return '#!/bin/sh\nip -6 link set "$INTERFACE" up mtu 1400\nip -6 addr add %s dev "$INTERFACE"\n' % net
-    
-    def get_tinc_down(self):
-        net = self.address.make_net(48).strNormal()
-        return '#!/bin/sh\nip -6 addr del %s dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % net
     
     class UpdateTincdError(Exception): pass
 

@@ -46,15 +46,17 @@ class Image(object):
         
         # add files to base_image
         for f in self.files:
-            dest_path = self.mnt + f.path
+            dest_path = self.mnt + f.name
             dest_dir = os.path.dirname(dest_path)
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
             dest_file = open(dest_path, 'w+')
-            dest_file.write(f.value)
+            dest_file.write(f.read())
             dest_file.close()
-            if f.mode:
-                self.chmod(dest_path, f.mode)
+            if f.config.mode:
+                self.chmod(dest_path, f.config.mode)
         
         self.umount()
         compress = "gzip " + self.image

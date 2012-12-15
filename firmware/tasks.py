@@ -5,7 +5,7 @@ from celery.task import task
 from .images import Image
 
 @task(name="firmware.build")
-def build(build_id):
+def build(build_id, options={}):
     from firmware.models import Build, Config
     
     # retrieve the existing build instance, used for user feedback
@@ -19,12 +19,12 @@ def build(build_id):
     
     # prepare the new image and copy the files in it
     image = Image(base_image.path)
-    for f in config.get_files():
-        f.eval(node)
+
+    for f in config.get_files(node):
         image.add_file(f)
     
     # calculating image destination path
-    image_name = base_image.name.replace('.img.gz', '-%s.img.gz' % build_obj.pk)
+    image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     
     # build the image
@@ -37,7 +37,5 @@ def build(build_id):
     image.clean()
     build_obj.image = image_name
     build_obj.save()
-#    for uci in build_uci:
-#        build_obj.add_uci(**uci)
     
     return image_path

@@ -8,16 +8,14 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from .models import Build
+from .forms import OptionalFilesForm
+from .models import Build, Config
 
 
 # TODO implement an AJAX based feedback (triggering a refresh when there is an
 #      state change should be enough)
 #      build info in JSON format is available at <node_id>/firmware/build_info
 
-# TODO offer to generate keys: show a warning unsecure 
-#      check if node.tinc.pub key exists: show a warning if so, do not sysupgrade
-#           and node will lose mgmt network connectivity
 
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
@@ -37,8 +35,11 @@ def get_firmware(modeladmin, request, queryset):
     
     # User has requested a firmware build
     if request.POST.get('post'):
-        build = Build.build(node, async=True)
-        modeladmin.log_change(request, node, "Build firmware")
+        form = OptionalFilesForm(request.POST)
+        if form.is_valid():
+            optional_fields = form.cleaned_data
+            build = Build.build(node, async=True, options=optional_fields)
+            modeladmin.log_change(request, node, "Build firmware")
     
     context = {
         "action_name": 'Firmware',
@@ -47,8 +48,9 @@ def get_firmware(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
+        'form': OptionalFilesForm(),
     }
-
+    
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     
@@ -57,26 +59,25 @@ def get_firmware(modeladmin, request, queryset):
         try: build = Build.objects.get_current(node=node)
         except Build.DoesNotExist:
             context.update({
-                "title": "Build firmware for '%s' Research Device?" % node,
-                "content_title":  mark_safe("Build firmware for '%s' Research Device?" % node_link),
+                "title": "Build firmware for '%s' Research Device" % node,
+                "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
                 "content_message": mark_safe("There is no pre-build up-to-date \
                     firmware for this research device, but you can instruct the \
                     system to build a fresh one for you, it will take only a few \
-                    seconds. <p> Do you want me to build a new firwmare?</p>"),
+                    seconds."),
             })
             return TemplateResponse(request, 'admin/get_firmware.html', context, 
                 current_app=modeladmin.admin_site.name)
     
     description = {
         Build.REQUESTED: "Build request received.",
-        Build.QUEUED: "Building task queued for building.",
+        Build.QUEUED: "Build task queued for building.",
         Build.BUILDING: "Building image ...",
         Build.AVAILABLE: "Firmware available for download.",
-        Build.DELETED: "This firmware is no longer available. Do you want to build it again?",
-        Build.OUTDATED: "This firmware is out-dated. Do you want to build it again?",
-        Build.FAILED: "The last building has failed. The error logs are monitored \
-            and this issue will be fixed. But you can try again anyway.\
-            <p>Do you want to build again?</p>",
+        Build.DELETED: "This firmware is no longer available.",
+        Build.OUTDATED: "This firmware is out-dated.",
+        Build.FAILED: "The last building has failed. The error logs are monitored"
+                      "and this issue will be fixed. But you can try again anyway.",
     }
     context.update({
         "title": "Research Device Firmware for '%s'" % node,

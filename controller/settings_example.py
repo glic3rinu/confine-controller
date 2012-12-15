@@ -155,6 +155,7 @@ INSTALLED_APPS = (
     'tinc',
     'communitynetworks',
     'firmware',
+    'monitor', 
     
     # Third party apps that should load last
     'rest_framework',
@@ -266,6 +267,7 @@ CELERY_DISABLE_RATE_LIMITS = True
 # Use controller logging system instead of celer
 #CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERY_SEND_TASK_ERROR_EMAILS = True
+#CELERYD_POOL = 'gevent'
 ## end
 
 

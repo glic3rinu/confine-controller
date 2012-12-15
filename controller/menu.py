@@ -45,10 +45,13 @@ class CustomMenu(Menu):
         
         if 'issues' in settings.INSTALLED_APPS:
             administration_models += ('issues.*',)
-            
+        
         if 'firmware' in settings.INSTALLED_APPS:
             administration_models += ('firmware.*',)
-            
+        
+        if 'monitor' in settings.INSTALLED_APPS:
+            administration_models += ('monitor.*',)
+        
         self.children.append(items.AppList(
             'Administration',
             models=administration_models

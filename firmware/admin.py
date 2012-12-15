@@ -44,8 +44,8 @@ class ConfigFileInline(admin.TabularInline):
     extra = 0
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'80'})
-        if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'110'})
+        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'70'})
+        if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'85'})
         if db_field.name == 'mode': kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
         if db_field.name == 'priority': kwargs['widget'] = forms.TextInput(attrs={'size':'2'})
         return super(ConfigFileInline, self).formfield_for_dbfield(db_field, **kwargs)

@@ -3,10 +3,13 @@ from hashlib import sha256
 import re
 
 from django_transaction_signals import defer
+from django.conf import settings as project_settings
 from django.contrib.auth import get_user_model
 from django.core import validators
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from IPy import IP
+from private_files import PrivateFileField
 
 from common.ip import lsb, msb, int_to_hex_str, split_len
 from common.validators import UUIDValidator
@@ -17,7 +20,8 @@ from . import settings
 from .tasks import force_slice_update, force_sliver_update
 
 
-# TODO protect exp_data and data files (like in firmware.build.image)
+private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
+
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
@@ -104,12 +108,14 @@ class Slice(models.Model):
                   'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
-    exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_EXP_DATA_DIR, 
+        storage=private_storage, verbose_name='Experiment Data',
+        condition=lambda request, self: 
+                  request.user.has_perm('slices.slice_change', obj=self),
         help_text='.tar.gz archive containing experiment data for slivers (if'
                   'they do not explicitly indicate one)', 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-                   'Upload a valid .tar.gz file', 'invalid')],
-        verbose_name='Experiment Data')
+                   'Upload a valid .tar.gz file', 'invalid')],)
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
@@ -211,11 +217,13 @@ class Sliver(models.Model):
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).', 
         verbose_name='Instance Sequence Number')
-    exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_EXP_DATA_DIR, 
+        storage=private_storage, verbose_name='Experiment Data',
+        condition=lambda request, self: 
+                  request.user.has_perm('slices.sliver_change', obj=self),
         help_text='.tar.gz archive containing experiment data for this sliver.',
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-                   'Upload a valid .tar.gz file', 'invalid')],
-        verbose_name='Experiment Data',)
+                   'Upload a valid .tar.gz file', 'invalid')],)
     template = models.ForeignKey(Template, null=True, blank=True, 
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')

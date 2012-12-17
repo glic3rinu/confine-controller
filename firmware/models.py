@@ -25,7 +25,6 @@ from .tasks import build
 # TODO create a pluggin system for add custom functions to be used in file 
 #       and uci evaluation fields.
 
-# TODO make this accessible in a common place: settings? controller? common? ..?
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
 
@@ -59,9 +58,8 @@ class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
-    # TODO: write condition method for preventing unauthorized downloads
-    # http://django-private-files.readthedocs.org/en/latest/usage.html
-    image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage)
+    image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage, 
+        condition=lambda request, self: request.user.has_perm('nodes.node_getfirmware', obj=self.node))
     task_id = models.CharField(max_length=36, unique=True, null=True)
     
     objects = generate_chainer_manager(BuildQuerySet)
@@ -122,7 +120,7 @@ class Build(models.Model):
         except: return None
     
     @classmethod
-    def build(cls, node, async=False, options={}):
+    def build(cls, node, async=False, exclude=[]):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
@@ -135,20 +133,34 @@ class Build(models.Model):
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
         if async:
-            defer(build.delay, build_obj.pk, options=options)
+            defer(build.delay, build_obj.pk, exclude=exclude)
         else:
-            build_obj = build(build_obj.pk, options=options)
+            build_obj = build(build_obj.pk, exclude=exclude)
         return build_obj
     
-    def get_uci(self):
-        return self.builduci_set.all()
+    def add_file(self, path, content):
+        BuildFile.objects.create(build=self, path=path, content=content)
+    
+    def get_files(self):
+        return self.buildfile_set.all()
     
     def match(self, config):
-        return False if self.version != config.version else True
-        # TODO check the files if they match    
+        if self.version != config.version: 
+            return True
+        config = Config.objects.get()
+        exclude = config.configfile_set.optional().values_list('pk', flat=True)
+        old_files = set( (f.path, f.content) for f in self.buildfile_set.all() )
+        new_files = set( (f.name, f.read()) for f in config.get_files(self.node, exclude=exclude) )
+        return new_files == old_files
 
-    def add_uci(self, **kwargs):
-        BuildUCI.objects.create(build=self, **kwargs)
+
+class BuildFile(models.Model):
+    build = models.ForeignKey(Build)
+    path = models.CharField(max_length=256)
+    content = models.TextField()
+    
+    def __unicode__(self):
+        return self.path
 
 
 class Config(SingletonModel):

@@ -282,3 +282,12 @@ PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
 
 # common.api
 CUSTOM_API_ROOT = 'controller.api.Base'
+
+
+# Email config 
+EMAIL_HOST = 'smtp.confine-project.eu'
+#EMAIL_PORT = ''
+#EMAIL_HOST_USER = ''
+#EMAIL_HOST_PASSWORD = ''
+#EMAIL_USE_TLS = False
+MAINTAINANCE_FROM_EMAIL = 'controller@confine-project.eu'

@@ -12,7 +12,8 @@ from common.admin import (get_modeladmin, admin_link, insert_action, colored,
 from nodes.models import Node
 
 from .actions import get_firmware
-from .models import BaseImage, Config, ConfigUCI, Build, ConfigFile, ConfigFileHelpText
+from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile, 
+    ConfigFileHelpText, BuildFile)
 
 
 STATE_COLORS = {
@@ -33,10 +34,18 @@ class BaseImageInline(admin.TabularInline):
 class ConfigUCIInline(admin.TabularInline):
     model = ConfigUCI
     extra = 0
-
+    
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'value': kwargs['widget'] = forms.TextInput(attrs={'size':'100'})
         return super(ConfigUCIInline, self).formfield_for_dbfield(db_field, **kwargs)
+
+
+class BuildFileInline(admin.TabularInline):
+    model = BuildFile
+    extra = 0
+    fields = ['path', 'content']
+    readonly_fields = ['path', 'content']
+    can_delete = False
 
 
 class ConfigFileInline(admin.TabularInline):
@@ -57,8 +66,9 @@ class ConfigFileHelpTextInline(admin.TabularInline):
 
 
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['id', admin_link('node'), 'version', colored('state', STATE_COLORS), 
+    list_display = ['id', 'node', 'version', colored('state', STATE_COLORS), 
                     'task_link', 'image_link', 'date']
+    list_display_links = ['id', 'node']
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
@@ -66,6 +76,7 @@ class BuildAdmin(admin.ModelAdmin):
               'state', 'task_link']
     readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 
                        'version', 'build_date', 'task_link']
+    inlines = [BuildFileInline]
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")

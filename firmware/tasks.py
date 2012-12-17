@@ -5,7 +5,7 @@ from celery.task import task
 from .images import Image
 
 @task(name="firmware.build")
-def build(build_id, options={}):
+def build(build_id, exclude=[]):
     from firmware.models import Build, Config
     
     # retrieve the existing build instance, used for user feedback
@@ -19,8 +19,9 @@ def build(build_id, options={}):
     
     # prepare the new image and copy the files in it
     image = Image(base_image.path)
-
-    for f in config.get_files(node):
+    
+    files = config.get_files(node, exclude=exclude)
+    for f in files:
         image.add_file(f)
     
     # calculating image destination path
@@ -37,5 +38,8 @@ def build(build_id, options={}):
     image.clean()
     build_obj.image = image_name
     build_obj.save()
+    for f in files:
+        f.seek(0)
+        build_obj.add_file(f.name, f.read())
     
     return image_path

@@ -25,11 +25,12 @@ DEFAULT_TEMPLATE_ARCH = getattr(settings, 'DEFAULT_TEMPLATE_ARCH', 'amd64')
 
 
 TEMPLATE_IMAGE_DIR = getattr(settings, 'TEMPLATE_IMAGE_DIR', 'templates/')
-SLICE_EXP_DATA_DIR = getattr(settings, 'SLICE_EXP_DATA_DIR', 'exp_data/')
+SLICES_EXP_DATA_DIR = getattr(settings, 'SLICES_EXP_DATA_DIR', 'exp_data/')
 
 
 # 30 days expiration interval
 SLICE_EXPIRATION_INTERVAL = getattr(settings, 'SLICE_EXPIRATION_INTERVAL', timedelta(30))
+SLICE_EXPIRATION_WARNING = getattr(settings, 'SLICE_EXPIRATION_WARNING', timedelta(4))
 
 # Clean expired slices everyday at midnigth
 CLEAN_EXPIRED_SLICES_CRONTAB = getattr(settings, 'CLEAN_EXPIRED_SLICES_CRONTAB',

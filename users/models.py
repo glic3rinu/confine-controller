@@ -62,6 +62,9 @@ class Group(models.Model):
         if not self.uuid: self.uuid = None
         if not self.pubkey: self.pubkey = None
         super(Group, self).clean()
+    
+    def get_admin_emails(self):
+        return self.roles_set.filter(is_admin=True).values_list('user__email', flat=True)
 
 
 class Roles(models.Model):
@@ -84,7 +87,7 @@ class Roles(models.Model):
         verbose_name_plural = 'roles'
     
     def __unicode__(self):
-        return self.group
+        return str(self.group)
     
     def has_role(self, role):
         attr_map = {

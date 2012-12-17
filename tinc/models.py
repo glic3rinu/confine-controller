@@ -10,7 +10,7 @@ from django_transaction_signals import defer
 from IPy import IP
 
 from common.ip import split_len, int_to_hex_str
-from common.validators import validate_host_name, validate_or, validate_rsa_pubkey
+from common.validators import validate_host_name, OrValidator, validate_rsa_pubkey
 from nodes.models import Server, Node
 
 
@@ -160,7 +160,7 @@ class TincAddress(models.Model):
     """
     addr = models.CharField('Address', max_length=128,
         help_text='The tinc IP address or host name of the host this one connects to.',
-        validators=[validate_or([validators.validate_ipv4_address, validate_host_name])])
+        validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,

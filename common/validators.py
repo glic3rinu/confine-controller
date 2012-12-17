@@ -31,16 +31,22 @@ def validate_host_name(value):
                               'Insert a valid host name.', 'invalid')(value)
 
 
-def validate_or(validators):
+class OrValidator(object):
     """
     Run validators with an OR logic
     """
-    def closure(value, validators=validators):
+    def __init__(self, validators):
+        self.validators = validators
+    
+    def __call__(self, value):
         msg = []
-        for validator in validators:
+        print self.validators
+        for validator in self.validators:
             try: validator(value)
             except ValidationError, e: 
+                # TODO get exception message in a readable way not:
+                #      [u'blabana'] or [u'kajkja'] ...
                 msg.append(str(e))
             else: return
         raise type(e)(' OR '.join(msg))
-    return closure
+        

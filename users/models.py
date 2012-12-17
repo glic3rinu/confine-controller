@@ -5,7 +5,7 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
-from common.validators import UUIDValidator
+from common.validators import UUIDValidator, RSAPublicKeyValidator
 
 
 class Group(models.Model):
@@ -28,7 +28,8 @@ class Group(models.Model):
                   'user (used by SFA). This is optional, but once set to a valid '
                   'UUID it can not be changed.', validators=[UUIDValidator])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
-        help_text='A PEM-encoded RSA public key for this user (used by SFA).')
+        help_text='A PEM-encoded RSA public key for this user (used by SFA).',
+        validators=[RSAPublicKeyValidator])
     allow_nodes = models.BooleanField(default=False,
         help_text='Whether nodes belonging to this group can be created (false by '
                   'default). Its value can only be changed by testbed superusers.')

@@ -3,13 +3,14 @@ import re
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from common.validators import UUIDValidator
+from common.validators import UUIDValidator, RSAPublicKeyValidator, NetIfaceNameValidator
 
 from . import settings
-from .validators import sliver_mac_prefix_validator
+from .validators import SliverMacPrefixValidator, Ipv4Range
 
 
 class Node(models.Model):
@@ -54,7 +55,8 @@ class Node(models.Model):
                   '(used by SFA). This is optional, but once set to a valid UUID '
                   'it can not be changed.', validators=[UUIDValidator])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
-        help_text='PEM-encoded RSA public key for this RD (used by SFA).')
+        help_text='PEM-encoded RSA public key for this RD (used by SFA).',
+        validators=[RSAPublicKeyValidator])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
@@ -82,7 +84,6 @@ class Node(models.Model):
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
         default='none', choices=IPV4_METHODS)
-    # TODO validate BASE_IP#N 
     sliver_pub_ipv4_range = models.CharField('Sliver Public IPv4 Range', 
         help_text='Describes the public IPv4 range that can be used by sliver '
                   'public interfaces. If /sliver_pub_ipv4 is none, its value is '
@@ -92,9 +93,9 @@ class Node(models.Model):
                   'where N is the decimal integer number of consecutive addresses '
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
-        max_length=256, blank=True, null=True)
+        max_length=256, blank=True, null=True, validators=[Ipv4Range])
     sliver_mac_prefix = models.CharField('Sliver MAC Prefix', null=True,
-        blank=True, max_length=5, validators=[sliver_mac_prefix_validator],
+        blank=True, max_length=5, validators=[SliverMacPrefixValidator],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
@@ -125,7 +126,12 @@ class Node(models.Model):
         if self.pubkey == '': self.pubkey = None
         if self.cert == '': self.cert = None
         if self.uuid == '': self.uuid = None
-        if self.sliver_pub_ipv4 == 'none': self.sliver_pub_ipv4_range = None
+        if self.sliver_pub_ipv4 == 'none':
+            if self.sliver_pub_ipv4_range == '' or self.sliver_pub_ipv4_range is None:
+                self.sliver_pub_ipv4_range = None
+            else:
+                raise ValidationError("If 'Sliver Public IPv4 is 'none' then Sliver "
+                                      "Public IPv4 Range must be empty")
         super(Node, self).clean()
     
     @property
@@ -207,7 +213,10 @@ class DirectIface(models.Model):
     
     See node architecture: http://wiki.confine-project.eu/arch:node
     """
-    name = models.CharField(max_length=16)
+    name = models.CharField(max_length=16, validators=[NetIfaceNameValidator],
+        help_text='he name of the interface used as a local interface (non-empty). '
+                  'See <a href="https://wiki.confine-project.eu/arch:node">node '
+                  'architecture</a>.')
     node = models.ForeignKey(Node)
     
     class Meta:

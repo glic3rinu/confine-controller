@@ -13,7 +13,7 @@ from private_files import PrivateFileField
 
 from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
-from common.validators import UUIDValidator
+from common.validators import UUIDValidator, RSAPublicKeyValidator, NetIfaceNameValidator
 from nodes.models import Node
 from nodes import settings as node_settings
 
@@ -87,7 +87,8 @@ class Slice(models.Model):
                   '(used by SFA). This is optional, but once set to a valid UUID '
                   'it can not be changed.', validators=[UUIDValidator])
     pubkey = models.TextField('Public Key', null=True, blank=True,
-        help_text='PEM-encoded RSA public key for this slice (used by SFA).')
+        help_text='PEM-encoded RSA public key for this slice (used by SFA).',
+        validators=[RSAPublicKeyValidator])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, 
@@ -172,7 +173,7 @@ class Slice(models.Model):
             for new_nr in range(2, int('ffff', 16)):
                 if not Slice.objects.filter(vlan_nr=new_nr):
                     return new_nr
-            raise self.VlanAllocationError("No VLAN address space left")
+            raise self.VlanAllocationError("No VLAN address space left.")
         return last_nr + 1
     
     def force_update(self, async=False):
@@ -190,7 +191,7 @@ class SliceProp(models.Model):
     slice = models.ForeignKey(Slice)
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
-                  'whitespace surrounding it',
+                  'whitespace surrounding it.',
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid property name.', 'invalid')])
     value = models.CharField(max_length=256)
@@ -308,8 +309,7 @@ class SliverIface(models.Model):
     name = models.CharField(max_length=10,
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
-        validators=[validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'), 
-                    'Enter a valid interface name.', 'invalid')])
+        validators=[NetIfaceNameValidator])
     
     class Meta:
         abstract = True

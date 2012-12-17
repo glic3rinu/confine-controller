@@ -10,7 +10,8 @@ from django_transaction_signals import defer
 from IPy import IP
 
 from common.ip import split_len, int_to_hex_str
-from common.validators import HostNameValidator, Ipv4Validator, OrValidator
+from common.validators import (HostNameValidator, Ipv4Validator, OrValidator, 
+    RSAPublicKeyValidator)
 from nodes.models import Server, Node
 
 
@@ -39,7 +40,8 @@ class TincHost(models.Model):
     A Tinc Host could be a Server or a Client.
     """
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
-        help_text='PEM-encoded RSA public key used on tinc management network.')
+        help_text='PEM-encoded RSA public key used on tinc management network.',
+        validators=[RSAPublicKeyValidator])
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
         help_text='A list of tinc addresses this host connects to.')
     

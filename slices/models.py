@@ -13,7 +13,7 @@ from private_files import PrivateFileField
 
 from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
-from common.validators import UUIDValidator, RSAPublicKeyValidator, NetIfaceNameValidator
+from common.validators import validate_uuid, validate_rsa_pubkey, validate_net_iface_name
 from nodes.models import Node
 from nodes import settings as node_settings
 
@@ -85,10 +85,10 @@ class Slice(models.Model):
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this slice '
                   '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.', validators=[UUIDValidator])
+                  'it can not be changed.', validators=[validate_uuid])
     pubkey = models.TextField('Public Key', null=True, blank=True,
         help_text='PEM-encoded RSA public key for this slice (used by SFA).',
-        validators=[RSAPublicKeyValidator])
+        validators=[validate_rsa_pubkey])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, 
@@ -309,7 +309,7 @@ class SliverIface(models.Model):
     name = models.CharField(max_length=10,
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
-        validators=[NetIfaceNameValidator])
+        validators=[validate_net_iface_name])
     
     class Meta:
         abstract = True

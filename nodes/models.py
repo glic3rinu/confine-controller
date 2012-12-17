@@ -7,10 +7,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from common.validators import UUIDValidator, RSAPublicKeyValidator, NetIfaceNameValidator
+from common.validators import validate_uuid, validate_rsa_pubkey, validate_net_iface_name
 
 from . import settings
-from .validators import SliverMacPrefixValidator, Ipv4Range
+from .validators import validate_sliver_mac_prefix, validate_ipv4_range
 
 
 class Node(models.Model):
@@ -53,10 +53,10 @@ class Node(models.Model):
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node '
                   '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.', validators=[UUIDValidator])
+                  'it can not be changed.', validators=[validate_uuid])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).',
-        validators=[RSAPublicKeyValidator])
+        validators=[validate_rsa_pubkey])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
@@ -67,7 +67,7 @@ class Node(models.Model):
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
         help_text='Architecture of this RD (as reported by uname -m).',)
     local_iface = models.CharField('Local Interface', max_length=16, 
-        default=settings.DEFAULT_NODE_LOCAL_IFACE, validators=[NetIfaceNameValidator],
+        default=settings.DEFAULT_NODE_LOCAL_IFACE, validators=[validate_net_iface_name],
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,
@@ -93,9 +93,9 @@ class Node(models.Model):
                   'where N is the decimal integer number of consecutive addresses '
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
-        max_length=256, blank=True, null=True, validators=[Ipv4Range])
+        max_length=256, blank=True, null=True, validators=[validate_ipv4_range])
     sliver_mac_prefix = models.CharField('Sliver MAC Prefix', null=True,
-        blank=True, max_length=5, validators=[SliverMacPrefixValidator],
+        blank=True, max_length=5, validators=[validate_sliver_mac_prefix],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
@@ -213,7 +213,7 @@ class DirectIface(models.Model):
     
     See node architecture: http://wiki.confine-project.eu/arch:node
     """
-    name = models.CharField(max_length=16, validators=[NetIfaceNameValidator],
+    name = models.CharField(max_length=16, validators=[validate_net_iface_name],
         help_text='he name of the interface used as a local interface (non-empty). '
                   'See <a href="https://wiki.confine-project.eu/arch:node">node '
                   'architecture</a>.')

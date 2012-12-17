@@ -10,8 +10,7 @@ from django_transaction_signals import defer
 from IPy import IP
 
 from common.ip import split_len, int_to_hex_str
-from common.validators import (HostNameValidator, Ipv4Validator, OrValidator, 
-    RSAPublicKeyValidator)
+from common.validators import validate_host_name, validate_or, validate_rsa_pubkey
 from nodes.models import Server, Node
 
 
@@ -41,7 +40,7 @@ class TincHost(models.Model):
     """
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key used on tinc management network.',
-        validators=[RSAPublicKeyValidator])
+        validators=[validate_rsa_pubkey])
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
         help_text='A list of tinc addresses this host connects to.')
     
@@ -126,7 +125,7 @@ class TincServer(TincHost):
     
     def get_host(self):
         # FIXME this depends on each node(node.tinc.island)
-        #       maybe an optional node/tincclient argument and introspect islands=?
+        #       maybe an optional node/tincclient argument and introspect islands?
         host = ""
         for addr in self.addresses:
             host += "Address = %s\n" % addr.addr
@@ -159,11 +158,9 @@ class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
     """
-    # TODO domain name and IPv4 validator: 
-    #      https://code.djangoproject.com/attachment/ticket/18119/domainnamevalidator_2.txt
     addr = models.CharField('Address', max_length=128,
         help_text='The tinc IP address or host name of the host this one connects to.',
-        validators=[OrValidator([Ipv4Validator, HostNameValidator])])
+        validators=[validate_or([validators.validate_ipv4_address, validate_host_name])])
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,
@@ -187,7 +184,6 @@ class TincAddress(models.Model):
 
 
 class TincClient(TincHost):
-    # TODO autocreate tinc client when a related object is created
     """
     Describes a Tinc Client in the testbed. A tinc client can be a testbed node
     or a host.

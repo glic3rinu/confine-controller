@@ -6,38 +6,32 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 
 
-def UUIDValidator(value):
+def validate_uuid(value):
     try: 
         UUID(value)
     except:
         raise ValidationError('%s is a badly formed hexadecimal UUID string.' % value)
 
 
-def RSAPublicKeyValidator(value):
+def validate_rsa_pubkey(value):
     try: 
         PublicKey.RSA.importKey(value)
     except:
         raise ValidationError('This is not a valid RSA public key.')
 
 
-def NetIfaceNameValidator(value):
+def validate_net_iface_name(value):
     validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'),
                               'Enter a valid network interface name.', 'invalid')(value)
 
 
-def Ipv4Validator(value):
-    ValidIpAddressRegex = '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
-    validators.RegexValidator(re.compile(ValidIpAddressRegex),
-                              'Insert a valid IPv4 address.', 'invalid')(value)
-
-
-def HostNameValidator(value):
+def validate_host_name(value):
     ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$"
     validators.RegexValidator(re.compile(ValidHostnameRegex),
                               'Insert a valid host name.', 'invalid')(value)
 
 
-def OrValidator(validators):
+def validate_or(validators):
     """
     Run validators with an OR logic
     """

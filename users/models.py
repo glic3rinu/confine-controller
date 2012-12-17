@@ -5,7 +5,7 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
-from common.validators import UUIDValidator, RSAPublicKeyValidator
+from common.validators import validate_uuid, validate_rsa_pubkey
 
 
 class Group(models.Model):
@@ -26,10 +26,10 @@ class Group(models.Model):
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this '
                   'user (used by SFA). This is optional, but once set to a valid '
-                  'UUID it can not be changed.', validators=[UUIDValidator])
+                  'UUID it can not be changed.', validators=[validate_uuid])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
         help_text='A PEM-encoded RSA public key for this user (used by SFA).',
-        validators=[RSAPublicKeyValidator])
+        validators=[validate_rsa_pubkey])
     allow_nodes = models.BooleanField(default=False,
         help_text='Whether nodes belonging to this group can be created (false by '
                   'default). Its value can only be changed by testbed superusers.')
@@ -155,7 +155,7 @@ class User(auth_models.AbstractBaseUser):
         help_text='A universally unique identifier (UUID, RFC 4122) for this '
                   'user (used by SFA). This is optional, but once set to a valid '
                   'UUID it can not be changed.',
-        validators=[UUIDValidator])
+        validators=[validate_uuid])
     groups = models.ManyToManyField(Group, blank=True, through=Roles)
     
     objects = UserManager()

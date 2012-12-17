@@ -79,6 +79,10 @@ class Build(models.Model):
         except: pass
     
     @property
+    def image_name(self):
+        return self.image.name.split('/')[-1]
+    
+    @property
     def task(self):
         """
         Returns the celery task responsible for 'self' image build.

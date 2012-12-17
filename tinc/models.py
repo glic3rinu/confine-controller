@@ -25,7 +25,7 @@ class Host(models.Model):
     """
     description = models.CharField(max_length=256, 
         help_text='Free-form textual description of this host.')
-    admin = models.ForeignKey(get_user_model(), 
+    owner = models.ForeignKey(get_user_model(), 
         help_text='The user who administrates this host (its creator by default)')
     
     def __unicode__(self):
@@ -126,7 +126,7 @@ class TincServer(TincHost):
         #       maybe an optional node/tincclient argument and introspect islands=?
         host = ""
         for addr in self.addresses:
-            host += "Address = %s\n" % addr.ip_addr
+            host += "Address = %s\n" % addr.addr
         host += "Port = 655\n"
         host += "Subnet = %s\n\n" % self.subnet.strNormal()
         host += "%s\n" % self.pubkey
@@ -156,8 +156,10 @@ class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
     """
-    ip_addr = models.GenericIPAddressField('IP Address', protocol='IPv4', 
-        help_text='The tinc IP address of the host this one connects to.')
+    # TODO domain name and IPv4 validator: 
+    #      https://code.djangoproject.com/attachment/ticket/18119/domainnamevalidator_2.txt
+    addr = models.CharField('Address', max_length=128,
+        help_text='The tinc IP address or host name of the host this one connects to.')
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,
@@ -169,7 +171,7 @@ class TincAddress(models.Model):
         verbose_name_plural = 'Tinc Addresses'
     
     def __unicode__(self):
-        return str(self.ip_addr)
+        return str(self.addr)
     
     @property
     def name(self):

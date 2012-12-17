@@ -11,6 +11,7 @@ from django.db import models
 from IPy import IP
 from private_files import PrivateFileField
 
+from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
 from common.validators import UUIDValidator
 from nodes.models import Node
@@ -47,11 +48,11 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.DEFAULT_TEMPLATE_TYPE)
-    arch = models.CharField('Architecture', max_length=32,
-        choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
-        help_text='Architecture of this template (as reported by uname -m). '
-                  'Slivers using this template should run on nodes that match '
-                  'this architecture.')
+    node_archs = MultiSelectField(max_length=32, choices=settings.TEMPLATE_ARCHS,
+        default=settings.DEFAULT_TEMPLATE_ARCH,
+        help_text='The node architectures accepted by this template (as reported '
+                  'by uname -m, non-empty). Slivers using this template should '
+                  'run on nodes whose architecture is listed here.')
     is_active = models.BooleanField(default=True)
     image = models.FileField(upload_to=settings.TEMPLATE_IMAGE_DIR, 
         help_text='Template\'s image file.')

@@ -44,15 +44,15 @@ class TincAddressInline(PermissionTabularInline):
 
 class ReadOnlyTincAddressInline(PermissionTabularInline):
     model = TincAddress
-    readonly_fields = ['ip_addr', 'port', 'server']
+    readonly_fields = ['addr', 'port', 'server']
     can_delete = False
     max_num = 0
 
 
 class TincAddressAdmin(PermissionModelAdmin):
-    list_display = ['ip_addr', 'port', 'island', 'server']
+    list_display = ['addr', 'port', 'island', 'server']
     list_filter = ['island__name', 'port', 'server']
-    search_fields = ['ip_addr', 'island__name', 'island__description', 
+    search_fields = ['addr', 'island__name', 'island__description', 
                      'server__tinc_name'] 
 
 
@@ -68,7 +68,7 @@ class GatewayAdmin(PermissionModelAdmin):
 
 
 class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('admin'), 'address']
+    list_display = ['description', 'id', admin_link('owner'), 'address']
     inlines = [TincClientInline]
     actions = [set_island]
     list_filter = [MyHostsListFilter]
@@ -102,14 +102,14 @@ class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """
         form = super(HostAdmin, self).get_form(request, *args, **kwargs)
-        if 'admin' in form.base_fields:
+        if 'owner' in form.base_fields:
             # ronly forms doesn't have initial
             user = request.user
             if not user.is_superuser:
-                form.base_fields['admin'].widget = ReadOnlyWidget(user.id, user.username)
-                form.base_fields['admin'].required = False
+                form.base_fields['owner'].widget = ReadOnlyWidget(user.id, user.username)
+                form.base_fields['owner'].required = False
             else:
-                form.base_fields['admin'].initial = user
+                form.base_fields['owner'].initial = user
         return form
     
     def set_island_view(modeladmin, request, object_id):

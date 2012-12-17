@@ -92,7 +92,7 @@ class BuildAdmin(admin.ModelAdmin):
     task_link.short_description = "Task"
     
     def image_link(self, build):
-        try: return '<a href=%s>%s</a>' % (build.image.url, build.image)
+        try: return '<a href=%s>%s</a>' % (build.image.url, build.image_name)
         except: return ''
     image_link.allow_tags = True
     

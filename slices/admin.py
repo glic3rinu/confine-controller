@@ -397,16 +397,23 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 
 class TemplateAdmin(PermissionModelAdmin):
-    list_display = ['name', 'description', 'type', 'arch', 'image', 'is_active']
-    list_filter = ['is_active', 'type', 'arch']
-    search_fields = ['name', 'description', 'type', 'arch']
-    fields = ['name', 'description', 'type', 'arch', 'image', 'image_sha256', 
+    list_display = ['name', 'description', 'type', 'node_archs_str', 'image', 
+                    'is_active']
+    list_filter = ['is_active', 'type', 'node_archs']
+    #FIXME node_archs: contains rather than exact
+    search_fields = ['name', 'description', 'type', 'node_archs']
+    fields = ['name', 'description', 'type', 'node_archs', 'image', 'image_sha256', 
               'is_active']
     readonly_fields = ['image_sha256']
     
     def image_sha256(self, instance):
         return instance.image_sha256
     image_sha256.short_description = 'Image SHA256'
+    
+    def node_archs_str(self, instance):
+        return ', '.join(instance.node_archs)
+    node_archs_str.short_description = 'Node archs'
+    node_archs_str.admin_order_field = 'node_archs'
 
 
 admin.site.register(Sliver, SliverAdmin)

@@ -49,7 +49,6 @@ class Template(models.Model):
                   'template, the research device must support its type.',
         default=settings.DEFAULT_TEMPLATE_TYPE)
     node_archs = MultiSelectField(max_length=32, choices=settings.TEMPLATE_ARCHS,
-        default=settings.DEFAULT_TEMPLATE_ARCH,
         help_text='The node architectures accepted by this template (as reported '
                   'by uname -m, non-empty). Slivers using this template should '
                   'run on nodes whose architecture is listed here.')

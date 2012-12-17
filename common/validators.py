@@ -1,5 +1,7 @@
+import re
 from uuid import UUID
 
+from django.core import validators
 from django.core.exceptions import ValidationError
 
 
@@ -8,3 +10,28 @@ def UUIDValidator(value):
         UUID(value)
     except:
         raise ValidationError('%s is a badly formed hexadecimal UUID string' % value)
+
+
+def Ipv4Validator(value):
+    ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+    validators.RegexValidator(re.compile(ValidIpAddressRegex), 'Insert a valid IPv4', 'invalid')(value)
+
+
+def HostNameValidator(value):
+    ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$";
+    validators.RegexValidator(re.compile(ValidHostnameRegex), 'Insert a valid host name', 'invalid')(value)
+
+
+def OrValidator(validators):
+    """
+    Run validators with an OR logit
+    """
+    def closure(value, validators=validators):
+        msg = []
+        for validator in validators:
+            try: validator(value)
+            except ValidationError, e: 
+                msg.append(str(e))
+            else: return
+        raise type(e)(' or '.join(msg))
+    return closure

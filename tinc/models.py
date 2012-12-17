@@ -10,6 +10,7 @@ from django_transaction_signals import defer
 from IPy import IP
 
 from common.ip import split_len, int_to_hex_str
+from common.validators import HostNameValidator, Ipv4Validator, OrValidator
 from nodes.models import Server, Node
 
 
@@ -159,7 +160,8 @@ class TincAddress(models.Model):
     # TODO domain name and IPv4 validator: 
     #      https://code.djangoproject.com/attachment/ticket/18119/domainnamevalidator_2.txt
     addr = models.CharField('Address', max_length=128,
-        help_text='The tinc IP address or host name of the host this one connects to.')
+        help_text='The tinc IP address or host name of the host this one connects to.',
+        validators=[OrValidator([Ipv4Validator, HostNameValidator])])
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,

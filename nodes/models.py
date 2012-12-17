@@ -67,7 +67,7 @@ class Node(models.Model):
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
         help_text='Architecture of this RD (as reported by uname -m).',)
     local_iface = models.CharField('Local Interface', max_length=16, 
-        default=settings.DEFAULT_NODE_LOCAL_IFACE,
+        default=settings.DEFAULT_NODE_LOCAL_IFACE, validators=[NetIfaceNameValidator],
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,

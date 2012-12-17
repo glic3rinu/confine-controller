@@ -22,13 +22,13 @@ def RSAPublicKeyValidator(value):
 
 def NetIfaceNameValidator(value):
     validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'),
-                              'Enter a valid interface name.', 'invalid')
+                              'Enter a valid network interface name.', 'invalid')(value)
 
 
 def Ipv4Validator(value):
     ValidIpAddressRegex = '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
     validators.RegexValidator(re.compile(ValidIpAddressRegex),
-                              'Insert a valid IPv4.', 'invalid')(value)
+                              'Insert a valid IPv4 address.', 'invalid')(value)
 
 
 def HostNameValidator(value):
@@ -39,7 +39,7 @@ def HostNameValidator(value):
 
 def OrValidator(validators):
     """
-    Run validators with an OR logit
+    Run validators with an OR logic
     """
     def closure(value, validators=validators):
         msg = []
@@ -48,5 +48,5 @@ def OrValidator(validators):
             except ValidationError, e: 
                 msg.append(str(e))
             else: return
-        raise type(e)(' or '.join(msg))
+        raise type(e)(' OR '.join(msg))
     return closure

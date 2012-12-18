@@ -11,7 +11,7 @@ from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop
     validate_net_iface_name)
 
 from . import settings
-from .validators import validate_sliver_mac_prefix, validate_ipv4_range
+from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
 
 
 class Node(models.Model):
@@ -95,7 +95,7 @@ class Node(models.Model):
                   'where N is the decimal integer number of consecutive addresses '
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
-        max_length=256, blank=True, null=True, validators=[validate_ipv4_range])
+        max_length=256, blank=True, null=True)
     sliver_mac_prefix = models.CharField('Sliver MAC Prefix', null=True,
         blank=True, max_length=5, validators=[validate_sliver_mac_prefix],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
@@ -129,11 +129,16 @@ class Node(models.Model):
         if self.cert == '': self.cert = None
         if self.uuid == '': self.uuid = None
         if self.sliver_pub_ipv4 == 'none':
-            if self.sliver_pub_ipv4_range == '' or self.sliver_pub_ipv4_range is None:
+            if not self.sliver_pub_ipv4_range:
+                # make sure empty sliver_pub_ipv4_range is None
                 self.sliver_pub_ipv4_range = None
             else:
                 raise ValidationError("If 'Sliver Public IPv4 is 'none' then Sliver "
                                       "Public IPv4 Range must be empty")
+        elif self.sliver_pub_ipv4 == 'dhcp':
+            validate_dhcp_range(self.sliver_pub_ipv4_range)
+        elif self.sliver_pub_ipv4 == 'range':
+            validate_ipv4_range(self.sliver_pub_ipv4_range)
         super(Node, self).clean()
     
     @property
@@ -165,18 +170,13 @@ class Node(models.Model):
     @property
     def sliver_pub_ipv4_num(self):
         """
-        Obtains the number of availables IPs type 4 for the sliver
-          + When Node.sliver_pub_ipv4 is dhcp, its value is #N, meaning there
-          are N total public IPv4 addresses for slivers.
-          + When Node.sliver_pub_ipv4 is range, its value is IP#N
-          meaning there are N total public IPv4 addresses for slivers after and
-          including IP or B.
-          + When Node.sliver_pub_ipv4 is none there are not support for public ipv4
+        Number of available IPv4 for slivers
+        
+        [BASE_IP]#N when sliver_pub_ipv4_range is not empty
         """
-        if not self.sliver_pub_ipv4_range:
-            return 0
-        else:
+        if self.sliver_pub_ipv4_range:
             return int(self.sliver_pub_ipv4_range.split('#')[1])
+        return 0
 
 
 class NodeProp(models.Model):

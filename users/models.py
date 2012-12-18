@@ -5,7 +5,7 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
-from common.validators import validate_uuid, validate_rsa_pubkey
+from common.validators import validate_uuid, validate_rsa_pubkey, validate_ascii
 
 
 class Group(models.Model):
@@ -263,7 +263,8 @@ class AuthToken(models.Model):
         'kinds of public keys or X.509 certificates to be used for slivers or '
         'experiments. The exact valid format depends on the type of token as '
         'long as it is non-empty and only contains ASCII characters '
-        '(e.g. by using PEM encoding or other ASCII armour).')
+        '(e.g. by using PEM encoding or other ASCII armour).',
+        validators=[validate_ascii])
     
     class Meta:
         verbose_name = 'Authentication Token'

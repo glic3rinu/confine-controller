@@ -182,7 +182,7 @@ class Config(SingletonModel):
         return 'Current Firmware Config'
     
     def get_uci(self):
-        return self.configuci_set.all()
+        return self.configuci_set.all().order_by('section')
     
     def eval_uci(self, node, sections=None):
         uci = []

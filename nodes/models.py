@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from common.validators import validate_uuid, validate_rsa_pubkey, validate_net_iface_name
+from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop_name,
+    validate_net_iface_name)
 
 from . import settings
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range
@@ -57,6 +58,7 @@ class Node(models.Model):
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).',
         validators=[validate_rsa_pubkey])
+    # TODO validate cert
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
@@ -161,7 +163,7 @@ class Node(models.Model):
         return settings.PRIV_IPV4_PREFIX_DFLT
     
     @property
-    def max_pub4ifaces(self):
+    def sliver_pub_ipv4_num(self):
         """
         Obtains the number of availables IPs type 4 for the sliver
           + When Node.sliver_pub_ipv4 is dhcp, its value is #N, meaning there
@@ -171,18 +173,10 @@ class Node(models.Model):
           including IP or B.
           + When Node.sliver_pub_ipv4 is none there are not support for public ipv4
         """
-        if self.sliver_pub_ipv4 == 'none':
-            max_num = 0
-        else: # dhcp | range
-            max_num = int(self.sliver_pub_ipv4_range.split('#')[1])
-        return max_num
-    
-    @property
-    def sliver_pub_ipv4_avail(self):
         if not self.sliver_pub_ipv4_range:
             return 0
         else:
-            return self.sliver_pub_ipv4_range.split('#')[1]
+            return int(self.sliver_pub_ipv4_range.split('#')[1])
 
 
 class NodeProp(models.Model):
@@ -194,8 +188,7 @@ class NodeProp(models.Model):
     name = models.CharField(max_length=32,
         help_text='Per node unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
-                   'Enter a valid property name.', 'invalid')])
+        validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:

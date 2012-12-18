@@ -3,7 +3,7 @@ from django.contrib.admin.util import unquote
 from django.contrib.contenttypes import generic
 from django.forms.models import fields_for_model
 
-from .helpers import add_view, change_view, changelist_view
+from . import helpers
 
 
 class PermExtensionMixin(object):
@@ -89,13 +89,13 @@ class PermExtensionMixin(object):
         }
     
     def add_view(self, request, form_url='', extra_context=None):
-        return add_view(self, request, form_url='', extra_context=extra_context)
+        return helpers.add_view(self, request, form_url='', extra_context=extra_context)
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        return change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
+        return helpers.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
-        return changelist_view(self, request, extra_context=extra_context)
+        return helpers.changelist_view(self, request, extra_context=extra_context)
     
     def get_inline_instances(self, request, obj=None):
         inline_instances = []

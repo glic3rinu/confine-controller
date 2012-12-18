@@ -13,7 +13,8 @@ from private_files import PrivateFileField
 
 from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
-from common.validators import validate_uuid, validate_rsa_pubkey, validate_net_iface_name
+from common.validators import (validate_uuid, validate_rsa_pubkey, validate_net_iface_name,
+    validate_prop_name)
 from nodes.models import Node
 from nodes import settings as node_settings
 
@@ -192,8 +193,7 @@ class SliceProp(models.Model):
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
                   'whitespace surrounding it.',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
-                   'Enter a valid property name.', 'invalid')])
+        validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -289,8 +289,7 @@ class SliverProp(models.Model):
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
-                   'Enter a valid property name.', 'invalid')])
+        validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:

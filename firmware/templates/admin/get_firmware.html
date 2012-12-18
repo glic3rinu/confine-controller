@@ -28,26 +28,25 @@
     <p></p>
     <p>{{ content_message }}</p>
     {% if build %}
-        <ul>
         {% if build.is_available %}
+        <ul>
             <li><b>Download:</b> <a href={{ build.image.url }}>{{ build.image_name }}</a> </li>
             <ul>
                 <li>Buil Date: {{ build.date }}</li>
                 <li>Version: {{ build.version }}</li>
                 <li>SHA256: {{ build.image_sha256 }}</li>
-        {% endif %}
             </ul>
+        <div style="margin-left:20px; margin-bottom:20px; margin-top:30px;">
+        <fieldset class="module aligned">
+            <h2>Instructions</h2>
+            <p></p>
+            <p>The following command can be used for flashing this image:</p>
+            <pre style='color:#000000;background:#ffffff;'>gunzip <span style='color:#0000e6; '>{{ build.image_name }}</span> <span style='color:#44aadd; '>-c</span> <span style='color:#e34adc; '>|</span> dd <span style='color:#797997; '>of</span><span style='color:#808030; '>=</span><span style='color:#40015a; '>/dev/sdX</span> <span style='color:#797997; '>bs</span><span style='color:#808030; '>=</span>1M <span style='color:#800080; '>;</span> sync
+            </pre>
+        </fieldset>
+        </div>
         </ul>
-    
-    <div style="margin-left:20px; margin-bottom:20px; margin-top:30px;">
-    <fieldset class="module aligned">
-        <h2>Instructions</h2>
-        <p></p>
-        <p>The following command can be used for flashing this image:</p>
-        <pre style='color:#000000;background:#ffffff;'>gunzip <span style='color:#0000e6; '>{{ build.image_name }}</span> <span style='color:#44aadd; '>-c</span> <span style='color:#e34adc; '>|</span> dd <span style='color:#797997; '>of</span><span style='color:#808030; '>=</span><span style='color:#40015a; '>/dev/sdX</span> <span style='color:#797997; '>bs</span><span style='color:#808030; '>=</span>1M <span style='color:#800080; '>;</span> sync
-        </pre>
-    </fieldset>
-    </div>
+        {% endif %}
     {% endif %}
     {% if not build or build.is_unavailable %}
         <form action="" method="post">{% csrf_token %}

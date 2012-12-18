@@ -31,6 +31,18 @@ def validate_host_name(value):
                               'Insert a valid host name.', 'invalid')(value)
 
 
+def validate_prop_name(value):
+    validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+                              'Enter a valid property name.', 'invalid')(value)
+
+
+def validate_ascii(value):
+    try:
+        value.decode('ascii')
+    except UnicodeDecodeError:
+        raise ValidationError('This is not an ASCII string.')
+
+
 class OrValidator(object):
     """
     Run validators with an OR logic

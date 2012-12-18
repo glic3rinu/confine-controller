@@ -63,7 +63,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "public_ipv4_avail", 
-        "value": "str(node.sliver_pub_ipv4_avail)"
+        "value": "str(node.sliver_pub_ipv4_num)"
     }
 },
 {

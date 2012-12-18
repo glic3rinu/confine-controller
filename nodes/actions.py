@@ -78,7 +78,7 @@ def request_cert(modeladmin, request, queryset):
         form = RequestCertificateForm(request.POST)
         if form.is_valid():
             pubkey = form.cleaned_data['pubkey']
-            node.issue_certificate(pubkey)
+            node.sign_cert_request(pubkey)
             modeladmin.log_change(request, node, "Certificate requested")
             return
         else:
@@ -93,7 +93,7 @@ def request_cert(modeladmin, request, queryset):
     context = {
         "title": "Request certificate for node '%s'" % node,
         "content_title": mark_safe("Request certificate for node '%s'" % node_link),
-        "content_message": "Introduce the node RSA public key.",
+        "content_message": "Introduce the node certificate to be signed.",
         'queryset': queryset,
         "opts": opts,
         "app_label": app_label,

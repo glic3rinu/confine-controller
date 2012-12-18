@@ -28,10 +28,10 @@ class NodeInlineAdminForm(forms.ModelForm):
 
 
 class RequestCertificateForm(forms.Form):
-    pubkey = forms.CharField(widget=forms.Textarea)
+    pubkey = forms.CharField(widget=forms.Textarea(attrs={'cols': '70', 'rows': '20'}))
     
     def clean_pubkey(self):
         data = self.cleaned_data['pubkey']
-        validate_rsa_pubkey(data)
+        # TODO validate node's RD management address (2001:db8:cafe::2) as a distinguished name and the technician's e-mail address for contact
         return data
 

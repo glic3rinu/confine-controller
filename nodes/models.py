@@ -6,7 +6,6 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
-#import M2Crypto
 
 from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop_name,
     validate_net_iface_name)
@@ -203,20 +202,16 @@ class Node(models.Model):
             return int(self.sliver_pub_ipv4_range.split('#')[1])
         return 0
     
-    def issue_certificate(self, pubkey):
-        # TODO https://gist.github.com/2338529
-        return
-#        cert = M2Crypto.X509.load_cert(os.path.join(settings.CERT_PATH, 'cert'))
-#        pubkey = M2Crypto.BIO.MemoryBuffer(pubkey.encode('utf-8'))
-#        pubkey = M2Crypto.RSA.load_pub_key_bio(pubkey)
-#        cert.sign(pubkey, md="sha256")
-#        privkey = os.path.join(settings.CERT_PATH, 'confine-private.pem')
-#        privkey = M2Crypto.EVP.load_key(privkey)
-#        privkey.sign_init()
-#        privkey.sign_update(pubkey)
-#        self.cert = privkey.sign_final()
-#        self.save()
-#        return self.cert
+    def sign_cert_request(self, cert_request):
+        # TODO make this the default ssl library and put in imports block
+        import M2Crypto
+        privkey = os.path.join(settings.CERT_PRIVATE_KEY_PATH)
+        privkey = M2Crypto.EVP.load_key(privkey)
+        # TODO .Request.load_request_string ?
+        request = M2Crypto.X509.load_cert_string(str(cert_request))
+        request.sign(privkey, md="sha256")
+        self.cert = request.as_pem()
+        self.save()
     
     def revoke_certificate(self):
         self.cert = None

@@ -28,4 +28,4 @@ SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'SLIVER_MAC_PREFIX_DFLT', '0x06ab')
 
 # Certificate
 # Path where the certificate files are stored
-CERT_PATH = getattr(settings, 'CERT_PATH', '/tmp/')
+CERT_PRIVATE_KEY_PATH = getattr(settings, 'CERT_PRIVATE_KEY_PATH', '/etc/apache2/ssl/generic.confine-project.eu/generic.confine-project.eu.key')

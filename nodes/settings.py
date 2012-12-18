@@ -25,3 +25,16 @@ PRIV_IPV6_PREFIX = getattr(settings, 'PRIV_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
 PRIV_IPV4_PREFIX_DFLT = getattr(settings, 'PRIV_IPV4_PREFIX_DFLT', '192.168.157.0/24')
 SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'SLIVER_MAC_PREFIX_DFLT', '0x06ab')
 
+
+# Certificate
+# Path where the certificate files are stored
+CERT_PATH = getattr(settings, 'CERT_PATH', '/tmp/')
+# the certificate issuer's country of residence
+CERT_C = getattr(settings, 'CERT_C', 'ES')
+# the certificate owner's common name
+CERT_CN = getattr(settings, 'CERT_CN', 'Confine testbed')
+# the certificate owner's email address
+CERT_EMAIL = getattr(settings, 'CERT_EMAIL', 'confine@confine-project.eu')
+# Expiration time (4 years)
+CERT_EXPIRATION = getattr(settings, 'CERT_EXPIRATION', 60*60*24*365*4)
+

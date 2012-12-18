@@ -1,5 +1,6 @@
 import re
 
+# TODO: migrate to M2Crypto
 from Crypto.PublicKey import RSA
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic

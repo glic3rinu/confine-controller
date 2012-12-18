@@ -2,6 +2,7 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
+from common.validators import validate_rsa_pubkey
 from common.widgets import ShowText
 
 
@@ -24,3 +25,13 @@ class NodeInlineAdminForm(forms.ModelForm):
             self.initial['pk'] = instance.pk
             self.initial['arch'] = instance.arch
             self.initial['set_state'] = instance.set_state
+
+
+class RequestCertificateForm(forms.Form):
+    pubkey = forms.CharField(widget=forms.Textarea)
+    
+    def clean_pubkey(self):
+        data = self.cleaned_data['pubkey']
+        validate_rsa_pubkey(data)
+        return data
+

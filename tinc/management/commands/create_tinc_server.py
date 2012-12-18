@@ -89,6 +89,7 @@ class Command(BaseCommand):
         if cmd.returncode > 0:
             raise CreateTincdError(stderr)
         
+        # Get created pubkey
         pubkey = ''
         for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
             pubkey += line

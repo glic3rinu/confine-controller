@@ -1,4 +1,4 @@
-import re
+import re, os
 
 from django_extensions.db import fields
 from django_transaction_signals import defer
@@ -6,6 +6,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
+import M2Crypto
 
 from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop_name,
     validate_net_iface_name)
@@ -20,15 +21,11 @@ class Node(models.Model):
     
     See Node architecture: http://wiki.confine-project.eu/arch:node
     """
-    INSTALL_CONF = 'install_conf'
-    INSTALL_CERT = 'install_cert'
     DEBUG = 'debug'
     FAILURE = 'failure'
     SAFE = 'safe'
     PRODUCTION = 'production'
     STATES = (
-        (INSTALL_CONF, 'Install Configuration'),
-        (INSTALL_CERT, 'Install Certificate'),
         (DEBUG, 'Debug'),
         (FAILURE, 'Failure'),
         (SAFE, 'Safe'),
@@ -58,7 +55,6 @@ class Node(models.Model):
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key for this RD (used by SFA).',
         validators=[validate_rsa_pubkey])
-    # TODO validate cert
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
@@ -110,7 +106,18 @@ class Node(models.Model):
                   % settings.PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
-    set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
+    # TODO 
+    set_state = models.CharField(max_length=16, choices=STATES, default=DEBUG,
+        help_text='The state set on this node (set state). Possible values: debug '
+                  '(initial), safe, production, failure. To support the late '
+                  'addition or generation of node keys, the set state is forced '
+                  'to remain debug while the node is missing some key, certificate '
+                  'or other configuration item. The set state is automatically '
+                  'changed to safe when all items are in place. Changing existing '
+                  'keys also moves the node into state debug or safe as appropriate. '
+                  'All set states but debug can be manually selected. See <a href='
+                  '"https://wiki.confine-project.eu/arch:node-states">node states</a> '
+                  'for the full description of set states and possible transitions.')
     group = models.ForeignKey('users.Group', 
         help_text='The group this node belongs to. The user creating this node '
                   'must be an administrator or technician of this group, and the '
@@ -123,10 +130,9 @@ class Node(models.Model):
     
     def clean(self):
         """ 
-        Empty pubkey, cert and sliver_pub_ipv4_range as NULL instead of empty string.
+        Empty pubkey and sliver_pub_ipv4_range as NULL instead of empty string.
         """
         if self.pubkey == '': self.pubkey = None
-        if self.cert == '': self.cert = None
         if self.uuid == '': self.uuid = None
         if self.sliver_pub_ipv4 == 'none':
             if not self.sliver_pub_ipv4_range:
@@ -140,6 +146,25 @@ class Node(models.Model):
         elif self.sliver_pub_ipv4 == 'range':
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         super(Node, self).clean()
+    
+    def save(self, *args, **kwargs):
+        # TODO policy: automatic corrections behind the scene or raise errors and 
+        #              make users manually intervin for corrections?
+        # TODO debug: automatic state (no manually enter nor exit)
+        # bad_conf
+        if not self.cert:
+            self.set_state = self.DEBUG
+        else:
+            if self.set_state == self.DEBUG:
+                # transition to safe when all config is correct
+                self.set_state = self.SAFE
+            elif self.set_state == self.FAILURE:
+                # changes not allowed
+                pass
+            elif self.set_state == self.PRODUCTION:
+                # transition to SAFE is changes are detected
+                pass
+        super(Node, self).save(*args, **kwargs)
     
     @property
     def properties(self):
@@ -177,6 +202,25 @@ class Node(models.Model):
         if self.sliver_pub_ipv4_range:
             return int(self.sliver_pub_ipv4_range.split('#')[1])
         return 0
+    
+    def issue_certificate(self, pubkey):
+        # TODO https://gist.github.com/2338529
+        return
+#        cert = M2Crypto.X509.load_cert(os.path.join(settings.CERT_PATH, 'cert'))
+#        pubkey = M2Crypto.BIO.MemoryBuffer(pubkey.encode('utf-8'))
+#        pubkey = M2Crypto.RSA.load_pub_key_bio(pubkey)
+#        cert.sign(pubkey, md="sha256")
+#        privkey = os.path.join(settings.CERT_PATH, 'confine-private.pem')
+#        privkey = M2Crypto.EVP.load_key(privkey)
+#        privkey.sign_init()
+#        privkey.sign_update(pubkey)
+#        self.cert = privkey.sign_final()
+#        self.save()
+#        return self.cert
+    
+    def revoke_certificate(self):
+        self.cert = None
+        self.save()
 
 
 class NodeProp(models.Model):

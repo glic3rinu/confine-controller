@@ -1,10 +1,14 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.db import router, transaction
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy, ugettext as _
+
+from .forms import RequestCertificateForm
 
 
 #TODO make this a generic pattern for reusing accros all actions that needs 
@@ -51,7 +55,7 @@ def reboot_selected(modeladmin, request, queryset):
     }
     
     # Display the confirmation page
-    return TemplateResponse(request, 'admin/node_reboot_confirmation.html', 
+    return TemplateResponse(request, 'admin/nodes/node/reboot_confirmation.html', 
         context, current_app=modeladmin.admin_site.name)
 
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
@@ -61,5 +65,43 @@ reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_nam
 def request_cert(modeladmin, request, queryset):
     message = "Not implemented!"
     messages.warning(request, message)
-
-
+    
+    if queryset.count() != 1:
+        messages.warning(request, "Please, one node at a time.")
+        return
+    
+    node = queryset[0]
+    form = RequestCertificateForm()
+    
+    # User has provided a pubkey
+    if request.POST.get('post'):
+        form = RequestCertificateForm(request.POST)
+        if form.is_valid():
+            pubkey = form.cleaned_data['pubkey']
+            node.issue_certificate(pubkey)
+            modeladmin.log_change(request, node, "Certificate requested")
+            return
+        else:
+            print form.errors
+            
+    
+    node_url = reverse("admin:nodes_node_change", args=[node.pk])
+    node_link = '<a href="%s">%s</a>' % (node_url, node)
+    opts = modeladmin.model._meta
+    app_label = opts.app_label
+    
+    context = {
+        "title": "Request certificate for node '%s'" % node,
+        "content_title": mark_safe("Request certificate for node '%s'" % node_link),
+        "content_message": "Introduce the node RSA public key.",
+        'queryset': queryset,
+        "opts": opts,
+        "app_label": app_label,
+        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+        "form": form,
+    }
+    
+    # Display the confirmation page
+    return TemplateResponse(request, 'admin/nodes/node/request_certificate.html', context, 
+        current_app=modeladmin.admin_site.name)
+    

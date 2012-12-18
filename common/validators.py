@@ -1,6 +1,7 @@
 import re
 from uuid import UUID
 
+# TODO migrate to M2Crypto
 from Crypto import PublicKey
 from django.core import validators
 from django.core.exceptions import ValidationError

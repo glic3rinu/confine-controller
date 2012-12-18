@@ -6,7 +6,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
-import M2Crypto
+#import M2Crypto
 
 from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop_name,
     validate_net_iface_name)

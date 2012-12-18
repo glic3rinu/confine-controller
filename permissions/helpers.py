@@ -5,8 +5,10 @@ from django.contrib.admin.util import unquote
 from django.views.decorators.csrf import csrf_protect
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.http import Http404
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
+from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
 from django.utils.encoding import force_text

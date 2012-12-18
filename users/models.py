@@ -39,9 +39,19 @@ class Group(models.Model):
     
     def __unicode__(self):
         return self.name
-    
+
+    @property
+    def admins(self):
+        #TODO: a group can have several admins??
+        try:
+            admins = Roles.objects.get(group=self, is_admin=True).user
+        except Roles.DoesNotExist:
+            #TODO: this situation should not never happen
+            raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
+        return admins
+
     def is_member(self, user):
-        return Roles.objects.get(group=self, user=user).exists()
+        return Roles.objects.filter(group=self, user=user).exists()
     
     def has_role(self, user, role):
         try: roles = Roles.objects.get(group=self, user=user)
@@ -275,3 +285,74 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return str(self.pk)
 
+
+class JoinRequest(models.Model):
+    """
+    This model's purpose is to store data temporaly for join the group.
+
+    An user can request to join into a group in two main scenaries:
+    1. While the registration: chooses the group(s)
+    2. A registered user: can request to join a group(s)
+
+    Once the request is created, the group's admin have to check it
+    accepting or refusing it.
+
+    """
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(Group)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'group')
+        verbose_name = 'Join Request'
+        verbose_name_plural = 'Join Requests'
+
+    def __unicode__(self):
+        return u"Join request from %s into %s" % (self.user, self.group)
+
+    def save(self, *args, **kwargs):
+        print "POST SAVE"
+        super(JoinRequest, self).save(*args, **kwargs)
+        # enqueue a task to send a mail to the group admin
+        self.send_mail_to_admin()
+
+    def refuse(self):
+        """
+        The admin refuse the user's request to join.
+        The request is deleted
+
+        """
+        self.delete()
+        #TODO: notify the user-applicant ??
+
+    def accept(self):
+        """
+        The admin accepts the user's request to join.
+        The user is added to the group and the request is deleted
+
+        """
+        #TODO create any role? research role?
+        Roles.objects.create(user=self.user, group=self.group)
+        self.delete()
+
+    def send_mail_to_admin(self):
+        """
+        Send an email to group admin to notify the new join group request
+
+        """
+        from django.contrib.sites.models import Site
+        from django.template.loader import render_to_string
+
+        site = Site.objects.get_current()
+
+        ctx_dict = {'group': self.group,
+                    'site': site} #TODO accept/refuse url??
+
+        # Email subject *must not* contain newlines
+        subject = 'Group join request (%s)' % self.group.name
+
+        message = render_to_string('registration/join_request_email.txt',
+                                   ctx_dict)
+
+        for admin in self.group.admins:
+            admin.email_user(subject, message)#, settings.DEFAULT_FROM_EMAIL)

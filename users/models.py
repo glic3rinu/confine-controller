@@ -43,10 +43,12 @@ class Group(models.Model):
 
     @property
     def admins(self):
-        #TODO: a group can have several admins??
-        try:
-            admins = Roles.objects.get(group=self, is_admin=True).user
-        except Roles.DoesNotExist:
+        admins = []
+        admin_roles = Roles.objects.filter(group=self, is_admin=True).values()
+        for rol in admin_roles:
+            admins.append(User.objects.get(id=rol['user_id']))
+            
+        if len(admins) == 0:
             #TODO: this situation should not never happen
             raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
         return admins

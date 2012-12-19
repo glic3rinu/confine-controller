@@ -1,5 +1,7 @@
 import re
 
+# TODO: migrate to M2Crypto
+from Crypto.PublicKey import RSA
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -9,10 +11,12 @@ from django_transaction_signals import defer
 from IPy import IP
 
 from common.ip import split_len, int_to_hex_str
+from common.validators import validate_host_name, OrValidator, validate_rsa_pubkey
 from nodes.models import Server, Node
-from nodes.settings import MGMT_IPV6_PREFIX
+
 
 from . import settings
+from .settings import MGMT_IPV6_PREFIX
 from .tasks import update_tincd
 
 
@@ -23,7 +27,7 @@ class Host(models.Model):
     """
     description = models.CharField(max_length=256, 
         help_text='Free-form textual description of this host.')
-    admin = models.ForeignKey(get_user_model(), 
+    owner = models.ForeignKey(get_user_model(), 
         help_text='The user who administrates this host (its creator by default)')
     
     def __unicode__(self):
@@ -35,8 +39,9 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host. 
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = models.TextField('Public Key', unique=True, blank=True,
-        help_text='PEM-encoded RSA public key used on tinc management network.')
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
+        help_text='PEM-encoded RSA public key used on tinc management network.',
+        validators=[validate_rsa_pubkey])
     connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
         help_text='A list of tinc addresses this host connects to.')
     
@@ -49,8 +54,19 @@ class TincHost(models.Model):
     
     def clean(self):
         """ Empty pubkey as NULL instead of empty string """
-        if self.pubkey == '': self.pubkey = None
+        if self.pubkey == '':
+            self.pubkey = None
         super(TincHost, self).clean()
+    
+    def get_tinc_up(self):
+        """ tinc-up file content """
+        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
+        return '#!/bin/sh\nip -6 link set "$INTERFACE" up mtu 1400\nip -6 addr add %s dev "$INTERFACE"\n' % ip
+    
+    def get_tinc_down(self):
+        """ tinc-down file content """
+        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
+        return '#!/bin/sh\nip -6 addr del %s dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % ip
 
 
 class Gateway(models.Model):
@@ -107,6 +123,17 @@ class TincServer(TincHost):
     @property
     def subnet(self):
         return self.address
+    
+    def get_host(self):
+        # FIXME this depends on each node(node.tinc.island)
+        #       maybe an optional node/tincclient argument and introspect islands?
+        host = ""
+        for addr in self.addresses:
+            host += "Address = %s\n" % addr.addr
+        host += "Port = 655\n"
+        host += "Subnet = %s\n\n" % self.subnet.strNormal()
+        host += "%s\n" % self.pubkey
+        return host
 
 
 class Island(models.Model):
@@ -132,8 +159,9 @@ class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
     """
-    ip_addr = models.GenericIPAddressField('IP Address', protocol='IPv4', 
-        help_text='The tinc IP address of the host this one connects to.')
+    addr = models.CharField('Address', max_length=128,
+        help_text='The tinc IP address or host name of the host this one connects to.',
+        validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
     port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,
@@ -145,7 +173,7 @@ class TincAddress(models.Model):
         verbose_name_plural = 'Tinc Addresses'
     
     def __unicode__(self):
-        return str(self.ip_addr)
+        return str(self.addr)
     
     @property
     def name(self):
@@ -157,7 +185,6 @@ class TincAddress(models.Model):
 
 
 class TincClient(TincHost):
-    # TODO autocreate tinc client when a related object is created
     """
     Describes a Tinc Client in the testbed. A tinc client can be a testbed node
     or a host.
@@ -174,6 +201,10 @@ class TincClient(TincHost):
         return "%s_%s" % (self.content_type.model, self.object_id)
     
     def save(self, *args, **kwargs):
+        # FIXME bug in django, this is a workaround
+        # https://code.djangoproject.com/ticket/19467
+        if self.pubkey == '': self.pubkey = None
+        # end of workaround
         if not self.pk:
             super(TincClient, self).save(*args, **kwargs)
             self.set_island()
@@ -216,14 +247,26 @@ class TincClient(TincHost):
         else:
             update_tincd()
     
+    def get_host(self):
+        """ returns tincd hosts file content """
+        return "Subnet = %s\n\n%s" % (self.subnet.strNormal(), self.pubkey)
+    
+    def get_config(self):
+        """ returns client tinc.conf file content """
+        config = "Name = %s\n" % self.name
+        for server in self.connect_to.all():
+            config += "ConnectTo = %s\n" % server.name
+        return config
+    
+    def generate_key(self, commit=False):
+        private = RSA.generate(2048)
+        if commit:
+            public = private.publickey()
+            self.pubkey = public.exportKey()
+            self.save()
+        return private
+    
     class UpdateTincdError(Exception): pass
-
-
-def add_to_class(cls, name, value):  
-    if hasattr(value, 'contribute_to_class'):
-        value.contribute_to_class(cls, name)
-    else:
-        setattr(cls, name, value)
 
 
 # Monkey-Patching Section

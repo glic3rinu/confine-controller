@@ -23,8 +23,8 @@ class UserPermission(Permission):
 
 
 class RolesPermission(Permission):
-#    def view(self, caller, user):
-#        return True
+    def view(self, caller, user):
+        return True
     
     def add(self, caller, user):
         if inspect.isclass(caller):

@@ -1,15 +1,17 @@
-import re
+import re, os
 
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from common.validators import UUIDValidator
+from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop_name,
+    validate_net_iface_name)
 
 from . import settings
-from .validators import sliver_mac_prefix_validator
+from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
 
 
 class Node(models.Model):
@@ -18,15 +20,11 @@ class Node(models.Model):
     
     See Node architecture: http://wiki.confine-project.eu/arch:node
     """
-    INSTALL_CONF = 'install_conf'
-    INSTALL_CERT = 'install_cert'
     DEBUG = 'debug'
     FAILURE = 'failure'
     SAFE = 'safe'
     PRODUCTION = 'production'
     STATES = (
-        (INSTALL_CONF, 'Install Configuration'),
-        (INSTALL_CERT, 'Install Certificate'),
         (DEBUG, 'Debug'),
         (FAILURE, 'Failure'),
         (SAFE, 'Safe'),
@@ -52,9 +50,10 @@ class Node(models.Model):
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node '
                   '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.', validators=[UUIDValidator])
+                  'it can not be changed.', validators=[validate_uuid])
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
-        help_text='PEM-encoded RSA public key for this RD (used by SFA).')
+        help_text='PEM-encoded RSA public key for this RD (used by SFA).',
+        validators=[validate_rsa_pubkey])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
@@ -65,7 +64,7 @@ class Node(models.Model):
         choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
         help_text='Architecture of this RD (as reported by uname -m).',)
     local_iface = models.CharField('Local Interface', max_length=16, 
-        default=settings.DEFAULT_NODE_LOCAL_IFACE,
+        default=settings.DEFAULT_NODE_LOCAL_IFACE, validators=[validate_net_iface_name],
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,
@@ -82,7 +81,6 @@ class Node(models.Model):
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
         default='none', choices=IPV4_METHODS)
-    # TODO validate BASE_IP#N 
     sliver_pub_ipv4_range = models.CharField('Sliver Public IPv4 Range', 
         help_text='Describes the public IPv4 range that can be used by sliver '
                   'public interfaces. If /sliver_pub_ipv4 is none, its value is '
@@ -94,7 +92,7 @@ class Node(models.Model):
                   'address BASE_IP (an IP address in the local network).',
         max_length=256, blank=True, null=True)
     sliver_mac_prefix = models.CharField('Sliver MAC Prefix', null=True,
-        blank=True, max_length=5, validators=[sliver_mac_prefix_validator],
+        blank=True, max_length=5, validators=[validate_sliver_mac_prefix],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
@@ -107,7 +105,18 @@ class Node(models.Model):
                   % settings.PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
-    set_state = models.CharField(max_length=16, choices=STATES, default=INSTALL_CONF)
+    # TODO 
+    set_state = models.CharField(max_length=16, choices=STATES, default=DEBUG,
+        help_text='The state set on this node (set state). Possible values: debug '
+                  '(initial), safe, production, failure. To support the late '
+                  'addition or generation of node keys, the set state is forced '
+                  'to remain debug while the node is missing some key, certificate '
+                  'or other configuration item. The set state is automatically '
+                  'changed to safe when all items are in place. Changing existing '
+                  'keys also moves the node into state debug or safe as appropriate. '
+                  'All set states but debug can be manually selected. See <a href='
+                  '"https://wiki.confine-project.eu/arch:node-states">node states</a> '
+                  'for the full description of set states and possible transitions.')
     group = models.ForeignKey('users.Group', 
         help_text='The group this node belongs to. The user creating this node '
                   'must be an administrator or technician of this group, and the '
@@ -120,13 +129,41 @@ class Node(models.Model):
     
     def clean(self):
         """ 
-        Empty pubkey, cert and sliver_pub_ipv4_range as NULL instead of empty string.
+        Empty pubkey and sliver_pub_ipv4_range as NULL instead of empty string.
         """
         if self.pubkey == '': self.pubkey = None
-        if self.cert == '': self.cert = None
         if self.uuid == '': self.uuid = None
-        if self.sliver_pub_ipv4 == 'none': self.sliver_pub_ipv4_range = None
+        if self.sliver_pub_ipv4 == 'none':
+            if not self.sliver_pub_ipv4_range:
+                # make sure empty sliver_pub_ipv4_range is None
+                self.sliver_pub_ipv4_range = None
+            else:
+                raise ValidationError("If 'Sliver Public IPv4 is 'none' then Sliver "
+                                      "Public IPv4 Range must be empty")
+        elif self.sliver_pub_ipv4 == 'dhcp':
+            validate_dhcp_range(self.sliver_pub_ipv4_range)
+        elif self.sliver_pub_ipv4 == 'range':
+            validate_ipv4_range(self.sliver_pub_ipv4_range)
         super(Node, self).clean()
+    
+    def save(self, *args, **kwargs):
+        # TODO policy: automatic corrections behind the scene or raise errors and 
+        #              make users manually intervin for corrections?
+        # TODO debug: automatic state (no manually enter nor exit)
+        # bad_conf
+        if not self.cert:
+            self.set_state = self.DEBUG
+        else:
+            if self.set_state == self.DEBUG:
+                # transition to safe when all config is correct
+                self.set_state = self.SAFE
+            elif self.set_state == self.FAILURE:
+                # changes not allowed
+                pass
+            elif self.set_state == self.PRODUCTION:
+                # transition to SAFE is changes are detected
+                pass
+        super(Node, self).save(*args, **kwargs)
     
     @property
     def properties(self):
@@ -155,28 +192,30 @@ class Node(models.Model):
         return settings.PRIV_IPV4_PREFIX_DFLT
     
     @property
-    def max_pub4ifaces(self):
+    def sliver_pub_ipv4_num(self):
         """
-        Obtains the number of availables IPs type 4 for the sliver
-          + When Node.sliver_pub_ipv4 is dhcp, its value is #N, meaning there
-          are N total public IPv4 addresses for slivers.
-          + When Node.sliver_pub_ipv4 is range, its value is IP#N
-          meaning there are N total public IPv4 addresses for slivers after and
-          including IP or B.
-          + When Node.sliver_pub_ipv4 is none there are not support for public ipv4
+        Number of available IPv4 for slivers
+        
+        [BASE_IP]#N when sliver_pub_ipv4_range is not empty
         """
-        if self.sliver_pub_ipv4 == 'none':
-            max_num = 0
-        else: # dhcp | range
-            max_num = int(self.sliver_pub_ipv4_range.split('#')[1])
-        return max_num
+        if self.sliver_pub_ipv4_range:
+            return int(self.sliver_pub_ipv4_range.split('#')[1])
+        return 0
     
-    @property
-    def sliver_pub_ipv4_avail(self):
-        if not self.sliver_pub_ipv4_range:
-            return 0
-        else:
-            return self.sliver_pub_ipv4_range.split('#')[1]
+    def sign_cert_request(self, cert_request):
+        # TODO make this the default ssl library and put in imports block
+        import M2Crypto
+        privkey = os.path.join(settings.CERT_PRIVATE_KEY_PATH)
+        privkey = M2Crypto.EVP.load_key(privkey)
+        # TODO .Request.load_request_string ?
+        request = M2Crypto.X509.load_cert_string(str(cert_request))
+        request.sign(privkey, md="sha256")
+        self.cert = request.as_pem()
+        self.save()
+    
+    def revoke_certificate(self):
+        self.cert = None
+        self.save()
 
 
 class NodeProp(models.Model):
@@ -188,8 +227,7 @@ class NodeProp(models.Model):
     name = models.CharField(max_length=32,
         help_text='Per node unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
-                   'Enter a valid property name.', 'invalid')])
+        validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -207,7 +245,10 @@ class DirectIface(models.Model):
     
     See node architecture: http://wiki.confine-project.eu/arch:node
     """
-    name = models.CharField(max_length=16)
+    name = models.CharField(max_length=16, validators=[validate_net_iface_name],
+        help_text='he name of the interface used as a local interface (non-empty). '
+                  'See <a href="https://wiki.confine-project.eu/arch:node">node '
+                  'architecture</a>.')
     node = models.ForeignKey(Node)
     
     class Meta:

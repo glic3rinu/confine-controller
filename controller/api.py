@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from django.conf import settings
+
 from api import ApiRoot
 from nodes import settings as nodes_settings
 
@@ -22,9 +24,11 @@ class Base(ApiRoot):
     def get(self, *args, **kwargs):
         response = super(Base, self).get(*args, **kwargs)
         testbed_params = {
-            "mgmt_ipv6_prefix": nodes_settings.MGMT_IPV6_PREFIX,
             "priv_ipv4_prefix_dflt": nodes_settings.PRIV_IPV4_PREFIX_DFLT,
             "sliver_mac_prefix_dflt": nodes_settings.SLIVER_MAC_PREFIX_DFLT, }
         
+        if 'tinc' in settings.INSTALLED_APPS:
+            from tinc.settings import MGMT_IPV6_PREFIX
+            testbed_params.update({"mgmt_ipv6_prefix": MGMT_IPV6_PREFIX})
         response.data.update({"testbed_params": testbed_params})
         return response

@@ -1,41 +1,45 @@
 import os
 
 from celery.task import task
-from confw import confw
 
+from .images import Image
 
 @task(name="firmware.build")
-def build(build_id):
+def build(build_id, exclude=[]):
     from firmware.models import Build, Config
-
+    
+    # retrieve the existing build instance, used for user feedback
     build_obj = Build.objects.get(pk=build_id)
     build_obj.task_id = build.request.id
     build_obj.save()
-    config = Config.objects.get()
-    base_image = config.get_image(build_obj.node)
-    template = confw.template('generic', 'confine', basedir='/tmp/templates/')
-#    files = confw.files()
-
-    build_uci = []
-    for config_uci in config.get_uci():
-        value = config_uci.get_value(build_obj.node)
-        template.set(config_uci.section, config_uci.option, value)
-        build_uci.append({
-            'section': config_uci.section,
-            'option': config_uci.option,
-            'value': value})
     
-    image = confw.image(template=template)
-    image_name = base_image.name.replace('.img.gz', '-%s.img' % build_obj.pk)
+    config = Config.objects.get()
+    node = build_obj.node
+    base_image = config.get_image(node)
+    
+    # prepare the new image and copy the files in it
+    image = Image(base_image.path)
+    
+    files = config.get_files(node, exclude=exclude)
+    for f in files:
+        image.add_file(f)
+    
+    # calculating image destination path
+    image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
-    try: image_path = image.build(base_image.path, userspace=True, output=image_path, gzip=True)
+    
+    # build the image
+    try: 
+        image.build(path=image_path)
     except: 
         image.clean()
         raise
+    
     image.clean()
-    build_obj.image = image_name + '.gz'
+    build_obj.image = image_name
     build_obj.save()
-    for uci in build_uci:
-        build_obj.add_uci(**uci)
+    for f in files:
+        f.seek(0)
+        build_obj.add_file(f.name, f.read())
     
     return image_path

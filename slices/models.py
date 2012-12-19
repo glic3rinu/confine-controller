@@ -3,13 +3,18 @@ from hashlib import sha256
 import re
 
 from django_transaction_signals import defer
+from django.conf import settings as project_settings
 from django.contrib.auth import get_user_model
 from django.core import validators
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from IPy import IP
+from private_files import PrivateFileField
 
+from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
-from common.validators import UUIDValidator
+from common.validators import (validate_uuid, validate_rsa_pubkey, validate_net_iface_name,
+    validate_prop_name)
 from nodes.models import Node
 from nodes import settings as node_settings
 
@@ -17,7 +22,8 @@ from . import settings
 from .tasks import force_slice_update, force_sliver_update
 
 
-# TODO protect exp_data and data files (like in firmware.build.image)
+private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
+
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
@@ -43,11 +49,10 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.DEFAULT_TEMPLATE_TYPE)
-    arch = models.CharField('Architecture', max_length=32,
-        choices=settings.TEMPLATE_ARCHS, default=settings.DEFAULT_TEMPLATE_ARCH,
-        help_text='Architecture of this template (as reported by uname -m). '
-                  'Slivers using this template should run on nodes that match '
-                  'this architecture.')
+    node_archs = MultiSelectField(max_length=32, choices=settings.TEMPLATE_ARCHS,
+        help_text='The node architectures accepted by this template (as reported '
+                  'by uname -m, non-empty). Slivers using this template should '
+                  'run on nodes whose architecture is listed here.')
     is_active = models.BooleanField(default=True)
     image = models.FileField(upload_to=settings.TEMPLATE_IMAGE_DIR, 
         help_text='Template\'s image file.')
@@ -81,9 +86,10 @@ class Slice(models.Model):
     uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this slice '
                   '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.', validators=[UUIDValidator])
+                  'it can not be changed.', validators=[validate_uuid])
     pubkey = models.TextField('Public Key', null=True, blank=True,
-        help_text='PEM-encoded RSA public key for this slice (used by SFA).')
+        help_text='PEM-encoded RSA public key for this slice (used by SFA).',
+        validators=[validate_rsa_pubkey])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, 
@@ -104,12 +110,14 @@ class Slice(models.Model):
                   'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
-    exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_EXP_DATA_DIR, 
+        storage=private_storage, verbose_name='Experiment Data',
+        condition=lambda request, self: 
+                  request.user.has_perm('slices.slice_change', obj=self),
         help_text='.tar.gz archive containing experiment data for slivers (if'
                   'they do not explicitly indicate one)', 
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-                   'Upload a valid .tar.gz file', 'invalid')],
-        verbose_name='Experiment Data')
+                   'Upload a valid .tar.gz file', 'invalid')],)
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
@@ -166,7 +174,7 @@ class Slice(models.Model):
             for new_nr in range(2, int('ffff', 16)):
                 if not Slice.objects.filter(vlan_nr=new_nr):
                     return new_nr
-            raise self.VlanAllocationError("No VLAN address space left")
+            raise self.VlanAllocationError("No VLAN address space left.")
         return last_nr + 1
     
     def force_update(self, async=False):
@@ -184,9 +192,8 @@ class SliceProp(models.Model):
     slice = models.ForeignKey(Slice)
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
-                  'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
-                   'Enter a valid property name.', 'invalid')])
+                  'whitespace surrounding it.',
+        validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -211,11 +218,13 @@ class Sliver(models.Model):
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).', 
         verbose_name='Instance Sequence Number')
-    exp_data = models.FileField(blank=True, upload_to=settings.SLICE_EXP_DATA_DIR,
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_EXP_DATA_DIR, 
+        storage=private_storage, verbose_name='Experiment Data',
+        condition=lambda request, self: 
+                  request.user.has_perm('slices.sliver_change', obj=self),
         help_text='.tar.gz archive containing experiment data for this sliver.',
         validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
-                   'Upload a valid .tar.gz file', 'invalid')],
-        verbose_name='Experiment Data',)
+                   'Upload a valid .tar.gz file', 'invalid')],)
     template = models.ForeignKey(Template, null=True, blank=True, 
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')
@@ -280,8 +289,7 @@ class SliverProp(models.Model):
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
                   'whitespace surrounding it',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
-                   'Enter a valid property name.', 'invalid')])
+        validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -300,8 +308,7 @@ class SliverIface(models.Model):
     name = models.CharField(max_length=10,
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
-        validators=[validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'), 
-                    'Enter a valid interface name.', 'invalid')])
+        validators=[validate_net_iface_name])
     
     class Meta:
         abstract = True
@@ -463,7 +470,7 @@ class PrivateIface(SliverIface):
         ipv6_words.extend(['0','1000'])
         # sliver.id
         ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))
-        return IP(':'.join(ipv4_words))
+        return IP(':'.join(ipv6_words))
     
     @property
     def ipv4_addr(self):

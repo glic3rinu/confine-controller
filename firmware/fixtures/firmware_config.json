@@ -1,0 +1,242 @@
+[
+{
+    "pk": 1, 
+    "model": "firmware.config", 
+    "fields": {
+        "version": "0.1", 
+        "description": "Confine Firmware"
+    }
+},
+{
+    "pk": 1, 
+    "model": "firmware.baseimage", 
+    "fields": {
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03-atom.img_2.gz", 
+        "config": 1, 
+        "architectures": "x86,x86_64,i586"
+    }
+},
+{
+    "pk": 1, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "id", 
+        "value": "node.id"
+    }
+},
+{
+    "pk": 2, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "local_ifname", 
+        "value": "node.local_iface"
+    }
+},
+{
+    "pk": 3, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "mac_prefix16", 
+        "value": "node.get_sliver_mac_prefix()"
+    }
+},
+{
+    "pk": 4, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "priv_ipv4_prefix24", 
+        "value": "node.get_priv_ipv4_prefix()"
+    }
+},
+{
+    "pk": 5, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "public_ipv4_avail", 
+        "value": "str(node.sliver_pub_ipv4_num)"
+    }
+},
+{
+    "pk": 6, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "rd_public_ipv4_proto", 
+        "value": "'dhcp'"
+    }
+},
+{
+    "pk": 7, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "sl_public_ipv4_proto", 
+        "value": "'dhcp'"
+    }
+},
+{
+    "pk": 8, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "rd_if_iso_parents", 
+        "value": "' '.join(node.direct_ifaces.values_list('name', flat=True))"
+    }
+},
+{
+    "pk": 10, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "testbed testbed", 
+        "config": 1, 
+        "option": "mgmt_ipv6_prefix48", 
+        "value": "'fdf5:5351:1dfd'"
+    }
+},
+{
+    "pk": 11, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "server server", 
+        "config": 1, 
+        "option": "mgmt_pubkey", 
+        "value": "server.tinc.pubkey"
+    }
+},
+{
+    "pk": 13, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "tinc-net confine", 
+        "config": 1, 
+        "option": "enabled", 
+        "value": "'1'"
+    }
+},
+{
+    "pk": 1, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server'])", 
+        "priority": 0, 
+        "mode": "", 
+        "is_optional": false, 
+        "path": "/etc/config/confine", 
+        "config": 1
+    }
+},
+{
+    "pk": 2, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "[ addr.server.get_host() for addr in node.tinc.connect_to.all() ]", 
+        "priority": 0, 
+        "mode": "", 
+        "is_optional": false, 
+        "path": "[ \"/etc/tinc/confine/hosts/%s\" % addr.server.name for addr in node.tinc.connect_to.all() ]", 
+        "config": 1
+    }
+},
+{
+    "pk": 3, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "node.tinc.generate_key(commit=True).exportKey()", 
+        "priority": 1, 
+        "mode": "og-rw", 
+        "is_optional": true, 
+        "path": "/etc/tinc/confine/rsa_key.priv", 
+        "config": 1
+    }
+},
+{
+    "pk": 4, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "node.tinc.get_host()", 
+        "priority": 0, 
+        "mode": "", 
+        "is_optional": false, 
+        "path": "'/etc/tinc/confine/hosts/%s' % node.tinc.name", 
+        "config": 1
+    }
+},
+{
+    "pk": 5, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "node.tinc.get_config()", 
+        "priority": 0, 
+        "mode": "+x", 
+        "is_optional": false, 
+        "path": "/etc/tinc/confine/tinc.conf", 
+        "config": 1
+    }
+},
+{
+    "pk": 6, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "node.tinc.get_tinc_up()", 
+        "priority": 0, 
+        "mode": "+x", 
+        "is_optional": false, 
+        "path": "/etc/tinc/confine/tinc-up", 
+        "config": 1
+    }
+},
+{
+    "pk": 7, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "node.tinc.get_tinc_down()", 
+        "priority": 0, 
+        "mode": "", 
+        "is_optional": false, 
+        "path": "/etc/tinc/confine/tinc-down", 
+        "config": 1
+    }
+},
+{
+    "pk": 8, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "is_active": true, 
+        "content": "self.config.render_uci(node, sections=['tinc-net confine'])", 
+        "priority": 0, 
+        "mode": "", 
+        "is_optional": false, 
+        "path": "/etc/config/tinc", 
+        "config": 1
+    }
+},
+{
+    "pk": 1, 
+    "model": "firmware.configfilehelptext", 
+    "fields": {
+        "help_text": "This file is the private key for the management overlay. \r\nNotice that the node public key will be automatically updated and your node will lose connectivity to the management network until the new image is not installed.\r\n", 
+        "config": 1, 
+        "file": 3
+    }
+}
+]

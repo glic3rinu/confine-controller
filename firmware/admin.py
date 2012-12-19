@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django import forms
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.http import HttpResponse
@@ -11,7 +12,9 @@ from common.admin import (get_modeladmin, admin_link, insert_action, colored,
 from nodes.models import Node
 
 from .actions import get_firmware
-from .models import BaseImage, Config, ConfigUCI, Build, BuildUCI
+from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile, 
+    ConfigFileHelpText, BuildFile)
+
 
 STATE_COLORS = {
     Build.REQUESTED: 'blue',
@@ -31,18 +34,41 @@ class BaseImageInline(admin.TabularInline):
 class ConfigUCIInline(admin.TabularInline):
     model = ConfigUCI
     extra = 0
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'value': kwargs['widget'] = forms.TextInput(attrs={'size':'100'})
+        return super(ConfigUCIInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class BuildUCIInline(admin.TabularInline):
-    model = BuildUCI
-    max_num = 0
-    readonly_fields = ['section', 'option', 'value']
+class BuildFileInline(admin.TabularInline):
+    model = BuildFile
+    extra = 0
+    fields = ['path', 'content']
+    readonly_fields = ['path', 'content']
     can_delete = False
 
 
+class ConfigFileInline(admin.TabularInline):
+    model = ConfigFile
+    extra = 0
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'70'})
+        if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'85'})
+        if db_field.name == 'mode': kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
+        if db_field.name == 'priority': kwargs['widget'] = forms.TextInput(attrs={'size':'2'})
+        return super(ConfigFileInline, self).formfield_for_dbfield(db_field, **kwargs)
+
+
+class ConfigFileHelpTextInline(admin.TabularInline):
+    model = ConfigFileHelpText
+    extra = 0
+
+
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['id', admin_link('node'), 'version', colored('state', STATE_COLORS), 
+    list_display = ['id', 'node', 'version', colored('state', STATE_COLORS), 
                     'task_link', 'image_link', 'date']
+    list_display_links = ['id', 'node']
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
@@ -50,7 +76,7 @@ class BuildAdmin(admin.ModelAdmin):
               'state', 'task_link']
     readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 
                        'version', 'build_date', 'task_link']
-    inlines = [BuildUCIInline]
+    inlines = [BuildFileInline]
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")
@@ -66,7 +92,7 @@ class BuildAdmin(admin.ModelAdmin):
     task_link.short_description = "Task"
     
     def image_link(self, build):
-        try: return '<a href=%s>%s</a>' % (build.image.url, build.image)
+        try: return '<a href=%s>%s</a>' % (build.image.url, build.image_name)
         except: return ''
     image_link.allow_tags = True
     
@@ -75,7 +101,7 @@ class BuildAdmin(admin.ModelAdmin):
 
 
 class ConfigAdmin(SingletonModelAdmin):
-    inlines = [BaseImageInline, ConfigUCIInline]
+    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline]
     
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.module_name

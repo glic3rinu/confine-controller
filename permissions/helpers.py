@@ -4,7 +4,7 @@ from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.util import unquote
 from django.views.decorators.csrf import csrf_protect
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
+from django.db import transaction, models
 from django.http import Http404
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator

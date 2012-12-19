@@ -19,8 +19,6 @@ from .models import Node, NodeProp, Server, DirectIface
 
 
 STATES_COLORS = { 
-    Node.INSTALL_CONF: 'black',
-    Node.INSTALL_CERT: 'grey',
     Node.DEBUG: 'darkorange',
     Node.FAILURE: 'red',
     Node.SAFE: 'grey',
@@ -43,7 +41,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display_links = ('id', 'uuid', 'name')
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
     search_fields = ['description', 'name', 'id', 'uuid']
-    readonly_fields = ['boot_sn']
+    readonly_fields = ['boot_sn', 'cert']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {

@@ -1,11 +1,14 @@
 from hashlib import sha256
+from StringIO import StringIO
 import os
 
 from celery import states as celery_states
+from django import template
 from django.conf import settings as project_settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
+from django.template import Template, Context
 from django_transaction_signals import defer
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
@@ -19,7 +22,9 @@ from . import settings
 from .tasks import build
 
 
-# TODO make this accessible in a common place: settings? controller? common? ..?
+# TODO create a pluggin system for add custom functions to be used in file 
+#       and uci evaluation fields.
+
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
 
@@ -30,9 +35,12 @@ class BuildQuerySet(models.query.QuerySet):
         """ 
         build = Build.objects.get(node=node)
         config = Config.objects.get()
-        if build.state != Build.AVAILABLE: return build
-        if build.match(config): return build
-        else: raise Build.DoesNotExist()
+        if build.state != Build.AVAILABLE: 
+            return build
+        if build.match(config): 
+            return build
+        else: 
+            raise Build.DoesNotExist()
 
 
 class Build(models.Model):
@@ -50,9 +58,8 @@ class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
-    # TODO: write condition method for preventing unauthorized downloads
-    # http://django-private-files.readthedocs.org/en/latest/usage.html
-    image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage)
+    image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage, 
+        condition=lambda request, self: request.user.has_perm('nodes.node_getfirmware', obj=self.node))
     task_id = models.CharField(max_length=36, unique=True, null=True)
     
     objects = generate_chainer_manager(BuildQuerySet)
@@ -70,6 +77,10 @@ class Build(models.Model):
         super(Build, self).delete(*args, **kwargs)
         try: os.remove(self.image.path)
         except: pass
+    
+    @property
+    def image_name(self):
+        return self.image.name.split('/')[-1]
     
     @property
     def task(self):
@@ -113,7 +124,7 @@ class Build(models.Model):
         except: return None
     
     @classmethod
-    def build(cls, node, async=False):
+    def build(cls, node, async=False, exclude=[]):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
@@ -126,43 +137,34 @@ class Build(models.Model):
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
         if async:
-            defer(build.delay, build_obj.pk)
+            defer(build.delay, build_obj.pk, exclude=exclude)
         else:
-            build_obj = build(build_obj.pk)
+            build_obj = build(build_obj.pk, exclude=exclude)
         return build_obj
     
-    def get_uci(self):
-        return self.builduci_set.all()
+    def add_file(self, path, content):
+        BuildFile.objects.create(build=self, path=path, content=content)
+    
+    def get_files(self):
+        return self.buildfile_set.all()
     
     def match(self, config):
-        """
-        Compare the existing image with the current state of the node in order
-        to detect changes.
-        """
-        if self.version != config.version: return False
-        ucis = set(self.get_uci().values_list('section', 'option', 'value'))
-        get = lambda uci: (uci.section, uci.option, uci.get_value(self.node))
-        config_ucis = set(map(get, config.get_uci()))
-        return ucis == config_ucis
-    
-    def add_uci(self, **kwargs):
-        BuildUCI.objects.create(build=self, **kwargs)
+        if self.version != config.version: 
+            return True
+        config = Config.objects.get()
+        exclude = config.configfile_set.optional().values_list('pk', flat=True)
+        old_files = set( (f.path, f.content) for f in self.buildfile_set.all() )
+        new_files = set( (f.name, f.read()) for f in config.get_files(self.node, exclude=exclude) )
+        return new_files == old_files
 
 
-class BuildUCI(models.Model):
-    """
-    Stores the UCI options that build image has
-    """
+class BuildFile(models.Model):
     build = models.ForeignKey(Build)
-    section = models.CharField(max_length=32, help_text='UCI config statement')
-    option = models.CharField(max_length=32, help_text='UCI option statement')
-    value = models.TextField()
-    
-    class Meta:
-        unique_together = ['build', 'section', 'option']
+    path = models.CharField(max_length=256)
+    content = models.TextField()
     
     def __unicode__(self):
-        return "%s.%s" % (self.section, self.option)
+        return self.path
 
 
 class Config(SingletonModel):
@@ -180,7 +182,24 @@ class Config(SingletonModel):
         return 'Current Firmware Config'
     
     def get_uci(self):
-        return self.configuci_set.all()
+        return self.configuci_set.all().order_by('section')
+    
+    def eval_uci(self, node, sections=None):
+        uci = []
+        config_ucis = self.get_uci()
+        if sections is not None:
+            config_ucis = config_ucis.filter(section__in=sections)
+        for config_uci in config_ucis:
+            uci.append({
+                'section': config_uci.section,
+                'option': config_uci.option,
+                'value': config_uci.eval_value(node)})
+        return uci
+    
+    def render_uci(self, node, sections=None):
+        uci = template.loader.get_template('uci')
+        context = Context({'uci': self.eval_uci(node, sections=sections)})
+        return uci.render(context)
     
     def get_image(self, node):
         """
@@ -188,6 +207,12 @@ class Config(SingletonModel):
         """
         arch_regex = "(^|,)%s(,|$)" % node.arch
         return self.baseimage_set.get(architectures__regex=arch_regex).image
+    
+    def get_files(self, node, exclude=[]):
+        files = []
+        for config_file in self.configfile_set.active().exclude(pk__in=exclude):
+            files.extend(config_file.get_files(node))
+        return files
 
 
 class BaseImage(models.Model):
@@ -196,6 +221,7 @@ class BaseImage(models.Model):
     """
     config = models.ForeignKey(Config)
     architectures = MultiSelectField(max_length=250, choices=NODE_ARCHS)
+    # TODO validate image file name: must end in img.gz
     image = models.FileField(upload_to=settings.FIRMWARE_DIR)
     
     def __unicode__(self):
@@ -227,15 +253,15 @@ class ConfigUCI(models.Model):
     value = models.CharField(max_length=255, 
         help_text='Python code that will be evaluated for obtining the value '
                   'from the node. For example: node.properties[\'ip\']')
-    # TODO Add validation field ?
     
     class Meta:
+        verbose_name_plural = "Config UCI"
         unique_together = ['config', 'section', 'option']
     
     def __unicode__(self):
         return "%s.%s" % (self.section, self.option)
     
-    def get_value(self, node):
+    def eval_value(self, node):
         """
         Evaluates the 'value' as python code with node as a context in order to
         get the current value for the given UCI option.
@@ -243,3 +269,69 @@ class ConfigUCI(models.Model):
         server = Server.objects.get()
         return unicode(eval(self.value))
 
+
+class ConfigFileQuerySet(models.query.QuerySet):
+    def active(self, **kwargs):
+        return self.filter(is_active=True, **kwargs)
+    
+    def optional(self, **kwargs):
+        return self.filter(is_optional=True, **kwargs)
+
+
+class ConfigFile(models.Model):
+    config = models.ForeignKey(Config)
+    path = models.CharField(max_length=256)
+    content = models.CharField(max_length=256)
+    mode = models.CharField(max_length=6, blank=True)
+    priority = models.IntegerField(default=0)
+    is_optional = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    
+    objects = generate_chainer_manager(ConfigFileQuerySet)
+    
+    class Meta:
+        unique_together = ['config', 'path']
+    
+    def __unicode__(self):
+        return self.path
+    
+    def get_files(self, node):
+        # server is part of the context
+        server = Server.objects.get()
+        try: 
+            paths = eval(self.path)
+        except (NameError, SyntaxError):
+            paths = eval("self.path")
+        
+        # get contents
+        contents = eval(self.content)
+        
+        # path and contents can be or not an iterator (multiple files)
+        if not hasattr(paths, '__iter__'):
+            paths = [paths]
+            contents = [contents]
+        
+        # put all together as an in memory file (StringIO)
+        files = []
+        for (name, content) in zip(paths, contents):
+            f = StringIO()
+            f.name = name
+            f.config = self
+            f.write(content)
+            f.seek(0)
+            files.append(f)
+        return files
+    
+    @property
+    def help_text(self):
+        try: return self.configfilehelptext.help_text
+        except ConfigFileHelpText.DoesNotExist: return ''
+
+
+class ConfigFileHelpText(models.Model):
+    config = models.ForeignKey(Config)
+    file = models.OneToOneField(ConfigFile)
+    help_text = models.TextField()
+    
+    def __unicode__(self):
+        return str(self.file)

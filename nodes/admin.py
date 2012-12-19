@@ -36,22 +36,22 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['name', 'id', 'uuid', 'arch', colored('set_state', STATES_COLORS, verbose=True), 
+    list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True), 
                     admin_link('group'), 'num_ifaces']
-    list_display_links = ('id', 'uuid', 'name')
+    list_display_links = ('id', 'name')
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
-    search_fields = ['description', 'name', 'id', 'uuid']
+    search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'cert']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'group', 'arch', 'local_iface', 
                        'sliver_pub_ipv6', 'sliver_pub_ipv4', 
-                       'sliver_pub_ipv4_range', 'boot_sn', 'set_state',),
+                       'sliver_pub_ipv4_range', 'boot_sn', 'set_state'),
         }),
-        ('SFA', {
+        ('Certificate', {
             'classes': ('collapse',),
-            'fields': ('pubkey', 'cert', 'uuid')
+            'fields': ('cert',)
         }),
         ('Optional Prefixes', {
             'classes': ('collapse',),

@@ -13,8 +13,7 @@ from private_files import PrivateFileField
 
 from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
-from common.validators import (validate_uuid, validate_rsa_pubkey, validate_net_iface_name,
-    validate_prop_name)
+from common.validators import validate_net_iface_name, validate_prop_name
 from nodes.models import Node
 from nodes import settings as node_settings
 
@@ -83,13 +82,6 @@ class Slice(models.Model):
                   '^[a-z][_0-9a-z]*[0-9a-z]$', 
         validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
                    'Enter a valid name.', 'invalid')])
-    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
-        help_text='A universally unique identifier (UUID, RFC 4122) for this slice '
-                  '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.', validators=[validate_uuid])
-    pubkey = models.TextField('Public Key', null=True, blank=True,
-        help_text='PEM-encoded RSA public key for this slice (used by SFA).',
-        validators=[validate_rsa_pubkey])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, 
@@ -137,14 +129,6 @@ class Slice(models.Model):
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
         super(Slice, self).save(*args, **kwargs)
-    
-    def clean(self):
-        """ 
-        Empty pubkey, cert and uuid as NULL instead of empty string.
-        """
-        if self.pubkey == '': self.pubkey = None
-        if self.uuid == '': self.uuid = None
-        super(Slice, self).clean()
     
     @property
     def slivers(self):

@@ -155,6 +155,7 @@ INSTALLED_APPS = (
     'slices',
     'issues',
     'tinc',
+    'sfa',
     'communitynetworks',
     'firmware',
     'registration',

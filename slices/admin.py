@@ -168,10 +168,10 @@ class NodeListAdmin(NodeAdmin):
     """ 
     Provides a list of available nodes for adding slivers to an existing slice
     """
-    list_display = ['add_sliver_link', 'id', 'uuid', link('cn_url', description='CN URL'), 
+    list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'), 
                     'arch', colored('set_state', STATES_COLORS, verbose=True), admin_link('group'), 
                     'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
-    list_display_links = ['add_sliver_link', 'id', 'uuid']
+    list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = None
@@ -317,15 +317,15 @@ class SlicePropInline(PermissionTabularInline):
 
 
 class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['name', 'uuid', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
+    list_display = ['name', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
-    list_display_links = ('name', 'uuid')
+    list_display_links = ('name',)
     list_filter = [MySlicesListFilter, 'set_state', 'template']
 #    filter_horizontal = ['users']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
                        'exp_data_sha256', template_link]
     date_hierarchy = 'expires_on'
-    search_fields = ['name', 'uuid']
+    search_fields = ['name']
     inlines = [SlicePropInline, SliverInline]
     actions = [reset_selected, renew_selected_slices]
     form = SliceAdminForm
@@ -335,10 +335,6 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                        'exp_data_sha256'), 'set_state', 'vlan_nr', 
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on',
                        'group'),
-        }),
-        ('SFA', {
-            'classes': ('collapse',),
-            'fields': ('pubkey', 'uuid')
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_actions = [('renew', renew_selected_slices, '', ''),

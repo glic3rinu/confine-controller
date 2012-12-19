@@ -7,8 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from common.validators import (validate_uuid, validate_rsa_pubkey, validate_prop_name,
-    validate_net_iface_name)
+from common.validators import validate_prop_name, validate_net_iface_name
 
 from . import settings
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
@@ -47,13 +46,6 @@ class Node(models.Model):
                   'the regular expression',
         validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
                    'Enter a valid name.', 'invalid')])
-    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
-        help_text='A universally unique identifier (UUID, RFC 4122) for this node '
-                  '(used by SFA). This is optional, but once set to a valid UUID '
-                  'it can not be changed.', validators=[validate_uuid])
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
-        help_text='PEM-encoded RSA public key for this RD (used by SFA).',
-        validators=[validate_rsa_pubkey])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
@@ -129,10 +121,8 @@ class Node(models.Model):
     
     def clean(self):
         """ 
-        Empty pubkey and sliver_pub_ipv4_range as NULL instead of empty string.
+        Empty sliver_pub_ipv4_range as NULL instead of empty string.
         """
-        if self.pubkey == '': self.pubkey = None
-        if self.uuid == '': self.uuid = None
         if self.sliver_pub_ipv4 == 'none':
             if not self.sliver_pub_ipv4_range:
                 # make sure empty sliver_pub_ipv4_range is None
@@ -147,8 +137,6 @@ class Node(models.Model):
         super(Node, self).clean()
     
     def save(self, *args, **kwargs):
-        # TODO policy: automatic corrections behind the scene or raise errors and 
-        #              make users manually intervin for corrections?
         # TODO debug: automatic state (no manually enter nor exit)
         # bad_conf
         if not self.cert:
@@ -207,7 +195,6 @@ class Node(models.Model):
         import M2Crypto
         privkey = os.path.join(settings.CERT_PRIVATE_KEY_PATH)
         privkey = M2Crypto.EVP.load_key(privkey)
-        # TODO .Request.load_request_string ?
         request = M2Crypto.X509.load_cert_string(str(cert_request))
         request.sign(privkey, md="sha256")
         self.cert = request.as_pem()

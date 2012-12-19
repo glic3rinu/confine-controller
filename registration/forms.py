@@ -33,35 +33,36 @@ class RegistrationForm(forms.ModelForm):
     """
     class Meta:
         model = User
-        fields = ('username', 'email', 'groups', 'pubkey')
-        widgets = {
-            'pubkey': forms.Textarea(attrs={'required':True, })
-        }
+#        fields = ('username', 'email', 'groups', 'pubkey')
+        fields = ('username', 'email', 'groups')
+#        widgets = {
+#            'pubkey': forms.Textarea(attrs={'required':True, })
+#        }
 
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
                                 render_value=False), label=_("Password"))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
                                 render_value=False), label=_("Password (again)"))
 
-    def clean_pubkey(self):
-        """
-        Validate that the pubkey is a valid PEM-encoded RSA public key
-        -----BEGIN PUBLIC KEY-----
-        MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANQNY7RD9BarYRsmMazM1hd7a+u3QeMP
-        FZQ7Ic+BmmeWHvvVP4Yjyu1t6vAut7mKkaDeKbT3yiGVUgAEUaWMXqECAwEAAQ==
-        -----END PUBLIC KEY-----
+#    def clean_pubkey(self):
+#        """
+#        Validate that the pubkey is a valid PEM-encoded RSA public key
+#        -----BEGIN PUBLIC KEY-----
+#        MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANQNY7RD9BarYRsmMazM1hd7a+u3QeMP
+#        FZQ7Ic+BmmeWHvvVP4Yjyu1t6vAut7mKkaDeKbT3yiGVUgAEUaWMXqECAwEAAQ==
+#        -----END PUBLIC KEY-----
 
-        """
-        try:
-            # the server encoding of may be unicode, to proper working is
-            # necessary convert back the key to ascii
-            public = self.cleaned_data['pubkey'].encode('ascii')
-            bio = BIO.MemoryBuffer(public)
-            RSA.load_pub_key_bio(bio)
-        except Exception as e:
-            raise forms.ValidationError(_("Invalid public key: '%s'") % e.message)
-        else:
-            return self.cleaned_data['pubkey']
+#        """
+#        try:
+#            # the server encoding of may be unicode, to proper working is
+#            # necessary convert back the key to ascii
+#            public = self.cleaned_data['pubkey'].encode('ascii')
+#            bio = BIO.MemoryBuffer(public)
+#            RSA.load_pub_key_bio(bio)
+#        except Exception as e:
+#            raise forms.ValidationError(_("Invalid public key: '%s'") % e.message)
+#        else:
+#            return self.cleaned_data['pubkey']
 
     def clean_username(self):
         """

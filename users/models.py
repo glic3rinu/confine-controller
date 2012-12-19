@@ -6,7 +6,7 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
-from common.validators import validate_uuid, validate_rsa_pubkey, validate_ascii
+from common.validators import validate_ascii
 
 
 class Group(models.Model):
@@ -24,13 +24,6 @@ class Group(models.Model):
 #    postal_code = models.PositiveIntegerField(blank=True, null=True)
 #    country = models.CharField(max_length=32) 
 #    url = models.URLField(blank=True)
-    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
-        help_text='A universally unique identifier (UUID, RFC 4122) for this '
-                  'user (used by SFA). This is optional, but once set to a valid '
-                  'UUID it can not be changed.', validators=[validate_uuid])
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
-        help_text='A PEM-encoded RSA public key for this user (used by SFA).',
-        validators=[validate_rsa_pubkey])
     allow_nodes = models.BooleanField(default=False,
         help_text='Whether nodes belonging to this group can be created (false by '
                   'default). Its value can only be changed by testbed superusers.')
@@ -43,13 +36,9 @@ class Group(models.Model):
 
     @property
     def admins(self):
-        admins = []
-        admin_roles = Roles.objects.filter(group=self, is_admin=True).values()
-        for rol in admin_roles:
-            admins.append(User.objects.get(id=rol['user_id']))
-            
-        if len(admins) == 0:
-            #TODO: this situation should not never happen
+        """ return user queryset containing all admins """
+        admins = User.objects.filter(roles__is_admin=True, roles__group=self)
+        if not admins.exists():
             raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
         return admins
 
@@ -68,14 +57,6 @@ class Group(models.Model):
         for role in roles:
             if group_roles.has_role(role): return True
         return False
-    
-    def clean(self):
-        """
-        Empty pubkey and uuid as NULL instead of empty string.
-        """
-        if not self.uuid: self.uuid = None
-        if not self.pubkey: self.pubkey = None
-        super(Group, self).clean()
     
     def get_admin_emails(self):
         return self.roles_set.filter(is_admin=True).values_list('user__email', flat=True)
@@ -162,13 +143,6 @@ class User(auth_models.AbstractBaseUser):
         help_text='Designates that this user has all permissions without '
                     'explicitly assigning them.')
     date_joined = models.DateTimeField(default=timezone.now)
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
-        help_text='A PEM-encoded RSA public key for this user (used by SFA).')
-    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
-        help_text='A universally unique identifier (UUID, RFC 4122) for this '
-                  'user (used by SFA). This is optional, but once set to a valid '
-                  'UUID it can not be changed.',
-        validators=[validate_uuid])
     groups = models.ManyToManyField(Group, blank=True, through=Roles)
     
     objects = UserManager()
@@ -182,14 +156,6 @@ class User(auth_models.AbstractBaseUser):
     
     def __unicode__(self):
         return self.username
-    
-    def clean(self):
-        """ 
-        Empty pubkey and uuid as NULL instead of empty string 
-        """
-        if self.pubkey == '': self.pubkey = None
-        if self.uuid == '': self.uuid = None
-        super(User, self).clean()
     
     def get_full_name(self):
         full_name = '%s %s' % (self.first_name, self.last_name)

@@ -62,7 +62,6 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
                                       'description',)}),
         ('Permissions', {'fields': ('is_active', 'is_superuser',)}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
-        ('SFA Options', {'classes': ('collapse',), 'fields': ('uuid', 'pubkey')}),
         )
     add_fieldsets = (
         (None, {
@@ -84,14 +83,13 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
 
 
 class GroupAdmin(PermissionModelAdmin):
-    list_display = ['name', 'uuid', 'description', 'allow_slices', 'allow_nodes',
+    list_display = ['name', 'description', 'allow_slices', 'allow_nodes',
                     'num_users']
     list_filter = ['allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]
     fieldsets = (
         (None, {'fields': ('name', 'description', 'allow_nodes', 'allow_slices')}),
-        ('SFA Options', {'classes': ('collapse',), 'fields': ('uuid', 'pubkey')}),
         )
     actions = ['join_request']
     change_form_template = 'admin/group_change_form.html'

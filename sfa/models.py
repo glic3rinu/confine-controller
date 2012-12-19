@@ -45,7 +45,7 @@ related_models = [Slice, User, Group, Node]
 @property
 def sfa(self):
     try: return self.related_sfaobject.get()
-    except SfaObject.DoesNotExist: return {}
+    except SfaObject.DoesNotExist: return None
 
 for model in related_models:
     model.add_to_class('related_sfaobject', generic.GenericRelation('sfa.SfaObject'))

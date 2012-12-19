@@ -276,8 +276,7 @@ related_models = [Host, Node]
 
 @property
 def tinc(self):
-    try: return self.related_tincclient.get()
-    except TincClient.DoesNotExist: return {}
+    return self.related_tincclient.get()
 
 for model in related_models:
     model.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
@@ -286,8 +285,7 @@ for model in related_models:
 # Hook TincServer support to Server
 @property
 def tinc(self):
-    try: return self.related_tincserver.get()
-    except TincServer.DoesNotExist: return {}
+    return self.related_tincserver.get()
 
 Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
 Server.add_to_class('tinc', tinc)

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from common.admin import insert_inline
 from nodes.models import Node
 from permissions.admin import PermissionGenericTabularInline

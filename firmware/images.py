@@ -19,18 +19,18 @@ class Image(object):
         mountimage = "%s/scripts/mountimage.sh -m %s" % (self.base_dir, args)
         self._exec_cmd(mountimage)
     
-    def umount(self, part_nr=2):
-        args = "'%s' %s %s %s" % (self.image, self.mnt, self.tmp_part_file, part_nr)
-        umountimage = "%s/scripts/mountimage.sh -u %s" % (self.base_dir, args)
-        self._exec_cmd(umountimage)
-    
+    def umount(self, part_nr=2): pass
+#        args = "'%s' %s %s %s" % (self.image, self.mnt, self.tmp_part_file, part_nr)
+#        umountimage = "%s/scripts/mountimage.sh -u %s" % (self.base_dir, args)
+#        self._exec_cmd(umountimage)
+#    
     def add_file(self, file):
         self.files.append(file)
     
-    def clean(self):
-        try: self.umount()
-        except: pass
-        shutil.rmtree(self.tmp)
+    def clean(self): pass
+#        try: self.umount()
+#        except: pass
+#        shutil.rmtree(self.tmp)
     
     def move(self, path):
         shutil.move(self.image, path)
@@ -58,13 +58,13 @@ class Image(object):
             if f.config.mode:
                 self.chmod(dest_path, f.config.mode)
         
-        self.umount()
-        compress = "gzip " + self.image
-        self._exec_cmd(compress)
-        self.image += '.gz'
-        
-        if path is not None:
-            self.move(path)
+#        self.umount()
+#        compress = "gzip " + self.image
+#        self._exec_cmd(compress)
+#        self.image += '.gz'
+#        
+#        if path is not None:
+#            self.move(path)
     
     def _exec_cmd(self, command, part_nr=2):
         mount_errors = {

@@ -20,7 +20,9 @@ def build(build_id, exclude=[]):
     # prepare the new image and copy the files in it
     image = Image(base_image.path)
     
-    files = config.get_files(node, exclude=exclude)
+    # TODO image filesystem is not available at this point so we can't read the 
+    #       private key :(
+    files = config.evaluate_files(node, exclude=exclude, image=image)
     for f in files:
         image.add_file(f)
     

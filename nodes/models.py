@@ -200,6 +200,42 @@ class Node(models.Model):
         self.cert = request.as_pem()
         self.save()
     
+    def generate_certificate(self, key_path, commit=False, user=None):
+        # TODO get rid of this import
+        import M2Crypto
+        
+        key = M2Crypto.RSA.load_key(key_path)
+        pkey = M2Crypto.EVP.PKey()
+        pkey.assign_rsa(key)
+        
+        if user is None:
+            user = self.group.admins[0]
+        
+        # time for certificate to stay valid
+        cur_time = M2Crypto.ASN1.ASN1_UTCTIME()
+        cur_time.set_time(int(time.time()))
+        expire_time = M2Crypto.ASN1.ASN1_UTCTIME()
+        # Expire certs in 4 years
+        expire_time.set_time(int(time.time()) + settings.CERT_EXPIRATION)
+        # creating a certificate
+        cert = M2Crypto.X509.X509()
+        cert.set_pubkey(pkey)
+        cs_name = M2Crypto.X509.X509_Name()
+        # TODO remove tinc dependency: self.mgmt_address?
+        cs_name.CN = str(self.tinc.address)
+        cs_name.Email = user.email
+        cert.set_subject(cs_name)
+        cert.set_issuer_name(cs_name)
+        cert.set_not_before(cur_time)
+        cert.set_not_after(expire_time)
+        # self signing a certificate
+        cert.sign(pkey, md="sha256")
+        
+        if commit:
+            self.cert = cert.as_pem()
+        
+        return cert
+    
     def revoke_certificate(self):
         self.cert = None
         self.save()

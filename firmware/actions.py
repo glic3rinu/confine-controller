@@ -38,7 +38,7 @@ def get_firmware(modeladmin, request, queryset):
         form = OptionalFilesForm(request.POST)
         if form.is_valid():
             optional_fields = form.cleaned_data
-            exclude = [ field for field, value in optional_fields.iteritems() if value ]
+            exclude = [ field for field, value in optional_fields.iteritems() if not value ]
             build = Build.build(node, async=True, exclude=exclude)
             modeladmin.log_change(request, node, "Build firmware")
     

@@ -55,6 +55,7 @@ class Build(models.Model):
     DELETED = 'DELETED'
     FAILED = 'FAILED'
     
+    # TODO: self.pk == node.id
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
@@ -208,10 +209,10 @@ class Config(SingletonModel):
         arch_regex = "(^|,)%s(,|$)" % node.arch
         return self.baseimage_set.get(architectures__regex=arch_regex).image
     
-    def get_files(self, node, exclude=[]):
+    def evaluate_files(self, node, exclude=[], **kwargs):
         files = []
         for config_file in self.configfile_set.active().exclude(pk__in=exclude):
-            files.extend(config_file.get_files(node))
+            files.extend(config_file.get_files(node, **kwargs))
         return files
 
 
@@ -295,16 +296,18 @@ class ConfigFile(models.Model):
     def __unicode__(self):
         return self.path
     
-    def get_files(self, node):
-        # server is part of the context
-        server = Server.objects.get()
+    def get_files(self, node, **kwargs):
+        safe_locals = kwargs
+        safe_locals.update({'node': node,
+                            'self': self,
+                            'server': Server.objects.get()})
         try: 
-            paths = eval(self.path)
+            paths = eval(self.path, safe_locals)
         except (NameError, SyntaxError):
-            paths = eval("self.path")
+            paths = eval("self.path", safe_locals)
         
         # get contents
-        contents = eval(self.content)
+        contents = eval(self.content, safe_locals)
         
         # path and contents can be or not an iterator (multiple files)
         if not hasattr(paths, '__iter__'):

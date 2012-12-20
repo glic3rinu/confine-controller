@@ -1,8 +1,7 @@
 import re
 from uuid import UUID
 
-# TODO migrate to M2Crypto
-from Crypto import PublicKey
+from M2Crypto import BIO, RSA
 from django.core import validators
 from django.core.exceptions import ValidationError
 
@@ -15,8 +14,11 @@ def validate_uuid(value):
 
 
 def validate_rsa_pubkey(value):
-    try: 
-        PublicKey.RSA.importKey(value)
+    try:
+        # the server encoding of may be unicode, to proper working is
+        # necessary convert back the key to ascii
+        bio = BIO.MemoryBuffer(value.encode('ascii'))
+        RSA.load_pub_key_bio(bio)
     except:
         raise ValidationError('This is not a valid RSA public key.')
 

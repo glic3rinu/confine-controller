@@ -44,6 +44,7 @@ class RegistrationForm(forms.ModelForm):
     password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
                                 render_value=False), label=_("Password (again)"))
 
+#   TODO now pubkey is from sfa
 #    def clean_pubkey(self):
 #        """
 #        Validate that the pubkey is a valid PEM-encoded RSA public key

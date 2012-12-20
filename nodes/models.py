@@ -1,6 +1,5 @@
 import re, os, time
 
-import M2Crypto
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.core import validators
@@ -10,7 +9,7 @@ from singleton_models.models import SingletonModel
 
 from common.validators import validate_prop_name, validate_net_iface_name
 
-from . import settings
+from . import settings, ssl
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
 
 
@@ -196,53 +195,20 @@ class Node(models.Model):
             return int(self.sliver_pub_ipv4_range.split('#')[1])
         return 0
     
-    def sign_cert_request(self, cert_request):
-        # TODO move to ssl.py ?
-        privkey = os.path.join(settings.CERT_PRIVATE_KEY_PATH)
-        privkey = M2Crypto.EVP.load_key(privkey)
-        request = M2Crypto.X509.load_cert_string(str(cert_request))
-        request.sign(privkey, md="sha256")
-        self.cert = request.as_pem()
-        self.save()
+    def sign_cert_request(self, scr, commit=True):
+        self.cert = ssl.sign_cert_request(scr)
+        if commit:
+            self.save()
+        return self.cert
     
     def generate_certificate(self, key, commit=False, user=None):
-        # TODO move to ssl.py ?
-        # we allow key to be a file and also an string
-        try:
-            key = M2Crypto.RSA.load_key(key)
-        except:
-            key = M2Crypto.RSA.load_key_string(key)
-        pkey = M2Crypto.EVP.PKey()
-        pkey.assign_rsa(key)
-        
-        if user is None:
+        if user is None: 
             user = self.group.admins[0]
-        
-        # time for certificate to stay valid
-        cur_time = M2Crypto.ASN1.ASN1_UTCTIME()
-        cur_time.set_time(int(time.time()))
-        expire_time = M2Crypto.ASN1.ASN1_UTCTIME()
-        # Expire certs in 4 years
-        expire_time.set_time(int(time.time()) + settings.CERT_EXPIRATION)
-        # creating a certificate
-        cert = M2Crypto.X509.X509()
-        cert.set_pubkey(pkey)
-        cs_name = M2Crypto.X509.X509_Name()
-        # TODO remove tinc dependency: self.mgmt_address?
-        cs_name.CN = str(self.tinc.address)
-        cs_name.Email = user.email
-        cert.set_subject(cs_name)
-        cert.set_issuer_name(cs_name)
-        cert.set_not_before(cur_time)
-        cert.set_not_after(expire_time)
-        # self signing a certificate
-        cert.sign(pkey, md="sha256")
-        
+        # TODO self.tinc dependency
+        self.cert = ssl.generate_certificate(key, Email=user.email, CN=str(self.tinc.address))
         if commit:
-            self.cert = cert.as_pem()
             self.save()
-        
-        return cert
+        return self.cert
     
     def revoke_certificate(self):
         self.cert = None

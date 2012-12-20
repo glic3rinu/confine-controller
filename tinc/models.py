@@ -1,7 +1,7 @@
 import re
 
 # TODO: migrate to M2Crypto
-from Crypto.PublicKey import RSA
+import M2Crypto
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -259,10 +259,14 @@ class TincClient(TincHost):
         return config
     
     def generate_key(self, commit=False):
-        private = RSA.generate(2048)
+        # TODO move to ssl.py ?
+        key = M2Crypto.RSA.gen_key(2048, 65537)
+        mem = M2Crypto.BIO.MemoryBuffer()
+        key.save_key_bio(mem, cipher=None)
+        private = mem.getvalue()
         if commit:
-            public = private.publickey()
-            self.pubkey = public.exportKey()
+            key.save_pub_key_bio(mem)
+            self.pubkey = mem.getvalue()
             self.save()
         return private
     

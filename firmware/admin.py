@@ -47,6 +47,8 @@ class BuildFileInline(admin.TabularInline):
     readonly_fields = ['path', 'content']
     can_delete = False
 
+    def has_add_permission(self, *args, **kwargs):
+        return False
 
 class ConfigFileInline(admin.TabularInline):
     model = ConfigFile

@@ -29,3 +29,5 @@ SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'SLIVER_MAC_PREFIX_DFLT', '0x06ab')
 # Certificate
 # Path where the certificate files are stored
 CERT_PRIVATE_KEY_PATH = getattr(settings, 'CERT_PRIVATE_KEY_PATH', '/etc/apache2/ssl/generic.confine-project.eu/generic.confine-project.eu.key')
+# expiration time for generated certificates (4years)
+CERT_EXPIRATION = getattr(settings, 'CERT_EXPIRATION', 60*60*24*365*4)

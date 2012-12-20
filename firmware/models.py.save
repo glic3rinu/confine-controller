@@ -158,13 +158,13 @@ class Build(models.Model):
         new_files = set()
         for origin, evaluated in config.evaluate_files(self.node, exclude=exclude):
             for f in evaluated:
-                new_files.add((f.name, f.content))
+                new_files.update(f.name, f.read())
         return new_files == old_files
 
 
 class BuildFile(models.Model):
     build = models.ForeignKey(Build)
-    parent = models.OneToOneField('firmware.ConfigFile')
+    parent = models.OneToOneField('firmware.ConfigFile')    
     path = models.CharField(max_length=256)
     content = models.TextField()
     
@@ -303,8 +303,6 @@ class ConfigFile(models.Model):
         return self.path
     
     def get_files(self, node, **kwargs):
-        class FakeFile(object): pass
-        
         safe_locals = kwargs
         safe_locals.update({'node': node,
                             'self': self,
@@ -325,10 +323,11 @@ class ConfigFile(models.Model):
         # put all together as an in memory file (StringIO)
         files = []
         for (name, content) in zip(paths, contents):
-            f = FakeFile()
+            f = StringIO()
             f.name = name
             f.config = self
-            f.content = content
+            f.write(content)
+            f.seek(0)
             files.append(f)
         return files
     

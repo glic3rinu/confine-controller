@@ -1,5 +1,6 @@
-import re, os
+import re, os, time
 
+import M2Crypto
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.core import validators
@@ -136,7 +137,7 @@ class Node(models.Model):
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         super(Node, self).clean()
     
-    def save(self, *args, **kwargs):
+    def update_set_state(self, commit=True):
         # TODO debug: automatic state (no manually enter nor exit)
         # bad_conf
         if not self.cert:
@@ -151,6 +152,11 @@ class Node(models.Model):
             elif self.set_state == self.PRODUCTION:
                 # transition to SAFE is changes are detected
                 pass
+        if commit:
+            self.save()
+    
+    def save(self, *args, **kwargs):
+        self.update_set_state(commit=False)
         super(Node, self).save(*args, **kwargs)
     
     @property
@@ -191,8 +197,7 @@ class Node(models.Model):
         return 0
     
     def sign_cert_request(self, cert_request):
-        # TODO make this the default ssl library and put in imports block
-        import M2Crypto
+        # TODO move to ssl.py ?
         privkey = os.path.join(settings.CERT_PRIVATE_KEY_PATH)
         privkey = M2Crypto.EVP.load_key(privkey)
         request = M2Crypto.X509.load_cert_string(str(cert_request))
@@ -200,11 +205,13 @@ class Node(models.Model):
         self.cert = request.as_pem()
         self.save()
     
-    def generate_certificate(self, key_path, commit=False, user=None):
-        # TODO get rid of this import
-        import M2Crypto
-        
-        key = M2Crypto.RSA.load_key(key_path)
+    def generate_certificate(self, key, commit=False, user=None):
+        # TODO move to ssl.py ?
+        # we allow key to be a file and also an string
+        try:
+            key = M2Crypto.RSA.load_key(key)
+        except:
+            key = M2Crypto.RSA.load_key_string(key)
         pkey = M2Crypto.EVP.PKey()
         pkey.assign_rsa(key)
         
@@ -233,6 +240,7 @@ class Node(models.Model):
         
         if commit:
             self.cert = cert.as_pem()
+            self.save()
         
         return cert
     

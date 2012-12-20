@@ -17,21 +17,21 @@ def build(build_id, exclude=[]):
     node = build_obj.node
     base_image = config.get_image(node)
     
-    # prepare the new image and copy the files in it
-    image = Image(base_image.path)
-    
-    # TODO image filesystem is not available at this point so we can't read the 
-    #       private key :(
-    files = config.evaluate_files(node, exclude=exclude, image=image)
-    for f in files:
-        image.add_file(f)
-    
-    # calculating image destination path
-    image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)
-    image_path = os.path.join(build_obj.image.storage.location, image_name)
-    
-    # build the image
-    try: 
+    try:
+        # prepare the new image and copy the files in it
+        image = Image(base_image.path)
+        
+        files = config.evaluate_files(node, exclude=exclude, image=image)
+        for original, evaluated in files:
+            for f in evaluated:
+                image.add_file(f)
+                build_obj.add_file(f.name, f.content, original)
+        
+        # calculating image destination path
+        image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)
+        image_path = os.path.join(build_obj.image.storage.location, image_name)
+        
+        # build the image
         image.build(path=image_path)
     except: 
         image.clean()
@@ -40,8 +40,7 @@ def build(build_id, exclude=[]):
     image.clean()
     build_obj.image = image_name
     build_obj.save()
-    for f in files:
-        f.seek(0)
-        build_obj.add_file(f.name, f.read())
+    
+    node.update_set_state()
     
     return image_path

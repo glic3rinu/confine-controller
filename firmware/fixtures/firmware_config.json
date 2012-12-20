@@ -1,5 +1,128 @@
 [
 {
+    "pk": 91, 
+    "model": "firmware.build", 
+    "fields": {
+        "node": 7, 
+        "date": "2012-12-14T15:06:40.633Z", 
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03-atom.img_2-91.gz", 
+        "version": "0.1", 
+        "task_id": "35b328c7-5770-4497-98a6-86b29094a034"
+    }
+},
+{
+    "pk": 102, 
+    "model": "firmware.build", 
+    "fields": {
+        "node": 15, 
+        "date": "2012-12-19T19:50:30.259Z", 
+        "image": "", 
+        "version": "0.1", 
+        "task_id": "06b9fd3e-ec6e-4581-8e8f-e002a494e848"
+    }
+},
+{
+    "pk": 134, 
+    "model": "firmware.build", 
+    "fields": {
+        "node": 14, 
+        "date": "2012-12-20T17:15:46.911Z", 
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03_3.img-134.gz", 
+        "version": "0.1", 
+        "task_id": "d8d0f5ae-41e6-460d-b4ea-c12a2a473a9d"
+    }
+},
+{
+    "pk": 154, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "-----BEGIN RSA PRIVATE KEY-----\nMIIEogIBAAKCAQEAm53sT2PefgLw86P6fTVED2RBlDyG2k08ev9AkZsVhdH/LRZT\njdqDQGybGnvbz8jsK/LfaRlfcXk/8/cwJqHrdW2IHMBONsRZ6w0yUmzMDcaWAnef\nkkCdVIZ8FuAkgiKMhxs4MDP/j2+nKfbe7a21KonxuDIE6Kbuhba3loRfrm8EXcpt\nz0r6DGyjflBdO6njzCIh7xeFmwu4YvZKywTHgI26iAMBo2UPyo9EKW0nbP8noRRQ\n2E/iaCd4uUupVZGMvzGRouGdaodgV7dXFHqZPG7RVOfW1u2CtR+Bbu5FKhI8OpTy\nL61jFoC99TDJdq66NpHkMFnxt4sJP9687dtTawIDAQABAoIBAAduoWyhPm0SQuO/\n/ySfuKJrjV5BDce7TJorOrA5keuUPfWvTUpHF2GqTjYTmEnyNKVcsiLY3WAUBGPo\neFo//XjcRFXrMVEYS5sYRED/hTdbNqrjf7GCeIEi8yY8ikHU2JVTTXmv4hK9qGQu\nsDL1yuM/N1YuvWFHJ7knItmDdPZlr+R1/UDtFrhxHP49fXBwaNNffjo3k1IMx0IQ\nhDv8f/ePna3TqvPKsfrP3Kx5N9C+LN55LjW23131EbGjQRpFMpVsAIJjgwxcEmKD\n9+eK3mhNm0rcP60fhKofpbHOIL5DDydVs7KXwikMWXS16/JCPfcKSMKU0V6pyzlw\n525V41ECgYEAyo918BsSvpcvnU1p2cYw6BTFway+TvJcwzkhg0f8B814vo8dNnvg\nIijLUi4c9/+PlCM2cHKvrbEP0j/Q8qRPURWNrQqvgNFzCuZRKRyE1hFL1dHTGpJv\nE4ByI31xsVpt3ZwjJfJyVIMkp7fIe3sBGkpDMyodAovIxmFRwDgPtrcCgYEAxKv9\nAABBa+pfv73div1BQ2GeqGu/+n4lHicRmyQZRifpNRtNcD/B9i2jRYrxnQczP1wA\nf9AG2DnBeRsEYtDOBctz+FsEB1fiN8mJ+AccCzXugcWIA6OZR1JsRxZOZ0kyZ0Gg\nK2rp3EqGk3RBz1vYyoMbLkEpJTG3T4cGnjleNO0CgYB/LrZxbL5HNuwpi1rD5uH8\nRlaotUrEjP5bgXqeUEtZptSCaZ+A/ySKriyDS/raZ/cBn15mGkxd9YemjnUmdK5s\njejn1oa9jkT6egRJmON6+V8xQM6Yp4rgpsyDphcFsW68L3YONH0+vRz9xbI2fdQC\natBoxq9yUsxcauyGkWykXwKBgF4s1Sto8+rPAiZ4rltdxiCT4DtZzUYPnYqAvseB\nU7Dqb5uEhWJYxXIyjFpCnEvLJNkUHxEU9hIYJfLt4v3GasEPmWq1eophpOt90Fk6\nXk1n99ugUO8dKcqjR0ILBmQjAsW7AQ2JVo6sCSEWrGS04Gyotx1BCojK87JbP+oI\nInpJAoGAND+ZbMlR7lCClnA/vXWpFmUJKu0aW+a5kAckAYkrufx6Bj/fGKFTlmMQ\nokPa1SzBKybKm/nLaLW5GKZTboEvRLrVOYE8kE4SB1DWoeus3vfbPW9K4nIue2X4\n6fnbH5Ivejk7Uk2thpF4FznY+2bx+ubongCjkqShXyFMECh7RrU=\n-----END RSA PRIVATE KEY-----\n", 
+        "path": "/etc/tinc/confine/rsa_key.priv", 
+        "build": 134, 
+        "parent": 3
+    }
+},
+{
+    "pk": 155, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Address = controller.confine-project.eu\nAddress = 10.228.207.8\nPort = 655\nSubnet = 2001:db8:cafe:0:0:0:0:2\n\n-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n\n", 
+        "path": "/etc/tinc/confine/hosts/server", 
+        "build": 134, 
+        "parent": 2
+    }
+},
+{
+    "pk": 156, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Subnet = 2001:db8:cafe:e:0:0:0:0/64\n\n-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm53sT2PefgLw86P6fTVE\nD2RBlDyG2k08ev9AkZsVhdH/LRZTjdqDQGybGnvbz8jsK/LfaRlfcXk/8/cwJqHr\ndW2IHMBONsRZ6w0yUmzMDcaWAnefkkCdVIZ8FuAkgiKMhxs4MDP/j2+nKfbe7a21\nKonxuDIE6Kbuhba3loRfrm8EXcptz0r6DGyjflBdO6njzCIh7xeFmwu4YvZKywTH\ngI26iAMBo2UPyo9EKW0nbP8noRRQ2E/iaCd4uUupVZGMvzGRouGdaodgV7dXFHqZ\nPG7RVOfW1u2CtR+Bbu5FKhI8OpTyL61jFoC99TDJdq66NpHkMFnxt4sJP9687dtT\nawIDAQAB\n-----END PUBLIC KEY-----\n", 
+        "path": "/etc/tinc/confine/hosts/node_14", 
+        "build": 134, 
+        "parent": 4
+    }
+},
+{
+    "pk": 157, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Name = node_14\nConnectTo = server\n", 
+        "path": "/etc/tinc/confine/tinc.conf", 
+        "build": 134, 
+        "parent": 5
+    }
+},
+{
+    "pk": 158, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "#!/bin/sh\nip -6 link set \"$INTERFACE\" up mtu 1400\nip -6 addr add 2001:db8:cafe:e::2/48 dev \"$INTERFACE\"\n", 
+        "path": "/etc/tinc/confine/tinc-up", 
+        "build": 134, 
+        "parent": 6
+    }
+},
+{
+    "pk": 159, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "#!/bin/sh\nip -6 addr del 2001:db8:cafe:e::2/48 dev \"$INTERFACE\"\nip -6 link set \"$INTERFACE\" down\n", 
+        "path": "/etc/tinc/confine/tinc-down", 
+        "build": 134, 
+        "parent": 7
+    }
+},
+{
+    "pk": 160, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "\n    config tinc-net confine\n     option enabled '1' \n    \n", 
+        "path": "/etc/config/tinc", 
+        "build": 134, 
+        "parent": 8
+    }
+},
+{
+    "pk": 161, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "\n    config node node\n     option public_ipv4_avail '333' \n     option local_ifname 'eth0' \n     option mac_prefix16 '0x06ab' \n     option priv_ipv4_prefix24 '192.168.157.0/24' \n     option rd_public_ipv4_proto 'dhcp' \n     option sl_public_ipv4_proto 'dhcp' \n     option rd_if_iso_parents 'eth1' \n     option id '14' \n    \n    config server server\n     option mgmt_pubkey '-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n' \n    \n    config testbed testbed\n     option mgmt_ipv6_prefix48 'fdf5:5351:1dfd' \n    \n", 
+        "path": "/etc/config/confine", 
+        "build": 134, 
+        "parent": 1
+    }
+},
+{
+    "pk": 162, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "-----BEGIN CERTIFICATE-----\nMIIC8TCCAdkCADANBgkqhkiG9w0BAQsFADA/MRswGQYDVQQDExIyMDAxOmRiODpj\nYWZlOmU6OjIxIDAeBgkqhkiG9w0BCQEWEW1hcmNheUBwYW5nZWEub3JnMB4XDTEy\nMTIyMDE3MTU0OFoXDTE2MTIxOTE3MTU0OFowPzEbMBkGA1UEAxMSMjAwMTpkYjg6\nY2FmZTplOjoyMSAwHgYJKoZIhvcNAQkBFhFtYXJjYXlAcGFuZ2VhLm9yZzCCASIw\nDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJud7E9j3n4C8POj+n01RA9kQZQ8\nhtpNPHr/QJGbFYXR/y0WU43ag0Bsmxp728/I7Cvy32kZX3F5P/P3MCah63VtiBzA\nTjbEWesNMlJszA3GlgJ3n5JAnVSGfBbgJIIijIcbODAz/49vpyn23u2ttSqJ8bgy\nBOim7oW2t5aEX65vBF3Kbc9K+gxso35QXTup48wiIe8XhZsLuGL2SssEx4CNuogD\nAaNlD8qPRCltJ2z/J6EUUNhP4mgneLlLqVWRjL8xkaLhnWqHYFe3VxR6mTxu0VTn\n1tbtgrUfgW7uRSoSPDqU8i+tYxaAvfUwyXauujaR5DBZ8beLCT/evO3bU2sCAwEA\nATANBgkqhkiG9w0BAQsFAAOCAQEAR7xLnsB4LhfIXPEFtMoh+NCNUvUPuGJk7G7e\nvmqS6ekOEvagxwUBBoM58a6DUrQQAZlF7PMQvaYeFFpdrLRS3nwBpoJCuh/UYSTI\nNlVIjEQP+QUnK7542A64N8ercIosm4dQ4ogkruxlnuSOwwc5Ts11N8PNZqzjxaAV\nEOlBPEX5es4na2qwyoEDKsaY+o6pf9Mho/Yk3IjSXtdQShQMFjBMmWCLYPZIedQF\n2lpZDZTTEekhvEAJjOoOQ5y682ry2N9VYzHyxg+PdJ1Nbq+WdT80hfBGOS3HPO1t\nMMmWDeNZ1/BwE7ef5DPXu0ObFTYmCuk5osai51T55iSgzFsleg==\n-----END CERTIFICATE-----\n", 
+        "path": "/etc/config/cert", 
+        "build": 134, 
+        "parent": 9
+    }
+},
+{
     "pk": 1, 
     "model": "firmware.config", 
     "fields": {
@@ -11,7 +134,7 @@
     "pk": 1, 
     "model": "firmware.baseimage", 
     "fields": {
-        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03-atom.img_2.gz", 
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03_3.img.gz", 
         "config": 1, 
         "architectures": "x86,x86_64,i586"
     }
@@ -130,9 +253,9 @@
     "pk": 1, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server'])", 
-        "priority": 0, 
         "mode": "", 
         "is_optional": false, 
         "path": "/etc/config/confine", 
@@ -143,9 +266,9 @@
     "pk": 2, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "[ addr.server.get_host() for addr in node.tinc.connect_to.all() ]", 
-        "priority": 0, 
         "mode": "", 
         "is_optional": false, 
         "path": "[ \"/etc/tinc/confine/hosts/%s\" % addr.server.name for addr in node.tinc.connect_to.all() ]", 
@@ -156,9 +279,9 @@
     "pk": 3, 
     "model": "firmware.configfile", 
     "fields": {
-        "is_active": true, 
-        "content": "node.tinc.generate_key(commit=True).exportKey()", 
         "priority": 1, 
+        "is_active": true, 
+        "content": "node.tinc.generate_key(commit=True)", 
         "mode": "og-rw", 
         "is_optional": true, 
         "path": "/etc/tinc/confine/rsa_key.priv", 
@@ -169,9 +292,9 @@
     "pk": 4, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "node.tinc.get_host()", 
-        "priority": 0, 
         "mode": "", 
         "is_optional": false, 
         "path": "'/etc/tinc/confine/hosts/%s' % node.tinc.name", 
@@ -182,9 +305,9 @@
     "pk": 5, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "node.tinc.get_config()", 
-        "priority": 0, 
         "mode": "+x", 
         "is_optional": false, 
         "path": "/etc/tinc/confine/tinc.conf", 
@@ -195,9 +318,9 @@
     "pk": 6, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "node.tinc.get_tinc_up()", 
-        "priority": 0, 
         "mode": "+x", 
         "is_optional": false, 
         "path": "/etc/tinc/confine/tinc-up", 
@@ -208,9 +331,9 @@
     "pk": 7, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "node.tinc.get_tinc_down()", 
-        "priority": 0, 
         "mode": "", 
         "is_optional": false, 
         "path": "/etc/tinc/confine/tinc-down", 
@@ -221,12 +344,25 @@
     "pk": 8, 
     "model": "firmware.configfile", 
     "fields": {
+        "priority": 0, 
         "is_active": true, 
         "content": "self.config.render_uci(node, sections=['tinc-net confine'])", 
-        "priority": 0, 
         "mode": "", 
         "is_optional": false, 
         "path": "/etc/config/tinc", 
+        "config": 1
+    }
+},
+{
+    "pk": 9, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "priority": 0, 
+        "is_active": true, 
+        "content": "node.generate_certificate(key=files[0][0].content, commit=True).as_pem()", 
+        "mode": "", 
+        "is_optional": true, 
+        "path": "/etc/config/cert", 
         "config": 1
     }
 },
@@ -237,6 +373,15 @@
         "help_text": "This file is the private key for the management overlay. \r\nNotice that the node public key will be automatically updated and your node will lose connectivity to the management network until the new image is not installed.\r\n", 
         "config": 1, 
         "file": 3
+    }
+},
+{
+    "pk": 2, 
+    "model": "firmware.configfilehelptext", 
+    "fields": {
+        "help_text": "This file contains the certificate for node authentication.\r\nNotice that the node certificate will be updated accordingly.", 
+        "config": 1, 
+        "file": 9
     }
 }
 ]

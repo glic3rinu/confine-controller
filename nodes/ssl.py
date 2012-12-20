@@ -1,6 +1,9 @@
+import os, time
+
 from M2Crypto import BIO, ASN1, RSA, X509, EVP
 
 from .settings import CERT_PRIVATE_KEY_PATH, CERT_EXPIRATION
+
 
 def sign_cert_request(scr):
     privkey = os.path.join(CERT_PRIVATE_KEY_PATH)
@@ -28,10 +31,12 @@ def generate_certificate(key, **subject):
     # creating a certificate
     cert = X509.X509()
     cert.set_pubkey(pkey)
+    # subject info
     subject_name = X509.X509_Name()
     for key, value in subject.iteritems():
         setattr(subject_name, key, value)
     cert.set_subject(subject_name)
+    # issuer info
     # TODO issuer info (confine)
     cert.set_issuer_name(subject_name)
     cert.set_not_before(cur_time)

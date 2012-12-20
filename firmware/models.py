@@ -164,9 +164,12 @@ class Build(models.Model):
 
 class BuildFile(models.Model):
     build = models.ForeignKey(Build)
-    parent = models.OneToOneField('firmware.ConfigFile')
+    parent = models.ForeignKey('firmware.ConfigFile')
     path = models.CharField(max_length=256)
     content = models.TextField()
+    
+    class Meta:
+        unique_together = ('build', 'parent')
     
     def __unicode__(self):
         return self.path

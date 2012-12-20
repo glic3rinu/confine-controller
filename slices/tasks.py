@@ -40,7 +40,7 @@ def clean_expired_slices():
             
             Thanks,
             Confine ops.""" % (slice.name, SLICE_EXPIRATION_WARNING.days, renew_url))
-        from_address = project_settings.MAINTAINANCE_EMAIL
+        from_address = project_settings.MAINTEINANCE_EMAIL
         to = slice.group.get_admin_emails()
         send_mail(subject, message, from_address, to, fail_silently=False)
     

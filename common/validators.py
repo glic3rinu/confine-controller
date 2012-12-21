@@ -15,8 +15,7 @@ def validate_uuid(value):
 
 def validate_rsa_pubkey(value):
     try:
-        # the server encoding of may be unicode, to proper working is
-        # necessary convert back the key to ascii
+        # the server encoding may be unicode, just making sure to get an ascii key
         bio = BIO.MemoryBuffer(value.encode('ascii'))
         RSA.load_pub_key_bio(bio)
     except:
@@ -55,12 +54,11 @@ class OrValidator(object):
     
     def __call__(self, value):
         msg = []
-        print self.validators
         for validator in self.validators:
             try: validator(value)
             except ValidationError, e: 
                 # TODO get exception message in a readable way not:
-                #      [u'blabana'] or [u'kajkja'] ...
+                #      [u'blabana'] or [u'kajkja'] ....
                 msg.append(str(e))
             else: return
         raise type(e)(' OR '.join(msg))

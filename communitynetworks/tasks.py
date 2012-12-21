@@ -2,10 +2,10 @@ from datetime import datetime
 
 from celery.task import periodic_task, task
 
-from .settings import CACHE_NODE_DB_CRONTAB
+from .settings import COMMUNITYNETWORKS_CACHE_NODE_DB_CRONTAB as CRONTAB
 
 
-@periodic_task(name="communitynetworks.periodic_cache_node_db", run_every=CACHE_NODE_DB_CRONTAB)
+@periodic_task(name="communitynetworks.periodic_cache_node_db", run_every=CRONTAB)
 def periodic_cache_node_db():
     from .models import CnHost
     for host in CnHost.objects.exclude(cndb_uri=""):

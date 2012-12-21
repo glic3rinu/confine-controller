@@ -155,10 +155,7 @@ class Build(models.Model):
         config = Config.objects.get()
         exclude = config.configfile_set.optional().values_list('pk', flat=True)
         old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(parent__pk__in=exclude) )
-        new_files = set()
-        for origin, evaluated in config.evaluate_files(self.node, exclude=exclude):
-            for f in evaluated:
-                new_files.add((f.name, f.content))
+        new_files = set( (f.path, f.content) for f in config.evaluate_files(self.node, exclude=exclude) )
         return new_files == old_files
 
 
@@ -173,6 +170,19 @@ class BuildFile(models.Model):
     
     def __unicode__(self):
         return self.path
+    
+    @property
+    def config(self):
+        """ in some contexts it make sense to call it config """
+        return self.parent
+    
+    @property
+    def name(self):
+        """ make it behave like a file """
+        return self.path
+    
+    def read(self):
+        return self.content
 
 
 class Config(SingletonModel):
@@ -217,11 +227,10 @@ class Config(SingletonModel):
         return self.baseimage_set.get(architectures__regex=arch_regex).image
     
     def evaluate_files(self, node, exclude=[], **kwargs):
-        files = self.configfile_set.active().exclude(pk__in=exclude)
-        evaluated = []
-        for config_file in files:
-            evaluated.append(config_file.get_files(node, files=evaluated, **kwargs))
-        return zip(files, evaluated)
+        files = []
+        for config_file in self.configfile_set.active().exclude(pk__in=exclude):
+            files.extend(config_file.get_files(node, files=files, **kwargs))
+        return files
 
 
 class BaseImage(models.Model):
@@ -306,8 +315,6 @@ class ConfigFile(models.Model):
         return self.path
     
     def get_files(self, node, **kwargs):
-        class FakeFile(object): pass
-        
         safe_locals = kwargs
         safe_locals.update({'node': node,
                             'self': self,
@@ -325,13 +332,10 @@ class ConfigFile(models.Model):
             paths = [paths]
             contents = [contents]
         
-        # put all together as an in memory file (StringIO)
+        # put all together in a BuildFile list
         files = []
-        for (name, content) in zip(paths, contents):
-            f = FakeFile()
-            f.name = name
-            f.config = self
-            f.content = content
+        for path, content in zip(paths, contents):
+            f = BuildFile(path=path, content=content, parent=self)
             files.append(f)
         return files
     

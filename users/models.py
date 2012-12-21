@@ -59,7 +59,7 @@ class Group(models.Model):
         return False
     
     def get_admin_emails(self):
-        return self.roles_set.filter(is_admin=True).values_list('user__email', flat=True)
+        return self.admins.values_list('email', flat=True)
 
 
 class Roles(models.Model):

@@ -20,12 +20,10 @@ def build(build_id, exclude=[]):
     try:
         # prepare the new image and copy the files in it
         image = Image(base_image.path)
-        
-        files = config.evaluate_files(node, exclude=exclude, image=image)
-        for original, evaluated in files:
-            for f in evaluated:
-                image.add_file(f)
-                build_obj.add_file(f.name, f.content, original)
+        for f in config.evaluate_files(node, exclude=exclude, image=image):
+            image.add_file(f)
+            f.build = build_obj
+            f.save()
         
         # calculating image destination path
         image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)

@@ -29,7 +29,8 @@ def update_tincd():
     sys_clients = glob.glob(os.path.join(hosts_path, 'host_*'))
     sys_clients.extend(glob.glob(os.path.join(hosts_path, 'node_*')))
     for client in sys_clients:
-        os.remove(client)
+        try: os.remove(client)
+        except OSError: pass
     
     # create clients
     if script != '':

@@ -11,115 +11,185 @@
     }
 },
 {
-    "pk": 102, 
-    "model": "firmware.build", 
-    "fields": {
-        "node": 15, 
-        "date": "2012-12-19T19:50:30.259Z", 
-        "image": "", 
-        "version": "0.1", 
-        "task_id": "06b9fd3e-ec6e-4581-8e8f-e002a494e848"
-    }
-},
-{
-    "pk": 134, 
+    "pk": 150, 
     "model": "firmware.build", 
     "fields": {
         "node": 14, 
-        "date": "2012-12-20T17:15:46.911Z", 
-        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03_3.img-134.gz", 
+        "date": "2012-12-21T11:46:07.875Z", 
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03_3.img-150.gz", 
         "version": "0.1", 
-        "task_id": "d8d0f5ae-41e6-460d-b4ea-c12a2a473a9d"
+        "task_id": "24fa909f-4b17-4f1f-80c8-3a2144e537c1"
     }
 },
 {
-    "pk": 154, 
+    "pk": 152, 
+    "model": "firmware.build", 
+    "fields": {
+        "node": 15, 
+        "date": "2012-12-21T16:25:48.165Z", 
+        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03_3.-152.img.gz", 
+        "version": "0.1", 
+        "task_id": "b8c4e9f2-a835-4e9e-a40b-8b8b5fdbd8a4"
+    }
+},
+{
+    "pk": 240, 
     "model": "firmware.buildfile", 
     "fields": {
-        "content": "-----BEGIN RSA PRIVATE KEY-----\nMIIEogIBAAKCAQEAm53sT2PefgLw86P6fTVED2RBlDyG2k08ev9AkZsVhdH/LRZT\njdqDQGybGnvbz8jsK/LfaRlfcXk/8/cwJqHrdW2IHMBONsRZ6w0yUmzMDcaWAnef\nkkCdVIZ8FuAkgiKMhxs4MDP/j2+nKfbe7a21KonxuDIE6Kbuhba3loRfrm8EXcpt\nz0r6DGyjflBdO6njzCIh7xeFmwu4YvZKywTHgI26iAMBo2UPyo9EKW0nbP8noRRQ\n2E/iaCd4uUupVZGMvzGRouGdaodgV7dXFHqZPG7RVOfW1u2CtR+Bbu5FKhI8OpTy\nL61jFoC99TDJdq66NpHkMFnxt4sJP9687dtTawIDAQABAoIBAAduoWyhPm0SQuO/\n/ySfuKJrjV5BDce7TJorOrA5keuUPfWvTUpHF2GqTjYTmEnyNKVcsiLY3WAUBGPo\neFo//XjcRFXrMVEYS5sYRED/hTdbNqrjf7GCeIEi8yY8ikHU2JVTTXmv4hK9qGQu\nsDL1yuM/N1YuvWFHJ7knItmDdPZlr+R1/UDtFrhxHP49fXBwaNNffjo3k1IMx0IQ\nhDv8f/ePna3TqvPKsfrP3Kx5N9C+LN55LjW23131EbGjQRpFMpVsAIJjgwxcEmKD\n9+eK3mhNm0rcP60fhKofpbHOIL5DDydVs7KXwikMWXS16/JCPfcKSMKU0V6pyzlw\n525V41ECgYEAyo918BsSvpcvnU1p2cYw6BTFway+TvJcwzkhg0f8B814vo8dNnvg\nIijLUi4c9/+PlCM2cHKvrbEP0j/Q8qRPURWNrQqvgNFzCuZRKRyE1hFL1dHTGpJv\nE4ByI31xsVpt3ZwjJfJyVIMkp7fIe3sBGkpDMyodAovIxmFRwDgPtrcCgYEAxKv9\nAABBa+pfv73div1BQ2GeqGu/+n4lHicRmyQZRifpNRtNcD/B9i2jRYrxnQczP1wA\nf9AG2DnBeRsEYtDOBctz+FsEB1fiN8mJ+AccCzXugcWIA6OZR1JsRxZOZ0kyZ0Gg\nK2rp3EqGk3RBz1vYyoMbLkEpJTG3T4cGnjleNO0CgYB/LrZxbL5HNuwpi1rD5uH8\nRlaotUrEjP5bgXqeUEtZptSCaZ+A/ySKriyDS/raZ/cBn15mGkxd9YemjnUmdK5s\njejn1oa9jkT6egRJmON6+V8xQM6Yp4rgpsyDphcFsW68L3YONH0+vRz9xbI2fdQC\natBoxq9yUsxcauyGkWykXwKBgF4s1Sto8+rPAiZ4rltdxiCT4DtZzUYPnYqAvseB\nU7Dqb5uEhWJYxXIyjFpCnEvLJNkUHxEU9hIYJfLt4v3GasEPmWq1eophpOt90Fk6\nXk1n99ugUO8dKcqjR0ILBmQjAsW7AQ2JVo6sCSEWrGS04Gyotx1BCojK87JbP+oI\nInpJAoGAND+ZbMlR7lCClnA/vXWpFmUJKu0aW+a5kAckAYkrufx6Bj/fGKFTlmMQ\nokPa1SzBKybKm/nLaLW5GKZTboEvRLrVOYE8kE4SB1DWoeus3vfbPW9K4nIue2X4\n6fnbH5Ivejk7Uk2thpF4FznY+2bx+ubongCjkqShXyFMECh7RrU=\n-----END RSA PRIVATE KEY-----\n", 
+        "content": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAzCKbsT3JT0yh3nojjxwm4awDP0ePgax9YuSBMYR6399emJUq\nOiPMzAFrWW5MHSL6cRHz6InLqSfmBby37QwrXM/X0LzCPuowrf3RJhczz47AKWzK\nbsZ91iMNg2ipeZRjjfWzArAv+EBv+GTdiSjsRHuipw0RMWrYNaGKxSslH9S5FpvE\nh03v0o/Ez32ap0Ik7ZhuTsy9d6X8CltogjG54gJ+FRFvfOB4F7OOfEtgIr6Cmafc\n3pbjNgoHmYPTXYhB1k3ii0ptARl2B3quK2BcNVtcdTGlGNjnnX7IhHmBpMybTCKR\n2SYEstjmaMe1jWBbuwL0TwDLf3IjSvK4+5XrwQIDAQABAoIBAQCUOKTX40civz/h\nbMoZBZXt0ppg/jLjMz2v6r8sF0eo+mWTYOvSX2A62OT7gKzfkyBJrYFu3W71mjTZ\nAZiDFIz/zSKlPAnG6QEDtQKCJ+LE2KAK9CVgnduM+tK7EenMj8RhtX+PeiK6nP8w\nWvzItOApMaR+q2xKd4waFPvQAm3oV53tkZ1g+n2FGpe0eGEpLvh1wf1Qog+abTMo\nO8sOgOgoOyZIn/GhVyu1sIO3OIaUz087xJ83g0uSeUk47Ikw5JRBUS/NoQMOGLKu\nvH0rTWr7yCJcfPNw0XoGv5Fbi0v5cYMasxO116cUZhTvO8VpClMoEOa9J1pCYipr\nA1ooD+RhAoGBAPnEX59kfVWspH/YpMq+W6DDslCO+pS3494HxII7pVvikFswGJ9u\nBM9JpnmVJXVe3uOpkkGXLzAxIzsB+6cGLfaZ5byzDFJ6DbF9ZRQvfQ6i0Hp5lehr\nqcVUFRCIJonYFVxZWyvmsfyovAena9Ogm+H+RAJjVuFz0JY/nEwcQInlAoGBANE6\nt5rXZEXs2abb4hw9YhGzVoD7AxpL5WDUVxQDMbnS4kTJt4tfmoFS4uLfcWrT8CAp\n+1viJ95IwcRI0+XQ5JRC0o2NAg0lxV1F5/XZcZWtCX0WhX9hjQb6YEg11zcVN0JT\nYF0FxRlZ6NSG2Fr26kMAdHPwCtazin/3FuqnWgytAoGBANpUVmI2rXje2U0IS8UO\ncXoulwjkcxbdSEsl7xkImpufiSCtAlkbCwlIEEXnoj7fF2dbK4Y6af1udqV2Lkzq\nkfMmxDQXL4ZJOv8T5e+nM2I/4I2vCuOIeXcM8PzqhwWn5cQ8N/5AQwXhWbw3FYKA\nusLqSPjtbVzWqFcuc6n0aFYhAoGAXMz6WsdmRk2DTCsC4xumv8sXdyXefm9jUctc\nxBeWmqEakwAVVNAWq32j/JS2rXdLbjiwsFRi8oi6yOC0e55nhAsPcJE2c7ZpD7HN\n7JGBe63AI6c1lwYhkxLCWcTnrBrQ464vc5L3lQL37ivREqepyAYPoMy7QfdoWtGx\nbGrF2hECgYA6oTsk10pkczwytrlLgZeRC6xsDMP8U4lg9yk+ETHzLAZlYqNkor3F\njQyqvmKC8gDuHovjYbmUkM42sR84JUgXjIZ3Hkaq/meZK1lwKuwN/5mpFJkhHGpp\nyRxsI3HMfuy6PSWrk/UgrfMkHiP7/zIZZv89unV/nj4S9/T/oF/8yA==\n-----END RSA PRIVATE KEY-----\n", 
         "path": "/etc/tinc/confine/rsa_key.priv", 
-        "build": 134, 
+        "build": 150, 
         "parent": 3
     }
 },
 {
-    "pk": 155, 
+    "pk": 241, 
     "model": "firmware.buildfile", 
     "fields": {
-        "content": "Address = controller.confine-project.eu\nAddress = 10.228.207.8\nPort = 655\nSubnet = 2001:db8:cafe:0:0:0:0:2\n\n-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n\n", 
-        "path": "/etc/tinc/confine/hosts/server", 
-        "build": 134, 
-        "parent": 2
-    }
-},
-{
-    "pk": 156, 
-    "model": "firmware.buildfile", 
-    "fields": {
-        "content": "Subnet = 2001:db8:cafe:e:0:0:0:0/64\n\n-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm53sT2PefgLw86P6fTVE\nD2RBlDyG2k08ev9AkZsVhdH/LRZTjdqDQGybGnvbz8jsK/LfaRlfcXk/8/cwJqHr\ndW2IHMBONsRZ6w0yUmzMDcaWAnefkkCdVIZ8FuAkgiKMhxs4MDP/j2+nKfbe7a21\nKonxuDIE6Kbuhba3loRfrm8EXcptz0r6DGyjflBdO6njzCIh7xeFmwu4YvZKywTH\ngI26iAMBo2UPyo9EKW0nbP8noRRQ2E/iaCd4uUupVZGMvzGRouGdaodgV7dXFHqZ\nPG7RVOfW1u2CtR+Bbu5FKhI8OpTyL61jFoC99TDJdq66NpHkMFnxt4sJP9687dtT\nawIDAQAB\n-----END PUBLIC KEY-----\n", 
+        "content": "Subnet = 2001:db8:cafe:e:0:0:0:0/64\n\n-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzCKbsT3JT0yh3nojjxwm\n4awDP0ePgax9YuSBMYR6399emJUqOiPMzAFrWW5MHSL6cRHz6InLqSfmBby37Qwr\nXM/X0LzCPuowrf3RJhczz47AKWzKbsZ91iMNg2ipeZRjjfWzArAv+EBv+GTdiSjs\nRHuipw0RMWrYNaGKxSslH9S5FpvEh03v0o/Ez32ap0Ik7ZhuTsy9d6X8CltogjG5\n4gJ+FRFvfOB4F7OOfEtgIr6Cmafc3pbjNgoHmYPTXYhB1k3ii0ptARl2B3quK2Bc\nNVtcdTGlGNjnnX7IhHmBpMybTCKR2SYEstjmaMe1jWBbuwL0TwDLf3IjSvK4+5Xr\nwQIDAQAB\n-----END PUBLIC KEY-----\n", 
         "path": "/etc/tinc/confine/hosts/node_14", 
-        "build": 134, 
+        "build": 150, 
         "parent": 4
     }
 },
 {
-    "pk": 157, 
+    "pk": 242, 
     "model": "firmware.buildfile", 
     "fields": {
         "content": "Name = node_14\nConnectTo = server\n", 
         "path": "/etc/tinc/confine/tinc.conf", 
-        "build": 134, 
+        "build": 150, 
         "parent": 5
     }
 },
 {
-    "pk": 158, 
+    "pk": 243, 
     "model": "firmware.buildfile", 
     "fields": {
         "content": "#!/bin/sh\nip -6 link set \"$INTERFACE\" up mtu 1400\nip -6 addr add 2001:db8:cafe:e::2/48 dev \"$INTERFACE\"\n", 
         "path": "/etc/tinc/confine/tinc-up", 
-        "build": 134, 
+        "build": 150, 
         "parent": 6
     }
 },
 {
-    "pk": 159, 
+    "pk": 244, 
     "model": "firmware.buildfile", 
     "fields": {
         "content": "#!/bin/sh\nip -6 addr del 2001:db8:cafe:e::2/48 dev \"$INTERFACE\"\nip -6 link set \"$INTERFACE\" down\n", 
         "path": "/etc/tinc/confine/tinc-down", 
-        "build": 134, 
+        "build": 150, 
         "parent": 7
     }
 },
 {
-    "pk": 160, 
+    "pk": 245, 
     "model": "firmware.buildfile", 
     "fields": {
-        "content": "\n    config tinc-net confine\n     option enabled '1' \n    \n", 
-        "path": "/etc/config/tinc", 
-        "build": 134, 
-        "parent": 8
-    }
-},
-{
-    "pk": 161, 
-    "model": "firmware.buildfile", 
-    "fields": {
-        "content": "\n    config node node\n     option public_ipv4_avail '333' \n     option local_ifname 'eth0' \n     option mac_prefix16 '0x06ab' \n     option priv_ipv4_prefix24 '192.168.157.0/24' \n     option rd_public_ipv4_proto 'dhcp' \n     option sl_public_ipv4_proto 'dhcp' \n     option rd_if_iso_parents 'eth1' \n     option id '14' \n    \n    config server server\n     option mgmt_pubkey '-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n' \n    \n    config testbed testbed\n     option mgmt_ipv6_prefix48 'fdf5:5351:1dfd' \n    \n", 
+        "content": "config node node\n    option public_ipv4_avail '333'\n    option local_ifname 'eth0'\n    option mac_prefix16 '0x06ab'\n    option priv_ipv4_prefix24 '192.168.157.0/24'\n    option rd_public_ipv4_proto 'dhcp'\n    option sl_public_ipv4_proto 'dhcp'\n    option rd_if_iso_parents 'eth1'\n    option id '14'\n\nconfig server server\n    option mgmt_pubkey '-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n'\n\nconfig testbed testbed\n    option mgmt_ipv6_prefix48 'fdf5:5351:1dfd'", 
         "path": "/etc/config/confine", 
-        "build": 134, 
+        "build": 150, 
         "parent": 1
     }
 },
 {
-    "pk": 162, 
+    "pk": 246, 
     "model": "firmware.buildfile", 
     "fields": {
-        "content": "-----BEGIN CERTIFICATE-----\nMIIC8TCCAdkCADANBgkqhkiG9w0BAQsFADA/MRswGQYDVQQDExIyMDAxOmRiODpj\nYWZlOmU6OjIxIDAeBgkqhkiG9w0BCQEWEW1hcmNheUBwYW5nZWEub3JnMB4XDTEy\nMTIyMDE3MTU0OFoXDTE2MTIxOTE3MTU0OFowPzEbMBkGA1UEAxMSMjAwMTpkYjg6\nY2FmZTplOjoyMSAwHgYJKoZIhvcNAQkBFhFtYXJjYXlAcGFuZ2VhLm9yZzCCASIw\nDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJud7E9j3n4C8POj+n01RA9kQZQ8\nhtpNPHr/QJGbFYXR/y0WU43ag0Bsmxp728/I7Cvy32kZX3F5P/P3MCah63VtiBzA\nTjbEWesNMlJszA3GlgJ3n5JAnVSGfBbgJIIijIcbODAz/49vpyn23u2ttSqJ8bgy\nBOim7oW2t5aEX65vBF3Kbc9K+gxso35QXTup48wiIe8XhZsLuGL2SssEx4CNuogD\nAaNlD8qPRCltJ2z/J6EUUNhP4mgneLlLqVWRjL8xkaLhnWqHYFe3VxR6mTxu0VTn\n1tbtgrUfgW7uRSoSPDqU8i+tYxaAvfUwyXauujaR5DBZ8beLCT/evO3bU2sCAwEA\nATANBgkqhkiG9w0BAQsFAAOCAQEAR7xLnsB4LhfIXPEFtMoh+NCNUvUPuGJk7G7e\nvmqS6ekOEvagxwUBBoM58a6DUrQQAZlF7PMQvaYeFFpdrLRS3nwBpoJCuh/UYSTI\nNlVIjEQP+QUnK7542A64N8ercIosm4dQ4ogkruxlnuSOwwc5Ts11N8PNZqzjxaAV\nEOlBPEX5es4na2qwyoEDKsaY+o6pf9Mho/Yk3IjSXtdQShQMFjBMmWCLYPZIedQF\n2lpZDZTTEekhvEAJjOoOQ5y682ry2N9VYzHyxg+PdJ1Nbq+WdT80hfBGOS3HPO1t\nMMmWDeNZ1/BwE7ef5DPXu0ObFTYmCuk5osai51T55iSgzFsleg==\n-----END CERTIFICATE-----\n", 
+        "content": "\nconfig tinc-net confine\n    option enabled '1'\n\n", 
+        "path": "/etc/config/tinc", 
+        "build": 150, 
+        "parent": 8
+    }
+},
+{
+    "pk": 247, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Address = controller.confine-project.eu\nAddress = 10.228.207.8\nPort = 655\nSubnet = 2001:db8:cafe:0:0:0:0:2\n\n-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n\n", 
+        "path": "/etc/tinc/confine/hosts/server", 
+        "build": 150, 
+        "parent": 2
+    }
+},
+{
+    "pk": 248, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "-----BEGIN CERTIFICATE-----\nMIIC8TCCAdkCADANBgkqhkiG9w0BAQsFADA/MSAwHgYJKoZIhvcNAQkBFhFtYXJj\nYXlAcGFuZ2VhLm9yZzEbMBkGA1UEAxMSMjAwMTpkYjg6Y2FmZTplOjoyMB4XDTEy\nMTIyMTExNDYwOVoXDTE2MTIyMDExNDYwOVowPzEgMB4GCSqGSIb3DQEJARYRbWFy\nY2F5QHBhbmdlYS5vcmcxGzAZBgNVBAMTEjIwMDE6ZGI4OmNhZmU6ZTo6MjCCASIw\nDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMwim7E9yU9Mod56I48cJuGsAz9H\nj4GsfWLkgTGEet/fXpiVKjojzMwBa1luTB0i+nER8+iJy6kn5gW8t+0MK1zP19C8\nwj7qMK390SYXM8+OwClsym7GfdYjDYNoqXmUY431swKwL/hAb/hk3Yko7ER7oqcN\nETFq2DWhisUrJR/UuRabxIdN79KPxM99mqdCJO2Ybk7MvXel/ApbaIIxueICfhUR\nb3zgeBezjnxLYCK+gpmn3N6W4zYKB5mD012IQdZN4otKbQEZdgd6ritgXDVbXHUx\npRjY551+yIR5gaTMm0wikdkmBLLY5mjHtY1gW7sC9E8Ay39yI0ryuPuV68ECAwEA\nATANBgkqhkiG9w0BAQsFAAOCAQEAaCeixjCOONamzntLTn4JzrgyOf2ODHvRhCKV\nqrvmST8e7aIpUE+WA/SQWSMt+xlSWHKgR6nBdJ9E2WHj3e7dezJ4XEEyNLYXjRQD\nqCw0WthodSUAh3MKHb/h1K1E7/10n/6kT74SCTkblgXXhj3oN4SdIC8zNSXxo1Kr\nAvLiI1e712SqeXYfUS1Eo9u4ocfwDMv0tryzLwiZZdtWO2ztodb8trxTk0KjA49Y\nZfhtOl+jc+iQxUYy0Lficnx1FtuU2OqAQBQ9AT9Co9/t3hUmF/Ex124gW67gJlRR\nI9QkbM0Q0MuJ0Ng4SDh/Qoxfi83ROOu33H/+DGbdDzvuC9g0PA==\n-----END CERTIFICATE-----", 
         "path": "/etc/config/cert", 
-        "build": 134, 
+        "build": 150, 
         "parent": 9
+    }
+},
+{
+    "pk": 258, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Address = controller.confine-project.eu\nAddress = 10.228.207.8\nPort = 666\nSubnet = 2001:db8:cafe:0:0:0:0:2\n\n-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n\n", 
+        "path": "/etc/tinc/confine/hosts/server", 
+        "build": 152, 
+        "parent": 2
+    }
+},
+{
+    "pk": 259, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Subnet = 2001:db8:cafe:f:0:0:0:0/64\n\n-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy1PjBRUFBg2tcCVpd9XL\nmUmWXmpRzZFv3ig2P4iqchXy1IRGtYhbJG9GSJW4EknQ6b0AMlWoi+9YfxqpMRgD\n3fuk2dLtzhipusxNRV+lGAlz6EhvWn6e8rgN5ZPgPfUgwpfnM0Lf6NkWMC7wsFsc\n2SUvJOggpOVQEcMk6U/ucXZupFq9D3zk21sXNBNbb3RDWQMfYcqw0lVG/Q/ET7jw\nHgtKQRF9mE26CdX7UzpwIkGXGc/diXw6RQIOPIwYKVrY1Xrh3Ql1qFzAxjHehHYH\nfcuMpxdBnto9jeZ2Uclq4Bcc1DpP74eIUzVZXvC2KjUTvXDMCHUD9rHVLOev5vFU\nRwIDAQAB\n-----END PUBLIC KEY-----\n", 
+        "path": "/etc/tinc/confine/hosts/node_15", 
+        "build": 152, 
+        "parent": 4
+    }
+},
+{
+    "pk": 260, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "Name = node_15\nConnectTo = server\n", 
+        "path": "/etc/tinc/confine/tinc.conf", 
+        "build": 152, 
+        "parent": 5
+    }
+},
+{
+    "pk": 261, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "#!/bin/sh\nip -6 link set \"$INTERFACE\" up mtu 1400\nip -6 addr add 2001:db8:cafe:f::2/48 dev \"$INTERFACE\"\n", 
+        "path": "/etc/tinc/confine/tinc-up", 
+        "build": 152, 
+        "parent": 6
+    }
+},
+{
+    "pk": 262, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "#!/bin/sh\nip -6 addr del 2001:db8:cafe:f::2/48 dev \"$INTERFACE\"\nip -6 link set \"$INTERFACE\" down\n", 
+        "path": "/etc/tinc/confine/tinc-down", 
+        "build": 152, 
+        "parent": 7
+    }
+},
+{
+    "pk": 263, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "config node node\n    option public_ipv4_avail '10'\n    option local_ifname 'eth0'\n    option mac_prefix16 '0x06ab'\n    option priv_ipv4_prefix24 '192.168.157.0/24'\n    option rd_public_ipv4_proto 'dhcp'\n    option sl_public_ipv4_proto 'dhcp'\n    option rd_if_iso_parents ''\n    option id '15'\n\nconfig server server\n    option mgmt_pubkey '-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEApwotnfHT9RAmxnuaGEMdI3lYPYE4aaqSD9v4KbTh1E7Le3GNJQb7\nwCpmDe8+n8S5Kp/gBEpWiYuvsVA/T4KseoX7NMcacP+DJMwjmNd9U58USn2vLz0Z\nTMtXpc/FUhW5PZdgCiuNzw6IFgGn9ZCCv85jjUIW3KD8fUNdrUfVSv4olDoL9NkR\ndTRg3Os/znC6l0gv/mqnLaqj2bJ/tx47kUmj6Oq13JuEq34T+DVmsUCFVundQnRp\nc/vVEqQot7Rvj9UmSvTi4WKt/qxiAnyZf3gXOdrXvxfVTGzD5I/Xg+By+a4C2JwB\nA5RGvZP3fyfhkCnnhFDpfws5lc20FA6ryQIDAQAB\n-----END RSA PUBLIC KEY-----\n'\n\nconfig testbed testbed\n    option mgmt_ipv6_prefix48 'fdf5:5351:1dfd'", 
+        "path": "/etc/config/confine", 
+        "build": 152, 
+        "parent": 1
+    }
+},
+{
+    "pk": 264, 
+    "model": "firmware.buildfile", 
+    "fields": {
+        "content": "\nconfig tinc-net confine\n    option enabled '1'\n\n", 
+        "path": "/etc/config/tinc", 
+        "build": 152, 
+        "parent": 8
     }
 },
 {
@@ -255,7 +325,7 @@
     "fields": {
         "priority": 0, 
         "is_active": true, 
-        "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server'])", 
+        "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server']).strip()", 
         "mode": "", 
         "is_optional": false, 
         "path": "/etc/config/confine", 
@@ -359,7 +429,7 @@
     "fields": {
         "priority": 0, 
         "is_active": true, 
-        "content": "node.generate_certificate(key=files[0][0].content, commit=True).as_pem()", 
+        "content": "node.generate_certificate(key=files[0].content, commit=True).strip()", 
         "mode": "", 
         "is_optional": true, 
         "path": "/etc/config/cert", 
@@ -379,7 +449,7 @@
     "pk": 2, 
     "model": "firmware.configfilehelptext", 
     "fields": {
-        "help_text": "This file contains the certificate for node authentication.\r\nNotice that the node certificate will be updated accordingly.", 
+        "help_text": "This file contains the certificate for node authentication.\r\nPlease notice that this depends on the RSA keys generated for the tinc overlay, so you must also select the rsa_key.priv if you want a certificate. Also if there is any node.certificate it will be overwritten.", 
         "config": 1, 
         "file": 9
     }

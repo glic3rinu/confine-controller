@@ -95,7 +95,6 @@ class Node(models.Model):
                   % settings.PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
-    # TODO 
     set_state = models.CharField(max_length=16, choices=STATES, default=DEBUG,
         help_text='The state set on this node (set state). Possible values: debug '
                   '(initial), safe, production, failure. To support the late '
@@ -118,35 +117,44 @@ class Node(models.Model):
         return self.name
     
     def clean(self):
-        """ 
-        Empty sliver_pub_ipv4_range as NULL instead of empty string.
-        """
+        # clean set_state:
+        if self.set_state not in [Node.DEBUG, Node.SAFE]:
+            ValidationError("Changes on %s state are not allowed." % self.set_state)
+        old = Node.objects.filter(pk=self.pk)
+        if old.exists():
+            old = old.get()
+            if old.set_state == Node.DEBUG and self.set_state != Node.DEBUG:
+                raise ValidationError("Can not manually exit from Debug state.")
+            elif self.set_state == Node.DEBUG and old.set_state != Node.DEBUG:
+                raise ValidationError("Can not manually enter to Debug state.")
+        
+        # clean sliver_pub_ipv4 and _range
         if self.sliver_pub_ipv4 == 'none':
             if not self.sliver_pub_ipv4_range:
                 # make sure empty sliver_pub_ipv4_range is None
                 self.sliver_pub_ipv4_range = None
             else:
-                raise ValidationError("If 'Sliver Public IPv4 is 'none' then Sliver "
+                raise ValidationError("If Sliver Public IPv4 is 'none' then Sliver "
                                       "Public IPv4 Range must be empty")
         elif self.sliver_pub_ipv4 == 'dhcp':
             validate_dhcp_range(self.sliver_pub_ipv4_range)
         elif self.sliver_pub_ipv4 == 'range':
             validate_ipv4_range(self.sliver_pub_ipv4_range)
+        
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
-        # TODO debug: automatic state (no manually enter nor exit)
-        # bad_conf
         if not self.cert:
-            self.set_state = self.DEBUG
+            # bad_conf
+            self.set_state = Node.DEBUG
         else:
-            if self.set_state == self.DEBUG:
+            if self.set_state == Node.DEBUG:
                 # transition to safe when all config is correct
-                self.set_state = self.SAFE
-            elif self.set_state == self.FAILURE:
+                self.set_state = Node.SAFE
+            elif self.set_state == Node.FAILURE:
                 # changes not allowed
                 pass
-            elif self.set_state == self.PRODUCTION:
+            elif self.set_state == Node.PRODUCTION:
                 # transition to SAFE is changes are detected
                 pass
         if commit:

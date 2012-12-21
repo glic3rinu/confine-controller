@@ -63,9 +63,6 @@ reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_nam
 
 @transaction.commit_on_success
 def request_cert(modeladmin, request, queryset):
-    message = "Not implemented!"
-    messages.warning(request, message)
-    
     if queryset.count() != 1:
         messages.warning(request, "Please, one node at a time.")
         return
@@ -81,9 +78,6 @@ def request_cert(modeladmin, request, queryset):
             node.sign_cert_request(pubkey)
             modeladmin.log_change(request, node, "Certificate requested")
             return
-        else:
-            print form.errors
-            
     
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
@@ -93,7 +87,7 @@ def request_cert(modeladmin, request, queryset):
     context = {
         "title": "Request certificate for node '%s'" % node,
         "content_title": mark_safe("Request certificate for node '%s'" % node_link),
-        "content_message": "Introduce the node certificate to be signed.",
+        "content_message": "Upload the node certificate to be signed (CSR file in PEM format).",
         'queryset': queryset,
         "opts": opts,
         "app_label": app_label,

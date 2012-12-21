@@ -120,7 +120,7 @@ class Node(models.Model):
     def clean(self):
         # clean set_state:
         if self.set_state not in [Node.DEBUG, Node.SAFE]:
-            ValidationError("Changes on %s state are not allowed." % self.set_state)
+            raise ValidationError("Changes on %s state are not allowed." % self.set_state)
         old = Node.objects.filter(pk=self.pk)
         if old.exists():
             old = old.get()

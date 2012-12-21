@@ -4,8 +4,10 @@ from django.core.validators import validate_ipv4_address
 
 def validate_sliver_mac_prefix(value):
     # TODO also limit to 16 bits
-    try: int(value, 16)
-    except: ValidationError('%s is not a hex value.' % value)
+    try: 
+        int(value, 16)
+    except: 
+        raise ValidationError('%s is not a hex value.' % value)
 
 
 def validate_ipv4_range(value):

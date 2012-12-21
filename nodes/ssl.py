@@ -2,11 +2,11 @@ import os, time
 
 from M2Crypto import BIO, ASN1, RSA, X509, EVP
 
-from .settings import CERT_PRIVATE_KEY_PATH, CERT_EXPIRATION
+from .settings import NODES_CERT_PRIVATE_KEY_PATH, NODES_CERT_EXPIRATION
 
 
 def sign_cert_request(scr):
-    privkey = os.path.join(CERT_PRIVATE_KEY_PATH)
+    privkey = os.path.join(NODES_CERT_PRIVATE_KEY_PATH)
     privkey = EVP.load_key(privkey)
     request = X509.load_cert_string(str(cert_request))
     request.sign(privkey, md="sha256")
@@ -27,7 +27,7 @@ def generate_certificate(key, **subject):
     cur_time.set_time(int(time.time()))
     expire_time = ASN1.ASN1_UTCTIME()
     # Expire certs in 4 years
-    expire_time.set_time(int(time.time()) + CERT_EXPIRATION)
+    expire_time.set_time(int(time.time()) + NODES_CERT_EXPIRATION)
     # creating a certificate
     cert = X509.X509()
     cert.set_pubkey(pkey)

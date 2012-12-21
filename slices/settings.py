@@ -6,32 +6,32 @@ from django.conf import settings
 ugettext = lambda s: s
 
 
-TEMPLATE_TYPES = getattr(settings, 'TEMPLATE_TYPES', (
+SLICES_TEMPLATE_TYPES = getattr(settings, 'SLICES_TEMPLATE_TYPES', (
     ('debian6', 'Debian 6'), 
     ('fedora12', 'Fedora 12'), 
     ('susele6', 'SUSE Linux Enterprise 6'),
 ))
 
-DEFAULT_TEMPLATE_TYPE = getattr(settings, 'DEFAULT_TEMPLATE_TYPE', 'debian6')
+SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', 'debian6')
 
 
-TEMPLATE_ARCHS = getattr(settings, 'TEMPLATE_ARCHS', (
+SLICES_TEMPLATE_ARCHS = getattr(settings, 'SLICES_TEMPLATE_ARCHS', (
     ('amd64', 'amd64'), 
     ('ia64', 'ia64'), 
     ('x86', 'x86'),
 ))
 
-DEFAULT_TEMPLATE_ARCH = getattr(settings, 'DEFAULT_TEMPLATE_ARCH', 'amd64')
+SLICES_TEMPLATE_ARCH_DFLT = getattr(settings, 'SLICES_TEMPLATE_ARCH_DFLT', 'amd64')
 
 
-TEMPLATE_IMAGE_DIR = getattr(settings, 'TEMPLATE_IMAGE_DIR', 'templates/')
-SLICES_EXP_DATA_DIR = getattr(settings, 'SLICES_EXP_DATA_DIR', 'exp_data/')
+SLICES_TEMPLATE_IMAGE_DIR = getattr(settings, 'SLICES_TEMPLATE_IMAGE_DIR', 'templates/')
+SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data/')
 
 
 # 30 days expiration interval
-SLICE_EXPIRATION_INTERVAL = getattr(settings, 'SLICE_EXPIRATION_INTERVAL', timedelta(30))
-SLICE_EXPIRATION_WARNING = getattr(settings, 'SLICE_EXPIRATION_WARNING', timedelta(4))
+SLICES_SLICE_EXP_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_INTERVAL', timedelta(30))
+SLICES_SLICE_EXP_WARN_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_WARN_INTERVAL', timedelta(4))
 
 # Clean expired slices everyday at midnigth
-CLEAN_EXPIRED_SLICES_CRONTAB = getattr(settings, 'CLEAN_EXPIRED_SLICES_CRONTAB',
+SLICES_CLEAN_EXP_SLICE_CRONTAB = getattr(settings, 'CLEAN_EXP_SLICE_CRONTAB',
     crontab(minute=0, hour=0))

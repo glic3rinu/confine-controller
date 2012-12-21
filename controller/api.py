@@ -24,11 +24,11 @@ class Base(ApiRoot):
     def get(self, *args, **kwargs):
         response = super(Base, self).get(*args, **kwargs)
         testbed_params = {
-            "priv_ipv4_prefix_dflt": nodes_settings.PRIV_IPV4_PREFIX_DFLT,
-            "sliver_mac_prefix_dflt": nodes_settings.SLIVER_MAC_PREFIX_DFLT, }
+            "priv_ipv4_prefix_dflt": nodes_settings.NODES_PRIV_IPV4_PREFIX_DFLT,
+            "sliver_mac_prefix_dflt": nodes_settings.NODES_SLIVER_MAC_PREFIX_DFLT, }
         
         if 'tinc' in settings.INSTALLED_APPS:
-            from tinc.settings import MGMT_IPV6_PREFIX
-            testbed_params.update({"mgmt_ipv6_prefix": MGMT_IPV6_PREFIX})
+            from tinc.settings import TINC_MGMT_IPV6_PREFIX
+            testbed_params.update({"mgmt_ipv6_prefix": TINC_MGMT_IPV6_PREFIX})
         response.data.update({"testbed_params": testbed_params})
         return response

@@ -51,10 +51,11 @@ class Node(models.Model):
     description = models.TextField(blank=True,
         help_text='Free-form textual description of this host/device.')
     arch = models.CharField('Architecture', max_length=16,
-        choices=settings.NODE_ARCHS, default=settings.DEFAULT_NODE_ARCH,
+        choices=settings.NODES_NODE_ARCHS, default=settings.NODES_NODE_ARCH_DFLT,
         help_text='Architecture of this RD (as reported by uname -m).',)
     local_iface = models.CharField('Local Interface', max_length=16, 
-        default=settings.DEFAULT_NODE_LOCAL_IFACE, validators=[validate_net_iface_name],
+        default=settings.NODES_NODE_LOCAL_IFACE_DFLT, 
+        validators=[validate_net_iface_name],
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,
@@ -86,13 +87,13 @@ class Node(models.Model):
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
-                  'values. %s when null.</a>.' % settings.SLIVER_MAC_PREFIX_DFLT)
+                  'values. %s when null.</a>.' % settings.NODES_SLIVER_MAC_PREFIX_DFLT)
     priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 
         protocol='IPv4', null=True, blank=True,
         help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
                   'prefix. See <a href="http://wiki.confine-project.eu/arch:'
                   'addressing">addressing</a> for legal values. %s When null.' 
-                  % settings.PRIV_IPV4_PREFIX_DFLT)
+                  % settings.NODES_PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=DEBUG,
@@ -183,12 +184,15 @@ class Node(models.Model):
     def get_sliver_mac_prefix(self):
         if self.sliver_mac_prefix: 
             return self.sliver_mac_prefix
-        return settings.SLIVER_MAC_PREFIX_DFLT
+        return settings.NODES_SLIVER_MAC_PREFIX_DFLT
     
     def get_priv_ipv4_prefix(self):
         if self.priv_ipv4_prefix:
             return self.priv_ipv4_prefix
-        return settings.PRIV_IPV4_PREFIX_DFLT
+        return settings.NODES_PRIV_IPV4_PREFIX_DFLT
+    
+    def get_priv_ipv6_prefix(self):
+        return settings.NODES_PRIV_IPV6_PREFIX
     
     @property
     def sliver_pub_ipv4_num(self):

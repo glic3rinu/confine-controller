@@ -18,7 +18,7 @@ from singleton_models.models import SingletonModel
 from common.fields import MultiSelectField
 from common.models import generate_chainer_manager
 from nodes.models import Server
-from nodes.settings import NODE_ARCHS
+from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .tasks import build
@@ -241,7 +241,7 @@ class BaseImage(models.Model):
     Describes the image used for generating per node customized images.
     """
     config = models.ForeignKey(Config)
-    architectures = MultiSelectField(max_length=250, choices=NODE_ARCHS)
+    architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(upload_to=settings.FIRMWARE_DIR,
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',

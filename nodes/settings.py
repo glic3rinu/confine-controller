@@ -3,31 +3,32 @@ from django.conf import settings
 ugettext = lambda s: s
 
 
-NODE_ARCHS = getattr(settings, 'NODE_ARCHS', (
+NODES_NODE_ARCHS = getattr(settings, 'NODES_NODE_ARCHS', (
     ('x86', 'x86'),
     ('x86_64', 'x86_64'),
     ('ar71xx', 'ar71xx'),
     ('i586', 'i586'),
 ))
 
-DEFAULT_NODE_ARCH = getattr(settings, 'DEFAULT_NODE_ARCH', 'x86_64')
+NODES_NODE_ARCH_DFLT = getattr(settings, 'NODES_NODE_ARCH_DFLT', 'x86_64')
 
-DEFAULT_NODE_LOCAL_IFACE = getattr(settings, 'DEFAULT_NODE_LOCAL_IFACE', 'eth0')
+NODES_NODE_LOCAL_IFACE_DFLT = getattr(settings, 'NODES_NODE_LOCAL_IFACE_DFLT', 'eth0')
 
 #TODO should the following options go into controller.settings ?
 
 # ConfineParams
-DEBUG_IPV6_PREFIX = getattr(settings, 'DEBUG_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
-PRIV_IPV6_PREFIX = getattr(settings, 'PRIV_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
+NODES_DEBUG_IPV6_PREFIX = getattr(settings, 'NODES_DEBUG_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
+NODES_PRIV_IPV6_PREFIX = getattr(settings, 'NODES_PRIV_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
 
 
 # TestbedParams
-PRIV_IPV4_PREFIX_DFLT = getattr(settings, 'PRIV_IPV4_PREFIX_DFLT', '192.168.157.0/24')
-SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'SLIVER_MAC_PREFIX_DFLT', '0x06ab')
+NODES_PRIV_IPV4_PREFIX_DFLT = getattr(settings, 'NODES_PRIV_IPV4_PREFIX_DFLT', '192.168.157.0/24')
+NODES_SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'NODES_SLIVER_MAC_PREFIX_DFLT', '0x06ab')
 
 
 # Certificate
 # Path where the certificate files are stored
-CERT_PRIVATE_KEY_PATH = getattr(settings, 'CERT_PRIVATE_KEY_PATH', '/etc/apache2/ssl/generic.confine-project.eu/generic.confine-project.eu.key')
+NODES_CERT_PRIVATE_KEY_PATH = getattr(settings, 'NODES_CERT_PRIVATE_KEY_PATH', 
+    '/etc/apache2/ssl/generic.confine-project.eu/generic.confine-project.eu.key')
 # expiration time for generated certificates (4years)
-CERT_EXPIRATION = getattr(settings, 'CERT_EXPIRATION', 60*60*24*365*4)
+NODES_CERT_EXPIRATION = getattr(settings, 'NODES_CERT_EXPIRATION', 60*60*24*365*4)

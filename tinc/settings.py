@@ -2,8 +2,8 @@ from django.conf import settings
 
 ugettext = lambda s: s
 
-TINC_DEFAULT_PORT = getattr(settings, 'TINC_DEFAULT_PORT', '666')
+TINC_PORT_DFLT = getattr(settings, 'TINC_PORT_DFLT', '666')
 
 TINC_NET_NAME = getattr(settings, 'TINC_NET_NAME', 'confine')
 
-MGMT_IPV6_PREFIX = getattr(settings, 'MGMT_IPV6_PREFIX', '2001:db8:cafe::/48')
+TINC_MGMT_IPV6_PREFIX = getattr(settings, 'TINC_MGMT_IPV6_PREFIX', '2001:db8:cafe::/48')

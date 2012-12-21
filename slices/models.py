@@ -14,7 +14,6 @@ from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
 from common.validators import validate_net_iface_name, validate_prop_name
 from nodes.models import Node
-from nodes import settings as node_settings
 
 from . import settings
 from .tasks import force_slice_update, force_sliver_update
@@ -25,7 +24,7 @@ private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
-    return datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+    return datetime.now() + settings.SLICES_SLICE_EXPIRATION_INTERVAL
 
 
 class Template(models.Model):
@@ -40,19 +39,19 @@ class Template(models.Model):
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this template.')
-    type = models.CharField(max_length=32, choices=settings.TEMPLATE_TYPES,
+    type = models.CharField(max_length=32, choices=settings.SLICES_TEMPLATE_TYPES,
         help_text='The system type of this template. Roughly equivalent to the '
                   'distribution the template is based on, e.g. debian (Debian, '
                   'Ubuntu...), fedora (Fedora, RHEL...), suse (openSUSE, SUSE '
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
-        default=settings.DEFAULT_TEMPLATE_TYPE)
-    node_archs = MultiSelectField(max_length=32, choices=settings.TEMPLATE_ARCHS,
+        default=settings.SLICES_TEMPLATE_TYPE_DFLT)
+    node_archs = MultiSelectField(max_length=32, choices=settings.SLICES_TEMPLATE_ARCHS,
         help_text='The node architectures accepted by this template (as reported '
                   'by uname -m, non-empty). Slivers using this template should '
                   'run on nodes whose architecture is listed here.')
     is_active = models.BooleanField(default=True)
-    image = models.FileField(upload_to=settings.TEMPLATE_IMAGE_DIR, 
+    image = models.FileField(upload_to=settings.SLICES_TEMPLATE_IMAGE_DIR, 
         help_text='Template\'s image file.')
     
     def __unicode__(self):
@@ -101,7 +100,7 @@ class Slice(models.Model):
                   'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
-    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_EXP_DATA_DIR, 
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
         storage=private_storage, verbose_name='Experiment Data',
         condition=lambda request, self: 
                   request.user.has_perm('slices.slice_change', obj=self),
@@ -126,7 +125,7 @@ class Slice(models.Model):
             elif not self.set_state == self.REGISTER:
                 raise self.VlanAllocationError('This value can not be setted')
         if not self.pk:
-            self.expires_on = datetime.now() + settings.SLICE_EXPIRATION_INTERVAL
+            self.expires_on = datetime.now() + settings.SLICES_SLICE_EXPIRATION_INTERVAL
         super(Slice, self).save(*args, **kwargs)
     
     @property
@@ -201,7 +200,7 @@ class Sliver(models.Model):
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).', 
         verbose_name='Instance Sequence Number')
-    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_EXP_DATA_DIR, 
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
         storage=private_storage, verbose_name='Experiment Data',
         condition=lambda request, self: 
                   request.user.has_perm('slices.sliver_change', obj=self),
@@ -380,6 +379,7 @@ class IpIface(ResearchIface):
 
 
 class MgmtIface(IpIface):
+    # TODO implement this interface into tinc application ?
     """
     Describes the management network interface for an sliver.
     """
@@ -393,7 +393,9 @@ class MgmtIface(IpIface):
         
         MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64
         """
-        ipv6_words = node_settings.MGMT_IPV6_PREFIX.split(':')[:3]
+        # TODO this import is crap, make this generic with proper tinc abstraction: mgmt
+        from tinc.settings import TINC_MGMT_IPV6_PREFIX
+        ipv6_words = TINC_MGMT_IPV6_PREFIX.split(':')[:3]
         ipv6_words.extend([
             int_to_hex_str(self.sliver.node_id, 4), # Node.id
             '10' + int_to_hex_str(self.nr, 2), # Iface.nr
@@ -449,7 +451,7 @@ class PrivateIface(SliverIface):
         one showed in the node, which is the real address)
         PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64
         """
-        ipv6_words = node_settings.PRIV_IPV6_PREFIX.split(':')[:3]
+        ipv6_words = self.node.get_priv_ipv6_prefix().split(':')[:3]
         ipv6_words.extend(['0','1000'])
         # sliver.id
         ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))

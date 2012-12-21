@@ -12,7 +12,6 @@ from common.validators import validate_host_name, OrValidator, validate_rsa_pubk
 from nodes.models import Server, Node
 
 from . import settings
-from .settings import MGMT_IPV6_PREFIX
 from .tasks import update_tincd
 
 
@@ -56,12 +55,12 @@ class TincHost(models.Model):
     
     def get_tinc_up(self):
         """ tinc-up file content """
-        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
+        ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
         return '#!/bin/sh\nip -6 link set "$INTERFACE" up mtu 1400\nip -6 addr add %s dev "$INTERFACE"\n' % ip
     
     def get_tinc_down(self):
         """ tinc-down file content """
-        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
+        ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
         return '#!/bin/sh\nip -6 addr del %s dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % ip
 
 
@@ -106,7 +105,7 @@ class TincServer(TincHost):
     @property
     def address(self):
         """ IPV6 management address """
-        ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
+        ipv6_words = settings.TINC_MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'server':
             # MGMT_IPV6_PREFIX:0:0000::2/128
             return IP(':'.join(ipv6_words) + '::2')
@@ -126,7 +125,7 @@ class TincServer(TincHost):
         host = ""
         for addr in self.addresses:
             host += "Address = %s\n" % addr.addr
-        host += "Port = 655\n"
+        host += "Port = %s\n" % settings.TINC_PORT_DFLT
         host += "Subnet = %s\n\n" % self.subnet.strNormal()
         host += "%s\n" % self.pubkey
         return host
@@ -158,7 +157,7 @@ class TincAddress(models.Model):
     addr = models.CharField('Address', max_length=128,
         help_text='The tinc IP address or host name of the host this one connects to.',
         validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
-    port = models.SmallIntegerField(default=settings.TINC_DEFAULT_PORT, 
+    port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT, 
         help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island,
         help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
@@ -219,7 +218,7 @@ class TincClient(TincHost):
     @property
     def address(self):
         """ IPV6 management address """
-        ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
+        ipv6_words = settings.TINC_MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'node':
             # MGMT_IPV6_PREFIX:N:0000::2/64 i
             ipv6_words.append(int_to_hex_str(self.object_id, 4))

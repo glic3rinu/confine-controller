@@ -1,6 +1,5 @@
 from datetime import datetime
 from hashlib import sha256
-import re
 
 from django_transaction_signals import defer
 from django.conf import settings as project_settings
@@ -37,7 +36,7 @@ class Template(models.Model):
         help_text='The unique name of this template. A single line of free-form '
                   'text with no whitespace surrounding it, it can include '
                   'version numbers and other information.',
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+        validators=[validators.RegexValidator('^[a-z][_0-9a-z]*[0-9a-z]$', 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this template.')
@@ -80,7 +79,7 @@ class Slice(models.Model):
     name = models.CharField(max_length=64, unique=True, 
         help_text='A unique name for this slice matching the regular expression'
                   '^[a-z][_0-9a-z]*[0-9a-z]$', 
-        validators=[validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+        validators=[validators.RegexValidator('^[a-z][_0-9a-z]*[0-9a-z]$', 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
@@ -108,7 +107,7 @@ class Slice(models.Model):
                   request.user.has_perm('slices.slice_change', obj=self),
         help_text='.tar.gz archive containing experiment data for slivers (if'
                   'they do not explicitly indicate one)', 
-        validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
+        validators=[validators.RegexValidator('.*\.tar\.gz', 
                    'Upload a valid .tar.gz file', 'invalid')],)
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template, 
@@ -207,7 +206,7 @@ class Sliver(models.Model):
         condition=lambda request, self: 
                   request.user.has_perm('slices.sliver_change', obj=self),
         help_text='.tar.gz archive containing experiment data for this sliver.',
-        validators=[validators.RegexValidator(re.compile('.*\.tar\.gz'), 
+        validators=[validators.RegexValidator('.*\.tar\.gz', 
                    'Upload a valid .tar.gz file', 'invalid')],)
     template = models.ForeignKey(Template, null=True, blank=True, 
         help_text='If present, the template to be used by this sliver, instead '

@@ -1,5 +1,3 @@
-import re
-
 from django_extensions.db import fields
 from django_transaction_signals import defer
 from django.core import validators
@@ -44,7 +42,7 @@ class Node(models.Model):
         help_text='A unique name for this node. A single non-empty line of '
                   'free-form text with no whitespace surrounding it. matching '
                   'the regular expression',
-        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
+        validators=[validators.RegexValidator('^[\w.@+-]+$', 
                    'Enter a valid name.', 'invalid')])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '

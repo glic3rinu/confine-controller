@@ -5,11 +5,13 @@ import os
 from celery import states as celery_states
 from django import template
 from django.conf import settings as project_settings
+from django.core import validators
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.template import Template, Context
 from django_transaction_signals import defer
+from djcelery.models import TaskState
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
 
@@ -55,13 +57,12 @@ class Build(models.Model):
     DELETED = 'DELETED'
     FAILED = 'FAILED'
     
-    # TODO: self.pk == node.id
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage, 
         condition=lambda request, self: request.user.has_perm('nodes.node_getfirmware', obj=self.node))
-    task_id = models.CharField(max_length=36, unique=True, null=True)
+    task_id = models.CharField(max_length=36, unique=True, null=True, help_text="Celery Task ID")
     
     objects = generate_chainer_manager(BuildQuerySet)
     
@@ -88,7 +89,6 @@ class Build(models.Model):
         """
         Returns the celery task responsible for 'self' image build.
         """
-        from djcelery.models import TaskState
         if not self.task_id: return None
         try: return TaskState.objects.get(task_id=self.task_id)
         except TaskState.DoesNotExist: return None
@@ -133,7 +133,8 @@ class Build(models.Model):
         try: old_build = cls.objects.get(node=node)
         except cls.DoesNotExist: pass
         else: 
-            #TODO: kill or prevent existing task if its running
+            if old_build.state == cls.BUILDING:
+                raise cls.ConcurrencyError("One build at a time.")
             old_build.delete()
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
@@ -157,6 +158,8 @@ class Build(models.Model):
         old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(parent__pk__in=exclude) )
         new_files = set( (f.path, f.content) for f in config.evaluate_files(self.node, exclude=exclude) )
         return new_files == old_files
+    
+    class ConcurrencyError(Exception): pass
 
 
 class BuildFile(models.Model):
@@ -195,7 +198,7 @@ class Config(SingletonModel):
     class Meta:
         verbose_name = "Firmware Config"
         verbose_name_plural = "Firmware Config"
-
+    
     def __unicode__(self):
         return 'Current Firmware Config'
     
@@ -239,8 +242,10 @@ class BaseImage(models.Model):
     """
     config = models.ForeignKey(Config)
     architectures = MultiSelectField(max_length=250, choices=NODE_ARCHS)
-    # TODO validate image file name: must end in img.gz
-    image = models.FileField(upload_to=settings.FIRMWARE_DIR)
+    image = models.FileField(upload_to=settings.FIRMWARE_DIR,
+        help_text='Image file compressed in gzip. The file name must end in .img.gz',
+        validators=[validators.RegexValidator('.*\.img\.gz$',
+                    'Enter a valid name.', 'invalid')])
     
     def __unicode__(self):
         return ", ".join(self.architectures)
@@ -281,11 +286,11 @@ class ConfigUCI(models.Model):
     
     def eval_value(self, node):
         """
-        Evaluates the 'value' as python code with node as a context in order to
-        get the current value for the given UCI option.
+        Evaluates the 'value' as python code in order to get the current value
+        for the given UCI option.
         """
-        server = Server.objects.get()
-        return unicode(eval(self.value))
+        safe_locals = {'node': node, 'server': Server.objects.get()}
+        return unicode(eval(self.value, safe_locals))
 
 
 class ConfigFileQuerySet(models.query.QuerySet):

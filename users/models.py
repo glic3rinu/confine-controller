@@ -1,5 +1,3 @@
-import re
-
 from django.contrib.auth import models as auth_models
 from django.core.mail import send_mail
 from django.core import validators
@@ -14,7 +12,7 @@ class Group(models.Model):
         help_text='A unique name for this group. A single non-empty line of '
                   'free-form text with no whitespace surrounding it. matching '
                   'the regular expression',
-        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
+        validators=[validators.RegexValidator('^[\w.@+-]+$', 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True)
     # TODO Check these fields with Ivan
@@ -127,7 +125,7 @@ class User(auth_models.AbstractBaseUser):
     username = models.CharField(max_length=30, unique=True,
         help_text='Required. 30 characters or fewer. Letters, numbers and '
                   '@/./+/-/_ characters',
-        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
+        validators=[validators.RegexValidator('^[\w.@+-]+$', 
                     'Enter a valid username.', 'invalid')])
     email = models.EmailField('Email Address', max_length=255, unique=True)
     description = models.TextField(blank=True, 

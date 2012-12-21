@@ -6,7 +6,7 @@ from .images import Image
 
 @task(name="firmware.build")
 def build(build_id, exclude=[]):
-    from firmware.models import Build, Config
+    from .models import Build, Config
     
     # retrieve the existing build instance, used for user feedback
     build_obj = Build.objects.get(pk=build_id)
@@ -26,7 +26,7 @@ def build(build_id, exclude=[]):
             f.save()
         
         # calculating image destination path
-        image_name = base_image.name.replace('.gz', '-%s.gz' % build_obj.pk)
+        image_name = base_image.name.replace('img.gz', '-%s.img.gz' % build_obj.pk)
         image_path = os.path.join(build_obj.image.storage.location, image_name)
         
         # build the image

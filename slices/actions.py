@@ -10,7 +10,7 @@ from . import settings
 @transaction.commit_on_success
 def renew_selected_slices(modeladmin, request, queryset):
     for obj in queryset:
-        if not obj.has_permission.change(request.user):
+        if not modeladmin.has_change_permission(request, obj=obj):
             raise PermissionDenied
         obj.renew()
         msg = "Renewed for %s" % settings.SLICE_EXPIRATION_INTERVAL
@@ -23,7 +23,7 @@ def renew_selected_slices(modeladmin, request, queryset):
 @transaction.commit_on_success
 def reset_selected(modeladmin, request, queryset):
     for obj in queryset:
-        if not obj.has_permission.change(request.user):
+        if not modeladmin.has_change_permission(request, obj=obj):
             raise PermissionDenied
         obj.reset()
         modeladmin.log_change(request, obj, "Instructed to reset")

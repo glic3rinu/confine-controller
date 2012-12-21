@@ -1,6 +1,3 @@
-import re
-
-# TODO: migrate to M2Crypto
 import M2Crypto
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
@@ -13,7 +10,6 @@ from IPy import IP
 from common.ip import split_len, int_to_hex_str
 from common.validators import validate_host_name, OrValidator, validate_rsa_pubkey
 from nodes.models import Server, Node
-
 
 from . import settings
 from .settings import MGMT_IPV6_PREFIX
@@ -146,8 +142,8 @@ class Island(models.Model):
     name = models.CharField(max_length=32, unique=True, 
         help_text='The unique name of this island. A single line of free-form '
                   'text with no whitespace surrounding it.',
-        validators=[validators.RegexValidator(re.compile('^[\w.@+-]+$'), 
-                   'Enter a valid name.', 'invalid')])
+        validators=[validators.RegexValidator('^[\w.@+-]+$', 
+                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='Optional free-form textual description of this island.')
     

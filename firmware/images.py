@@ -89,5 +89,3 @@ class Image(object):
     
     class BuildError(Exception): pass
 
-
-

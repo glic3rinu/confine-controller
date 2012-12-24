@@ -6,14 +6,23 @@ class Image(object):
     def __init__(self, base_image):
         os.stat(base_image)
         self.base_image = base_image
-        # TODO __init__ must not touch the file system
-        #       create another method like prepare() to do so
-        self.tmp = tempfile.mkdtemp()
-        self.image = os.path.join(self.tmp, "image.bin")
-        self.mnt = os.path.join(self.tmp, "mnt")
-        self.base_dir = os.path.dirname(os.path.realpath(__file__))
-        self.tmp_part_file = os.path.join(self.tmp, 'part.img')
         self.files = []
+        self.base_dir = os.path.dirname(os.path.realpath(__file__))
+    
+    @property
+    def image(self):
+        return os.path.join(self.tmp, "image.bin")
+    
+    @property
+    def mnt(self):
+        return os.path.join(self.tmp, "mnt")
+    
+    @property
+    def tmp_part_file(self):
+        return os.path.join(self.tmp, 'part.img')
+    
+    def prepare(self):
+        self.tmp = tempfile.mkdtemp()
         os.mkdir(self.mnt)
     
     def mount(self, part_nr=2):
@@ -42,6 +51,7 @@ class Image(object):
         self._exec_cmd(chmod)
     
     def build(self, path=None):
+        self.prepare()
         extract = "cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image)
         self._exec_cmd(extract)
         self.mount()

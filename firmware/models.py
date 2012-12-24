@@ -144,8 +144,8 @@ class Build(models.Model):
             build_obj = build(build_obj.pk, exclude=exclude)
         return build_obj
     
-    def add_file(self, path, content, parent):
-        BuildFile.objects.create(build=self, path=path, content=content, parent=parent)
+    def add_file(self, path, content, config):
+        BuildFile.objects.create(build=self, path=path, content=content, config=config)
     
     def get_files(self):
         return self.buildfile_set.all()
@@ -155,7 +155,7 @@ class Build(models.Model):
             return True
         config = Config.objects.get()
         exclude = config.configfile_set.optional().values_list('pk', flat=True)
-        old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(parent__pk__in=exclude) )
+        old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(config__pk__in=exclude) )
         new_files = set( (f.path, f.content) for f in config.evaluate_files(self.node, exclude=exclude) )
         return new_files == old_files
     
@@ -164,20 +164,15 @@ class Build(models.Model):
 
 class BuildFile(models.Model):
     build = models.ForeignKey(Build)
-    parent = models.ForeignKey('firmware.ConfigFile')
+    config = models.ForeignKey('firmware.ConfigFile')
     path = models.CharField(max_length=256)
     content = models.TextField()
     
     class Meta:
-        unique_together = ('build', 'parent')
+        unique_together = ('build', 'config')
     
     def __unicode__(self):
         return self.path
-    
-    @property
-    def config(self):
-        """ in some contexts it make sense to call it config """
-        return self.parent
     
     @property
     def name(self):
@@ -340,7 +335,7 @@ class ConfigFile(models.Model):
         # put all together in a BuildFile list
         files = []
         for path, content in zip(paths, contents):
-            f = BuildFile(path=path, content=content, parent=self)
+            f = BuildFile(path=path, content=content, config=self)
             files.append(f)
         return files
     

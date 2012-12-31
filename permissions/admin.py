@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.util import unquote
 from django.contrib.contenttypes import generic
+from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
 
 from . import helpers
@@ -88,8 +89,14 @@ class PermExtensionMixin(object):
             'view': self.has_view_permission(request),
         }
     
-    def add_view(self, request, form_url='', extra_context=None):
-        return helpers.add_view(self, request, form_url='', extra_context=extra_context)
+    def save_form(self, request, form, change):
+        """
+        Handling of add_view permissions here to avoid copy pasta all django add_view code
+        """
+        new_object = form.save(commit=False)
+        if not change and not self.has_add_permission(request, new_object):
+            raise PermissionDenied
+        return new_object
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         return helpers.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)

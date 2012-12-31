@@ -60,7 +60,11 @@ class PermExtensionMixin(object):
         request has permission to change *any* object of the given type.
         """
         opts = self.opts
-        return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
+        # This hack is for avoiding copy pasta all change_view and changelist_view code
+        if request.method == 'POST':
+            return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
+        else:
+            return request.user.has_perm(opts.app_label + '.' + opts.get_view_permission(), obj)
     
     def has_delete_permission(self, request, obj=None):
         """
@@ -97,12 +101,6 @@ class PermExtensionMixin(object):
         if not change and not self.has_add_permission(request, new_object):
             raise PermissionDenied
         return new_object
-    
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        return helpers.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
-    
-    def changelist_view(self, request, extra_context=None):
-        return helpers.changelist_view(self, request, extra_context=extra_context)
     
     def get_inline_instances(self, request, obj=None):
         inline_instances = []

@@ -33,8 +33,9 @@ def change_view(self, request, object_id, form_url='', extra_context=None):
     if obj is None:
         raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_text(opts.verbose_name), 'key': escape(object_id)})
     
-    if not (self.has_change_permission(request, obj) or self.has_view_permission(request, obj)):
-        raise PermissionDenied
+    # the only modification:
+#    if not self.has_change_permission(request, obj):
+#        raise PermissionDenied
     
     if request.method == 'POST' and "_saveasnew" in request.POST:
         if not self.has_change_permission(request, obj):
@@ -127,8 +128,9 @@ def changelist_view(self, request, extra_context=None):
     opts = self.model._meta
     app_label = opts.app_label
     
-    if not self.has_view_permission(request, None):
-        raise PermissionDenied
+    # the only modification:
+#    if not self.has_change_permission(request, None):
+#        raise PermissionDenied
     
     list_display = self.get_list_display(request)
     list_display_links = self.get_list_display_links(request, list_display)

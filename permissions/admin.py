@@ -99,9 +99,14 @@ class PermExtensionMixin(object):
         return new_object
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
+        obj = self.get_object(request, unquote(object_id))
+        if not (self.has_change_permission(request, obj) or self.has_view_permission(request, obj)):
+            raise PermissionDenied
         return helpers.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
+        if not self.has_view_permission(request, None):
+            raise PermissionDenied
         return helpers.changelist_view(self, request, extra_context=extra_context)
     
     def get_inline_instances(self, request, obj=None):

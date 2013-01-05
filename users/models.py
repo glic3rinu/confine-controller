@@ -4,6 +4,7 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
+from common.utils import send_mail_template
 from common.validators import validate_ascii
 
 
@@ -15,6 +16,11 @@ class Group(models.Model):
         validators=[validators.RegexValidator('^[\w.@+-]+$', 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True)
+    # used when someone send a request to create a group
+    is_approved = models.BooleanField(default=False,
+        help_text='Designates if a group has been approved by the operations '
+                  'team. When someone sends a request, a group pending of '
+                  'be approved is created.')
     # TODO Check these fields with Ivan
 #    address = models.TextField()
 #    city = models.CharField(max_length=32)
@@ -286,15 +292,6 @@ class JoinRequest(models.Model):
         # enqueue a task to send a mail to the group admin
         self.send_mail_to_admin()
 
-    def refuse(self):
-        """
-        The admin refuse the user's request to join.
-        The request is deleted
-
-        """
-        self.delete()
-        #TODO: notify the user-applicant ??
-
     def accept(self):
         """
         The admin accepts the user's request to join.
@@ -303,26 +300,39 @@ class JoinRequest(models.Model):
         """
         #TODO create any role? research role?
         Roles.objects.create(user=self.user, group=self.group)
+        self.notify_user(template='registration/join_request_accept_email.txt')
         self.delete()
 
-    def send_mail_to_admin(self):
+    def refuse(self):
         """
-        Send an email to group admin to notify the new join group request
+        The admin refuse the user's request to join.
+        The request is deleted
 
         """
-        from django.contrib.sites.models import Site
-        from django.template.loader import render_to_string
+        self.notify_user(template='registration/join_request_refuse_email.txt')
+        self.delete()
+        
+    def notify_admins(self, template):
+        """
+        Notify group admins when a new join request has sent.
 
-        site = Site.objects.get_current()
+        """
+        context = {'group': self.group}
+        admins_email = self.group.get_admin_emails()
+        send_mail_template(template=template,
+                           context=context,
+                           email_from=project_settings.MAINTEINANCE_EMAIL,
+                           to=admins_email)
 
-        ctx_dict = {'group': self.group,
-                    'site': site} #TODO accept/refuse url??
+    def notify_user(self, template):
+        context = {'group': self.group}
+        send_mail_template(template=template,
+                           context=context,
+                           email_from=project_settings.MAINTEINANCE_EMAIL,
+                           to=self.user.email)
 
-        # Email subject *must not* contain newlines
-        subject = 'Group join request (%s)' % self.group.name
-
-        message = render_to_string('registration/join_request_email.txt',
-                                   ctx_dict)
-
-        for admin in self.group.admins:
-            admin.email_user(subject, message)#, settings.DEFAULT_FROM_EMAIL)
+    def save(self, *args, **kwargs):
+        # Only notify the user when the JoinRequest has successfully created
+        if self.pk:
+            self.notify_admins(template='registration/join_request_email.txt')
+        super(JoinRequest, self).save(*args, **kwargs)

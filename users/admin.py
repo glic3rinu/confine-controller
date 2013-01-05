@@ -1,20 +1,22 @@
 from __future__ import absolute_import
 
+from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError, transaction
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from common.admin import link, get_admin_link
+from common.admin import link, get_admin_link, ChangeViewActionsModelAdmin
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
+from .actions import join_request
 from .forms import UserCreationForm, UserChangeForm
 from .models import User, AuthToken, Roles, Group, JoinRequest
 
@@ -28,29 +30,25 @@ class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
 
-def action_link(instance, action):
-    #/admin/users/group/{group_id}/join_[action]/?id=[joinReq_id]
-    url = reverse('admin:users_group_join_%s' % action, args=(instance.group.id,))
-    url = url + "?id=%s" % instance.id
-    href_name = action
-    return mark_safe(' <a href="%s">[%s]</a> ' % (url, href_name))
-
-def actions(instance):
-    act_accept = action_link(instance, "accept")
-    act_refuse = action_link(instance, "refuse")
-    
-    return act_accept + act_refuse
-
 class JoinRequestInline(PermissionTabularInline):
     model = JoinRequest
     extra = 0
-    readonly_fields = ('user', actions)
+    readonly_fields = ('user', 'action_links')
 
     def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def action_links(self, instance):
+        actions = ['accept', 'refuse']
+        # kwargs pel reverse()
+        kwargs = {'group_id': instance.group_id, 'request_id': instance.id}
+        urls = [ reverse('admin:%s_join_request' % a, kwargs=kwargs) for a in actions ]
+        hrefs = [ '<a href="%s">[%s]</a>' % (url, a) for (url, a) in zip(urls, actions) ]
+        return mark_safe(' '.join(hrefs))
+    action_links.short_description = 'actions'
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 
@@ -82,7 +80,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
     group_links.short_description = 'Groups'
 
 
-class GroupAdmin(PermissionModelAdmin):
+class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['name', 'description', 'allow_slices', 'allow_nodes',
                     'num_users']
     list_filter = ['allow_slices', 'allow_nodes']
@@ -91,8 +89,9 @@ class GroupAdmin(PermissionModelAdmin):
     fieldsets = (
         (None, {'fields': ('name', 'description', 'allow_nodes', 'allow_slices')}),
         )
-    actions = ['join_request']
-    change_form_template = 'admin/group_change_form.html'
+    actions = [join_request]
+    change_view_actions = [('join-request', join_request, 'Join request', ''),]
+    change_form_template = 'admin/common/change_form.html'
 
     def num_users(self, instance):
         return instance.user_set.all().count()
@@ -107,103 +106,44 @@ class GroupAdmin(PermissionModelAdmin):
         qs = qs.annotate(models.Count('user'))
         return qs
 
-    def join_request(self, request, queryset):
-        """
-        @action
-        The user can create request to join some groups.
-        If there are any error when creating a request, the process continues
-        for the other groups.
-
-        """
-        for group in queryset:
-            self._new_join_request(request, group)
-
-    join_request.short_description = "Request to join the groups selected"
-
     def get_urls(self):
-        from django.conf.urls import patterns, url
         urls = super(GroupAdmin, self).get_urls()
         actions_urls = patterns('',
-            url(r'^(?P<group_id>\d)/join/$', self.admin_site.admin_view(self.join_request_view), name='users_group_join'),
-            url(r'^(?P<group_id>\d)/join_accept/$', self.admin_site.admin_view(self.join_accept_view), name='users_group_join_accept'),
-            url(r'^(?P<group_id>\d)/join_refuse/$', self.admin_site.admin_view(self.join_refuse_view), name='users_group_join_refuse'),
+            url(r'^(?P<group_id>\d+)/accept-join-request/(?P<request_id>\d+)$',
+                self.admin_site.admin_view(self.accept_join_request_view),
+                name='accept_join_request'),
+            url(r'^(?P<group_id>\d+)/refuse-join-request/(?P<request_id>\d+)$',
+                self.admin_site.admin_view(self.refuse_join_request_view),
+                name='refuse_join_request'),
         )
         return actions_urls + urls
 
-    def join_request_view(self, request, group_id):
+    @transaction.commit_on_success
+    def accept_join_request_view(self, request, group_id, request_id):
         """
-        Create a join request in the group "group_id" view
-
+        Accept join request
         """
-        group = Group.objects.get(pk=group_id)
-        self._new_join_request(request, group)
-
-        return redirect('admin:users_group_change', group_id)
-
-    def join_accept_view(self, request, group_id):
-        """
-        Accept a join request
-
-        """
-        jreq_id = request.GET.get('id', False)
-        if not jreq_id:
-            messages.error(request, "Invalid request")
-
-        if self.__has_join_change_permissions(request, group_id):
-            try:
-                jreq = JoinRequest.objects.get(pk=jreq_id)
-            except JoinRequest.DoesNotExist:
-                raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': 'JoinRequest', 'key': escape(jreq_id)})
-            jreq.accept()
-            messages.info(request, "User %s has been added to the group" % jreq.user)
-        else:
-            messages.error(request, "Insufficient privileges")
+        jrequest = JoinRequest.objects.get(pk=request_id)
+        # we can reuse the group_change permission
+        if not request.user.has_perm('users.group_change', obj=jrequest):
             raise PermissionDenied
 
-        return redirect('admin:users_group_change', group_id)
+        jrequest.accept()
+        messages.info(request, "User %s has been added to the group" % jrequest.user)
+        return HttpResponseRedirect(reverse('admin:users_group_change', args=[group_id]))
 
-    def join_refuse_view(self, request, group_id):
+    @transaction.commit_on_success
+    def refuse_join_request_view(self, request, group_id, request_id):
         """
-        Refuse a join request
-
+        Refuse join request
         """
-        if not request.GET.__contains__('id'):
-            messages.error(request, "Invalid request")
+        jrequest = JoinRequest.objects.get(pk=request_id)
+        if not request.user.has_perm('users.group_change', obj=jrequest):
+            raise PermissionDenied
 
-        if self.__has_join_change_permissions(request, group_id):
-            jreq = JoinRequest.objects.get(pk=request.GET['id'])
-            jreq.refuse()
-            messages.info(request, "Join refused for user %s" % jreq.user)
-        else:
-            messages.error(request, "Insufficient privileges")
-        
-        return redirect('admin:users_group_change', group_id)
-
-    def __has_join_change_permissions(self, request, group_id):
-        #TODO: implement as permissions.py??
-        group = Group.objects.get(pk=group_id)
-        if request.user.is_superuser:
-            return True
-        if not group.has_role(request.user, 'admin'):
-            return False
-        
-        return True
-
-    def _new_join_request(self, request, group):
-        """
-        Try to create a new JoinRequest. If there are any problem (e.g. alreday
-        exists a join request for this user into this group); it shows a message
-        otherwise it instantiates the request.
-
-        """
-        try:
-            sid = transaction.savepoint()
-            JoinRequest.objects.create(user=request.user, group=group)
-            transaction.savepoint_commit(sid)
-            messages.success(request, "Your join request has been sent (%s)" % group)
-        except IntegrityError:
-            transaction.savepoint_rollback(sid)
-            messages.error(request, "You have alreday sent a request to this group (%s)" % group)
+        jrequest.refuse()
+        messages.info(request, "Join refused for user %s" % jrequest.user)
+        return HttpResponseRedirect(reverse('admin:users_group_change', args=[group_id]))
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)

@@ -5,7 +5,7 @@ Forms and validation code for user registration.
 
 
 #from django.contrib.auth.models import User
-from users.models import User
+from users.models import User, Group
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from M2Crypto import BIO, RSA
@@ -33,11 +33,10 @@ class RegistrationForm(forms.ModelForm):
     """
     class Meta:
         model = User
-#        fields = ('username', 'email', 'groups', 'pubkey')
-        fields = ('username', 'email', 'groups')
-#        widgets = {
-#            'pubkey': forms.Textarea(attrs={'required':True, })
-#        }
+        fields = ('username', 'email', 'pubkey') #'groups', 
+        widgets = {
+            'pubkey': forms.Textarea(attrs={'required':True, })
+        }
 
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict,
                                 render_value=False), label=_("Password"))
@@ -144,3 +143,8 @@ class RegistrationFormNoFreeEmail(RegistrationForm):
         if email_domain in self.bad_domains:
             raise forms.ValidationError(_("Registration using free email addresses is prohibited. Please supply a different email address."))
         return self.cleaned_data['email']
+
+class GroupRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ('name', 'description', 'uuid')

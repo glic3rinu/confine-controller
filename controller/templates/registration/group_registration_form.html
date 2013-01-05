@@ -1,0 +1,41 @@
+{% extends "registration/layout.html" %}
+
+{% block accounts_title %}Group registration{% endblock %}
+
+{% block accounts %}
+    <form action="." method="post" enctype="multipart/form-data">
+        <h3>Research Group Information:</h3>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-row">
+            {{ field.errors }}
+            {{ field.label_tag }}: {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+        </div>
+        {% endfor %}
+
+    {% if request.user.is_authenticated %}
+      <ul class="messagelist form-row">
+        <li class="info">Are you requesting a group as <em>{{ request.user }}.</em>
+            When the group is approved, this user will became the group admin.
+        </li>
+      </ul>
+    {% else %}{# also show user registration form #}
+        <h3>Administrator information:</h3>
+        {% for field in user_form %}
+        <div class="form-row">
+            {{ field.errors }}
+            {{ field.label_tag }}: {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+        </div>
+        {% endfor %}
+    {% endif %}
+    
+    {# aa #}
+            <div class="form-row">
+            <label>&nbsp;</label>
+            <input type="submit" value="Register" />
+        </div>
+    </form>
+    
+{% endblock %}

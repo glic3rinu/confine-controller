@@ -66,7 +66,7 @@ class RegistrationManager(models.Manager):
         return False
     
     def create_inactive_user(self, username, email, password,
-                             site, groups, send_email=True):
+                             site, send_email=True):
         """
         Create a new, inactive ``User``, generate a
         ``RegistrationProfile`` and email its activation key to the
@@ -90,11 +90,10 @@ class RegistrationManager(models.Manager):
         # + We send an email to the admin of the group which must approbe this request
         #    a. admin approbes
         #    b. admin refuses
-        for group in groups:
-            # TODO: call function from users app to create a new JoinRequest
-            # create_registration_group(new_user, group)
-            print group
-            pass
+#        for group in groups:
+#            # TODO: call function from users app to create a new JoinRequest
+#            # create_registration_group(new_user, group)
+#            print group
             
         return new_user
     create_inactive_user = transaction.commit_on_success(create_inactive_user)

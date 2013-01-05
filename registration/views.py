@@ -9,6 +9,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from registration.backends import get_backend
+from users.models import User #TODO create a wrap in registration.models??
 
 
 def activate(request, backend,
@@ -206,4 +207,48 @@ def register(request, backend, success_url=None, form_class=None,
 
     return render_to_response(template_name,
                               {'form': form},
+                              context_instance=context)
+
+def register_group(request, backend,
+             template_name='registration/group_registration_form.html',
+             extra_context=None):
+
+    # redirect logged users to users_group_add
+    if request.user.is_authenticated():
+        return redirect('admin:users_group_add')
+
+    backend = get_backend(backend)
+    context = RequestContext(request)
+
+    group_form_class = backend.group_get_form_class(request)
+    user_form_class  = backend.get_form_class(request)
+        
+    if request.method == 'POST':
+        group_form = group_form_class(data=request.POST, files=request.FILES)
+        user_form = user_form_class(data=request.POST, files=request.FILES, prefix='user')
+
+        if group_form.is_valid() and user_form.is_valid():
+            # TODO group cleaned data not properly cleaned (as defined at Model)
+            
+            # http://collingrady.wordpress.com/2008/02/18/editing-multiple-objects-in-django-with-newforms/
+            #group_form.cleaned_data.update(user_form.cleaned_data)
+
+            # add prefix to user_form (avoid collisions group-user fields)
+            for key in user_form.cleaned_data.keys():
+                group_form.cleaned_data['user-'+key] = user_form.cleaned_data[key]
+
+            new_group, new_user = backend.group_register(request, **group_form.cleaned_data)
+
+            to, args, kwargs = backend.group_post_registration_redirect(request, new_group, new_user)
+            return redirect(to, *args, **kwargs)
+
+    #SHOW THE FORM
+    else:
+        group_form = group_form_class()
+        user_form = user_form_class(prefix='user')
+
+
+    return render_to_response(template_name,
+                              {'form': group_form,
+                               'user_form': user_form},
                               context_instance=context)

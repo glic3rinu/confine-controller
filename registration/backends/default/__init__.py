@@ -1,10 +1,12 @@
+from django.db import transaction
 from django.conf import settings
 from django.contrib.sites.models import RequestSite
 from django.contrib.sites.models import Site
 
 from registration import signals
-from registration.forms import RegistrationForm
+from registration.forms import RegistrationForm, GroupRegistrationForm
 from registration.models import RegistrationProfile
+from users.models import Group, Roles, User #TODO create a wrap in registration.models??
 
 
 class DefaultBackend(object):
@@ -70,13 +72,13 @@ class DefaultBackend(object):
         class of this backend as the sender.
 
         """
-        username, email, password, groups = kwargs['username'], kwargs['email'], kwargs['password1'], kwargs['groups']
+        username, email, password = kwargs['username'], kwargs['email'], kwargs['password1']
         if Site._meta.installed:
             site = Site.objects.get_current()
         else:
             site = RequestSite(request)
         new_user = RegistrationProfile.objects.create_inactive_user(username, email,
-                                                                    password, site, groups)
+                                                                    password, site)
         signals.user_registered.send(sender=self.__class__,
                                      user=new_user,
                                      request=request)
@@ -145,3 +147,30 @@ class DefaultBackend(object):
 
         """
         return ('admin:index', (), {})
+
+    # Group registration staff
+    @transaction.commit_on_success
+    def group_register(self, request, **kwargs):
+        """
+        Register a group in the system
+
+        """
+        # create new group
+        name, desc, uuid = kwargs['name'], kwargs['description'], kwargs['uuid']
+        new_group = Group.objects.create(name=name, description=desc, uuid=uuid)
+
+        #create new user
+        username, email, password, pubkey = kwargs['user-username'], kwargs['user-email'], kwargs['user-password1'], kwargs['user-pubkey']
+        new_user = User.objects.create_user(username, email, password, pubkey=pubkey)
+
+        # create admin role
+        Roles.objects.create(user=new_user, group=new_group, is_admin=True)
+
+        return new_group, new_user
+
+    def group_get_form_class(self, request):
+        return GroupRegistrationForm
+
+    def group_post_registration_redirect(self, request, group, user):
+        #TODO where redirect + create template
+        return ('registration_complete', (), {})

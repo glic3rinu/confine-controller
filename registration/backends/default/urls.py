@@ -21,8 +21,7 @@ up your own URL patterns for these views instead.
 from django.conf.urls import *
 from django.views.generic.base import TemplateView
 
-from registration.views import activate
-from registration.views import register
+from registration.views import activate, register, register_group
 
 
 urlpatterns = patterns('',
@@ -47,4 +46,9 @@ urlpatterns = patterns('',
                        url(r'^register/closed/$',
                            TemplateView.as_view(template_name='registration/registration_closed.html'),
                            name='registration_disallowed'),
+                       # Groups registration
+                       url(r'^register/group/$',
+                           register_group,
+                           {'backend': 'registration.backends.default.DefaultBackend'},
+                           name='registration_group_register'),
                        )

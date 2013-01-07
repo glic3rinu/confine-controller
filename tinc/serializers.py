@@ -62,6 +62,7 @@ class TincServerSerializer(serializers.ModelSerializer):
 class GatewaySerializer(UriHyperlinkedModelSerializer):
     tinc = TincServerSerializer()
     id = serializers.Field()
+    mgmt_addr = serializers.Field()
     
     class Meta:
         model = Gateway
@@ -70,6 +71,7 @@ class GatewaySerializer(UriHyperlinkedModelSerializer):
 class HostSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     tinc = TincClientSerializer()
+    mgmt_addr = serializers.Field()
     
     class Meta:
         model = Host

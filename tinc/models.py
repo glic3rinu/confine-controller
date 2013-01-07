@@ -24,9 +24,18 @@ class Host(models.Model):
         help_text='Free-form textual description of this host.')
     owner = models.ForeignKey(get_user_model(), 
         help_text='The user who administrates this host (its creator by default)')
+    related_tincclient = generic.GenericRelation('tinc.TincClient')
     
     def __unicode__(self):
         return self.description
+    
+    @property
+    def tinc(self):
+        return self.related_tincclient.get()
+    
+    @property
+    def mgmt_addr(self):
+        return self.tinc.address
 
 
 class TincHost(models.Model):
@@ -79,6 +88,10 @@ class Gateway(models.Model):
     def tinc(self):
         try: return self.related_tincserver.get()
         except TincServer.DoesNotExist: return {}
+    
+    @property
+    def mgmt_addr(self):
+        return self.tinc.address
 
 
 class TincServer(TincHost):
@@ -270,16 +283,14 @@ class TincClient(TincHost):
 
 # Monkey-Patching Section
 
-# Hook TincClient support for related models
-related_models = [Host, Node]
+# Hook TincClient support to Node
 
 @property
 def tinc(self):
     return self.related_tincclient.get()
 
-for model in related_models:
-    model.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
-    model.add_to_class('tinc', tinc)
+Node.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
+Node.add_to_class('tinc', tinc)
 
 # Hook TincServer support to Server
 @property

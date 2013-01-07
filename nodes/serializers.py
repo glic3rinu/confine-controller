@@ -8,6 +8,8 @@ from .models import Server, Node
 
 
 class ServerSerializer(UriHyperlinkedModelSerializer):
+    mgmt_addr = serializers.Field()
+    
     class Meta:
         model = Server
 

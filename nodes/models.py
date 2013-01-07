@@ -3,12 +3,12 @@ from django_transaction_signals import defer
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.importlib import import_module
 from singleton_models.models import SingletonModel
 
 from common.validators import validate_prop_name, validate_net_iface_name
 
 from . import settings, ssl
+from .utils import get_mgmt_backend
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
 
 
@@ -180,9 +180,7 @@ class Node(models.Model):
     
     @property
     def mgmt_addr(self):
-        mod, inst = settings.NODES_MGMT_BACKEND.rsplit('.', 1)
-        mod = import_module(mod)
-        mgmt_backend = getattr(mod, inst)
+        mgmt_backend = get_mgmt_backend()
         return mgmt_backend.address(self)
     
     def reboot(self):
@@ -287,3 +285,8 @@ class Server(SingletonModel):
     
     def __unicode__(self):
         return 'Server'
+    
+    @property
+    def mgmt_addr(self):
+        mgmt_backend = get_mgmt_backend()
+        return mgmt_backend.address(self)

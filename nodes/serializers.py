@@ -18,6 +18,7 @@ class NodeSerializer(UriHyperlinkedModelSerializer):
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail',
         read_only=True)
     direct_ifaces = serializers.Field()
+    mgmt_addr = serializers.Field()
     
     class Meta:
         model = Node

@@ -3,6 +3,7 @@ from django_transaction_signals import defer
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.importlib import import_module
 from singleton_models.models import SingletonModel
 
 from common.validators import validate_prop_name, validate_net_iface_name
@@ -177,6 +178,13 @@ class Node(models.Model):
     def direct_ifaces(self):
         return self.directiface_set.all()
     
+    @property
+    def mgmt_addr(self):
+        mod, inst = settings.NODES_MGMT_BACKEND.rsplit('.', 1)
+        mod = import_module(mod)
+        mgmt_backend = getattr(mod, inst)
+        return mgmt_backend.address(self)
+    
     def reboot(self):
         self.boot_sn += 1
         self.save()
@@ -214,8 +222,7 @@ class Node(models.Model):
     def generate_certificate(self, key, commit=False, user=None):
         if user is None: 
             user = self.group.admins[0]
-        # TODO self.tinc dependency
-        self.cert = ssl.generate_certificate(key, Email=user.email, CN=str(self.tinc.address))
+        self.cert = ssl.generate_certificate(key, Email=user.email, CN=str(self.mgmt_addr))
         if commit:
             self.save()
         return self.cert

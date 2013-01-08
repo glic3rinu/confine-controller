@@ -216,6 +216,8 @@ class Sliver(models.Model):
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')
     
+    _iface_registry = {}
+    
     class Meta:
         unique_together = ('slice', 'node')
     
@@ -256,6 +258,19 @@ class Sliver(models.Model):
         # TODO rename to pull request?
         if async: defer(force_sliver_update.delay, self.pk)
         else: force_sliver_update(self.pk)
+    
+    @classmethod
+    def register_iface(cls, iface, name):
+        cls._iface_registry[name] = iface()
+    
+    @classmethod
+    def get_registred_iface_types(cls):
+        types = cls._iface_registry.keys() 
+        return zip(types, [ iface.capitalize() for iface in types ])
+    
+    @classmethod
+    def get_registred_iface(cls, type_):
+        return cls._iface_registry[type_]
 
 
 class SliverProp(models.Model):
@@ -279,27 +294,27 @@ class SliverProp(models.Model):
         return self.name
 
 
+# Autodiscover sliver ifaces
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.importlib import import_module
+def autodiscover():
+    """ Auto-discover INSTALLED_APPS permission.py module """
+    for app in settings.INSTALLED_APPS:
+        mod = import_module(app)
+        try: 
+            import_module('%s.ifaces' % app)
+        except (ImportError, ImproperlyConfigured): 
+            pass
+autodiscover()
+
+
 class SliverIface(models.Model):
     """
     Implememts the network interfaces that will be created in the slivers.
     There must exist a first interface of type private. See node architecture.
     """
-    # TODO: make iface customizable and 'hookable' (mgmt)
     # TODO: precreate a private interface
-    PRIVATE = 'private'
-    DEBUG = 'debug'
-    MANAGEMENT = 'management'
-    PUBLIC4 = 'public4'
-    PUBLIC6 = 'public6'
-    ISOLATED = 'isolated'
-    
-    TYPES = ((PRIVATE, 'private'),
-             (DEBUG,'debug'),
-             (MANAGEMENT, 'management'),
-             (PUBLIC4, 'public4'),
-             (PUBLIC6, 'public6'),
-             (ISOLATED, 'isolated'),)
-    
     sliver = models.ForeignKey(Sliver)
     nr = models.PositiveIntegerField(help_text='The unique 8-bit, positive integer '
         'number of this interface in this sliver. Interface #0 is always the '
@@ -308,7 +323,7 @@ class SliverIface(models.Model):
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
         validators=[validate_net_iface_name])
-    type = models.CharField(max_length=16, choices=TYPES,
+    type = models.CharField(max_length=16, choices=Sliver.get_registred_iface_types(),
         help_text="The type of this interface. Types public4 and public6 are only "
             "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 respectively "
             "are not none. There can only be one interface of type private, and by "
@@ -331,29 +346,7 @@ class SliverIface(models.Model):
         return self.name
     
     def clean(self):
-        # Unfortunately it is not possible to define more than one unique_together
-        # clause because unique_together is directly translated to the SQL unique 
-        # index, therefore this method validates other uniqueness
-        nr_qs = SliverIface.objects.filter(sliver=self.sliver, nr=self.nr)
-        if self.pk:
-            nr_qs = nr_qs.exclude(pk=self.pk)
-        if nr_qs.exists():
-            raise ValidationError('Unique together constrain validation: nr and sliver')
-        if self.type == self.PRIVATE:
-            private_qs = SliverIface.objects.filter(sliver=self.sliver, type=self.PRIVATE)
-            if self.pk:
-                private_qs = private_qs.exclude(pk=self.pk)
-            if private_qs.exists():
-                raise ValidationError('There can only be one interface of type private')
-        
-        if self.type == self.PUBLIC4 and self.sliver.node.sliver_pub_ipv4 is None:
-            raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
-        if self.type == self.PUBLIC6 and self.sliver.node.sliver_pub_ipv6 is None:
-            raise ValidationError("public6 is only available if node's sliver_pub_ipv6 is not None")
-        if self.type != self.ISOLATED and self.parent:
-            raise ValidationError("Parent is only meaningful for isolated interfaces.")
-        if self.type == self.ISOLATED and not self.parent:
-            raise ValidationError("Parent is mandatory for isolated interfaces.")
+        Sliver.get_registred_iface(self.type).clean(self)
         super(SliverIface, self).clean()
     
     def save(self, *args, **kwargs):
@@ -372,50 +365,23 @@ class SliverIface(models.Model):
     @property
     def ipv6_addr(self):
         """
-        Calculates IPv6 address of the SliverIfaces that works on L3. 
+        Returns IPv6 address of the SliverIfaces that works on L3. 
         Notice that not all L3 ifaces has a predictable IPv6 address, thus might
         depend on the node state which is unknown by the server.
         """
-        
-        # Hex representation of the needed values
-        nr = '10' + int_to_hex_str(self.nr, 2)
-        node_id = int_to_hex_str(self.sliver.node_id, 4)
-        slice_id = int_to_hex_str(self.sliver.slice_id, 12)
-        
-        if self.type == self.PRIVATE:
-            # PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64
-            ipv6_words = self.sliver.node.get_priv_ipv6_prefix().split(':')[:3]
-            node_id = '0'
-        elif self.type == self.MANAGEMENT:
-            # Testbed management IPv6 network (local bridge)
-            # MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64
-            # TODO this import is crap, make this generic with proper tinc abstraction: mgmt
-            from tinc.settings import TINC_MGMT_IPV6_PREFIX
-            ipv6_words = TINC_MGMT_IPV6_PREFIX.split(':')[:3]
-        elif self.type == self.DEBUG:
-            # DEBUG_IPV6_PREFIX:N:10ii:ssss:ssss:ssss
-            # TODO this import is crap, relocate DEBUG PREFIX
-            from nodes.settings import NODES_DEBUG_IPV6_PREFIX
-            ipv6_words = NODES_DEBUG_IPV6_PREFIX.split(':')[:3]
-        else:
-            return None
-        ipv6_words.extend([node_id, nr])
-        ipv6_words.extend(split_len(slice_id, 4))
-        return IP(':'.join(ipv6_words))
+        if self.type != '':
+            return Sliver.get_registred_iface(self.type).ipv6_addr(self)
+        return None
     
     @property
     def ipv4_addr(self):
         """
-        Calculates IPv4 address of the SliverIfaces that works on L3.
+        Returns the IPv4 address of the SliverIfaces that works on L3.
         Notice that not all L3 ifaces has a predictable IPv6 address, thus might
         depend on the node state which is unknown by the server.
         """
-        if self.type == self.PRIVATE:
-            # {X.Y.Z}.S is the address of sliver #S
-            prefix = self.sliver.node.get_priv_ipv4_prefix()
-            ipv4_words = prefix.split('.')[:3]
-            ipv4_words.append('%d' % self.sliver.nr)
-            return IP('.'.join(ipv4_words))
+        if self.type != '':
+            return Sliver.get_registred_iface(self.type).ipv4_addr(self)
         return None
     
     @property
@@ -442,8 +408,9 @@ class SliverIface(models.Model):
     
     def _get_nr(self):
         """ Calculates nr value of the new SliverIface """
-        if self.type == self.PRIVATE:
-            return 0
+        iface = Sliver.get_registred_iface(self.type)
+        if hasattr(iface, '_get_nr'):
+            return iface._get_nr(self)
         # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
         if not SliverIface.objects.filter(sliver=self.sliver).exists():
             return 1

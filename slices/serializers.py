@@ -5,13 +5,15 @@ from rest_framework import serializers
 from api.serializers import (UriHyperlinkedModelSerializer, HyperlinkedFileField,
     RelManyHyperlinkedRelatedField)
 
-from .models import Slice, Sliver, Template
+from .models import Slice, Sliver, Template, SliverIface
 
 
-class IfaceSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    type = serializers.CharField()
-    parent_name = serializers.CharField()
+class IfaceSerializer(serializers.ModelSerializer):
+    parent_name = serializers.Field()
+    
+    class Meta:
+        model = SliverIface
+        fields = ['name', 'nr', 'type', 'parent_name']
 
 
 class SliverSerializer(UriHyperlinkedModelSerializer):

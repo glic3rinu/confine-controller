@@ -48,4 +48,7 @@ class SliverIfaceInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """ Restrict parent FK to sliver.node """
         super(SliverIfaceInlineForm, self).__init__(*args, **kwargs)
-        self.fields['parent'].queryset = self.node.direct_ifaces
+        if 'parent' in self.fields:
+            # readonly forms doesn't have model fields
+            # TODO handle this on the permission application?
+            self.fields['parent'].queryset = self.node.direct_ifaces

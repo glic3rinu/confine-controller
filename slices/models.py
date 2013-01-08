@@ -13,6 +13,7 @@ from private_files import PrivateFileField
 
 from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str, split_len
+from common.utils import autodiscover
 from common.validators import validate_net_iface_name, validate_prop_name
 from nodes.models import Node
 
@@ -295,18 +296,7 @@ class SliverProp(models.Model):
 
 
 # Autodiscover sliver ifaces
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.utils.importlib import import_module
-def autodiscover():
-    """ Auto-discover INSTALLED_APPS permission.py module """
-    for app in settings.INSTALLED_APPS:
-        mod = import_module(app)
-        try: 
-            import_module('%s.ifaces' % app)
-        except (ImportError, ImproperlyConfigured): 
-            pass
-autodiscover()
+autodiscover('ifaces')
 
 
 class SliverIface(models.Model):

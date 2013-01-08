@@ -132,7 +132,7 @@ INSTALLED_APPS = (
     'admin_tools.menu',
     'admin_tools.dashboard',
     'singleton_models',
-    'django_extensions',
+#    'django_extensions',
     'djcelery',
     'private_files',
 

@@ -5,6 +5,7 @@ from django_transaction_signals import defer
 from django.conf import settings as project_settings
 from django.contrib.auth import get_user_model
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from IPy import IP
@@ -24,7 +25,7 @@ private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
-    return datetime.now() + settings.SLICES_SLICE_EXPIRATION_INTERVAL
+    return datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
 
 
 class Template(models.Model):
@@ -125,7 +126,7 @@ class Slice(models.Model):
             elif not self.set_state == self.REGISTER:
                 raise self.VlanAllocationError('This value can not be setted')
         if not self.pk:
-            self.expires_on = datetime.now() + settings.SLICES_SLICE_EXPIRATION_INTERVAL
+            self.expires_on = datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
         super(Slice, self).save(*args, **kwargs)
     
     @property
@@ -149,12 +150,17 @@ class Slice(models.Model):
         self.instance_sn += 1
         self.save()
     
+    @property
+    def max_vlan_nr(self):
+        return int('ffff', 16)
+    
     def _get_vlan_nr(self):
-        last_nr = Slice.objects.order_by('-vlan_nr')[0]
+        last_nr = Slice.objects.order_by('-vlan_nr')[0].vlan_nr
         if last_nr < 2: return 2
-        if last_nr >= int('ffff', 16):
-            for new_nr in range(2, int('ffff', 16)):
-                if not Slice.objects.filter(vlan_nr=new_nr):
+        if last_nr >= self.max_vlan_nr:
+            # Try to recycle old values
+            for new_nr in range(2, self.max_vlan_nr):
+                if not Slice.objects.filter(vlan_nr=new_nr).exists():
                     return new_nr
             raise self.VlanAllocationError("No VLAN address space left.")
         return last_nr + 1
@@ -202,8 +208,7 @@ class Sliver(models.Model):
         verbose_name='Instance Sequence Number')
     exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
         storage=private_storage, verbose_name='Experiment Data',
-        condition=lambda request, self: 
-                  request.user.has_perm('slices.sliver_change', obj=self),
+        condition=lambda request, self: request.user.has_perm('slices.sliver_change', obj=self),
         help_text='.tar.gz archive containing experiment data for this sliver.',
         validators=[validators.RegexValidator('.*\.tar\.gz', 
                    'Upload a valid .tar.gz file', 'invalid')],)
@@ -238,15 +243,7 @@ class Sliver(models.Model):
     
     @property
     def interfaces(self):
-        try: 
-            ifaces = [self.privateiface] 
-        except PrivateIface.DoesNotExist: 
-            ifaces = []
-        ifaces += list(self.isolatediface_set.all())
-        ifaces += list(self.mgmtiface_set.all())
-        ifaces += list(self.pub6iface_set.all())
-        ifaces += list(self.pub4iface_set.all())
-        return ifaces
+        return self.sliveriface_set.all()
     
     @property
     def max_num_ifaces(self):
@@ -284,34 +281,139 @@ class SliverProp(models.Model):
 
 
 class SliverIface(models.Model):
-    """
-    Base class for sliver network interfaces
-    """
+    # TODO: make iface customizable and 'hookable' (mgmt)
+    PRIVATE = 'private'
+    DEBUG = 'debug'
+    MANAGEMENT = 'management'
+    PUBLIC4 = 'public4'
+    PUBLIC6 = 'public6'
+    ISOLATED = 'isolated'
+    
+    TYPES = ((PRIVATE, 'private'),
+             (DEBUG,'debug'),
+             (MANAGEMENT, 'management'),
+             (PUBLIC4, 'public4'),
+             (PUBLIC6, 'public6'),
+             (ISOLATED, 'isolated'),)
+    
+    sliver = models.ForeignKey(Sliver)
+    nr = models.PositiveIntegerField(help_text='The unique 8-bit, positive integer '
+        'number of this interface in this sliver. Interface #0 is always the '
+        'private interface.')
     name = models.CharField(max_length=10,
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
         validators=[validate_net_iface_name])
+    type = models.CharField(max_length=16, choices=TYPES,
+        help_text="The type of this interface. Types public4 and public6 are only "
+            "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 respectively "
+            "are not none. There can only be one interface of type private, and by "
+            "default it is configured for both IP4 and IPv6 default routes using "
+            "the RD's internal addresses. The first public4 interface declared "
+            "is configured for the default IPv4 route using the CD's IPv4 gateway "
+            "address, and similarly with public6 interfaces for IPv6.")
+    parent = models.ForeignKey('nodes.DirectIface', null=True, blank=True,
+        help_text="The name of a direct interface in the research device to use "
+            "for this interface's traffic (VLAN-tagged); the slice must have a "
+            "non-null vlan_nr. Only meaningful (and mandatory) for isolated "
+            "interfaces.")
     
     class Meta:
-        abstract = True
+        unique_together = ('sliver', 'name')
     
     def __unicode__(self):
-        return str(self.pk)
+        return self.name
+    
+    def clean(self):
+        # Unfortunately it is not possible to define more than one unique_together
+        # clause because unique_together is directly translated to the SQL unique 
+        # index, therefore this method validates other uniqueness
+        nr_qs = SliverIface.objects.filter(sliver=self.sliver, nr=self.nr)
+        if self.pk:
+            nr_qs = nr_qs.exclude(pk=self.pk)
+        if nr_qs.exists():
+            raise ValidationError('Unique together constrain validation: nr and sliver')
+        if self.type == self.PRIVATE:
+            private_qs = SliverIface.objects.filter(sliver=self.sliver, type=self.PRIVATE)
+            if self.pk:
+                private_qs = private_qs.exclude(pk=self.pk)
+            if private_qs.exists():
+                raise ValidationError('There can only be one interface of type private')
+        
+        if self.type == self.PUBLIC4 and self.sliver.node.sliver_pub_ipv4 is None:
+            raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
+        if self.type == self.PUBLIC6 and self.sliver.node.sliver_pub_ipv6 is None:
+            raise ValidationError("public6 is only available if node's sliver_pub_ipv6 is not None")
+        if self.type != self.ISOLATED and self.parent:
+            raise ValidationError("Parent is only meaningful for isolated interfaces.")
+        if self.type == self.ISOLATED and not self.parent:
+            raise ValidationError("Parent is mandatory for isolated interfaces.")
+        super(SliverIface, self).clean()
     
     def save(self, *args, **kwargs):
-        # TODO use max_pub4ifaces on pubipv4ifaces ?
-        if not self.pk and len(self.sliver.interfaces) >= self.sliver.max_num_ifaces:
-            raise self.IfaceAllocationError('No more space left for interfaces')
+        if not self.pk:
+            self.nr = self._get_nr()
         super(SliverIface, self).save(*args, **kwargs)
     
     @property
-    def type(self):
-        return self._meta.verbose_name.split(' ')[0]
+    def parent_name(self):
+        return self.parent.name if self.parent else None
     
     @property
-    def parent_name(self):
-        if hasattr(self, 'parent'):
-            return self.parent.name
+    def max_nr(self):
+        return 256
+    
+    def _get_nr(self):
+        if self.type == self.PRIVATE:
+            return 0
+        # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
+        if not SliverIface.objects.filter(sliver=self.sliver).exists():
+            return 1
+        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr')[0].nr
+        if last_nr >= self.max_nr:
+            # try to recycle old values
+            for new_nr in range(1, self.max_nr):
+                if not Slice.objects.filter(sliver=self.sliver, vlan_nr=new_nr).exists():
+                    return new_nr
+            raise self.IfaceAllocationError("No Iface NR space left.")
+        return last_nr + 1
+    
+    @property
+    def ipv6_addr(self):
+        # Hex representation of the needed values
+        nr = '10' + int_to_hex_str(self.nr, 2)
+        node_id = int_to_hex_str(self.sliver.node_id, 4)
+        slice_id = int_to_hex_str(self.sliver.slice_id, 12)
+        
+        if self.type == self.PRIVATE:
+            # PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64
+            ipv6_words = self.sliver.node.get_priv_ipv6_prefix().split(':')[:3]
+            node_id = '0'
+        elif self.type == self.MANAGEMENT:
+            # Testbed management IPv6 network (local bridge)
+            # MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64
+            # TODO this import is crap, make this generic with proper tinc abstraction: mgmt
+            from tinc.settings import TINC_MGMT_IPV6_PREFIX
+            ipv6_words = TINC_MGMT_IPV6_PREFIX.split(':')[:3]
+        elif self.type == self.DEBUG:
+            # DEBUG_IPV6_PREFIX:N:10ii:ssss:ssss:ssss
+            # TODO this import is crap, relocate DEBUG PREFIX
+            from nodes.settings import NODES_DEBUG_IPV6_PREFIX
+            ipv6_words = NODES_DEBUG_IPV6_PREFIX.split(':')[:3]
+        else:
+            return None
+        ipv6_words.extend([node_id, nr])
+        ipv6_words.extend(split_len(slice_id, 4))
+        return IP(':'.join(ipv6_words))
+    
+    @property
+    def ipv4_addr(self):
+        if self.type == self.PRIVATE:
+            # {X.Y.Z}.S is the address of sliver #S
+            prefix = self.sliver.node.get_priv_ipv4_prefix()
+            ipv4_words = prefix.split('.')[:3]
+            ipv4_words.append('%d' % self.sliver.nr)
+            return IP('.'.join(ipv4_words))
         return None
     
     @property
@@ -339,136 +441,3 @@ class SliverIface(models.Model):
     class StateNotAvailable(Exception): pass
     
     class IfaceAllocationError(Exception): pass
-
-
-class ResearchIface(SliverIface):
-    sliver = models.ForeignKey(Sliver)
-    
-    class Meta:
-        abstract = True
-        # FIXME: this unique constrain only takes into account The class from which
-        #       inherits, a different approach is needed for ensuring unique names
-        #       accross all interfaces of an sliver.
-        unique_together = ['sliver', 'name']
-    
-    @property
-    def nr(self): # 1 >= nr >= 256
-        # TODO how to predict what nr is used on the node?
-        return self.pk # % 256 ) + 1 ?? #FIXME
-
-
-class IsolatedIface(ResearchIface):
-    """
-    Describes an Isolated interface of an sliver: It is used for sharing the 
-    same physical interface but isolated at L3, by means of tagging all the 
-    outgoing traffic with a VLAN tag per slice. By means of using an isolated 
-    interface, the researcher will be able to configure it at L3, but several 
-    slices may share the same physical interface.
-    """
-    parent = models.ForeignKey('nodes.DirectIface', unique=True)
-
-
-class IpIface(ResearchIface):
-    """
-    Base class for IP based sliver interfaces. IP Interfaces might have assigned
-    either a public or a private address.
-    """
-    
-    class Meta:
-        abstract = True
-
-
-class MgmtIface(IpIface):
-    # TODO implement this interface into tinc application ?
-    """
-    Describes the management network interface for an sliver.
-    """
-    @property
-    def ipv6_addr(self): #
-        """
-        Testbed management IPv6 network (local bridge)
-        
-        Expected address calculated in the server (can be different from the
-        one showed in the node, which is the real address)
-        
-        MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64
-        """
-        # TODO this import is crap, make this generic with proper tinc abstraction: mgmt
-        from tinc.settings import TINC_MGMT_IPV6_PREFIX
-        ipv6_words = TINC_MGMT_IPV6_PREFIX.split(':')[:3]
-        ipv6_words.extend([
-            int_to_hex_str(self.sliver.node_id, 4), # Node.id
-            '10' + int_to_hex_str(self.nr, 2), # Iface.nr
-        ])
-        # sliver id
-        ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))
-        return IP(':'.join(ipv6_words))
-
-
-class Pub6Iface(IpIface):
-    """
-    Local network interface: assigned by stateless autoconf or DHCPv6
-    Describes an IPv6 Public Interface for an sliver. Traffic from a public
-    interface will be bridged to the community network.
-    """
-    
-    @property
-    def ipv6_addr(self):
-        raise StateNotAvailable('state address (only available from nodes)')
-
-
-class Pub4Iface(IpIface):
-    """
-    Local network interface: assigned by DHCP or using a configuration range
-    Describes an IPv4 Public Interface for an sliver. Traffic from a public
-    interface will be bridged to the community network.
-    """
-    
-    @property
-    def ipv4_addr(self):
-        raise StateNotAvailable('state address (only available from nodes)')
-
-
-class PrivateIface(SliverIface):
-    """
-    Describes a Private Interface of an sliver.Traffic from a private interface 
-    will be forwarded to the community network by means of NAT. Every sliver 
-    will have at least a private interface.
-    """
-    sliver = models.OneToOneField(Sliver)
-    
-    class Meta:
-        unique_together = ['sliver', 'name']
-    
-    @property
-    def nr(self):
-        return 0
-    
-    @property
-    def ipv6_addr(self):
-        """
-        Expected address calculated in the server (can be different from the
-        one showed in the node, which is the real address)
-        PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64
-        """
-        ipv6_words = self.node.get_priv_ipv6_prefix().split(':')[:3]
-        ipv6_words.extend(['0','1000'])
-        # sliver.id
-        ipv6_words.extend(split_len(int_to_hex_str(self.sliver.slice_id, 12), 4))
-        return IP(':'.join(ipv6_words))
-    
-    @property
-    def ipv4_addr(self):
-        """
-        X.Y.Z.S is the address of sliver #S during its lifetime (called the
-        sliver's private IPv4 address).
-            - X.Y.Z == prefix
-            - S = sliver #number
-        NOTE: this is the expected address calculated in the server (can be
-        different from the one showed in the node, which is the real address)
-        """
-        prefix = self.sliver.node.get_priv_ipv4_prefix()
-        ipv4_words = prefix.split('.')[:3]
-        ipv4_words.append('%d' % self.sliver.nr)
-        return IP('.'.join(ipv4_words))
-

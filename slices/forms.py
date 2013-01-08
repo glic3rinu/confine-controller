@@ -44,17 +44,8 @@ class SliceAdminForm(forms.ModelForm):
         return vlan_nr
 
 
-class IsolatedIfaceInlineForm(forms.ModelForm):
+class SliverIfaceInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(IsolatedIfaceInlineForm, self).__init__(*args, **kwargs)
-        ifaces = self.node.sliver_set.all()
-        ifaces_in_use = ifaces.filter(isolatediface__isnull=False)
-        ifaces_in_use = ifaces_in_use.values_list('isolatediface__parent', flat=True)
-        # read only views doens't have fields
-        if 'parent' in self.fields:
-            if 'instance' in kwargs:
-                instance = kwargs['instance']
-                ifaces_in_use = list(ifaces_in_use)
-                ifaces_in_use.remove(instance.parent.pk)
-            qs = self.fields['parent'].queryset.filter(node=self.node).exclude(pk__in=ifaces_in_use)
-            self.fields['parent'].queryset = qs
+        """ Restrict parent FK to sliver.node """
+        super(SliverIfaceInlineForm, self).__init__(*args, **kwargs)
+        self.fields['parent'].queryset = self.node.direct_ifaces

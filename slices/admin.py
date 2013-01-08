@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -17,10 +17,9 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import renew_selected_slices, reset_selected
 from .filters import MySlicesListFilter, MySliversListFilter
-from .forms import SliceAdminForm, IsolatedIfaceInlineForm
+from .forms import SliceAdminForm, SliverIfaceInlineForm
 from .helpers import wrap_action, remove_slice_id
-from .models import (Sliver, SliverProp, IsolatedIface, MgmtIface, PrivateIface,
-    Pub6Iface, Pub4Iface, Slice, SliceProp, Template)
+from .models import (Sliver, SliverProp, SliverIface, Slice, SliceProp, Template)
 
 
 STATE_COLORS = { 
@@ -44,56 +43,31 @@ class SliverPropInline(PermissionTabularInline):
     extra = 0
 
 
-class IsolatedIfaceInline(PermissionTabularInline):
-    model = IsolatedIface
+class SliverIfaceInline(PermissionTabularInline):
+    model = SliverIface
+    readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
     extra = 0
-    form = IsolatedIfaceInlineForm
-    verbose_name_plural = 'Isolated Network Interfaces'
+    verbose_name_plural = 'Sliver Network Interfaces'
+    form = SliverIfaceInlineForm
     
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
         self.form.node = request._node_
-        return super(IsolatedIfaceInline, self).get_formset(request, obj=obj, **kwargs)
-
-
-class MgmtIfaceInline(PermissionTabularInline):
-    model = MgmtIface
-    extra = 0
-    readonly_fields = ('ipv6_addr',)
-    verbose_name_plural = 'Management Network Interfaces'
-
-
-class PrivateIfaceInline(PermissionTabularInline):
-    model = PrivateIface
-    extra = 0
-    readonly_fields = ('ipv4_addr', 'ipv6_addr')
-    verbose_name_plural = 'Private Network Interface'
-
-
-class Pub6IfaceInline(PermissionTabularInline):
-    model = Pub6Iface
-    extra = 0
-    verbose_name_plural = 'Public IPv6 Interfaces'
-
-
-class Pub4IfaceInline(PermissionTabularInline):
-    model = Pub4Iface
-    extra = 0
-    verbose_name_plural = 'Public IPv4 Interfaces'
+        return super(SliverIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
-                    'has_private_iface', 'num_isolated_ifaces', 'num_pub4_ifaces',
-                    'num_pub6_ifaces', 'num_mgmt_ifaces']
+    # TODO reimplement num_ifaces!!
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice'), ]
+#                    'has_private_iface', 'num_isolated_ifaces', 'num_pub4_ifaces',
+#                    'num_pub6_ifaces', 'num_mgmt_ifaces']
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256',
                        template_link]
     search_fields = ['description', 'node__description', 'slice__name']
-    inlines = [SliverPropInline, PrivateIfaceInline, IsolatedIfaceInline,
-               Pub6IfaceInline, Pub4IfaceInline, MgmtIfaceInline]
+    inlines = [SliverPropInline, SliverIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
     
@@ -145,11 +119,11 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def queryset(self, request):
         """ Annotate number of ifaces for sorting on the changelist """
         qs = super(SliverAdmin, self).queryset(request)
-        qs = qs.annotate(models.Count('isolatediface'))
-        qs = qs.annotate(models.Count('pub6iface'))
-        qs = qs.annotate(models.Count('pub4iface'))
-        qs = qs.annotate(models.Count('isolatediface'))
-        qs = qs.annotate(models.Count('mgmtiface'))
+#        qs = qs.annotate(models.Count('isolatediface'))
+#        qs = qs.annotate(models.Count('pub6iface'))
+#        qs = qs.annotate(models.Count('pub4iface'))
+#        qs = qs.annotate(models.Count('isolatediface'))
+#        qs = qs.annotate(models.Count('mgmtiface'))
         return qs
     
     def has_add_permission(self, *args, **kwargs):

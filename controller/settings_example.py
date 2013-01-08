@@ -132,10 +132,10 @@ INSTALLED_APPS = (
     'admin_tools.menu',
     'admin_tools.dashboard',
     'singleton_models',
-#    'django_extensions',
+    'django_extensions',
     'djcelery',
     'private_files',
-
+    
     # Django.contrib
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -145,7 +145,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.sites',
-
+    
     # Confine
     'common',
     'api',

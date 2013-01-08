@@ -219,7 +219,6 @@ class Sliver(models.Model):
     class Meta:
         unique_together = ('slice', 'node')
     
-    
     def __unicode__(self):
         return "%s@%s" % (self.slice.name, self.node.name)
     
@@ -325,6 +324,8 @@ class SliverIface(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
+        verbose_name = 'Sliver Interface'
+        verbose_name_plural = 'Sliver Interfaces'
     
     def __unicode__(self):
         return self.name
@@ -367,22 +368,6 @@ class SliverIface(models.Model):
     @property
     def max_nr(self):
         return 256
-    
-    def _get_nr(self):
-        """ Calculates nr value of the new SliverIface """
-        if self.type == self.PRIVATE:
-            return 0
-        # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
-        if not SliverIface.objects.filter(sliver=self.sliver).exists():
-            return 1
-        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr')[0].nr
-        if last_nr >= self.max_nr:
-            # try to recycle old values
-            for new_nr in range(1, self.max_nr):
-                if not Slice.objects.filter(sliver=self.sliver, vlan_nr=new_nr).exists():
-                    return new_nr
-            raise self.IfaceAllocationError("No Iface NR space left.")
-        return last_nr + 1
     
     @property
     def ipv6_addr(self):
@@ -454,6 +439,22 @@ class SliverIface(models.Model):
             int_to_hex_str(self.nr, 2)
         ]
         return ':'.join(words)
+    
+    def _get_nr(self):
+        """ Calculates nr value of the new SliverIface """
+        if self.type == self.PRIVATE:
+            return 0
+        # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
+        if not SliverIface.objects.filter(sliver=self.sliver).exists():
+            return 1
+        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr')[0].nr
+        if last_nr >= self.max_nr:
+            # try to recycle old values
+            for new_nr in range(1, self.max_nr):
+                if not Slice.objects.filter(sliver=self.sliver, vlan_nr=new_nr).exists():
+                    return new_nr
+            raise self.IfaceAllocationError("No Iface NR space left.")
+        return last_nr + 1
     
     class StateNotAvailable(Exception): pass
     

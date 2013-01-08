@@ -3,8 +3,7 @@ import inspect
 
 from permissions import Permission, ReadOnlyPermission
 
-from .models import (Slice, Sliver, SliceProp, SliverProp, Template, 
-    IsolatedIface, MgmtIface, PrivateIface, Pub6Iface, Pub4Iface)
+from .models import Slice, Sliver, SliceProp, SliverProp, Template, SliverIface
 
 class SlicePermission(Permission):
     def view(self, caller, user):
@@ -86,9 +85,5 @@ Slice.has_permission = SlicePermission()
 Sliver.has_permission = SliverPermission()
 SliceProp.has_permission = SliverPermission()
 SliverProp.has_permission = SliverPropPermission()
-IsolatedIface.has_permission = SliverPropPermission()
-MgmtIface.has_permission = SliverPropPermission()
-PrivateIface.has_permission = SliverPropPermission()
-Pub6Iface.has_permission = SliverPropPermission()
-Pub4Iface.has_permission = SliverPropPermission()
+SliverIface.has_permission = SliverPropPermission()
 Template.has_permission = ReadOnlyPermission()

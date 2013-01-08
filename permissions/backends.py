@@ -37,6 +37,7 @@ class TestbedPermissionBackend(ModelBackend):
             try: has_perm = model.has_permission.view(user)
             except AttributeError: pass
             else:
-                if has_perm: return True
+                if has_perm:
+                    return True
         return False
 

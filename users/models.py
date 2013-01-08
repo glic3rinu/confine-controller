@@ -197,7 +197,6 @@ class User(auth_models.AbstractBaseUser):
         # Active superusers have all permissions.
         if self.is_active and self.is_superuser:
             return True
-        
         return auth_models._user_has_module_perms(self, app_label)
     
     def email_user(self, subject, message, from_email=None):
@@ -205,7 +204,7 @@ class User(auth_models.AbstractBaseUser):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email])
-
+    
     @property
     def is_staff(self):
         """ All users can loggin to the admin interface """

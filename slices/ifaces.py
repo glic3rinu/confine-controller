@@ -29,13 +29,13 @@ class IsolatedIface(BaseIface):
 
 class Public6Iface(BaseIface):
     def clean(self, iface):
-        if iface.sliver.nodesliver_pub_ipv4 is None:
+        if iface.sliver.nodesliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
 
 
 class Public4Iface(BaseIface):
     def clean(self, iface):
-        if iface.sliver.node.sliver_pub_ipv4 is None:
+        if iface.sliver.node.sliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
     
 class DebugIface(BaseIface):

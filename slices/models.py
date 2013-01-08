@@ -359,9 +359,9 @@ class SliverIface(models.Model):
         Notice that not all L3 ifaces has a predictable IPv6 address, thus might
         depend on the node state which is unknown by the server.
         """
-        if self.type != '':
-            return Sliver.get_registred_iface(self.type).ipv6_addr(self)
-        return None
+        if self.type == '':
+            return None
+        return Sliver.get_registred_iface(self.type).ipv6_addr(self)
     
     @property
     def ipv4_addr(self):
@@ -370,9 +370,9 @@ class SliverIface(models.Model):
         Notice that not all L3 ifaces has a predictable IPv6 address, thus might
         depend on the node state which is unknown by the server.
         """
-        if self.type != '':
-            return Sliver.get_registred_iface(self.type).ipv4_addr(self)
-        return None
+        if self.type == '':
+            return None
+        return Sliver.get_registred_iface(self.type).ipv4_addr(self)
     
     @property
     def mac_addr(self):

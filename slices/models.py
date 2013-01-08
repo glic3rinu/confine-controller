@@ -281,7 +281,12 @@ class SliverProp(models.Model):
 
 
 class SliverIface(models.Model):
+    """
+    Implememts the network interfaces that will be created in the slivers.
+    There must exist a first interface of type private. See node architecture.
+    """
     # TODO: make iface customizable and 'hookable' (mgmt)
+    # TODO: precreate a private interface
     PRIVATE = 'private'
     DEBUG = 'debug'
     MANAGEMENT = 'management'
@@ -364,6 +369,7 @@ class SliverIface(models.Model):
         return 256
     
     def _get_nr(self):
+        """ Calculates nr value of the new SliverIface """
         if self.type == self.PRIVATE:
             return 0
         # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
@@ -380,6 +386,12 @@ class SliverIface(models.Model):
     
     @property
     def ipv6_addr(self):
+        """
+        Calculates IPv6 address of the SliverIfaces that works on L3. 
+        Notice that not all L3 ifaces has a predictable IPv6 address, thus might
+        depend on the node state which is unknown by the server.
+        """
+        
         # Hex representation of the needed values
         nr = '10' + int_to_hex_str(self.nr, 2)
         node_id = int_to_hex_str(self.sliver.node_id, 4)
@@ -408,6 +420,11 @@ class SliverIface(models.Model):
     
     @property
     def ipv4_addr(self):
+        """
+        Calculates IPv4 address of the SliverIfaces that works on L3.
+        Notice that not all L3 ifaces has a predictable IPv6 address, thus might
+        depend on the node state which is unknown by the server.
+        """
         if self.type == self.PRIVATE:
             # {X.Y.Z}.S is the address of sliver #S
             prefix = self.sliver.node.get_priv_ipv4_prefix()

@@ -49,6 +49,7 @@ class SliverIfaceInline(PermissionTabularInline):
     extra = 0
     verbose_name_plural = 'Sliver Network Interfaces'
     form = SliverIfaceInlineForm
+    # TODO: precreate a private interface
     
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """

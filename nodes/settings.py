@@ -18,7 +18,7 @@ NODES_NODE_LOCAL_IFACE_DFLT = getattr(settings, 'NODES_NODE_LOCAL_IFACE_DFLT', '
 
 # ConfineParams
 NODES_DEBUG_IPV6_PREFIX = getattr(settings, 'NODES_DEBUG_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
-NODES_PRIV_IPV6_PREFIX = getattr(settings, 'NODES_PRIV_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
+NODES_PRIV_IPV6_PREFIX = getattr(settings, 'NODES_PRIV_IPV6_PREFIX', 'aa5f:eee5:a6ad::/48')
 
 
 # TestbedParams

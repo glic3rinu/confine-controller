@@ -46,8 +46,6 @@ class TincHost(models.Model):
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
         help_text='PEM-encoded RSA public key used on tinc management network.',
         validators=[validate_rsa_pubkey])
-    connect_to = models.ManyToManyField('tinc.TincAddress', blank=True,
-        help_text='A list of tinc addresses this host connects to.')
     
     class Meta:
         abstract = True
@@ -99,6 +97,10 @@ class TincServer(TincHost):
     Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
     the testbed server itself.
     """
+    is_active = models.BooleanField(default=True, 
+        help_text="Whether this tinc server is active. It should only be made "
+                  "false if there are other tinc servers with addresses in the "
+                  "same islands of the addresses provided by this server.")
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -172,7 +174,7 @@ class TincAddress(models.Model):
         validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
     port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT, 
         help_text='TCP/UDP port of this tinc address.')
-    island = models.ForeignKey(Island,
+    island = models.ForeignKey(Island, null=True, blank=True,
         help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
                   'at_server">Island</a> this tinc address is reachable from.')
     server = models.ForeignKey(TincServer)
@@ -197,7 +199,8 @@ class TincClient(TincHost):
     Describes a Tinc Client in the testbed. A tinc client can be a testbed node
     or a host.
     """
-    island = models.ForeignKey(Island, help_text='Island this client reaches to.')
+    island = models.ForeignKey(Island, null=True, blank=True,
+        help_text='An optional island used to hint where this tinc client reaches to.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey()
@@ -213,20 +216,12 @@ class TincClient(TincHost):
         # https://code.djangoproject.com/ticket/19467
         if self.pubkey == '': self.pubkey = None
         # end of workaround
-        if not self.pk:
-            super(TincClient, self).save(*args, **kwargs)
-            self.set_island()
-        else:
-            super(TincClient, self).save(*args, **kwargs)
+        super(TincClient, self).save(*args, **kwargs)
         self.update_tincd()
     
     def delete(self, *args, **kwargs):
         super(TincClient, self).delete(*args, **kwargs)
         self.update_tincd()
-    
-    def set_island(self):
-        self.connect_to = self.island.tincaddress_set.all()
-        self.save()
     
     @property
     def address(self):
@@ -248,6 +243,9 @@ class TincClient(TincHost):
             return self.address.make_net(64)
         elif self.content_type.model == 'host':
             return self.address
+    
+    def connect_to(self):
+        return TincServer.objects.all()
     
     def update_tincd(self, async=True):
         if async:

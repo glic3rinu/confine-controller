@@ -14,10 +14,7 @@ class SlicePermission(Permission):
         """ Admins and techs can add """
         if inspect.isclass(caller):
             return user.has_roles(('admin',))
-        if caller.group.allow_slices:
-            if caller.group.has_role(user, 'admin'):
-                return True
-        return False
+        return caller.group.allow_slices and caller.group.has_role(user, 'admin')
     
     def change(self, caller, user):
         """ group admins and techs can change """

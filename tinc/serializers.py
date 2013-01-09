@@ -41,7 +41,6 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 class TincClientSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    connect_to = TincConnectToSerializer()
     island = IslandSerializer()
     
     class Meta:
@@ -51,7 +50,6 @@ class TincClientSerializer(serializers.ModelSerializer):
 
 class TincServerSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    connect_to = TincConnectToSerializer()
     addresses = TincAddressSerializer()
     
     class Meta:

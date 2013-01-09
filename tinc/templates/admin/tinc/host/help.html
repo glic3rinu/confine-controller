@@ -52,7 +52,7 @@ code,pre {font-size:1.1em; }
 <div id="config" class="texter">
 <pre># tinc.conf
 Name = {{ host.tinc.name }}
-ConnectTo = server
+{% for addr in host.tinc.connect_to.all %}ConnectTo = {{ addr.name }}{% endfor %}
 
 # tinc-up and tinc-down
 Host address {{ host.tinc.subnet.strNormal }}/48
@@ -60,11 +60,13 @@ Host address {{ host.tinc.subnet.strNormal }}/48
 # hosts/{{ host.tinc.name }}
 Subnet = {{ host.tinc.subnet.strNormal }}
 
-# hosts/server
-{% for addr in host.tinc.connect_to.all %}Address = addr{% endfor %}
+{% for addr in host.tinc.connect_to.all %}
+# hosts/{{ addr.name }}
+Address = {{ addr }}
 Port = 655
 Subnet = {{ server.tinc.subnet.strNormal }}
-{{ server.tinc.pubkey }}</pre>
+{{ server.tinc.pubkey }}{% endfor %}
+</pre>
 </div>
 
 <!--Highlighted using http://tohtml.com/shell/-->
@@ -84,13 +86,14 @@ mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts</span>
 
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"Subnet = {{ host.tinc.subnet.strNormal }}"</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
 
+{% for addr in host.tinc.connect_to.all %}
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'</span>
-{% for addr in host.tinc.connect_to.all %}<span style='color:#0000e6; '>Address = {{ addr }}</span>{% endfor %}
+<span style='color:#0000e6; '>Address = {{ addr }}</span>
 <span style='color:#0000e6; '>Port = 655</span>
 <span style='color:#0000e6; '>Subnet = {{ server.tinc.subnet.strNormal }}</span>
 <span style='color:#0000e6; '></span>
 <span style='color:#0000e6; '>{{ server.tinc.pubkey }}</span><span style='color:#0000e6; '>'</span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/server</span>
-
+{% endfor %}
 <span style='color:#696969; '># Create scripts for setting up and down the network interface</span>
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'{{ host.tinc.get_tinc_up }}'<span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-up</span>
 

@@ -13,7 +13,6 @@ from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
-from .actions import set_island
 from .filters import MyHostsListFilter
 from .forms import HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
@@ -23,13 +22,15 @@ from . import settings
 class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
-    readonly_fields = ['connect_to', 'address']
+    readonly_fields = ['address']
     verbose_name_plural = 'Tinc client'
     formset = RequiredGenericInlineFormSet
 
 
 class TincServerInline(PermissionGenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
+    # TODO warn user when it tries to modify a tincserver with depends on more than 
+    #      one client without alternative path
     model = TincServer
     max_num = 1
     verbose_name_plural = 'Tinc server'
@@ -67,12 +68,10 @@ class GatewayAdmin(PermissionModelAdmin):
     inlines = [TincServerInline]
 
 
-class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
+class HostAdmin(PermissionModelAdmin):
     list_display = ['description', 'id', admin_link('owner'), 'address']
     inlines = [TincClientInline]
-    actions = [set_island]
     list_filter = [MyHostsListFilter]
-    change_view_actions = [('set-island', set_island, 'Set Island', ''),]
     change_form_template = "admin/tinc/host/change_form.html"
     
     def address(self, instance):
@@ -111,9 +110,6 @@ class HostAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             else:
                 form.base_fields['owner'].initial = user
         return form
-    
-    def set_island_view(modeladmin, request, object_id):
-        return action_as_view(set_island, modeladmin, request, object_id)
 
 
 admin.site.register(Host, HostAdmin)
@@ -126,8 +122,5 @@ admin.site.register(Gateway, GatewayAdmin)
 
 insert_inline(Node, TincClientInline)
 insert_inline(Server, TincServerInline)
-insert_action(Node, set_island)
 
 node_modeladmin = get_modeladmin(Node)
-node_modeladmin.set_change_view_action('set-island', set_island, 'Set Island', '')
-

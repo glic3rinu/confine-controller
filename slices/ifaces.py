@@ -45,6 +45,9 @@ class Pub6Iface(BaseIface):
         super(PubIface, self).clean(iface)
         if iface.sliver.nodesliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
+    
+    def ipv6_addr(self, iface):
+        return 'Unknown'
 
 
 class Pub4Iface(BaseIface):
@@ -57,6 +60,9 @@ class Pub4Iface(BaseIface):
         super(Pub4Iface, self).clean(iface)
         if iface.sliver.node.sliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
+    
+    def ipv4_addr(self, iface):
+        return 'Unknown'
 
 
 class DebugIface(BaseIface):

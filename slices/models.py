@@ -12,7 +12,7 @@ from IPy import IP
 from private_files import PrivateFileField
 
 from common.fields import MultiSelectField
-from common.ip import lsb, msb, int_to_hex_str, split_len
+from common.ip import lsb, msb, int_to_hex_str
 from common.utils import autodiscover
 from common.validators import validate_net_iface_name, validate_prop_name
 from nodes.models import Node
@@ -309,26 +309,27 @@ class SliverIface(models.Model):
     """
     # TODO: precreate a private interface
     sliver = models.ForeignKey(Sliver)
-    nr = models.PositiveIntegerField(help_text='The unique 8-bit, positive integer '
-        'number of this interface in this sliver. Interface #0 is always the '
-        'private interface.')
+    nr = models.PositiveIntegerField('Number',
+        help_text='The unique 8-bit, positive integer number of this interface '
+                  'in this sliver. Interface #0 is always the private interface.')
     name = models.CharField(max_length=10,
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
         validators=[validate_net_iface_name])
     type = models.CharField(max_length=16, choices=Sliver.get_registred_iface_types(),
         help_text="The type of this interface. Types public4 and public6 are only "
-            "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 respectively "
-            "are not none. There can only be one interface of type private, and by "
-            "default it is configured for both IP4 and IPv6 default routes using "
-            "the RD's internal addresses. The first public4 interface declared "
-            "is configured for the default IPv4 route using the CD's IPv4 gateway "
-            "address, and similarly with public6 interfaces for IPv6.")
+                  "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 "
+                  "respectively are not none. There can only be one interface of "
+                  "type private, and by default it is configured for both IP4 and "
+                  "IPv6 default routes using the RD's internal addresses. The "
+                  "first public4 interface declared is configured for the default "
+                  "IPv4 route using the CD's IPv4 gateway address, and similarly "
+                  "with public6 interfaces for IPv6.")
     parent = models.ForeignKey('nodes.DirectIface', null=True, blank=True,
         help_text="The name of a direct interface in the research device to use "
-            "for this interface's traffic (VLAN-tagged); the slice must have a "
-            "non-null vlan_nr. Only meaningful (and mandatory) for isolated "
-            "interfaces.")
+                  "for this interface's traffic (VLAN-tagged); the slice must "
+                  "have a non-null vlan_nr. Only meaningful (and mandatory) for "
+                  "isolated interfaces.")
     
     class Meta:
         unique_together = ('sliver', 'name')

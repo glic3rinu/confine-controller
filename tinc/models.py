@@ -20,9 +20,9 @@ class Host(models.Model):
     Describes an odd host computer connected to the testbed (through the 
     management network) with a known administrator.
     """
-    description = models.CharField(max_length=256, 
+    description = models.CharField(max_length=256,
         help_text='Free-form textual description of this host.')
-    owner = models.ForeignKey(get_user_model(), 
+    owner = models.ForeignKey(get_user_model(),
         help_text='The user who administrates this host (its creator by default)')
     related_tincclient = generic.GenericRelation('tinc.TincClient')
     
@@ -40,7 +40,7 @@ class Host(models.Model):
 
 class TincHost(models.Model):
     """
-    Base class that describes the basic attributs of a Tinc Host. 
+    Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
     pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
@@ -154,9 +154,9 @@ class Island(models.Model):
     name = models.CharField(max_length=32, unique=True, 
         help_text='The unique name of this island. A single line of free-form '
                   'text with no whitespace surrounding it.',
-        validators=[validators.RegexValidator('^[\w.@+-]+$', 
+        validators=[validators.RegexValidator('^[\w.@+-]+$',
                     'Enter a valid name.', 'invalid')])
-    description = models.TextField(blank=True, 
+    description = models.TextField(blank=True,
         help_text='Optional free-form textual description of this island.')
     
     def __unicode__(self):

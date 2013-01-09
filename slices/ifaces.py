@@ -32,7 +32,7 @@ class IsolatedIface(BaseIface):
     """
     def clean(self, iface):
         if not iface.parent:
-            raise ValidationError("Parent is mandatory for isolated interfaces.")
+            raise ValidationError("parent is mandatory for isolated interfaces.")
 
 
 class Pub6Iface(BaseIface):

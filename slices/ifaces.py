@@ -9,7 +9,12 @@ from .models import Sliver
 
 class BaseIface(object):
     """
-    Base class for defining Sliver Ifaces
+    Base class for defining Sliver Iface specific behaviour.
+    Four methods are available for overriding:
+        def clean(self, iface)
+        def ipv6_addr(self, iface)
+        def ipv4_addr(self, iface)
+        def _get_nr(self, iface)
     """
     def clean(self, iface):
         if iface.parent:

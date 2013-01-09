@@ -44,7 +44,7 @@ class Node(models.Model):
                   'free-form text with no whitespace surrounding it. matching '
                   'the regular expression',
         validators=[validators.RegexValidator('^[\w.@+-]+$', 
-                   'Enter a valid name.', 'invalid')])
+                    'Enter a valid name.', 'invalid')])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '

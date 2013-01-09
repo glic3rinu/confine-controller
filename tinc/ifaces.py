@@ -9,7 +9,9 @@ from .settings import TINC_MGMT_IPV6_PREFIX
 
 class MgmtIface(BaseIface):
     """
-    Describes the management network interface for an sliver.
+    Describes the management network interface for an sliver. This interface allows 
+    connections from the management network to the sliver and optional access to 
+    whatever other networks are routed by testbed gateways in the management network.
     """
     def ipv6_addr(self, iface):
         """ MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64 """

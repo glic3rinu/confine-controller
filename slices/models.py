@@ -262,7 +262,8 @@ class Sliver(models.Model):
     
     @classmethod
     def register_iface(cls, iface, name):
-        cls._iface_registry[name] = iface()
+        if name not in settings.SLICES_DISABLED_SLIVER_IFACES:
+            cls._iface_registry[name] = iface()
     
     @classmethod
     def get_registred_iface_types(cls):
@@ -399,6 +400,7 @@ class SliverIface(models.Model):
     def _get_nr(self):
         """ Calculates nr value of the new SliverIface """
         iface = Sliver.get_registred_iface(self.type)
+        # first check if iface has defined its own _get_nr()
         if hasattr(iface, '_get_nr'):
             return iface._get_nr(self)
         # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}

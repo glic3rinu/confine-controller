@@ -5,6 +5,7 @@ from permissions import Permission, ReadOnlyPermission
 
 from .models import Slice, Sliver, SliceProp, SliverProp, Template, SliverIface
 
+
 class SlicePermission(Permission):
     def view(self, caller, user):
         return True

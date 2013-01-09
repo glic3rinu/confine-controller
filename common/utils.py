@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 
 
@@ -9,6 +8,7 @@ def autodiscover(module):
         mod = import_module(app)
         try: 
             import_module('%s.%s' % (app, module))
-        except (ImportError, ImproperlyConfigured): 
-            pass
-
+        except ImportError, e:
+            # Hack for preventing mask of import errors
+            if str(e) != 'No module named %s' % module:
+                raise

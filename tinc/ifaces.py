@@ -8,6 +8,9 @@ from .settings import TINC_MGMT_IPV6_PREFIX
 
 
 class MgmtIface(BaseIface):
+    """
+    Describes the management network interface for an sliver.
+    """
     def ipv6_addr(self, iface):
         """ MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64 """
         # Hex representation of the needed values

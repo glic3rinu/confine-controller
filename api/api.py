@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from common.utils import autodiscover
+
 
 class ApiRoot(APIView):
     """ 
@@ -73,12 +75,8 @@ class RestApi(object):
     
     def autodiscover(self):
         """ Auto-discover INSTALLED_APPS api.py and serializers.py modules """
-        for app in settings.INSTALLED_APPS:
-            mod = import_module(app)
-            try: import_module('%s.api' % app)
-            except ImportError: pass
-            try: import_module('%s.serializers' % app)
-            except ImportError: pass
+        autodiscover('api')
+        autodiscover('serializers')
     
     def aggregate(self, model, field, name):
         """ Dynamically add new fields to an existing serializer """

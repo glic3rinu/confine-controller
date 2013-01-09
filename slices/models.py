@@ -297,6 +297,8 @@ class SliverProp(models.Model):
 
 
 # Autodiscover sliver ifaces
+# This is done just before entering to the SliverIface definition because we want 
+# type(choices=Sliver.get_registred_iface_types...) to be properly filled
 autodiscover('ifaces')
 
 
@@ -330,6 +332,7 @@ class SliverIface(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
+        ordering = ['nr']
         verbose_name = 'Sliver Interface'
         verbose_name_plural = 'Sliver Interfaces'
     

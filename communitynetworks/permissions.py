@@ -13,9 +13,7 @@ class CnHostPermission(Permission):
         """ Admins and techs can add """
         if inspect.isclass(caller):
             return user.has_roles(('admin', 'technician'))
-        elif caller.content_object.group.has_roles(user, roles=['admin', 'technician']):
-            return True
-        return False
+        return caller.content_object.group.has_roles(user, roles=['admin', 'technician'])
     
     def change(self, caller, user):
         """ group admins and techs can change """

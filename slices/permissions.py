@@ -40,9 +40,7 @@ class SliverPermission(Permission):
         """ Admins can add """
         if inspect.isclass(caller):
             return user.has_roles(('admin',))
-        elif caller.slice.group.has_role(user, 'admin'):
-            return True
-        return False
+        return caller.slice.group.has_role(user, 'admin')
     
     def change(self, caller, user):
         """ Group admins can change """
@@ -65,9 +63,7 @@ class SliverPropPermission(Permission):
         """ Admins can add """
         if inspect.isclass(caller):
             return user.has_roles(('admin',))
-        elif caller.sliver.slice.group.has_role(user, 'admin'):
-            return True
-        return False
+        return caller.sliver.slice.group.has_role(user, 'admin')
     
     def change(self, caller, user):
         """ Group admins can change """

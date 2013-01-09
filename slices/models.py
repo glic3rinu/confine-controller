@@ -297,7 +297,7 @@ class SliverProp(models.Model):
 
 
 # Autodiscover sliver ifaces
-# This is done just before entering to the SliverIface definition because we want 
+# Done just before entering to the SliverIface definition because we want 
 # type(choices=Sliver.get_registred_iface_types...) to be properly filled
 autodiscover('ifaces')
 
@@ -396,8 +396,7 @@ class SliverIface(models.Model):
             msb(node_id),
             lsb(node_id),
             int_to_hex_str(self.sliver.nr, 2),
-            int_to_hex_str(self.nr, 2)
-        ]
+            int_to_hex_str(self.nr, 2)]
         return ':'.join(words)
     
     def _get_nr(self):

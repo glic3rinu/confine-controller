@@ -15,9 +15,7 @@ class NodePermission(Permission):
         if inspect.isclass(caller):
             return user.has_roles(('admin', 'technician'))
         if caller.group.allow_nodes:
-            if caller.group.has_roles(user, roles=['admin', 'technician']):
-                return True
-        return False
+            return caller.group.has_roles(user, roles=['admin', 'technician'])
     
     def change(self, caller, user):
         """ group admins and techs can change """
@@ -40,9 +38,7 @@ class NodePropPermission(Permission):
         """ Admins and techs can add """
         if inspect.isclass(caller):
             return user.has_roles(('admin', 'technician'))
-        elif caller.node.group.has_roles(user, roles=['admin', 'technician']):
-            return True
-        return False
+        return caller.node.group.has_roles(user, roles=['admin', 'technician'])
     
     def change(self, caller, user):
         """ group admins and techs can change """

@@ -338,10 +338,10 @@
     "fields": {
         "priority": 0, 
         "is_active": true, 
-        "content": "[ addr.server.get_host() for addr in node.tinc.connect_to.all() ]", 
+        "content": "[ server.get_host() for server in node.tinc.connect_to.all() ]", 
         "mode": "", 
         "is_optional": false, 
-        "path": "[ \"/etc/tinc/confine/hosts/%s\" % addr.server.name for addr in node.tinc.connect_to.all() ]", 
+        "path": "[ \"/etc/tinc/confine/hosts/%s\" % server.name for server in node.tinc.connect_to.all() ]", 
         "config": 1
     }
 },

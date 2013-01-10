@@ -120,8 +120,6 @@ class Node(models.Model):
     
     def clean(self):
         # clean set_state:
-        if self.set_state not in [Node.DEBUG, Node.SAFE]:
-            raise ValidationError("Changes on %s state are not allowed." % self.set_state)
         old = Node.objects.filter(pk=self.pk)
         if old.exists():
             old = old.get()
@@ -129,7 +127,12 @@ class Node(models.Model):
                 raise ValidationError("Can not manually exit from Debug state.")
             elif self.set_state == Node.DEBUG and old.set_state != Node.DEBUG:
                 raise ValidationError("Can not manually enter to Debug state.")
-        
+            elif self.set_state == Node.PRODUCTION and old.set_state != Node.SAFE:
+                raise ValidationError("Can not make changes nor  manually enter to "
+                                      "Production state from another state different "
+                                      "than Safe.")
+        elif self.set_state != Node.DEBUG:
+            raise ValidationError("Initial state must be Debug")
         # clean sliver_pub_ipv4 and _range
         if self.sliver_pub_ipv4 == 'none':
             if not self.sliver_pub_ipv4_range:
@@ -153,11 +156,9 @@ class Node(models.Model):
             if self.set_state == Node.DEBUG:
                 # transition to safe when all config is correct
                 self.set_state = Node.SAFE
-            elif self.set_state == Node.FAILURE:
-                # changes not allowed
-                pass
             elif self.set_state == Node.PRODUCTION:
-                # transition to SAFE is changes are detected
+                #TODO transition to SAFE if changes are detected
+                #     self.set_state = Node.SAFE
                 pass
         if commit:
             self.save()

@@ -76,9 +76,9 @@ class Image(object):
         except: pass
         shutil.rmtree(self.tmp)
     
-    def move(self, path):
-        """ move generated image to a destination path """
-        shutil.move(self.image, path)
+    def move(self, src, dst):
+        """ move src destination path """
+        shutil.move(src, dst)
     
     def chmod(self, path, mode):
         """ change mode of the path """
@@ -112,11 +112,10 @@ class Image(object):
         # compress the generated image with gzip
         compress = "gzip " + self.image
         self._exec_cmd(compress)
-        self.image += '.gz'
         
         # move the image to the destination path if required
         if path is not None:
-            self.move(path)
+            self.move(self.image+'.gz', path)
     
     def _exec_cmd(self, command):
         """ Execute shell commands """

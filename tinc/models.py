@@ -113,6 +113,11 @@ class TincServer(TincHost):
         if self.content_type.model == 'server': return 'server'
         return "%s_%s" % (self.content_type.model, self.object_id)
     
+    def clean(self):
+#        if self.set_state not in [Node.DEBUG, Node.SAFE]:
+#            raise ValidationError("Changes on %s state are not allowed." % self.set_state)
+        super(TincServer, self).clean()
+    
     @property
     def addresses(self):
         return self.tincaddress_set.all()
@@ -244,8 +249,9 @@ class TincClient(TincHost):
         elif self.content_type.model == 'host':
             return self.address
     
+    @property
     def connect_to(self):
-        return TincServer.objects.all()
+        return TincServer.objects.filter(is_active=True)
     
     def update_tincd(self, async=True):
         if async:

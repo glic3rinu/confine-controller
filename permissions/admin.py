@@ -89,14 +89,11 @@ class PermExtensionMixin(object):
             'view': self.has_view_permission(request),
         }
     
-    def save_form(self, request, form, change):
-        """
-        Handling of add_view permissions here to avoid copy pasta all django add_view code
-        """
-        new_object = form.save(commit=False)
-        if not change and not self.has_add_permission(request, new_object):
+    def save_model(self, request, obj, form, change):
+        """ Given a model instance save it to the database. """
+        if not change and not self.has_add_permission(request, obj):
             raise PermissionDenied
-        return new_object
+        obj.save()
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         obj = self.get_object(request, unquote(object_id))

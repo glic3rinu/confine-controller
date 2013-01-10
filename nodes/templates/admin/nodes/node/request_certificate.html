@@ -3,6 +3,23 @@
 {% load url from future %}
 {% load admin_urls %}
 
+{% block extrahead %}{{ block.super }}
+<script language="JavaScript" type="text/javascript">
+<!-- Copyright 2005, Sandeep Gangadharan -->
+<!-- For more free scripts go to http://www.sivamdesign.com/scripts/ -->
+<!--
+if (document.getElementById) {
+document.writeln('<style type="text/css"><!--')
+document.writeln('.texter {display:none} @media print {.texter {display:block;}}')
+document.writeln('//--></style>') }
+
+function openClose(theID) {
+if (document.getElementById(theID).style.display == "block") { document.getElementById(theID).style.display = "none" }
+else { document.getElementById(theID).style.display = "block" } }
+// -->
+</script>
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
 <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
@@ -15,8 +32,43 @@
 
 
 {% block content %}
+<style>
+code,pre {font-size:1.1em; }
+</style>
+<div style="margin-left:20px;">
+
+
+<div style="margin-top:20px;">
+<fieldset class="module aligned collapse">
+<div onClick="openClose('config')" style="cursor:hand; cursor:pointer"><h2>HELP? How to generate a Certificate Signing Request (CSR) </h2></div>
+<div id="config" class="texter">
+<div class="level4">
+<p>
+For properly authenticate the node on the testbed the node admin should create a <a href="http://en.wikipedia.org/wiki/Certificate_signing_request" class="urlextern" title="http://en.wikipedia.org/wiki/Certificate_signing_request"  rel="nofollow">certiticate request</a> with the following two mandatory entries:
+</p>
+<ol>
+<li class="level1"><div class="li"> Common Name (CN): node's RD management address (2001:db8:cafe::2) (the domain that we want to secure)</div>
+</li>
+<li class="level1"><div class="li"> Email Address: technician's e-mail address for contact</div>
+</li>
+</ol>
+<p>
+The following command can be used for generating the requests and also generate the key pair:
+</p>
+<pre style='color:#000000;background:#ffffff;'>openssl req -nodes -newkey rsa<span style='color:#808030; '>:</span><span style='color:#008c00; '>2048</span> -keyout mynode<span style='color:#800000; font-weight:bold; '>.</span>key -out mynode<span style='color:#800000; font-weight:bold; '>.</span>csr
+</pre>
+<p>
+But of course existing node keys can be used, for example the Tinc key:
+</p>
+<pre style='color:#000000;background:#ffffff;'>openssl req -new -key <span style='color:#40015a; '>/etc/tinc/confine/rsa_key.priv</span> -out mynode<span style='color:#800000; font-weight:bold; '>.</span>csr
+</pre>
+</pre>
+</div>
+</fieldset>
+
+
     <p></p>
-    <p>{{ content_message }}</p>
+    <p>Upload a node certificate to be signed (CSR file in PEM format) using the following form:</p>
     <form action="" method="post">{% csrf_token %}
     {% for field in form %}
         <div class="fieldWrapper">
@@ -36,5 +88,10 @@
     </div>
     </div>
     </form>
+
+
+
+
+
 {% endblock %}
 

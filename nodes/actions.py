@@ -87,7 +87,6 @@ def request_cert(modeladmin, request, queryset):
     context = {
         "title": "Request certificate for node '%s'" % node,
         "content_title": mark_safe("Request certificate for node '%s'" % node_link),
-        "content_message": "Upload the node certificate to be signed (CSR file in PEM format).",
         'queryset': queryset,
         "opts": opts,
         "app_label": app_label,

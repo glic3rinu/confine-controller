@@ -39,7 +39,7 @@ class HostPermission(Permission):
     def change(self, caller, user):
         if inspect.isclass(caller):
             return True
-        return caller.admin == user
+        return caller.owner == user
     
     def delete(self, caller, user):
         if inspect.isclass(caller):

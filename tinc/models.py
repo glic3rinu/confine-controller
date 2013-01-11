@@ -31,7 +31,9 @@ class Host(models.Model):
     
     @property
     def tinc(self):
-        return self.related_tincclient.get()
+        ct = ContentType.objects.get_for_model(self)
+        obj, created = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
+        return obj
     
     @property
     def mgmt_addr(self):
@@ -114,8 +116,10 @@ class TincServer(TincHost):
         return "%s_%s" % (self.content_type.model, self.object_id)
     
     def clean(self):
-#        if self.set_state not in [Node.DEBUG, Node.SAFE]:
-#            raise ValidationError("Changes on %s state are not allowed." % self.set_state)
+        # TODO prevent changes when is_active = true, but take into account that 
+        #       change is_active to true is also a change, so this can be  a bit triky.
+#        if self.is_active:
+#            raise ValidationError("Changes on tinc servers are not allowed when is active.")
         super(TincServer, self).clean()
     
     @property
@@ -288,10 +292,11 @@ class TincClient(TincHost):
 # Monkey-Patching Section
 
 # Hook TincClient support to Node
-
 @property
 def tinc(self):
-    return self.related_tincclient.get()
+    ct = ContentType.objects.get_for_model(self)
+    obj, created = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
+    return obj
 
 Node.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
 Node.add_to_class('tinc', tinc)
@@ -299,7 +304,9 @@ Node.add_to_class('tinc', tinc)
 # Hook TincServer support to Server
 @property
 def tinc(self):
-    return self.related_tincserver.get()
+    ct = ContentType.objects.get_for_model(self)
+    obj, created = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
+    return obj
 
 Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
 Server.add_to_class('tinc', tinc)

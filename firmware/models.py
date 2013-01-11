@@ -168,8 +168,8 @@ class BuildFile(models.Model):
     path = models.CharField(max_length=256)
     content = models.TextField()
     
-#    class Meta:
-#        unique_together = ('build', 'path')
+    class Meta:
+        unique_together = ('build', 'path')
     
     def __unicode__(self):
         return self.path

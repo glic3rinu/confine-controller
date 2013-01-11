@@ -7,7 +7,6 @@ from django.template.response import TemplateResponse
 
 from common.admin import (insert_inline, admin_link, insert_action, wrap_admin_view,
     get_modeladmin, ChangeViewActionsModelAdmin, link)
-from common.forms import RequiredGenericInlineFormSet
 from common.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
@@ -24,7 +23,6 @@ class TincClientInline(PermissionGenericTabularInline):
     max_num = 1
     readonly_fields = ['address']
     verbose_name_plural = 'Tinc client'
-    formset = RequiredGenericInlineFormSet
 
 
 class TincServerInline(PermissionGenericTabularInline):

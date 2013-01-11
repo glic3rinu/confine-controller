@@ -25,6 +25,7 @@ class TincClientInline(PermissionGenericTabularInline):
     verbose_name_plural = 'Tinc client'
     
     def get_fieldsets(self, request, obj=None):
+        """ Warning user if the tinc client is not fully configured """
         if obj and not obj.tinc.pubkey:
             messages.warning(request, 'This %s misses a tinc public key.' % obj._meta.verbose_name)
         return super(TincClientInline, self).get_fieldsets(request, obj=obj)

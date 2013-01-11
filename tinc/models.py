@@ -86,8 +86,9 @@ class Gateway(models.Model):
     
     @property
     def tinc(self):
-        try: return self.related_tincserver.get()
-        except TincServer.DoesNotExist: return {}
+        ct = ContentType.objects.get_for_model(self)
+        obj, created = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
+        return obj
     
     @property
     def mgmt_addr(self):
@@ -144,8 +145,7 @@ class TincServer(TincHost):
         return self.address
     
     def get_host(self):
-        # FIXME this depends on each node(node.tinc.island)
-        #       maybe an optional node/tincclient argument and introspect islands?
+        """ Returns tincd host file """
         host = ""
         for addr in self.addresses:
             host += "Address = %s\n" % addr.addr
@@ -255,9 +255,11 @@ class TincClient(TincHost):
     
     @property
     def connect_to(self):
+        """ Returns all active TincServers to use on tincd ConnectTo """
         return TincServer.objects.filter(is_active=True)
     
     def update_tincd(self, async=True):
+        """ Update local tinc daemon configuration """
         if async:
             defer(update_tincd.delay)
         else:
@@ -275,7 +277,6 @@ class TincClient(TincHost):
         return config
     
     def generate_key(self, commit=False):
-        # TODO move to ssl.py ?
         key = M2Crypto.RSA.gen_key(2048, 65537)
         mem = M2Crypto.BIO.MemoryBuffer()
         key.save_key_bio(mem, cipher=None)

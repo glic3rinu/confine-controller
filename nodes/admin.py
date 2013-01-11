@@ -88,11 +88,11 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return qs
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        """ Warn the user if the node is not fully configured """
+        """ Warning user if the node is not fully configured """
         if request.method != 'POST':
             obj = self.get_object(request, object_id)
             if not obj.cert:
-                messages.warning(request, 'This node lacks on a valid certificate.')
+                messages.warning(request, 'This node lacks a valid certificate.')
         return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url, extra_context=extra_context)
 
 

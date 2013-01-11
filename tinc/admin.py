@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import patterns, url
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.template.response import TemplateResponse
 
@@ -23,6 +23,11 @@ class TincClientInline(PermissionGenericTabularInline):
     max_num = 1
     readonly_fields = ['address']
     verbose_name_plural = 'Tinc client'
+    
+    def get_fieldsets(self, request, obj=None):
+        if obj and not obj.tinc.pubkey:
+            messages.warning(request, 'This %s misses a tinc public key.' % obj._meta.verbose_name)
+        return super(TincClientInline, self).get_fieldsets(request, obj=obj)
 
 
 class TincServerInline(PermissionGenericTabularInline):

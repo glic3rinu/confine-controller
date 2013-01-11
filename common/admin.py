@@ -164,6 +164,8 @@ class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
     
     def change_view(self, *args, **kwargs):
         extra_context = kwargs['extra_context'] if 'extra_context' in kwargs else {}
+        if extra_context is None:
+            extra_context = {}
         extra_context.update({'object_tools_items': self.get_change_view_actions()})
         kwargs['extra_context'] = extra_context
         return super(ChangeViewActionsModelAdmin, self).change_view(*args, **kwargs)

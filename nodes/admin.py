@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import patterns, url
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.db import transaction, models
 from django.db.models import Q
@@ -86,6 +86,14 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         qs = super(NodeAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('directiface'))
         return qs
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Warn the user if the node is not fully configured """
+        if request.method != 'POST':
+            obj = self.get_object(request, object_id)
+            if not obj.cert:
+                messages.warning(request, 'This node lacks on a valid certificate.')
+        return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url, extra_context=extra_context)
 
 
 class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):

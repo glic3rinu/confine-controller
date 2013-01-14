@@ -27,7 +27,7 @@ class TincClientInline(PermissionGenericTabularInline):
     def get_readonly_fields(self, request, obj=None):
         """ pubkey as readonly if exists """
         readonly_fields = super(TincClientInline, self).get_readonly_fields(request, obj=obj)
-        if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
+        if obj and obj.tinc.pubkey is not None and 'pubkey' not in readonly_fields:
             readonly_fields.insert(0, 'pubkey')
         return readonly_fields
     

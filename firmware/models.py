@@ -39,7 +39,7 @@ class BuildQuerySet(models.query.QuerySet):
         config = Config.objects.get()
         if build.state != Build.AVAILABLE: 
             return build
-        if build.match(config): 
+        if build.match(config):
             return build
         else: 
             raise Build.DoesNotExist()
@@ -151,8 +151,9 @@ class Build(models.Model):
         return self.buildfile_set.all()
     
     def match(self, config):
-        if self.version != config.version: 
-            return True
+        """ checks if a a given build is up-to-date or not """
+        if self.version != config.version:
+            return False
         config = Config.objects.get()
         exclude = config.configfile_set.optional().values_list('pk', flat=True)
         old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(config__pk__in=exclude) )

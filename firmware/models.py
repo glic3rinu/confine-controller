@@ -61,7 +61,7 @@ class Build(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage, 
-        condition=lambda request, self: request.user.has_perm('nodes.node_getfirmware', obj=self.node))
+        condition=lambda request, self: request.user.has_perm('nodes.getfirmware_node', obj=self.node))
     task_id = models.CharField(max_length=36, unique=True, null=True, help_text="Celery Task ID")
     
     objects = generate_chainer_manager(BuildQuerySet)

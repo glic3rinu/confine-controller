@@ -7,6 +7,7 @@ class TestbedPermissionBackend(ModelBackend):
     supports_inactive_user = False
     
     def has_perm(self, user, perm, obj=None):
+        """ perm 'app.action_model' """
         if not user.is_active:
             return False
         

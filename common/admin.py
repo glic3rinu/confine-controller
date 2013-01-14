@@ -72,7 +72,7 @@ def admin_link(field_name, app_model='', href_name=''):
         if not app_model: app_model = rel._meta.db_table
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
         if not href_name: href_name = rel
-        return mark_safe('<a href="%s">%s</a>' % (url, href_name))
+        return mark_safe("<a href='%s'>%s</a>" % (url, href_name))
     link.short_description = field_name.capitalize()
     link.allow_tags = True
     link.admin_order_field = field_name
@@ -188,3 +188,10 @@ def wrap_admin_view(modeladmin, view):
     def wrapper(*args, **kwargs):
         return modeladmin.admin_site.admin_view(view)(*args, **kwargs)
     return update_wrapper(wrapper, view)
+
+
+def docstring_as_help_tip(cls):
+    """ return cls docstring as html help tip for use in admin """
+    docstring = cls.__doc__.strip()
+    img = '<img src="/static/admin/img/icon-unknown.gif" class="help help-tooltip" width="10" height="10" alt="(%s)" title="%s"/>'
+    return mark_safe(img % (docstring, docstring))

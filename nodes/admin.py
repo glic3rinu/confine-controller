@@ -3,12 +3,14 @@ from __future__ import absolute_import
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
 from django.db import transaction, models
 from django.db.models import Q
+from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
 from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
-    admin_link)
+    admin_link, docstring_as_help_tip)
 from common.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
@@ -28,6 +30,7 @@ STATES_COLORS = {
 class NodePropInline(PermissionTabularInline):
     model = NodeProp
     extra = 0
+    verbose_name_plural = mark_safe('Node Properties %s' % docstring_as_help_tip(NodeProp))
 
 
 class DirectIfaceInline(PermissionTabularInline):
@@ -41,7 +44,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display_links = ('id', 'name')
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
     search_fields = ['description', 'name', 'id']
-    readonly_fields = ['boot_sn', 'cert']
+    readonly_fields = ['boot_sn', 'display_cert']
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
@@ -51,7 +54,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         }),
         ('Certificate', {
             'classes': ('collapse',),
-            'fields': ('cert',)
+            'fields': ('display_cert',)
         }),
         ('Optional Prefixes', {
             'classes': ('collapse',),
@@ -61,6 +64,15 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]
     change_form_template = "admin/common/change_form.html"
+    
+    def display_cert(self, node):
+        if not node.pk:
+            return "You will be able to request a certificate once the node is registred"
+        if not node.cert:
+            req_url = reverse('admin:nodes_node_request-cert', args=[node.pk])
+            return mark_safe("<a href='%s'>Request certificate</a>" % req_url)
+        return node.cert
+    display_cert.short_description = 'Certificate'
     
     def num_ifaces(self, node):
         return node.directiface_set.count()
@@ -84,7 +96,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     
     def queryset(self, request):
         qs = super(NodeAdmin, self).queryset(request)
-        qs = qs.annotate(models.Count('directiface'))
+        qs = qs.annotate(models.Count('directiface', distinct=True))
         return qs
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -94,6 +106,15 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             if not obj.cert:
                 messages.warning(request, 'This node lacks a valid certificate.')
         return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url, extra_context=extra_context)
+    
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_nodes=True' """
+        if not request.GET.has_key('my_nodes'):
+            q = request.GET.copy()
+            q['my_nodes'] = 'True'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super(NodeAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
 class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):

@@ -25,7 +25,8 @@ else { document.getElementById(theID).style.display = "block" } }
 <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
 &rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
 &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-&rsaquo; {{ action_name }} multiple objects
+&rsaquo; <a href="{% url 'admin:nodes_node_change' node.pk %}">{{ node }}</a>
+&rsaquo; Request Certificate
 </div>
 {% endblock %}
 
@@ -81,7 +82,7 @@ But of course existing node keys can be used, for example the Tinc key:
     {% for obj in queryset %}
     <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
     {% endfor %}
-    <input type="hidden" name="action" value="reboot_selected" />
+    <input type="hidden" name="action" value="request_cert" />
     <input type="hidden" name="post" value="yes" />
     <div style="float:left;">
     <input type="submit" class="default" value="{% trans "Request" %}" />

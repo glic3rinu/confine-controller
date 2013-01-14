@@ -10,21 +10,33 @@ from .models import Sliver
 class BaseIface(object):
     """
     Base class for defining Sliver Iface specific behaviour.
-    Four methods are available for overriding:
-        def clean(self, iface)
-        def ipv6_addr(self, iface)
-        def ipv4_addr(self, iface)
-        def _get_nr(self, iface)
     """
-    def clean(self, iface):
+    DEFAULT_NAME = 'eth0'
+    ALLOW_BULK = True
+    AUTO_CREATE = False
+    
+    def clean_model(self, iface):
+        """ additional logic to be executed during model.clean() """
         if iface.parent:
             raise ValidationError("parent not allowed for this type of iface")
+    
+    def clean_formset(self, formset):
+        """ additional logic to be executed during formset.clean() """
+        pass
     
     def ipv6_addr(self, iface):
         return None
     
     def ipv4_addr(self, iface):
         return None
+    
+    def log_addition(self, sliver):
+        """ logic to implement AUTO_CREATE on sliver add form """
+        # Prevent circular imports
+        from .models import SliverIface
+        iface_type = Sliver.get_registred_iface_type(type(self))
+        if self.AUTO_CREATE and not sliver.sliveriface_set.filter(type=iface_type).exists():
+            SliverIface.objects.create(sliver=sliver, type=iface_type, name=self.DEFAULT_NAME)
 
 
 class IsolatedIface(BaseIface):
@@ -35,24 +47,13 @@ class IsolatedIface(BaseIface):
     interface, the researcher will be able to configure it at L3, but several 
     slices may share the same physical interface.
     """
-    def clean(self, iface):
+    DEFAULT_NAME = 'iso0'
+    ALLOW_BULK = False
+    
+    # TODO isolated iface must have slice.vlan_nr
+    def clean_model(self, iface):
         if not iface.parent:
             raise ValidationError("parent is mandatory for isolated interfaces.")
-
-
-class Pub6Iface(BaseIface):
-    """
-    Local network interface: assigned by stateless autoconf or DHCPv6
-    Describes an IPv6 Public Interface for an sliver. Traffic from a public
-    interface will be bridged to the community network.
-    """
-    def clean(self, iface):
-        super(PubIface, self).clean(iface)
-        if iface.sliver.nodesliver_pub_ipv4 == 'none':
-            raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
-    
-    def ipv6_addr(self, iface):
-        return 'Unknown'
 
 
 class Pub4Iface(BaseIface):
@@ -61,16 +62,41 @@ class Pub4Iface(BaseIface):
     Describes an IPv4 Public Interface for an sliver. Traffic from a public
     interface will be bridged to the community network.
     """
-    def clean(self, iface):
-        super(Pub4Iface, self).clean(iface)
-        if iface.sliver.node.sliver_pub_ipv4 == 'none':
-            raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
+    DEFAULT_NAME = 'pub0'
+    
+    def clean_model(self, iface):
+        super(Pub4Iface, self).clean_model(iface)
+        # TODO this breaks because ifce.sliver_id is not available at this time :( ?
+#        if iface.sliver.node.sliver_pub_ipv4 == 'none':
+#            raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
     
     def ipv4_addr(self, iface):
         return 'Unknown'
 
 
+class Pub6Iface(BaseIface):
+    """
+    Local network interface: assigned by stateless autoconf or DHCPv6
+    Describes an IPv6 Public Interface for an sliver. Traffic from a public
+    interface will be bridged to the community network.
+    """
+    DEFAULT_NAME = 'pub1'
+    
+    def ipv6_addr(self, iface):
+        return 'Unknown'
+
+
 class DebugIface(BaseIface):
+    """
+    Debug interface and address whose host side veth interface will be placed in 
+    the local bridge, thus allowing access to the debug network. The address is 
+    easily predictable and computed according to the address scheme, and no 
+    gateway is expected to exist in this network. This interface allows connections 
+    to other nodes and slivers in the same local network, which should be useful 
+    for debugging purposes
+    """
+    DEFAULT_NAME = 'deb0'
+    
     def ipv6_addr(self, iface):
         """ DEBUG_IPV6_PREFIX:N:10ii:ssss:ssss:ssss """
         # Hex representation of the needed values
@@ -90,13 +116,30 @@ class PrivateIface(BaseIface):
     will be forwarded to the community network by means of NAT. Every sliver 
     will have at least a private interface.
     """
-    def clean(self, iface):
-        super(PrivateIface, self).clean(iface)
+    DEFAULT_NAME = 'priv'
+    AUTO_CREATE = True
+    # TODO Autocreate iface logic 
+    
+    def clean_model(self, iface):
+        super(PrivateIface, self).clean_model(iface)
         private_qs = iface.__class__.objects.filter(sliver=iface.sliver, type='private')
         if iface.pk:
             private_qs = private_qs.exclude(pk=iface.pk)
         if private_qs.exists():
             raise ValidationError('There can only be one interface of type private')
+    
+    def clean_formset(self, formset):
+        """ Provide at least on private iface validation """
+        super(PrivateIface, self).clean_formset(formset)
+        if any(formset.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        private = False
+        for form in formset.forms:
+            if form.cleaned_data.get('type', None) == 'private':
+                if private:
+                    raise ValidationError("Only one private iface is allowed")
+                private = True
     
     def ipv6_addr(self, iface):
         """ PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64 """

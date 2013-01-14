@@ -13,6 +13,8 @@ class MgmtIface(BaseIface):
     connections from the management network to the sliver and optional access to 
     whatever other networks are routed by testbed gateways in the management network.
     """
+    DEFAULT_NAME = 'mgmt0'
+    
     def ipv6_addr(self, iface):
         """ MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64 """
         # Hex representation of the needed values

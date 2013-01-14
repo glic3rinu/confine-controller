@@ -9,15 +9,16 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
 from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
-    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view)
+    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view, 
+    docstring_as_help_tip)
 from common.widgets import ReadOnlyWidget
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
-from .actions import renew_selected_slices, reset_selected
+from .actions import renew_selected_slices, reset_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter
-from .forms import SliceAdminForm, SliverIfaceInlineForm
+from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormset
 from .helpers import wrap_action, remove_slice_id
 from .models import (Sliver, SliverProp, SliverIface, Slice, SliceProp, Template)
 
@@ -41,15 +42,16 @@ def template_link(instance):
 class SliverPropInline(PermissionTabularInline):
     model = SliverProp
     extra = 0
+    verbose_name_plural = mark_safe('Sliver Properties %s' % docstring_as_help_tip(SliverProp))
 
 
 class SliverIfaceInline(PermissionTabularInline):
     model = SliverIface
     readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
     extra = 0
-    verbose_name_plural = 'Sliver Network Interfaces'
+    verbose_name_plural = mark_safe('Sliver Network Interfaces <a href="http://wiki.confine-project.eu/arch:node">(Help)</a>')
     form = SliverIfaceInlineForm
-    # TODO: precreate a private interface
+    formset = SliverIfaceInlineFormset
     
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
@@ -58,10 +60,9 @@ class SliverIfaceInline(PermissionTabularInline):
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    # TODO reimplement num_ifaces!!
-    list_display = ['__unicode__', admin_link('node'), admin_link('slice'), ]
-#                    'has_private_iface', 'num_isolated_ifaces', 'num_pub4_ifaces',
-#                    'num_pub6_ifaces', 'num_mgmt_ifaces']
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
+                    'num_isolated_ifaces', 'num_pub4_ifaces', 'num_pub6_ifaces',
+                    'num_debug_ifaces', 'has_mgmt_iface', 'total_num_ifaces']
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
@@ -72,38 +73,36 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
     
-    def has_private_iface(self, instance):
-        try: instance.privateiface
-        except PrivateIface.DoesNotExist: return False
-        else: return True
-    has_private_iface.short_description = 'Private Iface'
-    has_private_iface.boolean = True
-    has_private_iface.admin_order_field = 'privateiface'
-    
-    # Total Interfaces Per Sliver (TIPS) = 256  (unsigned 8)
-    #TODO: how many mgmt ifaces can have a sliver? limited by TIPS
-    # @url: http://www.grups.pangea.org/pipermail/confine-devel/2012-November/000537.html
-    def num_mgmt_ifaces(self, instance):
-        #get_ipv6 = lambda iface: iface.ipv6_addr
-        #return "<br/> ".join(map(get_ipv6, instance.mgmtiface_set.all()))
-        return instance.mgmtiface_set.count()
-    num_mgmt_ifaces.short_description = 'Mgmt Ifaces'
-    num_mgmt_ifaces.admin_order_field = 'mgmtiface__count'
+    def has_mgmt_iface(self, instance):
+        # TODO: this should be provided by tinc
+        return instance.sliveriface_set.filter(type='management').exists()
+    has_mgmt_iface.short_description = 'Mgmt'
+    has_mgmt_iface.boolean = True
     
     def num_isolated_ifaces(self, instance):
-        return instance.isolatediface_set.count()
-    num_isolated_ifaces.short_description = 'Isolated Ifaces'
-    num_isolated_ifaces.admin_order_field = 'isolatediface__count'
+        # TODO make sortable
+        return instance.sliveriface_set.filter(type='isolated').count()
+    num_isolated_ifaces.short_description = 'Isolated'
+    
+    def num_debug_ifaces(self, instance):
+        # TODO make sortable
+        return instance.sliveriface_set.filter(type='debug').count()
+    num_debug_ifaces.short_description = 'Debug'
     
     def num_pub6_ifaces(self, instance):
-        return instance.pub6iface_set.count()
-    num_pub6_ifaces.short_description = 'Pub IPv6 Ifaces'
-    num_pub6_ifaces.admin_order_field = 'pub6iface__count'
+        # TODO make sortable
+        return instance.sliveriface_set.filter(type='public6').count()
+    num_pub6_ifaces.short_description = 'Public6'
     
     def num_pub4_ifaces(self, instance):
-        return instance.pub4iface_set.count()
-    num_pub4_ifaces.short_description = 'Pub IPv4 Ifaces'
-    num_pub4_ifaces.admin_order_field = 'pub4iface__count'
+        # TODO make sortable
+        return instance.sliveriface_set.filter(type='public4').count()
+    num_pub4_ifaces.short_description = 'Public4'
+    
+    def total_num_ifaces(self, instance):
+        return instance.sliveriface_set.count()
+    total_num_ifaces.short_description = 'Ifaces'
+    total_num_ifaces.admin_order_field = 'sliveriface__count'
 
     def slice_link(self, instance):
         return mark_safe("<b>%s</b>" % admin_link('slice')(instance))
@@ -117,16 +116,6 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return instance.exp_data_sha256
     exp_data_sha256.short_description = 'Experiment Data SHA256'
     
-    def queryset(self, request):
-        """ Annotate number of ifaces for sorting on the changelist """
-        qs = super(SliverAdmin, self).queryset(request)
-#        qs = qs.annotate(models.Count('isolatediface'))
-#        qs = qs.annotate(models.Count('pub6iface'))
-#        qs = qs.annotate(models.Count('pub4iface'))
-#        qs = qs.annotate(models.Count('isolatediface'))
-#        qs = qs.annotate(models.Count('mgmtiface'))
-        return qs
-    
     def has_add_permission(self, *args, **kwargs):
         """ 
         Remove add button on change list. Slivers can only be added from slice change form 
@@ -137,6 +126,37 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         """ Hook node reference for future processing in IsolatedIfaceInline """
         request._node_ = obj.node
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
+    
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_slivers=True' """
+        if not request.GET.has_key('my_slivers'):
+            q = request.GET.copy()
+            q['my_slivers'] = 'True'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super(SliverAdmin,self).changelist_view(request, extra_context=extra_context)
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Provide a linked title """
+        sliver = self.get_object(request, object_id)
+        context = {'title': mark_safe('Change sliver %s@%s' % \
+                                      (admin_link('')(sliver.node), admin_link('')(sliver.slice))),
+                   'slice': slice,}
+        context.update(extra_context or {})
+        return super(SliverAdmin, self).change_view(request, object_id, form_url=form_url, 
+                     extra_context=context)
+    
+    def queryset(self, request):
+        """ Annotate number of ifaces for future ordering on the changellist """
+        qs = super(SliverAdmin, self).queryset(request)
+        qs = qs.annotate(models.Count('sliveriface', distinct=True))
+        return qs
+    
+    def log_addition(self, request, object):
+        """ Hook for allowing sliver iface custom logic """
+        for iface in Sliver.get_registred_ifaces():
+            iface.log_addition(object)
+        super(SliverAdmin, self).log_addition(request, object)
 
 
 class NodeListAdmin(NodeAdmin):
@@ -149,7 +169,6 @@ class NodeListAdmin(NodeAdmin):
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
-    actions = None
     
     def add_sliver_link(self, instance):
         url = reverse('admin:slices_slice_add_sliver', 
@@ -157,6 +176,18 @@ class NodeListAdmin(NodeAdmin):
         return '<a href="%s">%s<a>' % (url, instance.name)
     add_sliver_link.allow_tags = True
     add_sliver_link.short_description = 'Add on Node'
+    
+    def get_actions(self, request):
+        from django.utils.datastructures import SortedDict
+        actions = []
+        actions.extend([self.get_action(action) for action in [create_slivers]])
+        
+        # Convert the actions into a SortedDict keyed by name.
+        actions = SortedDict([
+            (name, (func, name, desc))
+            for func, name, desc in actions
+        ])
+        return actions
     
     def custom_sliver_pub_ipv4_range(self, instance):
         return instance.sliver_pub_ipv4_range
@@ -167,10 +198,11 @@ class NodeListAdmin(NodeAdmin):
         """ Just fixing title and breadcrumbs """
         self.slice_id = slice_id
         slice = Slice.objects.get(pk=slice_id)
-        context = {'title': 'Select a node for slice "%s"' % slice.name,
+        context = {'title': mark_safe('Select one or more nodes for creating %s slivers' % admin_link('')(slice)),
                    'slice': slice, }
         context.update(extra_context or {})
-        return super(NodeListAdmin, self).changelist_view(request, extra_context=context)
+        # call super.super to avoid my_nodes default changelist filter of NodeAdmin
+        return super(NodeAdmin, self).changelist_view(request, extra_context=context)
     
     def queryset(self, request):
         """ Filter node list excluding nodes with already slivers of the slice """
@@ -197,8 +229,8 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
         node = Node.objects.get(pk=node_id)
-        context = {'title': 'Add sliver in node "%s" (slice "%s")' % \
-                            (node.description, slice.name),
+        context = {'title': mark_safe('Add sliver %s@%s' % \
+                                      (admin_link('')(slice), admin_link('')(node))),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).add_view(request, form_url='', 
@@ -209,8 +241,8 @@ class SliceSliversAdmin(SliverAdmin):
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
         self.node_id = sliver.node_id
-        context = {'title': 'Change sliver in node "%s" (slice "%s")' % \
-                            (sliver.node.description, slice.name),
+        context = {'title': mark_safe('Change sliver %s@%s' % \
+                                      (admin_link('')(slice), admin_link('')(sliver.node))),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).change_view(request, object_id, 
@@ -271,10 +303,39 @@ class SliverInline(PermissionTabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
-    readonly_fields = ['sliver_link', 'node_link', 'cn_url']
+    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'sliver_note_hack',
+                       'sliver_note_hack2']
+    
+    def sliver_note_hack(self, instance): pass
+    sliver_note_hack.short_description = ('The slice must be registred before creating '
+                                          'slivers. To do so select "Save and continue editing".')
+    
+    def sliver_note_hack2(self, instance): pass
+    sliver_note_hack2.short_description = mark_safe('Use the <a href="add_sliver">'
+                                                    '"Add Sliver"</a> button on the '
+                                                    'top-left of this page')
+    
+    def get_fieldsets(self, request, obj=None):
+        """ HACK display message using the field name of the inline form """
+        if obj is None:
+            return [(None, {'fields': ['sliver_note_hack']})]
+        # The slices is registred, display add button as the inline header
+        self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
+        if not obj.sliver_set.exists():
+            return [(None, {'fields': ['sliver_note_hack2']})]
+        return super(SliverInline, self).get_fieldsets(request, obj=obj)
+    
+    def has_delete_permission(self, request, obj=None):
+        """ Do not display delete field when there is no slivers """
+        if obj is None or not obj.sliver_set.exists():
+            return False
+        return super(SliverInline, self).has_delete_permission(request, obj=obj)
     
     def sliver_link(self, instance):
-        return mark_safe("<b>%s</b>" % admin_link('')(instance))
+        url = reverse('admin:slices_slice_slivers', 
+                      kwargs={'slice_id': instance.slice_id,
+                              'object_id': instance.id})
+        return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance))
     sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):
@@ -289,6 +350,7 @@ class SliverInline(PermissionTabularInline):
 class SlicePropInline(PermissionTabularInline):
     model = SliceProp
     extra = 0
+    verbose_name_plural = mark_safe('Slice Properties %s' % docstring_as_help_tip(SliceProp))
 
 
 class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
@@ -296,7 +358,6 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
     list_display_links = ('name',)
     list_filter = [MySlicesListFilter, 'set_state', 'template']
-#    filter_horizontal = ['users']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
                        'exp_data_sha256', template_link]
     date_hierarchy = 'expires_on'
@@ -324,7 +385,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         Annotate number of slivers on the slice for sorting on changelist 
         """
         qs = super(SliceAdmin, self).queryset(request)
-        qs = qs.annotate(models.Count('sliver'))
+        qs = qs.annotate(models.Count('sliver', distinct=True))
         return qs
     
     def get_urls(self):
@@ -365,6 +426,15 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                 form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].required = False
         return form
+    
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_slices=True' """
+        if not request.GET.has_key('my_slices'):
+            q = request.GET.copy()
+            q['my_slices'] = 'True'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super(SliceAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
 class TemplateAdmin(PermissionModelAdmin):
@@ -400,7 +470,7 @@ old_queryset = node_modeladmin.queryset
 def queryset(request):
     " Annotate number of slivers for sorting on node changelist "
     qs = old_queryset(request)
-    qs = qs.annotate(models.Count('sliver'))
+    qs = qs.annotate(models.Count('sliver', distinct=True))
     return qs
 
 node_modeladmin.queryset = queryset

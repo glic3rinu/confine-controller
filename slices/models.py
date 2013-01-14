@@ -57,7 +57,7 @@ class Template(models.Model):
         help_text='Template\'s image file.')
     
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.type)
     
     @property
     def image_sha256(self):
@@ -106,7 +106,7 @@ class Slice(models.Model):
         storage=private_storage, verbose_name='Experiment Data',
         condition=lambda request, self: 
                   request.user.has_perm('slices.slice_change', obj=self),
-        help_text='.tar.gz archive containing experiment data for slivers (if'
+        help_text='.tar.gz archive containing experiment data for slivers (if '
                   'they do not explicitly indicate one)', 
         validators=[validators.RegexValidator('.*\.tar\.gz', 
                    'Upload a valid .tar.gz file', 'invalid')],)
@@ -201,7 +201,7 @@ class Sliver(models.Model):
     """
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    description = models.CharField(max_length=256, blank=True, 
+    description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this sliver.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The number of times this sliver has been instructed to be '
@@ -271,8 +271,17 @@ class Sliver(models.Model):
         return zip(types, [ iface.capitalize() for iface in types ])
     
     @classmethod
+    def get_registred_iface_type(cls, iface):
+        for k, v in cls._iface_registry.iteritems():
+            if type(v) is iface: return k
+    
+    @classmethod
     def get_registred_iface(cls, type_):
         return cls._iface_registry[type_]
+    
+    @classmethod
+    def get_registred_ifaces(cls):
+        return cls._iface_registry.values()
 
 
 class SliverProp(models.Model):
@@ -341,8 +350,9 @@ class SliverIface(models.Model):
         return self.name
     
     def clean(self):
-        Sliver.get_registred_iface(self.type).clean(self)
         super(SliverIface, self).clean()
+        if self.type:
+            Sliver.get_registred_iface(self.type).clean_model(self)
     
     def save(self, *args, **kwargs):
         if not self.pk:

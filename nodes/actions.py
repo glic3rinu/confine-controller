@@ -88,6 +88,7 @@ def request_cert(modeladmin, request, queryset):
         "title": "Request certificate for node '%s'" % node,
         "content_title": mark_safe("Request certificate for node '%s'" % node_link),
         'queryset': queryset,
+        'node': node,
         "opts": opts,
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,

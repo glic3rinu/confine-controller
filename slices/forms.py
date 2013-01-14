@@ -2,7 +2,7 @@ from django import forms
 
 from common.widgets import ShowText
 
-from .models import Slice
+from .models import Slice, Sliver
 
 
 class SliceAdminForm(forms.ModelForm):
@@ -52,3 +52,24 @@ class SliverIfaceInlineForm(forms.ModelForm):
             # readonly forms doesn't have model fields
             # TODO handle this on the permission application?
             self.fields['parent'].queryset = self.node.direct_ifaces
+
+
+class SliverIfaceInlineFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        """ iface specific clean() definition """
+        super(SliverIfaceInlineFormset, self).clean()
+        for iface in Sliver.get_registred_ifaces():
+            iface.clean_formset(self)
+
+
+class SliverIfaceBulkForm(forms.Form):
+    """ Display available ifaces for request creation on add sliver bulk mode """
+    def __init__(self, *args, **kwargs):
+        super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
+        for iface_type in Sliver.get_registred_iface_types():
+            iface_type = iface_type[0]
+            iface = Sliver.get_registred_iface(iface_type)
+            if iface.ALLOW_BULK:
+                self.fields[iface_type] = forms.BooleanField(label=iface_type, 
+                    required=False, help_text=iface.__doc__.strip())
+

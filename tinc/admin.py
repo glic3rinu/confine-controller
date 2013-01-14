@@ -24,6 +24,13 @@ class TincClientInline(PermissionGenericTabularInline):
     readonly_fields = ['address']
     verbose_name_plural = 'Tinc client'
     
+    def get_readonly_fields(self, request, obj=None):
+        """ pubkey as readonly if exists """
+        readonly_fields = super(TincClientInline, self).get_readonly_fields(request, obj=obj)
+        if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
+            readonly_fields.insert(0, 'pubkey')
+        return readonly_fields
+    
     def get_fieldsets(self, request, obj=None):
         """ Warning user if the tinc client is not fully configured """
         if obj and not obj.tinc.pubkey:

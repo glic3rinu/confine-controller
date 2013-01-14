@@ -175,7 +175,7 @@ class Slice(models.Model):
 
 class SliceProp(models.Model):
     """
-    A mapping of (non-empty) arbitrary slice property names to their (string) 
+    A mapping of (non-empty) arbitrary slice property names to their (string)
     values.
     """
     slice = models.ForeignKey(Slice)

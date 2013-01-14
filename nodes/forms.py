@@ -5,6 +5,8 @@ from django.utils.safestring import mark_safe
 from common.validators import validate_rsa_pubkey
 from common.widgets import ShowText
 
+from .validators import validate_scr
+
 
 class NodeInlineAdminForm(forms.ModelForm):
     node = forms.CharField(label="Node", widget=ShowText(bold=True))
@@ -28,10 +30,10 @@ class NodeInlineAdminForm(forms.ModelForm):
 
 
 class RequestCertificateForm(forms.Form):
-    pubkey = forms.CharField(widget=forms.Textarea(attrs={'cols': '70', 'rows': '20'}))
+    scr = forms.CharField(widget=forms.Textarea(attrs={'cols': '70', 'rows': '20'}))
     
-    def clean_pubkey(self):
-        data = self.cleaned_data['pubkey']
-        # TODO validate node's RD management address (2001:db8:cafe::2) as a distinguished name and the technician's e-mail address for contact
+    def clean_scr(self):
+        data = self.cleaned_data['scr']
+        validate_scr(data)
         return data
 

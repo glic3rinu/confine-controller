@@ -70,12 +70,12 @@ def request_cert(modeladmin, request, queryset):
     node = queryset[0]
     form = RequestCertificateForm()
     
-    # User has provided a pubkey
+    # User has provided a SCR
     if request.POST.get('post'):
         form = RequestCertificateForm(request.POST)
         if form.is_valid():
-            pubkey = form.cleaned_data['pubkey']
-            node.sign_cert_request(pubkey)
+            scr = form.cleaned_data['scr']
+            node.sign_cert_request(scr)
             modeladmin.log_change(request, node, "Certificate requested")
             return
     

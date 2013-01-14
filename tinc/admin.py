@@ -28,7 +28,7 @@ class TincClientInline(PermissionGenericTabularInline):
         """ pubkey as readonly if exists """
         readonly_fields = super(TincClientInline, self).get_readonly_fields(request, obj=obj)
         if obj and obj.tinc.pubkey is not None and 'pubkey' not in readonly_fields:
-            readonly_fields.insert(0, 'pubkey')
+            return ['pubkey'] + readonly_fields
         return readonly_fields
     
     def get_fieldsets(self, request, obj=None):
@@ -94,7 +94,9 @@ class HostAdmin(PermissionModelAdmin):
         admin_site = self.admin_site
         opts = self.model._meta
         extra_urls = patterns("", 
-            url("^(?P<host_id>\d+)/help", wrap_admin_view(self, self.help_view), name='host-help'),
+            url("^(?P<host_id>\d+)/help",
+                wrap_admin_view(self, self.help_view),
+                name='host-help'),
         )
         return extra_urls + urls
     
@@ -106,7 +108,7 @@ class HostAdmin(PermissionModelAdmin):
                    'net_name': settings.TINC_NET_NAME,
                    'opts': opts,
                    'app_label': opts.app_label}
-        return TemplateResponse(request, 'admin/tinc/host/help.html', context, 
+        return TemplateResponse(request, 'admin/tinc/host/help.html', context,
                                 current_app=self.admin_site.name)
     
     def get_form(self, request, *args, **kwargs):
@@ -116,7 +118,8 @@ class HostAdmin(PermissionModelAdmin):
             # ronly forms doesn't have initial
             user = request.user
             if not user.is_superuser:
-                form.base_fields['owner'].widget = ReadOnlyWidget(user.id, user.username)
+                ro_widget = ReadOnlyWidget(user.id, user.username)
+                form.base_fields['owner'].widget = ro_widget
                 form.base_fields['owner'].required = False
             else:
                 form.base_fields['owner'].initial = user

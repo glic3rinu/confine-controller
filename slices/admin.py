@@ -53,7 +53,8 @@ class SliverIfaceInline(PermissionTabularInline):
     model = SliverIface
     readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
     extra = 0
-    verbose_name_plural = mark_safe('Sliver Network Interfaces <a href="http://wiki.confine-project.eu/arch:node">(Help)</a>')
+    verbose_name_plural = mark_safe('Sliver Network Interfaces <a href="http://wiki.'
+                                    'confine-project.eu/arch:node">(Help)</a>')
     form = SliverIfaceInlineForm
     
     def get_formset(self, request, obj=None, **kwargs):
@@ -63,7 +64,8 @@ class SliverIfaceInline(PermissionTabularInline):
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['__unicode__', admin_link('node'), admin_link('slice'), 'total_num_ifaces']
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice'), 
+                    'total_num_ifaces']
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
@@ -73,7 +75,6 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     inlines = [SliverPropInline, SliverIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
-    
     
     def __init__(self, *args, **kwargs):
         """ 
@@ -94,7 +95,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return instance.sliveriface_set.count()
     total_num_ifaces.short_description = 'Total Ifaces'
     total_num_ifaces.admin_order_field = 'sliveriface__count'
-
+    
     def slice_link(self, instance):
         return mark_safe("<b>%s</b>" % admin_link('slice')(instance))
     slice_link.short_description = 'Slice'
@@ -130,8 +131,9 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Provide a linked title """
         sliver = self.get_object(request, object_id)
-        context = {'title': mark_safe('Change sliver %s@%s' % \
-                                      (admin_link('')(sliver.node), admin_link('')(sliver.slice))),
+        slice_link = admin_link('')(sliver.slice)
+        sliver_link = admin_link('')(sliver.node)
+        context = {'title': mark_safe('Change sliver %s@%s' % (slice_link, sliver_link)),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliverAdmin, self).change_view(request, object_id, form_url=form_url, 
@@ -163,9 +165,10 @@ class NodeListAdmin(NodeAdmin):
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = [create_slivers]
+    
     def add_sliver_link(self, instance):
-        url = reverse('admin:slices_slice_add_sliver', 
-                      kwargs={'slice_id':self.slice_id, 'node_id':instance.pk})
+        kwargs = { 'slice_id':self.slice_id, 'node_id':instance.pk }
+        url = reverse('admin:slices_slice_add_sliver', kwargs=kwargs)
         return '<a href="%s">%s<a>' % (url, instance.name)
     add_sliver_link.allow_tags = True
     add_sliver_link.short_description = 'Add on Node'
@@ -184,7 +187,8 @@ class NodeListAdmin(NodeAdmin):
         """ Just fixing title and breadcrumbs """
         self.slice_id = slice_id
         slice = Slice.objects.get(pk=slice_id)
-        context = {'title': mark_safe('Select one or more nodes for creating %s slivers' % admin_link('')(slice)),
+        title = 'Select one or more nodes for creating %s slivers' % admin_link('')(slice)
+        context = {'title': mark_safe(title),
                    'slice': slice, }
         context.update(extra_context or {})
         # call super.super to avoid my_nodes default NodeAdmin changelist filter
@@ -215,8 +219,8 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
         node = Node.objects.get(pk=node_id)
-        context = {'title': mark_safe('Add sliver %s@%s' % \
-                                      (admin_link('')(slice), admin_link('')(node))),
+        title = 'Add sliver %s@%s' % (admin_link('')(slice), admin_link('')(node))
+        context = {'title': mark_safe(title),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).add_view(request, form_url='', 
@@ -227,8 +231,8 @@ class SliceSliversAdmin(SliverAdmin):
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
         self.node_id = sliver.node_id
-        context = {'title': mark_safe('Change sliver %s@%s' % \
-                                      (admin_link('')(slice), admin_link('')(sliver.node))),
+        title = 'Change sliver %s@%s' % (admin_link('')(slice), admin_link('')(sliver.node))
+        context = {'title': mark_safe(title),
                    'slice': slice,}
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).change_view(request, object_id, 
@@ -289,26 +293,24 @@ class SliverInline(PermissionTabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
-    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'sliver_note_hack',
-                       'sliver_note_hack2']
+    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'note_hack', 'note2_hack']
     
-    def sliver_note_hack(self, instance): pass
-    sliver_note_hack.short_description = ('The slice must be registred before creating '
-                                          'slivers. To do so select "Save and continue editing".')
+    def note_hack(self, instance): pass
+    note_hack.short_description = ('The slice must be registred before creating slivers. '
+                                   'To do so select "Save and continue editing".')
     
-    def sliver_note_hack2(self, instance): pass
-    sliver_note_hack2.short_description = mark_safe('Use the <a href="add_sliver">'
-                                                    '"Add Sliver"</a> button on the '
-                                                    'top-left of this page')
+    def note2_hack(self, instance): pass
+    note2_hack.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
+                                             '</a> button on the top-left of this page')
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
         if obj is None:
-            return [(None, {'fields': ['sliver_note_hack']})]
+            return [(None, {'fields': ['note_hack']})]
         # The slices is registred, display add button as the inline header
         self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
         if not obj.sliver_set.exists():
-            return [(None, {'fields': ['sliver_note_hack2']})]
+            return [(None, {'fields': ['note2_hack']})]
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
     def has_delete_permission(self, request, obj=None):
@@ -318,9 +320,9 @@ class SliverInline(PermissionTabularInline):
         return super(SliverInline, self).has_delete_permission(request, obj=obj)
     
     def sliver_link(self, instance):
-        url = reverse('admin:slices_slice_slivers', 
-                      kwargs={'slice_id': instance.slice_id,
-                              'object_id': instance.id})
+        kwargs = {'slice_id': instance.slice_id,
+                  'object_id': instance.id}
+        url = reverse('admin:slices_slice_slivers', kwargs=kwargs)
         return mark_safe("<b><a href='%s'>%s</a></b>" % (url, instance))
     sliver_link.short_description = 'Sliver'
     
@@ -367,9 +369,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     exp_data_sha256.short_description = 'Experiment Data SHA256'
     
     def queryset(self, request):
-        """ 
-        Annotate number of slivers on the slice for sorting on changelist 
-        """
+        """ Annotate number of slivers on the slice for sorting on changelist """
         qs = super(SliceAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('sliver', distinct=True))
         return qs
@@ -454,7 +454,7 @@ node_modeladmin = get_modeladmin(Node)
 old_queryset = node_modeladmin.queryset
 
 def queryset(request):
-    " Annotate number of slivers for sorting on node changelist "
+    """ Annotate number of slivers for sorting on node changelist """
     qs = old_queryset(request)
     qs = qs.annotate(models.Count('sliver', distinct=True))
     return qs

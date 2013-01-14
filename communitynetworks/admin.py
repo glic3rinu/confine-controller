@@ -21,9 +21,10 @@ class CnHostInline(PermissionGenericTabularInline):
      
     def cndb_cached(self, instance):
         date = instance.cndb_cached_on
-        if not date: return 'Never'
+        if not date:
+            return 'Never'
         return date
-    cndb_cached.short_description=CnHost._meta.get_field_by_name('cndb_cached_on')[0].verbose_name
+    cndb_cached.short_description = 'CNDB cached on'
 
 
 # Monkey-Patching Section

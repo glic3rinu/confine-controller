@@ -91,7 +91,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             if num_groups >= 1:
                 form.base_fields['group'].queryset = groups
             if num_groups == 1:
-                form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
+                ro_widget = ReadOnlyWidget(groups[0].id, groups[0].name)
+                form.base_fields['group'].widget = ro_widget
                 form.base_fields['group'].required = False
         return form
     
@@ -121,7 +122,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             obj = self.get_object(request, object_id)
             if not obj.cert:
                 messages.warning(request, 'This node lacks a valid certificate.')
-        return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url, extra_context=extra_context)
+        return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url, 
+                                                  extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
         """ Default filter as 'my_nodes=True' """

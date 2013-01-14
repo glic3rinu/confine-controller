@@ -44,14 +44,14 @@ class TicketInline(admin.TabularInline):
 class TicketAdmin(ChangeViewActionsModelAdmin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     # TODO Create a list filter for 'owner__username'
-    list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'), 
+    list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
                     admin_link('queue'), colored('priority', PRIORITY_COLORS),
-                    colored('state', STATE_COLORS), 'num_messages', 'created_on', 
+                    colored('state', STATE_COLORS), 'num_messages', 'created_on',
                     'last_modified_on']
     list_display_links = ('id', 'subject')
     list_filter = ['queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
-    search_fields = ['id', 'subject', 'created_by__username', 'created_by__email', 
+    search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
                      'queue', 'owner__username']
     inlines = [MessageInline]
     actions = [reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
@@ -61,7 +61,7 @@ class TicketAdmin(ChangeViewActionsModelAdmin):
     readonly_fields = ('created_by',)
     fieldsets = (
         (None, {
-            'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority', 
+            'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority',
                        'state'))
         }),
         ('CC', {

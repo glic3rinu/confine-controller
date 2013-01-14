@@ -36,7 +36,8 @@ class ConfigUCIInline(admin.TabularInline):
     extra = 0
     
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'value': kwargs['widget'] = forms.TextInput(attrs={'size':'100'})
+        if db_field.name == 'value':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'100'})
         return super(ConfigUCIInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 

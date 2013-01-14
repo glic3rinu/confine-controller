@@ -219,9 +219,11 @@ class Node(models.Model):
         return self.cert
     
     def generate_certificate(self, key, commit=False, user=None):
-        if user is None: 
+        if user is None:
+            # We pick one pseudo-random admin
             user = self.group.admins[0]
-        self.cert = ssl.generate_certificate(key, Email=user.email, CN=str(self.mgmt_addr))
+        addr = str(self.mgmt_addr)
+        self.cert = ssl.generate_certificate(key, Email=user.email, CN=addr)
         if commit:
             self.save()
         return self.cert
@@ -239,7 +241,7 @@ class NodeProp(models.Model):
     node = models.ForeignKey(Node)
     name = models.CharField(max_length=32,
         help_text='Per node unique single line of free-form text with no '
-                  'whitespace surrounding it',
+                  'whitespace surrounding it.',
         validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
@@ -254,7 +256,7 @@ class NodeProp(models.Model):
 
 class DirectIface(models.Model):
     """
-    Interfaces used as direct interfaces. 
+    Interfaces used as direct interfaces.
     
     See node architecture: http://wiki.confine-project.eu/arch:node
     """

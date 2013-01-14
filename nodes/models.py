@@ -24,9 +24,9 @@ class Node(models.Model):
     PRODUCTION = 'production'
     STATES = (
         (DEBUG, 'Debug'),
-        (FAILURE, 'Failure'),
         (SAFE, 'Safe'),
         (PRODUCTION, 'Production'),
+        (FAILURE, 'Failure'),
     )
     IPV6_METHODS = (
         ('none', 'none'),

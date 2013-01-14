@@ -66,6 +66,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     change_form_template = "admin/common/change_form.html"
     
     def display_cert(self, node):
+        """ with some contextual help if cert is not present """
         if not node.pk:
             return "You will be able to request a certificate once the node is registred"
         if not node.cert:
@@ -95,9 +96,24 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return form
     
     def queryset(self, request):
+        """ Annotate direct iface counter to allow ordering on change list """
         qs = super(NodeAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('directiface', distinct=True))
         return qs
+    
+    def get_readonly_fields(self, request, obj=None):
+        """ Disable set_state transitions when state is DEBUG """
+        if obj is None or obj.set_state == obj.DEBUG:
+            return self.readonly_fields + ['set_state']
+        return self.readonly_fields
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Remove DEBUG from set_state choices, DEBUG is an automatic state """
+        field = super(NodeAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == 'set_state':
+            # Removing Debug from choices
+            field.choices.pop(0)
+        return field
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Warning user if the node is not fully configured """

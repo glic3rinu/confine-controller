@@ -46,14 +46,14 @@ class BuildFileInline(admin.TabularInline):
     fields = ['path', 'content']
     readonly_fields = ['path', 'content']
     can_delete = False
-
+    
     def has_add_permission(self, *args, **kwargs):
         return False
 
 class ConfigFileInline(admin.TabularInline):
     model = ConfigFile
     extra = 0
-
+    
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'70'})
         if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'85'})

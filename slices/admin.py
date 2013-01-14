@@ -76,7 +76,9 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     
     
     def __init__(self, *args, **kwargs):
-        """ Show number of requested ifaces on sliver changelist """
+        """ 
+        For each sliver iface type show number of requested ifaces on sliver changelist
+        """
         for iface_type, iface_type_verbose in Sliver.get_registred_iface_types():
             iface = Sliver.get_registred_iface(iface_type)
             if not iface_type in self.list_display and not iface.AUTO_CREATE:
@@ -160,7 +162,7 @@ class NodeListAdmin(NodeAdmin):
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
-    
+    actions = [create_slivers]
     def add_sliver_link(self, instance):
         url = reverse('admin:slices_slice_add_sliver', 
                       kwargs={'slice_id':self.slice_id, 'node_id':instance.pk})
@@ -169,16 +171,9 @@ class NodeListAdmin(NodeAdmin):
     add_sliver_link.short_description = 'Add on Node'
     
     def get_actions(self, request):
-        from django.utils.datastructures import SortedDict
-        actions = []
-        actions.extend([self.get_action(action) for action in [create_slivers]])
-        
-        # Convert the actions into a SortedDict keyed by name.
-        actions = SortedDict([
-            (name, (func, name, desc))
-            for func, name, desc in actions
-        ])
-        return actions
+        """ avoid inherit NodeAdmin actions """
+        actions = super(NodeListAdmin, self).get_actions(request)
+        return {'create_slivers': actions['create_slivers']}
     
     def custom_sliver_pub_ipv4_range(self, instance):
         return instance.sliver_pub_ipv4_range
@@ -192,7 +187,7 @@ class NodeListAdmin(NodeAdmin):
         context = {'title': mark_safe('Select one or more nodes for creating %s slivers' % admin_link('')(slice)),
                    'slice': slice, }
         context.update(extra_context or {})
-        # call super.super to avoid my_nodes default changelist filter of NodeAdmin
+        # call super.super to avoid my_nodes default NodeAdmin changelist filter
         return super(NodeAdmin, self).changelist_view(request, extra_context=context)
     
     def queryset(self, request):

@@ -14,29 +14,25 @@ class BaseIface(object):
     DEFAULT_NAME = 'eth0'
     ALLOW_BULK = True
     AUTO_CREATE = False
+    UNIQUE = False
     
     def clean_model(self, iface):
         """ additional logic to be executed during model.clean() """
         if iface.parent:
             raise ValidationError("parent not allowed for this type of iface")
-    
-    def clean_formset(self, formset):
-        """ additional logic to be executed during formset.clean() """
-        pass
+        if self.UNIQUE:
+            iface_type = Sliver.get_registred_iface_type(type(self))
+            private_qs = iface.__class__.objects.filter(sliver=iface.sliver, type=iface_type)
+            if iface.pk:
+                private_qs = private_qs.exclude(pk=iface.pk)
+            if private_qs.exists():
+                raise ValidationError('There can only be one interface of type private')
     
     def ipv6_addr(self, iface):
         return None
     
     def ipv4_addr(self, iface):
         return None
-    
-    def log_addition(self, sliver):
-        """ logic to implement AUTO_CREATE on sliver add form """
-        # Prevent circular imports
-        from .models import SliverIface
-        iface_type = Sliver.get_registred_iface_type(type(self))
-        if self.AUTO_CREATE and not sliver.sliveriface_set.filter(type=iface_type).exists():
-            SliverIface.objects.create(sliver=sliver, type=iface_type, name=self.DEFAULT_NAME)
 
 
 class IsolatedIface(BaseIface):
@@ -50,8 +46,8 @@ class IsolatedIface(BaseIface):
     DEFAULT_NAME = 'iso0'
     ALLOW_BULK = False
     
-    # TODO isolated iface must have slice.vlan_nr
     def clean_model(self, iface):
+        # TODO isolated iface must have slice.vlan_nr
         if not iface.parent:
             raise ValidationError("parent is mandatory for isolated interfaces.")
 
@@ -118,28 +114,7 @@ class PrivateIface(BaseIface):
     """
     DEFAULT_NAME = 'priv'
     AUTO_CREATE = True
-    # TODO Autocreate iface logic 
-    
-    def clean_model(self, iface):
-        super(PrivateIface, self).clean_model(iface)
-        private_qs = iface.__class__.objects.filter(sliver=iface.sliver, type='private')
-        if iface.pk:
-            private_qs = private_qs.exclude(pk=iface.pk)
-        if private_qs.exists():
-            raise ValidationError('There can only be one interface of type private')
-    
-    def clean_formset(self, formset):
-        """ Provide at least on private iface validation """
-        super(PrivateIface, self).clean_formset(formset)
-        if any(formset.errors):
-            # Don't bother validating the formset unless each form is valid on its own
-            return
-        private = False
-        for form in formset.forms:
-            if form.cleaned_data.get('type', None) == 'private':
-                if private:
-                    raise ValidationError("Only one private iface is allowed")
-                private = True
+    UNIQUE = True
     
     def ipv6_addr(self, iface):
         """ PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64 """

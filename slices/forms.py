@@ -54,16 +54,8 @@ class SliverIfaceInlineForm(forms.ModelForm):
             self.fields['parent'].queryset = self.node.direct_ifaces
 
 
-class SliverIfaceInlineFormset(forms.models.BaseInlineFormSet):
-    def clean(self):
-        """ iface specific clean() definition """
-        super(SliverIfaceInlineFormset, self).clean()
-        for iface in Sliver.get_registred_ifaces():
-            iface.clean_formset(self)
-
-
 class SliverIfaceBulkForm(forms.Form):
-    """ Display available ifaces for request creation on add sliver bulk mode """
+    """ Display available ifaces on add sliver bulk action """
     def __init__(self, *args, **kwargs):
         super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
         for iface_type in Sliver.get_registred_iface_types():

@@ -272,6 +272,7 @@ class Sliver(models.Model):
     
     @classmethod
     def get_registred_iface_type(cls, iface):
+        # TODO inspect class/object and act upon it
         for k, v in cls._iface_registry.iteritems():
             if type(v) is iface: return k
     

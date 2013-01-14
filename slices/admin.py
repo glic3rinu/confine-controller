@@ -18,7 +18,7 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import renew_selected_slices, reset_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter
-from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormset
+from .forms import SliceAdminForm, SliverIfaceInlineForm
 from .helpers import wrap_action, remove_slice_id
 from .models import (Sliver, SliverProp, SliverIface, Slice, SliceProp, Template)
 
@@ -51,7 +51,6 @@ class SliverIfaceInline(PermissionTabularInline):
     extra = 0
     verbose_name_plural = mark_safe('Sliver Network Interfaces <a href="http://wiki.confine-project.eu/arch:node">(Help)</a>')
     form = SliverIfaceInlineForm
-    formset = SliverIfaceInlineFormset
     
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
@@ -60,9 +59,7 @@ class SliverIfaceInline(PermissionTabularInline):
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
-                    'num_isolated_ifaces', 'num_pub4_ifaces', 'num_pub6_ifaces',
-                    'num_debug_ifaces', 'has_mgmt_iface', 'total_num_ifaces']
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice'), 'total_num_ifaces']
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_sha256']
@@ -73,35 +70,23 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
     
-    def has_mgmt_iface(self, instance):
-        # TODO: this should be provided by tinc
-        return instance.sliveriface_set.filter(type='management').exists()
-    has_mgmt_iface.short_description = 'Mgmt'
-    has_mgmt_iface.boolean = True
     
-    def num_isolated_ifaces(self, instance):
-        # TODO make sortable
-        return instance.sliveriface_set.filter(type='isolated').count()
-    num_isolated_ifaces.short_description = 'Isolated'
-    
-    def num_debug_ifaces(self, instance):
-        # TODO make sortable
-        return instance.sliveriface_set.filter(type='debug').count()
-    num_debug_ifaces.short_description = 'Debug'
-    
-    def num_pub6_ifaces(self, instance):
-        # TODO make sortable
-        return instance.sliveriface_set.filter(type='public6').count()
-    num_pub6_ifaces.short_description = 'Public6'
-    
-    def num_pub4_ifaces(self, instance):
-        # TODO make sortable
-        return instance.sliveriface_set.filter(type='public4').count()
-    num_pub4_ifaces.short_description = 'Public4'
+    def __init__(self, *args, **kwargs):
+        """ Show number of requested ifaces on sliver changelist """
+        for iface_type, iface_type_verbose in Sliver.get_registred_iface_types():
+            iface = Sliver.get_registred_iface(iface_type)
+            if not iface_type in self.list_display and not iface.AUTO_CREATE:
+                def display_ifaces(instance, iface_type=iface_type):
+                    return instance.sliveriface_set.filter(type=iface_type).count()
+                display_ifaces.short_description = iface_type_verbose
+                display_ifaces.boolean = True if iface.UNIQUE else False
+                setattr(self, iface_type, display_ifaces)
+                self.list_display.append(iface_type)
+        super(SliverAdmin, self).__init__(*args, **kwargs)
     
     def total_num_ifaces(self, instance):
         return instance.sliveriface_set.count()
-    total_num_ifaces.short_description = 'Ifaces'
+    total_num_ifaces.short_description = 'Total Ifaces'
     total_num_ifaces.admin_order_field = 'sliveriface__count'
 
     def slice_link(self, instance):
@@ -153,9 +138,11 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return qs
     
     def log_addition(self, request, object):
-        """ Hook for allowing sliver iface custom logic """
+        """ AUTO_CREATE SliverIfaces """
         for iface in Sliver.get_registred_ifaces():
-            iface.log_addition(object)
+            iface_type = Sliver.get_registred_iface_type(type(iface))
+            if iface.AUTO_CREATE and not object.sliveriface_set.filter(type=iface_type).exists():
+                SliverIface.objects.create(sliver=object, type=iface_type, name=iface.DEFAULT_NAME)
         super(SliverAdmin, self).log_addition(request, object)
 
 

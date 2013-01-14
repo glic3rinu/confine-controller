@@ -46,7 +46,6 @@ reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_
 def create_slivers(modeladmin, request, queryset):
     """ Create slivers in selected nodes """
     # TODO check request.user and group permissions
-    # TODO form chosing ifaces
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
@@ -73,6 +72,7 @@ def create_slivers(modeladmin, request, queryset):
                 msg = 'Added sliver "%s"' % force_text(sliver)
                 slice_modeladmin.log_change(request, slice, msg)
                 sliver_modeladmin = get_modeladmin(Sliver)
+                # AUTO_CREATE SliverIfaces
                 sliver_modeladmin.log_addition(request, sliver)
             
             modeladmin.message_user(request, "Successfully created %d slivers." % n)

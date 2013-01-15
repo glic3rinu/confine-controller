@@ -223,6 +223,8 @@ class SliceSliversAdmin(SliverAdmin):
     readonly_fields = ['instance_sn', 'exp_data_sha256']
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
+        """ customizations needed for being nested to slices """
+        # hook for future use on self.save_model()
         self.slice_id = slice_id
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
@@ -231,10 +233,10 @@ class SliceSliversAdmin(SliverAdmin):
         context = {'title': mark_safe(title),
                    'slice': slice,}
         context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).add_view(request, form_url='', 
-            extra_context=context)
+        return super(SliceSliversAdmin, self).add_view(request, form_url='', extra_context=context)
     
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
+        """ customizations needed for being nested to slices """
         slice = Slice.objects.get(pk=slice_id)
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
@@ -247,6 +249,7 @@ class SliceSliversAdmin(SliverAdmin):
             form_url=form_url, extra_context=context)
     
     def save_model(self, request, obj, *args, **kwargs):
+        """ provde node and slice attributes to obj sliver """
         obj.node = Node.objects.get(pk=self.node_id)
         slice = Slice.objects.get(pk=self.slice_id)
         obj.slice = slice
@@ -255,6 +258,7 @@ class SliceSliversAdmin(SliverAdmin):
         slice_modeladmin.log_change(request, slice, 'Added sliver "%s"' % obj)
     
     def response_add(self, request, obj, post_url_continue='../%s/'):
+        """ customizations needed for being nested to slices """
         opts = obj._meta
         verbose_name = force_text(opts.verbose_name)
         msg = 'The %s "%s" was added successfully.' % (verbose_name, force_text(obj))
@@ -271,6 +275,7 @@ class SliceSliversAdmin(SliverAdmin):
             return HttpResponseRedirect(post_url)
     
     def response_change(self, request, obj):
+        """ customizations needed for being nested to slices """
         opts = obj._meta
         verbose_name = force_text(opts.verbose_name)
         msg = 'The %s "%s" was changed successfully.' % (verbose_name, force_text(obj))
@@ -282,6 +287,7 @@ class SliceSliversAdmin(SliverAdmin):
         return HttpResponseRedirect(post_url)
     
     def has_add_permission(self, *args, **kwargs):
+        """ skip SliverAdmin.has_add_permission definition """
         return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
     
     def get_form(self, request, obj=None, **kwargs):
@@ -328,6 +334,7 @@ class SliverInline(PermissionTabularInline):
         return super(SliverInline, self).has_delete_permission(request, obj=obj)
     
     def sliver_link(self, instance):
+        """ Display sliver change link on the inline form """
         kwargs = {'slice_id': instance.slice_id,
                   'object_id': instance.id}
         url = reverse('admin:slices_slice_slivers', kwargs=kwargs)
@@ -335,10 +342,12 @@ class SliverInline(PermissionTabularInline):
     sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):
+        """ Display node change link on the inline form """
         return get_admin_link(instance.node)
     node_link.short_description = 'Node'
     
     def cn_url(self, instance):
+        """ Display CN url on the inline form """
         node = instance.node
         return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
 

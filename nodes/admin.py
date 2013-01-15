@@ -76,6 +76,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     display_cert.short_description = 'Certificate'
     
     def num_ifaces(self, node):
+        """ diplay number of direct ifaces, used on changelist """
         return node.directiface_set.count()
     num_ifaces.short_description = 'Ifaces'
     num_ifaces.admin_order_field = 'directiface__count'
@@ -139,6 +140,7 @@ class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionMo
     fields = []
     
     def get_urls(self):
+        """ make urls singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
             url(r'^(?P<object_id>\d+)/history/$', 

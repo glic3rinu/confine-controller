@@ -40,6 +40,7 @@ num_slivers.admin_order_field = 'sliver__count'
 
 
 def template_link(instance):
+    """ Display template change view link """
     return get_admin_link(instance.template)
 
 
@@ -92,18 +93,18 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         super(SliverAdmin, self).__init__(*args, **kwargs)
     
     def total_num_ifaces(self, instance):
-        """ total number of sliver ifaces used on list_display """
+        """ Total number of sliver ifaces used on list_display """
         return instance.sliveriface_set.count()
     total_num_ifaces.short_description = 'Total Ifaces'
     total_num_ifaces.admin_order_field = 'sliveriface__count'
     
     def slice_link(self, instance):
-        """ link to related slice used on change_view """
+        """ Link to related slice used on change_view """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.slice))
     slice_link.short_description = 'Slice'
     
     def node_link(self, instance):
-        """ link to related node used on change_view """
+        """ Link to related node used on change_view """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.node))
     node_link.short_description = 'Node'
     
@@ -172,7 +173,7 @@ class NodeListAdmin(NodeAdmin):
     actions = [create_slivers]
     
     def add_sliver_link(self, instance):
-        """ link to add sliver to related node """
+        """ Link to add sliver to related node """
         kwargs = { 'slice_id':self.slice_id, 'node_id':instance.pk }
         url = reverse('admin:slices_slice_add_sliver', kwargs=kwargs)
         return '<a href="%s">%s<a>' % (url, instance.name)
@@ -180,12 +181,12 @@ class NodeListAdmin(NodeAdmin):
     add_sliver_link.short_description = 'Add on Node'
     
     def get_actions(self, request):
-        """ avoid inherit NodeAdmin actions """
+        """ Avoid inherit NodeAdmin actions """
         actions = super(NodeListAdmin, self).get_actions(request)
         return {'create_slivers': actions['create_slivers']}
     
     def display_sliver_pub_ipv4_range(self, instance):
-        """ show sliver_pub_ipv4_range on changeliste """
+        """ Show sliver_pub_ipv4_range on changeliste """
         return instance.sliver_pub_ipv4_range
     display_sliver_pub_ipv4_range.short_description = 'IPv4 Range'
     display_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
@@ -209,7 +210,7 @@ class NodeListAdmin(NodeAdmin):
         return qs
     
     def has_add_permission(self, *args, **kwargs):
-        """ prevent node addition on this ModelAdmin """
+        """ Prevent node addition on this ModelAdmin """
         return False
 
 
@@ -223,7 +224,7 @@ class SliceSliversAdmin(SliverAdmin):
     readonly_fields = ['instance_sn', 'exp_data_sha256']
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
-        """ customizations needed for being nested to slices """
+        """ Customizations needed for being nested to slices """
         # hook for future use on self.save_model()
         self.slice_id = slice_id
         self.node_id = node_id
@@ -236,7 +237,7 @@ class SliceSliversAdmin(SliverAdmin):
         return super(SliceSliversAdmin, self).add_view(request, form_url='', extra_context=context)
     
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
-        """ customizations needed for being nested to slices """
+        """ Customizations needed for being nested to slices """
         slice = Slice.objects.get(pk=slice_id)
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
@@ -249,7 +250,7 @@ class SliceSliversAdmin(SliverAdmin):
             form_url=form_url, extra_context=context)
     
     def save_model(self, request, obj, *args, **kwargs):
-        """ provde node and slice attributes to obj sliver """
+        """ Provde node and slice attributes to obj sliver """
         obj.node = Node.objects.get(pk=self.node_id)
         slice = Slice.objects.get(pk=self.slice_id)
         obj.slice = slice
@@ -258,7 +259,7 @@ class SliceSliversAdmin(SliverAdmin):
         slice_modeladmin.log_change(request, slice, 'Added sliver "%s"' % obj)
     
     def response_add(self, request, obj, post_url_continue='../%s/'):
-        """ customizations needed for being nested to slices """
+        """ Customizations needed for being nested to slices """
         opts = obj._meta
         verbose_name = force_text(opts.verbose_name)
         msg = 'The %s "%s" was added successfully.' % (verbose_name, force_text(obj))
@@ -275,7 +276,7 @@ class SliceSliversAdmin(SliverAdmin):
             return HttpResponseRedirect(post_url)
     
     def response_change(self, request, obj):
-        """ customizations needed for being nested to slices """
+        """ Customizations needed for being nested to slices """
         opts = obj._meta
         verbose_name = force_text(opts.verbose_name)
         msg = 'The %s "%s" was changed successfully.' % (verbose_name, force_text(obj))
@@ -287,7 +288,7 @@ class SliceSliversAdmin(SliverAdmin):
         return HttpResponseRedirect(post_url)
     
     def has_add_permission(self, *args, **kwargs):
-        """ skip SliverAdmin.has_add_permission definition """
+        """ Skip SliverAdmin.has_add_permission definition """
         return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
     
     def get_form(self, request, obj=None, **kwargs):
@@ -416,7 +417,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return extra_urls + urls
     
     def get_form(self, request, *args, **kwargs):
-        """ request.user as default node admin """
+        """ Request.user as default node admin """
         form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset

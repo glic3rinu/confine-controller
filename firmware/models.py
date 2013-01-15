@@ -95,7 +95,8 @@ class Build(models.Model):
     
     @property
     def state(self):
-        if self.image: 
+        """ Gives the current state of the build """
+        if self.image:
             try: self.image.file
             except IOError: return self.DELETED
             else: 
@@ -109,14 +110,17 @@ class Build(models.Model):
     
     @property
     def is_processing(self):
+        """ Abstract state useful for rendering the appropiate message on the build page """
         return self.state in [self.REQUESTED, self.QUEUED, self.BUILDING]
     
     @property
     def is_available(self):
+        """ Abstract state useful for rendering the appropiate message on the build page """
         return self.state == self.AVAILABLE
     
     @property
     def is_unavailable(self):
+        """ Abstract state useful for rendering the appropiate message on the build page """
         return self.state in [self.OUTDATED, self.DELETED, self.FAILED]
     
     @property
@@ -145,25 +149,32 @@ class Build(models.Model):
         return build_obj
     
     def add_file(self, path, content, config):
+        """ Add a new generated file to the build """
         BuildFile.objects.create(build=self, path=path, content=content, config=config)
     
     def get_files(self):
+        """ Get all the build generated files """
         return self.buildfile_set.all()
     
     def match(self, config):
-        """ checks if a a given build is up-to-date or not """
+        """ Checks if a a given build is up-to-date or not """
         if self.version != config.version:
             return False
         config = Config.objects.get()
         exclude = config.configfile_set.optional().values_list('pk', flat=True)
         old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(config__pk__in=exclude) )
-        new_files = set( (f.path, f.content) for f in config.evaluate_files(self.node, exclude=exclude) )
+        new_files = set( (f.path, f.content) for f in config.eval_files(self.node, exclude=exclude) )
         return new_files == old_files
     
-    class ConcurrencyError(Exception): pass
+    class ConcurrencyError(Exception):
+        """ Exception related to building images concurrently (not supported) """
+        pass
 
 
 class BuildFile(models.Model):
+    """ 
+    Describes a file of a builded image
+    """
     build = models.ForeignKey(Build)
     config = models.ForeignKey('firmware.ConfigFile')
     path = models.CharField(max_length=256)
@@ -177,10 +188,11 @@ class BuildFile(models.Model):
     
     @property
     def name(self):
-        """ make it behave like a file """
+        """ File-like attribute (dutck-typing) """
         return self.path
     
     def read(self):
+        """ File-like method (dutck-typing) """
         return self.content
 
 
@@ -202,6 +214,7 @@ class Config(SingletonModel):
         return self.configuci_set.all().order_by('section')
     
     def eval_uci(self, node, sections=None):
+        """ Evaluate all ConfigUCI python expressions """
         uci = []
         config_ucis = self.get_uci()
         if sections is not None:
@@ -213,7 +226,15 @@ class Config(SingletonModel):
                 'value': config_uci.eval_value(node)})
         return uci
     
+    def eval_files(self, node, exclude=[], **kwargs):
+        """ Evaluate all ConfigFiles python expressions """
+        files = []
+        for config_file in self.configfile_set.active().exclude(pk__in=exclude):
+            files.extend(config_file.get_files(node, files=files, **kwargs))
+        return files
+    
     def render_uci(self, node, sections=None):
+        """ Render UCI file """
         uci = template.loader.get_template('uci')
         context = Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
@@ -224,12 +245,6 @@ class Config(SingletonModel):
         """
         arch_regex = "(^|,)%s(,|$)" % node.arch
         return self.baseimage_set.get(architectures__regex=arch_regex).image
-    
-    def evaluate_files(self, node, exclude=[], **kwargs):
-        files = []
-        for config_file in self.configfile_set.active().exclude(pk__in=exclude):
-            files.extend(config_file.get_files(node, files=files, **kwargs))
-        return files
 
 
 class BaseImage(models.Model):
@@ -316,6 +331,7 @@ class ConfigFile(models.Model):
         return self.path
     
     def get_files(self, node, **kwargs):
+        """ Generate all the files related to self ConfigFile """
         safe_locals = kwargs
         safe_locals.update({'node': node,
                             'self': self,
@@ -342,6 +358,7 @@ class ConfigFile(models.Model):
     
     @property
     def help_text(self):
+        """ provide help_text file if exists """
         try: return self.configfilehelptext.help_text
         except ConfigFileHelpText.DoesNotExist: return ''
 

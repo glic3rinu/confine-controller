@@ -36,26 +36,32 @@ class ConfigUCIInline(admin.TabularInline):
     extra = 0
     
     def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make value input widget bigger """
         if db_field.name == 'value':
             kwargs['widget'] = forms.TextInput(attrs={'size':'100'})
         return super(ConfigUCIInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class BuildFileInline(admin.TabularInline):
+    """ Readonly inline for displaying build files """
     model = BuildFile
     extra = 0
     fields = ['path', 'content']
     readonly_fields = ['path', 'content']
+    verbose_name_plural = 'Files'
     can_delete = False
     
     def has_add_permission(self, *args, **kwargs):
+        """ Don't show add another link on the inline """
         return False
+
 
 class ConfigFileInline(admin.TabularInline):
     model = ConfigFile
     extra = 0
     
     def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make some char input widgets larger """
         if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'70'})
         if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'85'})
         if db_field.name == 'mode': kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
@@ -89,17 +95,20 @@ class BuildAdmin(admin.ModelAdmin):
     node_link.short_description = "Node"
     
     def task_link(self, build):
+        """ Display Celery task change view if exists """
         if build.task:
             return get_admin_link(build.task, href_name=build.task.task_id)
     task_link.allow_tags = True
     task_link.short_description = "Task"
     
     def image_link(self, build):
+        """ Display image url if exsists """
         try: return '<a href=%s>%s</a>' % (build.image.url, build.image_name)
         except: return ''
     image_link.allow_tags = True
     
     def has_add_permission(self, *args, **kwargs):
+        """ Build is a readonly information """
         return False
 
 
@@ -107,6 +116,7 @@ class ConfigAdmin(SingletonModelAdmin):
     inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline]
     
     def get_urls(self):
+        """ Make URLs singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
             url(r'^(?P<object_id>\d+)/history/$', 
@@ -141,7 +151,7 @@ old_get_urls = node_modeladmin.get_urls
 
 def get_urls(self):
     """ Hook JSON representation of a Build to NodeModeladmin """
-    def build_info(request, node_id):
+    def build_info_view(request, node_id):
         try: build = Build.objects.get(node=node_id)
         except Build.DoesNotExist: build_dict = {}
         else: build_dict = {
@@ -155,7 +165,7 @@ def get_urls(self):
     
     extra_urls = patterns("", 
         url("^(?P<node_id>\d+)/firmware/build_info/$", 
-        wrap_admin_view(self, build_info), 
+        wrap_admin_view(self, build_info_view), 
         name='build_info'),
     )
     return extra_urls + old_get_urls()

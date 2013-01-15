@@ -66,7 +66,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     change_form_template = "admin/common/change_form.html"
     
     def display_cert(self, node):
-        """ with some contextual help if cert is not present """
+        """ Display certificate with some contextual help if cert is not present """
         if not node.pk:
             return "You will be able to request a certificate once the node is registred"
         if not node.cert:
@@ -76,7 +76,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     display_cert.short_description = 'Certificate'
     
     def num_ifaces(self, node):
-        """ diplay number of direct ifaces, used on changelist """
+        """ Diplay number of direct ifaces, used on changelist """
         return node.directiface_set.count()
     num_ifaces.short_description = 'Ifaces'
     num_ifaces.admin_order_field = 'directiface__count'
@@ -137,10 +137,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 
 class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):
-    fields = []
-    
     def get_urls(self):
-        """ make urls singleton aware """
+        """ Make urls singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
             url(r'^(?P<object_id>\d+)/history/$', 

@@ -19,7 +19,7 @@ def build(build_id, exclude=[]):
     
     # prepare the image adding the files
     image = Image(base_image.path)
-    for file_ in config.evaluate_files(node, exclude=exclude, image=image):
+    for file_ in config.eval_files(node, exclude=exclude, image=image):
         image.add_file(file_)
         file_.build = build_obj
         file_.save()

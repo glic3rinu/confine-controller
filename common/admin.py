@@ -50,8 +50,8 @@ def insert_action(model, action):
 
 def link(attribute, description='', admin_order_field=True, base_url=''):
     """
-    returns a method that will yield its obj.attribute formatted as url
-    This is useful for printing hrefs on ModelAdmin.list_display
+    Returns a function that will yield its obj.attribute formatted as url
+    Useful for printing hrefs on ModelAdmin.list_display
     """
     def admin_link(obj, attr=attribute):
         try: 
@@ -71,8 +71,8 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
 
 def admin_link(field_name, app_model='', href_name=''):
     """ 
-    returns a method that will yield the admin url of the field_name related object
-    This is useful for specify a ModelAdmin.list_display member
+    Returns a function that will yield the admin url of obj.field_name
+    Useful for specify a ModelAdmin.list_display member
     """
     def link(obj, field=field_name, app_model=app_model, href_name=href_name):
         if field == '': rel = obj
@@ -90,9 +90,9 @@ def admin_link(field_name, app_model='', href_name=''):
     return link
 
 
-def get_admin_link(obj, field='', href_name=''):
-    """ return the admin change view of obj.field """
-    return admin_link(field, href_name=href_name)(obj)
+def get_admin_link(obj, href_name=''):
+    """ return the admin change view of obj """
+    return admin_link('', href_name=href_name)(obj)
 
 
 def colored(field_name, colours, description='', verbose=False):

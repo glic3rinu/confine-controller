@@ -85,7 +85,7 @@ class BuildAdmin(admin.ModelAdmin):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")
     
     def node_link(self, build):
-        return get_admin_link(build, field='node')
+        return get_admin_link(build.node)
     node_link.short_description = "Node"
     
     def task_link(self, build):

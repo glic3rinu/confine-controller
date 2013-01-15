@@ -40,7 +40,7 @@ num_slivers.admin_order_field = 'sliver__count'
 
 
 def template_link(instance):
-    return get_admin_link(instance, field='template')
+    return get_admin_link(instance.template)
 
 
 class SliverPropInline(PermissionTabularInline):
@@ -97,11 +97,11 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     total_num_ifaces.admin_order_field = 'sliveriface__count'
     
     def slice_link(self, instance):
-        return mark_safe("<b>%s</b>" % get_admin_link(instance, field='slice'))
+        return mark_safe("<b>%s</b>" % get_admin_link(instance.slice))
     slice_link.short_description = 'Slice'
     
     def node_link(self, instance):
-        return mark_safe("<b>%s</b>" % get_admin_link(instance, field='node'))
+        return mark_safe("<b>%s</b>" % get_admin_link(instance.node))
     node_link.short_description = 'Node'
     
     def exp_data_sha256(self, instance):
@@ -327,7 +327,7 @@ class SliverInline(PermissionTabularInline):
     sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):
-        return get_admin_link(instance, field='node')
+        return get_admin_link(instance.node)
     node_link.short_description = 'Node'
     
     def cn_url(self, instance):

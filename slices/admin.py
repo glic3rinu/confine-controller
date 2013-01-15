@@ -92,19 +92,23 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         super(SliverAdmin, self).__init__(*args, **kwargs)
     
     def total_num_ifaces(self, instance):
+        """ total number of sliver ifaces used on list_display """
         return instance.sliveriface_set.count()
     total_num_ifaces.short_description = 'Total Ifaces'
     total_num_ifaces.admin_order_field = 'sliveriface__count'
     
     def slice_link(self, instance):
+        """ link to related slice used on change_view """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.slice))
     slice_link.short_description = 'Slice'
     
     def node_link(self, instance):
+        """ link to related node used on change_view """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.node))
     node_link.short_description = 'Node'
     
     def exp_data_sha256(self, instance):
+        """ Experiment data SHA256 used on change_view """
         return instance.exp_data_sha256
     exp_data_sha256.short_description = 'Experiment Data SHA256'
     
@@ -156,17 +160,19 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 class NodeListAdmin(NodeAdmin):
     """ 
-    Provides a list of available nodes for adding slivers to an existing slice
+    Nested Node ModelAdmin that provides a list of available nodes for adding 
+    slivers hooked on Slice
     """
     list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'), 
                     'arch', colored('set_state', STATES_COLORS, verbose=True), admin_link('group'), 
-                    'num_ifaces', num_slivers, 'custom_sliver_pub_ipv4_range']
+                    'num_ifaces', num_slivers, 'display_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = [create_slivers]
     
     def add_sliver_link(self, instance):
+        """ link to add sliver to related node """
         kwargs = { 'slice_id':self.slice_id, 'node_id':instance.pk }
         url = reverse('admin:slices_slice_add_sliver', kwargs=kwargs)
         return '<a href="%s">%s<a>' % (url, instance.name)
@@ -178,10 +184,11 @@ class NodeListAdmin(NodeAdmin):
         actions = super(NodeListAdmin, self).get_actions(request)
         return {'create_slivers': actions['create_slivers']}
     
-    def custom_sliver_pub_ipv4_range(self, instance):
+    def display_sliver_pub_ipv4_range(self, instance):
+        """ show sliver_pub_ipv4_range on changeliste """
         return instance.sliver_pub_ipv4_range
-    custom_sliver_pub_ipv4_range.short_description = 'IPv4 Range'
-    custom_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
+    display_sliver_pub_ipv4_range.short_description = 'IPv4 Range'
+    display_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
     
     def changelist_view(self, request, slice_id, extra_context=None):
         """ Just fixing title and breadcrumbs """
@@ -202,12 +209,13 @@ class NodeListAdmin(NodeAdmin):
         return qs
     
     def has_add_permission(self, *args, **kwargs):
+        """ prevent node addition on this ModelAdmin """
         return False
 
 
 class SliceSliversAdmin(SliverAdmin):
-    """ 
-    This ModelAdmin provides Slivers management capabilities on the Slice ModelAdmin
+    """
+    Nested Sliver ModelAdmin that provides Slivers management capabilities on Slices
     """
     fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_sha256']
     add_form_template = 'admin/slices/slice/add_sliver.html'
@@ -307,7 +315,7 @@ class SliverInline(PermissionTabularInline):
         """ HACK display message using the field name of the inline form """
         if obj is None:
             return [(None, {'fields': ['note_hack']})]
-        # The slices is registred, display add button as the inline header
+        # The slices is registred: display add button in the inline header
         self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
         if not obj.sliver_set.exists():
             return [(None, {'fields': ['note2_hack']})]

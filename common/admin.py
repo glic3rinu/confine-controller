@@ -10,13 +10,13 @@ from .models import get_field_value
 
 
 def get_modeladmin(model):
+    """ return the model registred ModelAdmin """
     for k,v in admin.site._registry.iteritems():
         if k is model: return v
 
 
 def insert_inline(model, inline, head=False):
     """ Insert model inline into an existing model_admin """
-    
     model_admin = get_modeladmin(model)
     if hasattr(inline, 'inline_identify'):
         delete_inline(model, inline.inline_identify)
@@ -31,18 +31,21 @@ def insert_inline(model, inline, head=False):
 
 
 def insert_list_filter(model, filter):
+    """ insert filter to modeladmin.list_filters """
     model_admin = get_modeladmin(model)
     if not model_admin.list_filter: type(model_admin).list_filter = []
     model_admin.list_filter += (filter,)
 
 
 def insert_list_display(model, field):
+    """ insert field to modeladmin.list_display """
     model_admin = get_modeladmin(model)
     if not model_admin.list_display: type(model_admin).list_display = []
     model_admin.list_display += (field,)    
 
 
 def insert_action(model, action):
+    """ insert action to modeladmin.actions """
     model_admin = get_modeladmin(model)
     if not model_admin.actions: type(model_admin).actions = [action]
     else: model_admin.actions.append(action)
@@ -91,11 +94,12 @@ def admin_link(field_name, app_model='', href_name=''):
 
 
 def get_admin_link(obj, href_name=''):
-    """ return the admin change view of obj """
+    """ return the admin change view of obj formatted as url """
     return admin_link('', href_name=href_name)(obj)
 
 
 def colored(field_name, colours, description='', verbose=False):
+    """ return a method that will render obj with colored html """
     def colored_field(obj, field=field_name, colors=colours, verbose=verbose):
         value = escape(get_field_value(obj, field))
         color = colors.get(value, "black")

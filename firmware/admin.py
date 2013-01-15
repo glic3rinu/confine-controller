@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.utils import simplejson
 from singleton_models.admin import SingletonModelAdmin
 
-from common.admin import (get_modeladmin, admin_link, insert_action, colored, 
+from common.admin import (get_modeladmin, get_admin_link, insert_action, colored, 
     wrap_admin_view)
 from nodes.models import Node
 
@@ -85,12 +85,12 @@ class BuildAdmin(admin.ModelAdmin):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")
     
     def node_link(self, build):
-        return admin_link('node')(build)
+        return get_admin_link(build, field='node')
     node_link.short_description = "Node"
     
     def task_link(self, build):
         if build.task:
-            return admin_link('')(build.task, href_name=build.task.task_id)
+            return get_admin_link(build.task, href_name=build.task.task_id)
     task_link.allow_tags = True
     task_link.short_description = "Task"
     

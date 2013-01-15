@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view, 
-    docstring_as_help_tip)
+    docstring_as_help_tip, get_admin_link)
 from common.widgets import ReadOnlyWidget
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
@@ -40,7 +40,7 @@ num_slivers.admin_order_field = 'sliver__count'
 
 
 def template_link(instance):
-    return admin_link('template')(instance)
+    return get_admin_link(instance, field='template')
 
 
 class SliverPropInline(PermissionTabularInline):
@@ -97,11 +97,11 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     total_num_ifaces.admin_order_field = 'sliveriface__count'
     
     def slice_link(self, instance):
-        return mark_safe("<b>%s</b>" % admin_link('slice')(instance))
+        return mark_safe("<b>%s</b>" % get_admin_link(instance, field='slice'))
     slice_link.short_description = 'Slice'
     
     def node_link(self, instance):
-        return mark_safe("<b>%s</b>" % admin_link('node')(instance))
+        return mark_safe("<b>%s</b>" % get_admin_link(instance, field='node'))
     node_link.short_description = 'Node'
     
     def exp_data_sha256(self, instance):
@@ -131,8 +131,8 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Provide a linked title """
         sliver = self.get_object(request, object_id)
-        slice_link = admin_link('')(sliver.slice)
-        sliver_link = admin_link('')(sliver.node)
+        slice_link = get_admin_link(sliver.slice)
+        sliver_link = get_admin_link(sliver.node)
         context = {'title': mark_safe('Change sliver %s@%s' % (slice_link, sliver_link)),
                    'slice': slice,}
         context.update(extra_context or {})
@@ -187,7 +187,7 @@ class NodeListAdmin(NodeAdmin):
         """ Just fixing title and breadcrumbs """
         self.slice_id = slice_id
         slice = Slice.objects.get(pk=slice_id)
-        title = 'Select one or more nodes for creating %s slivers' % admin_link('')(slice)
+        title = 'Select one or more nodes for creating %s slivers' % get_admin_link(slice)
         context = {'title': mark_safe(title),
                    'slice': slice, }
         context.update(extra_context or {})
@@ -219,7 +219,7 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = node_id
         slice = Slice.objects.get(pk=slice_id)
         node = Node.objects.get(pk=node_id)
-        title = 'Add sliver %s@%s' % (admin_link('')(slice), admin_link('')(node))
+        title = 'Add sliver %s@%s' % (get_admin_link(slice), get_admin_link(node))
         context = {'title': mark_safe(title),
                    'slice': slice,}
         context.update(extra_context or {})
@@ -231,7 +231,7 @@ class SliceSliversAdmin(SliverAdmin):
         sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
         self.node_id = sliver.node_id
-        title = 'Change sliver %s@%s' % (admin_link('')(slice), admin_link('')(sliver.node))
+        title = 'Change sliver %s@%s' % (get_admin_link(slice), get_admin_link(sliver.node))
         context = {'title': mark_safe(title),
                    'slice': slice,}
         context.update(extra_context or {})
@@ -327,7 +327,7 @@ class SliverInline(PermissionTabularInline):
     sliver_link.short_description = 'Sliver'
     
     def node_link(self, instance):
-        return admin_link('node')(instance)
+        return get_admin_link(instance, field='node')
     node_link.short_description = 'Node'
     
     def cn_url(self, instance):

@@ -12,7 +12,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from common.admin import link, admin_link
+from common.admin import link, get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .forms import UserCreationForm, UserChangeForm
@@ -77,7 +77,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
     
     def group_links(self, instance):
         groups = instance.groups.all()
-        return ', '.join([admin_link('')(group) for group in groups])
+        return ', '.join([ get_admin_link(group) for group in groups ])
     group_links.allow_tags = True
     group_links.short_description = 'Groups'
 

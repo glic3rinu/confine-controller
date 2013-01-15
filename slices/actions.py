@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy
 
-from common.admin import admin_link, get_modeladmin
+from common.admin import get_admin_link, get_modeladmin
 
 from .forms import SliverIfaceBulkForm
 from .models import Slice, Sliver, SliverIface
@@ -82,7 +82,7 @@ def create_slivers(modeladmin, request, queryset):
     context = {
         "title": "Are you sure?",
         "slice": slice,
-        "deletable_objects": [[ admin_link('')(node) for node in queryset ]],
+        "deletable_objects": [[ get_admin_link(node) for node in queryset ]],
         'queryset': queryset,
         "opts": opts,
         "app_label": app_label,

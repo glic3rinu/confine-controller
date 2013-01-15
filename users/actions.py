@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.db import transaction
 
-from .models import JoinRequest
+from users.models import JoinRequest
 
 @transaction.commit_on_success
 def join_request(modeladmin, request, queryset):

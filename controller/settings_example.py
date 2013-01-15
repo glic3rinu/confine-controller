@@ -134,8 +134,10 @@ INSTALLED_APPS = (
     'singleton_models',
     'django_extensions',
     'djcelery',
+    'djcelery_email',
     'private_files',
-    
+    'registration',
+
     # Django.contrib
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -158,7 +160,7 @@ INSTALLED_APPS = (
 #    'sfa',
     'communitynetworks',
     'firmware',
-    'registration',
+    'registration2',
     
     # Third party apps that should load last
     'rest_framework',
@@ -289,7 +291,8 @@ PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
 CUSTOM_API_ROOT = 'controller.api.Base'
 
 
-# Email config 
+# Email config
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 EMAIL_HOST = 'smtp.confine-project.eu'
 #EMAIL_PORT = ''
 #EMAIL_HOST_USER = ''

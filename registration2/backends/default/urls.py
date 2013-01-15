@@ -21,7 +21,7 @@ up your own URL patterns for these views instead.
 from django.conf.urls.defaults import *
 from django.views.generic.base import TemplateView
 
-from registration.backends.default.urls import urlpatterns as urlextra
+#from registration.backends.default.urls import urlpatterns as urlextra
 from registration2.views import register_group#, complete
 
 urlpatterns = patterns('',
@@ -34,4 +34,4 @@ urlpatterns = patterns('',
                            name='registration_group_complete'),
                        )
                        
-urlpatterns += urlextra #django-registration URLS
+#urlpatterns += urlextra #django-registration URLS

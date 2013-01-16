@@ -60,6 +60,9 @@ class TincHost(models.Model):
         """ Empty pubkey as NULL instead of empty string """
         if self.pubkey == '':
             self.pubkey = None
+        else:
+            # remove blank spaces
+            self.pubkey = self.pubkey.strip()
         super(TincHost, self).clean()
     
     def get_tinc_up(self):

@@ -35,5 +35,5 @@ class RequestCertificateForm(forms.Form):
     def clean_scr(self):
         data = self.cleaned_data['scr']
         validate_scr(data)
-        return data
+        return data.strip()
 

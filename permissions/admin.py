@@ -91,8 +91,10 @@ class PermExtensionMixin(object):
         """ update context has_change_permission with true change_permission """
         template_response = super(PermExtensionMixin, self).render_change_form(request,
             context, add=add, change=change, form_url=form_url, obj=obj)
-        template_response.context_data['has_change_permission'] = self.has_change_permission(request, obj, view=False)
+        has_change_permission = self.has_change_permission(request, obj, view=False)
+        template_response.context_data['has_change_permission'] = has_change_permission
         return template_response
+
 
 class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
     pass

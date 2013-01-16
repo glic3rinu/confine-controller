@@ -129,6 +129,15 @@ class HostAdmin(PermissionModelAdmin):
             else:
                 form.base_fields['owner'].initial = user
         return form
+    
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_hosts=True' """
+        if not request.GET.has_key('my_hosts'):
+            q = request.GET.copy()
+            q['my_hosts'] = 'True'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super(HostAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
 admin.site.register(Host, HostAdmin)

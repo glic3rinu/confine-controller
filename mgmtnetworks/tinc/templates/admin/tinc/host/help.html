@@ -59,9 +59,8 @@ Host address {{ host.tinc.subnet.strNormal }}/48
 Subnet = {{ host.tinc.subnet.strNormal }}
 
 {% for gw in host.tinc.connect_to.all %}# hosts/{{ gw }}
-{% for addr in gw.addresses %}Address = {{ addr }}
-{% endfor %}Port = 655
-Subnet = {{ gw.subnet.strNormal }}
+{% for addr in gw.addresses %}Address = {{ addr }} {{ addr.port }}
+{% endfor %}Subnet = {{ gw.subnet.strNormal }}
 {{ gw.pubkey }}{% endfor %}
 </pre>
 </div>
@@ -85,9 +84,8 @@ mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts</span>
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"Subnet = {{ host.tinc.subnet.strNormal }}"</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
 {% for gw in host.tinc.connect_to %}
 <span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'</span>
-{% for addr in gw.addresses %}<span style='color:#0000e6; '>Address = {{ addr }}</span>
-{% endfor %}<span style='color:#0000e6; '>Port = 655</span>
-<span style='color:#0000e6; '>Subnet = {{ gw.subnet.strNormal }}</span>
+{% for addr in gw.addresses %}<span style='color:#0000e6; '>Address = {{ addr }} {{ addr.port }}</span>
+{% endfor %}<span style='color:#0000e6; '><span style='color:#0000e6; '>Subnet = {{ gw.subnet.strNormal }}</span>
 <span style='color:#0000e6; '></span>
 <span style='color:#0000e6; '>{{ gw.pubkey }}</span><span style='color:#0000e6; '>'</span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ gw }}</span>
 {% endfor %}

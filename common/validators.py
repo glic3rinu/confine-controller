@@ -2,7 +2,7 @@ import re
 from base64 import b64decode
 from uuid import UUID
 
-from Crypto.PublicKey import RSA
+from Crypto.PublicKey import RSA as CryptoRSA
 from Crypto.Util import asn1
 from django.core import validators
 from django.core.exceptions import ValidationError
@@ -18,6 +18,7 @@ def validate_uuid(value):
 
 def validate_rsa_pubkey(value):
     # TODO use only M2Crypto ?
+    # https://groups.google.com/d/topic/comp.lang.python/1IP2p00diiY/discussion
     bio = BIO.MemoryBuffer(value.encode('ascii'))
     try:
         # ckeck X.501 formatted key
@@ -32,9 +33,12 @@ def validate_rsa_pubkey(value):
             key64 = '\n'.join(value.splitlines()[1:-1])
             keyDER = b64decode(key64)
             seq.decode(keyDER)
-            RSA.construct((seq[0], seq[1]))
+            CryptoRSA.construct((seq[0], seq[1]))
         except:
-            raise ValidationError('This is not a valid RSA public key.')
+            try:
+                PublicKey.RSA.importKey(value)
+            except:
+                raise ValidationError('This is not a valid RSA public key.')
 
 
 def validate_net_iface_name(value):

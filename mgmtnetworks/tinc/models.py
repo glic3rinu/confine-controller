@@ -149,10 +149,10 @@ class TincServer(TincHost):
     
     def get_host(self):
         """ Returns tincd host file """
+        # TODO order by island
         host = ""
         for addr in self.addresses:
-            host += "Address = %s\n" % addr.addr
-        host += "Port = %s\n" % settings.TINC_PORT_DFLT
+            host += "Address = %s %d\n" % (addr.addr, addr.port)
         host += "Subnet = %s\n\n" % self.subnet.strNormal()
         host += "%s\n" % self.pubkey
         return host
@@ -165,7 +165,7 @@ class Island(models.Model):
     when there is a gateway that gives access to the testbed server (possibly
     through other gateways), or when the server itself is in that island.
     """
-    name = models.CharField(max_length=32, unique=True, 
+    name = models.CharField(max_length=32, unique=True,
         help_text='The unique name of this island. A single line of free-form '
                   'text with no whitespace surrounding it.',
         validators=[validators.RegexValidator('^[\w.@+-]+$',
@@ -202,7 +202,7 @@ class TincAddress(models.Model):
         return self.server.name
     
     @property
-    def pubkey(self):
+    def pubksaveey(self):
         return self.server.pubkey
 
 
@@ -275,6 +275,8 @@ class TincClient(TincHost):
     def get_config(self):
         """ returns client tinc.conf file content """
         config = "Name = %s\n" % self.name
+        # TODO Order by island
+        # TODO order by some priority?
         for server in self.connect_to.all():
             config += "ConnectTo = %s\n" % server.name
         return config

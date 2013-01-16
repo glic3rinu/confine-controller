@@ -35,10 +35,7 @@ def validate_rsa_pubkey(value):
             seq.decode(keyDER)
             CryptoRSA.construct((seq[0], seq[1]))
         except:
-            try:
-                PublicKey.RSA.importKey(value)
-            except:
-                raise ValidationError('This is not a valid RSA public key.')
+            raise ValidationError('This is not a valid RSA public key.')
 
 
 def validate_net_iface_name(value):

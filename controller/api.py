@@ -1,8 +1,7 @@
 from __future__ import absolute_import
 
-from django.conf import settings
-
 from api import ApiRoot
+from common.utils import is_installed
 from nodes import settings as nodes_settings
 
 
@@ -27,8 +26,8 @@ class Base(ApiRoot):
             "priv_ipv4_prefix_dflt": nodes_settings.NODES_PRIV_IPV4_PREFIX_DFLT,
             "sliver_mac_prefix_dflt": nodes_settings.NODES_SLIVER_MAC_PREFIX_DFLT, }
         
-        if 'tinc' in settings.INSTALLED_APPS:
-            from tinc.settings import TINC_MGMT_IPV6_PREFIX
+        if is_installed('mgmtnetworks.tinc'):
+            from mgmtnetworks.tinc.settings import TINC_MGMT_IPV6_PREFIX
             testbed_params.update({"mgmt_ipv6_prefix": TINC_MGMT_IPV6_PREFIX})
         response.data.update({"testbed_params": testbed_params})
         return response

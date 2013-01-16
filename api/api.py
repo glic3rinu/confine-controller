@@ -74,7 +74,7 @@ class RestApi(object):
         return urlpatterns
     
     def autodiscover(self):
-        """ Auto-discover INSTALLED_APPS api.py and serializers.py modules """
+        """ Auto-discover api.py and serializers.py modules """
         autodiscover('api')
         autodiscover('serializers')
     

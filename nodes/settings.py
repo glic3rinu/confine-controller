@@ -35,4 +35,4 @@ NODES_CERT_EXPIRATION = getattr(settings, 'NODES_CERT_EXPIRATION', 60*60*24*365*
 
 
 # Management backend, needed for management network IP
-NODES_MGMT_BACKEND = getattr(settings, 'NODES_MGMT_BACKEND', 'tinc.mgmt.backend')
+NODES_MGMT_BACKEND = getattr(settings, 'NODES_MGMT_BACKEND', 'mgmtnetworks.tinc.backend')

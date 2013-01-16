@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-from django.conf import settings as project_settings
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
 from common.admin import insert_inline, insert_list_display, link
+from common.utils import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
 
@@ -35,7 +35,7 @@ insert_inline(Node, CnHostInline)
 insert_inline(Server, CnHostInline)
 insert_list_display(Node, app_url_link)
 
-if 'tinc' in project_settings.INSTALLED_APPS:
-    from tinc.models import Gateway
+if is_installed('mgmtnetworks.tinc'):
+    from mgmtnetworks.tinc.models import Gateway
     insert_inline(Gateway, CnHostInline)
     insert_list_display(Gateway, app_url_link)

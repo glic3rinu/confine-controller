@@ -226,11 +226,11 @@ class TincClient(TincHost):
         if self.pubkey == '': self.pubkey = None
         # end of workaround
         super(TincClient, self).save(*args, **kwargs)
-        self.update_tincd()
+        self.update_tincd(async=True)
     
     def delete(self, *args, **kwargs):
         super(TincClient, self).delete(*args, **kwargs)
-        self.update_tincd()
+        self.update_tincd(async=True)
     
     @property
     def address(self):

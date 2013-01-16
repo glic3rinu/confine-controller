@@ -1,8 +1,8 @@
-from django.conf import settings as project_settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from common.utils import is_installed
 from nodes.models import Node, Server
 
 from .tasks import cache_node_db
@@ -11,8 +11,8 @@ from .tasks import cache_node_db
 # Hook Community Network support for related models
 # This must be at the begining in order to avoid imports wired problems
 related_models = [Node, Server]
-if 'tinc' in project_settings.INSTALLED_APPS:
-    from tinc.models import Gateway
+if is_installed('mgmtnetworks.tinc'):
+    from mgmtnetworks.tinc.models import Gateway
     related_models.append(Gateway)
 
 

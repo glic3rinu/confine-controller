@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from django.conf import settings as project_settings
 from rest_framework import serializers
 
 from api import api
+from common.utils import is_installed
 from nodes.models import Server, Node
 
 from .models import CnHost
@@ -19,6 +19,6 @@ api.aggregate(Node, CnHostSerializer, name='cn')
 api.aggregate(Server, CnHostSerializer, name='cn')
 
 
-if 'tinc' in project_settings.INSTALLED_APPS:
-    from tinc.models import Gateway
+if is_installed('mgmtnetworks.tinc'):
+    from mgmtnetworks.tinc.models import Gateway
     api.aggregate(Gateway, CnHostSerializer, name='cn')

@@ -14,12 +14,14 @@ def validate_uuid(value):
 
 
 def validate_rsa_pubkey(value):
-    try:
-        # the server encoding may be unicode, just making sure to get an ascii key
-        bio = BIO.MemoryBuffer(value.encode('ascii'))
-        RSA.load_pub_key_bio(bio)
-    except:
-        raise ValidationError('This is not a valid RSA public key.')
+    pass
+    # FIXME this doesn't work with tinc keys, damm it!
+#    try:
+#        # the server encoding may be unicode, just making sure to get an ascii key
+#        bio = BIO.MemoryBuffer(value.encode('ascii'))
+#        RSA.load_pub_key_bio(bio)
+#    except:
+#        raise ValidationError('This is not a valid RSA public key.')
 
 
 def validate_net_iface_name(value):

@@ -16,7 +16,9 @@ def update_tincd():
     from .models import TincClient
     
     server = Server.objects.get().tinc
-    db_clients = TincClient.objects.filter(island__tincaddress__server=server)
+#    db_clients = TincClient.objects.filter(island__tincaddress__server=server)
+    db_clients = list(TincClient.objects.all())
+    db_clients += list(TincClient.objects.all())
     hosts_path = '/etc/tinc/%s/hosts/' % TINC_NET_NAME
     
     # create bash script for generating clients host files

@@ -12,3 +12,8 @@ def autodiscover(module):
             # Hack for preventing mask of import errors
             if str(e) != 'No module named %s' % module:
                 raise
+
+
+def is_installed(app):
+    """ returns True if app is installed """
+    return app in settings.INSTALLED_APPS

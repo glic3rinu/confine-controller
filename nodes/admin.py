@@ -20,7 +20,7 @@ from .forms import NodeInlineAdminForm
 from .models import Node, NodeProp, Server, DirectIface
 
 
-STATES_COLORS = { 
+STATES_COLORS = {
     Node.DEBUG: 'darkorange',
     Node.FAILURE: 'red',
     Node.SAFE: 'grey',
@@ -39,7 +39,7 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True), 
+    list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True),
                     admin_link('group'), 'num_ifaces']
     list_display_links = ('id', 'name')
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
@@ -48,8 +48,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     inlines = [NodePropInline, DirectIfaceInline]
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'group', 'arch', 'local_iface', 
-                       'sliver_pub_ipv6', 'sliver_pub_ipv4', 
+            'fields': ('name', 'description', 'group', 'arch', 'local_iface',
+                       'sliver_pub_ipv6', 'sliver_pub_ipv4',
                        'sliver_pub_ipv4_range', 'boot_sn', 'set_state'),
         }),
         ('Certificate', {
@@ -105,9 +105,11 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         """ Disable set_state transitions when state is DEBUG """
-        if obj is None or obj.set_state == obj.DEBUG:
-            return self.readonly_fields + ['set_state']
-        return self.readonly_fields
+        readonly_fields = super(NodeAdmin, self).get_readonly_fields(request, obj=obj)
+        if 'set_state' not in readonly_fields:
+            if obj is None or obj.set_state == obj.DEBUG:
+                return readonly_fields + ['set_state']
+        return readonly_fields
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Remove DEBUG from set_state choices, DEBUG is an automatic state """
@@ -123,7 +125,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             obj = self.get_object(request, object_id)
             if not obj.cert:
                 messages.warning(request, 'This node lacks a valid certificate.')
-        return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url, 
+        return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url,
                                                   extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
@@ -141,17 +143,17 @@ class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionMo
         """ Make urls singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
-            url(r'^(?P<object_id>\d+)/history/$', 
+            url(r'^(?P<object_id>\d+)/history/$',
                 self.history_view,
                 name='%s_%s_history' % info),
-            url(r'^(?P<object_id>\d+)/delete/$', 
-                self.delete_view, 
+            url(r'^(?P<object_id>\d+)/delete/$',
+                self.delete_view,
                 name='%s_%s_delete' % info),
             url(r'^(?P<object_id>\d+)$',
-                self.change_view, 
+                self.change_view,
                 name='%s_%s_change' % info),
             url(r'^$',
-                self.change_view, {'object_id': '1'}, 
+                self.change_view, {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
         urls = super(ServerAdmin, self).get_urls()

@@ -24,11 +24,6 @@ class Image(object):
         self.part_nr = part_nr
     
     @property
-    def image(self):
-        """ image path """
-        return os.path.join(self.tmp, "image.bin")
-    
-    @property
     def mnt(self):
         """ mnt path """
         return os.path.join(self.tmp, 'mnt')
@@ -48,6 +43,7 @@ class Image(object):
         """ create temporary directories needed for building the image """
         self.tmp = tempfile.mkdtemp()
         os.mkdir(self.mnt)
+        self.image = os.path.join(self.tmp, "image.bin")
     
     def mount(self):
         """ mount image partition with user-space tools """
@@ -76,9 +72,10 @@ class Image(object):
         except: pass
         shutil.rmtree(self.tmp)
     
-    def move(self, src, dst):
-        """ move src destination path """
-        shutil.move(src, dst)
+    def move(self, dst):
+        """ move self.image to destination path """
+        shutil.move(self.image, dst)
+        self.image = dst
     
     def chmod(self, path, mode):
         """ change mode of the path """
@@ -112,10 +109,11 @@ class Image(object):
         # compress the generated image with gzip
         compress = "gzip " + self.image
         self._exec_cmd(compress)
+        self.image += '.gz'
         
         # move the image to the destination path if required
         if path is not None:
-            self.move(self.image+'.gz', path)
+            self.move(path)
     
     def _exec_cmd(self, command):
         """ Execute shell commands """

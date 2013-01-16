@@ -6,6 +6,8 @@ from .image import Image
 
 @task(name="firmware.build")
 def build(build_id, exclude=[]):
+    """ Builds a firmware image for build_obj.node, excluding exclude files """
+    # Avoid circular imports
     from .models import Build, Config
     
     # retrieve the existing build instance, used for user feedback
@@ -19,26 +21,23 @@ def build(build_id, exclude=[]):
     
     # prepare the image adding the files
     image = Image(base_image.path)
-    for file_ in config.eval_files(node, exclude=exclude, image=image):
-        image.add_file(file_)
-        file_.build = build_obj
-        file_.save()
+    for build_file in config.eval_files(node, exclude=exclude, image=image):
+        image.add_file(build_file)
+        build_file.build = build_obj
+        build_file.save()
     
     # calculating image destination path
     image_name = base_image.name.replace('img.gz', '-%s.img.gz' % build_obj.pk)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     
-    # build the image
     try:
         image.build(path=image_path)
     except:
         image.clean()
         raise
-
+    
     image.clean()
     build_obj.image = image_name
     build_obj.save()
-    
-    node.update_set_state()
     
     return image_path

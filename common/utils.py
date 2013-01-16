@@ -28,3 +28,7 @@ def send_mail_template(template, context, email_from, to):
     subject = render_to_string(template, {'subject': True}, context)
     message = render_to_string(template, {'message': True}, context)
     send_mail(subject, message, email_from, to)
+
+def is_installed(app):
+    """ returns True if app is installed """
+    return app in settings.INSTALLED_APPS

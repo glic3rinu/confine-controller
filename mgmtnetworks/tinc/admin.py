@@ -21,8 +21,13 @@ from . import settings
 class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
-    readonly_fields = ['address']
+    readonly_fields = ['tinc_compatible_address']
     verbose_name_plural = 'Tinc client'
+    
+    def tinc_compatible_address(self, instance):
+        """ return instance.address in a format compatible with tinc daemon """
+        return instance.address.strNormal()
+    tinc_compatible_address.short_description = 'Address'
     
     def get_readonly_fields(self, request, obj=None):
         """ pubkey as readonly if exists """

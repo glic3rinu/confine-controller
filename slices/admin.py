@@ -9,7 +9,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
 from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
-    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view, 
+    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view,
     docstring_as_help_tip, get_admin_link)
 from common.widgets import ReadOnlyWidget
 from nodes.admin import NodeAdmin, STATES_COLORS
@@ -20,7 +20,7 @@ from .actions import renew_selected_slices, reset_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter
 from .forms import SliceAdminForm, SliverIfaceInlineForm
 from .helpers import wrap_action, remove_slice_id
-from .models import (Sliver, SliverProp, SliverIface, Slice, SliceProp, Template)
+from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
 STATE_COLORS = { 
@@ -165,8 +165,9 @@ class NodeListAdmin(NodeAdmin):
     slivers hooked on Slice
     """
     list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'), 
-                    'arch', colored('set_state', STATES_COLORS, verbose=True), admin_link('group'), 
-                    'num_ifaces', num_slivers, 'display_sliver_pub_ipv4_range']
+                    'arch', colored('set_state', STATES_COLORS, verbose=True),
+                    admin_link('group'), 'num_ifaces', num_slivers, 
+                    'display_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
@@ -310,11 +311,13 @@ class SliverInline(PermissionTabularInline):
     fields = ['sliver_link', 'node_link', 'cn_url']
     readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'note_hack', 'note2_hack']
     
-    def note_hack(self, instance): pass
+    def note_hack(self, instance):
+        pass
     note_hack.short_description = ('The slice must be registred before creating slivers. '
                                    'To do so select "Save and continue editing".')
     
-    def note2_hack(self, instance): pass
+    def note2_hack(self, instance):
+        pass
     note2_hack.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
                                              '</a> button on the top-left of this page')
     
@@ -373,8 +376,8 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', ('template', template_link), ('exp_data', 
-                       'exp_data_sha256'), 'set_state', 'vlan_nr', 
+            'fields': ('name', 'description', ('template', template_link),
+                       ('exp_data', 'exp_data_sha256'), 'set_state', 'vlan_nr',
                        'instance_sn', 'new_sliver_instance_sn', 'expires_on',
                        'group'),
         }),)
@@ -397,21 +400,21 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
-        extra_urls = patterns("", 
-            url("^(?P<slice_id>\d+)/add_sliver/$", 
-                wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view), 
+        extra_urls = patterns("",
+            url("^(?P<slice_id>\d+)/add_sliver/$",
+                wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view),
                 name='slices_slice_add_sliver'),
-            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)/$", 
+            url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)/$",
                 wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).add_view), 
                 name='slices_slice_add_sliver'),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/$", 
-                wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).change_view), 
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/$",
+                wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).change_view),
                 name='slices_slice_slivers'),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/history", 
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/history",
                 wrap_admin_view(self, remove_slice_id(SliceSliversAdmin(Sliver,
                     admin_site).history_view)),),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/reset", 
-                wrap_admin_view(self, wrap_action(reset_selected, 
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/reset",
+                wrap_admin_view(self, wrap_action(reset_selected,
                     SliceSliversAdmin(Sliver, admin_site))),)
         )
         return extra_urls + urls

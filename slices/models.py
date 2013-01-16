@@ -61,8 +61,10 @@ class Template(models.Model):
     
     @property
     def image_sha256(self):
-        try: return sha256(self.image.file.read()).hexdigest()
-        except: return None
+        try:
+            return sha256(self.image.file.read()).hexdigest()
+        except:
+            return None
 
 
 class Slice(models.Model):
@@ -140,8 +142,10 @@ class Slice(models.Model):
     
     @property
     def exp_data_sha256(self):
-        try: return sha256(self.exp_data.file.read()).hexdigest()
-        except: return None
+        try:
+            return sha256(self.exp_data.file.read()).hexdigest()
+        except:
+            return None
     
     def renew(self):
         self.expires_on = get_expires_on()
@@ -167,8 +171,10 @@ class Slice(models.Model):
         return last_nr + 1
     
     def force_update(self, async=False):
-        if async: defer(force_slice_update.delay, self.pk)
-        else: force_slice_update(self.pk)
+        if async:
+            defer(force_slice_update.delay, self.pk)
+        else:
+            force_slice_update(self.pk)
     
     class VlanAllocationError(Exception): pass
 
@@ -231,13 +237,17 @@ class Sliver(models.Model):
     
     @property
     def exp_data_sha256(self):
-        try: return sha256(self.exp_data.file.read()).hexdigest()
-        except: return None
+        try:
+            return sha256(self.exp_data.file.read()).hexdigest()
+        except:
+            return None
     
     @property
     def exp_data_sha256(self):
-        try: return sha256(self.exp_data.file.read()).hexdigest()
-        except: return None
+        try:
+            return sha256(self.exp_data.file.read()).hexdigest()
+        except:
+            return None
     
     @property
     def properties(self):
@@ -257,8 +267,10 @@ class Sliver(models.Model):
     
     def force_update(self, async=False):
         # TODO rename to pull request?
-        if async: defer(force_sliver_update.delay, self.pk)
-        else: force_sliver_update(self.pk)
+        if async:
+            defer(force_sliver_update.delay, self.pk)
+        else:
+            force_sliver_update(self.pk)
     
     @classmethod
     def register_iface(cls, iface, name):
@@ -273,7 +285,7 @@ class Sliver(models.Model):
     @classmethod
     def get_registred_iface_type(cls, iface):
         # TODO inspect class/object and act upon it
-        for k, v in cls._iface_registry.iteritems():
+        for k,v in cls._iface_registry.iteritems():
             if type(v) is iface: return k
     
     @classmethod
@@ -395,7 +407,6 @@ class SliverIface(models.Model):
         """
         Expected address calculated in the server (can be different from the
         one showed in the node, which is the real address)
-        
         <mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
             example 06:ab:04:d2:05:00
         """

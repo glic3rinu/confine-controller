@@ -156,7 +156,7 @@ INSTALLED_APPS = (
     'nodes',
     'slices',
     'issues',
-    'tinc',
+    'mgmtnetworks.tinc',
 #    'sfa',
     'communitynetworks',
     'firmware',
@@ -236,7 +236,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('Tinc', {
         'models': (
-            'tinc.*',
+            'mgmtnetworks.tinc.*',
         ),
         'collapsible': True,
     }),

@@ -77,8 +77,10 @@ class Build(models.Model):
         Deletes the build and also the image file stored on the file system
         """
         super(Build, self).delete(*args, **kwargs)
-        try: os.remove(self.image.path)
-        except: pass
+        try:
+            os.remove(self.image.path)
+        except:
+            pass
     
     @property
     def image_name(self):
@@ -89,44 +91,62 @@ class Build(models.Model):
         """
         Returns the celery task responsible for 'self' image build.
         """
-        if not self.task_id: return None
-        try: return TaskState.objects.get(task_id=self.task_id)
-        except TaskState.DoesNotExist: return None
+        if not self.task_id:
+            return None
+        try:
+            return TaskState.objects.get(task_id=self.task_id)
+        except TaskState.DoesNotExist:
+            return None
     
     @property
     def state(self):
         """ Gives the current state of the build """
         if self.image:
-            try: self.image.file
-            except IOError: return self.DELETED
+            try:
+                self.image.file
+            except IOError:
+                return self.DELETED
             else: 
                 config = Config.objects.get()
-                if self.match(config): return self.AVAILABLE
-                else: return self.OUTDATED
-        if not self.task_id: return self.REQUESTED
-        if self.task and self.task.state == celery_states.RECEIVED: return self.QUEUED
-        if self.task and self.task.state == celery_states.STARTED: return self.BUILDING
+                if self.match(config):
+                    return self.AVAILABLE
+                else:
+                    return self.OUTDATED
+        if not self.task_id:
+            return self.REQUESTED
+        if self.task and self.task.state == celery_states.RECEIVED:
+            return self.QUEUED
+        if self.task and self.task.state == celery_states.STARTED:
+            return self.BUILDING
         return self.FAILED
     
     @property
     def is_processing(self):
-        """ Abstract state useful for rendering the appropiate message on the build page """
+        """
+        Abstract state, useful for rendering the appropiate message on the build page
+        """
         return self.state in [self.REQUESTED, self.QUEUED, self.BUILDING]
     
     @property
     def is_available(self):
-        """ Abstract state useful for rendering the appropiate message on the build page """
+        """
+        Abstract state, useful for rendering the appropiate message on the build page
+        """
         return self.state == self.AVAILABLE
     
     @property
     def is_unavailable(self):
-        """ Abstract state useful for rendering the appropiate message on the build page """
+        """
+        Abstract state, useful for rendering the appropiate message on the build page
+        """
         return self.state in [self.OUTDATED, self.DELETED, self.FAILED]
     
     @property
     def image_sha256(self):
-        try: return sha256(self.image.file.read()).hexdigest()
-        except: return None
+        try:
+            return sha256(self.image.file.read()).hexdigest()
+        except:
+            return None
     
     @classmethod
     def build(cls, node, async=False, exclude=[]):
@@ -134,8 +154,10 @@ class Build(models.Model):
         This method handles the building image,
         if async is True the building task will be executed with Celery
         """
-        try: old_build = cls.objects.get(node=node)
-        except cls.DoesNotExist: pass
+        try:
+            old_build = cls.objects.get(node=node)
+        except cls.DoesNotExist:
+            pass
         else: 
             if old_build.state == cls.BUILDING:
                 raise cls.ConcurrencyError("One build at a time.")
@@ -162,8 +184,8 @@ class Build(models.Model):
             return False
         config = Config.objects.get()
         exclude = config.configfile_set.optional().values_list('pk', flat=True)
-        old_files = set( (f.path, f.content) for f in self.buildfile_set.exclude(config__pk__in=exclude) )
-        new_files = set( (f.path, f.content) for f in config.eval_files(self.node, exclude=exclude) )
+        old_files = set( (f.path,f.content) for f in self.buildfile_set.exclude(config__pk__in=exclude) )
+        new_files = set( (f.path,f.content) for f in config.eval_files(self.node, exclude=exclude) )
         return new_files == old_files
     
     class ConcurrencyError(Exception):
@@ -214,7 +236,7 @@ class Config(SingletonModel):
         return self.configuci_set.all().order_by('section')
     
     def eval_uci(self, node, sections=None):
-        """ Evaluate all ConfigUCI python expressions """
+        """ Evaluates all ConfigUCI python expressions """
         uci = []
         config_ucis = self.get_uci()
         if sections is not None:
@@ -227,14 +249,14 @@ class Config(SingletonModel):
         return uci
     
     def eval_files(self, node, exclude=[], **kwargs):
-        """ Evaluate all ConfigFiles python expressions """
+        """ Evaluates all ConfigFiles python expressions """
         files = []
         for config_file in self.configfile_set.active().exclude(pk__in=exclude):
             files.extend(config_file.get_files(node, files=files, **kwargs))
         return files
     
     def render_uci(self, node, sections=None):
-        """ Render UCI file """
+        """ Renders UCI file """
         uci = template.loader.get_template('uci')
         context = Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
@@ -262,12 +284,14 @@ class BaseImage(models.Model):
         return ", ".join(self.architectures)
     
     def clean(self):
-        """ Prevent repeated architectures """
+        """ Prevents repeated architectures """
         #TODO: move this logic to formset validation
         for arch in self.architectures:
             arch_regex = "(^|\s)%s(,|$)" % arch
-            try: existing = BaseImage.objects.get(architectures__regex=arch_regex)
-            except BaseImage.DoesNotExist: pass
+            try:
+                existing = BaseImage.objects.get(architectures__regex=arch_regex)
+            except BaseImage.DoesNotExist:
+                pass
             else:
                 if existing and (not self.pk or existing.pk != self.pk):
                     raise ValidationError("%s already present" % arch)
@@ -336,7 +360,7 @@ class ConfigFile(models.Model):
         safe_locals.update({'node': node,
                             'self': self,
                             'server': Server.objects.get()})
-        try: 
+        try:
             paths = eval(self.path, safe_locals)
         except (NameError, SyntaxError):
             paths = eval("self.path", safe_locals)
@@ -359,8 +383,10 @@ class ConfigFile(models.Model):
     @property
     def help_text(self):
         """ provide help_text file if exists """
-        try: return self.configfilehelptext.help_text
-        except ConfigFileHelpText.DoesNotExist: return ''
+        try:
+            return self.configfilehelptext.help_text
+        except ConfigFileHelpText.DoesNotExist:
+            return ''
 
 
 class ConfigFileHelpText(models.Model):
@@ -370,3 +396,5 @@ class ConfigFileHelpText(models.Model):
     
     def __unicode__(self):
         return str(self.file)
+
+

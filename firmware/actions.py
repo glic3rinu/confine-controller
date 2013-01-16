@@ -62,10 +62,10 @@ def get_firmware(modeladmin, request, queryset):
             context.update({
                 "title": "Build firmware for '%s' Research Device" % node,
                 "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
-                "content_message": mark_safe("There is no pre-build up-to-date \
-                    firmware for this research device, but you can instruct the \
-                    system to build a fresh one for you, it will take only a few \
-                    seconds."),
+                "content_message": mark_safe("There is no pre-build up-to-date"
+                    "firmware for this research device, but you can instruct the"
+                    "system to build a fresh one for you, it will take only a few"
+                    "seconds."),
             })
             return TemplateResponse(request, 'admin/get_firmware.html', context, 
                 current_app=modeladmin.admin_site.name)

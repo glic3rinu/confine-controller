@@ -1,7 +1,7 @@
 from admin_tools.menu import items, Menu
 from django.core.urlresolvers import reverse
 
-from controller import settings
+from common.utils import is_installed
 
 
 def api_link(context):
@@ -32,7 +32,7 @@ class CustomMenu(Menu):
                     items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
                 ]))
         
-        if 'tinc' in settings.INSTALLED_APPS and context['user'].has_module_perms('tinc'):
+        if is_installed('mgmtnetworks.tinc') and context['user'].has_module_perms('tinc'):
             self.children.append(items.MenuItem('Tinc', reverse('admin:app_list', args=['tinc']),
                 children=[
                     items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
@@ -43,10 +43,10 @@ class CustomMenu(Menu):
         
         administration_models = ('users.*', 'djcelery.*')
         
-        if 'issues' in settings.INSTALLED_APPS:
+        if is_installed('issues'):
             administration_models += ('issues.*',)
             
-        if 'firmware' in settings.INSTALLED_APPS:
+        if is_installed('firmware'):
             administration_models += ('firmware.*',)
         
             

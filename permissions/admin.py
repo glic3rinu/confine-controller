@@ -4,8 +4,6 @@ from django.contrib.contenttypes import generic
 from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
 
-from . import helpers
-
 
 class PermExtensionMixin(object):
     change_form_template = 'admin/permissions_change_form.html'
@@ -14,8 +12,8 @@ class PermExtensionMixin(object):
         """
         Make all fields read only if user doesn't have change permissions.
         """
-        if not self.has_change_permission(request, obj=obj) and \
-            self.has_view_permission(request, obj=obj):
+        if not self.has_change_permission(request, obj=obj, view=False):
+            if self.has_view_permission(request, obj=obj):
                 excluded_fields = ['object_id', 'content_type']
                 model_fields = fields_for_model(self.model).keys()
                 fields = []
@@ -43,35 +41,28 @@ class PermExtensionMixin(object):
     def has_add_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to add an object.
-        Can be overriden by the user in subclasses.
         """
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + opts.get_add_permission(), obj)
     
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None, view=True):
         """
-        Returns True if the given request has permission to change the given
-        Django model instance, the default implementation doesn't examine the
-        `obj` parameter.
-        
-        Can be overriden by the user in subclasses. In such case it should
-        return True if the given request has permission to change the `obj`
-        model instance. If `obj` is None, this should return True if the given
-        request has permission to change *any* object of the given type.
+        WARN: Hacky version of has_change_permission
+        Returns True if the given request has permission to view or change the given
+        Django model instance.
+        If view is set to False, then it will only return True if the user has change
+        permission.
         """
         opts = self.opts
+        # Hack to avoid copy&pasta all django's changelist_view and change_view
+        if request.method == 'GET' and view:
+            return self.has_view_permission(request, obj)
         return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), obj)
     
     def has_delete_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to change the given
-        Django model instance, the default implementation doesn't examine the
-        `obj` parameter.
-        
-        Can be overriden by the user in subclasses. In such case it should
-        return True if the given request has permission to delete the `obj`
-        model instance. If `obj` is None, this should return True if the given
-        request has permission to delete *any* object of the given type.
+        Django model instance.
         """
         opts = self.opts
         return request.user.has_perm(opts.app_label + '.' + opts.get_delete_permission(), obj)
@@ -81,6 +72,7 @@ class PermExtensionMixin(object):
         Returns a dict of all perms for this model. This dict has the keys
         ``add``, ``change``, and ``delete`` and ``view`` mapping to the True/False
         for each of those actions.
+        ** Not sure for what is used **
         """
         return {
             'add': self.has_add_permission(request),
@@ -90,53 +82,17 @@ class PermExtensionMixin(object):
         }
     
     def save_model(self, request, obj, form, change):
-        """ Given a model instance save it to the database. """
+        """ Passing obj to has_add_permission for checking """
         if not change and not self.has_add_permission(request, obj):
             raise PermissionDenied
         obj.save()
     
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        obj = self.get_object(request, unquote(object_id))
-        if not (self.has_change_permission(request, obj) or self.has_view_permission(request, obj)):
-            raise PermissionDenied
-        return helpers.change_view(self, request, object_id, form_url=form_url, extra_context=extra_context)
-    
-    def changelist_view(self, request, extra_context=None):
-        if not self.has_view_permission(request, None):
-            raise PermissionDenied
-        return helpers.changelist_view(self, request, extra_context=extra_context)
-    
-    def get_inline_instances(self, request, obj=None):
-        inline_instances = []
-        for inline_class in self.inlines:
-            inline = inline_class(self.model, self.admin_site)
-            if request:
-                try: inline.has_view_permission(request)
-                except AttributeError: continue
-                if not (inline.has_view_permission(request) or
-                        inline.has_add_permission(request) or
-                        inline.has_change_permission(request, obj) or
-                        inline.has_delete_permission(request, obj)):
-                    continue
-                if not inline.has_add_permission(request):
-                    inline.max_num = 0
-            inline_instances.append(inline)
-        
-        return inline_instances
-    
-    def queryset(self, request):
-        """
-        Returns a QuerySet of all model instances that can be viewes or edited by the
-        admin site. This is used by changelist_view and inline change_view.
-        """
-        qs = self.model._default_manager.get_query_set()
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        if not (self.has_view_permission(request) or self.has_change_permission(request)):
-            qs = qs.none()
-        return qs
-
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        """ update context has_change_permission with true change_permission """
+        template_response = super(PermExtensionMixin, self).render_change_form(request,
+            context, add=add, change=change, form_url=form_url, obj=obj)
+        template_response.context_data['has_change_permission'] = self.has_change_permission(request, obj, view=False)
+        return template_response
 
 class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
     pass

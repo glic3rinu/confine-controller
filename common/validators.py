@@ -1,9 +1,12 @@
 import re
+from base64 import b64decode
 from uuid import UUID
 
-from M2Crypto import BIO, RSA
+from Crypto.PublicKey import RSA
+from Crypto.Util import asn1
 from django.core import validators
 from django.core.exceptions import ValidationError
+from M2Crypto import BIO, RSA
 
 
 def validate_uuid(value):
@@ -14,14 +17,24 @@ def validate_uuid(value):
 
 
 def validate_rsa_pubkey(value):
-    pass
-    # FIXME this doesn't work with tinc keys, damm it!
-#    try:
-#        # the server encoding may be unicode, just making sure to get an ascii key
-#        bio = BIO.MemoryBuffer(value.encode('ascii'))
-#        RSA.load_pub_key_bio(bio)
-#    except:
-#        raise ValidationError('This is not a valid RSA public key.')
+    # TODO use only M2Crypto ?
+    bio = BIO.MemoryBuffer(value.encode('ascii'))
+    try:
+        # ckeck X.501 formatted key
+        RSA.load_pub_key_bio(bio)
+    except:
+        # Check PKCS#1 formatted key (tinc favourite format), very hacky
+        value = value.strip()
+        seq = asn1.DerSequence()
+        try:
+            assert re.match('-----BEGIN.*PUBLIC KEY-----', value.splitlines()[0])
+            assert re.match('-----END.*PUBLIC KEY-----', value.splitlines()[-1])
+            key64 = '\n'.join(value.splitlines()[1:-1])
+            keyDER = b64decode(key64)
+            seq.decode(keyDER)
+            RSA.construct((seq[0], seq[1]))
+        except:
+            raise ValidationError('This is not a valid RSA public key.')
 
 
 def validate_net_iface_name(value):

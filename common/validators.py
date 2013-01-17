@@ -1,9 +1,6 @@
 import re
-from base64 import b64decode
 from uuid import UUID
 
-from Crypto.PublicKey import RSA as CryptoRSA
-from Crypto.Util import asn1
 from django.core import validators
 from django.core.exceptions import ValidationError
 from M2Crypto import BIO, RSA
@@ -17,23 +14,28 @@ def validate_uuid(value):
 
 
 def validate_rsa_pubkey(value):
-    # TODO use only M2Crypto ?
-    # https://groups.google.com/d/topic/comp.lang.python/1IP2p00diiY/discussion
-    bio = BIO.MemoryBuffer(value.encode('ascii'))
+    value = value.encode('ascii')
+    bio = BIO.MemoryBuffer(value)
     try:
         # ckeck X.501 formatted key
         RSA.load_pub_key_bio(bio)
     except:
-        # Check PKCS#1 formatted key (tinc favourite format), very hacky
+        # Check PKCS#1 formatted key (tinc favourite format), a bit hacky
         value = value.strip()
-        seq = asn1.DerSequence()
+        value += '\n'
         try:
+            # Convert from PKCS#1 to X.501
             assert re.match('-----BEGIN.*PUBLIC KEY-----', value.splitlines()[0])
             assert re.match('-----END.*PUBLIC KEY-----', value.splitlines()[-1])
-            key64 = '\n'.join(value.splitlines()[1:-1])
-            keyDER = b64decode(key64)
-            seq.decode(keyDER)
-            CryptoRSA.construct((seq[0], seq[1]))
+            pk = value.split('\n') 
+            # Get rid of the 'RSA' in header and trailer
+            # Prepend X.501 header 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' to the data
+            pk = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' + ''.join(pk[1:-2])
+            # Reformat the lines to 64 characters
+            pk = [pk[i:i+64] for i in range(0, len(pk), 64)]
+            pk = '-----BEGIN PUBLIC KEY-----\n' + '\n'.join(pk) + '\n-----END PUBLIC KEY-----'
+            bio = BIO.MemoryBuffer(pk) # pk is ASCII, don't encode
+            RSA.load_pub_key_bio(bio)
         except:
             raise ValidationError('This is not a valid RSA public key.')
 

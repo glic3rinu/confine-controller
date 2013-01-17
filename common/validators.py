@@ -14,6 +14,7 @@ def validate_uuid(value):
 
 
 def validate_rsa_pubkey(value):
+    """ Validate X.501 and PKCS#1 RSA public keys """
     value = value.encode('ascii')
     bio = BIO.MemoryBuffer(value)
     try:
@@ -24,6 +25,8 @@ def validate_rsa_pubkey(value):
         value = value.strip()
         try:
             # Convert from PKCS#1 to X.501
+            # Tanks to Piet van Oostrum
+            # https://groups.google.com/d/msg/comp.lang.python/1IP2p00diiY/htGAsHHFDTkJ
             pk = value.splitlines()
             assert pk[0] == '-----BEGIN RSA PUBLIC KEY-----'
             assert pk[-1] == '-----END RSA PUBLIC KEY-----'

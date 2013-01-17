@@ -5,6 +5,8 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from M2Crypto import BIO, RSA
 
+from common.ssl import pkcs_to_x501
+
 
 def validate_uuid(value):
     try: 
@@ -16,26 +18,14 @@ def validate_uuid(value):
 def validate_rsa_pubkey(value):
     """ Validate X.501 and PKCS#1 RSA public keys """
     value = value.encode('ascii')
-    bio = BIO.MemoryBuffer(value)
     try:
         # ckeck X.501 formatted key
+        bio = BIO.MemoryBuffer(value)
         RSA.load_pub_key_bio(bio)
     except:
-        # Check PKCS#1 formatted key (tinc favourite format), a bit hacky
-        value = value.strip()
         try:
-            # Convert from PKCS#1 to X.501
-            # Tanks to Piet van Oostrum
-            # https://groups.google.com/d/msg/comp.lang.python/1IP2p00diiY/htGAsHHFDTkJ
-            pk = value.splitlines()
-            assert pk[0] == '-----BEGIN RSA PUBLIC KEY-----'
-            assert pk[-1] == '-----END RSA PUBLIC KEY-----'
-            # Get rid of the 'RSA' in header and convert from PKCS#1 to X.501 trailer
-            # Prepend X.501 header 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' to the data
-            pk = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' + ''.join(pk[1:-1])
-            # Reformat the lines to 64 characters
-            pk = [pk[i:i+64] for i in range(0, len(pk), 64)]
-            pk = '-----BEGIN PUBLIC KEY-----\n' + '\n'.join(pk) + '\n-----END PUBLIC KEY-----'
+            # Check PKCS#1 formatted key (tinc favourite format), a bit hacky
+            pk = pkcs_to_x501(value)
             bio = BIO.MemoryBuffer(pk)
             RSA.load_pub_key_bio(bio)
         except:

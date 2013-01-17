@@ -2,6 +2,7 @@
 {% load i18n l10n %}
 {% load url from future %}
 {% load admin_urls %}
+{% load code %}
 
 {% block extrahead %}
     {{ block.super }}
@@ -41,8 +42,8 @@
             <h2>Instructions</h2>
             <p></p>
             <p>The following command can be used for flashing this image:</p>
-            <pre style='color:#000000;background:#ffffff;'>gunzip <span style='color:#0000e6; '>{{ build.image_name }}</span> <span style='color:#44aadd; '>-c</span> <span style='color:#e34adc; '>|</span> dd <span style='color:#797997; '>of</span><span style='color:#808030; '>=</span><span style='color:#40015a; '>/dev/sdX</span> <span style='color:#797997; '>bs</span><span style='color:#808030; '>=</span>1M <span style='color:#800080; '>;</span> sync
-            </pre>
+            <link rel="stylesheet" type="text/css" media="screen" href="/static/common/css/default.css" />
+            {% code 'bash' %}gunzip {{ build.image_name }} -c | of=/dev/sdX bs=1M; sync{% endcode %}
         </fieldset>
         </div>
         </ul>

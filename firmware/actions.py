@@ -27,7 +27,7 @@ def get_firmware(modeladmin, request, queryset):
     app_label = opts.app_label
     
     using = router.db_for_write(modeladmin.model)
-    node = queryset[0]
+    node = queryset.get()
     
     # Check if the user has permissions for download the image
     if not request.user.has_perm('nodes.getfirmware_node', node):

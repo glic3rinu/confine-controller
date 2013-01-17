@@ -21,8 +21,10 @@ def reboot_selected(modeladmin, request, queryset):
     app_label = opts.app_label
     
     # Check that the user has change permission for the actual model
-    if not modeladmin.has_change_permission(request):
-        raise PermissionDenied
+    # TODO performance improvenet: if superuser skip
+    for node in queryset:
+        if not request.user.has_perm('nodes.change_node', node):
+            raise PermissionDenied
     
     using = router.db_for_write(modeladmin.model)
     
@@ -67,7 +69,10 @@ def request_cert(modeladmin, request, queryset):
         messages.warning(request, "Please, one node at a time.")
         return
     
-    node = queryset[0]
+    node = queryset.get()
+    if not request.user.has_perm('nodes.change_node', node):
+        raise PermissionDenied
+    
     form = RequestCertificateForm()
     
     # User has provided a SCR

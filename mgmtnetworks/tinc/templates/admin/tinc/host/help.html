@@ -2,6 +2,7 @@
 {% load i18n l10n %}
 {% load url from future %}
 {% load admin_urls %}
+{% load code %}
 
 {% block extrahead %}{{ block.super }}
 <script language="JavaScript" type="text/javascript">
@@ -42,13 +43,12 @@ code,pre {font-size:1.1em; }
 <p>These instructions are specific for a Debian-like Linux distribution (i.e. Ubuntu). Instructions for other systems can be found on Internet.</p>
 
 <div style="margin-left:20px;">
-
-<!--<div style="margin-left:50px;" class="collapse">-->
+<link rel="stylesheet" type="text/css" media="screen" href="/static/common/css/default.css" />
 <fieldset class="module aligned collapse">
 
 <div onClick="openClose('config')" style="cursor:hand; cursor:pointer"><h2>Show the basic configuration parameters</h2></div>
 <div id="config" class="texter">
-<pre># tinc.conf
+{% code 'bash' %}# tinc.conf
 Name = {{ host.tinc.name }}
 {% for gw in host.tinc.connect_to %}ConnectTo = {{ gw }}
 {% endfor %}
@@ -61,61 +61,58 @@ Subnet = {{ host.tinc.subnet.strNormal }}
 {% for gw in host.tinc.connect_to.all %}# hosts/{{ gw }}
 {% for addr in gw.addresses %}Address = {{ addr }} {{ addr.port }}
 {% endfor %}Subnet = {{ gw.subnet.strNormal }}
+
 {{ gw.pubkey }}{% endfor %}
-</pre>
+{% endcode %}
 </div>
 
 <!--Highlighted using http://tohtml.com/shell/-->
 
+
 <h2>1. Install dependencies</h2>
 
-<pre style='color:#000000;background:#ffffff;'>apt-get install tinc ip</pre>
+{% code 'bash' %}apt-get install tinc ip{% endcode %}
 
 <h2>2. Create and configure the tinc network</h2>
-<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Create and configure the {{ net_name }} network</span>
-mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}</span><span style='color:#40015a; '>/</span>
+{% code 'bash' %}# Create and configure the {{ net_name }} network
+mkdir /etc/tinc/{{ net_name }}
 
-<span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"Name = {{ host.tinc.name }}"</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc.conf</span>
-<span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"{% for gw in host.tinc.connect_to %}ConnectTo = {{ gw }}
-{% endfor %}"</span> <span style='color:#e34adc; '>></span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc.conf</span>
+echo '{{ host.tinc.get_config }}' > /etc/tinc/{{ net_name }}/tinc.conf
 
-mkdir <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts</span>
+mkdir /etc/tinc/{{ net_name }}/hosts
 
-<span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>"Subnet = {{ host.tinc.subnet.strNormal }}"</span> <span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
+echo '{{ host.tinc.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
 {% for gw in host.tinc.connect_to %}
-<span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'</span>
-{% for addr in gw.addresses %}<span style='color:#0000e6; '>Address = {{ addr }} {{ addr.port }}</span>
-{% endfor %}<span style='color:#0000e6; '><span style='color:#0000e6; '>Subnet = {{ gw.subnet.strNormal }}</span>
-<span style='color:#0000e6; '></span>
-<span style='color:#0000e6; '>{{ gw.pubkey }}</span><span style='color:#0000e6; '>'</span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ gw }}</span>
+echo '{{ gw.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ gw }}
 {% endfor %}
-<span style='color:#696969; '># Create scripts for setting up and down the network interface</span>
-<span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'{{ host.tinc.get_tinc_up }}'<span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-up</span>
+# Create scripts for setting up and down the network interface
+echo '{{ host.tinc.get_tinc_up }}' > /etc/tinc/{{ net_name }}/tinc-up
 
-<span style='color:#bb7977; font-weight:bold; '>echo</span> <span style='color:#0000e6; '>'{{ host.tinc.get_tinc_down }}'<span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-down</span>
+echo '{{ host.tinc.get_tinc_down }}' > /etc/tinc/{{ net_name }}/tinc-down
 
-<span style='color:#696969; '># Make the scripts executable</span>
-chmod a+rx <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/tinc-</span><span style='color:#800080; '>{</span>up,down<span style='color:#800080; '>}</span>
-</pre>
-
+# Make the scripts executable
+chmod a+rx /etc/tinc/{{ net_name }}/tinc-{up,down}
+{% endcode %}
 
 <h2>3. Generate and upload the key to the server</h2>
-<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Generate the RSA key pair for your host</span>
-tincd <span style='color:#44aadd; '>-n</span> {{ net_name }} -K</pre>
+{% code 'bash' %}
+# Generate the RSA key pair for your host
+tincd -n {{ net_name }} -K
+{% endcode %}
 <p>Now you have to upload your public key on your <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a> host page. </p>
 <p>You can found the key at the end of <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}</span> file.</p>
 
 <h2>4. Start tinc daemon</h2>
+{% code 'bash' %}
+# Enable {{ net_name }} network to automatically start on boot
+echo {{ net_name }} >> /etc/tinc/nets.boot
 
-<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '># Enable {{ net_name }} network to automatically start on boot</span>
-<span style='color:#bb7977; font-weight:bold; '>echo</span> {{ net_name }} <span style='color:#e34adc; '>></span><span style='color:#e34adc; '>></span> <span style='color:#40015a; '>/etc/tinc/nets.boot</span>
+# Restart the tinc service in order to apply the new configuration
+/etc/init.d/tinc restart
 
-<span style='color:#696969; '># Restart the tinc service in order to apply the new configuration</span>
-<span style='color:#40015a; '>/etc/init.d/tinc</span> restart
-
-<span style='color:#696969; '># Try if your connection is working by ping the server</span>
-ping6 <span style='color:#008c00; '>{{ server.tinc.address }}</span>
-</pre>
+# Try if your connection is working by ping the server
+ping6 {{ server.tinc.address }}
+{% endcode %}
 
 </div>
 {% endblock %}

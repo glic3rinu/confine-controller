@@ -52,6 +52,9 @@ def create_slivers(modeladmin, request, queryset):
     slice_id = request.path.split('/')[-3]
     slice = Slice.objects.get(pk=slice_id)
     
+    if not modeladmin.has_change_permission(request, obj=slice):
+        raise PermissionDenied
+    
     n = queryset.count()
     if n == 1:
         node = queryset.get()
@@ -64,6 +67,7 @@ def create_slivers(modeladmin, request, queryset):
             requested_ifaces = [ field for field, value in optional_ifaces.iteritems() if value ]
             
             for node in queryset:
+                # TODO use admin save_model (ensuring correct permission checking)
                 sliver = Sliver.objects.create(slice=slice, node=node)
                 for iface_type in requested_ifaces:
                     iface = Sliver.get_registred_iface(iface_type)

@@ -22,22 +22,21 @@ def validate_rsa_pubkey(value):
     except:
         # Check PKCS#1 formatted key (tinc favourite format), a bit hacky
         value = value.strip()
-        value += '\n'
         try:
             # Convert from PKCS#1 to X.501
-            assert re.match('-----BEGIN.*PUBLIC KEY-----', value.splitlines()[0])
-            assert re.match('-----END.*PUBLIC KEY-----', value.splitlines()[-1])
-            pk = value.split('\n') 
-            # Get rid of the 'RSA' in header and trailer
+            pk = value.splitlines()
+            assert pk[0] == '-----BEGIN RSA PUBLIC KEY-----'
+            assert pk[-1] == '-----END RSA PUBLIC KEY-----'
+            # Get rid of the 'RSA' in header and convert from PKCS#1 to X.501 trailer
             # Prepend X.501 header 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' to the data
-            pk = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' + ''.join(pk[1:-2])
+            pk = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A' + ''.join(pk[1:-1])
             # Reformat the lines to 64 characters
             pk = [pk[i:i+64] for i in range(0, len(pk), 64)]
             pk = '-----BEGIN PUBLIC KEY-----\n' + '\n'.join(pk) + '\n-----END PUBLIC KEY-----'
-            bio = BIO.MemoryBuffer(pk) # pk is ASCII, don't encode
+            bio = BIO.MemoryBuffer(pk)
             RSA.load_pub_key_bio(bio)
         except:
-            raise ValidationError('This is not a valid RSA public key.')
+            raise ValidationError('This is not a valid RSA (X.501 or PKCS#1) public key.')
 
 
 def validate_net_iface_name(value):
@@ -52,7 +51,7 @@ def validate_host_name(value):
 
 
 def validate_prop_name(value):
-    validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'), 
+    validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'),
                               'Enter a valid property name.', 'invalid')(value)
 
 

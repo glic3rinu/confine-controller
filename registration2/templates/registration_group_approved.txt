@@ -1,0 +1,15 @@
+{% if subject %}
+Community-Lab Testbed - approval group registration
+{% endif %}
+
+{% if message %}
+Dear user,
+Your group has been approved by the Community-Lab operators.
+These are your registration information:
+- group: {{ group.name }}
+- user: {{ user.username }}
+
+Best regards,
+
+The Community-Lab team
+{% endif %}

@@ -21,17 +21,15 @@ up your own URL patterns for these views instead.
 from django.conf.urls.defaults import *
 from django.views.generic.base import TemplateView
 
-#from registration.backends.default.urls import urlpatterns as urlextra
 from registration2.views import register_group#, complete
 
 urlpatterns = patterns('',
-                       url(r'^register/group/$',
-                           register_group,
-                           {'backend': 'registration2.backends.default.UserGroup'},
-                           name='registration_group_register'),
-                       url(r'^register/group/complete/$',
-                           TemplateView.as_view(template_name='registration_group_complete.html'),
-                           name='registration_group_complete'),
-                       )
+   url(r'^register/group/$',
+       register_group,
+       {'backend': 'registration2.backends.default.UserGroup'},
+       name='registration_group_register'),
+   url(r'^register/group/complete/$',
+       TemplateView.as_view(template_name='registration_group_complete.html'),
+       name='registration_group_complete'),
+)
                        
-#urlpatterns += urlextra #django-registration URLS

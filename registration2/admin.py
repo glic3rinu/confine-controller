@@ -1,9 +1,6 @@
-from common.admin import action_to_view, admin_link, ChangeViewActionsModelAdmin
+from common.admin import admin_link, ChangeViewActionsModelAdmin
 
-from django.conf.urls import patterns, url
 from django.contrib import admin
-from django.core.urlresolvers import reverse
-from django.utils.safestring import mark_safe
 
 from registration2.actions import approve_group, reject_group
 from registration2.models import GroupRegistration

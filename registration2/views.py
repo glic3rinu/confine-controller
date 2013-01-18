@@ -4,14 +4,13 @@ Views which allow users to create and activate accounts.
 """
 
 
-from django.shortcuts import redirect
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 
 from registration2.backends import get_backend
 
 # TODO extend from registration.views import register
-#       for avoid an authenticated user sign in
+#       for avoid an authenticated user sign in again
 #
 #def register(request, backend, success_url=None, form_class=None,
 #             disallowed_url='registration_disallowed',

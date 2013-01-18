@@ -1,0 +1,17 @@
+{% if subject %}
+Community-Lab Testbed - group registration request
+{% endif %}
+
+{% if message %}
+Dear Testbed operators,
+The Community-Lab Testbed have received a group registration request.
+Here is the request information:
+- group: {{ group.name }}
+         {{ group.description }}
+- user: {{ user.username }}
+
+Please, use the admin interface to approve or reject this petition.
+Best regards,
+
+The Community-Lab Testbed
+{% endif %}

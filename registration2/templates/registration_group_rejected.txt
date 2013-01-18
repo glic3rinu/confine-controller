@@ -1,0 +1,15 @@
+{% if subject %}
+Community-Lab Testbed - group registration rejected
+{% endif %}
+
+{% if message %}
+Dear user,
+Your group has NOT been approved by the Community-Lab operators.
+These are your registration request information:
+- group: {{ group.name }}
+- user: {{ user.username }}
+
+Best regards,
+
+The Community-Lab team
+{% endif %}

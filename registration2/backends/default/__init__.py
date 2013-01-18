@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.sites.models import RequestSite
 from django.contrib.sites.models import Site
 
+from registration.backends.default import DefaultBackend
 from registration2.forms import GroupRegistrationForm
 from registration2.models import GroupRegistration
 
@@ -14,7 +15,7 @@ else:
     User = get_user_model()
 
 
-class UserGroup(object): #TODO is subclassing register backend needed??
+class UserGroup(DefaultBackend):
     @transaction.commit_on_success
     def group_register(self, request, **kwargs):
         """

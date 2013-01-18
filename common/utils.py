@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.template import Context
 from django.utils.importlib import import_module
 
 
@@ -24,8 +25,12 @@ def send_mail_template(template, context, email_from, to):
     context can be a dictionary or a template.Context instance
     """
     if type(context) is dict:
-        context = template.Context(context)
-    subject = render_to_string(template, {'subject': True}, context)
+        context = Context(context)
+    if type(to) is str or type(to) is unicode:
+        to = [to] #send_mail 'to' argument must be a list or a tuple
+
+    #subject cannot have new lines
+    subject = render_to_string(template, {'subject': True}, context).strip()
     message = render_to_string(template, {'message': True}, context)
     send_mail(subject, message, email_from, to)
 

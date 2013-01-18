@@ -16,6 +16,10 @@ def autodiscover(module):
             if str(e) != 'No module named %s' % module:
                 raise
 
+def is_installed(app):
+    """ returns True if app is installed """
+    return app in settings.INSTALLED_APPS
+
 def send_mail_template(template, context, email_from, to):
     """
     Renders an email template with this format:
@@ -34,6 +38,3 @@ def send_mail_template(template, context, email_from, to):
     message = render_to_string(template, {'message': True}, context)
     send_mail(subject, message, email_from, to)
 
-def is_installed(app):
-    """ returns True if app is installed """
-    return app in settings.INSTALLED_APPS

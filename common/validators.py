@@ -24,7 +24,7 @@ def validate_rsa_pubkey(value):
         RSA.load_pub_key_bio(bio)
     except:
         try:
-            # Check PKCS#1 formatted key (tinc favourite format), a bit hacky
+            # Check PKCS#1 formatted key (tinc favourite format)
             pk = pkcs_to_x501(value)
             bio = BIO.MemoryBuffer(pk)
             RSA.load_pub_key_bio(bio)

@@ -116,7 +116,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         field = super(NodeAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == 'set_state':
             # Removing Debug from choices
-            field.choices.pop(0)
+            assert field.choices.pop(0)[0] == Node.DEBUG, "Problem removing DEBUG from set_state"
         return field
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -162,4 +162,3 @@ class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionMo
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)
-

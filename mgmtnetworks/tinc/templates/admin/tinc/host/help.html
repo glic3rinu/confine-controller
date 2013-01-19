@@ -4,11 +4,9 @@
 {% load admin_urls %}
 {% load code %}
 
-{% block extrahead %}{{ block.super }}
+{% block extrahead %}
+{{ block.super }}
 <script language="JavaScript" type="text/javascript">
-<!-- Copyright 2005, Sandeep Gangadharan -->
-<!-- For more free scripts go to http://www.sivamdesign.com/scripts/ -->
-<!--
 if (document.getElementById) {
 document.writeln('<style type="text/css"><!--')
 document.writeln('.texter {display:none} @media print {.texter {display:block;}}')
@@ -17,7 +15,6 @@ document.writeln('//--></style>') }
 function openClose(theID) {
 if (document.getElementById(theID).style.display == "block") { document.getElementById(theID).style.display = "none" }
 else { document.getElementById(theID).style.display = "block" } }
-// -->
 </script>
 {% endblock %}
 
@@ -42,11 +39,12 @@ code,pre {font-size:1.1em; }
 <p>The following instructions detail the process of configuring a <a href="http://www.tinc-vpn.org/">Tinc</a> <a href="http://en.wikipedia.org/wiki/Vpn">VPN</a> daemon in order to connect to the {{ net_name }} <a href="http://wiki.confine-project.eu/arch:ipv6-overlay">management network</a>.</p>
 <p>These instructions are specific for a Debian-like Linux distribution (i.e. Ubuntu). Instructions for other systems can be found on Internet.</p>
 
-<div style="margin-left:20px;">
+<div style="margin-left:20px; width:600px;">
 <link rel="stylesheet" type="text/css" media="screen" href="/static/common/css/default.css" />
 <fieldset class="module aligned collapse">
 
-<div onClick="openClose('config')" style="cursor:hand; cursor:pointer"><h2>Show the basic configuration parameters</h2></div>
+<div onClick="openClose('config')" style="cursor:hand; cursor:pointer">
+<h2>Show the basic configuration parameters</h2></div>
 <div id="config" class="texter">
 {% code 'bash' %}# tinc.conf
 Name = {{ host.tinc.name }}
@@ -66,29 +64,25 @@ Subnet = {{ host.tinc.subnet.strNormal }}
 {% endcode %}
 </div>
 
-<!--Highlighted using http://tohtml.com/shell/-->
-
-
 <h2>1. Install dependencies</h2>
-
 {% code 'bash' %}apt-get install tinc ip{% endcode %}
 
 <h2>2. Create and configure the tinc network</h2>
 {% code 'bash' %}# Create and configure the {{ net_name }} network
 mkdir /etc/tinc/{{ net_name }}
 
-echo '{{ host.tinc.get_config }}' > /etc/tinc/{{ net_name }}/tinc.conf
+echo '{{ host.tinc.get_config|safe }}' > /etc/tinc/{{ net_name }}/tinc.conf
 
 mkdir /etc/tinc/{{ net_name }}/hosts
 
-echo '{{ host.tinc.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
+echo '{{ host.tinc.get_host|safe }}' > /etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
 {% for gw in host.tinc.connect_to %}
 echo '{{ gw.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ gw }}
 {% endfor %}
 # Create scripts for setting up and down the network interface
-echo '{{ host.tinc.get_tinc_up }}' > /etc/tinc/{{ net_name }}/tinc-up
+echo '{{ host.tinc.get_tinc_up|safe }}' > /etc/tinc/{{ net_name }}/tinc-up
 
-echo '{{ host.tinc.get_tinc_down }}' > /etc/tinc/{{ net_name }}/tinc-down
+echo '{{ host.tinc.get_tinc_down|safe }}' > /etc/tinc/{{ net_name }}/tinc-down
 
 # Make the scripts executable
 chmod a+rx /etc/tinc/{{ net_name }}/tinc-{up,down}

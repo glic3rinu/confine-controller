@@ -45,7 +45,7 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
+    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
         help_text='PEM-encoded RSA public key used on tinc management network.',
         validators=[validate_rsa_pubkey])
     
@@ -58,22 +58,29 @@ class TincHost(models.Model):
     
     def clean(self):
         """ Empty pubkey as NULL instead of empty string """
+        # TODO  There is a bug in django, when the object is created on inlines
+        #       model.clean() doesn't get called. When saving chanegs it is called
+        #       A more elaborated describtion is required for this tiket:
+        #       https://code.djangoproject.com/ticket/19467
         if self.pubkey == '':
             self.pubkey = None
         else:
-            # remove blank spaces
             self.pubkey = self.pubkey.strip()
         super(TincHost, self).clean()
     
     def get_tinc_up(self):
-        """ tinc-up file content """
+        """ Returns tinc-up file content """
         ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
-        return '#!/bin/sh\nip -6 link set "$INTERFACE" up mtu 1400\nip -6 addr add %s dev "$INTERFACE"\n' % ip
+        return ('#!/bin/sh\n'
+                'ip -6 link set "$INTERFACE" up mtu 1400\n'
+                'ip -6 addr add %s dev "$INTERFACE"\n' % ip)
     
     def get_tinc_down(self):
-        """ tinc-down file content """
+        """ Returns tinc-down file content """
         ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
-        return '#!/bin/sh\nip -6 addr del %s dev "$INTERFACE"\nip -6 link set "$INTERFACE" down\n' % ip
+        return ('#!/bin/sh\n'
+                'ip -6 addr del %s dev "$INTERFACE"\n'
+                'ip -6 link set "$INTERFACE" down\n' % ip)
 
 
 class Gateway(models.Model):
@@ -154,7 +161,8 @@ class TincServer(TincHost):
         for addr in self.addresses:
             host += "Address = %s %d\n" % (addr.addr, addr.port)
         host += "Subnet = %s\n\n" % self.subnet.strNormal()
-        host += "%s\n" % self.pubkey
+        if self.pubkey:
+            host += "%s" % self.pubkey
         return host
 
 
@@ -200,10 +208,6 @@ class TincAddress(models.Model):
     @property
     def name(self):
         return self.server.name
-    
-    @property
-    def pubksaveey(self):
-        return self.server.pubkey
 
 
 class TincClient(TincHost):
@@ -224,10 +228,6 @@ class TincClient(TincHost):
         return "%s_%s" % (self.content_type.model, self.object_id)
     
     def save(self, *args, **kwargs):
-        # FIXME bug in django, this is a workaround
-        # https://code.djangoproject.com/ticket/19467
-        if self.pubkey == '': self.pubkey = None
-        # end of workaround
         super(TincClient, self).save(*args, **kwargs)
         self.update_tincd(async=True)
     
@@ -237,7 +237,7 @@ class TincClient(TincHost):
     
     @property
     def address(self):
-        """ IPV6 management address """
+        """ Calculates IPV6 management address """
         ipv6_words = settings.TINC_MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'node':
             # MGMT_IPV6_PREFIX:N:0000::2/64 i
@@ -269,17 +269,20 @@ class TincClient(TincHost):
             update_tincd()
     
     def get_host(self):
-        """ returns tincd hosts file content """
-        return "Subnet = %s\n\n%s" % (self.subnet.strNormal(), self.pubkey)
+        """ Returns tincd hosts file content """
+        host = "Subnet = %s" % self.subnet.strNormal()
+        if self.pubkey:
+            host += "\n\n%s" % self.pubkey
+        return host
     
     def get_config(self):
-        """ returns client tinc.conf file content """
-        config = "Name = %s\n" % self.name
+        """ Returns client tinc.conf file content """
+        config = ["Name = %s" % self.name]
         # TODO Order by island
         # TODO order by some priority?
         for server in self.connect_to.all():
-            config += "ConnectTo = %s\n" % server.name
-        return config
+            config.append("ConnectTo = %s" % server.name)
+        return '\n'.join(config)
     
     def generate_key(self, commit=False):
         key = M2Crypto.RSA.gen_key(2048, 65537)

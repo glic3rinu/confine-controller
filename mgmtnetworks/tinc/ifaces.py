@@ -22,11 +22,9 @@ class MgmtIface(BaseIface):
         nr = '10' + int_to_hex_str(iface.nr, 2)
         node_id = int_to_hex_str(iface.sliver.node_id, 4)
         slice_id = int_to_hex_str(iface.sliver.slice_id, 12)
-        
         ipv6_words = TINC_MGMT_IPV6_PREFIX.split(':')[:3]
         ipv6_words.extend([node_id, nr])
         ipv6_words.extend(split_len(slice_id, 4))
-        
         return IP(':'.join(ipv6_words))
 
 

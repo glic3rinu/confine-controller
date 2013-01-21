@@ -49,9 +49,7 @@ class CustomMenu(Menu):
         if is_installed('firmware'):
             administration_models += ('firmware.*',)
         
-            
         admin_item = items.AppList('Administration', models=administration_models)
-        self.children.append(admin_item)
 
         if is_installed('registration') and is_installed('registration2'):
             admin_item.children.append(items.MenuItem('Registration', 
@@ -59,10 +57,10 @@ class CustomMenu(Menu):
                     items.MenuItem('User registration', reverse('admin:registration_registrationprofile_changelist')),
                     items.MenuItem('Group registration', reverse('admin:registration2_groupregistration_changelist')),
                 ]))
+
+        self.children.append(admin_item)
         
         self.children += [
                     items.MenuItem('API', api_link(context)),
                     items.MenuItem('Documentation', 'http://wiki.confine-project.eu/soft:server'),]
 
-    class Meta:
-        ordering = ['title']

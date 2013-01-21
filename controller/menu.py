@@ -53,7 +53,7 @@ class CustomMenu(Menu):
         admin_item = items.AppList('Administration', models=administration_models)
         self.children.append(admin_item)
 
-        if 'registration' in settings.INSTALLED_APPS:
+        if is_installed('registration') and is_installed('registration2'):
             admin_item.children.append(items.MenuItem('Registration', 
                 children=[
                     items.MenuItem('User registration', reverse('admin:registration_registrationprofile_changelist')),

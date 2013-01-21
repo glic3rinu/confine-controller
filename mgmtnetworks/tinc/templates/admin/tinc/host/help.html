@@ -6,6 +6,9 @@
 
 {% block extrahead %}
 {{ block.super }}
+<!-- Code highlighting style -->
+<link rel="stylesheet" type="text/css" media="screen" href="/static/common/css/default.css" />
+<style> code,pre {font-size:1.13em; } </style>
 <!-- Collapse function -->
 <script language="JavaScript" type="text/javascript">
 if (document.getElementById) {
@@ -14,8 +17,9 @@ document.writeln('.texter {display:none} @media print {.texter {display:block;}}
 document.writeln('//--></style>') }
 
 function openClose(theID) {
-if (document.getElementById(theID).style.display == "block") { document.getElementById(theID).style.display = "none" }
-else { document.getElementById(theID).style.display = "block" } }
+if (document.getElementById(theID).style.display == "block") {
+    document.getElementById(theID).style.display = "none"
+} else { document.getElementById(theID).style.display = "block" } }
 </script>
 {% endblock %}
 
@@ -32,13 +36,12 @@ else { document.getElementById(theID).style.display = "block" } }
 {% block content_title %}<h1>Tinc client installation help</h1>{% endblock %}
 
 {% block content %}
-<style> code,pre {font-size:1.13em; } </style>
+
 
 <p>The following instructions detail the process of configuring a <a href="http://www.tinc-vpn.org/">Tinc</a> <a href="http://en.wikipedia.org/wiki/Vpn">VPN</a> daemon in order to connect to the {{ net_name }} <a href="http://wiki.confine-project.eu/arch:ipv6-overlay">management network</a>.</p>
 <p>These instructions are specific for a Debian-like Linux distribution (i.e. Ubuntu). Instructions for other systems can be found on Internet.</p>
 
 <div style="margin-left:20px; width:600px;">
-<link rel="stylesheet" type="text/css" media="screen" href="/static/common/css/default.css" />
 <fieldset class="module aligned collapse">
 
 

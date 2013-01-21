@@ -45,7 +45,6 @@ reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_
 @transaction.commit_on_success
 def create_slivers(modeladmin, request, queryset):
     """ Create slivers in selected nodes """
-    # TODO check request.user and group permissions
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
@@ -67,8 +66,10 @@ def create_slivers(modeladmin, request, queryset):
             requested_ifaces = [ field for field, value in optional_ifaces.iteritems() if value ]
             
             for node in queryset:
-                # TODO use admin save_model (ensuring correct permission checking)
-                sliver = Sliver.objects.create(slice=slice, node=node)
+                sliver = Sliver(slice=slice, node=node)
+                if not request.user.has_perm('slices.add_sliver', sliver):
+                    raise PermissionDenied
+                sliver.save()
                 for iface_type in requested_ifaces:
                     iface = Sliver.get_registred_iface(iface_type)
                     SliverIface.objects.create(sliver=sliver, name=iface.DEFAULT_NAME, type=iface_type)

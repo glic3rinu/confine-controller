@@ -23,8 +23,8 @@ def pkcs_to_x501(pubkey):
     """
     pubkey = pubkey.strip()
     pk = pubkey.splitlines()
-    assert pk[0] == '-----BEGIN RSA PUBLIC KEY-----', 'Wrong header'
-    assert pk[-1] == '-----END RSA PUBLIC KEY-----', 'Wrong footer'
+    assert pk[0] == '-----BEGIN RSA PUBLIC KEY-----', 'Wrong PKCS#1 header'
+    assert pk[-1] == '-----END RSA PUBLIC KEY-----', 'Wrong PKCS#1 footer'
     pk = '\0' + base64.decodestring(''.join(pk[1:-1]))
     header = '\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00\x03'
     pk = header + _der_length(len(pk)) + pk

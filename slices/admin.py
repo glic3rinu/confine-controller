@@ -309,26 +309,27 @@ class SliverInline(PermissionTabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
-    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'note_hack', 'note2_hack']
+    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'sliver_note1',
+                       'sliver_note2']
     
-    def note_hack(self, instance):
+    def sliver_note1(self, instance):
         pass
-    note_hack.short_description = ('The slice must be registred before creating slivers. '
-                                   'To do so select "Save and continue editing".')
+    sliver_note1.short_description = ('The slice must be registred before creating slivers. '
+                                      'To do so select "Save and continue editing".')
     
-    def note2_hack(self, instance):
+    def sliver_note2(self, instance):
         pass
-    note2_hack.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
+    sliver_note2.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
                                              '</a> button on the top-left of this page')
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
         if obj is None:
-            return [(None, {'fields': ['note_hack']})]
+            return [(None, {'fields': ['sliver_note1']})]
         # The slices is registred: display add button in the inline header
         self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
         if not obj.sliver_set.exists():
-            return [(None, {'fields': ['note2_hack']})]
+            return [(None, {'fields': ['sliver_note2']})]
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
     def has_delete_permission(self, request, obj=None):

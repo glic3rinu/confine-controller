@@ -46,8 +46,8 @@ class Command(BaseCommand):
     
     @transaction.commit_on_success
     def handle(self, *args, **options):
-        from tinc.models import TincServer
-        from tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX
+        from mgmtnetworks.tinc.models import TincServer
+        from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX
         
         if getpass.getuser() != 'root':
             raise CommandError('Sorry, create_tinc_server must be executed as a superuser (root)')
@@ -82,53 +82,53 @@ class Command(BaseCommand):
                                                     content_type__model='server',
                                                     content_type__app_label='nodes')
         
-        cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, 
-                                                       TINC_MGMT_IPV6_PREFIX.split('::')[0])
-        cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        if cmd.returncode > 0:
-            raise CreateTincdError(stderr)
-        
-        # Get created pubkey
-        pubkey = ''
-        for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
-            pubkey += line
-            if line == '-----BEGIN RSA PUBLIC KEY-----\n':
-                pubkey = line
-            elif line == '-----END RSA PUBLIC KEY-----\n':
-                break
-        
-        # Prompt for username/password, and any other required fields.
-        # Enclose this whole thing in a try/except to trap for a
-        # keyboard interrupt and exit gracefully.
-        default_username = get_default_celeryd_username()
-        username = None
-        while username is None and interactive:
-            if not username:
-                input_msg = "Celeryd username"
-                if default_username:
-                    input_msg += " (leave blank to use '%s')" % default_username
-                raw_value = raw_input(input_msg + ': ')
-            if default_username and raw_value == '':
-                raw_value = default_username
-            # validate username
-            try:
-                username = pwd.getpwnam(raw_value).pw_name
-            except KeyError:
-                self.stderr.write("Error: %s" % '; '.join(e.messages))
-                username = None
-                continue
-        
-        tinc_server.pubkey = pubkey
-        tinc_server.save()
-        cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
-                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 
-                                                                  'user': username}
-        cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        if cmd.returncode > 0:
-            raise self.CreateTincdError(stderr)
-        self.stdout.write('Tincd server successfully created and configured.')
-        self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')
+#        cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, 
+#                                                       TINC_MGMT_IPV6_PREFIX.split('::')[0])
+#        cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+#        (stdout, stderr) = cmd.communicate()
+#        if cmd.returncode > 0:
+#            raise CreateTincdError(stderr)
+#        
+#        # Get created pubkey
+#        pubkey = ''
+#        for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
+#            pubkey += line
+#            if line == '-----BEGIN RSA PUBLIC KEY-----\n':
+#                pubkey = line
+#            elif line == '-----END RSA PUBLIC KEY-----\n':
+#                break
+#        
+#        # Prompt for username/password, and any other required fields.
+#        # Enclose this whole thing in a try/except to trap for a
+#        # keyboard interrupt and exit gracefully.
+#        default_username = get_default_celeryd_username()
+#        username = None
+#        while username is None and interactive:
+#            if not username:
+#                input_msg = "Celeryd username"
+#                if default_username:
+#                    input_msg += " (leave blank to use '%s')" % default_username
+#                raw_value = raw_input(input_msg + ': ')
+#            if default_username and raw_value == '':
+#                raw_value = default_username
+#            # validate username
+#            try:
+#                username = pwd.getpwnam(raw_value).pw_name
+#            except KeyError:
+#                self.stderr.write("Error: %s" % '; '.join(e.messages))
+#                username = None
+#                continue
+#        
+#        tinc_server.pubkey = pubkey
+#        tinc_server.save()
+#        cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
+#                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 
+#                                                                  'user': username}
+#        cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+#        (stdout, stderr) = cmd.communicate()
+#        if cmd.returncode > 0:
+#            raise self.CreateTincdError(stderr)
+#        self.stdout.write('Tincd server successfully created and configured.')
+#        self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')
     
     class CreateTincdError(Exception): pass

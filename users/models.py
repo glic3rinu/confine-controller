@@ -21,13 +21,6 @@ class Group(models.Model):
         help_text='Designates if a group has been approved by the operations '
                   'team. When someone sends a request, a group pending of '
                   'be approved is created.')
-    # TODO Check these fields with Ivan
-#    address = models.TextField()
-#    city = models.CharField(max_length=32)
-#    state = models.CharField(max_length=32)
-#    postal_code = models.PositiveIntegerField(blank=True, null=True)
-#    country = models.CharField(max_length=32) 
-#    url = models.URLField(blank=True)
     allow_nodes = models.BooleanField(default=False,
         help_text='Whether nodes belonging to this group can be created (false by '
                   'default). Its value can only be changed by testbed superusers.')

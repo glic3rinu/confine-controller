@@ -64,8 +64,8 @@ class Command(BaseCommand):
                 raise CommandError("Username doesn't exists.")
         
         server = Server.objects.get_or_create(id=1)
-        tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server', 
-                                                content_type__app_label='nodes') 
+        tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server',
+                                                content_type__app_label='nodes')
         if tinc_server.exists():
             if interactive:
                 msg = ("\nSeems that you already have a tinc server configured.\nThis will "
@@ -122,7 +122,7 @@ class Command(BaseCommand):
         tinc_server.pubkey = pubkey
         tinc_server.save()
         cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
-                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME, 
+                 chmod o+x /etc/tinc/%(net)s/tinc-{up,down}""" % {'net': TINC_NET_NAME,
                                                                   'user': username}
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()

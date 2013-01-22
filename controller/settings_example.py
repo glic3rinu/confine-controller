@@ -298,4 +298,4 @@ EMAIL_HOST = 'smtp.confine-project.eu'
 #EMAIL_HOST_USER = ''
 #EMAIL_HOST_PASSWORD = ''
 #EMAIL_USE_TLS = False
-MAINTEINANCE_EMAIL = 'controller@confine-project.eu'
+DEFAULT_FROM_EMAIL = 'controller@confine-project.eu'

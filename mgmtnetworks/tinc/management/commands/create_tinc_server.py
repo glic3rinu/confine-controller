@@ -47,7 +47,7 @@ class Command(BaseCommand):
     @transaction.commit_on_success
     def handle(self, *args, **options):
         from tinc.models import TincServer
-        from tinc.settings import TINC_NET_NAME, MGMT_IPV6_PREFIX
+        from tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX
         
         if getpass.getuser() != 'root':
             raise CommandError('Sorry, create_tinc_server must be executed as a superuser (root)')
@@ -83,7 +83,7 @@ class Command(BaseCommand):
                                                     content_type__app_label='nodes')
         
         cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, 
-                                                       MGMT_IPV6_PREFIX.split('::')[0])
+                                                       TINC_MGMT_IPV6_PREFIX.split('::')[0])
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

@@ -1,7 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.core.exceptions import ValidationError
 
-from .models import User
+from common.fields import MultiSelectFormField
+
+from .models import User, JoinRequest
 
 
 class UserCreationForm(forms.ModelForm):
@@ -40,3 +43,30 @@ class UserChangeForm(forms.ModelForm):
         # This is done here, rather than on the field, because the
         # field does not have access to the initial value
         return self.initial["password"]
+
+
+class JoinRequestForm(forms.ModelForm):
+    ROLES = (
+        ('researcher', 'Researcher'),
+        ('admin', 'Admin'),
+        ('technician', 'Technician'))
+    
+    accept = forms.BooleanField(label='Accept', required=False)
+    reject = forms.BooleanField(label='Reject', required=False)
+    roles = MultiSelectFormField(label='Roles', choices=ROLES, required=False)
+    
+    class Meta:
+        model = JoinRequest
+    
+    def clean(self):
+        cleaned_data = super(JoinRequestForm, self).clean()
+        if self.cleaned_data.get('accept') and self.cleaned_data.get('reject'):
+            raise ValidationError('Accept or Reject?')
+        return cleaned_data
+    
+    def save(self, commit=True):
+        if self.cleaned_data.get('accept'):
+            roles = self.cleaned_data.get('roles')
+            self.instance.accept(roles=roles)
+        elif self.cleaned_data.get('reject'):
+            self.instance.reject()

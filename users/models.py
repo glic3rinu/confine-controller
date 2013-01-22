@@ -30,7 +30,7 @@ class Group(models.Model):
     
     def __unicode__(self):
         return self.name
-
+    
     @property
     def admins(self):
         """ return user queryset containing all admins """
@@ -38,7 +38,7 @@ class Group(models.Model):
         if not admins.exists():
             raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
         return admins
-
+    
     def is_member(self, user):
         return Roles.objects.filter(group=self, user=user).exists()
     
@@ -132,7 +132,6 @@ class User(auth_models.AbstractBaseUser):
                   'can include URLs and other information.')
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
-#    phone = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True,
         help_text='Designates whether this user should be treated as '
                   'active. Unselect this instead of deleting accounts.')
@@ -258,74 +257,62 @@ class AuthToken(models.Model):
 class JoinRequest(models.Model):
     """
     This model's purpose is to store data temporaly for join the group.
-
+    
     An user can request to join into a group in two main scenaries:
     1. While the registration: chooses the group(s)
     2. A registered user: can request to join a group(s)
-
+    
     Once the request is created, the group's admin have to check it
     accepting or refusing it.
-
     """
     user = models.ForeignKey(User)
     group = models.ForeignKey(Group)
     date = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         unique_together = ('user', 'group')
-        verbose_name = 'Join Request'
-        verbose_name_plural = 'Join Requests'
-
+    
     def __unicode__(self):
-        return u"Join request from %s into %s" % (self.user, self.group)
-
+        return '#%s' % self.pk
+    
     def save(self, *args, **kwargs):
-        print "POST SAVE"
+        if self.pk:
+            # Notify admins that a new join request is created
+            self.notify_admins(template='created_join_request.email')
         super(JoinRequest, self).save(*args, **kwargs)
-        # enqueue a task to send a mail to the group admin
-        self.send_mail_to_admin()
-
-    def accept(self):
+    
+    def accept(self, roles=[]):
         """
         The admin accepts the user's request to join.
         The user is added to the group and the request is deleted
-
         """
-        #TODO create any role? research role?
-        Roles.objects.create(user=self.user, group=self.group)
-        self.notify_user(template='registration/join_request_accept_email.txt')
+        roles_kwargs = dict( ('is_%s' % role, True) for role in roles )
+        Roles.objects.create(user=self.user, group=self.group, **roles_kwargs)
+        self.notify_user(template='accepted_join_request.email')
         self.delete()
-
-    def refuse(self):
+    
+    def reject(self):
         """
         The admin refuse the user's request to join.
         The request is deleted
-
         """
-        self.notify_user(template='registration/join_request_refuse_email.txt')
+        self.notify_user(template='rejected_join_request.email')
         self.delete()
-        
+    
     def notify_admins(self, template):
         """
         Notify group admins when a new join request has sent.
-
         """
         context = {'group': self.group}
         admins_email = self.group.get_admin_emails()
         send_mail_template(template=template,
                            context=context,
-                           email_from=project_settings.MAINTEINANCE_EMAIL,
                            to=admins_email)
-
+    
     def notify_user(self, template):
         context = {'group': self.group}
         send_mail_template(template=template,
                            context=context,
-                           email_from=project_settings.MAINTEINANCE_EMAIL,
                            to=self.user.email)
 
-    def save(self, *args, **kwargs):
-        # Only notify the user when the JoinRequest has successfully created
-        if self.pk:
-            self.notify_admins(template='registration/join_request_email.txt')
-        super(JoinRequest, self).save(*args, **kwargs)
+

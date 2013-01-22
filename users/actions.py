@@ -3,6 +3,7 @@ from django.db import transaction
 
 from users.models import JoinRequest
 
+
 @transaction.commit_on_success
 def join_request(modeladmin, request, queryset):
     """

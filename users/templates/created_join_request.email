@@ -1,0 +1,2 @@
+{% if subject %}Created join request{% endif %}
+{% if message %}Email body{% endif %}

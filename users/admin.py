@@ -17,7 +17,7 @@ from common.admin import link, get_admin_link, ChangeViewActionsModelAdmin
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request
-from .forms import UserCreationForm, UserChangeForm
+from .forms import UserCreationForm, UserChangeForm, JoinRequestForm
 from .models import User, AuthToken, Roles, Group, JoinRequest
 
 
@@ -30,25 +30,22 @@ class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
 
+
 class JoinRequestInline(PermissionTabularInline):
     model = JoinRequest
     extra = 0
-    readonly_fields = ('user', 'action_links')
-
+    fields = ('user_link', 'action', 'roles')
+    readonly_fields = ('user_link',)
+    form = JoinRequestForm
+    
     def has_add_permission(self, request):
         return False
+    
+    def user_link(self, instance):
+        """ Link to related User """
+        return mark_safe("<b>%s</b>" % get_admin_link(instance.user))
+    user_link.short_description = 'User'
 
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def action_links(self, instance):
-        actions = ['accept', 'refuse']
-        # kwargs pel reverse()
-        kwargs = {'group_id': instance.group_id, 'request_id': instance.id}
-        urls = [ reverse('admin:%s_join_request' % a, kwargs=kwargs) for a in actions ]
-        hrefs = [ '<a href="%s">[%s]</a>' % (url, a) for (url, a) in zip(urls, actions) ]
-        return mark_safe(' '.join(hrefs))
-    action_links.short_description = 'actions'
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 
@@ -92,7 +89,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     actions = [join_request]
     change_view_actions = [('join-request', join_request, 'Join request', ''),]
     change_form_template = 'admin/common/change_form.html'
-
+    
     def num_users(self, instance):
         return instance.user_set.all().count()
     num_users.short_description = 'Users'
@@ -106,44 +103,6 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         qs = qs.annotate(models.Count('user'))
         return qs
 
-    def get_urls(self):
-        urls = super(GroupAdmin, self).get_urls()
-        actions_urls = patterns('',
-            url(r'^(?P<group_id>\d+)/accept-join-request/(?P<request_id>\d+)$',
-                self.admin_site.admin_view(self.accept_join_request_view),
-                name='accept_join_request'),
-            url(r'^(?P<group_id>\d+)/refuse-join-request/(?P<request_id>\d+)$',
-                self.admin_site.admin_view(self.refuse_join_request_view),
-                name='refuse_join_request'),
-        )
-        return actions_urls + urls
-
-    @transaction.commit_on_success
-    def accept_join_request_view(self, request, group_id, request_id):
-        """
-        Accept join request
-        """
-        jrequest = JoinRequest.objects.get(pk=request_id)
-        # we can reuse the group_change permission
-        if not request.user.has_perm('users.group_change', obj=jrequest):
-            raise PermissionDenied
-
-        jrequest.accept()
-        messages.info(request, "User %s has been added to the group" % jrequest.user)
-        return HttpResponseRedirect(reverse('admin:users_group_change', args=[group_id]))
-
-    @transaction.commit_on_success
-    def refuse_join_request_view(self, request, group_id, request_id):
-        """
-        Refuse join request
-        """
-        jrequest = JoinRequest.objects.get(pk=request_id)
-        if not request.user.has_perm('users.group_change', obj=jrequest):
-            raise PermissionDenied
-
-        jrequest.refuse()
-        messages.info(request, "Join refused for user %s" % jrequest.user)
-        return HttpResponseRedirect(reverse('admin:users_group_change', args=[group_id]))
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)

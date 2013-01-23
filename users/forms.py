@@ -46,27 +46,25 @@ class UserChangeForm(forms.ModelForm):
 
 
 class JoinRequestForm(forms.ModelForm):
+    ACTIONS = (
+        (None, '------'),
+        ('accept', 'Accept'),
+        ('reject', 'Reject'))
     ROLES = (
         ('researcher', 'Researcher'),
         ('admin', 'Admin'),
         ('technician', 'Technician'))
     
-    accept = forms.BooleanField(label='Accept', required=False)
-    reject = forms.BooleanField(label='Reject', required=False)
+    action = forms.ChoiceField(label='Action', choices=ACTIONS, required=False)
     roles = MultiSelectFormField(label='Roles', choices=ROLES, required=False)
     
     class Meta:
         model = JoinRequest
     
-    def clean(self):
-        cleaned_data = super(JoinRequestForm, self).clean()
-        if self.cleaned_data.get('accept') and self.cleaned_data.get('reject'):
-            raise ValidationError('Accept or Reject?')
-        return cleaned_data
-    
     def save(self, commit=True):
-        if self.cleaned_data.get('accept'):
+        action = self.cleaned_data.get('action')
+        if action == 'accept':
             roles = self.cleaned_data.get('roles')
             self.instance.accept(roles=roles)
-        elif self.cleaned_data.get('reject'):
+        elif action == 'reject':
             self.instance.reject()

@@ -34,7 +34,7 @@ class RolesInline(PermissionTabularInline):
 class JoinRequestInline(PermissionTabularInline):
     model = JoinRequest
     extra = 0
-    fields = ('user_link', 'accept', 'reject', 'roles')
+    fields = ('user_link', 'action', 'roles')
     readonly_fields = ('user_link',)
     form = JoinRequestForm
     

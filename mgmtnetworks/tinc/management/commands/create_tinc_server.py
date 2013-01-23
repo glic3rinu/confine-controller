@@ -2,6 +2,7 @@ import getpass, pwd, re
 from optparse import make_option
 from subprocess import Popen, PIPE
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -78,9 +79,8 @@ class Command(BaseCommand):
                     confirm = raw_input('Please enter either "yes" or "no": ')
             tinc_server = tinc_server[0]
         else:
-            tinc_server = TincServer.objects.create(object_id=1, 
-                                                    content_type__model='server',
-                                                    content_type__app_label='nodes')
+            sevrer_ct = ContentType.objects.get_for_model(Server)
+            tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
         cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, 
                                                        TINC_MGMT_IPV6_PREFIX.split('::')[0])

@@ -87,7 +87,7 @@ class Command(BaseCommand):
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:
-            raise CreateTincdError(stderr)
+            raise self.CreateTincdError(stderr)
         
         # Get created pubkey
         pubkey = ''

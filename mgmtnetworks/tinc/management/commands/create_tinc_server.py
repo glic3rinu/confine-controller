@@ -79,7 +79,7 @@ class Command(BaseCommand):
                     confirm = raw_input('Please enter either "yes" or "no": ')
             tinc_server = tinc_server[0]
         else:
-            sevrer_ct = ContentType.objects.get_for_model(Server)
+            server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
         cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, 

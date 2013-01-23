@@ -82,8 +82,8 @@ class Command(BaseCommand):
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
-        cmd = "tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME, 
-                                                       TINC_MGMT_IPV6_PREFIX.split('::')[0])
+        cmd = "mgmtnetworks/tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME,
+                                                                    TINC_MGMT_IPV6_PREFIX.split('::')[0])
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

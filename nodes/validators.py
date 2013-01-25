@@ -1,7 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
-
+from IPy import IP
 from M2Crypto import X509
+
+from users.models import Group
 
 
 def validate_sliver_mac_prefix(value):
@@ -30,6 +32,22 @@ def validate_dhcp_range(value):
 
 
 def validate_scr(value):
-    try: X509.load_cert_string(str(value))
-    except: raise ValidationError('Not a valid SCR')
-    # TODO validate node's RD management address (2001:db8:cafe::2) as a distinguished name and the technician's e-mail address for contact
+    try:
+        X509.load_request_string(str(value))
+    except:
+        raise ValidationError('Not a valid SCR')
+
+
+def validate_scr_subject(scr, node):
+    try:
+        scr = X509.load_request_string(str(scr))
+    except:
+        raise ValidationError('Not a valid SCR')
+    
+    subject = scr.get_subject()
+    if node.mgmt_addr != IP(subject.CN):
+        raise ValidationError("CN != node.mgmt_addr")
+    
+    if not Group.objects.filter(node=node, roles__user__email=subject.emailAddress, roles__is_admin=True).exists():
+        raise ValidationError("No admin with '%s' email address" % subject.emailAddress)
+

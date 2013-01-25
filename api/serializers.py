@@ -9,7 +9,7 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
     """
     def to_native(self, obj):
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
-        if url is None: 
+        if url is None:
              return None
         return {'uri': url}
 
@@ -33,12 +33,12 @@ class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
     
     def get_related_field(self, model_field, to_many):
         """
-        Creates a default instance of an object relational field.
+        same as DRF2 but rturning RelXxxxXxxx
         """
         rel = model_field.rel.to
-        queryset = rel._default_manager
         kwargs = {
-            'queryset': queryset,
+            'null': model_field.null,
+            'queryset': rel._default_manager,
             'view_name': self._get_default_view_name(rel)
         }
         if to_many:

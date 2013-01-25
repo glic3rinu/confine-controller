@@ -3,12 +3,6 @@ from django.core import exceptions
 from django.db.models import Field, SubfieldBase
 from django.utils.text import capfirst
 
-#try:
-#    from south.modelsinspector import add_introspection_rules
-#    add_introspection_rules([], [r"^common\.fields\.UUIDField"])
-#except ImportError:
-#    pass
-
 
 #### MultiCSelect #####
 # New version of this snippet http://djangosnippets.org/snippets/1200/
@@ -16,11 +10,11 @@ from django.utils.text import capfirst
 
 class MultiSelectFormField(forms.MultipleChoiceField):
     widget = forms.CheckboxSelectMultiple
- 
+    
     def __init__(self, *args, **kwargs):
         self.max_choices = kwargs.pop('max_choices', 0)
         super(MultiSelectFormField, self).__init__(*args, **kwargs)
- 
+    
     def clean(self, value):
         if not value and self.required:
             raise forms.ValidationError(self.error_messages['required'])
@@ -32,17 +26,17 @@ class MultiSelectFormField(forms.MultipleChoiceField):
 
 class MultiSelectField(Field):
     __metaclass__ = SubfieldBase
- 
+    
     def get_internal_type(self):
         return "CharField"
- 
+    
     def get_choices_default(self):
         return self.get_choices(include_blank=False)
- 
+    
     def _get_FIELD_display(self, field):
         value = getattr(self, field.attname)
         choicedict = dict(field.choices)
- 
+    
     def formfield(self, **kwargs):
         # don't call super, as that overrides default widget if it has choices
         defaults = {'required': not self.blank, 'label': capfirst(self.verbose_name),
@@ -51,21 +45,21 @@ class MultiSelectField(Field):
             defaults['initial'] = self.get_default()
         defaults.update(kwargs)
         return MultiSelectFormField(**defaults)
-
+    
     def get_prep_value(self, value):
         return value
-
+    
     def get_db_prep_value(self, value, connection=None, prepared=False):
         if isinstance(value, basestring):
             return value
         elif isinstance(value, list):
             return ",".join(value)
- 
+    
     def to_python(self, value):
         if value is not None:
             return value if isinstance(value, list) else value.split(',')
         return ''
-
+    
     def contribute_to_class(self, cls, name):
         super(MultiSelectField, self).contribute_to_class(cls, name)
         if self.choices:
@@ -78,7 +72,7 @@ class MultiSelectField(Field):
             if (opt_select not in arr_choices):  # the int() here is for comparing with integer choices
                 raise exceptions.ValidationError(self.error_messages['invalid_choice'] % value)  
         return
- 
+    
     def get_choices_selected(self, arr_choices=''):
         if not arr_choices:
             return False
@@ -86,12 +80,15 @@ class MultiSelectField(Field):
         for choice_selected in arr_choices:
             list.append(choice_selected[0])
         return list
- 
+    
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
 
 
-try: from south.modelsinspector import add_introspection_rules
-except ImportError: pass
-else: add_introspection_rules([], ["^common\.fields\.MultiSelectField"])
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    add_introspection_rules([], ["^common\.fields\.MultiSelectField"])

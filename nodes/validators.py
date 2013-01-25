@@ -31,14 +31,7 @@ def validate_dhcp_range(value):
         raise ValidationError('Range %s has not a valid format (#N).' % value)
 
 
-def validate_scr(value):
-    try:
-        X509.load_request_string(str(value))
-    except:
-        raise ValidationError('Not a valid SCR')
-
-
-def validate_scr_subject(scr, node):
+def validate_scr(scr, node):
     try:
         scr = X509.load_request_string(str(scr))
     except:
@@ -46,8 +39,8 @@ def validate_scr_subject(scr, node):
     
     subject = scr.get_subject()
     if node.mgmt_addr != IP(subject.CN):
-        raise ValidationError("CN != node.mgmt_addr")
+        raise ValidationError("CN != node.mgmt_addr: %s != %s" % (subject.CN, node.mgmt_addr))
     
     if not Group.objects.filter(node=node, roles__user__email=subject.emailAddress, roles__is_admin=True).exists():
-        raise ValidationError("No admin with '%s' email address" % subject.emailAddress)
+        raise ValidationError("No admin with '%s' email address for this node." % subject.emailAddress)
 

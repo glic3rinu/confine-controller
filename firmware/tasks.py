@@ -26,7 +26,7 @@ def build(build_id, exclude=[]):
         build_file.build = build_obj
         build_file.save()
     
-    # calculating image destination path
+    # image destination path
     name_dict = {
         'node_name': node.name,
         'arch': node.arch,

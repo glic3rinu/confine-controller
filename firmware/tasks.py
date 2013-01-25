@@ -27,7 +27,11 @@ def build(build_id, exclude=[]):
         build_file.save()
     
     # calculating image destination path
-    image_name = base_image.name.replace('img.gz', '-%s.img.gz' % build_obj.pk)
+    name_dict = {
+        'node_name': node.name,
+        'arch': node.arch,
+        'build_id': build_obj.pk,}
+    image_name = config.image_name % name_dict
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     
     try:

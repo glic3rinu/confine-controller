@@ -8,7 +8,7 @@ from .settings import NODES_CERT_PRIVATE_KEY_PATH, NODES_CERT_EXPIRATION
 def sign_cert_request(scr):
     privkey = os.path.join(NODES_CERT_PRIVATE_KEY_PATH)
     privkey = EVP.load_key(privkey)
-    request = X509.load_cert_string(str(scr))
+    request = X509.load_request_string(str(scr))
     request.sign(privkey, md="sha256")
     return request.as_pem()
 

@@ -68,6 +68,14 @@ class TincHost(models.Model):
             self.pubkey = self.pubkey.strip()
         super(TincHost, self).clean()
     
+    def save(self, *args, **kwargs):
+        super(TincHost, self).save(*args, **kwargs)
+        defer(update_tincd.delay)
+    
+    def delete(self, *args, **kwargs):
+        super(TincHost, self).delete(*args, **kwargs)
+        defer(update_tincd.delay)
+    
     def get_tinc_up(self):
         """ Returns tinc-up file content """
         ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
@@ -123,7 +131,8 @@ class TincServer(TincHost):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        if self.content_type.model == 'server': return 'server'
+        if self.content_type.model == 'server':
+            return 'server'
         return "%s_%s" % (self.content_type.model, self.object_id)
     
     def clean(self):
@@ -209,6 +218,14 @@ class TincAddress(models.Model):
     def __unicode__(self):
         return str(self.addr)
     
+    def save(self, *args, **kwargs):
+        super(TincAddress, self).save(*args, **kwargs)
+        defer(update_tincd.delay)
+    
+    def delete(self, *args, **kwargs):
+        super(TincAddress, self).delete(*args, **kwargs)
+        defer(update_tincd.delay)
+    
     @property
     def name(self):
         return self.server.name
@@ -230,14 +247,6 @@ class TincClient(TincHost):
     
     def __unicode__(self):
         return "%s_%s" % (self.content_type.model, self.object_id)
-    
-    def save(self, *args, **kwargs):
-        super(TincClient, self).save(*args, **kwargs)
-        self.update_tincd(async=True)
-    
-    def delete(self, *args, **kwargs):
-        super(TincClient, self).delete(*args, **kwargs)
-        self.update_tincd(async=True)
     
     @property
     def address(self):
@@ -264,13 +273,6 @@ class TincClient(TincHost):
     def connect_to(self):
         """ Returns all active TincServers to use on tincd ConnectTo """
         return TincServer.objects.filter(is_active=True)
-    
-    def update_tincd(self, async=True):
-        """ Update local tinc daemon configuration """
-        if async:
-            defer(update_tincd.delay)
-        else:
-            update_tincd()
     
     def get_host(self):
         """ Returns tincd hosts file content """

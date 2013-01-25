@@ -2,7 +2,9 @@ import os
 
 from celery.task import task
 
+from . import settings
 from .image import Image
+
 
 @task(name="firmware.build")
 def build(build_id, exclude=[]):
@@ -31,7 +33,7 @@ def build(build_id, exclude=[]):
         'node_name': node.name,
         'arch': node.arch,
         'build_id': build_obj.pk,}
-    image_name = config.image_name % name_dict
+    image_name = os.path.join(settings.FIRMWARE_DIR, config.image_name % name_dict
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     
     try:

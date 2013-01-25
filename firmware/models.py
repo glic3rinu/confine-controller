@@ -24,9 +24,6 @@ from . import settings
 from .tasks import build
 
 
-# TODO create a pluggin system for add custom functions to be used in file 
-#       and uci evaluation fields.
-
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
 
 
@@ -61,7 +58,8 @@ class Build(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage, 
-        condition=lambda request, self: request.user.has_perm('nodes.getfirmware_node', obj=self.node))
+        condition=lambda request, self:
+                  request.user.has_perm('nodes.getfirmware_node', obj=self.node))
     task_id = models.CharField(max_length=36, unique=True, null=True, help_text="Celery Task ID")
     
     objects = generate_chainer_manager(BuildQuerySet)
@@ -382,7 +380,7 @@ class ConfigFile(models.Model):
     
     @property
     def help_text(self):
-        """ provide help_text file if exists """
+        """ Provides help_text file if exists """
         try:
             return self.configfilehelptext.help_text
         except ConfigFileHelpText.DoesNotExist:

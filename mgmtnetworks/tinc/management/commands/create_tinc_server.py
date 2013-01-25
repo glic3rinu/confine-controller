@@ -12,9 +12,10 @@ from nodes.models import Server
 def get_default_celeryd_username():
     """ Introspect celeryd defaults file in order to get default celeryd username """
     user = None
-    try: 
+    try:
         celeryd_defaults = open('/etc/default/celeryd')
-    except IOError: pass
+    except IOError:
+        pass
     else:
         for line in celeryd_defaults.readlines():
             if 'CELERYD_USER=' in line:
@@ -74,8 +75,10 @@ class Command(BaseCommand):
                        "/etc/tinc/%s.\nDo you want to continue? (yes/no): " % TINC_NET_NAME)
                 confirm = raw_input(msg)
                 while 1:
-                    if confirm == 'no': return
-                    if confirm == 'yes': break
+                    if confirm == 'no':
+                        return
+                    if confirm == 'yes':
+                        break
                     confirm = raw_input('Please enter either "yes" or "no": ')
             tinc_server = tinc_server[0]
         else:

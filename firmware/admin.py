@@ -134,6 +134,12 @@ class ConfigAdmin(SingletonModelAdmin):
         )
         urls = super(ConfigAdmin, self).get_urls()
         return urlpatterns + urls
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make value input widget bigger """
+        if db_field.name == 'image_name':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
+        return super(ConfigAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 admin.site.register(Config, ConfigAdmin)

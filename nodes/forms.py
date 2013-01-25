@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from common.validators import validate_rsa_pubkey
 from common.widgets import ShowText
 
-from .validators import validate_scr, validate_scr_subject
+from .validators import validate_scr
 
 
 class NodeInlineAdminForm(forms.ModelForm):
@@ -34,6 +34,5 @@ class RequestCertificateForm(forms.Form):
     
     def clean_scr(self):
         scr = self.cleaned_data['scr']
-        validate_scr(scr)
-        validate_scr_subject(scr, self.node)
+        validate_scr(scr, self.node)
         return scr.strip()

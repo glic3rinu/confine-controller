@@ -2,7 +2,7 @@ from django.conf import settings
 
 ugettext = lambda s: s
 
-TINC_PORT_DFLT = getattr(settings, 'TINC_PORT_DFLT', '666')
+TINC_PORT_DFLT = getattr(settings, 'TINC_PORT_DFLT', '655')
 
 TINC_NET_NAME = getattr(settings, 'TINC_NET_NAME', 'confine')
 

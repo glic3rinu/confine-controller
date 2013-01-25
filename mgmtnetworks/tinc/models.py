@@ -154,16 +154,20 @@ class TincServer(TincHost):
     def subnet(self):
         return self.address
     
-    def get_host(self):
+    def get_host(self, island=None):
         """ Returns tincd host file """
-        # TODO order by island
-        host = ""
+        host = []
         for addr in self.addresses:
-            host += "Address = %s %d\n" % (addr.addr, addr.port)
-        host += "Subnet = %s\n\n" % self.subnet.strNormal()
+            line = "Address = %s %d" % (addr.addr, addr.port)
+            if addr.island == island:
+                # Give preference to addresses of the island, if required
+                host.insert(0, line)
+            else:
+                host.append(line)
+        host.append("Subnet = %s\n" % self.subnet.strNormal())
         if self.pubkey:
-            host += "%s" % self.pubkey
-        return host
+            host.append("%s" % self.pubkey)
+        return '\n'.join(host)
 
 
 class Island(models.Model):

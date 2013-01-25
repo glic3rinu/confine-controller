@@ -43,16 +43,21 @@ class Group(models.Model):
         return Roles.objects.filter(group=self, user=user).exists()
     
     def has_role(self, user, role):
-        try: roles = Roles.objects.get(group=self, user=user)
+        # TODO deprecate in favour of has_roles
+        try:
+            roles = Roles.objects.get(group=self, user=user)
         except Roles.DoesNotExist: 
             return False
         return roles.has_role(role)
     
     def has_roles(self, user, roles):
-        try: group_roles = Roles.objects.get(group=self, user=user)
-        except Roles.DoesNotExist: return False
+        try:
+            group_roles = Roles.objects.get(group=self, user=user)
+        except Roles.DoesNotExist:
+            return False
         for role in roles:
-            if group_roles.has_role(role): return True
+            if group_roles.has_role(role):
+                return True
         return False
     
     def get_admin_emails(self):
@@ -107,11 +112,11 @@ class UserManager(auth_models.BaseUserManager):
         return user
     
     def create_superuser(self, username, email, password, **extra_fields):
-        u = self.create_user(username, email, password, **extra_fields)
-        u.is_active = True
-        u.is_superuser = True
-        u.save(using=self._db)
-        return u
+        user = self.create_user(username, email, password, **extra_fields)
+        user.is_active = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
 
 
 class User(auth_models.AbstractBaseUser):
@@ -168,7 +173,6 @@ class User(auth_models.AbstractBaseUser):
         auth backend is assumed to have permission in general. If an object is
         provided, permissions for this specific object are checked.
         """
-        
         # Active superusers have all permissions.
         if self.is_active and self.is_superuser:
             return True
@@ -201,9 +205,9 @@ class User(auth_models.AbstractBaseUser):
         """
         Sends an email to this User.
         """
+        # TODO Deprecate?
         send_mail(subject, message, from_email, [self.email])
     
-    @property
     def is_staff(self):
         """ All users can loggin to the admin interface """
         return True
@@ -278,7 +282,8 @@ class JoinRequest(models.Model):
     def save(self, *args, **kwargs):
         if self.pk:
             # Notify admins that a new join request is created
-            self.notify_admins(template='created_join_request.email')
+            admins = admins_email = self.group.get_admin_emails()
+            self.notify(template='created_join_request.email', to=admins)
         super(JoinRequest, self).save(*args, **kwargs)
     
     def accept(self, roles=[]):
@@ -288,7 +293,8 @@ class JoinRequest(models.Model):
         """
         roles_kwargs = dict( ('is_%s' % role, True) for role in roles )
         Roles.objects.create(user=self.user, group=self.group, **roles_kwargs)
-        self.notify_user(template='accepted_join_request.email')
+        self.notify(template='accepted_join_request.email',
+                    to=self.user.email)
         self.delete()
     
     def reject(self):
@@ -296,23 +302,10 @@ class JoinRequest(models.Model):
         The admin refuse the user's request to join.
         The request is deleted
         """
-        self.notify_user(template='rejected_join_request.email')
+        self.notify(template='rejected_join_request.email',
+                    to=self.user.email)
         self.delete()
     
-    def notify_admins(self, template):
-        """
-        Notify group admins when a new join request has sent.
-        """
+    def notify(self, template, to):
         context = {'group': self.group}
-        admins_email = self.group.get_admin_emails()
-        send_mail_template(template=template,
-                           context=context,
-                           to=admins_email)
-    
-    def notify_user(self, template):
-        context = {'group': self.group}
-        send_mail_template(template=template,
-                           context=context,
-                           to=self.user.email)
-
-
+        send_mail_template(template=template, context=context, to=to)

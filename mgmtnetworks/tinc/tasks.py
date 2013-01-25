@@ -16,7 +16,6 @@ def update_tincd():
     from .models import TincClient
     
     server = Server.objects.get().tinc
-#    db_clients = TincClient.objects.filter(island__tincaddress__server=server)
     db_clients = list(TincClient.objects.all())
     db_clients += list(TincClient.objects.all())
     hosts_path = '/etc/tinc/%s/hosts/' % TINC_NET_NAME
@@ -27,22 +26,24 @@ def update_tincd():
         host_file = os.path.join(hosts_path, client.name)
         script += 'echo -e "%s" > %s;' % (client.get_host(), host_file)
     
-    # delete clients
+    # delete all tinc hosts
     sys_clients = glob.glob(os.path.join(hosts_path, 'host_*'))
     sys_clients.extend(glob.glob(os.path.join(hosts_path, 'node_*')))
     for client in sys_clients:
-        try: os.remove(client)
-        except OSError: pass
+        try:
+            os.remove(client)
+        except OSError:
+            pass
     
-    # create clients
+    # create all tinc hosts
     if script != '':
         cmd = Popen(script, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:
             raise TincClient.UpdateTincdError(stderr)
         
-        # reload tincd in a separated command to prevent clients from losing 
-        # its connection when something goes wrong
+        # reload tincd in a separated command to prevent clients from losing its
+        # connection when something goes wrong
         cmd = Popen("/etc/init.d/tinc reload", shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

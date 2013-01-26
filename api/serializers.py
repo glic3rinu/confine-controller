@@ -1,3 +1,5 @@
+import ast
+
 from rest_framework import serializers
 
 # Haking rest_framework in order to meet our crazy design specifications
@@ -8,10 +10,15 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
     HyperlinkedRelatedField field providing a relation object rather than flat URL 
     """
     def to_native(self, obj):
+        # FIXME this doesn't work when posting
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
         if url is None:
              return None
         return {'uri': url}
+
+    def from_native(self, value):
+        value = ast.literal_eval(value).pop('uri')
+        return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 
 class RelManyHyperlinkedRelatedField(serializers.ManyRelatedMixin, RelHyperlinkedRelatedField):
@@ -23,7 +30,7 @@ class RelManyHyperlinkedRelatedField(serializers.ManyRelatedMixin, RelHyperlinke
 
 class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
     """ 
-    Like HyperlinkedModelSerializer but swapping url for uri field name 
+    Like HyperlinkedModelSerializer but renaming url field to uri 
     """
     uri = serializers.HyperlinkedIdentityField()
     

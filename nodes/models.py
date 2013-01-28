@@ -180,9 +180,9 @@ class Node(models.Model):
         return self.directiface_set.all()
     
     @property
-    def mgmt_addr(self):
+    def mgmt_net(self):
         mgmt_backend = get_mgmt_backend()
-        return mgmt_backend.address(self)
+        return mgmt_backend(self)
     
     def reboot(self):
         self.boot_sn += 1
@@ -222,7 +222,7 @@ class Node(models.Model):
         if user is None:
             # We pick one pseudo-random admin
             user = self.group.admins[0]
-        addr = str(self.mgmt_addr)
+        addr = str(self.mgmt_net.addr)
         self.cert = ssl.generate_certificate(key, Email=user.email, CN=addr)
         if commit:
             self.save()
@@ -289,7 +289,6 @@ class Server(SingletonModel):
     def __unicode__(self):
         return 'Server'
     
-    @property
-    def mgmt_addr(self):
+    def mgmt_net(self):
         mgmt_backend = get_mgmt_backend()
-        return mgmt_backend.address(self)
+        return mgmt_backend(self)

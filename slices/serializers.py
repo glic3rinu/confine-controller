@@ -20,7 +20,7 @@ class SliverSerializer(UriHyperlinkedModelSerializer):
     interfaces = IfaceSerializer()
     properties = serializers.Field()
     exp_data_sha256 = serializers.CharField(read_only=True)
-    exp_data_uri = HyperlinkedFileField(source='exp_data')
+    exp_data_uri = HyperlinkedFileField(source='exp_data', required=False)
     
     class Meta:
         model = Sliver
@@ -32,7 +32,7 @@ class SliceSerializer(UriHyperlinkedModelSerializer):
     slivers = RelManyHyperlinkedRelatedField(view_name='sliver-detail', read_only=True)
     properties = serializers.Field()
     exp_data_sha256 = serializers.CharField(read_only=True)
-    exp_data_uri = HyperlinkedFileField(source='exp_data')
+    exp_data_uri = HyperlinkedFileField(source='exp_data', required=False)
     
     class Meta:
         model = Slice

@@ -1,1 +1,1 @@
-from .backend import backend
+from .backend import TincBackend as backend

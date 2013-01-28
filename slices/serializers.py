@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from rest_framework import serializers
 
 from api.serializers import (UriHyperlinkedModelSerializer, HyperlinkedFileField,
-    RelManyHyperlinkedRelatedField)
+    RelManyHyperlinkedRelatedField, PropertyField)
 
 from .models import Slice, Sliver, Template, SliverIface
 
@@ -18,7 +18,7 @@ class IfaceSerializer(serializers.ModelSerializer):
 
 class SliverSerializer(UriHyperlinkedModelSerializer):
     interfaces = IfaceSerializer()
-    properties = serializers.Field()
+    properties = PropertyField(source='sliverprop_set', required=False)
     exp_data_sha256 = serializers.CharField(read_only=True)
     exp_data_uri = HyperlinkedFileField(source='exp_data', required=False)
     
@@ -30,7 +30,7 @@ class SliverSerializer(UriHyperlinkedModelSerializer):
 class SliceSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     slivers = RelManyHyperlinkedRelatedField(view_name='sliver-detail', read_only=True)
-    properties = serializers.Field()
+    properties = PropertyField(source='sliceprop_set', required=False)
     exp_data_sha256 = serializers.CharField(read_only=True)
     exp_data_uri = HyperlinkedFileField(source='exp_data', required=False)
     

@@ -17,7 +17,7 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
         return {'uri': url}
 
     def from_native(self, value):
-        value = ast.literal_eval(value).pop('uri')
+        value = ast.literal_eval(str(value)).pop('uri')
         return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 
@@ -40,7 +40,7 @@ class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
     
     def get_related_field(self, model_field, to_many):
         """
-        same as DRF2 but rturning RelXxxxXxxx
+        Same as DRF2 but returning RelXxxxXxxx
         """
         rel = model_field.rel.to
         kwargs = {
@@ -58,5 +58,35 @@ class HyperlinkedFileField(serializers.FileField):
         if value:
             request = self.context.get('request', None)
             return request.build_absolute_uri(value.url)
+
+
+class PropertyField(serializers.RelatedField):
+    def to_native(self, value):
+        return dict([ (prop.name, prop.value) for prop in value.all() ])
+#    
+#    def from_native(self, value):
+#        print self.queryset
+#            
+#    def field_from_native(self, data, files, field_name, into):
+#        if self.read_only:
+#            return
+#        try:
+#            # Form data
+#            value = data.getlist(self.source or field_name)
+#        except:
+#            # Non-form data
+#            value = data.get(self.source or field_name)
+#            value = data.get(u'properties')
+#            print value, 222
+#        else:
+#            if value == ['']:
+#                value = []
+#        into[field_name] = [self.from_native(item) for item in value.items()]
+#    
+#    def field_from_native(self, data, files, field_name, into):
+#        print data
+#        props = self.from_native(data.pop(u'properties'))
+#        for prop in props:
+#            prop.save()
 
 

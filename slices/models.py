@@ -137,10 +137,6 @@ class Slice(models.Model):
         return self.sliver_set.all()
     
     @property
-    def properties(self):
-        return dict(self.sliceprop_set.all().values_list('name', 'value'))
-    
-    @property
     def exp_data_sha256(self):
         try:
             return sha256(self.exp_data.file.read()).hexdigest()
@@ -248,10 +244,6 @@ class Sliver(models.Model):
             return sha256(self.exp_data.file.read()).hexdigest()
         except:
             return None
-    
-    @property
-    def properties(self):
-        return dict(self.sliverprop_set.all().values_list('name', 'value'))
     
     @property
     def interfaces(self):

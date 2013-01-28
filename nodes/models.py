@@ -146,6 +146,9 @@ class Node(models.Model):
         elif self.sliver_pub_ipv4 == 'range':
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         
+        if self.cert == '':
+            # Empty cert as None instead of empty string (uniqueness)
+            self.cert = None
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
@@ -181,8 +184,7 @@ class Node(models.Model):
     
     @property
     def mgmt_net(self):
-        mgmt_backend = get_mgmt_backend()
-        return mgmt_backend(self)
+        return get_mgmt_backend(self)
     
     def reboot(self):
         self.boot_sn += 1
@@ -290,5 +292,4 @@ class Server(SingletonModel):
         return 'Server'
     
     def mgmt_net(self):
-        mgmt_backend = get_mgmt_backend()
-        return mgmt_backend(self)
+        return get_mgmt_backend(self)

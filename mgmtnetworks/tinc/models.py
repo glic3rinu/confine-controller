@@ -11,7 +11,7 @@ from common.ip import split_len, int_to_hex_str
 from common.validators import validate_host_name, OrValidator, validate_rsa_pubkey
 from nodes.models import Server, Node
 
-from . import settings
+from . import settings, backend
 from .tasks import update_tincd
 
 
@@ -36,8 +36,8 @@ class Host(models.Model):
         return obj
     
     @property
-    def mgmt_addr(self):
-        return self.tinc.address
+    def mgmt_net(self):
+        return backend(self)
 
 
 class TincHost(models.Model):
@@ -108,9 +108,8 @@ class Gateway(models.Model):
         obj, created = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
     
-    @property
-    def mgmt_addr(self):
-        return self.tinc.address
+    def mgmt_net(self):
+        return backend(self)
 
 
 class TincServer(TincHost):

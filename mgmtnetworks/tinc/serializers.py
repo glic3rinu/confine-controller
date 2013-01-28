@@ -57,10 +57,16 @@ class TincServerSerializer(serializers.ModelSerializer):
         exclude = ('object_id', 'content_type', 'id')
 
 
+class MgmtNetConfSerializer(serializers.Serializer):
+    addr = serializers.Field()
+    backend = serializers.CharField(source='name')
+    tinc_client = TincClientSerializer()
+    tinc_server = TincServerSerializer()
+
+
 class GatewaySerializer(UriHyperlinkedModelSerializer):
-    tinc = TincServerSerializer()
     id = serializers.Field()
-    mgmt_addr = serializers.Field()
+    mgmt_net = MgmtNetConfSerializer()
     
     class Meta:
         model = Gateway
@@ -68,12 +74,11 @@ class GatewaySerializer(UriHyperlinkedModelSerializer):
 
 class HostSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    tinc = TincClientSerializer()
-    mgmt_addr = serializers.Field()
+    mgmt_net = MgmtNetConfSerializer()
     
     class Meta:
         model = Host
 
 
-api.aggregate(Server, TincServerSerializer, name='tinc')
-api.aggregate(Node, TincClientSerializer, name='tinc')
+api.aggregate(Server, MgmtNetConfSerializer, name='mgmt_net')
+api.aggregate(Node, MgmtNetConfSerializer, name='mgmt_net')

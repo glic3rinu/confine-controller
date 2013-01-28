@@ -22,14 +22,22 @@ class GroupRegistrationManager(models.Manager):
     
     """
     @transaction.commit_on_success
-    def create_group_registration(self, name, desc, username, email, password):
-        # create new group
+    def create_group_registration(self, name, desc, username, email, password, user=None):
+        """
+        Creates a new group registration associating the user who
+        request it and a created group storing the provided
+        information. If no user has provided, a new inactive
+        user is created with the username, email and password
+
+        """
         new_group = Group.objects.create(name=name, description=desc, is_approved=False)
 
-        # create new user
-        new_user = User.objects.create_user(username, email, password)
+        if user is None: # create new user
+            user = User.objects.create_user(username, email, password)
+            user.is_active = False
+            user.save()
 
-        return self.create(group=new_group, user=new_user)
+        return self.create(group=new_group, user=user)
 
 
 class GroupRegistration(models.Model):
@@ -62,7 +70,6 @@ class GroupRegistration(models.Model):
         self.notify_user(template='registration_group_approved.txt')
         
         self.delete()
-        #TODO mark redirect to change_list instead GroupReg change_view
 
     def reject(self):
         """
@@ -80,7 +87,6 @@ class GroupRegistration(models.Model):
 
         self.group.delete()
         self.delete()
-        #TODO mark redirect to change_list instead GroupReg change_view
 
     def notify_user(self, template):
         context = {'group': self.group, 'user': self.user}
@@ -91,7 +97,7 @@ class GroupRegistration(models.Model):
 
     def notify_operators(self):
         #TODO who are the operators?
-        template = 'registration_group_created.txt'
+        template = 'registration_group_creation_mail_operators.txt'
         context = {'group': self.group, 'user': self.user}
         operators_email = settings.MAINTEINANCE_EMAIL
         send_mail_template(template=template,
@@ -100,7 +106,9 @@ class GroupRegistration(models.Model):
                            to=operators_email)
 
     def save(self, *args, **kwargs):
-        # Only notify the user when the GroupRegistration has successfully created
+        # Only notify when the GroupRegistration was successfully created
         if self.pk:
             self.notify_operators()
+            self.notify_user('registration_group_creation_mail_user.txt')
         super(GroupRegistration, self).save(*args, **kwargs)
+

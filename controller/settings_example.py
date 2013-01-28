@@ -231,6 +231,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
+            'registration2.models.GroupRegistration',
         ),
         'collapsible': True,
     }),
@@ -259,6 +260,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'issues/ticket': "Ticket_star.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
+    'registration2/groupregistration': "registration.png",
 }
 
 

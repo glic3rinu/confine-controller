@@ -26,12 +26,10 @@ from registration2.backends import get_backend
 #    [...]
 
 def register_group(request, backend,
-             template_name='registration/group_registration_form.html',
-             extra_context=None):
+             template_name='registration_group_form.html'):
 
-    # redirect logged users to users_group_add
     if request.user.is_authenticated():
-        return redirect('admin:users_group_add')
+        return register_only_group(request, backend, template_name)
 
     backend = get_backend(backend)
     context = RequestContext(request)
@@ -62,3 +60,31 @@ def register_group(request, backend,
                               {'form': group_form,
                                'user_form': user_form},
                               context_instance=context)
+
+def register_only_group(request, backend,
+             template_name='registration_group_form.html'):
+
+    if not request.user.is_authenticated():
+        return register_group(request, backend, template_name)
+
+    backend = get_backend(backend)
+    context = RequestContext(request)
+
+    form_class = backend.group_get_form_class(request)
+
+    if request.method == 'POST':
+        form = form_class(data=request.POST, files=request.FILES)
+
+        if form.is_valid():
+            new_group_reg = backend.group_register(request, **form.cleaned_data)
+
+            to, args, kwargs = backend.group_post_registration_redirect(request, new_group_reg)
+            return redirect(to, *args, **kwargs)
+
+    else: #create empty form
+        form = form_class()
+
+    return render_to_response(template_name,
+                              {'form': form},
+                              context_instance=context)
+

@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 from common.fields import MultiSelectFormField
 
-from .models import User, JoinRequest
+from users.models import User, JoinRequest
 
 
 class UserCreationForm(forms.ModelForm):

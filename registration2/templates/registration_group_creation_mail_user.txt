@@ -1,0 +1,18 @@
+{% if subject %}
+Community-Lab Testbed - group registration request
+{% endif %}
+
+{% if message %}
+Dear user,
+- Your registration request has been received.<br/>
+- A mail was sent to the operations team, your application should be processed shortly.<br/>
+- Upon approval, the group admin will receive an information e-mail<br/>
+- Please send a message to support@confine-project.eu if this request is not instructed within a few days.
+- group: {{ group.name }}
+         {{ group.description }}
+- user: {{ user.username }}
+
+Best regards,
+
+The Community-Lab Testbed
+{% endif %}

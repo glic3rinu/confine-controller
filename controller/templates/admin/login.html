@@ -1,7 +1,11 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}" />{% endblock %}
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "css/registration2.css" %}" />
+{% endblock %}
 
 {% block bodyclass %}login{% endblock %}
 
@@ -51,7 +55,7 @@
 
 <div class="register-links">
   <a href="{% url 'registration_register' %}">Create an account</a>
-  <a href="{% url 'registration_group_register' %}">File a group registration</a>
+  <a href="{% url 'registration_group_register' %}">Register a new group</a>
 </div>
 
 <script type="text/javascript">

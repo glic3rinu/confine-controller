@@ -43,7 +43,7 @@
             <p></p>
             <p>The following command can be used for flashing this image:</p>
             <link rel="stylesheet" type="text/css" media="screen" href="/static/common/css/default.css" />
-            {% code 'bash' %}gunzip {{ build.image_name }} -c | of=/dev/sdX bs=1M; sync{% endcode %}
+            {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}
         </fieldset>
         </div>
         </ul>

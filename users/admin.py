@@ -93,6 +93,12 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     num_users.short_description = 'Users'
     num_users.admin_order_field = 'user__count'
     
+    def save_model(self, request, obj, form, change):
+        """ user that creates a group becomes its admin """
+        super(GroupAdmin, self).save_model(request, obj, form, change)
+        if not change:
+            Roles.objects.create(user=request.user, group=obj, is_admin=True)
+    
     def queryset(self, request):
         """ 
         Annotate number of users on the slice for sorting on changelist 

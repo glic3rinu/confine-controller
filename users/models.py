@@ -282,7 +282,7 @@ class JoinRequest(models.Model):
     def save(self, *args, **kwargs):
         if self.pk:
             # Notify admins that a new join request is created
-            admins = admins_email = self.group.get_admin_emails()
+            admins = self.group.get_admin_emails()
             self.notify(template='created_join_request.email', to=admins)
         super(JoinRequest, self).save(*args, **kwargs)
     

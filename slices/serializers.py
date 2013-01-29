@@ -19,12 +19,20 @@ class IfaceSerializer(serializers.ModelSerializer):
 class SliverSerializer(UriHyperlinkedModelSerializer):
     interfaces = IfaceSerializer()
     properties = PropertyField(source='sliverprop_set', required=False)
-    exp_data_sha256 = serializers.CharField(read_only=True)
-    exp_data_uri = HyperlinkedFileField(source='exp_data', required=False)
+    exp_data = HyperlinkedFileField(source='exp_data', required=False)
     
     class Meta:
         model = Sliver
-        exclude = ['exp_data']
+    
+    def restore_object(self, attrs, instance=None):
+        """ preliminary hack to make sure sliverprops get saved """
+        # Pop from attrs for avoiding AttributeErrors when POSTing
+        props = attrs.pop('sliverprop_set', None)
+        instance = super(SliverSerializer, self).restore_object(attrs, instance=instance)
+        if props is not None:
+            # add it to related_data for future saving
+            self.related_data['sliverprop_set'] = props
+        return instance
 
 
 class SliceSerializer(UriHyperlinkedModelSerializer):

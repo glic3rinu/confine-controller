@@ -60,33 +60,39 @@ class HyperlinkedFileField(serializers.FileField):
             return request.build_absolute_uri(value.url)
 
 
-class PropertyField(serializers.RelatedField):
+class PropertyField(serializers.WritableField):
+    """
+    Dict-like representation of a Property Model
+    A bit hacky, objects get deleted on from_native method and Serializer will
+    need a custom override of restore_object method.
+    """
     def to_native(self, value):
+        """ Dict-like representation of a Property Model"""
         return dict([ (prop.name, prop.value) for prop in value.all() ])
-#    
-#    def from_native(self, value):
-#        print self.queryset
-#            
-#    def field_from_native(self, data, files, field_name, into):
-#        if self.read_only:
-#            return
-#        try:
-#            # Form data
-#            value = data.getlist(self.source or field_name)
-#        except:
-#            # Non-form data
-#            value = data.get(self.source or field_name)
-#            value = data.get(u'properties')
-#            print value, 222
-#        else:
-#            if value == ['']:
-#                value = []
-#        into[field_name] = [self.from_native(item) for item in value.items()]
-#    
-#    def field_from_native(self, data, files, field_name, into):
-#        print data
-#        props = self.from_native(data.pop(u'properties'))
-#        for prop in props:
-#            prop.save()
-
-
+    
+    def from_native(self, value):
+        """ Convert a dict-like representation back to a Property Model """
+        parent = self.parent
+        related_manager = getattr(parent.object, self.source or field_name, False)
+        properties = []
+        if value:
+            model = getattr(parent.opts.model, self.source).related.model
+            dict_value = ast.literal_eval(str(value))
+            if not related_manager:
+                # POST (new parent object)
+                return [ model(name=n, value=v) for n,v in dict_value.iteritems() ]
+            # PUT
+            for (name, value) in dict_value.iteritems():
+                try:
+                    # Update existing property
+                    prop = related_manager.get(name=name)
+                except model.DoesNotExist:
+                    # Create a new one
+                    prop = model(name=name, value=value)
+                else:
+                    prop.value = value
+                properties.append(prop)
+        # Discart old values
+        if related_manager:
+            related_manager.all().delete()
+        return properties

@@ -14,7 +14,8 @@ from private_files import PrivateFileField
 from common.fields import MultiSelectField
 from common.ip import lsb, msb, int_to_hex_str
 from common.utils import autodiscover
-from common.validators import validate_net_iface_name, validate_prop_name
+from common.validators import (validate_net_iface_name, validate_prop_name,
+    validate_sha256)
 from nodes.models import Node
 
 from . import settings
@@ -112,6 +113,14 @@ class Slice(models.Model):
                   'they do not explicitly indicate one)', 
         validators=[validators.RegexValidator('.*\.tar\.gz', 
                    'Upload a valid .tar.gz file', 'invalid')],)
+    exp_data_uri = models.CharField(max_length=256, blank=True,
+        help_text='The URI of a file containing experiment data for slivers (if '
+                  'they do not explicitly indicate one). Its format and contents '
+                  'depend on the type of the template to be used.')
+    exp_data_sha256 = models.CharField(max_length=64, blank=True,
+        help_text='The SHA256 hash of the previous file, used to check its integrity. '
+                  'Compulsory when a file has been specified.',
+        validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
@@ -131,17 +140,17 @@ class Slice(models.Model):
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
         super(Slice, self).save(*args, **kwargs)
+
+    def clean(self):
+        super(Slice, self).clean()
+        if self.exp_data:
+            self.exp_data_sha = sha256(self.exp_data.file.read()).hexdigest()
+        if self.exp_data_uri and not self.exp_data_sha256:
+            raise ValidationError('Missing exp_data_sha256.')
     
     @property
     def slivers(self):
         return self.sliver_set.all()
-    
-    @property
-    def exp_data_sha256(self):
-        try:
-            return sha256(self.exp_data.file.read()).hexdigest()
-        except:
-            return None
     
     def renew(self):
         self.expires_on = get_expires_on()
@@ -215,6 +224,14 @@ class Sliver(models.Model):
         help_text='.tar.gz archive containing experiment data for this sliver.',
         validators=[validators.RegexValidator('.*\.tar\.gz', 
                    'Upload a valid .tar.gz file', 'invalid')],)
+    exp_data_uri = models.CharField(max_length=256, blank=True,
+        help_text='If present, the URI of a file containing experiment data for '
+                  'this sliver, instead of the one specified by the slice. Its '
+                  'format and contents depend on the type of the template to be used.')
+    exp_data_sha256 = models.CharField(max_length=64, blank=True,
+        help_text='The SHA256 hash of the previous file, used to check its integrity. '
+                  'Compulsory when a file has been specified.',
+        validators=[validate_sha256])
     template = models.ForeignKey(Template, null=True, blank=True, 
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')
@@ -226,24 +243,17 @@ class Sliver(models.Model):
     
     def __unicode__(self):
         return "%s@%s" % (self.slice.name, self.node.name)
-    
+
+    def clean(self):
+        super(Sliver, self).clean()
+        if self.exp_data:
+            self.exp_data_sha = sha256(self.exp_data.file.read()).hexdigest()
+        if self.exp_data_uri and not self.exp_data_sha256:
+            raise ValidationError('Missing exp_data_sha256.')
+
     @property
     def nr(self):
         return self.pk # TODO use automatic id? generate?
-    
-    @property
-    def exp_data_sha256(self):
-        try:
-            return sha256(self.exp_data.file.read()).hexdigest()
-        except:
-            return None
-    
-    @property
-    def exp_data_sha256(self):
-        try:
-            return sha256(self.exp_data.file.read()).hexdigest()
-        except:
-            return None
     
     @property
     def interfaces(self):

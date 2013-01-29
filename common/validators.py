@@ -1,4 +1,4 @@
-import re
+import re, string
 from uuid import UUID
 
 from django.core import validators
@@ -55,6 +55,12 @@ def validate_ascii(value):
         raise ValidationError('This is not an ASCII string.')
 
 
+def validate_sha256(value):
+    """ SHA256 hex digest """
+    if len(value) != 64 or not all(c in string.hexdigits for c in value):
+        raise ValidationError('This is not an SHA256 HEX digest.')
+    
+
 class OrValidator(object):
     """
     Run validators with an OR logic
@@ -65,11 +71,13 @@ class OrValidator(object):
     def __call__(self, value):
         msg = []
         for validator in self.validators:
-            try: validator(value)
+            try:
+                validator(value)
             except ValidationError, e: 
                 # TODO get exception message in a readable way not:
                 #      [u'blabana'] or [u'kajkja'] ....
                 msg.append(str(e))
-            else: return
+            else:
+                return
         raise type(e)(' OR '.join(msg))
         

@@ -171,7 +171,7 @@ class TincServer(TincHost):
         host = []
         for addr in self.addresses:
             line = "Address = %s %d" % (addr.addr, addr.port)
-            if addr.island == island:
+            if island and addr.island == island:
                 # Give preference to addresses of the island, if required
                 host.insert(0, line)
             else:
@@ -285,12 +285,16 @@ class TincClient(TincHost):
         return host
     
     def get_config(self):
-        """ Returns client tinc.conf file content """
+        """
+        Returns client tinc.conf file content, prioritizing island related gateways
+        """
         config = ["Name = %s" % self.name]
-        # TODO Order by island
-        # TODO order by some priority?
         for server in self.connect_to.all():
-            config.append("ConnectTo = %s" % server.name)
+            line = "ConnectTo = %s" % server.name
+            if self.island and server.addresses.filter(island=self.island).exists():
+                config.insert(0, line)
+            else:
+                config.append(line)
         return '\n'.join(config)
     
     def generate_key(self, commit=False):

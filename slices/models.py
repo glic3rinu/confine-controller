@@ -144,6 +144,8 @@ class Slice(models.Model):
     def clean(self):
         super(Slice, self).clean()
         if self.exp_data:
+            if self.exp_data_uri:
+                raise ValidationError('exp_data or exp_data_uri ?')
             self.exp_data_sha = sha256(self.exp_data.file.read()).hexdigest()
         if self.exp_data_uri and not self.exp_data_sha256:
             raise ValidationError('Missing exp_data_sha256.')
@@ -247,6 +249,8 @@ class Sliver(models.Model):
     def clean(self):
         super(Sliver, self).clean()
         if self.exp_data:
+            if self.exp_data_uri:
+                raise ValidationError('exp_data or exp_data_uri ?')
             self.exp_data_sha = sha256(self.exp_data.file.read()).hexdigest()
         if self.exp_data_uri and not self.exp_data_sha256:
             raise ValidationError('Missing exp_data_sha256.')

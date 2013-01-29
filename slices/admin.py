@@ -69,9 +69,8 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                     'total_num_ifaces']
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
-              template_link, 'exp_data', 'exp_data_sha256']
-    readonly_fields = ['instance_sn', 'slice_link', 'node_link', 'exp_data_sha256',
-                       template_link]
+              template_link, 'exp_data', 'exp_data_uri', 'exp_data_sha256']
+    readonly_fields = ['instance_sn', 'slice_link', 'node_link', template_link]
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverPropInline, SliverIfaceInline]
     actions = [reset_selected]
@@ -368,8 +367,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
     list_display_links = ('name',)
     list_filter = [MySlicesListFilter, 'set_state', 'template']
-    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', 
-                       'exp_data_sha256', template_link]
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', template_link]
     date_hierarchy = 'expires_on'
     search_fields = ['name']
     inlines = [SlicePropInline, SliverInline]
@@ -378,9 +376,9 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('name', 'description', ('template', template_link),
-                       ('exp_data', 'exp_data_sha256'), 'set_state', 'vlan_nr',
-                       'instance_sn', 'new_sliver_instance_sn', 'expires_on',
-                       'group'),
+                       ('exp_data', 'exp_data_uri'), 'exp_data_sha256', 'set_state',
+                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
+                       'expires_on', 'group'),
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     change_view_actions = [('renew', renew_selected_slices, '', ''),

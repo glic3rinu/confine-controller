@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from rest_framework import serializers
 
-from api.serializers import UriHyperlinkedModelSerializer
+from api.serializers import UriHyperlinkedModelSerializer, PropertyField
 
 from .models import Server, Node
 
@@ -14,7 +14,8 @@ class ServerSerializer(UriHyperlinkedModelSerializer):
 
 class NodeSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    properties = serializers.Field()
+    # TODO read_only = False
+    properties = PropertyField(source='nodeprop_set', required=False, read_only=True)
     slivers = serializers.ManyHyperlinkedRelatedField(view_name='sliver-detail',
         read_only=True)
     direct_ifaces = serializers.Field()

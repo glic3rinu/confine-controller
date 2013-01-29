@@ -4,12 +4,13 @@ from django.http import Http404
 from rest_framework import generics
 
 from api import api
+from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
 from .serializers import ServerSerializer, NodeSerializer
 
 
-class NodeList(generics.ListCreateAPIView):
+class NodeList(ApiPermissionsMixin, generics.ListCreateAPIView):
     """ 
     **Media type:** [`application/vnd.confine.server.Node.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#node_at_server)

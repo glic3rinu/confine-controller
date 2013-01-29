@@ -101,8 +101,8 @@ class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
 
 
 class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
+    # TODO define has_add_permissions accordingly (avoid inline add_anotther)
     pass
-
 
 class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularInline):
     pass

@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     
     # Third party apps that should load last
     'rest_framework',
+    'rest_framework.authtoken',
 )
 
 AUTH_USER_MODEL = 'users.User'
@@ -284,9 +285,18 @@ PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
 
 
 # rest_framework
-#REST_FRAMEWORK = {
-#    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend'
-#}
+REST_FRAMEWORK = {
+#    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'permissions.api.TestbedPermissionBackend',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+
+}
+
 
 
 # common.api

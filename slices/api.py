@@ -3,12 +3,13 @@ from __future__ import absolute_import
 from rest_framework import generics
 
 from api import api
+from permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
 from .serializers import SliceSerializer, SliverSerializer, TemplateSerializer
 
 
-class SliceList(generics.ListCreateAPIView):
+class SliceList(ApiPermissionsMixin, generics.ListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Slice.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
@@ -35,7 +36,7 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SliceSerializer
 
 
-class SliverList(generics.ListCreateAPIView):
+class SliverList(ApiPermissionsMixin, generics.ListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Sliver.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
@@ -63,7 +64,7 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SliverSerializer
 
 
-class TemplateList(generics.ListCreateAPIView):
+class TemplateList(ApiPermissionsMixin, generics.ListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Template.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#template_at_server)

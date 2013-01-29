@@ -171,10 +171,6 @@ class Node(models.Model):
         super(Node, self).save(*args, **kwargs)
     
     @property
-    def properties(self):
-        return dict(self.nodeprop_set.all().values_list('name', 'value'))
-    
-    @property
     def slivers(self):
         return self.sliver_set.all()
     

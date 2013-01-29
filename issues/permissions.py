@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import inspect
 
 from permissions import Permission
 
@@ -16,13 +15,13 @@ class TicketPermission(Permission):
         return True
     
     def change(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
 
 
 class MessagePermission(Permission):
     def view(self, caller, user):
-        if not inspect.isclass(caller):
+        if not self.is_class(caller):
             if caller.visibility == Message.PUBLIC:
                 return True
             elif caller.visibility == Message.PRIVATE:

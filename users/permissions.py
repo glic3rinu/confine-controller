@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import inspect, functools
 
 from permissions import Permission
 
@@ -11,7 +10,7 @@ class UserPermission(Permission):
         return True
     
     def add(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
         return caller == user
     
@@ -27,7 +26,7 @@ class RolesPermission(Permission):
         return True
     
     def add(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return user.has_roles(('admin',))
         return caller.group.has_role(user, 'admin')
     
@@ -46,12 +45,12 @@ class GroupPermission(Permission):
         return True
     
     def change(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
         return caller.has_role(user, 'admin')
     
     def delete(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
         return caller.has_role(user, 'admin')
 

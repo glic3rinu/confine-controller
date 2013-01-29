@@ -47,6 +47,10 @@ class Permission(object):
         for method in inspect.getmembers(perm, predicate=inspect.ismethod):
             if not method[0].startswith('_'):
                 setattr(type(self), method[0], method[1])
+    
+    def is_class(self, caller):
+        """ shortcut for inspect.isclass"""
+        return inspect.isclass(caller)
 
 
 class ReadOnlyPermission(Permission):

@@ -146,7 +146,7 @@ class Node(models.Model):
         elif self.sliver_pub_ipv4 == 'range':
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         
-        if self.cert == '':
+        if not self.cert == '':
             # Empty cert as None instead of empty string (uniqueness)
             self.cert = None
         super(Node, self).clean()

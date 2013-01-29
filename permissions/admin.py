@@ -101,8 +101,22 @@ class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
 
 
 class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
-    # TODO define has_add_permissions accordingly (avoid inline add_anotther)
-    pass
+    def has_add_permission(self, request, obj=None):
+        """ Prevent add another button to appear """
+        opts = self.opts
+        object_id = request.path.split('/')[-2]
+        if isinstance(object_id, type):
+            parent = self.parent_model.objects.get(pk=object_id)
+            return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent)
+        return super(PermissionTabularInline, self).has_add_permission(request, obj=obj)
+
 
 class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularInline):
-    pass
+    def has_add_permission(self, request, obj=None):
+        """ Prevent add another button to appear """
+        opts = self.opts
+        object_id = request.path.split('/')[-2]
+        if isinstance(object_id, type):
+            parent = self.parent_model.objects.get(pk=object_id)
+            return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent)
+        return super(PermissionGenericTabularInline, self).has_add_permission(request, obj=obj)

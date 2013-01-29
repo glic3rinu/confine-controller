@@ -62,13 +62,17 @@ class TincHost(models.Model):
         #       model.clean() doesn't get called. When saving chanegs it is called
         #       A more elaborated describtion is required for this tiket:
         #       https://code.djangoproject.com/ticket/19467
-        if self.pubkey == '':
+        if not self.pubkey:
             self.pubkey = None
         else:
             self.pubkey = self.pubkey.strip()
         super(TincHost, self).clean()
     
     def save(self, *args, **kwargs):
+        # FIXME this is a hack because django seems to have a bug and not call 
+        #       clean() on inlines
+        self.clean()
+        # End of hack
         super(TincHost, self).save(*args, **kwargs)
         defer(update_tincd.delay)
     

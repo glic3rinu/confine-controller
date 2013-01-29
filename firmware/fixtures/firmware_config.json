@@ -212,7 +212,7 @@
         "priority": 0, 
         "is_active": true, 
         "content": "node.tinc.get_tinc_down()", 
-        "mode": "", 
+        "mode": "+x", 
         "is_optional": false, 
         "path": "/etc/tinc/confine/tinc-down", 
         "config": 1

@@ -47,7 +47,7 @@ class GroupPermission(Permission):
     
     def change(self, caller, user):
         if inspect.isclass(caller):
-            return False
+            return True
         return caller.has_role(user, 'admin')
     
     def delete(self, caller, user):

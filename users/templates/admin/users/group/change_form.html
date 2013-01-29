@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% load groups %}
+{% block object-tools %}
+{% if change %}{% if not is_popup %}
+  <ul class="object-tools">
+    {% if original|has_join_request:user %}
+    <li><a href="#" class="historylink">You have a pending join request</a></li>
+    {% elif not original|is_member:user %}
+        <li><a href="join-request/" class="addlink">Join Request</a></li>
+    {% endif%}
+    <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+  </ul>
+{% endif %}{% endif %}
+{% endblock %}

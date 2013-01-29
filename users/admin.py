@@ -83,12 +83,11 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_filter = ['allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]
-    fieldsets = (
-        (None, {'fields': ('name', 'description', 'allow_nodes', 'allow_slices')}),
-        )
+    # TODO this is redundant if is_approved is deprecated
+    fields = ('name', 'description', 'allow_nodes', 'allow_slices')
     actions = [join_request]
     change_view_actions = [('join-request', join_request, 'Join request', ''),]
-    change_form_template = 'admin/common/change_form.html'
+    change_form_template = 'admin/users/group/change_form.html'
     
     def num_users(self, instance):
         return instance.user_set.all().count()

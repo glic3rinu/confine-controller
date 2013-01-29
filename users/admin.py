@@ -1,17 +1,12 @@
 from __future__ import absolute_import
 
-from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db import models, IntegrityError, transaction
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import redirect
-from django.utils.html import escape
+from django.db import models
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
 
 from common.admin import link, get_admin_link, ChangeViewActionsModelAdmin
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -90,7 +85,11 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/users/group/change_form.html'
     
     def num_users(self, instance):
-        return instance.user_set.all().count()
+        """ return num users as a link to users changelist view """
+        num = instance.user_set.count()
+        url = reverse('admin:users_user_changelist')
+        url += '?groups=%s' % instance.pk
+        return mark_safe('<a href="%s">%d</a>' % (url, num))
     num_users.short_description = 'Users'
     num_users.admin_order_field = 'user__count'
     

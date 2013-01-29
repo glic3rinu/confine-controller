@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import inspect
 
 from permissions import Permission
 from users.models import Group
@@ -12,7 +11,7 @@ class SfaObjectPermission(Permission):
     
     def add(self, caller, user):
         """ Admins can add """
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return user.has_roles(('admin',))
         elif type(caller.content_object) is Group:
             return caller.content_object.has_role(user, 'admin')
@@ -20,7 +19,7 @@ class SfaObjectPermission(Permission):
     
     def change(self, caller, user):
         """ Group admins can change """
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return user.has_roles(('admin',))
         elif type(caller.content_object) is Group:
             return caller.content_object.has_role(user, 'admin')
@@ -28,7 +27,7 @@ class SfaObjectPermission(Permission):
     
     def delete(self, caller, user):
         """ Group admins can delete """
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return user.has_roles(('admin',))
         elif type(caller.content_object) is Group:
             return caller.content_object.has_role(user, 'admin')

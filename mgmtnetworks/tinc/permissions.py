@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import inspect
 
 from permissions import Permission, ReadOnlyPermission
 
@@ -12,19 +11,19 @@ class TincClientPermission(Permission):
     
     def add(self, caller, user):
         """ Admins and techs can add """
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return user.has_roles(('admin', 'technician'))
         return caller.node.group.has_roles(user, roles=['admin', 'technician'])
     
     def change(self, caller, user):
         """ group admins and techs can change """
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return user.has_roles(('admin', 'technician'))
         return caller.node.group.has_roles(user, roles=['admin', 'technician'])
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
         return caller.node.group.has_roles(user, roles=['admin', 'technician'])
 
@@ -37,12 +36,12 @@ class HostPermission(Permission):
         return True
     
     def change(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
         return caller.owner == user
     
     def delete(self, caller, user):
-        if inspect.isclass(caller):
+        if self.is_class(caller):
             return True
         return self.change(caller, user)
 

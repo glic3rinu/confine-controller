@@ -79,7 +79,8 @@ class IslandAdmin(PermissionModelAdmin):
 
 
 class GatewayAdmin(PermissionModelAdmin):
-    list_display = ['id']
+    list_display = ['id', 'description']
+    list_display_links = ['id', 'description']
     inlines = [TincServerInline]
 
 

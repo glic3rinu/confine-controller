@@ -2,14 +2,30 @@
 
 set -u
 
+show () {
+    local bold=$(tput bold)
+    local normal=$(tput sgr0)
+    
+    echo " ${bold}\$ ${@}${normal}"
+}
+export -f show
+
+
+run () {
+    show ${@}
+    ${@}
+}
+export -f run
+
+
 prepare_image() {
     # USAGE: prepare_image file size
     
     local FILE=$1
     local SIZE=$2
-    echo -e "Preparing the image file ...\n"
-    dd if=/dev/zero of=$FILE bs=$SIZE count=1
-    mkfs.ext4 -F $FILE
+    echo "Preparing the image file ..."
+    run dd if=/dev/zero of=$FILE bs=$SIZE count=1
+    run mkfs.ext4 -F $FILE
 }
 
 
@@ -152,9 +168,9 @@ install_kernel_and_grub() {
     local DEVICE=$1
     
     apt-get update
-    apt-get install -y linux-image-amd64 
-    apt-get install -y dmsetup gettext-base grub-common libdevmapper1.02.1 \
-                       libfreetype6 os-prober ucf
+    run apt-get install -y linux-image-amd64 
+    run apt-get install -y dmsetup gettext-base grub-common libdevmapper1.02.1 \
+                           libfreetype6 os-prober ucf
     # Download grub and manually install it in order to avoid interactive questions.
     apt-get -dy install grub-pc
     local GRUB_PKG=$(find /var/cache/apt/archives/ -type f -name grub-pc*.deb)
@@ -188,7 +204,7 @@ export -f try_create_system_user
 
 install_portal() {
     # USAGE: install_portal dir username userpassword create_db db_name db_user \
-    #                       db_password db_host db_port
+    #                       db_password db_host db_port tinc_port mgmt_prefix
     
     local USER=$2
     local PASSWORD=$3
@@ -202,12 +218,14 @@ install_portal() {
     local DB_PASSWORD=$7
     local DB_HOST=$8
     local DB_PORT=$9
+    local TINC_PORT=${10}
+    local MGMT_PREFIX=${11}
     
     # Install dependencies
-    apt-get update
-    apt-get install -y libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2 \
-                       screen python-pip python-psycopg2 openssh-server tinc \
-                       fuseext2
+    run apt-get update
+    run apt-get install -y libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2 \
+                           screen python-pip python-psycopg2 openssh-server tinc \
+                           fuseext2
     
     # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
@@ -223,16 +241,18 @@ install_portal() {
     # Install Django
     python -c "import django" 2> /dev/null || { 
         mkdir -p /usr/local/share /usr/lib/${PYVERSION##*' '}/dist-packages /usr/local/bin
-        git clone git://github.com/django/django.git /usr/local/share/django-trunk
+        run git clone git://github.com/django/django.git /usr/local/share/django-trunk
+        cd /usr/local/share/django-trunk; git checkout stable/1.5.x
         local PYVERSION=$(ls -al /usr/bin/python)
         ln -s /usr/local/share/django-trunk/django /usr/local/lib/${PYVERSION##*' '}/dist-packages/
         ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
     }
-    pip install django-fluent-dashboard south djangorestframework markdown \
-                -e git+https://github.com/alex/django-filter.git#egg=django-filter \
-                django-singletons django-extensions django_transaction_signals \
-                django-private-files IPy python-m2crypto
+    run pip install django-fluent-dashboard south djangorestframework markdown \
+                    -e git+https://github.com/alex/django-filter.git#egg=django-filter \
+                    django-singletons django-extensions django_transaction_signals \
+                    django-private-files IPy python-m2crypto
     # Admin tools
+    show "Installing Django admin tools"
     hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin-tools
     cd /tmp/admin-tools
     wget -q --no-check-certificate -O - \
@@ -245,6 +265,7 @@ install_portal() {
     cd /tmp; rm -fr /tmp/admin-tools
     
     # django.registration
+    show "Installing Django Registration"
     hg clone https://bitbucket.org/ubernostrum/django-registration /tmp/django-registration
     cd /tmp/django-registration
     hg pull https://bitbucket.org/mrginglymus/django-registration
@@ -253,6 +274,7 @@ install_portal() {
     hg merge cbv
     python setup.py install
     cd /tmp; rm -fr /tmp/django-registration
+    
     # Installing and configuring MQ
     pip install django-celery django-celery-email
     wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' \
@@ -260,39 +282,39 @@ install_portal() {
     cat <<- EOF > /etc/default/celeryd
 		# Name of nodes to start, here we have a single node
 		CELERYD_NODES="w1"
-
+		
 		# Where to chdir at start.
 		CELERYD_CHDIR="$DIR"
-
+		
 		# How to call "manage.py celeryd_multi"
 		CELERYD_MULTI="\$CELERYD_CHDIR/manage.py celeryd_multi"
-
+		
 		# Extra arguments to celeryd
 		CELERYD_OPTS="--time-limit=300 --concurrency=8 -B"
-
+		
 		# Name of the celery config module.
 		CELERY_CONFIG_MODULE="celeryconfig"
-
+		
 		# %n will be replaced with the nodename.
 		CELERYD_LOG_FILE="/var/log/celery/%n.log"
 		CELERYD_PID_FILE="/var/run/celery/%n.pid"
-
+		
 		# Workers should run as an unprivileged user.
 		CELERYD_USER="$USER"
 		CELERYD_GROUP="\$CELERYD_USER"
-
+		
 		# Name of the projects settings module. (no needed for django +1.4
 		#export DJANGO_SETTINGS_MODULE="settings"
-
+		
 		# Path to celeryd
 		CELERYEV="\$CELERYD_CHDIR/manage.py"
-
+		
 		# Extra arguments to manage.py
 		CELERYEV_OPTS="celeryev"
-
+		
 		# Camera class to use (required)
 		CELERYEV_CAM="djcelery.snapshot.Camera"
-
+		
 		# Celerybeat
 		#CELERY_OPTS="\$CELERY_OPTS -B -S djcelery.schedulers.DatabaseScheduler"
 		
@@ -311,15 +333,21 @@ install_portal() {
     adduser $USER fuse
     
     # Install the portal
-    su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
-    git clone http://git.confine-project.eu/confine/controller.git /tmp/merda
+    if $(cd $DIR/controller &> /dev/null && git status &> /dev/null); then
+        cd $DIR/controller
+        show su $USER -c "git pull origin master"
+        su $USER -c "git pull origin master"
+    else
+        show su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
+        su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
+    fi
     su $USER -c "echo 'from controller.settings_example import *' > $DIR/controller/settings.py"
     cat <<- EOF >> $DIR/controller/settings.py
 		DATABASES = {
 		    'default': {
 		        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
 		        'NAME': '$DB_NAME',
-		        'USER': 'DB_USER',
+		        'USER': '$DB_USER',
 		        'PASSWORD': '$DB_PASSWORD',
 		        'HOST': '$DB_HOST',
 		        'PORT': '$DB_PORT',
@@ -328,12 +356,12 @@ install_portal() {
 		
 		EOF
     
-#    sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $DIR/controller/settings.py
-#    sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $DIR/controller/settings.py
-#    sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $DIR/controller/settings.py
-#    sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $DIR/controller/settings.py
-#    sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $DIR/controller/settings.py
-    echo 'MGMT_IPV6_PREFIX = "fdf5:5351:1dfd::/48"' >> $DIR/controller/settings.py
+    [[ $MGMT_PREFIX ]] && cat <<- EOF >> $DIR/controller/settings.py
+		'MGMT_IPV6_PREFIX = "$MGMT_PREFIX"'
+		EOF
+    [[ $TINC_PORT ]] && cat <<- EOF >> $DIR/controller/settings.py
+		'TINC_PORT_DFLT = "$TINC_PORT"'
+		EOF
     
     cat <<- EOF > /etc/apache2/httpd.conf
 		WSGIScriptAlias / $DIR/controller/wsgi.py
@@ -347,6 +375,13 @@ install_portal() {
 		Alias /media/ $DIR/media/
 		Alias /static/ $DIR/static/
 		EOF
+    
+    # Give upload file permissions to apache
+    adduser www-data $USER
+    run chmod g+w $DIR/media/firmwares
+    run chmod g+w $DIR/media/templates
+    run chmod g+w $DIR/private/exp_data
+
 }
 export -f install_portal
 
@@ -529,6 +564,12 @@ print_help () {
 		            
 		    -k, --keyboard_layout
 		            supported layouts: spanish and english (default)
+		            
+		    -t, --tinc_port
+		            tinc port
+		            
+		    -m, --mgmt_prefix
+		            management network prefix
 		    
 		${bold}EXAMPLES${normal}
 		    server_deployment.sh --type bootable --image /tmp/server.img --suite squeeze
@@ -548,7 +589,7 @@ print_help () {
 #### MAIN ####
 ##############
 
-opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N:k: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path:,keyboard_layout: -- "$@") || exit 1
+opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N:k: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path:,keyboard_layout:,tinc_port:,mgmt_prefix: -- "$@") || exit 1
 set -- $opts
 
 # Default values 
@@ -569,6 +610,9 @@ DB_PASSWORD="confine"
 DB_HOST="localhost"
 DB_PORT="5432"
 KEYBOARD_LAYOUT=''
+TINC_PORT=''
+MGMT_PREFIX=''
+
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -587,6 +631,8 @@ while [ $# -gt 0 ]; do
         -S|--db_host) DB_HOST="${2:1:${#2}-2}"; create_db=false; shift ;;
         -P|--dp_port) DB_PORT="${2:1:${#2}-2}"; shift ;;
         -k|--keyboard_layout) KEYBOARD_LAYOUT="${2:1:${#2}-2}"; shift ;;
+        -t|--tinc_port) TINC_PORT="${2:1:${#2}-2}"; shift ;;
+        -m|--mgmt_prefix) MGMT_PREFIX="${2:1:${#2}-2}"; shift ;;
         -h|--help) print_help; exit 0 ;;
         (--) shift; break;;
         (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
@@ -630,8 +676,8 @@ if [[ $TYPE != 'local' ]]; then
     fi
     
     [ $TYPE == 'bootable' ] && EXCLUDE='' || EXCLUDE='--exclude=udev'
-    echo -e "Debootstraping a base system ...\n"
-    debootstrap --include=locales --arch=$ARCH $EXCLUDE $SUITE $DIRECTORY || exit 1
+    echo "Debootstraping a base system ..."
+    run debootstrap --include=locales --arch=$ARCH $EXCLUDE $SUITE $DIRECTORY || exit 1
     
     custom_mount -s $DIRECTORY
     trap "custom_umount -sl $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
@@ -653,7 +699,9 @@ if [[ $TYPE != 'local' ]]; then
 			EOF
         chmod 755 $DIRECTORY/usr/sbin/policy-rc.d
     fi
-    chroot $DIRECTORY /bin/bash -c "install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD $DB_HOST $DB_PORT"
+    chroot $DIRECTORY /bin/bash -c "install_portal $INSTALL_PATH $USER $PASSWORD \
+                                    $create_db $DB_NAME $DB_USER $DB_PASSWORD \
+                                    $DB_HOST $DB_PORT $TINC_PORT $MGMT_PREFIX"
     rm -fr $DIRECTORY/usr/sbin/policy-rc.d
     
     chroot $DIRECTORY /bin/bash -c "configure_portal_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
@@ -666,8 +714,8 @@ if [[ $TYPE != 'local' ]]; then
     trap - INT TERM EXIT
     $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
 else
+    # local installation
     install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD $DB_HOST $DB_PORT
-#    try_create_system_user $USER $PASSWORD
     /bin/bash -c "$(echo_portal_configuration_script $INSTALL_PATH $USER $create_db $DB_NAME $DB_USER $DB_PASSWORD)"
 fi
 

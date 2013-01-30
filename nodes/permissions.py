@@ -12,7 +12,8 @@ class NodePermission(Permission):
     def add(self, caller, user):
         """ Admins and techs can add """
         if self.is_class(caller):
-            return user.has_roles(('admin', 'technician'))
+            allow_nodes = user.groups.filter(allow_nodes=True).exists()
+            return user.has_roles(('admin', 'technician')) and allow_nodes
         if caller.group.allow_nodes:
             return caller.group.has_roles(user, roles=['admin', 'technician'])
     
@@ -20,7 +21,8 @@ class NodePermission(Permission):
         """ group admins and techs can change """
         if self.is_class(caller):
             return user.has_roles(('admin', 'technician'))
-        return caller.group.has_roles(user, roles=['admin', 'technician'])
+        allow_nodes = user.groups.filter(allow_nodes=True).exists()
+        return caller.group.has_roles(user, roles=['admin', 'technician']) and allow_nodes
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
@@ -29,34 +31,24 @@ class NodePermission(Permission):
         return caller.group.has_roles(user, roles=['admin', 'technician'])
 
 
-class NodePropPermission(Permission):
-    def view(self, caller, user):
-        return True
-    
+class NodeRelatedPermission(NodePermission):
     def add(self, caller, user):
         """ Admins and techs can add """
-        if self.is_class(caller):
-            return user.has_roles(('admin', 'technician'))
-        return caller.node.group.has_roles(user, roles=['admin', 'technician'])
+        parent = caller if self.is_class(caller) else caller.node
+        return super(NodeRelatedPermission, self).add(parent, user)
     
     def change(self, caller, user):
         """ group admins and techs can change """
-        if self.is_class(caller):
-            return user.has_roles(('admin', 'technician'))
-        return caller.node.group.has_role(user, roles=['admin', 'technician'])
+        parent = caller if self.is_class(caller) else caller.node
+        return super(NodeRelatedPermission, self).change(parent, user)
     
     def delete(self, caller, user):
         """ group admins and techs can delete """
-        if self.is_class(caller):
-            return user.has_roles(('admin', 'technician'))
-        return caller.node.group.has_roles(user, roles=['admin', 'technician'])
-
-
-class DirectIfacePermission(NodePropPermission):
-    pass
+        parent = caller if self.is_class(caller) else caller.node
+        return super(NodeRelatedPermission, self).delete(parent, user)
 
 
 Node.has_permission = NodePermission()
-NodeProp.has_permission = NodePropPermission()
-DirectIface.has_permission = DirectIfacePermission()
-Server.has_permission = ReadOnlyPermission()
+NodeProp.has_permission = NodeRelatedPermission()
+DirectIface.has_permission = NodeRelatedPermission()
+Server.has_permission = NodeRelatedPermission()

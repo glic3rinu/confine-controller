@@ -20,7 +20,7 @@ def reject_group(modeladmin, request, queryset):
         group.reject()
         rows_updated+=1
 
-    rows_updated = queryset.delete()
+    queryset.delete()
     messages.info(request, "%s group(s) has been rejected" % rows_updated)
     return redirect('admin:registration2_groupregistration_changelist')
 reject_group.short_description = "Reject selected groups"

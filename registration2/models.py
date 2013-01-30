@@ -47,6 +47,13 @@ class GroupRegistration(models.Model):
 
     objects = GroupRegistrationManager()
 
+    class Meta:
+        verbose_name = 'group registration'
+        verbose_name_plural = 'group registrations'
+
+    def __unicode__(self):
+        return "%s by %s at %s" % (self.group, self.user, self.date)
+
     def approve(self):
         """
         Approving the registration of a group implies the next actions:

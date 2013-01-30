@@ -134,6 +134,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     
     def changelist_view(self, request, extra_context=None):
         """ Default filter as 'my_nodes=True' """
+        from django.contrib.sites.models import RequestSite
+        print RequestSite(request)
         if not request.GET.has_key('my_nodes'):
             q = request.GET.copy()
             q['my_nodes'] = 'True'

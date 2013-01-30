@@ -22,11 +22,13 @@ class Group(models.Model):
                   'team. When someone sends a request, a group pending of '
                   'be approved is created.')
     allow_nodes = models.BooleanField(default=False,
-        help_text='Whether nodes belonging to this group can be created (false by '
-                  'default). Its value can only be changed by testbed superusers.')
+        help_text='Whether nodes belonging to this group can be created or set '
+                  'into production (false by default). Its value can only be '
+                  'changed by testbed superusers.')
     allow_slices = models.BooleanField(default=False,
-        help_text='Whether nodes belonging to this group can be created (false by '
-                  'default). Its value can only be changed by testbed superusers.')
+        help_text='Whether slices belonging to this group can be created or '
+                  'instantiated (false by default). Its value can only be changed '
+                  'by testbed superusers.')
     
     def __unicode__(self):
         return self.name

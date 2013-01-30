@@ -7,7 +7,7 @@ prepare_image() {
     
     local FILE=$1
     local SIZE=$2
-        
+    echo -e "Preparing the image file ...\n"
     dd if=/dev/zero of=$FILE bs=$SIZE count=1
     mkfs.ext4 -F $FILE
 }
@@ -206,7 +206,8 @@ install_portal() {
     # Install dependencies
     apt-get update
     apt-get install -y libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2 \
-                       screen python-pip python-psycopg2 openssh-server tinc
+                       screen python-pip python-psycopg2 openssh-server tinc \
+                       fuseext2
     
     # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
@@ -227,18 +228,35 @@ install_portal() {
         ln -s /usr/local/share/django-trunk/django /usr/local/lib/${PYVERSION##*' '}/dist-packages/
         ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
     }
-    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin_tools
-    python /tmp/admin_tools/setup.py install
-    rm -fr /tmp/admin_tools
     pip install django-fluent-dashboard south djangorestframework markdown \
                 -e git+https://github.com/alex/django-filter.git#egg=django-filter \
                 django-singletons django-extensions django_transaction_signals \
-                django-private-files
+                django-private-files IPy python-m2crypto
+    # Admin tools
+    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin-tools
+    cd /tmp/admin-tools
+    wget -q --no-check-certificate -O - \
+        https://bitbucket.org/glic3rinu/django-admin-tools/commits/80dc4614be792761bfb953f285a1858b4c662062/raw/ | hg import -
+    wget -q --no-check-certificate -O - \
+        https://bitbucket.org/glic3rinu/django-admin-tools-fixes/commits/f619e537cd67c3c8547b40cc3b0e8724b1a83d5d/raw/ | hg import -
+    wget -q --no-check-certificate -O - \
+        https://bitbucket.org/glic3rinu/django-admin-tools-fixes/commits/9248fffbb17276eba46f4b356bafb3a1ef0642bb/raw/ | hg import -
+    pip install /tmp/admin-tools/
+    cd /tmp; rm -fr /tmp/admin-tools
     
+    # django.registration
+    hg clone https://bitbucket.org/ubernostrum/django-registration /tmp/django-registration
+    cd /tmp/django-registration
+    hg pull https://bitbucket.org/mrginglymus/django-registration
+    hg update
+    hg pull https://bitbucket.org/jscott1971/django-registration -r cbv
+    hg merge cbv
+    python setup.py install
+    cd /tmp; rm -fr /tmp/django-registration
     # Installing and configuring MQ
-    pip install django-celery
+    pip install django-celery django-celery-email
     wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' \
-         -O /etc/init.d/celeryd
+        --no-check-certificate -O /etc/init.d/celeryd
     cat <<- EOF > /etc/default/celeryd
 		# Name of nodes to start, here we have a single node
 		CELERYD_NODES="w1"
@@ -284,24 +302,37 @@ install_portal() {
     chmod +x /etc/init.d/celeryd
     update-rc.d celeryd defaults
     wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam"\
-         -O /etc/init.d/celeryevcam
+         --no-check-certificate -O /etc/init.d/celeryevcam
     chmod +x /etc/init.d/celeryevcam
     update-rc.d celeryevcam defaults
     
-    # Install ConFw
-    git clone http://git.confine-project.eu/confine/confw.git \
-              /usr/local/lib/python2.6/dist-packages/confw
+    # Configure firmware generation
     [ $(grep "^fuse:" /etc/group &> /dev/null) ] || addgroup fuse
     adduser $USER fuse
     
     # Install the portal
     su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
     su $USER -c "echo 'from controller.settings_example import *' > $DIR/controller/settings.py"
-    sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $DIR/controller/settings.py
-    sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $DIR/controller/settings.py
-    sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $DIR/controller/settings.py
-    sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $DIR/controller/settings.py
-    sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $DIR/controller/settings.py
+    cat <<- EOF > $DIR/controller/settings.py
+		DATABASES = {
+		    'default': {
+		        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+		        'NAME': '$DB_NAME',
+		        'USER': 'DB_USER',
+		        'PASSWORD': '$DB_PASSWORD',
+		        'HOST': '$DB_HOST',
+		        'PORT': '$DB_PORT',
+		    }
+		}
+		
+		EOF
+    
+#    sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $DIR/controller/settings.py
+#    sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $DIR/controller/settings.py
+#    sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $DIR/controller/settings.py
+#    sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $DIR/controller/settings.py
+#    sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $DIR/controller/settings.py
+    echo 'MGMT_IPV6_PREFIX = "fdf5:5351:1dfd::/48"' >> $DIR/controller/settings.py
     
     cat <<- EOF > /etc/apache2/httpd.conf
 		WSGIScriptAlias / $DIR/controller/wsgi.py
@@ -338,6 +369,7 @@ echo_generate_ssh_keys () {
 
 }
 export -f echo_generate_ssh_keys
+
 
 generate_ssh_keys_postponed () {
     local USER=$1
@@ -389,9 +421,13 @@ echo_portal_configuration_script () {
 		su $USER -c "echo \"from django.contrib.auth import get_user_model; \\
 		             User = get_user_model(); \\
 		             User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
+		su $USER -c "python $DIR/manage.py loaddata firmware_config"
+		su $USER -c "python $DIR/manage.py collectstatic --noinput"
+		python $DIR/manage.py create_tinc_server
 		EOF
 }
 export -f echo_portal_configuration_script
+
 
 configure_portal_postponed () {
     # USAGE: echo_portal_configuration_steps dir user db_name db_user db_password
@@ -502,7 +538,6 @@ print_help () {
 		    #TODO: offer script to raise chroot when chroot deployment type is chosen 
 		    #TODO: virtualenv support for local deployment
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
-		    #TODO: Tinc
 		    #TODO: Option: Use provided ssh keys instead of generating them
 		EOF
 }
@@ -594,6 +629,7 @@ if [[ $TYPE != 'local' ]]; then
     fi
     
     [ $TYPE == 'bootable' ] && EXCLUDE='' || EXCLUDE='--exclude=udev'
+    echo -e "Debootstraping a base system ...\n"
     debootstrap --include=locales --arch=$ARCH $EXCLUDE $SUITE $DIRECTORY || exit 1
     
     custom_mount -s $DIRECTORY

@@ -87,7 +87,9 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            groups = user.groups.filter(Q(roles__is_admin=True)|Q(roles__is_technician=True))
+            query = Q( Q(roles__is_admin=True) | Q(roles__is_technician=True) )
+            query = Q( query & Q(allow_nodes=True) )
+            groups = user.groups.filter(query)
             num_groups = groups.count()
             if num_groups >= 1:
                 form.base_fields['group'].queryset = groups
@@ -95,6 +97,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                 ro_widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].widget = ro_widget
                 form.base_fields['group'].required = False
+            elif not user.is_superuser:
+                raise Exception('Oops this is unfortunate but you can not proceed.')
         return form
     
     def queryset(self, request):

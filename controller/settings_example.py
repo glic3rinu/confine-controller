@@ -146,7 +146,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.sites',
+#    'django.contrib.sites',
     
     # Confine
     'common',
@@ -296,7 +296,6 @@ REST_FRAMEWORK = {
     )
 
 }
-
 
 
 # common.api

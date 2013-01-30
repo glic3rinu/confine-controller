@@ -312,8 +312,9 @@ install_portal() {
     
     # Install the portal
     su $USER -c "git clone http://git.confine-project.eu/confine/controller.git $DIR"
+    git clone http://git.confine-project.eu/confine/controller.git /tmp/merda
     su $USER -c "echo 'from controller.settings_example import *' > $DIR/controller/settings.py"
-    cat <<- EOF > $DIR/controller/settings.py
+    cat <<- EOF >> $DIR/controller/settings.py
 		DATABASES = {
 		    'default': {
 		        'ENGINE': 'django.db.backends.postgresql_psycopg2', 

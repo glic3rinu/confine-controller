@@ -156,6 +156,7 @@ class AdminViewsTestCase(TestCase):
         self._login(superuser=True)
 
     def test_admin_list(self):
+        """ List the group registration """
         url = reverse('admin:registration2_groupregistration_changelist')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -166,30 +167,48 @@ class AdminViewsTestCase(TestCase):
         self.assertEqual(resp.status_code, 403)
 
     def test_admin_approve(self):
-        url = reverse('admin:registration2_groupregistration_approve', args=[1])
+        """ Approve a group registration """
+        gr = GroupRegistration.objects.get(pk=1)
+        url = reverse('admin:registration2_groupregistration_approve', args=[gr.id])
         resp = self.client.get(url)
 
         url_changelist = test_reverse('admin:registration2_groupregistration_changelist')
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_changelist)
 
-        # Trying with a not existent object
-        ##FIXME! when an object does not exists --> 404!!
+        # check if approve gr has proper side effects
+        self.assertTrue(gr.group.is_approved)
+        self.assertTrue(gr.user.is_active)
+        self.assertTrue(gr.group.has_roles(gr.user, ['admin']))
+    
+    def test_admin_reject(self):
+        """ Reject a group registration """
+        gr = GroupRegistration.objects.get(pk=1)
+        uid = gr.user.id
+        gid = gr.group.id
+
+        url = reverse('admin:registration2_groupregistration_reject', args=[gr.id])
+        resp = self.client.get(url)
+
+        url_changelist = test_reverse('admin:registration2_groupregistration_changelist')
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], url_changelist)
+
+        # check if reject gr has proper side effects
+        # if the user was inactive then should be removed
+        if User.objects.filter(pk=uid).exists():
+            self.assertTrue(gr.user.is_active)
+
+        self.assertFalse(Group.objects.filter(pk=gid).exists())
+        self.assertFalse(GroupRegistration.objects.filter(pk=1).exists())
+
+    def ztest_admin_not_exist(self):
+        """ Access to a not existent object """
+        # TODO BUG: when an object does not exists --> 404!!
         url = reverse('admin:registration2_groupregistration_approve', args=[10])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
 
-#        self.assertTrue(group.is_approved)
-#        self.assertTrue(user.is_active)
-#        self.assertTrue(group.has_roles(user, ['admin']))
-
-#    def test_admin_reject(self):
-#        url = reverse('admin:registration2_groupregistration_reject', args=[1])
-#        resp = self.client.get(url)
-
-#        if not user.is_active:
-#            not user.exists()
-#
-#        not group.exists()
-#        not rg.exists()
 
     def _login(self, superuser=False):
         self.client.logout()

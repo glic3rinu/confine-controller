@@ -92,7 +92,7 @@ class Roles(models.Model):
         attr_map = {
             'technician': 'is_technician',
             'admin': 'is_admin',
-            'researcher': 'is_researche'}
+            'researcher': 'is_researcher'}
         return getattr(self, attr_map[role])
 
 

@@ -252,10 +252,12 @@ install_portal() {
         ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
     fi
     cd /tmp
-    run pip install django-fluent-dashboard south djangorestframework markdown \
+    run pip install django-fluent-dashboard south markdown django-private-files IPy \
                     -e git+https://github.com/alex/django-filter.git#egg=django-filter \
                     django-singletons django-extensions django_transaction_signals \
-                    django-private-files IPy
+    # This package has a very active development
+    run pip install djangorestframework --upgrade
+    
 #    # Admin tools
 #    show "Installing Django admin tools"
 #    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin-tools

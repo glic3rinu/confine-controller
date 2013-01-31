@@ -467,6 +467,10 @@ echo_portal_configuration_script () {
 		su $USER -c "python $DIR/manage.py loaddata firmware_config"
 		su $USER -c "python $DIR/manage.py collectstatic --noinput"
 		python $DIR/manage.py create_tinc_server --noinput
+		service tinc restart
+		service apache2 restart
+		service celeryd restart
+		service celeryevcam restart
 		EOF
 }
 export -f echo_portal_configuration_script

@@ -133,9 +133,11 @@ class Command(BaseCommand):
         if not protect:
             tinc_server.pubkey = pubkey
             tinc_server.save()
+        print username
+        print 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
-                 chmod o+x /etc/tinc/%(net)s/tinc-up;
-                 chmod o+x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
+                 chmod u+x /etc/tinc/%(net)s/tinc-up;
+                 chmod u+x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
                                                              'user': username}
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()

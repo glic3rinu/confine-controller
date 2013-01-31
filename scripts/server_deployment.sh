@@ -466,7 +466,7 @@ echo_portal_configuration_script () {
 		             User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
 		su $USER -c "python $DIR/manage.py loaddata firmware_config"
 		su $USER -c "python $DIR/manage.py collectstatic --noinput"
-		python $DIR/manage.py create_tinc_server
+		python $DIR/manage.py create_tinc_server --noinput
 		EOF
 }
 export -f echo_portal_configuration_script

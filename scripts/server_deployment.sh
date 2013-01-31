@@ -715,8 +715,8 @@ if [[ $TYPE != 'local' ]]; then
     $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
 else
     # local installation
-    install_portal $INSTALL_PATH $USER $PASSWORD $create_db $DB_NAME $DB_USER $DB_PASSWORD \
-                   $DB_HOST $DB_PORT $TINC_PORT $MGMT_PREFIX
+    install_portal "$INSTALL_PATH" "$USER" "$PASSWORD" "$create_db" "$DB_NAME" "$DB_USER" \
+                   "$DB_PASSWORD" "$DB_HOST" "$DB_PORT" "$TINC_PORT" "$MGMT_PREFIX"
     /bin/bash -c "$(echo_portal_configuration_script $INSTALL_PATH $USER $create_db $DB_NAME $DB_USER $DB_PASSWORD)"
 fi
 

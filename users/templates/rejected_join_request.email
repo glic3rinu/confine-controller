@@ -1,2 +1,0 @@
-{% if subject %}Rejected join request{% endif %}
-{% if message %}Email body{% endif %}

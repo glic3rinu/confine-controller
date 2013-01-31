@@ -285,7 +285,7 @@ class JoinRequest(models.Model):
         if self.pk:
             # Notify admins that a new join request is created
             admins = self.group.get_admin_emails()
-            self.notify(template='created_join_request.email', to=admins)
+            self.notify(template='users/created_join_request.email', to=admins)
         super(JoinRequest, self).save(*args, **kwargs)
     
     def accept(self, roles=[]):
@@ -295,7 +295,7 @@ class JoinRequest(models.Model):
         """
         roles_kwargs = dict( ('is_%s' % role, True) for role in roles )
         Roles.objects.create(user=self.user, group=self.group, **roles_kwargs)
-        self.notify(template='accepted_join_request.email',
+        self.notify(template='users/accepted_join_request.email',
                     to=self.user.email)
         self.delete()
     
@@ -304,7 +304,7 @@ class JoinRequest(models.Model):
         The admin refuse the user's request to join.
         The request is deleted
         """
-        self.notify(template='rejected_join_request.email',
+        self.notify(template='users/rejected_join_request.email',
                     to=self.user.email)
         self.delete()
     

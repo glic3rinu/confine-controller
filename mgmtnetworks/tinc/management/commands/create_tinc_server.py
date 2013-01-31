@@ -130,11 +130,12 @@ class Command(BaseCommand):
                 username = None
                 continue
         
+        if username is None:
+            username = default_username
+        
         if not protect:
             tinc_server.pubkey = pubkey
             tinc_server.save()
-        print username
-        print 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
                  chmod u+x /etc/tinc/%(net)s/tinc-up;
                  chmod u+x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,

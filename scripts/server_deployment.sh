@@ -468,7 +468,7 @@ echo_portal_configuration_script () {
 		             User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
 		su $USER -c "python $DIR/manage.py loaddata firmware_config"
 		su $USER -c "python $DIR/manage.py collectstatic --noinput"
-		python $DIR/manage.py create_tinc_server --noinput
+		python $DIR/manage.py create_tinc_server --noinput --safe
 		service tinc restart
 		service apache2 restart
 		service celeryd restart
@@ -594,6 +594,7 @@ print_help () {
 		    #TODO: virtualenv support for local deployment
 		    #TODO: always use update.rc instead of insserv for more compatibility? i.e. ubuntu
 		    #TODO: Option: Use provided ssh keys instead of generating them
+		    #TODO: safly update tincd config tincd_update task rather than create_tinc_server
 		EOF
 }
 

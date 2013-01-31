@@ -1,4 +1,4 @@
-import getpass, pwd, re
+import getpass, pwd, re, os
 from optparse import make_option
 from subprocess import Popen, PIPE
 
@@ -85,8 +85,9 @@ class Command(BaseCommand):
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
-        cmd = "mgmtnetworks/tinc/scripts/create_server.sh %s %s" % (TINC_NET_NAME,
-                                                                    TINC_MGMT_IPV6_PREFIX.split('::')[0])
+        FILE_PATH = os.path.dirname(os.path.realpath(__file__))
+        SCRIPT_PATH = os.path.join(FILE_PATH, '../../scripts/create_server.sh')
+        cmd = "%s %s %s" % (SCRIPTS_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0])
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

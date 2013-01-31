@@ -225,7 +225,7 @@ install_portal() {
     run apt-get update
     run apt-get install -y libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2 \
                            screen python-pip python-psycopg2 openssh-server tinc \
-                           fuseext2
+                           fuseext2 python-m2crypto
     
     # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
@@ -252,10 +252,10 @@ install_portal() {
         ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
     fi
     cd /tmp
-#    run pip install django-fluent-dashboard south djangorestframework markdown \
-#                    -e git+https://github.com/alex/django-filter.git#egg=django-filter \
-#                    django-singletons django-extensions django_transaction_signals \
-#                    django-private-files IPy python-m2crypto
+    run pip install django-fluent-dashboard south djangorestframework markdown \
+                    -e git+https://github.com/alex/django-filter.git#egg=django-filter \
+                    django-singletons django-extensions django_transaction_signals \
+                    django-private-files IPy
 #    # Admin tools
 #    show "Installing Django admin tools"
 #    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin-tools

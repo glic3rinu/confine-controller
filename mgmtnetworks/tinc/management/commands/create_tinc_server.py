@@ -72,7 +72,8 @@ class Command(BaseCommand):
         tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server',
                                                 content_type__app_label='nodes')
         
-        protect = options.get('safe') and tinc_server.exists()
+        safe = options.get('safe')
+        protect = safe and tinc_server.exists()
         if not protect:
             if interactive:
                 msg = ("\nSeems that you already have a tinc server configured.\nThis will "
@@ -86,7 +87,7 @@ class Command(BaseCommand):
                         break
                     confirm = raw_input('Please enter either "yes" or "no": ')
             tinc_server = tinc_server[0]
-        else:
+        elif not safe:
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         

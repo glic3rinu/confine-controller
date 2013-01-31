@@ -161,7 +161,7 @@ INSTALLED_APPS = (
 #    'sfa',
     'communitynetworks',
     'firmware',
-    'groupregistration',
+#    'groupregistration',
     
     # Third party apps that should load last
     'rest_framework',
@@ -175,6 +175,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_ACTIVATION_DAYS = 7
+LOGIN_REDIRECT_URL = '/admin/'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -233,7 +234,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
-            'groupregistration.models.GroupRegistration',
+#            'groupregistration.models.GroupRegistration',
         ),
         'collapsible': True,
     }),
@@ -262,7 +263,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'issues/ticket': "Ticket_star.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
-    'groupregistration/groupregistration': "registration.png",
+#    'groupregistration/groupregistration': "registration.png",
 }
 
 

@@ -468,7 +468,11 @@ echo_portal_configuration_script () {
 		             User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
 		su $USER -c "python $DIR/manage.py loaddata firmware_config"
 		su $USER -c "python $DIR/manage.py collectstatic --noinput"
+		
 		python $DIR/manage.py create_tinc_server --noinput --safe
+		su $USER -c "echo \"from mgmtnetworks.tinc.tasks import update_tincd; \\
+		             update_tincd()\" | $DIR/manage.py shell"
+		
 		service tinc restart
 		service apache2 restart
 		service celeryd restart

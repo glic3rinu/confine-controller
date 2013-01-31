@@ -37,6 +37,9 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default=get_default_celeryd_username(),
                 help='Specifies the login for the superuser.'),
+            make_option('--safe', dest='safe', action='store_true', default=False,
+                help='Specifies if this command should regenerate the existing server '
+                     'keys, if they exists. Useful combined with --noinput'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -68,7 +71,9 @@ class Command(BaseCommand):
         server = Server.objects.get_or_create(id=1)
         tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server',
                                                 content_type__app_label='nodes')
-        if tinc_server.exists():
+        
+        protect = options.get('safe') and tinc_server.exists()
+        if not protect:
             if interactive:
                 msg = ("\nSeems that you already have a tinc server configured.\nThis will "
                        "generate a new tinc public key and delete all the configuration under "
@@ -85,22 +90,23 @@ class Command(BaseCommand):
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
-        FILE_PATH = os.path.dirname(os.path.realpath(__file__))
-        SCRIPT_PATH = os.path.join(FILE_PATH, '../../scripts/create_server.sh')
-        cmd = "%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0])
-        cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        if cmd.returncode > 0:
-            raise self.CreateTincdError(stderr)
-        
-        # Get created pubkey
-        pubkey = ''
-        for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
-            pubkey += line
-            if line == '-----BEGIN RSA PUBLIC KEY-----\n':
-                pubkey = line
-            elif line == '-----END RSA PUBLIC KEY-----\n':
-                break
+        if not protect:
+            FILE_PATH = os.path.dirname(os.path.realpath(__file__))
+            SCRIPT_PATH = os.path.join(FILE_PATH, '../../scripts/create_server.sh')
+            cmd = "%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0])
+            cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+            (stdout, stderr) = cmd.communicate()
+            if cmd.returncode > 0:
+                raise self.CreateTincdError(stderr)
+            
+            # Get created pubkey
+            pubkey = ''
+            for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
+                pubkey += line
+                if line == '-----BEGIN RSA PUBLIC KEY-----\n':
+                    pubkey = line
+                elif line == '-----END RSA PUBLIC KEY-----\n':
+                    break
         
         # Prompt for username/password, and any other required fields.
         # Enclose this whole thing in a try/except to trap for a
@@ -123,8 +129,9 @@ class Command(BaseCommand):
                 username = None
                 continue
         
-        tinc_server.pubkey = pubkey
-        tinc_server.save()
+        if not protect:
+            tinc_server.pubkey = pubkey
+            tinc_server.save()
         cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
                  chmod o+x /etc/tinc/%(net)s/tinc-up;
                  chmod o+x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,

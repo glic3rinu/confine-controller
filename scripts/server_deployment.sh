@@ -469,6 +469,9 @@ echo_portal_configuration_script () {
 		su $USER -c "python $DIR/manage.py loaddata firmware_config"
 		su $USER -c "python $DIR/manage.py collectstatic --noinput"
 		
+		KEY=$(python $DIR/manage.py generate_secret_key)
+		echo "SECRET_KEY = '$KEY'" >> $DIR/controller/settings.py
+		
 		python $DIR/manage.py create_tinc_server --noinput --safe
 		su $USER -c "echo \"from mgmtnetworks.tinc.tasks import update_tincd; \\
 		             update_tincd()\" | $DIR/manage.py shell"

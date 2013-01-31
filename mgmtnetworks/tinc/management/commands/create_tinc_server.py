@@ -87,7 +87,7 @@ class Command(BaseCommand):
         
         FILE_PATH = os.path.dirname(os.path.realpath(__file__))
         SCRIPT_PATH = os.path.join(FILE_PATH, '../../scripts/create_server.sh')
-        cmd = "%s %s %s" % (SCRIPTS_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0])
+        cmd = "%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0])
         cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         (stdout, stderr) = cmd.communicate()
         if cmd.returncode > 0:

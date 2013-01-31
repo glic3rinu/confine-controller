@@ -239,94 +239,99 @@ install_portal() {
     fi
     
     # Install Django
-    python -c "import django" 2> /dev/null || { 
+    if (python -c "import django" 2> /dev/null); then
+        cd /usr/local/share/django-trunk
+        run git pull origin
+    else 
         mkdir -p /usr/local/share /usr/lib/${PYVERSION##*' '}/dist-packages /usr/local/bin
         run git clone git://github.com/django/django.git /usr/local/share/django-trunk
-        cd /usr/local/share/django-trunk; git checkout stable/1.5.x
+        cd /usr/local/share/django-trunk;
+        run git checkout stable/1.5.x
         local PYVERSION=$(ls -al /usr/bin/python)
         ln -s /usr/local/share/django-trunk/django /usr/local/lib/${PYVERSION##*' '}/dist-packages/
         ln -s /usr/local/share/django-trunk/django/bin/django-admin.py /usr/local/bin/
-    }
-    run pip install django-fluent-dashboard south djangorestframework markdown \
-                    -e git+https://github.com/alex/django-filter.git#egg=django-filter \
-                    django-singletons django-extensions django_transaction_signals \
-                    django-private-files IPy python-m2crypto
-    # Admin tools
-    show "Installing Django admin tools"
-    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin-tools
-    cd /tmp/admin-tools
-    wget -q --no-check-certificate -O - \
-        https://bitbucket.org/glic3rinu/django-admin-tools/commits/80dc4614be792761bfb953f285a1858b4c662062/raw/ | hg import -
-    wget -q --no-check-certificate -O - \
-        https://bitbucket.org/glic3rinu/django-admin-tools-fixes/commits/f619e537cd67c3c8547b40cc3b0e8724b1a83d5d/raw/ | hg import -
-    wget -q --no-check-certificate -O - \
-        https://bitbucket.org/glic3rinu/django-admin-tools-fixes/commits/9248fffbb17276eba46f4b356bafb3a1ef0642bb/raw/ | hg import -
-    pip install /tmp/admin-tools/
-    cd /tmp; rm -fr /tmp/admin-tools
-    
-    # django.registration
-    show "Installing Django Registration"
-    hg clone https://bitbucket.org/ubernostrum/django-registration /tmp/django-registration
-    cd /tmp/django-registration
-    hg pull https://bitbucket.org/mrginglymus/django-registration
-    hg update
-    hg pull https://bitbucket.org/jscott1971/django-registration -r cbv
-    hg merge cbv
-    python setup.py install
-    cd /tmp; rm -fr /tmp/django-registration
-    
-    # Installing and configuring MQ
-    pip install django-celery django-celery-email
-    wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' \
-        --no-check-certificate -O /etc/init.d/celeryd
-    cat <<- EOF > /etc/default/celeryd
-		# Name of nodes to start, here we have a single node
-		CELERYD_NODES="w1"
-		
-		# Where to chdir at start.
-		CELERYD_CHDIR="$DIR"
-		
-		# How to call "manage.py celeryd_multi"
-		CELERYD_MULTI="\$CELERYD_CHDIR/manage.py celeryd_multi"
-		
-		# Extra arguments to celeryd
-		CELERYD_OPTS="--time-limit=300 --concurrency=8 -B"
-		
-		# Name of the celery config module.
-		CELERY_CONFIG_MODULE="celeryconfig"
-		
-		# %n will be replaced with the nodename.
-		CELERYD_LOG_FILE="/var/log/celery/%n.log"
-		CELERYD_PID_FILE="/var/run/celery/%n.pid"
-		
-		# Workers should run as an unprivileged user.
-		CELERYD_USER="$USER"
-		CELERYD_GROUP="\$CELERYD_USER"
-		
-		# Name of the projects settings module. (no needed for django +1.4
-		#export DJANGO_SETTINGS_MODULE="settings"
-		
-		# Path to celeryd
-		CELERYEV="\$CELERYD_CHDIR/manage.py"
-		
-		# Extra arguments to manage.py
-		CELERYEV_OPTS="celeryev"
-		
-		# Camera class to use (required)
-		CELERYEV_CAM="djcelery.snapshot.Camera"
-		
-		# Celerybeat
-		#CELERY_OPTS="\$CELERY_OPTS -B -S djcelery.schedulers.DatabaseScheduler"
-		
-		# Persistent revokes
-		CELERYD_STATE_DB="\$CELERYD_CHDIR/persistent_revokes"
-		EOF
-    chmod +x /etc/init.d/celeryd
-    update-rc.d celeryd defaults
-    wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam"\
-         --no-check-certificate -O /etc/init.d/celeryevcam
-    chmod +x /etc/init.d/celeryevcam
-    update-rc.d celeryevcam defaults
+    fi
+    cd /tmp
+#    run pip install django-fluent-dashboard south djangorestframework markdown \
+#                    -e git+https://github.com/alex/django-filter.git#egg=django-filter \
+#                    django-singletons django-extensions django_transaction_signals \
+#                    django-private-files IPy python-m2crypto
+#    # Admin tools
+#    show "Installing Django admin tools"
+#    hg clone https://bitbucket.org/izi/django-admin-tools /tmp/admin-tools
+#    cd /tmp/admin-tools
+#    wget -q --no-check-certificate -O - \
+#        https://bitbucket.org/glic3rinu/django-admin-tools/commits/80dc4614be792761bfb953f285a1858b4c662062/raw/ | hg import -
+#    wget -q --no-check-certificate -O - \
+#        https://bitbucket.org/glic3rinu/django-admin-tools-fixes/commits/f619e537cd67c3c8547b40cc3b0e8724b1a83d5d/raw/ | hg import -
+#    wget -q --no-check-certificate -O - \
+#        https://bitbucket.org/glic3rinu/django-admin-tools-fixes/commits/9248fffbb17276eba46f4b356bafb3a1ef0642bb/raw/ | hg import -
+#    pip install /tmp/admin-tools/
+#    cd /tmp; rm -fr /tmp/admin-tools
+#    
+#    # django.registration
+#    show "Installing Django Registration"
+#    hg clone https://bitbucket.org/ubernostrum/django-registration /tmp/django-registration
+#    cd /tmp/django-registration
+#    hg pull https://bitbucket.org/mrginglymus/django-registration
+#    hg update
+#    hg pull https://bitbucket.org/jscott1971/django-registration -r cbv
+#    hg merge cbv
+#    python setup.py install
+#    cd /tmp; rm -fr /tmp/django-registration
+#    
+#    # Installing and configuring MQ
+#    pip install django-celery django-celery-email
+#    wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' \
+#        --no-check-certificate -O /etc/init.d/celeryd
+#    cat <<- EOF > /etc/default/celeryd
+#		# Name of nodes to start, here we have a single node
+#		CELERYD_NODES="w1"
+#		
+#		# Where to chdir at start.
+#		CELERYD_CHDIR="$DIR"
+#		
+#		# How to call "manage.py celeryd_multi"
+#		CELERYD_MULTI="\$CELERYD_CHDIR/manage.py celeryd_multi"
+#		
+#		# Extra arguments to celeryd
+#		CELERYD_OPTS="--time-limit=300 --concurrency=8 -B"
+#		
+#		# Name of the celery config module.
+#		CELERY_CONFIG_MODULE="celeryconfig"
+#		
+#		# %n will be replaced with the nodename.
+#		CELERYD_LOG_FILE="/var/log/celery/%n.log"
+#		CELERYD_PID_FILE="/var/run/celery/%n.pid"
+#		
+#		# Workers should run as an unprivileged user.
+#		CELERYD_USER="$USER"
+#		CELERYD_GROUP="\$CELERYD_USER"
+#		
+#		# Name of the projects settings module. (no needed for django +1.4
+#		#export DJANGO_SETTINGS_MODULE="settings"
+#		
+#		# Path to celeryd
+#		CELERYEV="\$CELERYD_CHDIR/manage.py"
+#		
+#		# Extra arguments to manage.py
+#		CELERYEV_OPTS="celeryev"
+#		
+#		# Camera class to use (required)
+#		CELERYEV_CAM="djcelery.snapshot.Camera"
+#		
+#		# Celerybeat
+#		#CELERY_OPTS="\$CELERY_OPTS -B -S djcelery.schedulers.DatabaseScheduler"
+#		
+#		# Persistent revokes
+#		CELERYD_STATE_DB="\$CELERYD_CHDIR/persistent_revokes"
+#		EOF
+#    chmod +x /etc/init.d/celeryd
+#    update-rc.d celeryd defaults
+#    wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam"\
+#         --no-check-certificate -O /etc/init.d/celeryevcam
+#    chmod +x /etc/init.d/celeryevcam
+#    update-rc.d celeryevcam defaults
     
     # Configure firmware generation
     [ $(grep "^fuse:" /etc/group &> /dev/null) ] || addgroup fuse
@@ -717,6 +722,7 @@ else
     # local installation
     install_portal "$INSTALL_PATH" "$USER" "$PASSWORD" "$create_db" "$DB_NAME" "$DB_USER" \
                    "$DB_PASSWORD" "$DB_HOST" "$DB_PORT" "$TINC_PORT" "$MGMT_PREFIX"
+    show /bin/bash -c "$(echo_portal_configuration_script $INSTALL_PATH $USER $create_db $DB_NAME $DB_USER $DB_PASSWORD)"
     /bin/bash -c "$(echo_portal_configuration_script $INSTALL_PATH $USER $create_db $DB_NAME $DB_USER $DB_PASSWORD)"
 fi
 

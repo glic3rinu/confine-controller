@@ -1,3 +1,4 @@
-recursive-include controller/apps *.po *.mo *.html *.txt *.rml *.xml *.yaml *.csv
-recursive-include controller/static *
+recursive-include controller/apps *.html *.txt *.email *.ula
+recursive-include controller/projects/ *
+
 recursive-include docs *

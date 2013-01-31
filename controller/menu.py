@@ -25,13 +25,15 @@ def api_link(context):
 
 class CustomMenu(Menu):
     def init_with_context(self, context):
+        user = context['user']
+        
         self.children += [
             items.MenuItem('Dashboard', reverse('admin:index')),
             items.Bookmarks(),]
         
         self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')))
         
-        if context['user'].has_module_perms('slices'):
+        if user.has_module_perms('slices'):
             self.children.append(items.MenuItem('Slices', reverse('admin:app_list', args=['slices']),
                 children=[
                     items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
@@ -39,7 +41,7 @@ class CustomMenu(Menu):
                     items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
                 ]))
         
-        if is_installed('mgmtnetworks.tinc') and context['user'].has_module_perms('tinc'):
+        if is_installed('mgmtnetworks.tinc') and user.has_module_perms('tinc'):
             self.children.append(items.MenuItem('Tinc', reverse('admin:app_list', args=['tinc']),
                 children=[
                     items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
@@ -48,7 +50,10 @@ class CustomMenu(Menu):
                     items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
                 ]))
         
-        administration_models = ('users.*', 'djcelery.*')
+        administration_models = ()
+        
+        if is_installed('djcelery'):
+            administration_models += ('djcelery.*',)
         
         if is_installed('issues'):
             administration_models += ('issues.*',)
@@ -57,14 +62,21 @@ class CustomMenu(Menu):
             administration_models += ('firmware.*',)
         
         admin_item = items.AppList('Administration', models=administration_models)
-
-        if is_installed('registration'):
-            menu_items=[items.MenuItem('User registration', reverse('admin:registration_registrationprofile_changelist'))]
-            if  is_installed('groupregistration'):
-                menu_items+=[items.MenuItem('Group registration', reverse('admin:groupregistration_groupregistration_changelist')),]
-
-            admin_item.children.append(items.MenuItem('Registration', children=menu_items))
-
+        
+        # Users menu item
+        user_items = [ items.MenuItem('User', reverse('admin:users_user_changelist')),
+                       items.MenuItem('Group', reverse('admin:users_user_changelist'))]
+        
+        if is_installed('registration') and user.has_module_perms('registration'):
+            user_items.append(items.MenuItem('User Registration',
+                              reverse('admin:registration_registrationprofile_changelist')))
+        
+        if is_installed('groupregistration') and user.has_module_perms('groupregistration'):
+            user_items.append(items.MenuItem('Group registration',
+                              reverse('admin:groupregistration_groupregistration_changelist')))
+        
+        admin_item.children.append(items.MenuItem('Users', children=user_items))
+        
         self.children.append(admin_item)
         
         self.children += [

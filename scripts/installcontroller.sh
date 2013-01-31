@@ -526,7 +526,7 @@ print_help () {
     cat <<- EOF 
 		
 		${bold}NAME${normal}
-		    server_deployment.sh - Confine server installation script
+		    installcontroller.sh - Confine server installation script
 		    
 		${bold}SYNOPSIS${normal}
 		    required parameters: -t TYPE ( -d DIRECTORY | -i IMAGE )
@@ -592,9 +592,9 @@ print_help () {
 		            management network prefix
 		    
 		${bold}EXAMPLES${normal}
-		    server_deployment.sh --type bootable --image /tmp/server.img --suite squeeze
+		    installcontroller.sh --type bootable --image /tmp/server.img --suite squeeze
 		    
-		    server_deployment.sh --type local -u confine -p 2hd4nd
+		    installcontroller.sh --type local -u confine -p 2hd4nd
 		    
 		${bold}TODO${normal}
 		    #TODO: offer script to raise chroot when chroot deployment type is chosen 

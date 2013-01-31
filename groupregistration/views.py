@@ -7,7 +7,7 @@ Views which allow users to create and activate accounts.
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 
-from registration2.backends import get_backend
+from groupregistration.backends import get_backend
 
 # TODO extend from registration.views import register
 #       for avoid an authenticated user sign in again

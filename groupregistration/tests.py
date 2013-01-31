@@ -2,7 +2,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from registration2.models import GroupRegistration
+from groupregistration.models import GroupRegistration
 from users.models import Group, User
 
 
@@ -157,7 +157,7 @@ class AdminViewsTestCase(TestCase):
 
     def test_admin_list(self):
         """ List the group registration """
-        url = reverse('admin:registration2_groupregistration_changelist')
+        url = reverse('admin:groupregistration_groupregistration_changelist')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
 
@@ -169,10 +169,10 @@ class AdminViewsTestCase(TestCase):
     def test_admin_approve(self):
         """ Approve a group registration """
         gr = GroupRegistration.objects.get(pk=1)
-        url = reverse('admin:registration2_groupregistration_approve', args=[gr.id])
+        url = reverse('admin:groupregistration_groupregistration_approve', args=[gr.id])
         resp = self.client.get(url)
 
-        url_changelist = test_reverse('admin:registration2_groupregistration_changelist')
+        url_changelist = test_reverse('admin:groupregistration_groupregistration_changelist')
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_changelist)
 
@@ -187,10 +187,10 @@ class AdminViewsTestCase(TestCase):
         uid = gr.user.id
         gid = gr.group.id
 
-        url = reverse('admin:registration2_groupregistration_reject', args=[gr.id])
+        url = reverse('admin:groupregistration_groupregistration_reject', args=[gr.id])
         resp = self.client.get(url)
 
-        url_changelist = test_reverse('admin:registration2_groupregistration_changelist')
+        url_changelist = test_reverse('admin:groupregistration_groupregistration_changelist')
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_changelist)
 
@@ -205,7 +205,7 @@ class AdminViewsTestCase(TestCase):
     def ztest_admin_not_exist(self):
         """ Access to a not existent object """
         # TODO BUG: when an object does not exists --> 404!!
-        url = reverse('admin:registration2_groupregistration_approve', args=[10])
+        url = reverse('admin:groupregistration_groupregistration_approve', args=[10])
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 

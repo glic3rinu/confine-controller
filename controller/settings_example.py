@@ -161,7 +161,7 @@ INSTALLED_APPS = (
 #    'sfa',
     'communitynetworks',
     'firmware',
-    'registration2',
+    'groupregistration',
     
     # Third party apps that should load last
     'rest_framework',
@@ -233,7 +233,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
-            'registration2.models.GroupRegistration',
+            'groupregistration.models.GroupRegistration',
         ),
         'collapsible': True,
     }),
@@ -262,7 +262,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'issues/ticket': "Ticket_star.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
-    'registration2/groupregistration': "registration.png",
+    'groupregistration/groupregistration': "registration.png",
 }
 
 

@@ -58,12 +58,12 @@ class CustomMenu(Menu):
         
         admin_item = items.AppList('Administration', models=administration_models)
 
-        if is_installed('registration') and is_installed('registration2'):
-            admin_item.children.append(items.MenuItem('Registration', 
-                children=[
-                    items.MenuItem('User registration', reverse('admin:registration_registrationprofile_changelist')),
-                    items.MenuItem('Group registration', reverse('admin:registration2_groupregistration_changelist')),
-                ]))
+        if is_installed('registration'):
+            menu_items=[items.MenuItem('User registration', reverse('admin:registration_registrationprofile_changelist'))]
+            if  is_installed('groupregistration'):
+                menu_items+=[items.MenuItem('Group registration', reverse('admin:groupregistration_groupregistration_changelist')),]
+
+            admin_item.children.append(items.MenuItem('Registration', children=menu_items))
 
         self.children.append(admin_item)
         

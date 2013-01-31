@@ -1,9 +1,9 @@
-from common.admin import admin_link, ChangeViewActionsModelAdmin
+from common.admin import ChangeViewActionsModelAdmin
 
 from django.contrib import admin
 
-from registration2.actions import approve_group, reject_group
-from registration2.models import GroupRegistration
+from groupregistration.actions import approve_group, reject_group
+from groupregistration.models import GroupRegistration
 
 def group_info(obj):
     return ''.join([
@@ -28,7 +28,6 @@ class GroupRegistrationAdmin(ChangeViewActionsModelAdmin):
     change_view_actions = [('approve', approve_group, '', ''),
                            ('reject', reject_group, '', '')]
 
-    #list_display = ('date', admin_link('group'), admin_link('user'))
     list_display = (group_info, user_info)
     readonly_fields = ('group', 'user', 'date')
 

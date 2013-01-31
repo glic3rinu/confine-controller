@@ -16,5 +16,5 @@ urlpatterns = patterns('',
     url(r'^api-token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^api/', include(api.urls)),
     url(r'^accounts/', include('registration.backends.default.urls')),
-    url(r'^accounts/', include('registration2.backends.default.urls')),
+    url(r'^accounts/', include('groupregistration.backends.default.urls')),
 )

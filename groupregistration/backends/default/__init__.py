@@ -6,8 +6,8 @@ from django.contrib.sites.models import Site
 from registration.backends.default import DefaultBackend
 from registration.forms import RegistrationFormUniqueEmail
 
-from registration2.forms import GroupRegistrationForm
-from registration2.models import GroupRegistration
+from groupregistration.forms import GroupRegistrationForm
+from groupregistration.models import GroupRegistration
 
 try:
     from django.contrib.auth import get_user_model

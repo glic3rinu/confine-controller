@@ -71,7 +71,7 @@
 },
 {
     "pk": 1, 
-    "model": "registration2.groupregistration", 
+    "model": "groupregistration.groupregistration",
     "fields": {
         "date": "2013-01-30T12:17:46.955Z", 
         "group": 1, 
@@ -80,7 +80,7 @@
 },
 {
     "pk": 2, 
-    "model": "registration2.groupregistration", 
+    "model": "groupregistration.groupregistration",
     "fields": {
         "date": "2013-01-30T12:19:24.355Z", 
         "group": 2, 

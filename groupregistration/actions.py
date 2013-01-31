@@ -10,7 +10,7 @@ def approve_group(modeladmin, request, queryset):
         rows_updated+=1
         
     messages.info(request, "%s group(s) has been approved" % rows_updated)
-    return redirect('admin:registration2_groupregistration_changelist')
+    return redirect('admin:groupregistration_groupregistration_changelist')
 approve_group.short_description = "Approve selected groups"
 
 @transaction.commit_on_success
@@ -22,6 +22,6 @@ def reject_group(modeladmin, request, queryset):
 
     queryset.delete()
     messages.info(request, "%s group(s) has been rejected" % rows_updated)
-    return redirect('admin:registration2_groupregistration_changelist')
+    return redirect('admin:groupregistration_groupregistration_changelist')
 reject_group.short_description = "Reject selected groups"
 

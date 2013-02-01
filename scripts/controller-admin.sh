@@ -50,10 +50,10 @@ function print_help () {
 		    ${bold}update_tincd${normal}
 		        Updates your tincd instance according to information stored on the database
 		    
-		    ${bold}full_install${normal}
+		    ${bold}deploy${normal}
 		        Performs a full install of the controller server.
 		        It supports local, container, bootable and chroot deployment types
-		        run ${bold}controller-admin.sh help full_install${normal} for more details.
+		        run ${bold}controller-admin.sh help deploy${normal} for more details.
 		    
 		    ${bold}help${normal}
 		        Displays this help text or related help page as argument
@@ -642,7 +642,7 @@ install_kernel_and_grub() {
 export -f install_kernel_and_grub
 
 
-full_install_common () {
+deploy_common () {
     check_root
     
     local PROJECT_NAME=$1
@@ -662,10 +662,10 @@ full_install_common () {
     run update_secrete_key
     run setup_firmware
 }
-export -f full_install_common
+export -f deploy_common
 
 
-full_install_running_services () {
+deploy_running_services () {
     check_root
     
     local DIR=$(eval echo $1)
@@ -690,10 +690,10 @@ full_install_running_services () {
                  update_tincd()\" | $DIR/manage.py shell"
     controller-admin.sh restart_services
 }
-export -f full_install_running_services
+export -f deploy_running_services
 
 
-function full_install_postponed () {
+function deploy_postponed () {
     # USAGE: echo_portal_configuration_steps dir user db_name db_user db_password
     
     # Some configuration commands should run when the database is online, 
@@ -717,7 +717,7 @@ function full_install_postponed () {
 		# Description:       Creates and fills database on first boot
 		### END INIT INFO
 		
-		controller-admin.sh full_install_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD"
+		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD"
 		insserv -r /etc/init.d/setup_portal_db
 		rm -f \$0
 		EOF
@@ -725,7 +725,7 @@ function full_install_postponed () {
     chmod a+x /etc/init.d/setup_portal_db
     insserv /etc/init.d/setup_portal_db
 }
-export -f full_install_postponed
+export -f deploy_postponed
 
 
 echo_generate_ssh_keys () {
@@ -777,11 +777,11 @@ generate_ssh_keys_postponed () {
 export -f generate_ssh_keys_postponed
 
 
-print_full_install_help () {
+print_deploy_help () {
     cat <<- EOF 
 		
 		${bold}NAME${normal}
-		    ${bold}controller-admin.sh full_install${normal} - Confine server deployment subsystem
+		    ${bold}controller-admin.sh deploy${normal} - Confine server deployment subsystem
 		    
 		${bold}SYNOPSIS${normal}
 		    ${bold}required parameters: -t TYPE ( -d DIRECTORY | -i IMAGE )${normal}
@@ -856,16 +856,16 @@ print_full_install_help () {
 		            management network prefix
 		    
 		${bold}EXAMPLES${normal}
-		    controller-admin.sh full_install --type bootable --image /tmp/server.img --suite squeeze
+		    controller-admin.sh deploy --type bootable --image /tmp/server.img --suite squeeze
 		    
-		    controller-admin.sh full_install --type local -u confine -p 2hd4nd
+		    controller-admin.sh deploy --type local -u confine -p 2hd4nd
 		    
 		EOF
 }
-export -f print_full_install_help
+export -f print_deploy_help
 
 
-function full_install () {
+function deploy () {
     opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N:k:j:t:m:l: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path:,keyboard_layout:,project_name:,tinc_port:,mgmt_prefix:,skeletone: -- "$@") || exit 1
     set -- $opts
 
@@ -913,7 +913,7 @@ function full_install () {
             -l|--skeletone) SKELETONE="${2:1:${#2}-2}"; shift ;;
             -t|--tinc_port) TINC_PORT="${2:1:${#2}-2}"; shift ;;
             -m|--mgmt_prefix) MGMT_PREFIX="${2:1:${#2}-2}"; shift ;;
-            -h|--help) print_full_install_help; exit 0 ;;
+            -h|--help) print_deploy_help; exit 0 ;;
             (--) shift; break;;
             (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
             (*) break;;
@@ -978,10 +978,10 @@ function full_install () {
             echo -e "#!/bin/sh\nexit 101\n" > $DIRECTORY/usr/sbin/policy-rc.d
             chmod 755 $DIRECTORY/usr/sbin/policy-rc.d
         fi
-        chroot $DIRECTORY /bin/bash -c "full_install_common $PROJECT_NAME $SKELETONE $USER $PASSWORD"
+        chroot $DIRECTORY /bin/bash -c "deploy_common $PROJECT_NAME $SKELETONE $USER $PASSWORD"
         rm -fr $DIRECTORY/usr/sbin/policy-rc.d
         
-        chroot $DIRECTORY /bin/bash -c "full_install_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
+        chroot $DIRECTORY /bin/bash -c "deploy_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
         chroot $DIRECTORY /bin/bash -c "generate_ssh_keys_postponed $USER"
         
         # Clean up
@@ -992,13 +992,13 @@ function full_install () {
         $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
     else
         # local installation
-        run full_install_common "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
-        run full_install_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD"
+        run deploy_common "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
+        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD"
     fi
     
     echo -e "\n ... seems that everything went better than expected :)"
 }
-export -f full_install
+export -f deploy
 
 
 [ $# -lt 1 ] && print_help

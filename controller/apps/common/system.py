@@ -39,7 +39,7 @@ def run(command, display=True, err_codes=[0]):
     if p.returncode not in err_codes:
         out.failed = True
         msg = "run() encountered an error (return code %s) while executing '%s'" % (p.returncode, command)
-        raise CommandError(msg + out + err)
+        print "\033[1;31mCommandError: %s %s\033[m" % (msg, err)
     out.succeeded = not out.failed
     if display:
         print out

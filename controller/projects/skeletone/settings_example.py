@@ -3,7 +3,8 @@
 import os, sys
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 SITE_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, '..'))
-sys.path.insert(0, os.path.join(SITE_ROOT, 'apps'))
+CONTROLLER_ROOT = os.path.dirname(os.path.realpath(controller.__file__))
+sys.path.insert(0, os.path.join(CONTROLLER_ROOT, 'apps'))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

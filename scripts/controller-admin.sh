@@ -183,7 +183,7 @@ function clone () {
     run django-admin.py startproject $PROJECT_NAME
     run cp -r "${CONTROLLER_PATH}/projects/skeletone/*" $PROJECT_NAME/$PROJECT_NAME
     [ $SKELETONE ] && run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
-    run sed "s/skeletone/$PROJECT_NAME/g" $PROJECT_NAME/$PROJECT_NAME/settings_example.py
+    run sed -i "s/skeletone/$PROJECT_NAME/g" $PROJECT_NAME/$PROJECT_NAME/settings_example.py
 }
 export -f clone
 

@@ -1,4 +1,5 @@
-from controller.settings_example import *
+from __future__ import absolute_import
+from .settings_example import *
 
 
 TINC_MGMT_IPV6_PREFIX = "fdf5:5351:1dfd::/48"

@@ -157,8 +157,8 @@ print_clone_help () {
 
 
 function clone () {
-    local SKELETONE="confine"
-    local PROJECT_NAME="$1"; shift
+    local SKELETONE=""
+    local PROJECT_NAME="$2"; shift
     
     opts=$(getopt -o s:h -l skeletone:,help -- "$@") || exit 1
     set -- $opts
@@ -181,7 +181,8 @@ function clone () {
     
     CONTROLLER_PATH=$(get_controller_dir)
     run django-admin.py startproject $PROJECT_NAME
-    run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
+    run cp -r "${CONTROLLER_PATH}/projects/skeletone/*" $PROJECT_NAME/$PROJECT_NAME
+    [ $SKELETONE ] && run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
 }
 export -f clone
 

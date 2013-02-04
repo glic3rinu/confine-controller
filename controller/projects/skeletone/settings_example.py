@@ -1,6 +1,6 @@
 # Django settings for controller project.
 
-import os, sys
+import os, sys, controller
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 SITE_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, '..'))
 CONTROLLER_ROOT = os.path.dirname(os.path.realpath(controller.__file__))

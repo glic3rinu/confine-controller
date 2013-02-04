@@ -188,6 +188,7 @@ function clone () {
     run mkdir -p $PROJECT_NAME/media/templates
     run mkdir -p $PROJECT_NAME/private/exp_data
     run mkdir -p $PROJECT_NAME/private/firmwares
+    run cp -r ${CONTROLLER_PATH}/static $PROJECT_NAME
 }
 export -f clone
 

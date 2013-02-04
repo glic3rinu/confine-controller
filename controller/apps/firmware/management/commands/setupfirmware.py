@@ -2,7 +2,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
-from common.system import run, check_root
+from common.system import run, check_root, get_default_celeryd_username
 
 
 class Command(BaseCommand):
@@ -19,7 +19,6 @@ class Command(BaseCommand):
     
     option_list = BaseCommand.option_list
     help = 'Prepare the system for generating firmware in userspace.'
-    
     
     @check_root
     def handle(self, *args, **options):

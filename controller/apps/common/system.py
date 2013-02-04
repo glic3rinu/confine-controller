@@ -1,4 +1,4 @@
-import subprocess, getpass
+import subprocess, getpass, re
 
 from django.core.management.base import CommandError
 

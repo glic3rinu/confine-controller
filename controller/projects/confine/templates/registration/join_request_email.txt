@@ -1,0 +1,9 @@
+Hi:
+
+You receive this mail cause your are the administrator of the group
+{{ group.name }} and someone has requested to join your group.
+
+Please, check this request and approve or refuse it visiting the section groups
+at manager page: http://{{ site }}/admin/users/group/{{ group.id }}.
+
+Thank you!

@@ -1,0 +1,13 @@
+django==1.5
+kombu==2.4.7
+django-celery-email
+django-fluent-dashboard
+south
+django-private-files
+IPy
+django-singletons
+django-extensions
+django_transaction_signals
+django-celery
+markdown
+-e git+https://github.com/alex/django-filter.git#egg=django-filter

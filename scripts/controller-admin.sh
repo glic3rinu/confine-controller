@@ -187,6 +187,7 @@ function clone () {
     run mkdir -p $PROJECT_NAME/media/firmwares
     run mkdir -p $PROJECT_NAME/media/templates
     run mkdir -p $PROJECT_NAME/private/exp_data
+    run mkdir -p $PROJECT_NAME/private/firmwares
 }
 export -f clone
 

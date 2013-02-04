@@ -184,6 +184,9 @@ function clone () {
     run cp -r "${CONTROLLER_PATH}/projects/skeletone/*" $PROJECT_NAME/$PROJECT_NAME
     [ $SKELETONE ] && run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
     run sed -i "s/skeletone/$PROJECT_NAME/g" $PROJECT_NAME/$PROJECT_NAME/settings_example.py
+    run mkdir -p $PROJECT_NAME/media/firmwares
+    run mkdir -p $PROJECT_NAME/media/templates
+    run mkdir -p $PROJECT_NAME/private/exp_data
 }
 export -f clone
 

@@ -1,5 +1,6 @@
 from optparse import make_option
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from common.system import run, check_root
@@ -44,9 +45,9 @@ class Command(BaseCommand):
             '# Name of the celery config module.\n'
             'CELERY_CONFIG_MODULE="celeryconfig"\n'
             '\n'
-            '# %n will be replaced with the nodename.\n'
-            'CELERYD_LOG_FILE="/var/log/celery/\%n.log"\n'
-            'CELERYD_PID_FILE="/var/run/celery/\%n.pid"\n'
+            '# %%n will be replaced with the nodename.\n'
+            'CELERYD_LOG_FILE="/var/log/celery/%%n.log"\n'
+            'CELERYD_PID_FILE="/var/run/celery/%%n.pid"\n'
             '\n'
             '# Workers should run as an unprivileged user.\n'
             'CELERYD_USER="%(username)s"\n'
@@ -67,7 +68,7 @@ class Command(BaseCommand):
             '# Persistent revokes\n'
             'CELERYD_STATE_DB="$CELERYD_CHDIR/persistent_revokes"\n' % context)
         
-        run('echo "%s" > etc/default/celeryd' % celery_config)
+        run("echo '%s' > /etc/default/celeryd" % celery_config)
         run('chmod +x /etc/init.d/celeryd')
         run('update-rc.d celeryd defaults')
         run('wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam" '

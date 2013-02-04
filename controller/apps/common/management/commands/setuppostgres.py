@@ -1,3 +1,4 @@
+import os
 from optparse import make_option
 
 from django.conf import settings
@@ -39,8 +40,8 @@ class Command(BaseCommand):
             'db_host': options.get('db_host'),
             'db_port': options.get('db_port')}
         
-        run("""su postgres -c "psql -c \"CREATE USER %(db_user)s PASSWORD '%(db_password)';\"""" % context
-        run("""su postgres -c "psql -c \"CREATE DATABASE %(db_name)s OWNER %(db_user)s;\"""" % context
+        run("""su postgres -c "psql -c \\"CREATE USER %(db_user)s PASSWORD '%(db_password)s';\\"" """ % context, err_codes=[0,1])
+        run("""su postgres -c "psql -c \\"CREATE DATABASE %(db_name)s OWNER %(db_user)s;\\"" """ % context, err_codes=[0,1])
         
         context.update({'settings': os.path.join(settings.PROJECT_ROOT, 'settings.py')})
         
@@ -64,5 +65,5 @@ class Command(BaseCommand):
                 "        'PORT': '%(db_port)s',\n"
                 "    }\n"
                 "}\n" % context)
-            
-            run('echo "db_config" >> %(settings)s' % context))
+            context.update({'db_config': db_config})
+            run('echo "%(db_config)s" >> %(settings)s' % context)

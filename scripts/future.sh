@@ -49,13 +49,13 @@ confine-controller
     su confine
     # FOR PRODUCTION
         sudo pip install confine-controller
-        controller-admin.sh clone communitylab [ ~confine/controller ] [ --skeletone ]
     # FOR DEVELOPMENT
         git clone gitosis@git.confine-project.eu:confine/controller.git ~confine/confine-controller
         cd ~confine/confine-controller
-        sudo echo ~confine/confine-controller/controller > /usr/local/lib/python2.6/dist-packages/controller.pth
+        sudo echo ~confine/confine-controller/ > /usr/local/lib/python2.6/dist-packages/controller.pth
         sudo ln -s ~confine/confine-controller/bin/controller-admin.sh /usr/bin/
     # Minimal instance setup
+    controller-admin.sh clone communitylab [ ~confine/controller ] [ --skeletone ]
     sudo controller-admin.sh install_requirements --minimal
     sudo python manage.py setuppostgres [ --user ] [ --password ] [ --name ] [ --noinput ]
     python manage.py syncdb

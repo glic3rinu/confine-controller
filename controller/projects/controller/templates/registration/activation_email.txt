@@ -1,6 +1,0 @@
-Hi, welcome to {{ site }}:
-
-Please, enable your account at: {{ site }}/accounts/activate/{{ activation_key }}
-
-Thank you!
-

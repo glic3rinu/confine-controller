@@ -157,14 +157,15 @@ print_clone_help () {
 
 
 function clone () {
-    # Default values
-    [ $# -lt 1 ] && { echo -e "Err. project name is missing\n"; exit 1; }
-    [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
-
-    local PROJECT_NAME="$1"
     local SKELETONE="confine"
     
     opts=$(getopt -o s:h -l skeletone:,help -- "$@") || exit 1
+    set -- $opts
+    minimal=false
+    
+    local PROJECT_NAME="$1"; shift
+    local PATH="$2"; shift
+    
     set -- $opts
     while [ $# -gt 0 ]; do
         case $1 in
@@ -178,6 +179,7 @@ function clone () {
     done
     unset OPTIND
     unset opt
+    [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
     
     CONTROLLER_PATH=$(get_controller_dir)
     run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}" .

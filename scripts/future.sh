@@ -51,19 +51,18 @@ confine-controller
         sudo pip install confine-controller
     # FOR DEVELOPMENT
         git clone gitosis@git.confine-project.eu:confine/controller.git ~confine/confine-controller
-        cd ~confine/confine-controller
         sudo echo ~confine/confine-controller/ > /usr/local/lib/python2.6/dist-packages/controller.pth
         sudo ln -s ~confine/confine-controller/scripts/controller-admin.sh /usr/local/bin/
     # Minimal instance setup
-    cd ~confine
     sudo controller-admin.sh install_requirements --minimal
+    cd ~confine
     controller-admin.sh clone communitylab [ ~confine/controller ] [ --skeletone ]
     sudo python manage.py setuppostgres [ --user ] [ --password ] [ --name ] [ --noinput ]
     python manage.py syncdb
     python manage.py migrate
     python manage.py createsuperuser
     # Fully featured setup (Optional and not needed for devel)
-    sudo controller-admin.sh infstall_requirements
+    sudo controller-admin.sh install_requirements
     sudo python manage.py setupapache
     python manage.py collectstatic
     sudo python manage.py setupceleryd

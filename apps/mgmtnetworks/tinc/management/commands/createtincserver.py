@@ -1,26 +1,12 @@
 import getpass, pwd, re, os
 from optparse import make_option
-from subprocess import Popen, PIPE
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from common.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
-
-
-def get_default_celeryd_username():
-    """ Introspect celeryd defaults file in order to get default celeryd username """
-    user = None
-    try:
-        celeryd_defaults = open('/etc/default/celeryd')
-    except IOError:
-        pass
-    else:
-        for line in celeryd_defaults.readlines():
-            if 'CELERYD_USER=' in line:
-                user = re.findall('"([^"]*)"', line)[0]
-    return user
 
 
 class Command(BaseCommand):
@@ -50,12 +36,10 @@ class Command(BaseCommand):
     help = 'Creates the tincd config files and Server.tinc object'
     
     @transaction.commit_on_success
+    @check_root
     def handle(self, *args, **options):
         from mgmtnetworks.tinc.models import TincServer
         from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX
-        
-        if getpass.getuser() != 'root':
-            raise CommandError('Sorry, create_tinc_server must be executed as a superuser (root)')
         
         interactive = options.get('interactive')
         if not interactive:
@@ -94,11 +78,7 @@ class Command(BaseCommand):
         if not protect:
             FILE_PATH = os.path.dirname(os.path.realpath(__file__))
             SCRIPT_PATH = os.path.join(FILE_PATH, '../../scripts/create_server.sh')
-            cmd = "%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0])
-            cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-            (stdout, stderr) = cmd.communicate()
-            if cmd.returncode > 0:
-                raise self.CreateTincdError(stderr)
+            run("%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0]))
             
             # Get created pubkey
             pubkey = ''
@@ -136,15 +116,9 @@ class Command(BaseCommand):
         if not protect:
             tinc_server.pubkey = pubkey
             tinc_server.save()
-        cmd = """chown %(user)s /etc/tinc/%(net)s/hosts;
+        run("""chown %(user)s /etc/tinc/%(net)s/hosts;
                  chmod +x /etc/tinc/%(net)s/tinc-up;
                  chmod +x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
-                                                             'user': username}
-        cmd = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        if cmd.returncode > 0:
-            raise self.CreateTincdError(stderr)
+                                                             'user': username})
         self.stdout.write('Tincd server successfully created and configured.')
         self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')
-    
-    class CreateTincdError(Exception): pass

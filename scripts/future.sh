@@ -1,3 +1,8 @@
+Devel
+Testing
+Production
+
+
 confine-controller
     controller
         apps
@@ -88,7 +93,7 @@ confine-controller
 2. Remove all the code base
 3. Install your choice (production or development)
 4. Copy your settings.py file into PROJECT_DIR/localsettings.py
-5. Remove the line "from .settings_example import *" 
+5. Remove the line "from .settings_example import *"  ??? maybe not
 6. GOTO Update steps
 
 

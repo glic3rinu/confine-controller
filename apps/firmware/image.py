@@ -68,8 +68,10 @@ class Image(object):
     
     def clean(self):
         """ remove temporary files """
-        try: self.umount()
-        except: pass
+        try:
+            self.umount()
+        except:
+            pass
         shutil.rmtree(self.tmp)
     
     def move(self, dst):
@@ -130,8 +132,10 @@ class Image(object):
         returncode = cmd.returncode
         if returncode > 0:
             error_msg = ""
-            try: error_msg += "%s --  " % mount_errors[returncode]
-            except KeyError: pass
+            try:
+                error_msg += "%s --  " % mount_errors[returncode]
+            except KeyError:
+                pass
             error_msg += stderr
             raise self.BuildError(error_msg)
     

@@ -68,7 +68,7 @@ get_controller_dir () {
         echo -e "\nErr. Controller not installed.\n" >&2
         exit 1
     fi
-    PATH=$(echo "import controller; print controller.__path__[0]" | python)
+    PATH=$(echo "import controller, os; print os.path.dirname(os.path.realpath(controller.__file__))" | python)
     echo $PATH
 }
 export -f get_controller_dir

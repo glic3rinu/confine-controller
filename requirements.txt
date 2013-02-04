@@ -1,4 +1,4 @@
-django==1.5
+#django==1.5
 kombu==2.4.7
 django-celery-email
 django-fluent-dashboard

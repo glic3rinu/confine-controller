@@ -164,7 +164,6 @@ function clone () {
     minimal=false
     
     local PROJECT_NAME="$1"; shift
-    local PATH="$2"; shift
     
     set -- $opts
     while [ $# -gt 0 ]; do
@@ -182,7 +181,8 @@ function clone () {
     [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
     
     CONTROLLER_PATH=$(get_controller_dir)
-    run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}" .
+    run django-admin.py startproject $PROJECT_NAME
+    run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
 }
 export -f clone
 

@@ -1,8 +1,9 @@
 # Django settings for controller project.
 
-import os
+import os, sys
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 SITE_ROOT = os.path.join(PROJECT_ROOT, '..')
+sys.path.insert(0, os.path.join(SITE_ROOT, 'apps'))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

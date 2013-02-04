@@ -348,8 +348,9 @@ function setup_apache2 () {
     
     local DIR=$(pwd)
     local USER=$(ls -dl|awk {'print $3'})
+# TODO: local PROJECT_NAME
     
-    cat <<- EOF >> /etc/apache2/httpd.conf
+    cat <<- EOF > /etc/apache2/sites-available/$PROJECT_NAME.conf
 		WSGIScriptAlias / $DIR/controller/wsgi.py
 		WSGIPythonPath $DIR
 		<Directory $DIR/controller/>
@@ -362,6 +363,7 @@ function setup_apache2 () {
 		Alias /static/ $DIR/static/
 		EOF
     
+    a2ensite $PROJECT_NAME
     # Give upload file permissions to apache
     adduser www-data $USER
     run chmod g+w $DIR/media/firmwares

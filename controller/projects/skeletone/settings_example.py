@@ -18,7 +18,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'controller',      # Or path to database file if using sqlite3.
+        'NAME': 'skeletone',      # Or path to database file if using sqlite3.
         'USER': 'confine',         # Not used with sqlite3.
         'PASSWORD': 'confine',     # Not used with sqlite3.
         'HOST': 'localhost',       # Set to empty string for localhost. Not used with sqlite3.
@@ -114,10 +114,10 @@ TEMPLATE_CONTEXT_PROCESSORS =(
     "django.core.context_processors.request",
 )
 
-ROOT_URLCONF = 'controller.urls'
+ROOT_URLCONF = 'skeletone.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'controller.wsgi.application'
+WSGI_APPLICATION = 'skeletone.wsgi.application'
 
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, 'templates'),
@@ -210,7 +210,7 @@ LOGGING = {
 
 
 # Admin Tools
-ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
+ADMIN_TOOLS_MENU = 'skeletone.menu.CustomMenu'
 
 # Fluent dashboard
 ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
@@ -303,7 +303,7 @@ REST_FRAMEWORK = {
 
 
 # common.api
-CUSTOM_API_ROOT = 'controller.api.Base'
+CUSTOM_API_ROOT = 'skeletone.api.Base'
 
 
 # Email config

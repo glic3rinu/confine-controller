@@ -54,9 +54,9 @@ confine-controller
         git clone gitosis@git.confine-project.eu:confine/controller.git ~confine/confine-controller
         cd ~confine/confine-controller
         sudo echo ~confine/confine-controller/controller > /usr/local/lib/python2.6/dist-packages/controller.pth
-        sudo ln -s ~confine/bin/contine-controller.sh /usr/bin/
+        sudo ln -s ~confine/confine-controller/bin/controller-admin.sh /usr/bin/
     # Minimal instance setup
-    sudo controller-admin.sh infstall_requirements --minimal
+    sudo controller-admin.sh install_requirements --minimal
     sudo python manage.py setuppostgres [ --user ] [ --password ] [ --name ] [ --noinput ]
     python manage.py syncdb
     python manage.py migrate

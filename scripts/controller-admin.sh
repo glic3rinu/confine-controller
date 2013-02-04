@@ -114,7 +114,7 @@ function install_requirements () {
     
     MINIMAL_APT = "python-pip python-m2crypto python-psycopg2"
     EXTENDED_APT = "libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2
-                screen openssh-server tinc"
+                    screen openssh-server tinc"
     
     run apt-get update
     run apt-get install -y "$MINIMAL_APT"
@@ -125,8 +125,8 @@ function install_requirements () {
         sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
         sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
         run update-rc.d rabbitmq-server defaults
-    
-    run pip install -r "${CONTROLLER_PATH}/requirements.txt"
+    fi
+    run pip install -r "${CONTROLLER_PATH}/conf/requirements.txt"
 }
 export -f install_requirements
 

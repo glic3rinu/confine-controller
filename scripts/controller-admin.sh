@@ -110,11 +110,11 @@ function install_requirements () {
     unset opt
     
     check_root
-    CONTROLLER_PATH=$(get_controller_path)
+    CONTROLLER_PATH=$(get_controller_dir)
     
-    MINIMAL_APT = "python-pip python-m2crypto python-psycopg2"
-    EXTENDED_APT = "libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2
-                    screen openssh-server tinc"
+    MINIMAL_APT="python-pip python-m2crypto python-psycopg2"
+    EXTENDED_APT="libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2
+                  screen openssh-server tinc"
     
     run apt-get update
     run apt-get install -y "$MINIMAL_APT"

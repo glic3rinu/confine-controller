@@ -158,12 +158,11 @@ print_clone_help () {
 
 function clone () {
     local SKELETONE="confine"
+    local PROJECT_NAME="$1"; shift
     
     opts=$(getopt -o s:h -l skeletone:,help -- "$@") || exit 1
     set -- $opts
     minimal=false
-    
-    local PROJECT_NAME="$1"; shift
     
     set -- $opts
     while [ $# -gt 0 ]; do

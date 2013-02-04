@@ -11,19 +11,18 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         username = run("ls -dl|awk {'print $3'}")
         project_name = settings.PROJECT_ROOT.split('/')[-1]
-        apache_conf = ("WSGIScriptAlias / %(project_root)/wsgi.py\n"
-                       "WSGIPythonPath %(site_root)s\n"
-                       "<Directory %(project_root)>\n"
+        apache_conf = ("WSGIScriptAlias / %(project_root)s/wsgi.py\n"
+                       "WSGIPythonPath %(site_root)s\n\n"
+                       "<Directory %(project_root)s>\n"
                        "    <Files wsgi.py>\n"
                        "        Order deny,allow\n"
                        "        Allow from all\n"
                        "    </Files>\n"
-                       "</Directory>\n"
+                       "</Directory>\n\n"
                        "Alias /media/ %(site_root)s/media/\n"
                        "Alias /static/ %(site_root)s/static/\n" % {'project_root': settings.PROJECT_ROOT,
                                                                    'site_root': settings.SITE_ROOT})
-        
-        run('echo %s > /etc/apache2/sites-available/%s.conf' % (apache_conf, project_name))
+        run("echo '%s' > /etc/apache2/sites-available/%s.conf" % (apache_conf, project_name))
         run('a2ensite %s' % project_name)
         # Give upload file permissions to apache
         run('adduser www-data %s' % username)

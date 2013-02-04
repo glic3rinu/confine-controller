@@ -20,8 +20,10 @@ class _AttributeString(str):
         return str(self)
 
 
-def run(command, display=True):
+def run(command, display=True, err_codes=[0]):
     """ Subprocess wrapper for running commands """
+    if display:
+        print "\033[1m $ %s\033[0m" % command
     out_stream = subprocess.PIPE
     err_stream = subprocess.PIPE
     
@@ -34,10 +36,10 @@ def run(command, display=True):
     out.failed = False
     out.return_code = p.returncode
     out.stderr = err
-    if p.returncode != 0:
+    if p.returncode not in err_codes:
         out.failed = True
         msg = "run() encountered an error (return code %s) while executing '%s'" % (p.returncode, command)
-        error(message=msg, stdout=out, stderr=err)
+        raise CommandError(msg + out + err)
     out.succeeded = not out.failed
     if display:
         print out

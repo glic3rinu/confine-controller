@@ -56,13 +56,13 @@ confine-controller
         sudo echo ~confine/confine-controller/controller > /usr/local/lib/python2.6/dist-packages/controller.pth
         sudo ln -s ~confine/bin/contine-controller.sh /usr/bin/
     # Minimal instance setup
-    sudo python manage.py installrequirements [ --minimal ]
+    sudo controller-admin.sh infstall_requirements --minimal
     sudo python manage.py setuppostgres [ --user ] [ --password ] [ --name ] [ --noinput ]
     python manage.py syncdb
     python manage.py migrate
     python manage.py createsuperuser
     # Fully featured setup (Optional and not needed for devel)
-    sudo python manage.py installrequirements [ --all ]
+    sudo controller-admin.sh infstall_requirements
     sudo python manage.py setupapache
     python manage.py collectstatic
     sudo python manage.py setupceleryd
@@ -80,7 +80,7 @@ confine-controller
 
 # UPDATE STEPS
 1. Satisfy your level of requirements
-    sudo python manage.py installrequirements [ --all | --minimal ]
+    sudo controller-admin.sh infstall_requirements [ --minimal ]
 2. Update database
     python manage.py syncdb
     python manage.py migrate

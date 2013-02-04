@@ -2,7 +2,7 @@
 
 import os, sys
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-SITE_ROOT = os.path.join(PROJECT_ROOT, '..')
+SITE_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, '..'))
 sys.path.insert(0, os.path.join(SITE_ROOT, 'apps'))
 
 DEBUG = True

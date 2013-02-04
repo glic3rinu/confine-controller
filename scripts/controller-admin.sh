@@ -29,27 +29,6 @@ function print_help () {
 		    ${bold}clone${normal}
 		        Creates a new Confine-Controller instance
 		    
-		    ${bold}setup_celeryd${normal}
-		        Configures Celeryd to run with your controller instance
-		    
-		    ${bold}setup_postgres${normal}
-		        PostgresSQL administration script
-		    
-		    ${bold}setup_apache2${normal}
-		        Configures Apache2 to run with your controller instance
-		    
-		    ${bold}update_secrete_key${normal}
-		        Update your instance secrete key
-		    
-		    ${bold}setup_firmware${normal}
-		        Prepare your system for generating firmware in userspace
-		    
-		    ${bold}restart_services${normal}
-		        Restars all related services, usefull for reload configuration and files
-		    
-		    ${bold}update_tincd${normal}
-		        Updates your tincd instance according to information stored on the database
-		    
 		    ${bold}deploy${normal}
 		        Performs a full install of the controller server.
 		        It supports local, container, bootable and chroot deployment types
@@ -84,21 +63,6 @@ check_root () {
 export -f check_root
 
 
-check_project_dir () {
-    [[ -f manage.py ]] || { echo -e "\nErr. Not in project directory\n" >&2; exit 1; }
-}
-export -f check_project_dir
-
-
-get_project_dir () {
-    CMD="from django.conf import settings; import os;\
-         os.path.dirname(os.path.normpath(os.sys.modules[settings.SETTINGS_MODULE].__file__))"
-    PATH=$(echo $CMD|python manage.py shell 2> /dev/null|cut -d"'" -f2|head -n1)
-    echo $PATH
-}
-export -f get_project_dir
-
-
 get_controller_dir () {
     if ! $(echo "import controller"|python 2> /dev/null); then
         echo -e "\nErr. Controller not installed.\n" >&2
@@ -110,20 +74,57 @@ get_controller_dir () {
 export -f get_controller_dir
 
 
+function print_install_requirements_help () {
+    cat <<- EOF 
+		
+		${bold}NAME${normal}
+		    ${bold}controller-admin.sh install_requirements${normal} - Installs all the controller requirements using apt-get and pip
+		
+		${bold}OPTIONS${normal}
+		    ${bold}-m, --minimal${normal}
+		        Installs all the controller requirements using apt-get and pip
+		    
+		    ${bold}-h, --help${normal}
+		        Displays this help text
+		
+		EOF
+}
+
+
 function install_requirements () {
-    # TODO different requirements levels (basic all...)
+    opts=$(getopt -o mh -l minimal,help -- "$@") || exit 1
+    set -- $opts
+    minimal=false
+    
+    while [ $# -gt 0 ]; do
+        case $1 in
+            -m|--minimal) minimal=true; shift ;;
+            -h|--help) print_deploy_help; exit 0 ;;
+            (--) shift; break;;
+            (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
+            (*) break;;
+        esac
+        shift
+    done
+    unset OPTIND
+    unset opt
+    
     check_root
     CONTROLLER_PATH=$(get_controller_path)
     
-    run apt-get update
-    run apt-get install -y libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2 \
-                           screen python-pip python-psycopg2 openssh-server tinc \
-                           python-m2crypto
+    MINIMAL_APT = "python-pip python-m2crypto python-psycopg2"
+    EXTENDED_APT = "libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2
+                screen openssh-server tinc"
     
-    # Some versions of rabbitmq-server will not start automatically by default unless ...
-    sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
-    sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
-    run update-rc.d rabbitmq-server defaults
+    run apt-get update
+    run apt-get install -y "$MINIMAL_APT"
+    if ! $minimal; then
+        run apt-get install -y "$EXTENDED_APT"
+    
+        # Some versions of rabbitmq-server will not start automatically by default unless ...
+        sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
+        sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
+        run update-rc.d rabbitmq-server defaults
     
     run pip install -r "${CONTROLLER_PATH}/requirements.txt"
 }
@@ -182,273 +183,6 @@ function clone () {
     run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}" .
 }
 export -f clone
-
-
-print_setup_postgres_help () {
-    cat <<- EOF 
-		
-		${bold}NAME${normal}
-		    ${bold}controller-admin.sh setup_postgres${bold} - PostgresSQL administration script
-		
-		${bold}SYNOPSIS${normal}
-		    Options: [ -u USER ] [ -p PASSWORD ] [ -n NAME ] [ -P PORT ]
-		    
-		${bold}OPTIONS${normal}
-		    ${bold}-n, --name${bold}
-		            db will be created if not exists (default confine)
-		    
-		    ${bold}-u, --user${bold}
-		            user will be created if not exists (default confine)
-		    
-		    ${bold}-p, --password${bold}
-		            default confine
-		    
-		    ${bold}-H, --host${bold}
-		            if this option is provided, no DB will be created nor installed (default localhost)
-		    
-		    ${bold}-P, --port${bold}
-		            default 5432
-		    
-		${bold}EXAMPLES${normal}
-		    controller-admin.sh setup_postgres --user confine --password confine
-		    
-		    controller-admin.sh setup_postgres
-		
-		EOF
-}
-
-
-function setup_postgres () {
-    # Default values
-    local DB_NAME="controller"
-    local DB_USER="confine"
-    local DB_PASSWORD="confine"
-    local DB_HOST="localhost"
-    local DB_PORT="5432"
-    
-    opts=$(getopt -o u:p:n:P:H:h -l user:,password:,port:,host:,help -- "$@") || exit 1
-    set -- $opts
-    
-    while [ $# -gt 0 ]; do
-        case $1 in
-            -u|--user) local DB_USER="${2:1:${#2}-2}"; shift ;;
-            -p|--password) local DB_PASSWORD="${2:1:${#2}-2}"; shift ;;
-            -n|--name) local DB_NAME="${2:1:${#2}-2}"; shift ;;
-            -P|--port) local DB_PORT="${2:1:${#2}-2}"; shift ;;
-            -H|--host) local DB_HOST="${2:1:${#2}-2}"; shift ;;
-            -h|--help) print_setup_postgres_help; exit 0 ;;
-            (--) shift; break;;
-            (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
-            (*) break;;
-        esac
-        shift
-    done
-    unset OPTIND
-    unset opt
-    
-    check_root
-    check_project_dir
-    
-    show su postgres -c "psql -c \"CREATE USER $DB_USER PASSWORD '$DB_PASSWORD';\""
-    show su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\""
-    
-    local SETTINGS_FILE="$(get_project_dir)/local_settings.py"
-    if $(grep 'DATABASES' "$SETTINGS_FILE" &> /dev/null); then
-        sed -i "s/'ENGINE': '.*',/'ENGINE': 'django.db.backends.postgresql_psycopg2',/" $SETTINGS_FILE
-        sed -i "s/'NAME': '.*',/'NAME': '$DB_NAME',/" $SETTINGS_FILE
-        sed -i "s/'USER': '.*',/'USER': '$DB_USER',/" $SETTINGS_FILE
-        sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$DB_PASSWORD',/" $SETTINGS_FILE
-        sed -i "s/'HOST': '.*',/'HOST': '$DB_HOST',/" $SETTINGS_FILE
-        sed -i "s/'PORT': '.*',/'PORT': '$DB_PORT',/" $SETTINGS_FILE
-    else
-        cat <<- EOF >> $SETTINGS_FILE
-			DATABASES = {
-			    'default': {
-			        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-			        'NAME': '$DB_NAME',
-			        'USER': '$DB_USER',
-			        'PASSWORD': '$DB_PASSWORD',
-			        'HOST': '$DB_HOST',
-			        'PORT': '$DB_PORT',
-			    }
-			}
-			
-			EOF
-    fi
-}
-export -f setup_postgres
-
-
-function setup_celeryd () {
-    check_root
-    check_project_dir
-    
-    local DIR=$(pwd)
-    local USER=$(ls -dl|awk {'print $3'})
-    [ $USER == 'root' ] && { echo -e "\nYou don't want your project files to be owned by root, please change to a regular user\n" >&2; exit 1; }
-    
-    wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' \
-        --no-check-certificate -O /etc/init.d/celeryd
-    cat <<- EOF > /etc/default/celeryd
-		# Name of nodes to start, here we have a single node
-		CELERYD_NODES="w1"
-		
-		# Where to chdir at start.
-		CELERYD_CHDIR="$DIR"
-		
-		# How to call "manage.py celeryd_multi"
-		CELERYD_MULTI="\$CELERYD_CHDIR/manage.py celeryd_multi"
-		
-		# Extra arguments to celeryd
-		CELERYD_OPTS="--time-limit=300 --concurrency=8 -B"
-		
-		# Name of the celery config module.
-		CELERY_CONFIG_MODULE="celeryconfig"
-		
-		# %n will be replaced with the nodename.
-		CELERYD_LOG_FILE="/var/log/celery/%n.log"
-		CELERYD_PID_FILE="/var/run/celery/%n.pid"
-		
-		# Workers should run as an unprivileged user.
-		CELERYD_USER="$USER"
-		CELERYD_GROUP="\$CELERYD_USER"
-		
-		# Name of the projects settings module. (no needed for django +1.4
-		#export DJANGO_SETTINGS_MODULE="settings"
-		
-		# Path to celeryd
-		CELERYEV="\$CELERYD_CHDIR/manage.py"
-		
-		# Extra arguments to manage.py
-		CELERYEV_OPTS="celeryev"
-		
-		# Camera class to use (required)
-		CELERYEV_CAM="djcelery.snapshot.Camera"
-		
-		# Celerybeat
-		#CELERY_OPTS="\$CELERY_OPTS -B -S djcelery.schedulers.DatabaseScheduler"
-		
-		# Persistent revokes
-		CELERYD_STATE_DB="\$CELERYD_CHDIR/persistent_revokes"
-		EOF
-    
-    chmod +x /etc/init.d/celeryd
-    update-rc.d celeryd defaults
-    wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam"\
-         --no-check-certificate -O /etc/init.d/celeryevcam
-    chmod +x /etc/init.d/celeryevcam
-    update-rc.d celeryevcam defaults
-}
-export -f setup_celeryd
-
-
-function setup_apache2 () {
-    check_project_dir
-    check_root
-    
-    local DIR=$(pwd)
-    local USER=$(ls -dl|awk {'print $3'})
-# TODO: local PROJECT_NAME
-    
-    cat <<- EOF > /etc/apache2/sites-available/$PROJECT_NAME.conf
-		WSGIScriptAlias / $DIR/controller/wsgi.py
-		WSGIPythonPath $DIR
-		<Directory $DIR/controller/>
-		    <Files wsgi.py>
-		        Order deny,allow
-		        Allow from all
-		    </Files>
-		</Directory>
-		Alias /media/ $DIR/media/
-		Alias /static/ $DIR/static/
-		EOF
-    
-    a2ensite $PROJECT_NAME
-    # Give upload file permissions to apache
-    adduser www-data $USER
-    run chmod g+w $DIR/media/firmwares
-    run chmod g+w $DIR/media/templates
-    run chmod g+w $DIR/private/exp_data
-}
-export -f setup_apache2 
-
-
-function setup_firmware () {
-    check_root
-    check_project_dir
-    local USER=$(ls -dl|awk {'print $3'})
-    [ $USER == 'root' ] && { echo -e "\nYou don't want your project files to be owned by root, please change to a regular user\n" >&2; exit 1; }
-    
-    # Configure firmware generation
-    [ $(grep "^fuse:" /etc/group &> /dev/null) ] || addgroup fuse
-    [ $(grep "^fuse:.*${USER}" /etc/group &> /dev/null) ] || adduser $USER fuse
-}
-export -f setup_firmware
-
-
-function update_tincd () {
-    check_project_dir
-    DIR=$(pwd)
-    echo "from mgmtnetworks.tinc.tasks import update_tincd; update_tincd()" | $DIR/manage.py shell
-}
-export -f update_tincd
-
-
-print_restart_services_help () {
-    cat <<- EOF 
-		
-		${bold}NAME${normal}
-		    ${bold}controller-admin.sh restart_services${normal} - Restars all related services
-		
-		${bold}SYNOPSIS${normal}
-		    service tinc restart
-		    service apache2 restart
-		    service celeryd restart
-		    service celeryevcam restart
-		
-		EOF
-}
-
-
-function restart_services () {
-    opts=$(getopt -o h -l help -- "$@") || exit 1
-    set -- $opts
-    
-    while [ $# -gt 0 ]; do
-        case $1 in
-            -h|--help) print_restart_services_help; exit 0 ;;
-            (--) shift; break;;
-            (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
-            (*) break;;
-        esac
-        shift
-    done
-    unset OPTIND
-    unset opt
-    
-    check_root
-    
-    run service tinc restart
-    run service apache2 restart
-    run service celeryd restart
-    run service celeryevcam restart
-}
-export -f restart_services
-
-
-function update_secrete_key () {
-    check_project_dir
-    local DIR=$(pwd)
-    
-    KEY=$(python $DIR/manage.py generate_secret_key)
-    local SETTINGS_FILE="$(get_project_dir)/local_settings.py"
-    if $(grep 'SECRET_KEY' "$SETTINGS_FILE" &> /dev/null); then
-        sed -i "s/SECRET_KEY = '.*'/SECRET_KEY = '$KEY'/" $SETTINGS_FILE
-    else
-        echo "SECRET_KEY = '$KEY'" >> $DIR/controller/local_settings.py
-    fi
-}
-export -f update_secrete_key
 
 
 ###############################
@@ -659,10 +393,10 @@ deploy_common () {
     su $USER -c "cd ~$USER/$PROJECT_NAME"
     
     su $USER -c "controller-admin.sh clone $PROJECT_NAME --skeletone $SKELETONE"
-    run setup_celeryd
-    run setup_apache2
-    run update_secrete_key
-    run setup_firmware
+    python manage.py setupceleryd
+    python manage.py setupapache
+    python manage.py updatesecretekey
+    python manage.py setupfirmware
 }
 export -f deploy_common
 
@@ -677,19 +411,18 @@ deploy_running_services () {
     local DB_PASSWORD=$5
     
     cd $DIR
-    sudo controller-admin.sh setup_postgresql --name $DB_NAME --user $DB_USER --password $DB_PASSWORD
+    sudo python manage.py setuppostgres --name $DB_NAME --user $DB_USER --password $DB_PASSWORD
     su $USER -c "python manage.py syncdb --noinput"
     su $USER -c "python manage.py migrate --noinput"
     su $USER -c "echo \"from django.contrib.auth import get_user_model; \\
                  User = get_user_model(); \\
                  User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
     
-    su $USER -c "python $DIR/manage.py loaddata firmware_config"
+    su $USER -c "python $DIR/manage.py loaddata firmwareconfig"
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
-    python $DIR/manage.py create_tinc_server --noinput --safe
-    su $USER -c "echo \"from mgmtnetworks.tinc.tasks import update_tincd; \\
-                 update_tincd()\" | $DIR/manage.py shell"
+    python $DIR/manage.py createtincserver --noinput --safe
+    su $USER -c "python $DIR/manage.py loaddata updatetincd"
     controller-admin.sh restart_services
 }
 export -f deploy_running_services

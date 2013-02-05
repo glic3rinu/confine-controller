@@ -262,8 +262,8 @@ deploy_running_services () {
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
     cmd="python $DIR/manage.py createtincserver --noinput --safe"
-        [ $MGMT_PREFIX ] && cmd="$cmd --mgmt_prefix \"$MGMT_PREFIX\""
-        [ $TINC_PORT ] && cmd="$cmd --tinc_port $TINC_PORT"
+        [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix \"$MGMT_PREFIX\""
+        [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
         $cmd
     su $USER -c "python $DIR/manage.py updatetincd"
     python $DIR/manage.py restartservices
@@ -468,8 +468,8 @@ function deploy () {
     KEYBOARD_LAYOUT=''
     PROJECT_NAME='confine'
     SKELETONE='confine'
-    TINC_PORT=''
-    MGMT_PREFIX=''
+    TINC_PORT=false
+    MGMT_PREFIX=false
 
     while [ $# -gt 0 ]; do
         case $1 in

@@ -221,7 +221,7 @@ deploy_common () {
     local USER=$3
     local PASSWORD=$4
     
-    run apt-get install -y sudo nano pip
+    run apt-get install -y --force-yes sudo nano python-pip
     run pip install confine-controller --upgrade
     run controller-admin.sh install_requirements
     
@@ -248,7 +248,7 @@ deploy_running_services () {
     local DB_PASSWORD=$5
     
     cd $DIR
-    sudo python manage.py setuppostgres --name $DB_NAME --user $DB_USER --password $DB_PASSWORD
+    sudo python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
     su $USER -c "python manage.py syncdb --noinput"
     su $USER -c "python manage.py migrate --noinput"
     su $USER -c "echo \"from django.contrib.auth import get_user_model; \\
@@ -259,8 +259,8 @@ deploy_running_services () {
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
     python $DIR/manage.py createtincserver --noinput --safe
-    su $USER -c "python $DIR/manage.py loaddata updatetincd"
-    controller-admin.sh restart_services
+    su $USER -c "python $DIR/manage.py updatetincd"
+    python $DIR/manage.py restartservices
 }
 export -f deploy_running_services
 
@@ -389,9 +389,6 @@ print_deploy_help () {
 		    ${bold}-p, --password${normal}
 		            password is needed if USER does not exist (default confine)
 		    
-		    ${bold}-I, --install_path${normal}
-		            where the portal code will live (default ~USER/controller)
-		    
 		    ${bold}-a, --arch${normal}
 		            when debootsraping i.e amd64, i386 ... (amd64 by default)
 		    
@@ -519,7 +516,7 @@ function deploy () {
         *) echo "Unknown type $TYPE" >&2; exit 1 ;;
     esac
     
-    [ $INSTALL_PATH == false ] && INSTALL_PATH="~$USER/controller"
+    [ $INSTALL_PATH == false ] && INSTALL_PATH="~$USER/$PROJECT_NAME"
     
     if [[ $TYPE != 'local' ]]; then 
         

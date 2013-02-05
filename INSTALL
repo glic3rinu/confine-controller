@@ -62,7 +62,7 @@ Table of contents
 ###################
 
 1. Satisfy your level of requirements
-    sudo controller-admin.sh infstall_requirements [ --minimal ]
+    sudo controller-admin.sh install_requirements [ --minimal ]
 
 2. Update database
     python manage.py syncdb
@@ -77,9 +77,14 @@ Table of contents
 # 4. MIGRATION FROM OLD CODE LAYOUT #
 #####################################
 
-1. Remember to save your controller/settings.py file
+1. Save somewhere your controller/settings.py file
 2. Remove all the code base
-3. Install your choice (production or development)
-4. Copy your settings.py file into PROJECT_DIR/localsettings.py
-5. Remove the line "from .settings_example import *"  ??? maybe not
-6. GOTO 3. Update steps
+3. Install your choice (production or development):
+    https://wiki.confine-project.eu/soft:server-installation (Quick Install secction)
+4. Carfully migrate your old settings.py file into the new PROJECT_DIR/settings.py
+5. Make sure you have the minimal requirements
+    sudo controller-admin.sh install_requirements --minimal
+6. Apply any pending database schema migrations
+    python manage.py syncdb
+    python manage.py migrate
+7. sudo python manage.py restartservices

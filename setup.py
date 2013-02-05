@@ -1,25 +1,25 @@
 import os
 from setuptools import setup, find_packages
 
+# allow setup.py to be run from any path
+os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
 packages = find_packages('.')
 
 setup(
     name = 'confine-controller',
     version = '0.1dev',
     packages = packages,
-#    package_data={
-#        'controller': ['templates/tastypie/*'],
-#    },
-
     include_package_data = True,
     license = 'BSD License',
     description = 'Django-based framework for building control servers for computer networking and distributed systems testbeds.',
     long_description = 'Django-based framework for building control servers for computer networking and distributed systems testbeds.',
-    scripts=['scripts/controller-admin.sh'],
+    scripts=['controller/bin/controller-admin.sh'],
     url = 'http://wiki.confine-project.eu/soft:server',
     author = 'Marc Aymerich, Santiago Lamora',
     author_email = 'marcay@pangea.org, santiago@pangea.org',
     classifiers = [
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
@@ -31,6 +31,8 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Internet :: WWW/HTTP :: Site Management',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
 

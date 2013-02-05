@@ -1,3 +1,4 @@
+https://www.djangoproject.com/download/1.5c1/tarball/
 #django==1.5
 kombu==2.4.7
 django-celery-email
@@ -13,3 +14,4 @@ markdown
 -e git+https://github.com/alex/django-filter.git#egg=django-filter
 https://bitbucket.org/glic3rinu/django-admin-tools-fixes/get/tip.tar.gz
 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
+

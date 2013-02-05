@@ -1,1 +1,6 @@
-recursive-include controller/ *.html *.txt *.email *.ula *.sh *.png
+recursive-include controller *
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *~
+recursive-exclude * *.save

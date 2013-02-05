@@ -48,7 +48,7 @@ class Command(BaseCommand):
         
         if run("grep 'DATABASES' %(settings)s" % context, err_codes=[0,1]):
             # Update existing settings_file
-            run("""sed -i "s/'ENGINE': '.*',/'ENGINE': 'django.db.backends.postgresql_psycopg2',/" %(settings)s""" % context)
+            run("""sed -i "s/'ENGINE': '\w*',/'ENGINE': 'django.db.backends.postgresql_psycopg2',/" %(settings)s""" % context)
             run("""sed -i "s/'NAME': '.*',/'NAME': '%(db_name)s',/" %(settings)s""" % context)
             run("""sed -i "s/'USER': '.*',/'USER': '%(db_user)s',/" %(settings)s""" % context)
             run("""sed -i "s/'PASSWORD': '.*',/'PASSWORD': '%(db_password)s',/" %(settings)s""" % context)

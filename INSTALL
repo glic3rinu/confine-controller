@@ -37,7 +37,7 @@ Table of contents
     # Fully featured setup (Optional and not needed for devel)
     sudo controller-admin.sh install_requirements
     sudo python manage.py setupapache
-    python manage.py collectstatic
+    python manage.py collectstatic --noinput
     sudo python manage.py setupceleryd
     sudo python manage.py createtincserver
     python manage.py updatetincd

@@ -43,6 +43,7 @@ class Command(BaseCommand):
         
         run("echo '%s' > /etc/apache2/sites-available/%s.conf" % (apache_conf, project_name))
         run('a2ensite %s.conf' % project_name)
+        run('a2enmod expires')
         # Give upload file permissions to apache
         run('adduser www-data %s' % username)
         run('chmod g+w %s/media/firmwares' % site_root)

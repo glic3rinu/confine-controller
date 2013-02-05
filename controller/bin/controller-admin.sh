@@ -112,7 +112,7 @@ function install_requirements () {
     check_root
     CONTROLLER_PATH=$(get_controller_dir)
     
-    MINIMAL_APT="python-pip python-m2crypto python-psycopg2"
+    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql"
     EXTENDED_APT="libapache2-mod-wsgi rabbitmq-server git mercurial fuseext2
                   screen openssh-server tinc"
     
@@ -387,17 +387,19 @@ deploy_common () {
     local USER=$3
     local PASSWORD=$4
     
-    controller-admin.sh install_requirements
+    run apt-get install -y sudo nano pip
+    run pip install confine-controller --upgrade
+    run controller-admin.sh install_requirements
     
     try_create_system_user $USER $PASSWORD
-    su $USER -c "mkdir ~$USER/$PROJECT_NAME"
-    su $USER -c "cd ~$USER/$PROJECT_NAME"
-    
+    adduser $USER sudo
+    cd ~$USER
     su $USER -c "controller-admin.sh clone $PROJECT_NAME --skeletone $SKELETONE"
-    python manage.py setupceleryd
-    python manage.py setupapache
-    python manage.py updatesecretekey
-    python manage.py setupfirmware
+    cd $PROJECT_NAME
+    run python manage.py setupceleryd
+    run python manage.py setupapache
+    run python manage.py updatesecretekey
+    run python manage.py setupfirmware
 }
 export -f deploy_common
 
@@ -690,7 +692,7 @@ function deploy () {
             chmod 0644 $DIRECTORY
             prepare_image $IMAGE $IMAGE_SIZE
             custom_mount -l $IMAGE $DIRECTORY
-            trap "custom_umount -l $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT 
+            trap "custom_umount -l $DIRECTORY; $image && rm -fr $DIRECTORY; exit 1;" INT TERM EXIT
         fi
         
         [ $TYPE == 'bootable' ] && EXCLUDE='' || EXCLUDE='--exclude=udev'

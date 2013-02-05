@@ -53,5 +53,5 @@ def get_project_name():
 
 
 def get_site_root():
-    return os.path.abspath(os.path.realpath(get_project_root(), '..'))
+    return os.path.abspath(os.path.join(get_project_root(), '..'))
 

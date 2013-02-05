@@ -58,7 +58,7 @@ class Command(BaseCommand):
         
         safe = options.get('safe')
         protect = safe and tinc_server.exists()
-        if not protect:
+        if tinc_server.exists():
             if interactive:
                 msg = ("\nSeems that you already have a tinc server configured.\nThis will "
                        "generate a new tinc public key and delete all the configuration under "
@@ -77,7 +77,7 @@ class Command(BaseCommand):
         
         if not protect:
             FILE_PATH = os.path.dirname(os.path.realpath(__file__))
-            SCRIPT_PATH = os.path.join(FILE_PATH, '../../scripts/create_server.sh')
+            SCRIPT_PATH = os.path.abspath(os.path.join(FILE_PATH, '../../scripts/create_server.sh'))
             run("%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0]))
             
             # Get created pubkey

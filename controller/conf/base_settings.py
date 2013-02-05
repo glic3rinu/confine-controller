@@ -1,3 +1,8 @@
+import os, sys
+CONTROLLER_ROOT = os.path.dirname(os.path.realpath(__file__))
+CONTROLLER_ROOT = os.path.abspath(os.path.join(CONTROLLER_ROOT, '..'))
+sys.path.insert(0, os.path.join(CONTROLLER_ROOT, 'apps'))
+
 # Django settings for controller project.
 
 DEBUG = False
@@ -6,7 +11,7 @@ TEMPLATE_DEBUG = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'skeletone',      # Or path to database file if using sqlite3.
+        'NAME': 'controller',      # Or path to database file if using sqlite3.
         'USER': 'confine',         # Not used with sqlite3.
         'PASSWORD': 'confine',     # Not used with sqlite3.
         'HOST': 'localhost',       # Set to empty string for localhost. Not used with sqlite3.

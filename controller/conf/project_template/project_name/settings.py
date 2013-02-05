@@ -13,14 +13,6 @@ https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/
 # Development settings
 from controller.conf.devel_settings import *
 
-
-import os, sys, controller
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-SITE_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, '..'))
-CONTROLLER_ROOT = os.path.dirname(os.path.realpath(controller.__file__))
-sys.path.insert(0, os.path.join(CONTROLLER_ROOT, 'apps'))
-
-
 # SECURITY WARNING: keep the secret key used in production secret!
 # Hardcoded values can leak through source control. Consider loading
 # the secret key from an environment variable or a file instead.

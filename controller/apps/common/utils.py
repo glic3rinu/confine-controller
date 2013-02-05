@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -39,4 +41,17 @@ def send_mail_template(template, context, to, email_from=None):
     subject = render_to_string(template, {'subject': True}, context).strip()
     message = render_to_string(template, {'message': True}, context)
     send_mail(subject, message, email_from, to)
+
+
+def get_project_root():
+    """ Return the django project path """
+    return os.path.dirname(os.path.normpath(os.sys.modules[settings.SETTINGS_MODULE].__file__))
+
+
+def get_project_name():
+    return  os.path.basename(get_project_root())
+
+
+def get_site_root():
+    return os.path.abspath(os.path.realpath(get_project_root(), '..')
 

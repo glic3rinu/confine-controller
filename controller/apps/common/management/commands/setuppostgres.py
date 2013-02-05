@@ -4,6 +4,7 @@ from optparse import make_option
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from common.utils import get_project_root
 from common.system import run, check_root
 
 
@@ -43,7 +44,7 @@ class Command(BaseCommand):
         run("""su postgres -c "psql -c \\"CREATE USER %(db_user)s PASSWORD '%(db_password)s';\\"" """ % context, err_codes=[0,1])
         run("""su postgres -c "psql -c \\"CREATE DATABASE %(db_name)s OWNER %(db_user)s;\\"" """ % context, err_codes=[0,1])
         
-        context.update({'settings': os.path.join(settings.PROJECT_ROOT, 'settings.py')})
+        context.update({'settings': os.path.join(get_project_root(), 'settings.py')})
         
         if run("grep 'DATABASES' %(settings)s" % context, err_codes=[0,1]):
             # Update existing settings_file

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from common.utils import get_project_name, get_project_root, get_site_root
 from common.system import run, check_root
 
 
@@ -10,7 +11,9 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         username = run("ls -dl|awk {'print $3'}")
-        project_name = settings.PROJECT_ROOT.split('/')[-1]
+        project_name = get_project_name()
+        project_root = get_project_root()
+        site_root = get_site_root()
         apache_conf = (
             'WSGIScriptAlias / %(project_root)s/wsgi.py\n'
             'WSGIPythonPath %(site_root)s\n\n'
@@ -35,13 +38,13 @@ class Command(BaseCommand):
             '        FileETag MTime Size\n'
             '    </FilesMatch>\n'
             '</Directory>\n'
-            'RedirectMatch ^/$ /admin\n' % {'project_root': settings.PROJECT_ROOT,
-                                            'site_root': settings.SITE_ROOT})
+            'RedirectMatch ^/$ /admin\n' % {'project_root': project_root,
+                                            'site_root': site_root})
         
         run("echo '%s' > /etc/apache2/sites-available/%s.conf" % (apache_conf, project_name))
         run('a2ensite %s.conf' % project_name)
         # Give upload file permissions to apache
         run('adduser www-data %s' % username)
-        run('chmod g+w %s/media/firmwares' % settings.SITE_ROOT)
-        run('chmod g+w %s/media/templates' % settings.SITE_ROOT)
-        run('chmod g+w %s/private/exp_data' % settings.SITE_ROOT)
+        run('chmod g+w %s/media/firmwares' % site_root)
+        run('chmod g+w %s/media/templates' % site_root)
+        run('chmod g+w %s/private/exp_data' % site_root)

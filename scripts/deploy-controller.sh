@@ -254,10 +254,11 @@ deploy_running_services () {
     sudo python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
     su $USER -c "python manage.py syncdb --noinput"
     su $USER -c "python manage.py migrate --noinput"
-    su $USER -c "echo \"from django.contrib.auth import get_user_model; \\
-                 User = get_user_model(); \\
-                 if not User.objects.filter(username='confine').exists():
-                     User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
+    su $USER -c "echo -e \"\\
+from django.contrib.auth import get_user_model;\\
+User = get_user_model()\n\\
+if not User.objects.filter(username='confine').exists():\\
+ User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
     
     su $USER -c "python $DIR/manage.py loaddata firmwareconfig"
     su $USER -c "python $DIR/manage.py collectstatic --noinput"

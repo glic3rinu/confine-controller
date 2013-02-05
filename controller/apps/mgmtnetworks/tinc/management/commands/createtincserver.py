@@ -118,9 +118,9 @@ class Command(BaseCommand):
         if not protect:
             tinc_server.pubkey = pubkey
             tinc_server.save()
-        run("chown %(user)s /etc/tinc/%(net)s/hosts;\n"
-            "chmod +x /etc/tinc/%(net)s/tinc-up;\n"
-            "chmod +x /etc/tinc/%(net)s/tinc-down" % {'net': TINC_NET_NAME,
-                                                      'user': username})
+        run("""chown %(user)s /etc/tinc/%(net)s/hosts;
+               chmod +x /etc/tinc/%(net)s/tinc-up;
+               chmod +x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
+                                                          'user': username})
         self.stdout.write('Tincd server successfully created and configured.')
         self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')

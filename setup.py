@@ -8,7 +8,7 @@ packages = find_packages('.')
 
 setup(
     name = 'confine-controller',
-    version = '0.5dev',
+    version = '0.5.1dev',
     packages = packages,
     include_package_data = True,
     license = 'BSD License',

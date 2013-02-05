@@ -6,6 +6,8 @@ from django.template.loader import render_to_string
 from django.template import Context
 from django.utils.importlib import import_module
 
+from .system import run
+
 
 def autodiscover(module):
     """ Auto-discover INSTALLED_APPS permission.py module """
@@ -55,3 +57,13 @@ def get_project_name():
 def get_site_root():
     return os.path.abspath(os.path.join(get_project_root(), '..'))
 
+
+def update_settings(**options):
+    for name, value in options.iteritems():
+        if getattr(settings, name, None) != value:
+            settings_file = os.path.join(get_project_root(), 'settings.py')
+            if run("grep '%s' %s" % (name, settings_file), err_codes=[0,1]):
+                # Update existing settings_file
+                run("""sed -i "s/%s = '\w*'/%s = '%s'/" %s""" % (name, name, value, settings_file))
+            else:
+                run("""echo "%s = '%s'" >> %s""" % (name, value, settings_file))

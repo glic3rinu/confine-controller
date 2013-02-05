@@ -8,6 +8,7 @@
 
 NET_NAME=$1
 IPV6_PREFIX=$2
+PORT=$3
 
 if [[ ! $(grep $NET_NAME /etc/tinc/nets.boot) ]]; then
     echo $NET_NAME >> /etc/tinc/nets.boot
@@ -17,7 +18,7 @@ mkdir -p /etc/tinc/$NET_NAME/hosts
 
 cat <<- EOF > /etc/tinc/$NET_NAME/tinc.conf
 	BindToAddress = 0.0.0.0
-	Port = 655
+	Port = $PORT
 	Name = server
 	StrictSubnets = True
 EOF

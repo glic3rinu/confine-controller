@@ -247,6 +247,8 @@ deploy_running_services () {
     local DB_NAME=$3
     local DB_USER=$4
     local DB_PASSWORD=$5
+    local MGMT_PREFIX=$6
+    local TINC_PORT=$7
     
     cd $DIR
     sudo python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
@@ -259,7 +261,10 @@ deploy_running_services () {
     su $USER -c "python $DIR/manage.py loaddata firmwareconfig"
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
-    python $DIR/manage.py createtincserver --noinput --safe
+    cmd="python $DIR/manage.py createtincserver --noinput --safe"
+        [ $MGMT_PREFIX ] && cmd="$cmd --mgmt_prefix \"$MGMT_PREFIX\""
+        [ $TINC_PORT ] && cmd="$cmd --tinc_port $TINC_PORT"
+        $cmd
     su $USER -c "python $DIR/manage.py updatetincd"
     python $DIR/manage.py restartservices
 }
@@ -277,6 +282,8 @@ function deploy_postponed () {
     local DB_NAME=$3
     local DB_USER=$4
     local DB_PASSWORD=$5
+    local MGMT_PREFIX=$6
+    local TINC_PORT=$7
     
     cat <<- EOF > /etc/init.d/setup_portal_db
 		#!/bin/sh
@@ -290,7 +297,7 @@ function deploy_postponed () {
 		# Description:       Creates and fills database on first boot
 		### END INIT INFO
 		
-		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD"
+		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT"
 		insserv -r /etc/init.d/setup_portal_db
 		rm -f \$0
 		EOF
@@ -553,7 +560,7 @@ function deploy () {
         chroot $DIRECTORY /bin/bash -c "deploy_common $PROJECT_NAME $SKELETONE $USER $PASSWORD"
         rm -fr $DIRECTORY/usr/sbin/policy-rc.d
         
-        chroot $DIRECTORY /bin/bash -c "deploy_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD"
+        chroot $DIRECTORY /bin/bash -c "deploy_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD $MGMT_PREFIX $TINC_PORT"
         chroot $DIRECTORY /bin/bash -c "generate_ssh_keys_postponed $USER"
         
         # Clean up
@@ -565,7 +572,7 @@ function deploy () {
     else
         # local installation
         run deploy_common "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
-        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD"
+        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT"
     fi
     
     echo -e "\n ... seems that everything went better than expected :)"

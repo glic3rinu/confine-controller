@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from common.utils import update_settings
 from common.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
@@ -19,10 +20,15 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         # Options are defined in an __init__ method to support swapping out
         # custom user models in tests.
+        from mgmtnetworks.tinc.settings import TINC_MGMT_IPV6_PREFIX, TINC_PORT_DFLT
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default=get_default_celeryd_username(),
                 help='Specifies the login for the superuser.'),
+            make_option('--mgmt_prefix', dest='mgmt_prefix', default=TINC_MGMT_IPV6_PREFIX,
+                help='Mgmt prefix, the settings file will be updated.'),
+            make_option('--tinc_port_dflt', dest='tinc_port_dflt', default=TINC_PORT_DFLT,
+                help='Tinc port default, the settings file will be updated.'),
             make_option('--safe', dest='safe', action='store_true', default=False,
                 help='Specifies if this command should regenerate the existing server '
                      'keys, if they exists. Useful combined with --noinput'),
@@ -39,7 +45,7 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         from mgmtnetworks.tinc.models import TincServer
-        from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX
+        from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX, TINC_PORT_DFLT
         
         interactive = options.get('interactive')
         if not interactive:
@@ -77,11 +83,16 @@ class Command(BaseCommand):
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
         if not protect:
+            tinc_port = options.get('tinc_port_dflt')
+            mgmt_prefix = options.get('mgmt_prefix')
+            update_settings(TINC_MGMT_IPV6_PREFIX=mgmt_prefix)
+            update_settings(TINC_PORT_DFLT=tinc_port)
+            
             FILE_PATH = os.path.dirname(os.path.realpath(__file__))
             SCRIPT_PATH = os.path.abspath(os.path.join(FILE_PATH, '../../scripts/create_server.sh'))
             # This is a workarround for this issue https://github.com/pypa/pip/issues/317
             run("chmod +x %s" % SCRIPT_PATH)
-            run("%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0]))
+            run("%s %s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, mgmt_prefix.split('::')[0], tinc_port))
             
             # Get created pubkey
             pubkey = ''

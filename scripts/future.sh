@@ -1,5 +1,7 @@
-# TODO settings-> globalsettings localsettings...
-
+# TODO settings-> globalsettings localsettings... prod devels
+# TODO https://docs.djangoproject.com/en/dev/ref/django-admin/#django-admin-startproject
+# TODO inspect django 1.6 settings
+https://github.com/stephenmcd/mezzanine/blob/master/mezzanine/project_template/fabfile.py
 Devel
 Testing
 Production

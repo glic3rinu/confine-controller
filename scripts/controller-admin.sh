@@ -180,15 +180,8 @@ function clone () {
     [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
     
     CONTROLLER_PATH=$(get_controller_dir)
-    run django-admin.py startproject $PROJECT_NAME
-    run cp -r "${CONTROLLER_PATH}/projects/skeletone/*" $PROJECT_NAME/$PROJECT_NAME
+    run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
     [ $SKELETONE ] && run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
-    run sed -i "s/skeletone/$PROJECT_NAME/g" $PROJECT_NAME/$PROJECT_NAME/settings_example.py
-    run mkdir -p $PROJECT_NAME/media/firmwares
-    run mkdir -p $PROJECT_NAME/media/templates
-    run mkdir -p $PROJECT_NAME/private/exp_data
-    run mkdir -p $PROJECT_NAME/private/firmwares
-    run mkdir -p $PROJECT_NAME/static
 }
 export -f clone
 

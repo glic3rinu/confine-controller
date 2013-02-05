@@ -1,19 +1,7 @@
 # Django settings for controller project.
 
-import os, sys, controller
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-SITE_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, '..'))
-CONTROLLER_ROOT = os.path.dirname(os.path.realpath(controller.__file__))
-sys.path.insert(0, os.path.join(CONTROLLER_ROOT, 'apps'))
-
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
-
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
-
-MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
@@ -51,18 +39,17 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(SITE_ROOT, 'media')
+MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = '/media/'
 
-# Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(SITE_ROOT, 'static/')
+STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -82,9 +69,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '+d3w$ihecf3i0yb4a@-#)*m&amp;ugjp$b87%(6p1axb%e9r%hb=5y'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -113,13 +97,8 @@ TEMPLATE_CONTEXT_PROCESSORS =(
     "django.core.context_processors.request",
 )
 
-ROOT_URLCONF = 'skeletone.urls'
-
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'skeletone.wsgi.application'
 
 TEMPLATE_DIRS = (
-    os.path.join(PROJECT_ROOT, 'templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -210,7 +189,7 @@ LOGGING = {
 
 
 # Admin Tools
-ADMIN_TOOLS_MENU = 'skeletone.menu.CustomMenu'
+ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
 
 # Fluent dashboard
 ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
@@ -285,7 +264,7 @@ CELERY_DISABLE_RATE_LIMITS = True
 
 # django-private-files
 FILE_PROTECTION_METHOD = 'basic'
-PRIVATE_MEDIA_ROOT = os.path.join(SITE_ROOT, 'private')
+PRIVATE_MEDIA_ROOT = ''
 
 
 # rest_framework

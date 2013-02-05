@@ -194,7 +194,7 @@ export -f basic_strap_configuration
 install_kernel_and_grub() {
     local DEVICE=$1
     
-    apt-get update
+    run apt-get update
     run apt-get install -y linux-image-amd64 
     run apt-get install -y dmsetup gettext-base grub-common libdevmapper1.02.1 \
                            libfreetype6 os-prober ucf
@@ -221,6 +221,7 @@ deploy_common () {
     local USER=$3
     local PASSWORD=$4
     
+    run apt-get update
     run apt-get install -y --force-yes sudo nano python-pip
     run pip install confine-controller --upgrade
     run controller-admin.sh install_requirements

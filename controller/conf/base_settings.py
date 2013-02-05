@@ -123,7 +123,7 @@ INSTALLED_APPS = (
     'djcelery_email',
     'private_files',
     'registration',
-
+    
     # Django.contrib
     'django.contrib.auth',
     'django.contrib.contenttypes',

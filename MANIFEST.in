@@ -1,4 +1,1 @@
-recursive-include controller/apps *.html *.txt *.email *.ula
-recursive-include controller/projects *
-
-recursive-include docs *
+recursive-include controller/ *.html *.txt *.email *.ula *.sh *.png

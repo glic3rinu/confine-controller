@@ -10,12 +10,13 @@ Table of contents
 # 1. MANUAL INSTALLATION #
 ##########################
 
-# Reference platform: Debian 5.0 Squeeze, Python 2.6 and Django 1.5
+# Reference platform: Debian 6.0 Squeeze, Python 2.6 and Django 1.5
 
     adduser confine
     su confine
     
     # FOR PRODUCTION
+        sudo apt-get install pip
         sudo pip install confine-controller
     
     # FOR DEVELOPMENT

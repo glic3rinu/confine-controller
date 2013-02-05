@@ -16,8 +16,8 @@ setup(
     long_description = 'Django-based framework for building control servers for computer networking and distributed systems testbeds.',
     scripts=['controller/bin/controller-admin.sh'],
     url = 'http://wiki.confine-project.eu/soft:server',
-    author = 'Marc Aymerich, Santiago Lamora',
-    author_email = 'marcay@pangea.org, santiago@pangea.org',
+    author = 'Confine Project',
+    author_email = 'support@confine-project.eu',
     classifiers = [
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

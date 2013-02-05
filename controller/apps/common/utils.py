@@ -49,9 +49,9 @@ def get_project_root():
 
 
 def get_project_name():
-    return  os.path.basename(get_project_root())
+    return os.path.basename(get_project_root())
 
 
 def get_site_root():
-    return os.path.abspath(os.path.realpath(get_project_root(), '..')
+    return os.path.abspath(os.path.realpath(get_project_root(), '..'))
 

@@ -101,8 +101,8 @@ export -f custom_umount
 
 
 clean () {
-    rm -fr /tmp/*
-    apt-get clean
+    run rm -fr /tmp/*
+    run apt-get clean
 }
 export -f clean
 
@@ -242,7 +242,6 @@ deploy_common () {
     cd $PROJECT_NAME
     run python manage.py setupceleryd
     run python manage.py setupapache
-    run python manage.py updatesecretekey
     run python manage.py setupfirmware
 }
 export -f deploy_common

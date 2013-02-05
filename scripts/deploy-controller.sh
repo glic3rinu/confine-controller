@@ -100,6 +100,13 @@ custom_umount() {
 export -f custom_umount
 
 
+clean () {
+    rm -fr /tmp/*
+    apt-get clean
+}
+export -f clean
+
+
 container_customization () {
     
     # USAGE: container_customization mount_point
@@ -223,6 +230,8 @@ deploy_common () {
     
     run apt-get update
     run apt-get install -y --force-yes sudo nano python-pip
+    # for cleaning pip garbage afterwards
+    cd /tmp
     run pip install confine-controller --upgrade
     run controller-admin.sh install_requirements
     
@@ -566,6 +575,7 @@ function deploy () {
         chroot $DIRECTORY /bin/bash -c "generate_ssh_keys_postponed $USER"
         
         # Clean up
+        chroot $DIRECTORY /bin/bash -c "clean"
         custom_umount -s $DIRECTORY
         [ $TYPE == 'bootable' ] && custom_umount -d $DIRECTORY
         $image && custom_umount -l $DIRECTORY

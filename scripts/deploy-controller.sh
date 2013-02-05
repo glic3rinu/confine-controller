@@ -256,13 +256,14 @@ deploy_running_services () {
     su $USER -c "python manage.py migrate --noinput"
     su $USER -c "echo \"from django.contrib.auth import get_user_model; \\
                  User = get_user_model(); \\
-                 User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
+                 if not User.objects.filter(username='confine').exists():
+                     User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
     
     su $USER -c "python $DIR/manage.py loaddata firmwareconfig"
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
     cmd="python $DIR/manage.py createtincserver --noinput --safe"
-        [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix \"$MGMT_PREFIX\""
+        [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix $MGMT_PREFIX"
         [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
         $cmd
     su $USER -c "python $DIR/manage.py updatetincd"

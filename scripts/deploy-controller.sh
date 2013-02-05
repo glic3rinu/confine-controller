@@ -257,8 +257,8 @@ deploy_running_services () {
     su $USER -c "echo -e \"\\
 from django.contrib.auth import get_user_model;\\
 User = get_user_model()\n\\
-if not User.objects.filter(username='confine').exists():\\
- User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\" | $DIR/manage.py shell"
+if not User.objects.filter(username='confine').exists(): \\
+User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\n\" | $DIR/manage.py shell"
     
     su $USER -c "python $DIR/manage.py loaddata firmwareconfig"
     su $USER -c "python $DIR/manage.py collectstatic --noinput"

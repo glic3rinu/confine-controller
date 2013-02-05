@@ -78,6 +78,8 @@ class Command(BaseCommand):
         if not protect:
             FILE_PATH = os.path.dirname(os.path.realpath(__file__))
             SCRIPT_PATH = os.path.abspath(os.path.join(FILE_PATH, '../../scripts/create_server.sh'))
+            # This is a workarround for this issue https://github.com/pypa/pip/issues/317
+            run("chmod +x %s" % SCRIPT_PATH)
             run("%s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX.split('::')[0]))
             
             # Get created pubkey
@@ -117,8 +119,8 @@ class Command(BaseCommand):
             tinc_server.pubkey = pubkey
             tinc_server.save()
         run("""chown %(user)s /etc/tinc/%(net)s/hosts;
-                 chmod +x /etc/tinc/%(net)s/tinc-up;
-                 chmod +x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
-                                                             'user': username})
+               chmod +x /etc/tinc/%(net)s/tinc-up;
+               chmod +x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
+                                                          'user': username})
         self.stdout.write('Tincd server successfully created and configured.')
         self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')

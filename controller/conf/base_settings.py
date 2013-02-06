@@ -196,7 +196,7 @@ ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
 
 # Fluent dashboard
 ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
-FLUENT_DASHBOARD_ICON_THEME = '../icons'
+FLUENT_DASHBOARD_ICON_THEME = '../controller/icons'
 
 FLUENT_DASHBOARD_APP_GROUPS = (
     ('Nodes', {

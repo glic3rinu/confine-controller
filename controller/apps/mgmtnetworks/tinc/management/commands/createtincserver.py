@@ -9,6 +9,8 @@ from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
+from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX, TINC_PORT_DFLT
+
 
 class Command(BaseCommand):
     """
@@ -20,18 +22,17 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         # Options are defined in an __init__ method to support swapping out
         # custom user models in tests.
-        from mgmtnetworks.tinc.settings import TINC_MGMT_IPV6_PREFIX, TINC_PORT_DFLT
         super(Command, self).__init__(*args, **kwargs)
+        default_username = get_default_celeryd_username()
         self.option_list = BaseCommand.option_list + (
-            make_option('--username', dest='username', default=get_default_celeryd_username(),
+            make_option('--username', dest='username', default=default_username,
                 help='Specifies the login for the superuser.'),
             make_option('--mgmt_prefix', dest='mgmt_prefix', default=TINC_MGMT_IPV6_PREFIX,
                 help='Mgmt prefix, the settings file will be updated.'),
             make_option('--tinc_port_dflt', dest='tinc_port_dflt', default=TINC_PORT_DFLT,
                 help='Tinc port default, the settings file will be updated.'),
-            make_option('--safe', dest='safe', action='store_true', default=False,
-                help='Specifies if this command should regenerate the existing server '
-                     'keys, if they exists. Useful combined with --noinput'),
+            make_option('--safe', dest='protect', action='store_true', default=False,
+                help='Do not generate tinc keys if exist. Useful combined with --noinput'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -45,14 +46,13 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         from mgmtnetworks.tinc.models import TincServer
-        from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX, TINC_PORT_DFLT
-        
         interactive = options.get('interactive')
+        username = options.get('username')
+        
         if not interactive:
-            username = options.get('username')
+            # validate username
             if not username:
                 raise CommandError("You must use --username with --noinput.")
-            # validate username
             try:
                 username = pwd.getpwnam(username).pw_name
             except KeyError:
@@ -62,8 +62,7 @@ class Command(BaseCommand):
         tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server',
                                                 content_type__app_label='nodes')
         
-        safe = options.get('safe')
-        protect = safe and tinc_server.exists()
+        protect = options.get('protect')
         if tinc_server.exists():
             if interactive:
                 msg = ("\nSeems that you already have a tinc server configured.\nThis will "
@@ -82,29 +81,25 @@ class Command(BaseCommand):
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         
-        # Prompt for username/password, and any other required fields.
+        # Prompt for username
         # Enclose this whole thing in a try/except to trap for a
         # keyboard interrupt and exit gracefully.
-        default_username = get_default_celeryd_username()
-        username = None
-        while username is None and interactive:
-            if not username:
+        prompt_username = None
+        while prompt_username is None and interactive:
+            if not prompt_username:
                 input_msg = "Celeryd username"
-                if default_username:
-                    input_msg += " (leave blank to use '%s')" % default_username
+                if username:
+                    input_msg += " (leave blank to use '%s')" % username
                 raw_value = raw_input(input_msg + ': ')
-            if default_username and raw_value == '':
-                raw_value = default_username
+            if username and raw_value == '':
+                raw_value = username
             # validate username
             try:
-                username = pwd.getpwnam(raw_value).pw_name
+                prompt_username = pwd.getpwnam(raw_value).pw_name
             except KeyError:
                 self.stderr.write("Error: %s" % '; '.join(e.messages))
-                username = None
+                prompt_username = None
                 continue
-        
-        if username is None:
-            username = default_username
         
         tinc_port = options.get('tinc_port_dflt')
         mgmt_prefix = options.get('mgmt_prefix')
@@ -127,7 +122,6 @@ class Command(BaseCommand):
             e("echo %(net_name)s >> /etc/tinc/nets.boot" % context)
         r("mkdir -p /etc/tinc/%(net_name)s/hosts" % context)
         r("echo '%(tinc_conf)s' > /etc/tinc/%(net_name)s/tinc.conf" % context)
-        # TODO get from tinc model!
         r('echo "Subnet = %(mgmt_prefix)s:0:0:0:0:2/128" > /etc/tinc/%(net_name)s/hosts/server' % context)
         r("echo '%(tinc_up)s' > /etc/tinc/%(net_name)s/tinc-up" % context)
         r("echo '%(tinc_down)s' > /etc/tinc/%(net_name)s/tinc-down" % context)
@@ -136,6 +130,7 @@ class Command(BaseCommand):
         r("chmod +x /etc/tinc/%(net_name)s/tinc-down" % context)
         
         if not protect:
+            # Generate new keys
             r('tincd -n %(net_name)s -K' % context)
             # Get created pubkey
             pubkey = ''

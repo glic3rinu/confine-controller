@@ -10,15 +10,6 @@
 },
 {
     "pk": 1, 
-    "model": "firmware.baseimage", 
-    "fields": {
-        "image": "firmwares/openwrt-x86-generic-combined-ext4-merge_trunk_03_3.img.gz", 
-        "config": 1, 
-        "architectures": "x86,x86_64,i586"
-    }
-},
-{
-    "pk": 1, 
     "model": "firmware.configuci", 
     "fields": {
         "section": "node node", 

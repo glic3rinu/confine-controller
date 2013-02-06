@@ -1,6 +1,6 @@
 from django import forms
 
-from common.widgets import ShowText
+from controller.forms.widgets import ShowText
 
 from .models import Slice, Sliver
 

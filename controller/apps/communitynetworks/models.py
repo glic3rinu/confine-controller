@@ -2,7 +2,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from common.utils import is_installed
+from controller.utils import is_installed
 from nodes.models import Node, Server
 
 from .tasks import cache_node_db

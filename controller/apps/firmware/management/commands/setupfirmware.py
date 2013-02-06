@@ -2,7 +2,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
-from common.system import run, check_root, get_default_celeryd_username
+from controller.utils.system import run, check_root, get_default_celeryd_username
 
 
 class Command(BaseCommand):

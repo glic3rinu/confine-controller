@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
-from common.validators import validate_prop_name, validate_net_iface_name
+from controller.core.validators import validate_prop_name, validate_net_iface_name
 
 from . import settings, ssl
 from .utils import get_mgmt_backend

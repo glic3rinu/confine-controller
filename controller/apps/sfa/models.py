@@ -2,7 +2,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from common.validators import validate_uuid, validate_rsa_pubkey
+from controller.core.validators import validate_uuid, validate_rsa_pubkey
 from nodes.models import Node
 from slices.models import Slice
 from users.models import User, Group

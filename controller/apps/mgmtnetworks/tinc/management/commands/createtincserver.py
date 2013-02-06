@@ -5,8 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from common.utils import update_settings
-from common.system import check_root, run, get_default_celeryd_username
+from controller.utils import update_settings
+from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
 

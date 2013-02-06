@@ -11,10 +11,10 @@ from django.db import models
 from IPy import IP
 from private_files import PrivateFileField
 
-from common.fields import MultiSelectField
-from common.ip import lsb, msb, int_to_hex_str
-from common.utils import autodiscover
-from common.validators import (validate_net_iface_name, validate_prop_name,
+from controller.models.fields import MultiSelectField
+from controller.utils.ip import lsb, msb, int_to_hex_str
+from controller.utils import autodiscover
+from controller.core.validators import (validate_net_iface_name, validate_prop_name,
     validate_sha256)
 from nodes.models import Node
 

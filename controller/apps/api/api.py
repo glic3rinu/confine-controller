@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from common.utils import autodiscover
+from controller.utils import autodiscover
 
 
 class ApiRoot(APIView):

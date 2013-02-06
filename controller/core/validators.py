@@ -5,7 +5,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from M2Crypto import BIO, RSA
 
-from common.ssl import pkcs_to_x501
+from controller.utils.ssl import pkcs_to_x501
 
 
 def validate_uuid(value):

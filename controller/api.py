@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from api import ApiRoot
-from common.utils import is_installed
+from controller.utils import is_installed
 from nodes import settings as nodes_settings
 
 

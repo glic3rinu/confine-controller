@@ -1,33 +1,17 @@
-from django import forms
+from django.db import models
 from django.core import exceptions
-from django.db.models import Field, SubfieldBase, TextField
 from django.utils.text import capfirst
 
-from .validators import validate_rsa_pubkey
+from controller.core.validators import validate_rsa_pubkey
+from controller.forms.fields import MultiSelectFormField
 
 
 #### MultiCSelect #####
 # New version of this snippet http://djangosnippets.org/snippets/1200/
 # tested with Django 1.4
 
-class MultiSelectFormField(forms.MultipleChoiceField):
-    widget = forms.CheckboxSelectMultiple
-    
-    def __init__(self, *args, **kwargs):
-        self.max_choices = kwargs.pop('max_choices', 0)
-        super(MultiSelectFormField, self).__init__(*args, **kwargs)
-    
-    def clean(self, value):
-        if not value and self.required:
-            raise forms.ValidationError(self.error_messages['required'])
-        # if value and self.max_choices and len(value) > self.max_choices:
-        #     raise forms.ValidationError('You must select a maximum of %s choice%s.'
-        #             % (apnumber(self.max_choices), pluralize(self.max_choices)))
-        return value
-
-
-class MultiSelectField(Field):
-    __metaclass__ = SubfieldBase
+class MultiSelectField(models.Field):
+    __metaclass__ = models.SubfieldBase
     
     def get_internal_type(self):
         return "CharField"
@@ -88,7 +72,7 @@ class MultiSelectField(Field):
         return self.get_db_prep_value(value)
 
 
-class RSAPublicKeyField(TextField):
+class RSAPublicKeyField(models.TextField):
     default_validators = [validate_rsa_pubkey]
     
     def __init__(self, *args, **kwargs):
@@ -112,5 +96,5 @@ try:
 except ImportError:
     pass
 else:
-    add_introspection_rules([], ["^common\.fields\.MultiSelectField"])
-    add_introspection_rules([], ["^common\.fields\.RSAPublicKeyField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.MultiSelectField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.RSAPublicKeyField"])

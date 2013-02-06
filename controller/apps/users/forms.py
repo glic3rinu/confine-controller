@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
-from common.fields import MultiSelectFormField
+from controller.forms.fields import MultiSelectFormField
 
 from users.models import User, JoinRequest
 

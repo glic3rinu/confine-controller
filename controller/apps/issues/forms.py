@@ -1,7 +1,7 @@
 from django import forms
 
-from common.forms import colored_field, admin_link
-from common.widgets import ShowText
+from controller.forms.utils import colored_field, admin_link
+from controller.forms.widgets import ShowText
 
 
 class MessageInlineForm(forms.ModelForm):

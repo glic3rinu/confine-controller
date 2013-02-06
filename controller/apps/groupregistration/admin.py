@@ -1,9 +1,10 @@
-from common.admin import ChangeViewActionsModelAdmin
-
 from django.contrib import admin
+
+from controller.admin import ChangeViewActionsModelAdmin
 
 from groupregistration.actions import approve_group, reject_group
 from groupregistration.models import GroupRegistration
+
 
 def group_info(obj):
     return ''.join([
@@ -11,17 +12,21 @@ def group_info(obj):
                 display_field('Description', obj.group.description),
             ])
 
+
 def user_info(obj):
     return ''.join([
                 display_field('username', obj.user.username),
                 display_field('email', obj.user.email),
             ])
 
+
 def display_field(name, value):
     return "<strong>%s:</strong> %s<br/>" % (name, value)
 
+
 group_info.allow_tags = True
 user_info.allow_tags = True
+
 
 class GroupRegistrationAdmin(ChangeViewActionsModelAdmin):
     actions = [approve_group, reject_group]

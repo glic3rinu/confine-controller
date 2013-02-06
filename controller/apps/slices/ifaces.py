@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from IPy import IP
 
-from common.ip import int_to_hex_str, split_len
+from controller.utils.ip import int_to_hex_str, split_len
 from nodes.settings import NODES_DEBUG_IPV6_PREFIX
 
 from .models import Sliver

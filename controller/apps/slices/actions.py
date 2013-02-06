@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy
 
-from common.admin import get_admin_link, get_modeladmin
+from controller.admin.utils import get_admin_link, get_modeladmin
 
 from .forms import SliverIfaceBulkForm
 from .models import Slice, Sliver, SliverIface

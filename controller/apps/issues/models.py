@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from common.models import generate_chainer_manager
+from controller.models.utils import generate_chainer_manager
 
 
 class QueueQuerySet(models.query.QuerySet):

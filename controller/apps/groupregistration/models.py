@@ -1,4 +1,4 @@
-from common.utils import send_mail_template
+from controller.utils import send_mail_template
 
 from django.conf import settings
 from django.db import models

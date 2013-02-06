@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.template import Context
 from django.utils.importlib import import_module
 
-from .system import run
+from controller.utils.system import run
 
 
 def autodiscover(module):

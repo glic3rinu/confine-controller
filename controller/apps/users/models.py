@@ -4,8 +4,8 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
-from common.utils import send_mail_template
-from common.validators import validate_ascii
+from controller.utils import send_mail_template
+from controller.core.validators import validate_ascii
 
 
 class Group(models.Model):

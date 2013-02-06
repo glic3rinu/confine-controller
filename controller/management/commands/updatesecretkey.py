@@ -4,8 +4,8 @@ from random import choice
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
-from common.utils import get_project_root
-from common.system import run
+from controller.utils import get_project_root
+from controller.utils.system import run
 
 
 class Command(NoArgsCommand):

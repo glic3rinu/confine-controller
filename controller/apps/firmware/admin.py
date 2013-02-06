@@ -7,8 +7,8 @@ from django.http import HttpResponse
 from django.utils import simplejson
 from singleton_models.admin import SingletonModelAdmin
 
-from common.admin import (get_modeladmin, get_admin_link, insert_action, colored, 
-    wrap_admin_view)
+from controller.admin.utils import (get_modeladmin, get_admin_link, insert_action,
+    colored, wrap_admin_view)
 from nodes.models import Node
 
 from .actions import get_firmware

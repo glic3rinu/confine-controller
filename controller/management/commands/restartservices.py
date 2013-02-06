@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from common.system import run, check_root
+from controller.utils.system import run, check_root
 
 
 class Command(BaseCommand):

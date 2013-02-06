@@ -9,9 +9,9 @@ from django.db.models import Q
 from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
-from common.admin import (link, insert_inline, colored, ChangeViewActionsModelAdmin,
-    admin_link, docstring_as_help_tip)
-from common.widgets import ReadOnlyWidget
+from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin.utils import link, insert_inline, colored, admin_link, docstring_as_help_tip
+from controller.forms.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import request_cert, reboot_selected
@@ -63,7 +63,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     actions = [request_cert, reboot_selected]
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]
-    change_form_template = "admin/common/change_form.html"
+    change_form_template = "admin/controller/change_form.html"
     
     def display_cert(self, node):
         """ Display certificate with some contextual help if cert is not present """

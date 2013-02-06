@@ -2,8 +2,8 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
-from common.validators import validate_rsa_pubkey
-from common.widgets import ShowText
+from controller.core.validators import validate_rsa_pubkey
+from controller.forms.widgets import ShowText
 
 from .validators import validate_scr
 

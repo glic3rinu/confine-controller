@@ -8,10 +8,11 @@ from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
-from common.admin import (ChangeViewActionsModelAdmin, colored, admin_link, link,
+from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin.utils import (colored, admin_link, link, get_admin_link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view,
-    docstring_as_help_tip, get_admin_link)
-from common.widgets import ReadOnlyWidget
+    docstring_as_help_tip)
+from controller.forms.widgets import ReadOnlyWidget
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline

@@ -1,6 +1,6 @@
 from IPy import IP
 
-from common.ip import int_to_hex_str, split_len
+from controller.utils.ip import int_to_hex_str, split_len
 from slices.ifaces import BaseIface
 from slices.models import Sliver
 

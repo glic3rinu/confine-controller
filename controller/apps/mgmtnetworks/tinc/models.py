@@ -7,9 +7,9 @@ from django.db import models
 from django_transaction_signals import defer
 from IPy import IP
 
-from common.fields import RSAPublicKeyField
-from common.ip import split_len, int_to_hex_str
-from common.validators import validate_host_name, OrValidator
+from controller.models.fields import RSAPublicKeyField
+from controller.utils.ip import split_len, int_to_hex_str
+from controller.core.validators import validate_host_name, OrValidator
 from nodes.models import Server, Node
 
 from . import settings, backend

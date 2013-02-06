@@ -1,7 +1,7 @@
 import gzip, os, tempfile, shutil
 from subprocess import Popen, PIPE
 
-from common.system import run
+from controller.utils.system import run
 
 
 class Image(object):

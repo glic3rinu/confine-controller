@@ -1,4 +1,4 @@
-from common.utils import autodiscover
+from controller.utils import autodiscover
 
 from .permissions import Permission, ReadOnlyPermission, AllowAllPermission
 

@@ -8,7 +8,8 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from common.admin import link, get_admin_link, ChangeViewActionsModelAdmin
+from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin.utils import link, get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request

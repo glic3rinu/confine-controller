@@ -14,8 +14,8 @@ from djcelery.models import TaskState
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
 
-from common.fields import MultiSelectField
-from common.models import generate_chainer_manager
+from controller.models.fields import MultiSelectField
+from controller.models.utils import generate_chainer_manager
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 

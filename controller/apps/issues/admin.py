@@ -3,8 +3,9 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.db import models
 
-from common.admin import admin_link, colored, ChangeViewActionsModelAdmin
-from issues.actions import (reject_tickets, resolve_tickets, take_tickets, 
+from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin.utils import admin_link, colored
+from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
     mark_as_unread)
 
 from .forms import MessageInlineForm, TicketInlineForm

@@ -83,7 +83,8 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'common.middlewares.DisableLoginCSRF',
+    # TODO put this on communitylab
+    'controller.core.middlewares.DisableLoginCSRF',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,7 +137,6 @@ INSTALLED_APPS = (
     
     # Confine
     'controller',
-    'common',
     'api',
     'permissions',
     'users',

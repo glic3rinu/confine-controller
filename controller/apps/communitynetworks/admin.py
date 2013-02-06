@@ -3,8 +3,8 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
-from common.admin import insert_inline, insert_list_display, link
-from common.utils import is_installed
+from controller.admin.utils import insert_inline, insert_list_display, link
+from controller.utils import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
 

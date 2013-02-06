@@ -177,8 +177,10 @@ function clone () {
     run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
     # TODO skeletone
     # [ $SKELETONE ] && run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
-    # This is a workaround for this issue https://github.com/pypa/pip/issues/317
+    # FIXME This is a workaround for this issue https://github.com/pypa/pip/issues/317
     run chmod +x $PROJECT_NAME/manage.py
+    run chmod +x $CONTROLLER_PATH/apps/firmware/scripts/mountimage.sh
+    # End of workaround ###
 }
 export -f clone
 

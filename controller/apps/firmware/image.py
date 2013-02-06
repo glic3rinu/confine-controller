@@ -47,18 +47,31 @@ class Image(object):
         os.mkdir(self.mnt)
         self.image = os.path.join(self.tmp, "image.bin")
     
+    def get_sector(self):
+        context = { 'image': self.image, 'part_nr': self.part_nr }
+        result = run("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|sed -n %(part_nr)dp" % context)
+        return int(result.stdout)
+    
+    def get_run_context(self):
+        return { 'mnt': self.mnt,
+                 'image': self.image,
+                 'partition': self.partition,
+                 'sector': self.get_sector(),}
+    
     def mount(self):
         """ mount image partition with user-space tools """
-        args = "'%s' %s %s %s" % (self.image, self.mnt, self.partition, self.part_nr)
-        script = os.path.join(self.scripts, "mountimage.sh")
-        # TODO This is a workaround for this issue https://github.com/pypa/pip/issues/317
-        run("chmod +x %s" % script)
-        run("%s -m %s" % (script, args), silent=False)
+        context = self.get_run_context()
+        run("mountpoint -q %(mnt)s" % context)
+        run("dd if=%(image)s of=%(partition)s skip=%(sector)d" % context, silent=False)
+        run("fuseext2 %(partition)s %(mnt)s -o rw+" % context, silent=False)
+        # fuseext2 is a pice of crap since doesn't return a correct exit code, let's kludge
+        run("mountpoint -q %(mnt)s" % context, silent=False)
     
     def umount(self):
         """ umount image partition """
-        args = "'%s' %s %s %s" % (self.image, self.mnt, self.partition, self.part_nr)
-        run("%s/mountimage.sh -u %s" % (self.scripts, args), silent=False)
+        context = self.get_run_context()
+        run("fusermount -u %(mnt)s" % context, silent=False)
+        run("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context, silent=False)
     
     def add_file(self, file):
         """

@@ -1,8 +1,8 @@
-from subprocess import Popen, PIPE
 import os, glob
 
 from celery.task import task
 
+from controller.utils.system import run
 from nodes.models import Server
 
 from .settings import TINC_NET_NAME
@@ -14,6 +14,8 @@ def update_tincd():
     Generates all local tinc/hosts/* and reloads tincd
     """
     from .models import TincClient
+    
+    # TODO generate also TincServers/Gateways on tinc/hosts ??
     
     server = Server.objects.get().tinc
     db_clients = list(TincClient.objects.all())
@@ -37,14 +39,7 @@ def update_tincd():
     
     # create all tinc hosts
     if script != '':
-        cmd = Popen(script, shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        if cmd.returncode > 0:
-            raise TincClient.UpdateTincdError(stderr)
-        
+        run(script, silent=False)
         # reload tincd in a separated command to prevent clients from losing its
         # connection when something goes wrong
-        cmd = Popen("/etc/init.d/tinc reload", shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        if cmd.returncode > 0:
-            raise TincClient.UpdateTincdError(stderr)
+        run("/etc/init.d/tinc reload", silent=False)

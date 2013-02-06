@@ -287,8 +287,6 @@ class TincClient(TincHost):
             self.pubkey = mem.getvalue()
             self.save()
         return private
-    
-    class UpdateTincdError(Exception): pass
 
 
 # Monkey-Patching Section

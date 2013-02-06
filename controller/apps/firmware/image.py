@@ -1,7 +1,9 @@
-import gzip, os, tempfile, shutil
-from subprocess import Popen, PIPE
+import gzip, os, tempfile, shutil, functools
 
 from controller.utils.system import run
+
+
+r = functools.partial(run, silent=False)
 
 
 class Image(object):
@@ -61,17 +63,17 @@ class Image(object):
     def mount(self):
         """ mount image partition with user-space tools """
         context = self.get_run_context()
-        run("mountpoint -q %(mnt)s" % context)
-        run("dd if=%(image)s of=%(partition)s skip=%(sector)d" % context, silent=False)
-        run("fuseext2 %(partition)s %(mnt)s -o rw+" % context, silent=False)
+        r("mountpoint -q %(mnt)s" % context)
+        r("dd if=%(image)s of=%(partition)s skip=%(sector)d" % context)
+        r("fuseext2 %(partition)s %(mnt)s -o rw+" % context)
         # fuseext2 is a pice of crap since doesn't return a correct exit code, let's kludge
-        run("mountpoint -q %(mnt)s" % context, silent=False)
+        r("mountpoint -q %(mnt)s" % context)
     
     def umount(self):
         """ umount image partition """
         context = self.get_run_context()
-        run("fusermount -u %(mnt)s" % context, silent=False)
-        run("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context, silent=False)
+        r("fusermount -u %(mnt)s" % context)
+        r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
     
     def add_file(self, file):
         """
@@ -97,14 +99,14 @@ class Image(object):
     
     def chmod(self, path, mode):
         """ change mode of the path """
-        run("chmod %s '%s'" % (mode, path), silent=False)
+        r("chmod %s '%s'" % (mode, path))
     
     def build(self, path=None):
         """ build the new image """
         # create temporary dirs
         self.prepare()
         # extract the image
-        run("cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image), silent=False)
+        r("cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image))
         self.mount()
         
         # create the added files
@@ -123,7 +125,7 @@ class Image(object):
         
         self.umount()
         # compress the generated image with gzip
-        run("gzip " + self.image, silent=False)
+        r("gzip " + self.image)
         self.image += '.gz'
         
         # move the image to the destination path if required

@@ -1,4 +1,4 @@
-import getpass, pwd, re, os
+import getpass, pwd, re, os, functools
 from optparse import make_option
 
 from django.contrib.contenttypes.models import ContentType
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             except KeyError:
                 raise CommandError("Username doesn't exists.")
         
-        server = Server.objects.get_or_create(id=1)
+        server, created = Server.objects.get_or_create(id=1)
         tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server',
                                                 content_type__app_label='nodes')
         
@@ -81,27 +81,6 @@ class Command(BaseCommand):
         else:
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
-        
-        if not protect:
-            tinc_port = options.get('tinc_port_dflt')
-            mgmt_prefix = options.get('mgmt_prefix')
-            update_settings(TINC_MGMT_IPV6_PREFIX=mgmt_prefix)
-            update_settings(TINC_PORT_DFLT=tinc_port)
-            
-            FILE_PATH = os.path.dirname(os.path.realpath(__file__))
-            SCRIPT_PATH = os.path.abspath(os.path.join(FILE_PATH, '../../scripts/create_server.sh'))
-            # This is a workarround for this issue https://github.com/pypa/pip/issues/317
-            run("chmod +x %s" % SCRIPT_PATH)
-            run("%s %s %s %s" % (SCRIPT_PATH, TINC_NET_NAME, mgmt_prefix.split('::')[0], tinc_port))
-            
-            # Get created pubkey
-            pubkey = ''
-            for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
-                pubkey += line
-                if line == '-----BEGIN RSA PUBLIC KEY-----\n':
-                    pubkey = line
-                elif line == '-----END RSA PUBLIC KEY-----\n':
-                    break
         
         # Prompt for username/password, and any other required fields.
         # Enclose this whole thing in a try/except to trap for a
@@ -127,12 +106,47 @@ class Command(BaseCommand):
         if username is None:
             username = default_username
         
+        tinc_port = options.get('tinc_port_dflt')
+        mgmt_prefix = options.get('mgmt_prefix')
+        update_settings(TINC_MGMT_IPV6_PREFIX=mgmt_prefix)
+        update_settings(TINC_PORT_DFLT=tinc_port)
+        
+        context = {
+            'net_name': TINC_NET_NAME,
+            'tinc_conf': ( "BindToAddress = 0.0.0.0\n"
+                           "Port = %s\n"
+                           "Name = server\n"
+                           "StrictSubnets = True" % tinc_port ),
+            'tinc_up': tinc_server.get_tinc_up(),
+            'tinc_down': tinc_server.get_tinc_down(),
+            'mgmt_prefix': mgmt_prefix.split('::')[0],
+            'user': username }
+        
+        r = functools.partial(run, silent=False)
+        if run("grep %(net_name)s /etc/tinc/nets.boot" % context).return_code == 1:
+            e("echo %(net_name)s >> /etc/tinc/nets.boot" % context)
+        r("mkdir -p /etc/tinc/%(net_name)s/hosts" % context)
+        r("echo '%(tinc_conf)s' > /etc/tinc/%(net_name)s/tinc.conf" % context)
+        # TODO get from tinc model!
+        r('echo "Subnet = %(mgmt_prefix)s:0:0:0:0:2/128" > /etc/tinc/%(net_name)s/hosts/server' % context)
+        r("echo '%(tinc_up)s' > /etc/tinc/%(net_name)s/tinc-up" % context)
+        r("echo '%(tinc_down)s' > /etc/tinc/%(net_name)s/tinc-down" % context)
+        r("chown %(user)s /etc/tinc/%(net_name)s/hosts" % context)
+        r("chmod +x /etc/tinc/%(net_name)s/tinc-up" % context)
+        r("chmod +x /etc/tinc/%(net_name)s/tinc-down" % context)
+        
         if not protect:
+            r('tincd -n %(net_name)s -K' % context)
+            # Get created pubkey
+            pubkey = ''
+            for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
+                pubkey += line
+                if line == '-----BEGIN RSA PUBLIC KEY-----\n':
+                    pubkey = line
+                elif line == '-----END RSA PUBLIC KEY-----\n':
+                    break
             tinc_server.pubkey = pubkey
             tinc_server.save()
-        run("""chown %(user)s /etc/tinc/%(net)s/hosts;
-               chmod +x /etc/tinc/%(net)s/tinc-up;
-               chmod +x /etc/tinc/%(net)s/tinc-down""" % {'net': TINC_NET_NAME,
-                                                          'user': username})
+        
         self.stdout.write('Tincd server successfully created and configured.')
         self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')

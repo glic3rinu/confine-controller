@@ -1,7 +1,9 @@
 from django import forms
 from django.core import exceptions
-from django.db.models import Field, SubfieldBase
+from django.db.models import Field, SubfieldBase, TextField
 from django.utils.text import capfirst
+
+from .validators import validate_rsa_pubkey
 
 
 #### MultiCSelect #####
@@ -65,7 +67,7 @@ class MultiSelectField(Field):
         if self.choices:
             func = lambda self, fieldname = name, choicedict = dict(self.choices): ",".join([choicedict.get(value, value) for value in getattr(self, fieldname)])
             setattr(cls, 'get_%s_display' % self.name, func)
- 
+    
     def validate(self, value, model_instance):
         arr_choices = self.get_choices_selected(self.get_choices_default())
         for opt_select in value:
@@ -86,9 +88,29 @@ class MultiSelectField(Field):
         return self.get_db_prep_value(value)
 
 
+class RSAPublicKeyField(TextField):
+    default_validators = [validate_rsa_pubkey]
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['unique'] = kwargs.get('unique', True)
+        kwargs['null'] = kwargs.get('null', True)
+        kwargs['blank'] = kwargs.get('blank', True)
+        return super(RSAPublicKeyField, self).__init__(*args, **kwargs)
+    
+    def get_prep_value(self, value):
+        if not value:
+            value = None
+        else:
+            value = value.strip()
+        return super(RSAPublicKeyField, self).get_prep_value(value)
+    
+    # TODO to_python returns an rsa key
+
+
 try:
     from south.modelsinspector import add_introspection_rules
 except ImportError:
     pass
 else:
     add_introspection_rules([], ["^common\.fields\.MultiSelectField"])
+    add_introspection_rules([], ["^common\.fields\.RSAPublicKeyField"])

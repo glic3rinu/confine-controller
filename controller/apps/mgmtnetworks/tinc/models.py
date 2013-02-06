@@ -7,8 +7,9 @@ from django.db import models
 from django_transaction_signals import defer
 from IPy import IP
 
+from common.fields import RSAPublicKeyField
 from common.ip import split_len, int_to_hex_str
-from common.validators import validate_host_name, OrValidator, validate_rsa_pubkey
+from common.validators import validate_host_name, OrValidator
 from nodes.models import Server, Node
 
 from . import settings, backend
@@ -45,9 +46,8 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True,
-        help_text='PEM-encoded RSA public key used on tinc management network.',
-        validators=[validate_rsa_pubkey])
+    pubkey = RSAPublicKeyField('Public Key', help_text='PEM-encoded RSA public '
+        'key used on tinc management network.')
     
     class Meta:
         abstract = True
@@ -56,23 +56,7 @@ class TincHost(models.Model):
     def name(self):
         return str(self)
     
-    def clean(self):
-        """ Empty pubkey as NULL instead of empty string """
-        # TODO  There is a bug in django, when the object is created on inlines
-        #       model.clean() doesn't get called. When saving chanegs it is called
-        #       A more elaborated describtion is required for this tiket:
-        #       https://code.djangoproject.com/ticket/19467
-        if not self.pubkey:
-            self.pubkey = None
-        else:
-            self.pubkey = self.pubkey.strip()
-        super(TincHost, self).clean()
-    
     def save(self, *args, **kwargs):
-        # FIXME this is a hack because django seems to have a bug and not call 
-        #       clean() on inlines
-        self.clean()
-        # End of hack
         super(TincHost, self).save(*args, **kwargs)
         defer(update_tincd.delay)
     

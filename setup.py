@@ -13,7 +13,6 @@ setup(
     include_package_data = True,
     license = 'BSD License',
     description = 'Django-based framework for building control servers for computer networking and distributed systems testbeds.',
-    long_description = 'Django-based framework for building control servers for computer networking and distributed systems testbeds.',
     scripts=['controller/bin/controller-admin.sh'],
     url = 'http://wiki.confine-project.eu/soft:server',
     author = 'Confine Project',

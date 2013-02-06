@@ -254,7 +254,7 @@ class Config(SingletonModel):
     
     def render_uci(self, node, sections=None):
         """ Renders UCI file """
-        uci = template.loader.get_template('uci')
+        uci = template.loader.get_template('firmware/uci')
         context = Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
     
@@ -286,11 +286,11 @@ class BaseImage(models.Model):
         for arch in self.architectures:
             arch_regex = "(^|\s)%s(,|$)" % arch
             try:
-                existing = BaseImage.objects.get(architectures__regex=arch_regex)
+                existing = BaseImage.objects.filter(architectures__regex=arch_regex)
             except BaseImage.DoesNotExist:
                 pass
             else:
-                if existing and (not self.pk or existing.pk != self.pk):
+                if existing and (not self.pk or existing[0].pk != self.pk):
                     raise ValidationError("%s already present" % arch)
         super(BaseImage, self).clean()
 

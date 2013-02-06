@@ -1,6 +1,8 @@
 import gzip, os, tempfile, shutil
 from subprocess import Popen, PIPE
 
+from common.system import run
+
 
 class Image(object):
     """ 
@@ -48,14 +50,15 @@ class Image(object):
     def mount(self):
         """ mount image partition with user-space tools """
         args = "'%s' %s %s %s" % (self.image, self.mnt, self.partition, self.part_nr)
-        mountimage = "%s/mountimage.sh -m %s" % (self.scripts, args)
-        self._exec_cmd(mountimage)
+        script = os.path.join(self.scripts, "mountimage.sh")
+        # TODO This is a workaround for this issue https://github.com/pypa/pip/issues/317
+        run("chmod +x %s" % script)
+        run("%s -m %s" % (script, args), silent=False)
     
     def umount(self):
         """ umount image partition """
         args = "'%s' %s %s %s" % (self.image, self.mnt, self.partition, self.part_nr)
-        umountimage = "%s/mountimage.sh -u %s" % (self.scripts, args)
-        self._exec_cmd(umountimage)
+        run("%s/mountimage.sh -u %s" % (self.scripts, args), silent=False)
     
     def add_file(self, file):
         """
@@ -81,16 +84,14 @@ class Image(object):
     
     def chmod(self, path, mode):
         """ change mode of the path """
-        chmod = "chmod %s '%s'" % (mode, path) 
-        self._exec_cmd(chmod)
+        run("chmod %s '%s'" % (mode, path), silent=False)
     
     def build(self, path=None):
         """ build the new image """
         # create temporary dirs
         self.prepare()
         # extract the image
-        extract = "cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image)
-        self._exec_cmd(extract)
+        run("cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image), silent=False)
         self.mount()
         
         # create the added files
@@ -109,35 +110,9 @@ class Image(object):
         
         self.umount()
         # compress the generated image with gzip
-        compress = "gzip " + self.image
-        self._exec_cmd(compress)
+        run("gzip " + self.image, silent=False)
         self.image += '.gz'
         
         # move the image to the destination path if required
         if path is not None:
             self.move(path)
-    
-    def _exec_cmd(self, command):
-        """ Execute shell commands """
-        mount_errors = {
-            11: "Unable to find partition start sector",
-            12: "%s already mounted" % self.mnt,
-            13: "Error extracting partition",
-            14: "Cannot mount extracted partition",
-            15: "Unable to unmount %s" % self.mnt,
-            16: "Error joining extracted partition"}
-        
-        cmd = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-        (stdout, stderr) = cmd.communicate()
-        returncode = cmd.returncode
-        if returncode > 0:
-            error_msg = ""
-            try:
-                error_msg += "%s --  " % mount_errors[returncode]
-            except KeyError:
-                pass
-            error_msg += stderr
-            raise self.BuildError(error_msg)
-    
-    class BuildError(Exception): pass
-

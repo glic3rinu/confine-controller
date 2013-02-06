@@ -65,7 +65,7 @@ class CustomMenu(Menu):
         
         # Users menu item
         user_items = [ items.MenuItem('User', reverse('admin:users_user_changelist')),
-                       items.MenuItem('Group', reverse('admin:users_user_changelist'))]
+                       items.MenuItem('Group', reverse('admin:users_group_changelist'))]
         
         if is_installed('registration') and user.has_module_perms('registration'):
             user_items.append(items.MenuItem('User Registration',

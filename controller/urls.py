@@ -8,6 +8,7 @@ from api import api
 admin.autodiscover()
 api.autodiscover()
 
+
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin_tools/', include('admin_tools.urls')),
@@ -17,3 +18,4 @@ urlpatterns = patterns('',
     url(r'^api/', include(api.urls)),
     url(r'^accounts/', include('registration.backends.default.urls')),
 )
+

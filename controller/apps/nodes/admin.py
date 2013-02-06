@@ -81,19 +81,24 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     num_ifaces.short_description = 'Ifaces'
     num_ifaces.admin_order_field = 'direct_ifaces__count'
     
-    def get_form(self, request, *args, **kwargs):
+    def get_form(self, request, obj=None, *args, **kwargs):
         """ request.user as default node admin """
-        form = super(NodeAdmin, self).get_form(request, *args, **kwargs)
+        form = super(NodeAdmin, self).get_form(request, obj=obj, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
             query = Q( Q(roles__is_admin=True) | Q(roles__is_technician=True) )
             query = Q( query & Q(allow_nodes=True) )
+            if obj and obj.pk:
+                # Add actual group
+                query = Q( query | Q(pk=obj.group.pk) )
             groups = user.groups.filter(query)
             num_groups = groups.count()
             if num_groups >= 1:
+                # User has can add nodes in more than one group
                 form.base_fields['group'].queryset = groups
             if num_groups == 1:
+                # User can add nodes in only one group (set that group by default)
                 ro_widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].widget = ro_widget
                 form.base_fields['group'].required = False
@@ -135,7 +140,6 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def changelist_view(self, request, extra_context=None):
         """ Default filter as 'my_nodes=True' """
         from django.contrib.sites.models import RequestSite
-        print RequestSite(request)
         if not request.GET.has_key('my_nodes'):
             q = request.GET.copy()
             q['my_nodes'] = 'True'

@@ -215,7 +215,7 @@ class User(auth_models.AbstractBaseUser):
         return True
     
     @property
-    def roles(self):
+    def role_set(self):
         roles = set()
         for role in Roles.objects.filter(user=self):
             if role.is_admin:
@@ -232,7 +232,7 @@ class User(auth_models.AbstractBaseUser):
         return roles
     
     def has_roles(self, roles):
-        if self.roles.intersection(roles): 
+        if self.role_set.intersection(roles):
             return True
         return False
 

@@ -1,7 +1,9 @@
 from __future__ import absolute_import
 
 from nodes.models import Node
-from permissions import Permission
+from permissions import Permission, AllowAllPermission
+
+from .models import Build
 
 
 class FirmwarePermission(Permission):
@@ -13,3 +15,4 @@ class FirmwarePermission(Permission):
 
 
 Node.has_permission._aggregate(FirmwarePermission())
+Build.has_permission = AllowAllPermission()

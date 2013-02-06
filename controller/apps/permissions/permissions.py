@@ -57,3 +57,8 @@ class ReadOnlyPermission(Permission):
     def view(self, caller, user):
         return True
 
+
+class AllowAllPermission(object):
+    """ All methods return True """
+    def __get__(self, instance, cls):
+        return lambda *args: True

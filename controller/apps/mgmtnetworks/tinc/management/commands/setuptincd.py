@@ -119,7 +119,7 @@ class Command(BaseCommand):
         
         r = functools.partial(run, silent=False)
         if run("grep %(net_name)s /etc/tinc/nets.boot" % context).return_code == 1:
-            e("echo %(net_name)s >> /etc/tinc/nets.boot" % context)
+            r("echo %(net_name)s >> /etc/tinc/nets.boot" % context)
         r("mkdir -p /etc/tinc/%(net_name)s/hosts" % context)
         r("echo '%(tinc_conf)s' > /etc/tinc/%(net_name)s/tinc.conf" % context)
         r('echo "Subnet = %(mgmt_prefix)s:0:0:0:0:2/128" > /etc/tinc/%(net_name)s/hosts/server' % context)

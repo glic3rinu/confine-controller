@@ -25,7 +25,7 @@ class Command(BaseCommand):
             '</Directory>\n\n'
             'Alias /media/ %(site_root)s/media/\n'
             'Alias /static/ %(site_root)s/static/\n'
-            '<Directory /home/confine/controller/static/>\n'
+            '<Directory %(site_root)s/static/>\n'
             '    ExpiresActive On\n'
             '    ExpiresByType image/gif A1209600\n'
             '    ExpiresByType image/jpeg A1209600\n'
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             'RedirectMatch ^/$ /admin\n' % {'project_root': project_root,
                                             'site_root': site_root})
         
-        run("echo '%s' > /etc/apache2/sites-available/%s.conf" % (apache_conf, project_name))
+        run("echo '%s' > /etc/apache2/httpd.conf" % (apache_conf, project_name))
         run('a2ensite %s.conf' % project_name)
         run('a2enmod expires')
         # Give upload file permissions to apache

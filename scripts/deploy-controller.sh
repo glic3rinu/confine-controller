@@ -436,7 +436,7 @@ print_deploy_help () {
 		            project name, default confine.
 		            
 		    ${bold}-l, --skeletone${normal}
-		            project skeletone, default confine.
+		            project skeletone, default project_name.
 		            
 		    ${bold}-t, --tinc_port${normal}
 		            tinc port
@@ -477,7 +477,7 @@ function deploy () {
     DB_PORT="5432"
     KEYBOARD_LAYOUT=''
     PROJECT_NAME='confine'
-    SKELETONE='confine'
+    SKELETONE=false
     TINC_PORT=false
     MGMT_PREFIX=false
 
@@ -535,6 +535,7 @@ function deploy () {
     esac
     
     [ $INSTALL_PATH == false ] && INSTALL_PATH="~$USER/$PROJECT_NAME"
+    [ $SKELETONE == false ] && SKELETONE=$PROJECT_NAME
     
     if [[ $TYPE != 'local' ]]; then 
         

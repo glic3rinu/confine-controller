@@ -109,6 +109,8 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+
+    'controller',
     # Third Party APPS
     'south',
     'fluent_dashboard',
@@ -134,7 +136,6 @@ INSTALLED_APPS = (
 #    'django.contrib.sites',
     
     # Confine
-    'controller',
     'api',
     'permissions',
     'users',

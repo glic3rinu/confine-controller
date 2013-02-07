@@ -151,7 +151,7 @@ print_clone_help () {
 
 
 function clone () {
-    local SKELETONE=""
+    local SKELETONE=false
     local PROJECT_NAME="$2"; shift
     
     opts=$(getopt -o s:h -l skeletone:,help -- "$@") || exit 1
@@ -172,11 +172,11 @@ function clone () {
     unset OPTIND
     unset opt
     [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
-    
+    [ $SKELETONE == false ] && SKELETONE=$PROJECT_NAME
     CONTROLLER_PATH=$(get_controller_dir)
     run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
-    # TODO skeletone
-    # [ $SKELETONE ] && run cp -r "${CONTROLLER_PATH}/projects/${SKELETONE}/*" $PROJECT_NAME/$PROJECT_NAME
+    if [[ -f $CONTROLLER_PATH/projects/$SKELETONE ]]; then
+        echo "INSTALLED_APPS = ('controller.projects.$SKELETONE',) + INSTALLED_APPS" >> $PROJECT_NAME/$PROJECT_NAME/settings.py
     # FIXME This is a workaround for this issue https://github.com/pypa/pip/issues/317
     run chmod +x $PROJECT_NAME/manage.py
     # End of workaround ###

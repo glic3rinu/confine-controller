@@ -78,7 +78,7 @@ class Migration(SchemaMigration):
         },
         u'firmware.baseimage': {
             'Meta': {'object_name': 'BaseImage'},
-            'architectures': ('common.fields.MultiSelectField', [], {'max_length': '250'}),
+            'architectures': ('controller.models.fields.MultiSelectField', [], {'max_length': '250'}),
             'config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['firmware.Config']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'image': ('django.db.models.fields.files.FileField', [], {'max_length': '100'})

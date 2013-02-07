@@ -13,7 +13,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Template.node_archs'
         db.add_column(u'slices_template', 'node_archs',
-                      self.gf('common.fields.MultiSelectField')(default='amd64', max_length=32),
+                      self.gf('controller.models.fields.MultiSelectField')(default='amd64', max_length=32),
                       keep_default=False)
 
 
@@ -159,7 +159,7 @@ class Migration(SchemaMigration):
             'image': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'node_archs': ('common.fields.MultiSelectField', [], {'default': "'amd64'", 'max_length': '32'}),
+            'node_archs': ('controller.models.fields.MultiSelectField', [], {'default': "'amd64'", 'max_length': '32'}),
             'type': ('django.db.models.fields.CharField', [], {'default': "'debian6'", 'max_length': '32'})
         },
         u'tinc.island': {

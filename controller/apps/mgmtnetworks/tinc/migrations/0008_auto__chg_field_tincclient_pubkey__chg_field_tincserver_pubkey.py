@@ -10,10 +10,10 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'TincClient.pubkey'
-        db.alter_column(u'tinc_tincclient', 'pubkey', self.gf('common.fields.RSAPublicKeyField')(unique=True, null=True))
+        db.alter_column(u'tinc_tincclient', 'pubkey', self.gf('controller.models.fields.RSAPublicKeyField')(unique=True, null=True))
 
         # Changing field 'TincServer.pubkey'
-        db.alter_column(u'tinc_tincserver', 'pubkey', self.gf('common.fields.RSAPublicKeyField')(unique=True, null=True))
+        db.alter_column(u'tinc_tincserver', 'pubkey', self.gf('controller.models.fields.RSAPublicKeyField')(unique=True, null=True))
 
     def backwards(self, orm):
 
@@ -71,7 +71,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tinc.Island']", 'null': 'True', 'blank': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'pubkey': ('common.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
+            'pubkey': ('controller.models.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         u'tinc.tincserver': {
             'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincServer'},
@@ -79,7 +79,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'pubkey': ('common.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
+            'pubkey': ('controller.models.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         u'users.group': {
             'Meta': {'object_name': 'Group'},

@@ -221,7 +221,7 @@ class Migration(SchemaMigration):
             'image': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'node_archs': ('common.fields.MultiSelectField', [], {'max_length': '32'}),
+            'node_archs': ('controller.models.fields.MultiSelectField', [], {'max_length': '32'}),
             'type': ('django.db.models.fields.CharField', [], {'default': "'debian6'", 'max_length': '32'})
         },
         u'tinc.island': {

@@ -44,7 +44,7 @@ class Migration(SchemaMigration):
         db.create_table(u'firmware_baseimage', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('config', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['firmware.Config'])),
-            ('architectures', self.gf('common.fields.MultiSelectField')(max_length=250)),
+            ('architectures', self.gf('controller.models.fields.MultiSelectField')(max_length=250)),
             ('image', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
         ))
         db.send_create_signal(u'firmware', ['BaseImage'])
@@ -105,7 +105,7 @@ class Migration(SchemaMigration):
         },
         u'firmware.baseimage': {
             'Meta': {'object_name': 'BaseImage'},
-            'architectures': ('common.fields.MultiSelectField', [], {'max_length': '250'}),
+            'architectures': ('controller.models.fields.MultiSelectField', [], {'max_length': '250'}),
             'config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['firmware.Config']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'image': ('django.db.models.fields.files.FileField', [], {'max_length': '100'})

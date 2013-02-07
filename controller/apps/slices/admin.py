@@ -206,7 +206,7 @@ class NodeListAdmin(NodeAdmin):
     def queryset(self, request):
         """ Filter node list excluding nodes with already slivers of the slice """
         qs = super(NodeListAdmin, self).queryset(request)
-        qs = qs.exclude(pk__in=Node.objects.filter(sliver__slice=self.slice_id))
+        qs = qs.exclude(slivers__slice=self.slice_id)
         qs = qs.annotate(models.Count('slivers'))
         return qs
     

@@ -177,6 +177,7 @@ function clone () {
     run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
     if [[ -f $CONTROLLER_PATH/projects/$SKELETONE ]]; then
         echo "INSTALLED_APPS = ('controller.projects.$SKELETONE',) + INSTALLED_APPS" >> $PROJECT_NAME/$PROJECT_NAME/settings.py
+    fi
     # FIXME This is a workaround for this issue https://github.com/pypa/pip/issues/317
     run chmod +x $PROJECT_NAME/manage.py
     # End of workaround ###

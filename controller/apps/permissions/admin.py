@@ -105,9 +105,11 @@ class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
         """ Prevent add another button to appear """
         opts = self.opts
         object_id = request.path.split('/')[-2]
-        if isinstance(object_id, type):
+        if object_id.isdigit():
             parent = self.parent_model.objects.get(pk=object_id)
-            return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent)
+            if not request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent):
+                return False
+                # TODO inlines save_model is not called so we have find the way of checking add permissions with the resulting object
         return super(PermissionTabularInline, self).has_add_permission(request, obj=obj)
 
 
@@ -116,7 +118,9 @@ class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularI
         """ Prevent add another button to appear """
         opts = self.opts
         object_id = request.path.split('/')[-2]
-        if isinstance(object_id, type):
+        if object_id.isdigit():
             parent = self.parent_model.objects.get(pk=object_id)
-            return request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent)
+            if not request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent):
+                return False
+                # TODO inlines save_model is not called so we have find the way of checking add permissions with the resulting object
         return super(PermissionGenericTabularInline, self).has_add_permission(request, obj=obj)

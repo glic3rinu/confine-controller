@@ -308,6 +308,10 @@ class JoinRequest(models.Model):
                     to=self.user.email)
         self.delete()
     
+    def ignore(self, *args, **kwargs):
+        """ Just delete it without sending notifications """
+        self.delete(*args, **kwargs)
+    
     def notify(self, template, to):
         context = {'group': self.group}
         send_mail_template(template=template, context=context, to=to)

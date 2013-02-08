@@ -28,6 +28,7 @@ class RolesPermission(Permission):
     def add(self, caller, user):
         if self.is_class(caller):
             return user.has_roles(('admin',))
+        print caller, user
         return caller.group.has_role(user, 'admin')
     
     def change(self, caller, user):
@@ -45,8 +46,6 @@ class GroupPermission(Permission):
         return True
     
     def change(self, caller, user):
-        if self.is_class(caller):
-            return True
         return caller.has_role(user, 'admin')
     
     def delete(self, caller, user):

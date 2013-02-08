@@ -26,6 +26,12 @@ class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
 
+    def save_model(self, request, obj, form, change):
+        """ Passing obj to has_add_permission for checking """
+        print obj, 'resdsdsdeee'
+        if not change and not self.has_add_permission(request, obj):
+            raise PermissionDenied
+        obj.save()
 
 class JoinRequestInline(PermissionTabularInline):
     model = JoinRequest

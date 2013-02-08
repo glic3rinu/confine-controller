@@ -49,7 +49,8 @@ class JoinRequestForm(forms.ModelForm):
     ACTIONS = (
         (None, '------'),
         ('accept', 'Accept'),
-        ('reject', 'Reject'))
+        ('reject', 'Reject'),
+        ('ignore', 'Ignore'))
     ROLES = (
         ('researcher', 'Researcher'),
         ('admin', 'Admin'),
@@ -66,5 +67,5 @@ class JoinRequestForm(forms.ModelForm):
         if action == 'accept':
             roles = self.cleaned_data.get('roles')
             self.instance.accept(roles=roles)
-        elif action == 'reject':
-            self.instance.reject()
+        else:
+            getattr(self.instance, action)()

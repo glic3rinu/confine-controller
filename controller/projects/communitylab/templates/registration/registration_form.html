@@ -1,6 +1,7 @@
 {% extends "registration/layout.html" %}
 
 {% block accounts %}
+ <div style="padding-left:50px;">
     <form action="." method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
@@ -14,5 +15,7 @@
             <label>&nbsp;</label>
             <input type="submit" value="Sign up" />
         </div>
+
     </form>
+</div>
 {% endblock %}

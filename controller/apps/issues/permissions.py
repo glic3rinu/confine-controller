@@ -15,13 +15,13 @@ class TicketPermission(Permission):
         return True
     
     def change(self, caller, user):
-        if self.is_class(caller):
+        if self._is_class(caller):
             return True
 
 
 class MessagePermission(Permission):
     def view(self, caller, user):
-        if not self.is_class(caller):
+        if not self._is_class(caller):
             if caller.visibility == Message.PUBLIC:
                 return True
             elif caller.visibility == Message.PRIVATE:

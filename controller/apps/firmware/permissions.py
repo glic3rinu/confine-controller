@@ -8,7 +8,7 @@ from .models import Build
 
 class FirmwarePermission(Permission):
     def getfirmware(self, caller, user):
-        if not self.is_class(caller):
+        if not self._is_class(caller):
             if caller.group.has_roles(user, roles=['admin', 'technician']):
                 return True
         return False

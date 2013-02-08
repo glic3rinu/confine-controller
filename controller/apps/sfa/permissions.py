@@ -11,7 +11,7 @@ class SfaObjectPermission(Permission):
     
     def add(self, caller, user):
         """ Admins can add """
-        if self.is_class(caller):
+        if self._is_class(caller):
             return user.has_roles(('admin',))
         elif type(caller.content_object) is Group:
             return caller.content_object.has_role(user, 'admin')
@@ -19,7 +19,7 @@ class SfaObjectPermission(Permission):
     
     def change(self, caller, user):
         """ Group admins can change """
-        if self.is_class(caller):
+        if self._is_class(caller):
             return user.has_roles(('admin',))
         elif type(caller.content_object) is Group:
             return caller.content_object.has_role(user, 'admin')
@@ -27,7 +27,7 @@ class SfaObjectPermission(Permission):
     
     def delete(self, caller, user):
         """ Group admins can delete """
-        if self.is_class(caller):
+        if self._is_class(caller):
             return user.has_roles(('admin',))
         elif type(caller.content_object) is Group:
             return caller.content_object.has_role(user, 'admin')

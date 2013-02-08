@@ -19,11 +19,11 @@ urlpatterns = patterns('',
 if is_installed('registration'):
     from registration.forms import RegistrationFormUniqueEmail
     urlpatterns += patterns('',
-        url(r'^accounts/', include('registration.backends.default.urls')),
         url(r'^accounts/register/$', 'registration.views.register',
             {'form_class': RegistrationFormUniqueEmail,
              'backend': 'registration.backends.default.DefaultBackend'},
-            name='registration_register'),)
+            name='registration_register'),
+        url(r'^accounts/', include('registration.backends.default.urls')),)
 
 
 if is_installed('api'):

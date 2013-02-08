@@ -95,6 +95,10 @@ class PermExtensionMixin(object):
         template_response.context_data['has_change_permission'] = has_change_permission
         return template_response
 
+    def get_inline_instances(self, request, obj=None):
+        """ Hack! Hook parent obj just in time to use in has_add_permission """
+        request.__parent_object__ = obj
+        return super(PermExtensionMixin, self).get_inline_instances(request, obj=obj)
 
 class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
     pass
@@ -104,9 +108,8 @@ class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
     def has_add_permission(self, request, obj=None):
         """ Prevent add another button to appear """
         opts = self.opts
-        object_id = request.path.split('/')[-2]
-        if object_id.isdigit():
-            parent = self.parent_model.objects.get(pk=object_id)
+        parent = request.__parent_object__
+        if parent is not None:
             if not request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent):
                 return False
                 # TODO inlines save_model is not called so we have find the way of checking add permissions with the resulting object

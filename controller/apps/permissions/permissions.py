@@ -48,12 +48,13 @@ class Permission(object):
             if not method[0].startswith('_'):
                 setattr(type(self), method[0], method[1])
     
-    def is_class(self, caller):
+    def _is_class(self, caller):
         """ shortcut for inspect.isclass"""
         return inspect.isclass(caller)
 
 
 class ReadOnlyPermission(Permission):
+    """ Read only permissions """
     def view(self, caller, user):
         return True
 
@@ -62,3 +63,28 @@ class AllowAllPermission(object):
     """ All methods return True """
     def __get__(self, instance, cls):
         return lambda *args: True
+
+
+class RelatedPermission(Permission):
+    """ Inherit permissions of a related object """
+    def __init__(self, relation):
+        self.relation = relation
+    
+    def __get__(self, instance, cls):
+        if instance is not None:
+            caller = instance
+        elif cls is not None:
+            caller = cls
+        else: 
+            raise TypeError('WTF are you doing dude?')
+        def call(user, perm):
+            # Walk through the FK relations
+            relations = self.relation.split('.')
+            if inspect.isclass(caller):
+                parent = caller
+                for relation in relations:
+                    parent = getattr(parent, relation).field.rel.to
+            else:
+                parent = reduce(getattr, relations, caller)
+            return getattr(parent.has_permission, perm)(user)
+        return call

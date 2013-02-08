@@ -1,7 +1,7 @@
 {% extends "admin/permissions_change_form.html" %}
 {% load i18n %}
 {% block object-tools-items %}
-{% if has_add_permission %}
+{% if has_change_permission %}
     <li><a href="add_sliver/" class="addlink">Add Sliver</a></li>
     {% for item in object_tools_items %}
         <li><a href="{{item.0}}/" class="{{item.3}}">{{item.2}}</a></li>

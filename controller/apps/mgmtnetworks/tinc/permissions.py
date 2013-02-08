@@ -13,16 +13,17 @@ class HostPermission(Permission):
         return True
     
     def change(self, caller, user):
-        if self.is_class(caller):
+        if self._is_class(caller):
             return True
         return caller.owner == user
     
     def delete(self, caller, user):
-        if self.is_class(caller):
+        if self._is_class(caller):
             return True
         return self.change(caller, user)
 
-
+# Since it uses generic relations we must relay that permissions will be 
+# handled by the parent object
 TincClient.has_permission = AllowAllPermission()
 TincServer.has_permission = ReadOnlyPermission()
 Host.has_permission = HostPermission()

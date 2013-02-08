@@ -320,14 +320,15 @@ class SliverInline(PermissionTabularInline):
     def sliver_note2(self, instance):
         pass
     sliver_note2.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
-                                             '</a> button on the top-left of this page')
+                                               '</a> button on the top-left of this page')
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
         if obj is None:
             return [(None, {'fields': ['sliver_note1']})]
         # The slices is registred: display add button in the inline header
-        self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
+        if self.has_change_permission(request, obj, view=False):
+            self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
         if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]
         return super(SliverInline, self).get_fieldsets(request, obj=obj)

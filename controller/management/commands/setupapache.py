@@ -42,8 +42,9 @@ class Command(BaseCommand):
                                             'site_root': site_root})
         
         run("echo '%s' > /etc/apache2/httpd.conf" % (apache_conf, project_name))
-        run('a2ensite %s.conf' % project_name)
+        # run('a2ensite %s.conf' % project_name)
         run('a2enmod expires')
+        run('a2enmod deflate')
         # Give upload file permissions to apache
         run('adduser www-data %s' % username)
         run('chmod g+w %s/media/firmwares' % site_root)

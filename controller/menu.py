@@ -31,24 +31,30 @@ class CustomMenu(Menu):
             items.MenuItem('Dashboard', reverse('admin:index')),
             items.Bookmarks(),]
         
-        self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')))
+        if user.has_module_perms('nodes'):
+            self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist'),
+                children=[
+                    items.MenuItem('Server', reverse('admin:nodes_server_changelist')),
+                ]))
         
         if user.has_module_perms('slices'):
-            self.children.append(items.MenuItem('Slices', reverse('admin:app_list', args=['slices']),
+            self.children.append(items.MenuItem('Slices', reverse('admin:slices_slice_changelist'),
                 children=[
-                    items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
                     items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
                     items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
                 ]))
         
-        if is_installed('mgmtnetworks.tinc') and user.has_module_perms('tinc'):
-            self.children.append(items.MenuItem('Tinc', reverse('admin:app_list', args=['tinc']),
-                children=[
-                    items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
-                    items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
-                    items.MenuItem('TincAddresses', reverse('admin:tinc_tincaddress_changelist')),
-                    items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
-                ]))
+        if is_installed('mgmtnetworks.tinc'):
+            if user.is_superuser:
+                self.children.append(items.MenuItem('Tinc', reverse('admin:app_list', args=['tinc']),
+                    children=[
+                        items.MenuItem('Gateways', reverse('admin:tinc_gateway_changelist')),
+                        items.MenuItem('Islands', reverse('admin:tinc_island_changelist')),
+                        items.MenuItem('TincAddresses', reverse('admin:tinc_tincaddress_changelist')),
+                        items.MenuItem('Hosts', reverse('admin:tinc_host_changelist')),
+                    ]))
+            elif user.has_module_perms('tinc'):
+                self.children.append(items.MenuItem('Tinc Hosts', reverse('admin:tinc_host_changelist')))
         
         administration_models = ()
         
@@ -75,11 +81,12 @@ class CustomMenu(Menu):
             user_items.append(items.MenuItem('Group registration',
                               reverse('admin:groupregistration_groupregistration_changelist')))
         
-        admin_item.children.append(items.MenuItem('Users', children=user_items))
+        admin_item.children.append(items.MenuItem('Users', reverse('admin:app_list', args=['users']),
+            children=user_items))
         
         self.children.append(admin_item)
         
         self.children += [
-                    items.MenuItem('API', _api_link(context)),
-                    items.MenuItem('Documentation', 'http://wiki.confine-project.eu/soft:server'),]
+            items.MenuItem('API', _api_link(context)),
+            items.MenuItem('Documentation', 'http://wiki.confine-project.eu/soft:server'),]
 

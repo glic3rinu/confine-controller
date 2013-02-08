@@ -1,6 +1,6 @@
 from controller.utils import autodiscover
 
-from .permissions import Permission, ReadOnlyPermission, AllowAllPermission
+from .permissions import *
 
 
 # Autodiscover permissions.py

@@ -27,6 +27,21 @@ class RolesInline(PermissionTabularInline):
     extra = 0
 
 
+class ReadOnlyRolesInline(PermissionTabularInline):
+    model = Roles
+    extra = 0
+    fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
+    readonly_fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
+    
+    def group_link(self, instance):
+        """ Link to related Group """
+        return mark_safe("<b>%s</b>" % get_admin_link(instance.group))
+    group_link.short_description = 'Group'
+    
+    def has_add_permission(self, *args, **kwargs):
+        return False
+
+
 class JoinRequestInline(PermissionTabularInline):
     model = JoinRequest
     extra = 0
@@ -61,7 +76,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         ),)
     
     search_fields = ('username', 'email', 'first_name', 'last_name')
-    inlines = [AuthTokenInline, RolesInline]
+    inlines = [AuthTokenInline, ReadOnlyRolesInline]
     filter_horizontal = ()
     form = UserChangeForm
     add_form = UserCreationForm

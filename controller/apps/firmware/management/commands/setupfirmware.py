@@ -27,7 +27,7 @@ class Command(BaseCommand):
         if username is None:
             raise CommandError('Can not find default celeryd username')
         
-        if run('grep "^fuse:" /etc/groups').return_code == 1:
+        if run('grep "^fuse:" /etc/group', err_codes=[0,1]).return_code == 1:
             run('addgroup fuse')
-        if run('groups %s|grep fuse').return_code == 1: 
+        if run('groups %s|grep fuse' % username, err_codes=[0,1]).return_code == 1: 
             run('adduser %s fuse' % username)

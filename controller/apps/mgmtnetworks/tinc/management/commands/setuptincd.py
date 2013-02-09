@@ -118,7 +118,7 @@ class Command(BaseCommand):
             'user': username }
         
         r = functools.partial(run, silent=False)
-        if run("grep %(net_name)s /etc/tinc/nets.boot" % context).return_code == 1:
+        if run("grep %(net_name)s /etc/tinc/nets.boot" % context, err_codes=[0,1]).return_code == 1:
             r("echo %(net_name)s >> /etc/tinc/nets.boot" % context)
         r("mkdir -p /etc/tinc/%(net_name)s/hosts" % context)
         r("echo '%(tinc_conf)s' > /etc/tinc/%(net_name)s/tinc.conf" % context)

@@ -174,13 +174,17 @@ function clone () {
     [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
     [ $SKELETONE == false ] && SKELETONE=$PROJECT_NAME
     CONTROLLER_PATH=$(get_controller_dir)
-    run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
-    if [[ -d $CONTROLLER_PATH/projects/$SKELETONE ]]; then
-        echo "INSTALLED_APPS = ('controller.projects.$SKELETONE',) + INSTALLED_APPS" >> $PROJECT_NAME/$PROJECT_NAME/settings.py
+    if [[ ! -e $PROJECT_NAME/manage.py ]]; then
+        run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
+        if [[ -d $CONTROLLER_PATH/projects/$SKELETONE ]]; then
+            echo "INSTALLED_APPS = ('controller.projects.$SKELETONE',) + INSTALLED_APPS" >> $PROJECT_NAME/$PROJECT_NAME/settings.py
+        fi
+        # FIXME This is a workaround for this issue https://github.com/pypa/pip/issues/317
+        run chmod +x $PROJECT_NAME/manage.py
+        # End of workaround ###
+    else
+        echo "Not cloning: $PROJECT_NAME already exists."
     fi
-    # FIXME This is a workaround for this issue https://github.com/pypa/pip/issues/317
-    run chmod +x $PROJECT_NAME/manage.py
-    # End of workaround ###
 }
 export -f clone
 

@@ -41,7 +41,7 @@ class Command(BaseCommand):
             'RedirectMatch ^/$ /admin\n' % {'project_root': project_root,
                                             'site_root': site_root})
         
-        run("echo '%s' > /etc/apache2/httpd.conf" % (apache_conf, project_name))
+        run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
         # run('a2ensite %s.conf' % project_name)
         run('a2enmod expires')
         run('a2enmod deflate')

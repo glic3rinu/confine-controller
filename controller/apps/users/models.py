@@ -45,12 +45,7 @@ class Group(models.Model):
         return Roles.objects.filter(group=self, user=user).exists()
     
     def has_role(self, user, role):
-        # TODO deprecate in favour of has_roles
-        try:
-            roles = Roles.objects.get(group=self, user=user)
-        except Roles.DoesNotExist: 
-            return False
-        return roles.has_role(role)
+        return self.has_roles(user, (role,))
     
     def has_roles(self, user, roles):
         try:
@@ -108,7 +103,6 @@ class UserManager(auth_models.BaseUserManager):
         user = self.model(username=username, email=email, is_active=True, 
                           is_superuser=False, last_login=now, date_joined=now, 
                           **extra_fields)
-        
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -144,7 +138,7 @@ class User(auth_models.AbstractBaseUser):
                   'active. Unselect this instead of deleting accounts.')
     is_superuser = models.BooleanField(default=False,
         help_text='Designates that this user has all permissions without '
-                    'explicitly assigning them.')
+                  'explicitly assigning them.')
     date_joined = models.DateTimeField(default=timezone.now)
     groups = models.ManyToManyField(Group, blank=True, through=Roles, related_name='users')
     

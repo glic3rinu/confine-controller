@@ -5,8 +5,10 @@ from django.db import models
 
 from controller.admin import ChangeViewActionsModelAdmin
 from controller.admin.utils import admin_link, colored
+from controller.forms import RequiredInlineFormSet
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
     mark_as_unread)
+from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from .forms import MessageInlineForm, TicketInlineForm
 from .models import Ticket, Queue, Message
@@ -24,25 +26,29 @@ STATE_COLORS = {
     Ticket.REJECTED: 'yellow' }
 
 
-class MessageInline(admin.TabularInline):
+class MessageInline(PermissionTabularInline):
     model = Message
-    extra = 1
+    extra = 0
     form = MessageInlineForm
+    formset = RequiredInlineFormSet
+    can_delete = False
     
-    def get_formset(self, request, *args, **kwargs):
+    def get_formset(self, request, obj=None, **kwargs):
         """ hook request.user on the inline form """
+        if obj is None:
+            self.extra = 1
         self.form.user = request.user
-        return super(MessageInline, self).get_formset(request, *args, **kwargs)
+        return super(MessageInline, self).get_formset(request, obj, **kwargs)
 
 
-class TicketInline(admin.TabularInline):
+class TicketInline(PermissionTabularInline):
     model = Ticket
     form = TicketInlineForm
     extra = 0
     max_num = 0
 
 
-class TicketAdmin(ChangeViewActionsModelAdmin):
+class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     # TODO Create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
@@ -59,7 +65,7 @@ class TicketAdmin(ChangeViewActionsModelAdmin):
     change_view_actions = [('reject', reject_tickets, '', ''),
                            ('resolve', resolve_tickets, '', ''),
                            ('take', take_tickets, '', ''),]
-    readonly_fields = ('created_by',)
+    readonly_fields = ('created_by', 'state')
     fieldsets = (
         (None, {
             'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority',
@@ -99,13 +105,16 @@ class TicketAdmin(ChangeViewActionsModelAdmin):
     
     def get_form(self, request, *args, **kwargs):
         """ Ugly trick for providing default ticket queue """
-        try: query_string = 'queue=%s' % Queue.objects.get_default().id
-        except Queue.DoesNotExist: pass
-        else:  request.META['QUERY_STRING'] = query_string
+        try:
+            query_string = 'queue=%s' % Queue.objects.get_default().id
+        except Queue.DoesNotExist:
+            pass
+        else:
+            request.META['QUERY_STRING'] = query_string
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
 
 
-class QueueAdmin(admin.ModelAdmin):
+class QueueAdmin(PermissionModelAdmin):
     list_display = ['name', 'default', 'num_tickets']
     list_editable = ['default']
     inlines = [TicketInline]

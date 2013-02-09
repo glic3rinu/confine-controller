@@ -187,7 +187,7 @@ class SliceProp(models.Model):
     A mapping of (non-empty) arbitrary slice property names to their (string)
     values.
     """
-    slice = models.ForeignKey(Slice)
+    slice = models.ForeignKey(Slice, related_name='properties')
     name = models.CharField(max_length=64,
         help_text='Per slice unique single line of free-form text with no '
                   'whitespace surrounding it.',

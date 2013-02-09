@@ -40,17 +40,30 @@ class ReadOnlyRolesInline(PermissionTabularInline):
     
     def has_add_permission(self, *args, **kwargs):
         return False
+    
+    def get_fieldsets(self, request, obj=None):
+        """ HACK display message using the field name of the inline form """
+        if self.has_change_permission(request, obj, view=False):
+            self.verbose_name_plural = mark_safe(
+                'Roles <a href="../../group">(Request group membership)</a>')
+        return super(ReadOnlyRolesInline, self).get_fieldsets(request, obj=obj)
 
 
 class JoinRequestInline(PermissionTabularInline):
     model = JoinRequest
     extra = 0
-    fields = ('user_link', 'action', 'roles')
+    fields = ('user_link', 'roles', 'action')
     readonly_fields = ('user_link',)
     form = JoinRequestForm
+    can_delete = False
     
     def has_add_permission(self, request):
         return False
+    
+    def has_view_permission(self, request, obj=None):
+        if request.user.is_superuser or obj is None:
+            return True
+        return obj.has_role(request.user, 'admin')
     
     def user_link(self, instance):
         """ Link to related User """
@@ -86,6 +99,13 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         return ', '.join([ get_admin_link(group) for group in groups ])
     group_links.allow_tags = True
     group_links.short_description = 'Groups'
+    
+    def get_readonly_fields(self, request, obj=None):
+        """ Makes all fields read only if user doesn't have change permissions """
+        fields = super(UserAdmin, self).get_readonly_fields(request, obj)
+        if not request.user.is_superuser:
+            fields += ('last_login', 'date_joined', 'is_active', 'is_superuser')
+        return fields
 
 
 class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
@@ -116,9 +136,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             Roles.objects.create(user=request.user, group=obj, is_admin=True)
     
     def queryset(self, request):
-        """ 
-        Annotate number of users on the slice for sorting on changelist 
-        """
+        """ Annotate number of users on the slice for sorting on changelist """
         qs = super(GroupAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('users'))
         return qs

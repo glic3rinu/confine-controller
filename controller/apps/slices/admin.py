@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django.conf.urls import patterns, url, include
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.http import HttpResponseRedirect
@@ -312,13 +312,11 @@ class SliverInline(PermissionTabularInline):
     readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'sliver_note1',
                        'sliver_note2']
     
-    def sliver_note1(self, instance):
-        pass
+    def sliver_note1(self, instance): pass
     sliver_note1.short_description = ('The slice must be registred before creating slivers. '
                                       'To do so select "Save and continue editing".')
     
-    def sliver_note2(self, instance):
-        pass
+    def sliver_note2(self, instance): pass
     sliver_note2.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
                                                '</a> button on the top-left of this page')
     
@@ -421,7 +419,13 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return extra_urls + urls
     
     def get_form(self, request, *args, **kwargs):
-        """ Request.user as default node admin """
+        """ 
+        Request.user as default node admin and Warn the user that the testbed is 
+        not ready for allocating shit
+        """
+        if request.method == 'GET':
+            messages.warning(request, 'At this time the testbed is not ready for '
+                'allocating slices. But you can try this interface anyway.')
         form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset

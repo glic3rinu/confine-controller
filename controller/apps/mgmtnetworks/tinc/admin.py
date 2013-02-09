@@ -114,8 +114,8 @@ class HostAdmin(PermissionModelAdmin):
                    'net_name': settings.TINC_NET_NAME,
                    'opts': opts,
                    'app_label': opts.app_label}
-        return TemplateResponse(request, 'admin/tinc/host/help.html', context,
-                                current_app=self.admin_site.name)
+        return TemplateResponse(request, 'admin/tinc/host/help.html', context, 
+            current_app=self.admin_site.name)
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """

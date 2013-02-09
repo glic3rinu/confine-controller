@@ -101,7 +101,6 @@ TEMPLATE_CONTEXT_PROCESSORS =(
     "django.core.context_processors.request",
 )
 
-
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -109,7 +108,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-
     'controller',
     # Third Party APPS
     'south',
@@ -159,9 +157,6 @@ AUTHENTICATION_BACKENDS = [
     'permissions.backends.TestbedPermissionBackend',
 ]
 
-ACCOUNT_ACTIVATION_DAYS = 7
-LOGIN_REDIRECT_URL = '/admin/'
-
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -191,6 +186,19 @@ LOGGING = {
     }
 }
 
+# Email config
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+EMAIL_HOST = 'smtp.confine-project.eu'
+#EMAIL_PORT = ''
+#EMAIL_HOST_USER = ''
+#EMAIL_HOST_PASSWORD = ''
+#EMAIL_USE_TLS = False
+DEFAULT_FROM_EMAIL = 'controller@confine-project.eu'
+
+
+#################################
+## 3RD PARTY APPS CONIGURATION ##
+#################################
 
 # Admin Tools
 ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
@@ -219,7 +227,6 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
-#            'groupregistration.models.GroupRegistration',
         ),
         'collapsible': True,
     }),
@@ -248,7 +255,6 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'issues/ticket': "Ticket_star.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
-#    'groupregistration/groupregistration': "registration.png",
 }
 
 
@@ -265,11 +271,13 @@ CELERY_DISABLE_RATE_LIMITS = True
 #CELERY_SEND_TASK_ERROR_EMAILS = True
 ## end
 
-
 # django-private-files
 FILE_PROTECTION_METHOD = 'basic'
 PRIVATE_MEDIA_ROOT = ''
 
+# Django-Registration
+ACCOUNT_ACTIVATION_DAYS = 7
+LOGIN_REDIRECT_URL = '/admin/'
 
 # rest_framework
 REST_FRAMEWORK = {
@@ -281,19 +289,15 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     )
-
 }
 
+
+###################################
+## CONTROLLER APPS CONFIGURATION ##
+###################################
 
 # common.api
 CUSTOM_API_ROOT = 'controller.api.Base'
 
 
-# Email config
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
-EMAIL_HOST = 'smtp.confine-project.eu'
-#EMAIL_PORT = ''
-#EMAIL_HOST_USER = ''
-#EMAIL_HOST_PASSWORD = ''
-#EMAIL_USE_TLS = False
-DEFAULT_FROM_EMAIL = 'controller@confine-project.eu'
+

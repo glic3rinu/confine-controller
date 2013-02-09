@@ -114,6 +114,7 @@ class BuildAdmin(admin.ModelAdmin):
 
 class ConfigAdmin(SingletonModelAdmin):
     inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline]
+    save_on_top = True
     
     def get_urls(self):
         """ Make URLs singleton aware """

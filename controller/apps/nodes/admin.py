@@ -10,7 +10,8 @@ from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActionsModelAdmin
-from controller.admin.utils import link, insert_inline, colored, admin_link, docstring_as_help_tip
+from controller.admin.utils import (link, insert_inline, colored, admin_link,
+    docstring_as_help_tip)
 from controller.forms.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
@@ -130,16 +131,15 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Warning user if the node is not fully configured """
-        if request.method != 'POST':
+        if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if not obj.cert:
                 messages.warning(request, 'This node lacks a valid certificate.')
-        return super(NodeAdmin, self).change_view(request, object_id, form_url=form_url,
-                                                  extra_context=extra_context)
+        return super(NodeAdmin, self).change_view(
+            request, object_id, form_url=form_url, extra_context=extra_context)
     
     def changelist_view(self, request, extra_context=None):
         """ Default filter as 'my_nodes=True' """
-        from django.contrib.sites.models import RequestSite
         if not request.GET.has_key('my_nodes'):
             q = request.GET.copy()
             q['my_nodes'] = 'True'
@@ -149,6 +149,8 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 
 class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):
+    change_form_template = 'admin/nodes/server/change_form.html'
+    
     def get_urls(self):
         """ Make urls singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name

@@ -47,7 +47,7 @@ class UserChangeForm(forms.ModelForm):
 
 class JoinRequestForm(forms.ModelForm):
     ACTIONS = (
-        (None, '------'),
+        ('', '------'),
         ('accept', 'Accept'),
         ('reject', 'Reject'),
         ('ignore', 'Ignore'))
@@ -67,5 +67,5 @@ class JoinRequestForm(forms.ModelForm):
         if action == 'accept':
             roles = self.cleaned_data.get('roles')
             self.instance.accept(roles=roles)
-        else:
+        elif action:
             getattr(self.instance, action)()

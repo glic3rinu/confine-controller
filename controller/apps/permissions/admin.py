@@ -5,19 +5,31 @@ from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
 
 
-class PermExtensionMixin(object):
+# WARNING: *HACKY MODULE*
+# There are lots of hacks down there, mostly because avoiding Django code copypasta
+
+
+# TODO:
+# View permissions -> qset (define on permission._get_view_queryset())
+# change permission -> save model && custom widget
+# add permission -> save model
+# delete permission -> delete()
+# Problem django admin doesn't check for inline permissions if they don't have modeladmin, just checks for a first class objects
+# Maybe we can do the same for the api permissions (only check resources and not nested objects)
+
+
+class ReadPermModelAdminMixin(object):
+    """ Mixing class that adds view permission support to ModelAdmin """
     change_form_template = 'admin/permissions_change_form.html'
     
     def get_readonly_fields(self, request, obj=None):
-        """
-        Make all fields read only if user doesn't have change permissions.
-        """
+        """ Makes all fields read only if user doesn't have change permissions """
         if not self.has_change_permission(request, obj=obj, view=False):
             if self.has_view_permission(request, obj=obj):
                 excluded_fields = ['object_id', 'content_type']
                 model_fields = fields_for_model(self.model).keys()
                 fields = []
-                # set.union() is not used for preserving order
+                # more efficient set.union() is not used for preserving order
                 for field in model_fields + list(self.readonly_fields):
                     if field not in excluded_fields and field not in fields:
                         fields.append(field)
@@ -89,22 +101,25 @@ class PermExtensionMixin(object):
     
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         """ update context has_change_permission with true change_permission """
-        template_response = super(PermExtensionMixin, self).render_change_form(request,
+        template_response = super(ReadPermModelAdminMixin, self).render_change_form(request,
             context, add=add, change=change, form_url=form_url, obj=obj)
         has_change_permission = self.has_change_permission(request, obj, view=False)
         template_response.context_data['has_change_permission'] = has_change_permission
         return template_response
-
+    
     def get_inline_instances(self, request, obj=None):
-        """ Hack! Hook parent obj just in time to use in has_add_permission """
+        """ Hack! Hook parent obj just in time to use in inline has_add_permission """
         request.__parent_object__ = obj
-        return super(PermExtensionMixin, self).get_inline_instances(request, obj=obj)
+        return super(ReadPermModelAdminMixin, self).get_inline_instances(request, obj=obj)
 
-class PermissionModelAdmin(PermExtensionMixin, admin.ModelAdmin):
+
+class PermissionModelAdmin(ReadPermModelAdminMixin, admin.ModelAdmin):
+    """ Base class for supporting permissions on ModelAdmins """
     pass
 
 
-class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
+# TODO checkout wiki todo
+class ReadPermInlineModelAdminMixin(ReadPermModelAdminMixin):
     def has_add_permission(self, request, obj=None):
         """ Prevent add another button to appear """
         opts = self.opts
@@ -113,17 +128,12 @@ class PermissionTabularInline(PermExtensionMixin, admin.TabularInline):
             if not request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent):
                 return False
                 # TODO inlines save_model is not called so we have find the way of checking add permissions with the resulting object
-        return super(PermissionTabularInline, self).has_add_permission(request, obj=obj)
+        return super(ReadPermInlineModelAdminMixin, self).has_add_permission(request, obj=obj)
 
 
-class PermissionGenericTabularInline(PermExtensionMixin, generic.GenericTabularInline):
-    def has_add_permission(self, request, obj=None):
-        """ Prevent add another button to appear """
-        opts = self.opts
-        object_id = request.path.split('/')[-2]
-        if object_id.isdigit():
-            parent = self.parent_model.objects.get(pk=object_id)
-            if not request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent):
-                return False
-                # TODO inlines save_model is not called so we have find the way of checking add permissions with the resulting object
-        return super(PermissionGenericTabularInline, self).has_add_permission(request, obj=obj)
+class PermissionTabularInline(ReadPermInlineModelAdminMixin, admin.TabularInline):
+    """ Base class for supporting permissions on TabularInlines """
+
+
+class PermissionGenericTabularInline(ReadPermInlineModelAdminMixin, generic.GenericTabularInline):
+    """ Base class for supporting permissions on GenericTabularInlines """

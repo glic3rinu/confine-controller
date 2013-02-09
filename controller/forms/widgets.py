@@ -6,12 +6,14 @@ from django.utils.safestring import mark_safe
 
 class ShowText(forms.Widget):
     def render(self, name, value, attrs):
+        if value is None:
+            return ''
         if hasattr(self, 'initial'):
             value = self.initial
         if self.bold: 
             final_value = u'<b>%s</b>' % (value)
         else:
-            final_value = value
+            final_value = '<br/>'.join(value.split('\n'))
         if self.warning:
             final_value = u'<ul class="messagelist"><li class="warning">%s</li></ul>' %(final_value)
         if self.hidden:

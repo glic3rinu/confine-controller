@@ -94,7 +94,7 @@ class Message(models.Model):
     author = models.ForeignKey(get_user_model())
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, 
         default=PUBLIC)
-    content = models.TextField(blank=True)
+    content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
     
     def __unicode__(self):

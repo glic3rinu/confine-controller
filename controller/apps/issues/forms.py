@@ -12,15 +12,15 @@ class MessageInlineForm(forms.ModelForm):
         fields = ('content', 'visibility',)
     
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
         super(MessageInlineForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
-            instance = kwargs['instance']
-            self.initial['author'] = admin_link(instance.author)
-            self.initial['created_on'] = instance.created_on.strftime("%Y-%m-%d %H:%M:%S")
+        message = kwargs.get('instance', False)
+        if message:
+            self.initial['author'] = '</b>'+admin_link(message.author)
+            self.initial['created_on'] = message.created_on.strftime("%Y-%m-%d %H:%M:%S")
             self.fields['content'].widget = ShowText()
-        else: 
-            self.initial['author'] = ''
+            self.fields['content'].required = False
+        else:
+            self.initial['author'] = '</b>'+admin_link(self.user)
             self.initial['created_on'] = ''
     
     def save(self, *args, **kwargs):

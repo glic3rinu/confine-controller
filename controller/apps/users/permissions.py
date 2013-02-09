@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from permissions import Permission, RelatedPermission
 
-from .models import User, AuthToken, Group, Roles
+from .models import User, AuthToken, Group, Roles, JoinRequest
 
 
 class UserPermission(Permission):
@@ -10,15 +10,15 @@ class UserPermission(Permission):
         return True
     
     def add(self, caller, user):
+        return False
+    
+    def change(self, caller, user):
         if self._is_class(caller):
             return True
         return caller == user
     
-    def change(self, caller, user):
-        return self.add(caller, user)
-    
     def delete(self, caller, user):
-        return self.add(caller, user)
+        return self.change(caller, user)
 
 
 class RolesPermission(Permission):
@@ -27,7 +27,7 @@ class RolesPermission(Permission):
     
     def add(self, caller, user):
         if self._is_class(caller):
-            return user.has_roles(('admin',))
+            return user.has_role('admin')
         return caller.group.has_role(user, 'admin')
     
     def change(self, caller, user):
@@ -45,6 +45,8 @@ class GroupPermission(Permission):
         return True
     
     def change(self, caller, user):
+        if self._is_class(caller):
+            return True
         return caller.has_role(user, 'admin')
     
     def delete(self, caller, user):

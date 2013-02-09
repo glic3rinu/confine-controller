@@ -5,6 +5,7 @@ from controller.utils import is_installed
 
 
 def _api_link(context):
+    """ Dynamically generates the API related URL """
     if 'opts' in context:
         opts = context['opts']
     elif 'cl' in context:

@@ -1,5 +1,10 @@
 import inspect, functools
 
+
+# WARNING: *MAGIC MODULE*
+# This is not a safe place, lot of magic is happening here
+
+
 class Permission(object):
     """ 
     Base class for defining class and instance permissions.
@@ -66,7 +71,12 @@ class AllowAllPermission(object):
 
 
 class RelatedPermission(Permission):
-    """ Inherit permissions of a related object """
+    """
+    Inherit permissions of a related object
+    
+    The following example will inherit permissions from sliver_iface.sliver.slice
+        SliverIfaces.has_permission = RelatedPermission('sliver.slices')
+    """
     def __init__(self, relation):
         self.relation = relation
     

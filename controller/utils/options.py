@@ -5,19 +5,23 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.template import Context
 from django.utils.importlib import import_module
+from django.utils.module_loading import module_has_submodule
 
 from controller.utils.system import run
 
 
 def autodiscover(module):
-    """ Auto-discover INSTALLED_APPS permission.py module """
+    """ Auto-discover INSTALLED_APPS module.py """
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)
         try: 
             import_module('%s.%s' % (app, module))
-        except ImportError, e:
-            # Hack for preventing mask of import errors
-            if str(e) != 'No module named %s' % module:
+        except ImportError:
+            # Decide whether to bubble up this error. If the app just
+            # doesn't have the module, we can ignore the error
+            # attempting to import it, otherwise we want it to bubble up.
+            if module_has_submodule(mod, module):
+                print '%s module caused this error:' % module
                 raise
 
 

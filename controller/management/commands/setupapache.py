@@ -46,8 +46,8 @@ class Command(BaseCommand):
             # save the old one if it is different
             run("cp /etc/apache2/httpd.conf /etc/apache2/httpd.conf.save")
             run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
-            print "\033[1;31mA new version of /etc/apache2/httpd.conf has been installed. "
-                  "The old version has been placed at /etc/apache2/httpd.conf.save\033[m"
+            print ("\033[1;31mA new version of /etc/apache2/httpd.conf has been installed. "
+                   "The old version has been placed at /etc/apache2/httpd.conf.save\033[m")
         
         # run('a2ensite %s' % project_name)
         run('a2enmod expires')

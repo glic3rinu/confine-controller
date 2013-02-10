@@ -108,7 +108,11 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    # Prioritizing static files and templates
     'controller',
+    # Avoiding problems with admin_tools migrations
+    'users',
+    
     # Third Party APPS
     'south',
     'fluent_dashboard',
@@ -131,12 +135,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.auth',
-#    'django.contrib.sites',
     
     # Confine
     'api',
     'permissions',
-    'users',
     'nodes',
     'slices',
     'issues',

@@ -2,13 +2,12 @@ from django import template
 
 register = template.Library()
 
-#(not save_as or context['add'])
 
-
-@register.inclusion_tag('admin/submit_line.html', takes_context=True)
+@register.inclusion_tag('admin/permissions_submit_line.html', takes_context=True)
 def submit_row(context):
     """
     Displays the row of buttons for delete and save with view permission awearness.
+    Also implements optional priority for show_save_and_continue
     """
     opts = context['opts']
     change = context['change']

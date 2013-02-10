@@ -112,8 +112,8 @@ function install_requirements () {
     
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then
-        sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
-        locale-gen
+        run sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
+        run locale-gen
     fi
     
     run apt-get update
@@ -175,8 +175,10 @@ function clone () {
         esac
         shift
     done
+    
     unset OPTIND
     unset opt
+    
     [ $(whoami) == 'root' ] && { echo -e "\nYou don't want to run this as root\n" >&2; exit 1; }
     [ $SKELETONE == false ] && SKELETONE=$PROJECT_NAME
     CONTROLLER_PATH=$(get_controller_dir)

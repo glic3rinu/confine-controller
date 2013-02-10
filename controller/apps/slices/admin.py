@@ -299,13 +299,18 @@ class SliverInline(PermissionTabularInline):
     readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'sliver_note1',
                        'sliver_note2']
     
-    def sliver_note1(self, instance): pass
-    sliver_note1.short_description = ('The slice must be registred before creating slivers. '
-                                      'To do so select "Save and continue editing".')
+    def sliver_note1(self, instance):
+        """
+        <p>The slice must be saved before creating slivers.
+        <input type="submit" value="Save" name="_continue" /></p>
+        """
+    sliver_note1.short_description = mark_safe(sliver_note1.__doc__)
     
-    def sliver_note2(self, instance): pass
-    sliver_note2.short_description = mark_safe('Use the <a href="add_sliver">"Add Sliver"'
-                                               '</a> button on the top-left of this page')
+    def sliver_note2(self, instance):
+        """
+        <a href="add_sliver" class="addlink"> Add another Sliver </a>
+        """
+    sliver_note2.short_description = mark_safe(sliver_note2.__doc__)
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
@@ -313,8 +318,6 @@ class SliverInline(PermissionTabularInline):
             return [(None, {'fields': ['sliver_note1']})]
         # The slices is registred: display add button in the inline header
         if self.has_change_permission(request, obj, view=False):
-            self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add Sliver)</a>')
-        if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     

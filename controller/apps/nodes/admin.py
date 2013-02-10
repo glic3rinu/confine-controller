@@ -172,7 +172,9 @@ class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionMo
         return urlpatterns + urls
     
     def has_delete_permission(self, *args, **kwargs):
+        """ It doesn't make sense to delete the server """
         return False
+
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)

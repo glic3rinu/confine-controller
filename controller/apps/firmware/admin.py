@@ -143,6 +143,7 @@ class ConfigAdmin(SingletonModelAdmin):
         return super(ConfigAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
     def has_delete_permission(self, *args, **kwargs):
+        """ It doesn't make sense to delete a singleton configuration """
         return False
 
 admin.site.register(Config, ConfigAdmin)
@@ -161,9 +162,12 @@ old_get_urls = node_modeladmin.get_urls
 def get_urls(self):
     """ Hook JSON representation of a Build to NodeModeladmin """
     def build_info_view(request, node_id):
-        try: build = Build.objects.get(node=node_id)
-        except Build.DoesNotExist: build_dict = {}
-        else: build_dict = {
+        try:
+            build = Build.objects.get(node=node_id)
+        except Build.DoesNotExist:
+            build_dict = {}
+        else:
+            build_dict = {
                 'state': build.state,
                 'date': build.date.strftime("%Y-%m-%d %H:%M:%S"),
                 'image': build.image.name,

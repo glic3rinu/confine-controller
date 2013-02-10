@@ -41,19 +41,19 @@ class Command(BaseCommand):
             'db_host': options.get('db_host'),
             'db_port': options.get('db_port')}
         
-        run("""su postgres -c "psql -c \\"CREATE USER %(db_user)s PASSWORD '%(db_password)s';\\"" """ % context, err_codes=[0,1])
-        run("""su postgres -c "psql -c \\"CREATE DATABASE %(db_name)s OWNER %(db_user)s;\\"" """ % context, err_codes=[0,1])
+        run('su postgres -c "psql -c \\"CREATE USER %(db_user)s PASSWORD \'%(db_password)s\';\\""' % context, err_codes=[0,1])
+        run('su postgres -c "psql -c \\"CREATE DATABASE %(db_name)s OWNER %(db_user)s;\\""' % context, err_codes=[0,1])
         
         context.update({'settings': os.path.join(get_project_root(), 'settings.py')})
         
         if run("grep 'DATABASES' %(settings)s" % context, err_codes=[0,1]).return_code == 0:
             # Update existing settings_file
-            run("""sed -i "s/'ENGINE': '\w*',/'ENGINE': 'django.db.backends.postgresql_psycopg2',/" %(settings)s""" % context)
-            run("""sed -i "s/'NAME': '.*',/'NAME': '%(db_name)s',/" %(settings)s""" % context)
-            run("""sed -i "s/'USER': '.*',/'USER': '%(db_user)s',/" %(settings)s""" % context)
-            run("""sed -i "s/'PASSWORD': '.*',/'PASSWORD': '%(db_password)s',/" %(settings)s""" % context)
-            run("""sed -i "s/'HOST': '.*',/'HOST': '%(db_host)s',/" %(settings)s""" % context)
-            run("""sed -i "s/'PORT': '.*',/'PORT': '%(db_port)s',/" %(settings)s""" % context)
+            run("sed -i \"s/'ENGINE': '\w*',/'ENGINE': 'django.db.backends.postgresql_psycopg2',/\" %(settings)s" % context)
+            run("sed -i \"s/'NAME': '.*',/'NAME': '%(db_name)s',/\" %(settings)s" % context)
+            run("sed -i \"s/'USER': '.*',/'USER': '%(db_user)s',/\" %(settings)s" % context)
+            run("sed -i \"s/'PASSWORD': '.*',/'PASSWORD': '%(db_password)s',/\" %(settings)s" % context)
+            run("sed -i \"s/'HOST': '.*',/'HOST': '%(db_host)s',/\" %(settings)s" % context)
+            run("sed -i \"s/'PORT': '.*',/'PORT': '%(db_port)s',/\" %(settings)s" % context)
         else:
             db_config = (
                 "DATABASES = {\n"

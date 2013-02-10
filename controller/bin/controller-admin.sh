@@ -110,6 +110,10 @@ function install_requirements () {
     MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server"
     EXTENDED_APT="libapache2-mod-wsgi git mercurial fuseext2 screen openssh-server tinc"
     
+    # Make sure locales are in place before installing postgres
+    sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
+    locale-gen
+    
     run apt-get update
     run apt-get install -y "$MINIMAL_APT"
     if ! $minimal; then

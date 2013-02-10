@@ -18,6 +18,6 @@ class Command(NoArgsCommand):
         
         run("echo hola")
         if run("grep 'SECRET_KEY' %(settings)s" % context, err_codes=[0,1]).return_code == 0:
-            run("""sed -i "s/SECRET_KEY = '\w*'/SECRET_KEY = '%(key)s'/" %(settings)s""" % context)
+            run("sed -i \"s/SECRET_KEY = '\w*'/SECRET_KEY = '%(key)s'/\" %(settings)s" % context)
         else:
-            run("""echo "SECRET_KEY = '%(key)s'" >> %(settings)s""" % context)
+            run("echo \"SECRET_KEY = '%(key)s'\" >> %(settings)s" % context)

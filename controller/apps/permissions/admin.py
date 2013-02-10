@@ -108,7 +108,7 @@ class ReadPermModelAdminMixin(object):
         if not self.has_change_permission(request, obj, view=False):
             model = force_text(opts.verbose_name)
             context = {'title': 'View %s %s' % (model, obj)} 
-            context.update(extra_context or {})
+        context.update(extra_context or {})
         return super(ReadPermModelAdminMixin, self).change_view(request, object_id,
             form_url='', extra_context=context)
     

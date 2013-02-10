@@ -38,7 +38,8 @@ class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
     """
     def __init__(self, *args, **kwargs):
         super(ChangeViewActionsModelAdmin, self).__init__(*args, **kwargs)
-        if not hasattr(self, 'change_view_actions'): self.change_view_actions = []
+        if not hasattr(self, 'change_view_actions'):
+            self.change_view_actions = []
         else:
             links = [ self._prepare_change_view_action(*link) for link in self.change_view_actions ]
             self.change_view_actions = links

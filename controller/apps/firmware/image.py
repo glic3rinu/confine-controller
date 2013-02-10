@@ -63,7 +63,7 @@ class Image(object):
     def mount(self):
         """ mount image partition with user-space tools """
         context = self.get_run_context()
-        r("mountpoint -q %(mnt)s" % context)
+        r("mountpoint -q %(mnt)s" % context, err_codes=[1])
         r("dd if=%(image)s of=%(partition)s skip=%(sector)d" % context)
         r("fuseext2 %(partition)s %(mnt)s -o rw+" % context)
         # fuseext2 is a pice of crap since doesn't return a correct exit code, let's kludge

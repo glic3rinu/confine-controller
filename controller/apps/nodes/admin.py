@@ -94,16 +94,16 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                 # Add actual group
                 query = Q( query | Q(pk=obj.group.pk) )
             groups = user.groups.filter(query)
-            num_groups = groups.count()
+            num_groups = len(groups)
             if num_groups >= 1:
                 # User has can add nodes in more than one group
                 form.base_fields['group'].queryset = groups
-            elif num_groups == 1:
+            if num_groups == 1:
                 # User can add nodes in only one group (set that group by default)
                 ro_widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].widget = ro_widget
                 form.base_fields['group'].required = False
-            elif not user.is_superuser:
+            if num_groups == 0 and not user.is_superuser:
                 raise Exception('Oops this is unfortunate but you can not proceed.')
         return form
     

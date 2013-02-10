@@ -41,8 +41,11 @@ class Command(BaseCommand):
             'RedirectMatch ^/$ /admin\n' % {'project_root': project_root,
                                             'site_root': site_root})
         
+        if run("echo '%s'| diff - /etc/apache2/httpd.conf", err_codes=[0,1]).return_code == 1:
+            # save the old one if they are different
+            run("cp /etc/apache2/httpd.conf /etc/apache2/httpd.conf.save")
         run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
-        # run('a2ensite %s.conf' % project_name)
+        # run('a2ensite %s' % project_name)
         run('a2enmod expires')
         run('a2enmod deflate')
         # Give upload file permissions to apache

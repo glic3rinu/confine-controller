@@ -3,6 +3,7 @@ from django.contrib.admin.util import unquote
 from django.contrib.contenttypes import generic
 from django.core.exceptions import PermissionDenied
 from django.forms.models import fields_for_model
+from django.utils.encoding import force_text
 
 
 # WARNING: *HACKY MODULE*
@@ -21,6 +22,7 @@ from django.forms.models import fields_for_model
 class ReadPermModelAdminMixin(object):
     """ Mixing class that adds view permission support to ModelAdmin """
     change_form_template = 'admin/permissions_change_form.html'
+    save_and_continue = False
     
     def get_readonly_fields(self, request, obj=None):
         """ Makes all fields read only if user doesn't have change permissions """
@@ -99,12 +101,24 @@ class ReadPermModelAdminMixin(object):
             raise PermissionDenied
         obj.save()
     
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        opts = self.model._meta
+        obj = self.get_object(request, unquote(object_id))
+        context = {}
+        if not self.has_change_permission(request, obj, view=False):
+            model = force_text(opts.verbose_name)
+            context = {'title': 'View %s %s' % (model, obj)} 
+            context.update(extra_context or {})
+        return super(ReadPermModelAdminMixin, self).change_view(request, object_id,
+            form_url='', extra_context=context)
+    
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         """ update context has_change_permission with true change_permission """
         template_response = super(ReadPermModelAdminMixin, self).render_change_form(request,
             context, add=add, change=change, form_url=form_url, obj=obj)
         has_change_permission = self.has_change_permission(request, obj, view=False)
         template_response.context_data['has_change_permission'] = has_change_permission
+        template_response.context_data['save_and_continue'] = self.save_and_continue
         return template_response
     
     def get_inline_instances(self, request, obj=None):

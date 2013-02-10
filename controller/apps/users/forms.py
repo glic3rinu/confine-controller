@@ -45,27 +45,44 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
+class RolesFormSet(forms.models.BaseInlineFormSet):
+    """ At least on admin per group """
+    # TODO: ensure this also when deleting a user (more triky though)
+    def clean(self):
+        super(RolesFormSet, self).clean()
+        for form in self.forms:
+            if form.cleaned_data.get('is_admin'):
+                return
+        raise ValidationError('The group must have at least one admin')
+
+
 class JoinRequestForm(forms.ModelForm):
     ACTIONS = (
-        ('', '------'),
         ('accept', 'Accept'),
         ('reject', 'Reject'),
         ('ignore', 'Ignore'))
     ROLES = (
-        ('researcher', 'Researcher'),
         ('admin', 'Admin'),
-        ('technician', 'Technician'))
+        ('technician', 'Technician'),
+        ('researcher', 'Researcher'))
     
-    action = forms.ChoiceField(label='Action', choices=ACTIONS, required=False)
+    action = MultiSelectFormField(label='Action', choices=ACTIONS, required=False)
     roles = MultiSelectFormField(label='Roles', choices=ROLES, required=False)
     
     class Meta:
         model = JoinRequest
     
+    def clean_action(self):
+        actions = self.cleaned_data.get('action')
+        if len(actions) > 1:
+            raise ValidationError('Select only one action')
+        return actions[0] if len(actions) == 1 else ''
+    
     def save(self, commit=True):
         action = self.cleaned_data.get('action')
-        if action == 'accept':
-            roles = self.cleaned_data.get('roles')
+        roles = self.cleaned_data.get('roles')
+        if roles and action in ['accept', '']:
+            # Accept if explicit and also when a role is selected without any action
             self.instance.accept(roles=roles)
         elif action:
             getattr(self.instance, action)()

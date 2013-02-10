@@ -1,0 +1,18 @@
+{% load i18n %}
+<p class=warning>The testbed is not ready for allocating slices.
+</p>
+{% if user.join_requests.exists %}
+<p> You have a pending membership request for 
+{% for req in user.join_requests.all %}
+  <a href="{% url 'admin:users_group_change' req.group.pk %}">{{ req.group }}</a>, 
+{% endfor %}
+
+{% elif not user.groups.exists %}
+  <p>
+    You may want to <a href="{% url 'admin:users_group_add' %}">create a group</a> or <a href="{% url 'admin:users_group_changelist' %}">join to an existing one</a> to be able to create slices or nodes.
+  </p>
+{% endif %}
+
+{% if not user.tinc_hosts.exists %}
+    <p>You may want to <a href="{% url 'admin:tinc_host_add' %}">create a tinc host</a> for accessing the management network.</p>
+{% endif %}

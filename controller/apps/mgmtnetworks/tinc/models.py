@@ -23,7 +23,7 @@ class Host(models.Model):
     """
     description = models.CharField(max_length=256,
         help_text='Free-form textual description of this host.')
-    owner = models.ForeignKey(get_user_model(),
+    owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
         help_text='The user who administrates this host (its creator by default)')
     related_tincclient = generic.GenericRelation('tinc.TincClient')
     

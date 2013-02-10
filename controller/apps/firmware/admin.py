@@ -141,7 +141,9 @@ class ConfigAdmin(SingletonModelAdmin):
         if db_field.name == 'image_name':
             kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
         return super(ConfigAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-
+    
+    def has_delete_permission(self, *args, **kwargs):
+        return False
 
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Build, BuildAdmin)

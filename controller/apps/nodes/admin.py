@@ -98,7 +98,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             if num_groups >= 1:
                 # User has can add nodes in more than one group
                 form.base_fields['group'].queryset = groups
-            if num_groups == 1:
+            elif num_groups == 1:
                 # User can add nodes in only one group (set that group by default)
                 ro_widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].widget = ro_widget
@@ -170,7 +170,9 @@ class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionMo
         )
         urls = super(ServerAdmin, self).get_urls()
         return urlpatterns + urls
-
+    
+    def has_delete_permission(self, *args, **kwargs):
+        return False
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)

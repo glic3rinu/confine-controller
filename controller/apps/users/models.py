@@ -62,7 +62,6 @@ class Group(models.Model):
 
 
 class Roles(models.Model):
-    # TODO prevent groups without admins
     user = models.ForeignKey('users.User', related_name='roles')
     group = models.ForeignKey(Group, related_name='roles')
     is_admin = models.BooleanField(default=False,
@@ -186,7 +185,7 @@ class User(auth_models.AbstractBaseUser):
             if not self.has_perm(perm, obj):
                 return False
         return True
-
+    
     def has_module_perms(self, app_label):
         """
         Returns True if the user has any permissions in the given app label.
@@ -229,6 +228,9 @@ class User(auth_models.AbstractBaseUser):
         if self.role_set.intersection(roles):
             return True
         return False
+    
+    def has_role(self, role):
+        return self.has_roles((role,))
 
 
 class AuthToken(models.Model):
@@ -265,8 +267,8 @@ class JoinRequest(models.Model):
     Once the request is created, the group's admin have to check it
     accepting or refusing it.
     """
-    user = models.ForeignKey(User)
-    group = models.ForeignKey(Group)
+    user = models.ForeignKey(User, related_name='join_requests')
+    group = models.ForeignKey(Group, related_name='join_requests')
     date = models.DateTimeField(auto_now_add=True)
     
     class Meta:

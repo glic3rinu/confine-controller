@@ -90,6 +90,7 @@ class HostAdmin(PermissionModelAdmin):
     inlines = [TincClientInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
+    save_and_continue = True
     
     def address(self, instance):
         return instance.tinc.address if instance.tinc else ''

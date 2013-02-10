@@ -13,7 +13,7 @@ from controller.admin.utils import link, get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request
-from .forms import UserCreationForm, UserChangeForm, JoinRequestForm
+from .forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm
 from .models import User, AuthToken, Roles, Group, JoinRequest
 
 
@@ -25,6 +25,7 @@ class AuthTokenInline(PermissionTabularInline):
 class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
+    formset = RolesFormSet
 
 
 class ReadOnlyRolesInline(PermissionTabularInline):

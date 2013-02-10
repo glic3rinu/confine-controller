@@ -8,16 +8,15 @@ from api.serializers import (UriHyperlinkedModelSerializer, HyperlinkedFileField
 from .models import Slice, Sliver, Template, SliverIface
 
 
-class IfaceSerializer(serializers.ModelSerializer):
-    parent_name = serializers.Field()
-    
-    class Meta:
-        model = SliverIface
-        fields = ['name', 'nr', 'type', 'parent_name']
+class IfaceField(serializers.WritableField):
+    def to_native(self, value):
+        return [ {'type': iface.type,
+                  'name': iface.name,
+                  'parent': iface.parent } for iface in value.all() ]
 
 
 class SliverSerializer(UriHyperlinkedModelSerializer):
-    interfaces = serializers.Field()
+    interfaces = IfaceField()
     properties = PropertyField(required=False)
     exp_data = HyperlinkedFileField(source='exp_data', required=False)
     

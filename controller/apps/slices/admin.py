@@ -133,17 +133,6 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             request.META['QUERY_STRING'] = request.GET.urlencode()
         return super(SliverAdmin,self).changelist_view(request, extra_context=extra_context)
     
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        """ Provide a linked title """
-        sliver = self.get_object(request, object_id)
-        slice_link = get_admin_link(sliver.slice)
-        sliver_link = get_admin_link(sliver.node)
-        context = {'title': mark_safe('Change sliver %s@%s' % (slice_link, sliver_link)),
-                   'slice': slice,}
-        context.update(extra_context or {})
-        return super(SliverAdmin, self).change_view(request, object_id, form_url=form_url, 
-                     extra_context=context)
-    
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changellist """
         qs = super(SliverAdmin, self).queryset(request)
@@ -240,12 +229,10 @@ class SliceSliversAdmin(SliverAdmin):
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
         slice = Slice.objects.get(pk=slice_id)
-        sliver = self.get_object(request, object_id)
         self.slice_id = slice_id
+        sliver = self.get_object(request, object_id)
         self.node_id = sliver.node_id
-        title = 'Change sliver %s@%s' % (get_admin_link(slice), get_admin_link(sliver.node))
-        context = {'title': mark_safe(title),
-                   'slice': slice,}
+        context = { 'slice': slice }
         context.update(extra_context or {})
         return super(SliceSliversAdmin, self).change_view(request, object_id, 
             form_url=form_url, extra_context=context)
@@ -381,6 +368,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                        'expires_on', 'group'),
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
+    save_and_continue = True
     change_view_actions = [('renew', renew_selected_slices, '', ''),
                            ('reset', reset_selected, '', '')]
     

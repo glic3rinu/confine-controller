@@ -1,5 +1,6 @@
 {% extends "admin/permissions_change_form.html" %}
 {% load i18n %}
+
 {% block object-tools-items %}
 {% if has_change_permission %}
     {% for item in object_tools_items %}
@@ -12,4 +13,5 @@
 
 
 {% block coltype %}colM" style="max-width:900px; margin:0 auto;{% endblock %}
+
 

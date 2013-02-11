@@ -35,12 +35,14 @@ class CustomMenu(Menu):
         if user.has_module_perms('nodes'):
             self.children.append(items.MenuItem('Nodes', reverse('admin:nodes_node_changelist'),
                 children=[
+                    items.MenuItem('Nodes', reverse('admin:nodes_node_changelist')),
                     items.MenuItem('Server', reverse('admin:nodes_server_changelist')),
                 ]))
         
         if user.has_module_perms('slices'):
             self.children.append(items.MenuItem('Slices', reverse('admin:slices_slice_changelist'),
                 children=[
+                    items.MenuItem('Slices', reverse('admin:slices_slice_changelist')),
                     items.MenuItem('Slivers', reverse('admin:slices_sliver_changelist')),
                     items.MenuItem('Templates', reverse('admin:slices_template_changelist')),
                 ]))

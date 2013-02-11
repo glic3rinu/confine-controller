@@ -371,8 +371,11 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         (None, {
             'fields': ('name', 'description', ('template', template_link),
                        ('exp_data', 'exp_data_uri'), 'exp_data_sha256', 'set_state',
-                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
-                       'expires_on', 'group'),
+                       'vlan_nr', 'expires_on', 'group'),
+        }),
+        ('Debug ifno', {
+            'classes': ('collapse',),
+            'fields': ('instance_sn', 'new_sliver_instance_sn',)
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     save_and_continue = True

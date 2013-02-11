@@ -36,7 +36,7 @@ class NodePropInline(PermissionTabularInline):
 
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
-    extra = 0
+    extra = 1
 
 
 class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
@@ -51,7 +51,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         (None, {
             'fields': ('name', 'description', 'group', 'arch', 'local_iface',
                        'sliver_pub_ipv6', 'sliver_pub_ipv4',
-                       'sliver_pub_ipv4_range', 'boot_sn', 'set_state'),
+                       'sliver_pub_ipv4_range', 'set_state'),
         }),
         ('Certificate', {
             'classes': ('collapse',),
@@ -60,7 +60,12 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         ('Optional Prefixes', {
             'classes': ('collapse',),
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
-        }),)
+        }),
+        ('Debug info', {
+            'classes': ('collapse',),
+            'fields': ('boot_sn', )
+        }),
+        )
     actions = [request_cert, reboot_selected]
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]

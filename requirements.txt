@@ -1,4 +1,4 @@
-https://www.djangoproject.com/download/1.5c1/tarball/
+http://www.djangoproject.com/m/releases/1.5/Django-1.5c1.tar.gz
 kombu==2.4.7
 django-celery-email
 django-fluent-dashboard

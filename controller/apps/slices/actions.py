@@ -82,7 +82,7 @@ def create_slivers(modeladmin, request, queryset):
             
             modeladmin.message_user(request, "Successfully created %d slivers." % n)
             # Return None to display the change list page again.
-            return None
+            return redirect('admin:slices_slice_change', slice.pk)
     
     context = {
         "title": "Are you sure?",

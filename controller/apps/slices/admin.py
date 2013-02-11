@@ -73,7 +73,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
               template_link, 'exp_data', 'exp_data_uri', 'exp_data_sha256']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', template_link]
     search_fields = ['description', 'node__description', 'slice__name']
-    inlines = [SliverPropInline, SliverIfaceInline]
+    inlines = [SliverIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
     
@@ -161,6 +161,7 @@ class NodeListAdmin(NodeAdmin):
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
     actions = [create_slivers]
+    actions_on_bottom = True
     
     def add_sliver_link(self, instance):
         """ Link to add sliver to related node """
@@ -308,7 +309,7 @@ class SliverInline(PermissionTabularInline):
     
     def sliver_note2(self, instance):
         """
-        <a href="add_sliver" class="addlink"> Add another Sliver </a>
+        <a href="add_sliver" class="addlink"> Add Slivers </a>
         """
     sliver_note2.short_description = mark_safe(sliver_note2.__doc__)
     
@@ -318,7 +319,10 @@ class SliverInline(PermissionTabularInline):
             return [(None, {'fields': ['sliver_note1']})]
         # The slices is registred: display add button in the inline header
         if self.has_change_permission(request, obj, view=False):
+            self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add another Sliver)</a>')
+        if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]
+
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
     def has_delete_permission(self, request, obj=None):
@@ -360,7 +364,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', template_link]
     date_hierarchy = 'expires_on'
     search_fields = ['name']
-    inlines = [SlicePropInline, SliverInline]
+    inlines = [SliverInline]
     actions = [reset_selected, renew_selected_slices]
     form = SliceAdminForm
     fieldsets = (

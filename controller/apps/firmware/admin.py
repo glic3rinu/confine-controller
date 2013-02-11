@@ -136,6 +136,15 @@ class ConfigAdmin(SingletonModelAdmin):
         urls = super(ConfigAdmin, self).get_urls()
         return urlpatterns + urls
     
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Warning if the firmware doesn't have any image """
+        if request.method == 'GET':
+            obj = self.get_object(request, object_id)
+            if not obj.images.exists():
+                messages.warning(request, "Notice that you don't have any base image configured")
+        return super(ConfigAdmin, self).change_view(
+            request, object_id, form_url=form_url, extra_context=extra_context)
+    
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make value input widget bigger """
         if db_field.name == 'image_name':

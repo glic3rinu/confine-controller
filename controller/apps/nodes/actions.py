@@ -22,6 +22,7 @@ def reboot_selected(modeladmin, request, queryset):
     
     # Check that the user has change permission for the actual model
     # TODO performance improvenet: if superuser skip
+    # TODO Say more gently that permission is needed
     for node in queryset:
         if not request.user.has_perm('nodes.change_node', node):
             raise PermissionDenied

@@ -44,7 +44,7 @@ def run(command, display=True, err_codes=[0], silent=True):
             raise CommandError("%s %s" % (msg, err))
     out.succeeded = not out.failed
     if display:
-        print out
+        print out.stdout, out.stderr
     return out
 
 

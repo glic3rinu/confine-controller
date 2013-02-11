@@ -163,10 +163,11 @@ class Slice(models.Model):
         return int('ffff', 16)
     
     def _get_vlan_nr(self):
-        last_nr = Slice.objects.order_by('-vlan_nr')[0].vlan_nr
-        if last_nr < 2: return 2
+        last_nr = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')[0].vlan_nr
+        if last_nr < 2:
+            return 2
         if last_nr >= self.max_vlan_nr:
-            # Try to recycle old values
+            # Try to recycle old values ( very, very ineficient )
             for new_nr in range(2, self.max_vlan_nr):
                 if not Slice.objects.filter(vlan_nr=new_nr).exists():
                     return new_nr
@@ -284,7 +285,8 @@ class Sliver(models.Model):
     def get_registred_iface_type(cls, iface):
         # TODO inspect class/object and act upon it
         for k,v in cls._iface_registry.iteritems():
-            if type(v) is iface: return k
+            if type(v) is iface:
+                return k
     
     @classmethod
     def get_registred_iface(cls, type_):

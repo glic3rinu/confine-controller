@@ -66,8 +66,7 @@ class SliverIfaceInline(PermissionTabularInline):
 
 
 class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['__unicode__', admin_link('node'), admin_link('slice'), 
-                    'total_num_ifaces']
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice')]
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
               template_link, 'exp_data', 'exp_data_uri', 'exp_data_sha256']

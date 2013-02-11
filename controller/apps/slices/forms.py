@@ -23,7 +23,7 @@ class SliceAdminForm(forms.ModelForm):
         # read only views doens't have fields
         if 'vlan_nr' in self.fields:
             if not 'instance' in kwargs:
-                self.fields['vlan_nr'] = self.fields['request_vlan'] 
+                self.fields['vlan_nr'] = self.fields['request_vlan']
             else:
                 instance = kwargs['instance']
                 if instance.set_state == Slice.REGISTER and instance.vlan_nr == -1:
@@ -39,8 +39,8 @@ class SliceAdminForm(forms.ModelForm):
     def clean_vlan_nr(self):
         """ Return -1 if user requests vlan_nr """
         vlan_nr = self.cleaned_data['vlan_nr']
-        if isinstance(vlan_nr, bool):
-            if vlan_nr: return -1
+        if isinstance(vlan_nr, bool) and vlan_nr:
+            return -1
         return vlan_nr
 
 

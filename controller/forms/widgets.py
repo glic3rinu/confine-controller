@@ -1,11 +1,12 @@
 from django import forms
 from django.utils.safestring import mark_safe
-
+from django.utils.encoding import force_text
 
 # TODO combine both widgets
 
 class ShowText(forms.Widget):
     def render(self, name, value, attrs):
+        value = force_text(value)
         if value is None:
             return ''
         if hasattr(self, 'initial'):

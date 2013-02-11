@@ -14,15 +14,17 @@
 </head>
 {% load i18n %}
 
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" style="max-width:1100px; margin:0 auto;" >
 
 <!-- Container -->
 <div id="container">
-
+<style type="text/css">
+body { background:#FBFAF9 url(/static/page-gradient.png) top left repeat-x;}
+</style>
     {% if not is_popup %}
     <!-- Header -->
-    <div id="header">
-        <div id="branding">
+    <div id="header" >
+        <div id="branding"  >
         {% block branding %}{% endblock %}
         </div>
         {% if user.is_active and user.is_staff %}
@@ -58,14 +60,17 @@
     {% block breadcrumbs %}<div class="breadcrumbs"><a href="/">{% trans 'Home' %}</a>{% if title %} &rsaquo; {{ title }}{% endif %}</div>{% endblock %}
     {% endif %}
 
+    {% block messages %}
         {% if messages %}
-        <ul class="messagelist">{% for message in messages %}
+        <ul class="messagelist" >{% for message in messages %}
           <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-	{% endfor %}</ul>
+        {% endfor %}</ul>
         {% endif %}
+    {% endblock messages %}
+
 
     <!-- Content -->
-    <div id="content" class="{% block coltype %}colM{% endblock %}">
+    <div id="content" class="{% block coltype %}colM{% endblock %}" style="max-width:1100px; margin:20px auto;">
         {% block pretitle %}{% endblock %}
         {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
         {% block content %}

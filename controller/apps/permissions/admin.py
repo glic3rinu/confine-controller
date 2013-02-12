@@ -8,15 +8,10 @@ from django.utils.encoding import force_text
 
 # WARNING: *HACKY MODULE*
 # There are lots of hacks down there, mostly because avoiding Django code copypasta
+# Note: Django admin doesn't check for inline permissions if they don't have modeladmin
 
 
-# TODO:
-# View permissions -> qset (define on permission._get_view_queryset())
-# change permission -> save model && custom widget
-# add permission -> save model
-# delete permission -> delete()
-# Problem django admin doesn't check for inline permissions if they don't have modeladmin, just checks for a first class objects
-# Maybe we can do the same for the api permissions (only check resources and not nested objects)
+# TODO: View permissions -> qset (define on permission._get_view_queryset())
 
 
 class ReadPermModelAdminMixin(object):
@@ -102,6 +97,7 @@ class ReadPermModelAdminMixin(object):
         obj.save()
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Change title to View object if user has read only """
         opts = self.model._meta
         obj = self.get_object(request, unquote(object_id))
         context = {}
@@ -129,10 +125,8 @@ class ReadPermModelAdminMixin(object):
 
 class PermissionModelAdmin(ReadPermModelAdminMixin, admin.ModelAdmin):
     """ Base class for supporting permissions on ModelAdmins """
-    pass
 
 
-# TODO checkout wiki todo
 class ReadPermInlineModelAdminMixin(ReadPermModelAdminMixin):
     def has_add_permission(self, request, obj=None):
         """ Prevent add another button to appear """
@@ -141,7 +135,8 @@ class ReadPermInlineModelAdminMixin(ReadPermModelAdminMixin):
         if parent is not None:
             if not request.user.has_perm(opts.app_label + '.' + opts.get_change_permission(), parent):
                 return False
-                # TODO inlines save_model is not called so we have find the way of checking add permissions with the resulting object
+                # TODO inlines save_model is not called so we have find the way 
+                #      of checking add permissions with the resulting object, shall we?
         return super(ReadPermInlineModelAdminMixin, self).has_add_permission(request, obj=obj)
 
 

@@ -156,7 +156,7 @@ INSTALLED_APPS = (
 AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
-    'permissions.backends.TestbedPermissionBackend',
+    'permissions.auth.TestbedPermissionBackend',
 ]
 
 # A sample logging configuration. The only tangible logging

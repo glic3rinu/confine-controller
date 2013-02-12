@@ -8,6 +8,13 @@
 
 {% block bodyclass %}login{% endblock %}
 
+<!--TODO move this logic to a css-->
+{% block branding-stetic %}{% endblock %}
+{% block breadcrumb-stetic %}{% endblock %}
+{% block container-stetic %}<div id="container">{% endblock %}
+{% block header-stetic %}<div id="header">{% endblock %}
+<!--end of TODO-->
+
 {% block nav-global %}{% endblock %}
 
 {% block content_title %}{% endblock %}
@@ -52,7 +59,8 @@
   </div>
 </form>
 
-<div class="register-links">
+<!--TODO move this logic to a css-->
+<div class="register-links" style="margin-right: 20px;">
   <a href="{% url 'registration_register' %}">Create an account</a>
   {# disable groupregistration<a href="{% url 'registration_group_register' %}">Register a new group</a>#}
 </div>

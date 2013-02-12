@@ -232,6 +232,7 @@ deploy_common () {
     run apt-get install -y --force-yes sudo nano python-pip
     # for cleaning pip garbage afterwards
     cd /tmp
+    # TODO Detect if an older version is installed and delete it before proceding
     run pip install confine-controller --upgrade
     run controller-admin.sh install_requirements
     
@@ -262,6 +263,7 @@ deploy_running_services () {
     sudo python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
     su $USER -c "python manage.py syncdb --noinput"
     su $USER -c "python manage.py migrate --noinput"
+    # The following command is indent sensitive
     su $USER -c "echo -e \"\\
 from django.contrib.auth import get_user_model;\\
 User = get_user_model()\n\\

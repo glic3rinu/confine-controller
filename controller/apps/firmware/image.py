@@ -43,35 +43,41 @@ class Image(object):
         module_path = os.path.dirname(os.path.realpath(__file__))
         return os.path.join(module_path, 'scripts')
     
+    @property
+    def sector(self):
+        """ sector number of image part_nr """
+        context = { 'image': self.image, 'part_nr': self.part_nr }
+        result = run("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|sed -n %(part_nr)dp" % context)
+        return int(result.stdout)
+    
+    @property
+    def mount_context(self):
+        """ context used in mount and umount methods """
+        return { 'mnt': self.mnt,
+                 'image': self.image,
+                 'partition': self.partition,
+                 'sector': self.sector }
+    
     def prepare(self):
         """ create temporary directories needed for building the image """
         self.tmp = tempfile.mkdtemp()
         os.mkdir(self.mnt)
         self.image = os.path.join(self.tmp, "image.bin")
     
-    def get_sector(self):
-        context = { 'image': self.image, 'part_nr': self.part_nr }
-        result = run("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|sed -n %(part_nr)dp" % context)
-        return int(result.stdout)
-    
-    def get_run_context(self):
-        return { 'mnt': self.mnt,
-                 'image': self.image,
-                 'partition': self.partition,
-                 'sector': self.get_sector(),}
-    
     def mount(self):
         """ mount image partition with user-space tools """
-        context = self.get_run_context()
+        context = self.mount_context
+        # raise an exception if there is something mounted on our target
         r("mountpoint -q %(mnt)s" % context, err_codes=[1])
         r("dd if=%(image)s of=%(partition)s skip=%(sector)d" % context)
         r("fuseext2 %(partition)s %(mnt)s -o rw+" % context)
-        # fuseext2 is a pice of crap since doesn't return a correct exit code, let's kludge
+        # fuseext2 is a pice of crap since doesn't return a correct exit code
+        # raising an exception if fuseext2 didn't succeed
         r("mountpoint -q %(mnt)s" % context)
     
     def umount(self):
         """ umount image partition """
-        context = self.get_run_context()
+        context = self.mount_context
         r("fusermount -u %(mnt)s" % context)
         r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
     
@@ -106,7 +112,7 @@ class Image(object):
         # create temporary dirs
         self.prepare()
         # extract the image
-        r("cat '%s' | gunzip -c > '%s'" %(self.base_image, self.image))
+        r("cat '%s' | gunzip -c > '%s'" % (self.base_image, self.image))
         self.mount()
         
         # create the added files

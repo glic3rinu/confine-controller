@@ -46,7 +46,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [DirectIfaceInline]
+    inlines = [DirectIfaceInline, NodePropInline]
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'group', 'arch', 'local_iface',

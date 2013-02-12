@@ -1,4 +1,5 @@
-import os
+import os, sys
+from distutils.sysconfig import get_python_lib
 from setuptools import setup, find_packages
 
 # allow setup.py to be run from any path
@@ -8,7 +9,7 @@ packages = find_packages('.')
 
 setup(
     name = 'confine-controller',
-    version = '0.6.13dev',
+    version = '0.6.16dev',
     packages = packages,
     include_package_data = True,
     license = 'BSD License',
@@ -34,4 +35,41 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
+
+
+# Warn if we are installing over top of an existing installation. This can
+# cause issues where files that were deleted from a more recent Controller are
+# still present in site-packages.
+overlay_warning = False
+if "install" in sys.argv:
+    # We have to try also with an explicit prefix of /usr/local in order to
+    # catch Debian's custom user site-packages directory.
+    for lib_path in get_python_lib(), get_python_lib(prefix="/usr/local"):
+        existing_path = os.path.abspath(os.path.join(lib_path, "controller"))
+        if os.path.exists(existing_path):
+            # We note the need for the warning here, but present it after the
+            # command is run, so it's more likely to be seen.
+            overlay_warning = True
+            break
+
+
+if overlay_warning:
+    sys.stderr.write("""
+
+========
+WARNING!
+========
+
+You have just installed confine-controller over top of anexisting 
+installation, without removing it first. 
+Because of this, your install may now include extraneous 
+files from a previous version that have since been removed from
+Controller. This is known to cause a variety of problems. You
+should manually remove the
+
+%(existing_path)s
+
+directory and re-install confine-controller.
+
+""" % { "existing_path": existing_path })
 

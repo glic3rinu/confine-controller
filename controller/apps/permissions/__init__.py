@@ -1,6 +1,6 @@
 from controller.utils import autodiscover
 
-from .permissions import *
+from .options import *
 
 # Autodiscover permissions.py
 # Making sure models are loaded first in order to avoid circular imports !

@@ -26,6 +26,15 @@ class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
     formset = RolesFormSet
+    
+    def get_formset(self, request, obj=None, **kwargs):
+        """
+        Hook obj into formset to tell the difference bewteen add or change so it
+        can validate correctly that each group has at least one admin, except
+        during the add process which will be added automatically
+        """
+        self.formset.__obj__ = obj
+        return super(RolesInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class ReadOnlyRolesInline(PermissionTabularInline):
@@ -134,7 +143,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         """ user that creates a group becomes its admin """
         super(GroupAdmin, self).save_model(request, obj, form, change)
         if not change:
-            Roles.objects.create(user=request.user, group=obj, is_admin=True)
+            Roles.objects.get_or_create(user=request.user, group=obj, is_admin=True)
     
     def queryset(self, request):
         """ Annotate number of users on the slice for sorting on changelist """

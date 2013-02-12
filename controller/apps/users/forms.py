@@ -50,10 +50,12 @@ class RolesFormSet(forms.models.BaseInlineFormSet):
     # TODO: ensure this also when deleting a user (more triky though)
     def clean(self):
         super(RolesFormSet, self).clean()
-        for form in self.forms:
-            if form.cleaned_data.get('is_admin'):
-                return
-        raise ValidationError('The group must have at least one admin')
+        # Only checking in change forms
+        if self.__obj__ is not None:
+            for form in self.forms:
+                if form.cleaned_data.get('is_admin'):
+                    return
+            raise ValidationError('The group must have at least one admin')
 
 
 class JoinRequestForm(forms.ModelForm):

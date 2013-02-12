@@ -36,8 +36,14 @@ class Permission(object):
             caller = cls
         else: 
             raise TypeError('WTF are you doing dude?')
+        
+        # has_permission(user, 'perm')
         def call(user, perm):
+            if user.is_superuser:
+                return True
             return getattr(self, perm)(caller, user)
+        
+        # has_permission.perm(user)
         for func in inspect.getmembers(type(self), predicate=inspect.ismethod):
             if func[1].im_class is not type(self):
                 # aggregated methods
@@ -66,6 +72,7 @@ class ReadOnlyPermission(Permission):
 
 class AllowAllPermission(object):
     """ All methods return True """
+    # TODO has_permission.perm(user)
     def __get__(self, instance, cls):
         return lambda *args: True
 
@@ -81,6 +88,7 @@ class RelatedPermission(Permission):
         self.relation = relation
     
     def __get__(self, instance, cls):
+        # TODO has_permission.perm(user)
         if instance is not None:
             caller = instance
         elif cls is not None:
@@ -96,5 +104,5 @@ class RelatedPermission(Permission):
                     parent = getattr(parent, relation).field.rel.to
             else:
                 parent = reduce(getattr, relations, caller)
-            return getattr(parent.has_permission, perm)(user)
+            return parent.has_permission(user, perm)
         return call

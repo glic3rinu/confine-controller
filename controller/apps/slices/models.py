@@ -140,7 +140,7 @@ class Slice(models.Model):
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
         super(Slice, self).save(*args, **kwargs)
-
+    
     def clean(self):
         super(Slice, self).clean()
         if self.exp_data:
@@ -258,14 +258,13 @@ class Sliver(models.Model):
     
     @property
     def max_num_ifaces(self):
-        return 256 #limited by design -> #nr: unsigned 8 bits
+        return 256 # limited by design -> #nr: unsigned 8 bits
     
     def reset(self):
         self.instance_sn += 1
         self.save()
     
     def force_update(self, async=False):
-        # TODO rename to pull request?
         if async:
             defer(force_sliver_update.delay, self.pk)
         else:
@@ -283,7 +282,6 @@ class Sliver(models.Model):
     
     @classmethod
     def get_registred_iface_type(cls, iface):
-        # TODO inspect class/object and act upon it
         for k,v in cls._iface_registry.iteritems():
             if type(v) is iface:
                 return k
@@ -329,7 +327,6 @@ class SliverIface(models.Model):
     Implememts the network interfaces that will be created in the slivers.
     There must exist a first interface of type private. See node architecture.
     """
-    # TODO: precreate a private interface
     sliver = models.ForeignKey(Sliver, related_name='interfaces')
     nr = models.PositiveIntegerField('Number',
         help_text='The unique 8-bit, positive integer number of this interface '

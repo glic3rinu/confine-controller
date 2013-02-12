@@ -284,7 +284,7 @@ class SliceSliversAdmin(SliverAdmin):
         if obj: 
             request._node_ = obj.node
         else:
-            # TODO gatting node_id like this is really embarrassing...
+            # TODO gatting node_id like this is really embarassing...
             node_id = request.path.split('/')[-2]
             node = Node.objects.get(pk=node_id)
             request._node_ = node
@@ -321,7 +321,7 @@ class SliverInline(PermissionTabularInline):
             self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add another Sliver)</a>')
         if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]
-
+    
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
     def has_delete_permission(self, request, obj=None):
@@ -422,7 +422,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         """
         if request.method == 'GET':
             messages.warning(request, 'At this time the testbed is not ready for '
-                'allocating slices. But you can try this interface anyway.')
+                'allocating slices. But you are welcomed to try this interface anyway.')
         form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset

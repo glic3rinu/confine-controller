@@ -1,5 +1,5 @@
-from hashlib import sha256
 import os
+from hashlib import sha256
 
 from celery import states as celery_states
 from django import template

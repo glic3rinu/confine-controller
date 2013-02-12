@@ -104,7 +104,7 @@ class Image(object):
         self.image = dst
     
     def chmod(self, path, mode):
-        """ change mode of the path """
+        """ change path mode """
         r("chmod %s '%s'" % (mode, path))
     
     def build(self, path=None):

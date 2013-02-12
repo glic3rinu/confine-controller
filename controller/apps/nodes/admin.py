@@ -74,7 +74,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def display_cert(self, node):
         """ Display certificate with some contextual help if cert is not present """
         if not node.pk:
-            return "You will be able to request a certificate once the node is registred"
+            return "Certificates can be requested once the node is saved for the first time."
         if not node.cert:
             req_url = reverse('admin:nodes_node_request-cert', args=[node.pk])
             return mark_safe("<a href='%s'>Request certificate</a>" % req_url)

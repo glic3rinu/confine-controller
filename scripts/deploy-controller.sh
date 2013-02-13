@@ -223,7 +223,7 @@ export -f install_kernel_and_grub
 deploy_common () {
     check_root
     
-    local DIR=$1
+    local DIR=$(eval echo $1)
     local PROJECT_NAME=$2
     local SKELETONE=$3
     local USER=$4

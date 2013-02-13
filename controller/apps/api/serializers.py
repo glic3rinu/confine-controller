@@ -73,10 +73,10 @@ class PropertyField(serializers.WritableField):
     def from_native(self, value):
         """ Convert a dict-like representation back to a Property Model """
         parent = self.parent
-        related_manager = getattr(parent.object, self.source or field_name, False)
+        related_manager = getattr(parent.object, self.source or 'properties', False)
         properties = []
         if value:
-            model = getattr(parent.opts.model, self.source).related.model
+            model = getattr(parent.opts.model, self.source or 'properties').related.model
             dict_value = ast.literal_eval(str(value))
             if not related_manager:
                 # POST (new parent object)

@@ -46,13 +46,14 @@ class Command(BaseCommand):
             else:
                 # Remove all backups
                 run('rm -fr %s' % os.path.join(base_path, 'controller\.*'))
+                # Clean old egg files
                 version = run('python -c "from controller import get_version; print get_version();"').stdout
                 for egg in eggs:
                     # Do not remove the actual egg file when upgrading twice the same version
                     if egg.split('/')[-1] != "confine_controller-%s.egg-info" % version:
                         run('rm -r %s' % egg)
         else:
-            raise CommandError("You don't seems to have any previous PIP installation")
+            raise CommandError("You don't seem to have any previous PIP installation")
         
         # version specific upgrade operations
         if not options.get('pip_only'):

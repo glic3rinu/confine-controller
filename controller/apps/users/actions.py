@@ -20,9 +20,9 @@ def join_request(modeladmin, request, queryset):
         # get_or_create handle all the transaction stuff:transaction.savepoint ...
         jrequest, created = JoinRequest.objects.get_or_create(user=user, group=group)
         if created:
-            messages.success(request, "Your join request has been sent (%s)" % group)
+            modeladmin.message_user(request, "Your join request has been sent (%s)" % group)
         else:
-            messages.error(request, "You have alreday sent a request to this group (%s)" % group)
+            modeladmin.message_user(request, "You have alreday sent a request to this group (%s)" % group, messages.ERROR)
         return
 
 join_request.short_description = "Request to join the selected groups"

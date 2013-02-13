@@ -1,20 +1,19 @@
 from __future__ import absolute_import
 
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActionsModelAdmin
-from controller.admin.utils import link, get_admin_link
+from controller.admin.utils import get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
-from .actions import join_request
-from .forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm
-from .models import User, AuthToken, Roles, Group, JoinRequest
+from users.actions import join_request
+from users.forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm, GroupAdminForm
+from users.models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
 
 
 class AuthTokenInline(PermissionTabularInline):
@@ -119,17 +118,54 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
 
 
 class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
-    list_display = ['name', 'description', 'allow_slices', 'allow_nodes',
+    list_display = ['name', 'description', 'allow_nodes_info', 'allow_slices_info',
                     'num_users']
     list_filter = ['allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]
-    # TODO this is redundant if is_approved is deprecated
-    fields = ('name', 'description', 'allow_nodes', 'allow_slices')
     actions = [join_request]
     change_view_actions = [('join-request', join_request, 'Join request', ''),]
     change_form_template = 'admin/users/group/change_form.html'
-    
+    form = GroupAdminForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        """ Decides whether to show allow_resource or request_resource"""
+        form = super(GroupAdmin, self).get_form(request, obj=obj, **kwargs)
+        readonly_fields = self.get_readonly_fields(request, obj=obj)
+        user = request.user
+        for resource, verbose in ResourceRequest.RESOURCES:
+            if user.is_superuser or 'allow_%s' % resource in readonly_fields:
+                form.base_fields.pop('request_%s' % resource)
+            else:
+                form.base_fields.pop('allow_%s' % resource)
+        return form
+
+    def get_readonly_fields(self, request, obj=None):
+        """ Make allow_resource readonly accordingly """
+        fields = super(GroupAdmin, self).get_readonly_fields(request, obj=obj)
+        if not request.user.is_superuser and obj is not None:
+            for resource, verbose in ResourceRequest.RESOURCES:
+                resource = 'allow_%s' % resource
+                if getattr(obj, resource):
+                    fields += (resource,)
+        return fields
+
+    def allow_nodes_info(self, instance):
+        """Change allow nodes if exists a resource request"""
+        if instance.resource_requests.filter(resource='nodes').exists():
+            return None
+        return instance.allow_nodes
+    allow_nodes_info.boolean = True
+    allow_nodes_info.short_description = "Allow nodes"
+
+    def allow_slices_info(self, instance):
+        """Change allow slices if exists a resource request"""
+        if instance.resource_requests.filter(resource='slices').exists():
+            return None
+        return instance.allow_slices
+    allow_slices_info.boolean = True
+    allow_slices_info.short_description = "Allow slices"
+
     def num_users(self, instance):
         """ return num users as a link to users changelist view """
         num = instance.users.count()
@@ -154,5 +190,4 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
-admin.site.unregister(AuthGroup)
-
+#admin.site.unregister(AuthGroup)

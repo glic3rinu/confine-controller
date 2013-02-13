@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth import models as auth_models
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.core import validators
 from django.db import models
@@ -311,3 +313,39 @@ class JoinRequest(models.Model):
     def notify(self, template, to):
         context = {'group': self.group}
         send_mail_template(template=template, context=context, to=to)
+
+
+class ResourceRequest(models.Model):
+    """
+    Implements a system to manage the groups resources.
+    A group admin can create a request asking for enable
+    resources for the group (e.g. slices, nodes)
+    """
+    RESOURCES = (
+        ('nodes', 'Nodes'),
+        ('slices', 'Slices'))
+
+    group = models.ForeignKey(Group, related_name='resource_requests')
+    resource = models.CharField(max_length=16, choices=RESOURCES)
+
+    def accept(self):
+        """Accept the request updating the group properties
+        according to the requests info"""
+        setattr(self.group, 'allow_%s' % self.resource, True)
+        self.group.save()
+        admin_emails = self.group.get_admin_emails()
+        self.notify('groups/accepted_allow_request.email', admin_emails)
+        self.delete()
+
+    def notify(self, template, to):
+        """Send an email rendering the template to thespecified emails"""
+        context = {'instance': self}
+        send_mail_template(template=template, context=context, to=to)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            # Notify testbed operators when the request has been created
+            self.notify(template='groups/created_allow_request.email',
+                        to=settings.MAINTEINANCE_EMAIL)
+        super(ResourceRequest, self).save(*args, **kwargs)
+

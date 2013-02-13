@@ -23,7 +23,7 @@ class _AttributeString(str):
 def run(command, display=True, err_codes=[0], silent=True):
     """ Subprocess wrapper for running commands """
     if display:
-        sys.stderr.write("\033[1m $ %s\033[0m\n" % command)
+        sys.stderr.write("\n\033[1m $ %s\033[0m\n" % command)
     out_stream = subprocess.PIPE
     err_stream = subprocess.PIPE
     
@@ -38,10 +38,10 @@ def run(command, display=True, err_codes=[0], silent=True):
     out.stderr = err
     if p.returncode not in err_codes:
         out.failed = True
-        msg = "run() encountered an error (return code %s) while executing '%s'\n" % (p.returncode, command)
-        sys.stderr.write("\033[1;31mCommandError: %s %s\033[m\n" % (msg, err))
+        msg = "\nrun() encountered an error (return code %s) while executing '%s'\n" % (p.returncode, command)
+        sys.stderr.write("\n\033[1;31mCommandError: %s %s\033[m\n" % (msg, err))
         if not silent:
-            raise CommandError("%s\n %s\n" % (msg, err))
+            raise CommandError("\n%s\n %s\n" % (msg, err))
     out.succeeded = not out.failed
     if display:
         sys.stderr.write(out.stdout + out.stderr)

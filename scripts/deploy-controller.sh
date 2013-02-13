@@ -223,19 +223,26 @@ export -f install_kernel_and_grub
 deploy_common () {
     check_root
     
-    local PROJECT_NAME=$1
-    local SKELETONE=$2
-    local USER=$3
-    local PASSWORD=$4
+    local DIR=$1
+    local PROJECT_NAME=$2
+    local SKELETONE=$3
+    local USER=$4
+    local PASSWORD=$5
     
     run apt-get update
     run apt-get install -y --force-yes sudo nano python-pip
     # for cleaning pip garbage afterwards
     cd /tmp
-    # TODO Detect if an older version is installed and delete it before proceding
-    run pip install confine-controller --upgrade
-    run controller-admin.sh install_requirements
     
+    if [[ ! $(pip freeze|grep confine-controller) ]]; then
+        run pip install confine-controller --upgrade
+    else
+        python $DIR/manage.py upgradecontroller --pip_only
+        if [[ $? != 0 ]]; then
+            run pip install confine-controller --upgrade
+        fi
+    fi
+    run controller-admin.sh install_requirements
     try_create_system_user $USER $PASSWORD
     adduser $USER sudo
     cd $(eval echo "~$USER")
@@ -260,7 +267,7 @@ deploy_running_services () {
     local TINC_PORT=$7
     
     cd $DIR
-    sudo python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
+    python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
     su $USER -c "python manage.py syncdb --noinput"
     su $USER -c "python manage.py migrate --noinput"
     # The following command is indent sensitive
@@ -585,7 +592,7 @@ function deploy () {
         $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
     else
         # local installation
-        run deploy_common "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
+        run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
         run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT"
     fi
     

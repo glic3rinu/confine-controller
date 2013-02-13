@@ -1,4 +1,5 @@
 import os
+from distutils.sysconfig import get_python_lib
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -50,24 +51,37 @@ def send_mail_template(template, context, to, email_from=None):
 
 
 def get_project_root():
-    """ Return the django project path """
+    """ Return the current project path site/project """
     return os.path.dirname(os.path.normpath(os.sys.modules[settings.SETTINGS_MODULE].__file__))
 
 
 def get_project_name():
+    """ Returns current project name """
     return os.path.basename(get_project_root())
 
 
 def get_site_root():
+    """ Returns project site path """
     return os.path.abspath(os.path.join(get_project_root(), '..'))
 
 
+def get_existing_pip_installation():
+    """ returns current pip installation path """
+    if run("pip freeze|grep confine-controller", err_codes=[0,1]).return_code == 0:
+        for lib_path in get_python_lib(), get_python_lib(prefix="/usr/local"):
+            existing_path = os.path.abspath(os.path.join(lib_path, "controller"))
+            if os.path.exists(existing_path):
+                return existing_path
+    return None
+
+
 def update_settings(**options):
+    """ Warning this only works with a very simple setting format: NAME = 'value' """
     for name, value in options.iteritems():
         if getattr(settings, name, None) != value:
             settings_file = os.path.join(get_project_root(), 'settings.py')
             if run("grep '%s' %s" % (name, settings_file), err_codes=[0,1]):
                 # Update existing settings_file
-                run("""sed -i "s/%s = '\w*'/%s = '%s'/" %s""" % (name, name, value, settings_file))
+                run("sed -i \"s/%s = '\w*'/%s = '%s'/\" %s" % (name, name, value, settings_file))
             else:
-                run("""echo "%s = '%s'" >> %s""" % (name, value, settings_file))
+                run("echo \"%s = '%s'\" >> %s" % (name, value, settings_file))

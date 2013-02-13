@@ -1,4 +1,4 @@
-import subprocess, getpass, re
+import subprocess, getpass, re, sys
 
 from django.core.management.base import CommandError
 
@@ -23,7 +23,7 @@ class _AttributeString(str):
 def run(command, display=True, err_codes=[0], silent=True):
     """ Subprocess wrapper for running commands """
     if display:
-        print "\033[1m $ %s\033[0m" % command
+        sys.stderr.write("\033[1m $ %s\033[0m" % command)
     out_stream = subprocess.PIPE
     err_stream = subprocess.PIPE
     
@@ -39,12 +39,12 @@ def run(command, display=True, err_codes=[0], silent=True):
     if p.returncode not in err_codes:
         out.failed = True
         msg = "run() encountered an error (return code %s) while executing '%s'" % (p.returncode, command)
-        print "\033[1;31mCommandError: %s %s\033[m" % (msg, err)
+        sys.stderr.write("\033[1;31mCommandError: %s %s\033[m" % (msg, err))
         if not silent:
             raise CommandError("%s %s" % (msg, err))
     out.succeeded = not out.failed
     if display:
-        print out.stdout, out.stderr
+        sys.stderr.write(out.stdout + out.stderr)
     return out
 
 

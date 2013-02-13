@@ -19,7 +19,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         minimal = options.get('minimal')
         
-        self.stderr.write("\nThe next command can take a while to report feedback, be patient ...")
         if minimal:
             run("controller-admin.sh install_requirements --minimal")
         else:

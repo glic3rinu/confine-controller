@@ -38,6 +38,7 @@ def read_async(fd):
 
 def run(command, display=True, err_codes=[0], silent=True):
     """ Subprocess wrapper for running commands """
+    # TODO print stderr and stdin while command is running
     if display:
         sys.stderr.write("\n\033[1m $ %s\033[0m\n" % command)
     out_stream = subprocess.PIPE

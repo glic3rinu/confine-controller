@@ -126,6 +126,7 @@ function install_requirements () {
         sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
         run update-rc.d rabbitmq-server defaults
     fi
+    # TODO delete django installation before proceeding
     run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements

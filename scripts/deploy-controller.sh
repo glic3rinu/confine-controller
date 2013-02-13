@@ -237,7 +237,7 @@ deploy_common () {
     if [[ ! $(pip freeze|grep confine-controller) ]]; then
         run pip install confine-controller --upgrade
     else
-        python $DIR/manage.py upgradecontroller --pip_only
+        python $DIR/manage.py upgradecontroller
         if [[ $? != 0 ]]; then
             run pip install confine-controller --upgrade
         fi

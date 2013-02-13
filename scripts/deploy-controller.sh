@@ -237,7 +237,8 @@ deploy_common () {
     if [[ ! $(pip freeze|grep confine-controller) ]]; then
         run pip install confine-controller --upgrade
     else
-        python $DIR/manage.py upgradecontroller
+        run python $DIR/manage.py upgradecontroller --pip
+        # TODO deprecate when all installations support the new upgrade paradigm
         if [[ $? != 0 ]]; then
             run pip install confine-controller --upgrade
         fi
@@ -265,6 +266,7 @@ deploy_running_services () {
     local DB_PASSWORD=$5
     local MGMT_PREFIX=$6
     local TINC_PORT=$7
+    local VERSION=$8
     
     cd $DIR
     python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
@@ -286,6 +288,7 @@ User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine'
         $cmd
     su $USER -c "python $DIR/manage.py updatetincd"
     python $DIR/manage.py restartservices
+    [[ $VERSION != false ]] && python $DIR/manage.py upgrade --specifics --from $VERSION
 }
 export -f deploy_running_services
 
@@ -316,7 +319,7 @@ function deploy_postponed () {
 		# Description:       Creates and fills database on first boot
 		### END INIT INFO
 		
-		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT"
+		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT" "false"
 		insserv -r /etc/init.d/setup_portal_db
 		rm -f \$0
 		EOF
@@ -592,8 +595,9 @@ function deploy () {
         $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
     else
         # local installation
+        VERSION = python -c "from controller import get_version; print get_version();"
         run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
-        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT"
+        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT" "$VERSION"
     fi
     
     echo -e "\n ... seems that everything went better than expected :)"

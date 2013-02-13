@@ -10,7 +10,7 @@ packages = find_packages('.')
 
 setup(
     name = 'confine-controller',
-    version = '0.6.29dev',
+    version = '0.6.30dev',
     packages = packages,
     include_package_data = True,
     license = 'BSD License',
@@ -61,7 +61,7 @@ if overlay_warning:
 WARNING!
 ========
 
-You have just installed confine-controller over top of anexisting 
+You have just installed confine-controller over top of an existing 
 installation, without removing it first. 
 Because of this, your install may now include extraneous 
 files from a previous version that have since been removed from
@@ -71,6 +71,10 @@ should manually remove the
 %(existing_path)s
 
 directory and re-install confine-controller.
+
+You don't have to worry if you're upgrading using the standard procedure:
+  python manage.py upgradecontroller
+
 
 """ % { "existing_path": existing_path })
 

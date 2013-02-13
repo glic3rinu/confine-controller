@@ -21,7 +21,6 @@ class Command(BaseCommand):
             run("mv %s %s" % (current_path, backup))
             
             try:
-                self.stderr.write("\nThe next command can take a while to report feedback, be patient ...")
                 run('pip install confine-controller --upgrade', silent=False)
             except CommandError:
                 # Restore backup

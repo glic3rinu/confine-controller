@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--minimal', action='store_true', dest='minimal', default=false,
+            make_option('--minimal', action='store_true', dest='minimal', default=False,
                 help='Only install minimal requirements'),
             )
     

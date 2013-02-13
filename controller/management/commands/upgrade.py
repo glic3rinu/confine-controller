@@ -1,3 +1,4 @@
+import re
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
@@ -10,22 +11,42 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
             make_option('--minimal', action='store_true', dest='minimal', default=False,
-                help='Only install minimal requirements'),)
+                help='Only install minimal requirements'),
+            make_option('--specifics', action='store_true', dest='specifics_only', default=False,
+                help='Only run version specific operations'),
+            make_option('--from', dest='version', default=False,
+                help="Controller's version from where you are upgrading, i.e 0.6.32"),
+            )
     
     option_list = BaseCommand.option_list
     help = 'Upgrades confine controller installation'
     
     @check_root
     def handle(self, *args, **options):
-        minimal = options.get('minimal')
+        if not options.get('specifics_only'):
+            # Common stuff
+            minimal = options.get('minimal')
+            
+            if minimal:
+                run("controller-admin.sh install_requirements --minimal")
+            else:
+                run("controller-admin.sh install_requirements")
+                run("python manage.py collectstatic --noinput")
+            
+            run("python manage.py syncdb")
+            run("python manage.py migrate")
+            run("python manage.py restartservices")
         
-        if minimal:
-            run("controller-admin.sh install_requirements --minimal")
-        else:
-            run("controller-admin.sh install_requirements")
-            run("python manage.py collectstatic --noinput")
+        # Version specific
+        version = options.get('version')
+        if not version:
+            self.stderr.write('\nNext time you migth want to provide a --form argument '
+                              'in order to run version specific upgrade operations\n')
+            return
         
-        # Common stuff
-        run("python manage.py syncdb")
-        run("python manage.py migrate")
-        run("python manage.py restartservices")
+        version_re = re.compile(r'\S*(\d+)\.(\d+)\.(\d+)\S*')
+        major, major2, minor = version_re.search(version).groups()
+        # Represent version as two digits per number: 1.2.2 -> 10202
+        version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
+        if version <= 629:
+            run('echo "delete from django_session;" | python manage.py dbshell')

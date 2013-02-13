@@ -21,7 +21,7 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         current_path = get_existing_pip_installation()
-        full = options.get('full_upgrade')
+        full_upgrade = options.get('full_upgrade')
         if current_path is not None:
             # Create a backup of current installation
             base_path = os.path.abspath(os.path.join(current_path, '..'))

@@ -49,7 +49,7 @@ class SliceSerializer(UriHyperlinkedModelSerializer):
         """ preliminary hack to make sure sliverprops get saved """
         # Pop from attrs for avoiding AttributeErrors when POSTing
         props = attrs.pop('properties', None)
-        instance = super(SliverSerializer, self).restore_object(attrs, instance=instance)
+        instance = super(SliceSerializer, self).restore_object(attrs, instance=instance)
         if props is not None:
             # add it to related_data for future saving
             self.related_data['properties'] = props

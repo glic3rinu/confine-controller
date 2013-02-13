@@ -5,6 +5,8 @@ from django.core.management.base import BaseCommand
 
 from controller.utils.system import run, check_root
 
+# TODO rename the module to something less prone to confusion with upgradecontroller
+
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
@@ -19,7 +21,7 @@ class Command(BaseCommand):
             )
     
     option_list = BaseCommand.option_list
-    help = 'Upgrades confine controller installation'
+    help = 'Upgrades confine-controller installation'
     
     @check_root
     def handle(self, *args, **options):
@@ -40,7 +42,7 @@ class Command(BaseCommand):
         # Version specific
         version = options.get('version')
         if not version:
-            self.stderr.write('\nNext time you migth want to provide a --form argument '
+            self.stderr.write('\nNext time you migth want to provide a --from argument '
                               'in order to run version specific upgrade operations\n')
             return
         
@@ -49,4 +51,5 @@ class Command(BaseCommand):
         # Represent version as two digits per number: 1.2.2 -> 10202
         version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
         if version <= 629:
+            # Clean existing sessions because of change on auth backend
             run('echo "delete from django_session;" | python manage.py dbshell')

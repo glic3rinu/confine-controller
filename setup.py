@@ -76,9 +76,10 @@ should manually remove the
 
 directory and re-install confine-controller.
 
-You don't have to worry if you're upgrading using the standard procedure:
-  python manage.py upgradecontroller
 
+You don't have to worry if you're upgrading using the standard procedure:
+
+python manage.py upgradecontroller
 
 """ % { "existing_path": existing_path })
 

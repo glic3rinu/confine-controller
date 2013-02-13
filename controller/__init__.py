@@ -1,4 +1,5 @@
-VERSION = (0, 6, 32, 'alpha', 0)
+VERSION = (0, 6, 33, 'alpha', 0)
+
 
 def get_version():
     # Don't litter controller/__init__.py with all the get_version stuff.

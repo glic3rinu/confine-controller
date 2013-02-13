@@ -1,4 +1,4 @@
-import subprocess, getpass, re, sys
+import subprocess, getpass, re, sys, fcntl, select, os, errno
 
 from django.core.management.base import CommandError
 
@@ -20,6 +20,22 @@ class _AttributeString(str):
         return str(self)
 
 
+def make_async(fd):
+    """ Helper function to add the O_NONBLOCK flag to a file descriptor """
+    fcntl.fcntl(fd, fcntl.F_SETFL, fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
+
+
+def read_async(fd):
+    """ Helper function to read some data from a file descriptor, ignoring EAGAIN errors """
+    try:
+        return fd.read()
+    except IOError, e:
+        if e.errno != errno.EAGAIN:
+            raise e
+        else:
+            return ''
+
+
 def run(command, display=True, err_codes=[0], silent=True):
     """ Subprocess wrapper for running commands """
     # TODO print stderr and stdin while command is running
@@ -29,13 +45,38 @@ def run(command, display=True, err_codes=[0], silent=True):
     err_stream = subprocess.PIPE
     
     p = subprocess.Popen(command, shell=True, stdout=out_stream, stderr=err_stream)
-    (stdout, stderr) = p.communicate()
+    make_async(p.stdout)
+    make_async(p.stderr)
+    
+    stdout = str()
+    stderr = str()
+    
+    # Async reading of stdout and sterr
+    while True:
+        # Wait for data to become available 
+        select.select([p.stdout, p.stderr], [], [])
+        
+        # Try reading some data from each
+        stdoutPiece = read_async(p.stdout)
+        stderrPiece = read_async(p.stderr)
+        
+        if display and stdoutPiece:
+            sys.stdout.write(stdoutPiece)
+        if display and stderrPiece:
+            sys.stderr.write(stderrPiece)
+        
+        stdout += stdoutPiece
+        stderr += stderrPiece
+        returnCode = p.poll()
+        
+        if returnCode != None:
+            break
     
     out = _AttributeString(stdout.strip())
     err = _AttributeString(stderr.strip())
     
     out.failed = False
-    out.return_code = p.returncode
+    out.return_code = returnCode
     out.stderr = err
     if p.returncode not in err_codes:
         out.failed = True
@@ -43,9 +84,8 @@ def run(command, display=True, err_codes=[0], silent=True):
         sys.stderr.write("\n\033[1;31mCommandError: %s %s\033[m\n" % (msg, err))
         if not silent:
             raise CommandError("\n%s\n %s\n" % (msg, err))
+    
     out.succeeded = not out.failed
-    if display:
-        sys.stderr.write(out.stdout + out.stderr)
     return out
 
 

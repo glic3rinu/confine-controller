@@ -8,13 +8,17 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 packages = find_packages('.')
 
+# Dynamically calculate the version based on controller.VERSION.
+version = __import__('controller').get_version()
+
 setup(
     name = 'confine-controller',
-    version = '0.6.31dev',
+    version = version,
     packages = packages,
     include_package_data = True,
     license = 'BSD License',
-    description = 'Django-based framework for building control servers for computer networking and distributed systems testbeds.',
+    description = ('Django-based framework for building control servers for computer '
+                   'networking and distributed systems testbeds.'),
     scripts=['controller/bin/controller-admin.sh'],
     url = 'http://wiki.confine-project.eu/soft:server',
     author = 'Confine Project',

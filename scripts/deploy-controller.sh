@@ -288,7 +288,7 @@ User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine'
         $cmd
     su $USER -c "python $DIR/manage.py updatetincd"
     python $DIR/manage.py restartservices
-    [[ $VERSION != false ]] && python $DIR/manage.py upgrade --specifics --from $VERSION
+    [[ $VERSION != false ]] && run python $DIR/manage.py upgrade --specifics --from $VERSION
 }
 export -f deploy_running_services
 

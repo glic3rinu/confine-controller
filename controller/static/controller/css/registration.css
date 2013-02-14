@@ -7,10 +7,7 @@
 }
 
 .login .register-links {
-    margin-top: 2em; text-align: right
+    text-align: right
 }
 
-.login .register-links a{
-    margin-left: 1em;
-    margin-right: 20px;
 }

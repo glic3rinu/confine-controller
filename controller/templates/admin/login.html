@@ -55,13 +55,16 @@
   </div>
 </form>
 
-<div class="register-links">
-  <a href="{% url 'registration_register' %}">Create an account</a>
-  {# disable groupregistration<a href="{% url 'registration_group_register' %}">Register a new group</a>#}
-</div>
-
 <script type="text/javascript">
 document.getElementById('id_username').focus()
 </script>
 </div>
 {% endblock %}
+
+
+{% block footer %}<div id="footer">
+<div class="register-links">
+  <a href="{% url 'registration_register' %}">Create an account</a>
+  {# disable groupregistration<a href="{% url 'registration_group_register' %}">Register a new group</a>#}
+</div>
+</div>{% endblock %}

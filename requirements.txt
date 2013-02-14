@@ -15,3 +15,4 @@ markdown
 https://bitbucket.org/glic3rinu/django-admin-tools-fixes/get/tip.tar.gz
 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
 pygments
+requests

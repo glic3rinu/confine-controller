@@ -107,7 +107,7 @@ function install_requirements () {
     check_root
     CONTROLLER_PATH=$(get_controller_dir)
     
-    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server"
+    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-gevent"
     EXTENDED_APT="libapache2-mod-wsgi git mercurial fuseext2 screen openssh-server tinc"
     
     # Make sure locales are in place before installing postgres

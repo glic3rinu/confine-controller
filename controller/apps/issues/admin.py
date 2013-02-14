@@ -52,10 +52,9 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
                     admin_link('queue'), colored('priority', PRIORITY_COLORS),
-                    colored('state', STATE_COLORS), 'num_messages', 'created_on',
-                    'last_modified_on']
+                    colored('state', STATE_COLORS), 'last_modified_on']
     list_display_links = ('id', 'subject')
-    list_filter = [MyTicketsListFilter, 'queue__name', 'priority', 'state']
+    list_filter = [MyTicketsListFilter, 'queue__name', 'priority', 'state', 'visibility']
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
                      'queue', 'owner__username']
@@ -84,14 +83,8 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
             'fields': ('cc',)
         }),)
     
-    def num_messages(self, ticket):
-        return ticket.messages.count()
-    num_messages.short_description = 'Messages'
-    num_messages.admin_order_field = 'messages__count'
-    
     def queryset(self, request):
         qs = super(TicketAdmin, self).queryset(request)
-        qs = qs.annotate(models.Count('messages'))
         if not request.user.is_superuser:
             qset = Q(visibility=Ticket.PUBLIC)
             qset = Q(qset | Q(visibility=Ticket.PRIVATE, created_by=request.user))

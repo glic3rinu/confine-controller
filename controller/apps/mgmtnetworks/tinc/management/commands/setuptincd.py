@@ -78,6 +78,7 @@ class Command(BaseCommand):
                     confirm = raw_input('Please enter either "yes" or "no": ')
             tinc_server = tinc_server[0]
         else:
+            protect = False
             server_ct = ContentType.objects.get_for_model(Server)
             tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
         

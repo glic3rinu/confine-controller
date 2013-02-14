@@ -9,19 +9,20 @@ class MessageInlineForm(forms.ModelForm):
     created_on = forms.CharField(label="Created On", widget=ShowText(), required=False)
     
     class Meta:
-        fields = ('content', 'visibility',)
+        fields = ('content', )
     
     def __init__(self, *args, **kwargs):
         super(MessageInlineForm, self).__init__(*args, **kwargs)
         message = kwargs.get('instance', False)
-        if message:
-            self.initial['author'] = '</b>'+admin_link(message.author)
-            self.initial['created_on'] = message.created_on.strftime("%Y-%m-%d %H:%M:%S")
-            self.fields['content'].widget = ShowText()
-            self.fields['content'].required = False
-        else:
-            self.initial['author'] = '</b>'+admin_link(self.user)
-            self.initial['created_on'] = ''
+        if 'content' in self.fields:
+            if message:
+                self.initial['author'] = '</b>'+admin_link(message.author)
+                self.initial['created_on'] = message.created_on.strftime("%Y-%m-%d %H:%M:%S")
+                self.fields['content'].widget = ShowText()
+                self.fields['content'].required = False
+            else:
+                self.initial['author'] = '</b>'+admin_link(self.user)
+                self.initial['created_on'] = ''
     
     def save(self, *args, **kwargs):
         if self.instance.pk is None:

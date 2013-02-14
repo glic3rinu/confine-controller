@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.contrib import admin
 from django.db import models
+from django.db.models import Q
 
 from controller.admin import ChangeViewActionsModelAdmin
 from controller.admin.utils import admin_link, colored
@@ -28,15 +29,13 @@ STATE_COLORS = {
 
 class MessageInline(PermissionTabularInline):
     model = Message
-    extra = 0
+    extra = 1
     form = MessageInlineForm
     formset = RequiredInlineFormSet
     can_delete = False
     
     def get_formset(self, request, obj=None, **kwargs):
         """ hook request.user on the inline form """
-        if obj is None:
-            self.extra = 1
         self.form.user = request.user
         return super(MessageInline, self).get_formset(request, obj, **kwargs)
 
@@ -65,11 +64,12 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     change_view_actions = [('reject', reject_tickets, '', ''),
                            ('resolve', resolve_tickets, '', ''),
                            ('take', take_tickets, '', ''),]
+    change_form_template = "admin/issues/ticket/change_form.html"
     readonly_fields = ('created_by', 'state')
     fieldsets = (
         (None, {
             'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority',
-                       'state'))
+                       'visibility', 'state'))
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -77,7 +77,7 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         }),)
     add_fieldsets = (
         (None, {
-            'fields': ('subject', ('owner', 'queue'), ('priority', 'state'))
+            'fields': ('subject', ('owner', 'queue'), ('priority', 'visibility', 'state'))
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -92,6 +92,11 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     def queryset(self, request):
         qs = super(TicketAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('messages'))
+        if not request.user.is_superuser:
+            qset = Q(visibility=Ticket.PUBLIC)
+            qset = Q(qset | Q(visibility=Ticket.PRIVATE, created_by=request.user))
+            qset = Q(qset | Q(visibility=Ticket.INTERNAL, created_by__groups__users=request.user))
+            qs = qs.filter(qset)
         return qs
     
     def get_fieldsets(self, request, obj=None):
@@ -112,6 +117,14 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         else:
             request.META['QUERY_STRING'] = query_string
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
+    
+    def get_readonly_fields(self, request, obj=None):
+        """ Only superusers can change owner field """
+        readonly_fields = super(TicketAdmin, self).get_readonly_fields(request, obj=obj)
+        if not request.user.is_superuser:
+            readonly_fields += ('owner',)
+        return readonly_fields
+
 
 
 class QueueAdmin(PermissionModelAdmin):

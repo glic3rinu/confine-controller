@@ -1,0 +1,16 @@
+.login #container #content h1 {
+    text-align: center;
+}
+
+.login #container #content p {
+    text-align: center;
+}
+
+.login .register-links {
+    margin-top: 2em; text-align: right
+}
+
+.login .register-links a{
+    margin-left: 1em;
+    margin-right: 20px;
+}

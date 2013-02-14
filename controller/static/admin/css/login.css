@@ -56,10 +56,3 @@ body.login {
     text-align: center;
 }
 
-.login .register-links {
-    margin-top: 2em; text-align: right
-}
-
-.login .register-links a {
-    margin-left: 1em;
-}

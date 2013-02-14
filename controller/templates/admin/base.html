@@ -8,6 +8,7 @@
 <!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
 {% render_theming_css %}
+{% block controllerstyle %}<link rel="stylesheet" type="text/css" href="{% static "controller/css/controller-style.css" %}"/>{% endblock %}
 <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
 {% block extrahead %}{% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
@@ -17,50 +18,25 @@
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
 
-<!--TODO move this logic to a css-->
 {% block branding-stetic %}
-<div id="header-branding" style="
-    background-image: url(/static/admin_tools/images/admin-tools.png);
-    width: 100%;
-    z-index: -1;
-    height: 41px;
-    position: absolute;"></div>
-<div id="header-menu" style="
-    background: url(/static/admin_tools/images/admin-tools.png) 0 295px;
-    width: 100%;
-    z-index: -1;
-    margin-top: 41px;
-    height: 41px;
-    position: absolute;"></div>
+    {% if not is_popup %}
+    <div id="header-branding"></div>
+    <div id="header-menu"></div>
+    {% endif %}
 {% endblock %}
 
 {% block breadcrumb-stetic %}
-<div id="header-menu" style="
-    width: 100%;
-    z-index: -1;
-    margin-top: 76px;
-    height: 69px;
-    position: absolute;
-    background-attachment: scroll; background-clip: border-box; 
-    background-color: rgb(255, 255, 255); 
-    background-image: url(/static/admin/img/nav-bg-reverse.gif); 
-    background-origin: padding-box; background-position: 0px -8px; background-size: auto; border-bottom-color: rgb(237, 237, 237); border-bottom-style: solid; border-bottom-width: 1px; border-left-color: rgb(153, 153, 153); border-left-style: none; border-left-width: 0px; border-right-color: rgb(153, 153, 153); border-right-style: none; border-right-width: 0px; border-top-color: rgb(153, 153, 153); border-top-style: none; border-top-width: 0px; 
-    color: white;
-    height: 13px; padding-bottom: 10px; padding-left: 15px; padding-right: 15px; padding-top: 10px;
-    background-repeat: repeat-x;
-    padding-left: 0;
-    padding-rigth: 0;"></div>
+    {% if not is_popup %}
+    <div id="header-breadcrumb"></div>
+    {% endif %}
 {% endblock %}
 
 <!-- Container -->
-{% block container-stetic %}<div id="container" style="max-width:1100px; margin:0 auto;">{% endblock %}
-<style type="text/css">
-body { background:#FBFAF9 url(/static/page-gradient.png) top left repeat-x;}
-</style>
+{% block container-stetic %}<div id="container">{% endblock %}
+
     {% if not is_popup %}
     <!-- Header -->
-   {% block header-stetic %} <div id="header" style="background:none;"> {% endblock %}
-<!--end of TODO-->
+   {% block header-stetic %}<div id="header">{% endblock %}
         <div id="branding">
         {% block branding %}{% endblock %}
         </div>
@@ -104,7 +80,6 @@ body { background:#FBFAF9 url(/static/page-gradient.png) top left repeat-x;}
         {% endfor %}</ul>
         {% endif %}
     {% endblock messages %}
-
 
     <!-- Content -->
     <div id="content" class="{% block coltype %}colM{% endblock %}" style="max-width:1100px; margin:20px auto;">

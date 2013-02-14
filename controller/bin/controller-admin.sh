@@ -194,6 +194,12 @@ function clone () {
     else
         echo "Not cloning: $PROJECT_NAME already exists."
     fi
+    # Install bash autocompletition for django commands
+    if [[ ! $(grep 'source $HOME/.django_bash_completion.sh' ~/.bashrc &> /dev/null) ]]; then
+        run wget https://raw.github.com/django/django/master/extras/django_bash_completion --no-check-certificate -O ~/.django_bash_completion2.sh
+        echo 'source $HOME/.django_bash_completion.sh' >> ~/.bashrc
+    fi
+
 }
 export -f clone
 

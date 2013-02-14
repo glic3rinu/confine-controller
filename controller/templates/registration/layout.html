@@ -4,16 +4,11 @@
 {% block extrastyle %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "css/registration.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "controller/css/registration.css" %}" />
 {% endblock %}
 
+{% block controllerstyle %}{% endblock %}
 
-<!--TODO move this logic to a css-->
-{% block branding-stetic %}{% endblock %}
-{% block breadcrumb-stetic %}{% endblock %}
-{% block container-stetic %}<div id="container">{% endblock %}
-{% block header-stetic %}<div id="header">{% endblock %}
-<!--end of TODO-->
 
 {% block bodyclass %}login{% endblock %}
 

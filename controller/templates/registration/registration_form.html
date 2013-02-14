@@ -5,11 +5,9 @@
     <form action="." method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
-        <div class="form-row">
             {{ field.errors }}
-            {{ field.label_tag }} {{ field }}
+              <div class="form-row"><label for="id_username" class="required">{{ field.label }}:</label> {{ field }}</div>
             <p class="help">{{ field.help_text }}</p>
-        </div>
         {% endfor %}
         <div class="form-row">
             <label>&nbsp;</label>

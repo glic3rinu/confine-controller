@@ -59,6 +59,7 @@ class Build(models.Model):
     image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage,
         condition=lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node))
+    base_image = models.ForeignKey('firmware.BaseImage', null=True)
     task_id = models.CharField(max_length=36, unique=True, null=True, help_text="Celery Task ID")
     
     objects = generate_chainer_manager(BuildQuerySet)
@@ -175,6 +176,8 @@ class Build(models.Model):
         """ Checks if a a given build is up-to-date or not """
         if self.version != config.version:
             return False
+        if not self.base_image or self.base_image != config.get_image(self.node):
+            return False
         config = Config.objects.get()
         exclude = config.files.optional().values_list('pk', flat=True)
         old_files = set( (f.path,f.content) for f in self.files.exclude(config__pk__in=exclude) )
@@ -263,7 +266,10 @@ class Config(SingletonModel):
         Returns the correct base image file according to the node architecture
         """
         arch_regex = "(^|,)%s(,|$)" % node.arch
-        return self.images.get(architectures__regex=arch_regex).image
+        images = self.images.filter(architectures__regex=arch_regex)
+        if len(images) == 0:
+            return None
+        return images[0]
 
 
 class BaseImage(models.Model):
@@ -278,7 +284,7 @@ class BaseImage(models.Model):
                     'Enter a valid name.', 'invalid')])
     
     def __unicode__(self):
-        return ", ".join(self.architectures)
+        return str(self.image)
     
     def clean(self):
         """ Prevents repeated architectures """

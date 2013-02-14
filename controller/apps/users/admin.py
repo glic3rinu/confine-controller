@@ -13,6 +13,7 @@ from controller.admin.utils import link, get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request
+from .filters import MyGroupsListFilter
 from .forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm
 from .models import User, AuthToken, Roles, Group, JoinRequest
 
@@ -121,7 +122,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
 class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['name', 'description', 'allow_slices', 'allow_nodes',
                     'num_users']
-    list_filter = ['allow_slices', 'allow_nodes']
+    list_filter = [MyGroupsListFilter, 'allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]
     # TODO this is redundant if is_approved is deprecated

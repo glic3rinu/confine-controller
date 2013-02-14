@@ -56,7 +56,7 @@ class SliverIfaceInline(PermissionTabularInline):
     readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
     extra = 0
     verbose_name_plural = mark_safe('Sliver Network Interfaces <a href="http://wiki.'
-                                    'confine-project.eu/arch:node">(Help)</a>')
+        'confine-project.eu/arch:node" onclick="return showAddAnotherPopup(this);">(Help)</a>')
     form = SliverIfaceInlineForm
     
     def get_formset(self, request, obj=None, **kwargs):

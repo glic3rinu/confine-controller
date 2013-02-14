@@ -33,7 +33,7 @@ def build(build_id, exclude=[]):
         'node_name': node.name,
         'arch': node.arch,
         'build_id': build_obj.pk,
-        'version': config.version}
+        'version': config.version }
     image_name = os.path.join(settings.FIRMWARE_DIR, config.image_name % name_dict)
     image_path = os.path.join(build_obj.image.storage.location, image_name)
     

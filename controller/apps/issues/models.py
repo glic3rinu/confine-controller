@@ -55,12 +55,20 @@ class Ticket(models.Model):
               (OPEN, "Open"),
               (RESOLVED, "Resolved"),
               (REJECTED, "Rejected"),)
+    INTERNAL = 'INTERNAL'
+    PUBLIC = 'PUBLIC'
+    PRIVATE = 'PRIVATE'
+    VISIBILITY_CHOICES = ((INTERNAL, "Internal"),
+                          (PUBLIC,  "Public"),
+                          (PRIVATE, "Private"),)
     
     created_by = models.ForeignKey(get_user_model(), related_name='created_tickets')
     owner = models.ForeignKey(get_user_model(), null=True, blank=True,
         related_name='owned_tickets')
     queue = models.ForeignKey(Queue, related_name='Tickets')
     subject = models.CharField(max_length=256)
+    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES,
+        default=PUBLIC)
     priority = models.CharField(max_length=32, choices=PRIORITIES, default=MEDIUM)
     state = models.CharField(max_length=32, choices=STATES, default=NEW)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -83,17 +91,8 @@ class Ticket(models.Model):
 
 
 class Message(models.Model):
-    INTERNAL = 'INTERNAL'
-    PUBLIC = 'PUBLIC'
-    PRIVATE = 'PRIVATE'
-    VISIBILITY_CHOICES = ((INTERNAL, "Internal"),
-                          (PUBLIC,  "Public"),
-                          (PRIVATE, "Private"),)
-    
     ticket = models.ForeignKey('issues.Ticket', related_name='messages')
     author = models.ForeignKey(get_user_model())
-    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, 
-        default=PUBLIC)
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
     

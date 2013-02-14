@@ -44,7 +44,7 @@ class Command(BaseCommand):
                               'in order to run version specific upgrade operations\n')
             return
         
-        version_re = re.compile(r'\S*(\d+)\.(\d+)\.(\d+)\S*')
+        version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
         major, major2, minor = version_re.search(version).groups()
         # Represent version as two digits per number: 1.2.2 -> 10202
         version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))

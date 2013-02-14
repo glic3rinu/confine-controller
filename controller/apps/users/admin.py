@@ -11,9 +11,10 @@ from controller.admin import ChangeViewActionsModelAdmin
 from controller.admin.utils import get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
-from users.actions import join_request
-from users.forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm, GroupAdminForm
-from users.models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
+from .actions import join_request
+from .filters import MyGroupsListFilter
+from .forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm, GroupAdminForm
+from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
 
 
 class AuthTokenInline(PermissionTabularInline):
@@ -120,7 +121,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
 class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     list_display = ['name', 'description', 'allow_nodes_info', 'allow_slices_info',
                     'num_users']
-    list_filter = ['allow_slices', 'allow_nodes']
+    list_filter = [MyGroupsListFilter, 'allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]
     actions = [join_request]

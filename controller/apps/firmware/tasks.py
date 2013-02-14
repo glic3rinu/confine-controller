@@ -22,7 +22,7 @@ def build(build_id, exclude=[]):
     base_image = config.get_image(node)
     
     # prepare the image adding the files
-    image = Image(base_image.path)
+    image = Image(base_image.image.path)
     for build_file in config.eval_files(node, exclude=exclude, image=image):
         image.add_file(build_file)
         build_file.build = build_obj
@@ -45,6 +45,7 @@ def build(build_id, exclude=[]):
     
     image.clean()
     build_obj.image = image_name
+    build_obj.base_image = base_image
     build_obj.save()
     
     return image_path

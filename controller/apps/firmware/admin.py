@@ -62,10 +62,14 @@ class ConfigFileInline(admin.TabularInline):
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make some char input widgets larger """
-        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'60'})
-        if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'85'})
-        if db_field.name == 'mode': kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
-        if db_field.name == 'priority': kwargs['widget'] = forms.TextInput(attrs={'size':'2'})
+        if db_field.name == 'path':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'60'})
+        if db_field.name == 'content':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'85'})
+        if db_field.name == 'mode':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
+        if db_field.name == 'priority':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'2'})
         return super(ConfigFileInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
@@ -81,10 +85,10 @@ class BuildAdmin(admin.ModelAdmin):
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
-    fields = ['node_link', 'image_link', 'image_sha256', 'version', 'build_date',
-              'state', 'task_link']
-    readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 
-                       'version', 'build_date', 'task_link']
+    fields = ['node_link', 'base_image', 'image_link', 'image_sha256', 'version',
+              'build_date', 'state', 'task_link']
+    readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256',
+                       'version', 'build_date', 'task_link', 'base_image']
     inlines = [BuildFileInline]
     
     def build_date(self, build):
@@ -103,8 +107,10 @@ class BuildAdmin(admin.ModelAdmin):
     
     def image_link(self, build):
         """ Display image url if exsists """
-        try: return '<a href=%s>%s</a>' % (build.image.url, build.image_name)
-        except: return ''
+        try:
+            return '<a href=%s>%s</a>' % (build.image.url, build.image_name)
+        except:
+            return ''
     image_link.allow_tags = True
     
     def has_add_permission(self, *args, **kwargs):

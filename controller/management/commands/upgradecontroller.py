@@ -57,4 +57,4 @@ class Command(BaseCommand):
         
         # version specific upgrade operations
         if not options.get('pip_only'):
-            run("python manage.py upgrade --from %s" % current_version)
+            run("python manage.py postupgradecontroller --from %s" % current_version)

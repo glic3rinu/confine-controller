@@ -62,7 +62,7 @@ class ConfigFileInline(admin.TabularInline):
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make some char input widgets larger """
-        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'70'})
+        if db_field.name == 'path': kwargs['widget'] = forms.TextInput(attrs={'size':'60'})
         if db_field.name == 'content': kwargs['widget'] = forms.TextInput(attrs={'size':'85'})
         if db_field.name == 'mode': kwargs['widget'] = forms.TextInput(attrs={'size':'4'})
         if db_field.name == 'priority': kwargs['widget'] = forms.TextInput(attrs={'size':'2'})

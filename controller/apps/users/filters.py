@@ -1,5 +1,4 @@
 from django.contrib.admin import SimpleListFilter
-from django.utils.encoding import force_text
 
 
 class MyGroupsListFilter(SimpleListFilter):

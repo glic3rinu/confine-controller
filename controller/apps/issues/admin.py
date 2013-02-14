@@ -11,6 +11,7 @@ from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
     mark_as_unread)
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
+from .filters import MyTicketsListFilter
 from .forms import MessageInlineForm, TicketInlineForm
 from .models import Ticket, Queue, Message
 
@@ -49,13 +50,12 @@ class TicketInline(PermissionTabularInline):
 
 class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     # TODO Bold (id, subject) when tickets are unread for request.user
-    # TODO Create a list filter for 'owner__username'
     list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
                     admin_link('queue'), colored('priority', PRIORITY_COLORS),
                     colored('state', STATE_COLORS), 'num_messages', 'created_on',
                     'last_modified_on']
     list_display_links = ('id', 'subject')
-    list_filter = ['queue__name', 'priority', 'state']
+    list_filter = [MyTicketsListFilter, 'queue__name', 'priority', 'state']
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
                      'queue', 'owner__username']
@@ -124,7 +124,15 @@ class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         if not request.user.is_superuser:
             readonly_fields += ('owner',)
         return readonly_fields
-
+    
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_tickets=True' """
+        if not request.GET.has_key('my_tickets'):
+            q = request.GET.copy()
+            q['my_tickets'] = 'True' if not request.user.is_superuser else 'False'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super(TicketAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
 class QueueAdmin(PermissionModelAdmin):

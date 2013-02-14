@@ -3,7 +3,7 @@ from django.utils.encoding import force_text
 
 
 class MyNodesListFilter(SimpleListFilter):
-    """ Filter slices by group according to request.user """
+    """ Filter Nodes by group according to request.user """
     title = 'Nodes'
     parameter_name = 'my_nodes'
     

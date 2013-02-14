@@ -5,8 +5,6 @@ from django.core.management.base import BaseCommand
 
 from controller.utils.system import run, check_root
 
-# TODO rename the module to something less prone to confusion with upgradecontroller
-
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):

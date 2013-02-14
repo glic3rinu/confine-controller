@@ -147,6 +147,7 @@ INSTALLED_APPS = (
     'communitynetworks',
     'firmware',
 #    'groupregistration',
+    'state',
     
     # Third party apps that should load last
     'rest_framework',

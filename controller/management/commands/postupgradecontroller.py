@@ -20,6 +20,7 @@ class Command(BaseCommand):
     
     option_list = BaseCommand.option_list
     help = 'Upgrades confine-controller installation'
+    can_import_settings = False
     
     @check_root
     def handle(self, *args, **options):

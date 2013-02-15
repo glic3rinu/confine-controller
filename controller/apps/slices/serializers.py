@@ -5,7 +5,7 @@ import ast
 from rest_framework import serializers
 
 from api.serializers import (UriHyperlinkedModelSerializer, HyperlinkedFileField,
-    RelManyHyperlinkedRelatedField, PropertyField)
+    RelHyperlinkedRelatedField, PropertyField)
 
 from .models import Slice, Sliver, Template, SliverIface
 
@@ -70,7 +70,7 @@ class SliverSerializer(UriHyperlinkedModelSerializer):
 
 class SliceSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    slivers = RelManyHyperlinkedRelatedField(view_name='sliver-detail', read_only=True)
+    slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail', read_only=True)
     properties = PropertyField(required=False)
     exp_data = HyperlinkedFileField(source='exp_data', required=False)
     

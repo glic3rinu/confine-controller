@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from controller.admin.utils import insert_list_display, get_admin_link
 from nodes.models import Node
+from permissions.admin import PermissionModelAdmin
 
 from .models import NodeState
 
@@ -13,9 +16,17 @@ STATES_COLORS = {
     NodeState.ONLINE: 'green', }
 
 
-class NodeStateAdmin(admin.ModelAdmin):
-    fields = ['node_link', 'last_success_on', 'last_retry_on', 'metadata', 'current']
+class NodeStateAdmin(PermissionModelAdmin):
     readonly_fields = ['node_link', 'last_success_on', 'last_retry_on', 'current', 'metadata']
+    fieldsets = (
+        (None, {
+            'fields': ('node_link', 'last_success_on', 'last_retry_on', 'current')
+        }),
+        ('Details', {
+            'classes': ('collapse',),
+            'fields': ('metadata',)
+        }),)
+    change_form_template = 'admin/state/nodestate/change_form.html'
     
     def node_link(self, instance):
         """ Link to related node used on change_view """

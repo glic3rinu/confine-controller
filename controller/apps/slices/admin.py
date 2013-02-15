@@ -372,7 +372,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                        ('exp_data', 'exp_data_uri'), 'exp_data_sha256', 'set_state',
                        'vlan_nr', 'expires_on', 'group'),
         }),
-        ('Debug ifno', {
+        ('Debug info', {
             'classes': ('collapse',),
             'fields': ('instance_sn', 'new_sliver_instance_sn',)
         }),)

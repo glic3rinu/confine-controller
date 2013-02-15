@@ -28,7 +28,7 @@ class NodeState(models.Model):
     
     @property
     def current(self):
-        def heartbeat_expires(timestamp, freq=60, expire_window=200):
+        def heartbeat_expires(timestamp, freq=300, expire_window=200):
             return timestamp + freq * (expire_window / 1e2)
         
         if self.last_success_on and time() < heartbeat_expires(self.last_success_timestamp):

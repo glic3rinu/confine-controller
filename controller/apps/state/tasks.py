@@ -11,7 +11,7 @@ def _ping(url):
     return head
 
 
-@periodic_task(name="state.ping", run_every=crontab(minute='*', hour='*'))
+@periodic_task(name="state.ping", run_every=crontab(minute='*/5', hour='*'))
 def ping():
     from .models import NodeState
     nodes = Node.objects.all()
@@ -28,4 +28,5 @@ def ping():
     # look at the results
     for node, glet in zip(nodes, glets):
         NodeState.store_glet(node, glet)
+    
     return

@@ -15,17 +15,10 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
         if url is None:
              return None
         return {'uri': url}
-
+    
     def from_native(self, value):
         value = ast.literal_eval(str(value)).pop('uri')
         return super(RelHyperlinkedRelatedField, self).from_native(value)
-
-
-class RelManyHyperlinkedRelatedField(serializers.ManyRelatedMixin, RelHyperlinkedRelatedField):
-    """
-    Represents a to-many relationship, using hyperlinking inside a relation object
-    """
-    pass
 
 
 class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
@@ -48,8 +41,6 @@ class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
             'queryset': rel._default_manager,
             'view_name': self._get_default_view_name(rel)
         }
-        if to_many:
-            return RelManyHyperlinkedRelatedField(**kwargs)
         return RelHyperlinkedRelatedField(**kwargs)
 
 

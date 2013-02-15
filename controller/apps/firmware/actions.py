@@ -56,6 +56,17 @@ def get_firmware(modeladmin, request, queryset):
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     
+    if Config.objects.get().get_image(node) is None:
+        context.update({
+            "title": "Build firmware for '%s' Research Device" % node,
+            "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
+            "content_message": mark_safe("Sorry but currently we do not "
+                "have support for %s architecture :(" % node.arch),
+            "can_build": False,
+        })
+        return TemplateResponse(request, 'admin/get_firmware.html', context, 
+            current_app=modeladmin.admin_site.name)
+    
     try:
         build
     except NameError:
@@ -72,17 +83,6 @@ def get_firmware(modeladmin, request, queryset):
             })
             return TemplateResponse(request, 'admin/get_firmware.html', context, 
                 current_app=modeladmin.admin_site.name)
-        else:
-            if Config.objects.get().get_image(node) is None:
-                context.update({
-                    "title": "Build firmware for '%s' Research Device" % node,
-                    "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
-                    "content_message": mark_safe("Sorry but currently we do not "
-                        "have support for %s architecture :(" % node.arch),
-                    "can_build": False,
-                })
-                return TemplateResponse(request, 'admin/get_firmware.html', context, 
-                    current_app=modeladmin.admin_site.name)
     
     description = {
         Build.REQUESTED: "Build request received.",

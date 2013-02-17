@@ -43,6 +43,8 @@
     <label for="id_password" class="required">{% trans 'Password:' %}</label> {{ form.password }}
     <input type="hidden" name="this_is_the_login_form" value="1" />
     <input type="hidden" name="next" value="{{ next }}" />
+    <p></p>
+
   </div>
   {% url 'admin_password_reset' as password_reset_url %}
   {% if password_reset_url %}
@@ -64,7 +66,7 @@ document.getElementById('id_username').focus()
 
 {% block footer %}<div id="footer">
 <div class="register-links">
-  <a href="{% url 'registration_register' %}">Create an account</a>
+  <a href="{% url 'password_reset' %}">Forgot password?</a> &nbsp; <a href="{% url 'registration_register' %}">Create an account</a>
   {# disable groupregistration<a href="{% url 'registration_group_register' %}">Register a new group</a>#}
 </div>
 </div>{% endblock %}

@@ -134,15 +134,16 @@ class Command(BaseCommand):
             # Generate new keys
             r('tincd -n %(net_name)s -K' % context)
             # Get created pubkey
-            pubkey = ''
-            for line in file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME):
-                pubkey += line
-                if line == '-----BEGIN RSA PUBLIC KEY-----\n':
-                    pubkey = line
-                elif line == '-----END RSA PUBLIC KEY-----\n':
-                    break
-            tinc_server.pubkey = pubkey
-            tinc_server.save()
+            with file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME, 'ro') as server_file:
+                pubkey = ''
+                for line in server_file:
+                    pubkey += line
+                    if line == '-----BEGIN RSA PUBLIC KEY-----\n':
+                        pubkey = line
+                    elif line == '-----END RSA PUBLIC KEY-----\n':
+                        break
+                tinc_server.pubkey = pubkey
+                tinc_server.save()
         
         self.stdout.write('Tincd server successfully created and configured.')
         self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')

@@ -1,4 +1,4 @@
-import os
+import os, time
 from distutils.sysconfig import get_python_lib
 
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.template import Context
 from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
-from controller.utils.system import run
+from controller.utils.system import run, touch
 
 
 def autodiscover(module):
@@ -85,3 +85,24 @@ def update_settings(**options):
                 run("sed -i \"s/%s = '\w*'/%s = '%s'/\" %s" % (name, name, value, settings_file))
             else:
                 run("echo \"%s = '%s'\" >> %s" % (name, value, settings_file))
+
+
+class LockFile(object):
+    """ File-based lock mechanism used for preventing concurrency problems """
+    def __init__(self, lockfile, expire=5*60):
+        """ /dev/shm/ can be a good place for storing locks ;) """
+        self.lockfile = lockfile
+        self.expire = expire
+    
+    def acquire(self):
+        if os.path.exists(self.lockfile):
+            lock_time = os.path.getmtime(self.lockfile)
+            # lock expires to avoid starvation
+            if time.time()-lock_time < self.expire:
+                return False
+        touch(self.lockfile)
+        return True
+    
+    def release(self):
+        os.remove(self.lockfile)
+

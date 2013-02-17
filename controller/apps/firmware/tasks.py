@@ -39,11 +39,9 @@ def build(build_id, exclude=[]):
     
     try:
         image.build(path=image_path)
-    except:
+    finally:
         image.clean()
-        raise
     
-    image.clean()
     build_obj.image = image_name
     build_obj.base_image = base_image
     build_obj.save()

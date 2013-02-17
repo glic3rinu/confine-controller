@@ -269,6 +269,7 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_SEND_EVENTS = True
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_DISABLE_RATE_LIMITS = True
+CELERY_REDIRECT_STDOUTS_LEVEL = 'DEBUG'
 # Use controller logging system instead of celer
 #CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERY_SEND_TASK_ERROR_EMAILS = True
@@ -301,6 +302,4 @@ REST_FRAMEWORK = {
 
 # common.api
 CUSTOM_API_ROOT = 'controller.api.Base'
-
-
 

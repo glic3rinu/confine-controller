@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/
 """
 
 # Production settings
-# from controller.conf.production_settings import *
+from controller.conf.production_settings import *
 # Development settings
-from controller.conf.devel_settings import *
+# from controller.conf.devel_settings import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Hardcoded values can leak through source control. Consider loading

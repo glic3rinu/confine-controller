@@ -14,12 +14,12 @@ class CnHostSerializer(serializers.ModelSerializer):
         model = CnHost
         exclude = ['id', 'content_type', 'object_id']
 
-# TODO reenable after fixing bug on the API
-#api.aggregate(Node, CnHostSerializer, name='cn')
-#api.aggregate(Server, CnHostSerializer, name='cn')
+
+api.aggregate(Node, CnHostSerializer, name='cn')
+api.aggregate(Server, CnHostSerializer, name='cn')
 
 
 
-#if is_installed('mgmtnetworks.tinc'):
-#    from mgmtnetworks.tinc.models import Gateway
-#    api.aggregate(Gateway, CnHostSerializer, name='cn')
+if is_installed('mgmtnetworks.tinc'):
+    from mgmtnetworks.tinc.models import Gateway
+    api.aggregate(Gateway, CnHostSerializer, name='cn')

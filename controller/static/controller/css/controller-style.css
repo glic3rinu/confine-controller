@@ -48,12 +48,10 @@ body {
     color: white;
     height: 13px;
     padding-bottom: 10px;
-    padding-left: 15px;
-    padding-right: 15px;
     padding-top: 10px;
     background-repeat: repeat-x;
     padding-left: 0;
-    padding-rigth: 0;
+    padding-right: 0;
 }
 
 

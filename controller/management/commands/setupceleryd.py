@@ -50,9 +50,16 @@ class Command(BaseCommand):
             'CELERYD_LOG_FILE="/var/log/celery/%%n.log"\n'
             'CELERYD_PID_FILE="/var/run/celery/%%n.pid"\n'
             '\n'
+            '# Full path to the celeryd logfile.\n'
+            'CELERYEV_LOG_FILE="/var/log/celery/celeryev.log"\n'
+            'CELERYEV_PID_FILE="/var/run/celery/celeryev.pid"\n'
+            '\n'
             '# Workers should run as an unprivileged user.\n'
             'CELERYD_USER="%(username)s"\n'
             'CELERYD_GROUP="$CELERYD_USER"\n'
+            '\n'
+            'CELERYEV_USER="$CELERYD_USER"\n'
+            'CELERYEV_GROUP="$CELERYD_USER"\n'
             '\n'
             '# Path to celeryd\n'
             'CELERYEV="$CELERYD_CHDIR/manage.py"\n'
@@ -76,3 +83,14 @@ class Command(BaseCommand):
             '--no-check-certificate -O /etc/init.d/celeryevcam')
         run('chmod +x /etc/init.d/celeryevcam')
         run('update-rc.d celeryevcam defaults')
+        
+        rotate = ('/var/log/celery/*.log {\n'
+                  '    weekly\n'
+                  '    missingok\n'
+                  '    rotate 10\n'
+                  '    compress\n'
+                  '    delaycompress\n'
+                  '    notifempty\n'
+                  '    copytruncate\n'
+                  '}')
+        run("echo '%s' > /etc/logrotate.d/celeryd" % rotate)

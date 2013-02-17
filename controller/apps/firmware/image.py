@@ -47,7 +47,9 @@ class Image(object):
     def sector(self):
         """ sector number of image part_nr """
         context = { 'image': self.image, 'part_nr': self.part_nr }
+        print context
         result = run("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|sed -n %(part_nr)dp" % context)
+        print result
         return int(result.stdout)
     
     @property
@@ -80,7 +82,7 @@ class Image(object):
         context = self.mount_context
         r("fusermount -u %(mnt)s" % context)
         r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
-    
+
     def add_file(self, file):
         """
         add files to the image
@@ -96,16 +98,13 @@ class Image(object):
             self.umount()
         except:
             pass
-        shutil.rmtree(self.tmp)
+        finally:
+            shutil.rmtree(self.tmp)
     
     def move(self, dst):
         """ move self.image to destination path """
         shutil.move(self.image, dst)
         self.image = dst
-    
-    def chmod(self, path, mode):
-        """ change path mode """
-        r("chmod %s '%s'" % (mode, path))
     
     def build(self, path=None):
         """ build the new image """
@@ -123,11 +122,10 @@ class Image(object):
                 os.makedirs(dest_dir)
             if os.path.exists(dest_path):
                 os.remove(dest_path)
-            dest_file = open(dest_path, 'w+')
-            dest_file.write(f.content)
-            dest_file.close()
+            with open(dest_path, 'w+') as dest_file:
+                dest_file.write(f.content)
             if f.config.mode:
-                self.chmod(dest_path, f.config.mode)
+                r("chmod %s '%s'" % (f.config.mode, dest_path))
         
         self.umount()
         # compress the generated image with gzip

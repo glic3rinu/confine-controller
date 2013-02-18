@@ -1,4 +1,3 @@
-from celery.task.schedules import crontab
 from datetime import timedelta
 from django.conf import settings
 
@@ -30,11 +29,8 @@ SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_
 
 # 30 days expiration interval
 SLICES_SLICE_EXP_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_INTERVAL', timedelta(30))
-SLICES_SLICE_EXP_WARN_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_WARN_INTERVAL', timedelta(4))
-
-# Clean expired slices everyday at midnigth
-SLICES_CLEAN_EXP_SLICE_CRONTAB = getattr(settings, 'CLEAN_EXP_SLICE_CRONTAB',
-    crontab(minute=0, hour=0))
+# Send warning email 4 days before expiration
+SLICES_SLICE_EXP_WARN_DAYS = getattr(settings, 'SLICES_SLICE_EXP_WARN_DAYS', 4)
 
 # List of disabled sliver ifaces. i.e. ['management', 'public4']
 SLICES_DISABLED_SLIVER_IFACES = getattr(settings, 'SLICES_DISABLED_SLIVER_IFACES', [])

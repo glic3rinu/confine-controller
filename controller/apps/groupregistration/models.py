@@ -1,4 +1,4 @@
-from controller.utils import send_mail_template
+from controller.utils import send_email_template
 
 from django.conf import settings
 from django.db import models
@@ -97,7 +97,7 @@ class GroupRegistration(models.Model):
 
     def notify_user(self, template):
         context = {'group': self.group, 'user': self.user}
-        send_mail_template(template=template,
+        send_email_template(template=template,
                            context=context,
                            email_from=settings.MAINTEINANCE_EMAIL,
                            to=self.user.email)
@@ -107,7 +107,7 @@ class GroupRegistration(models.Model):
         template = 'registration_group_creation_mail_operators.txt'
         context = {'group': self.group, 'user': self.user}
         operators_email = settings.MAINTEINANCE_EMAIL
-        send_mail_template(template=template,
+        send_email_template(template=template,
                            context=context,
                            email_from=settings.MAINTEINANCE_EMAIL,
                            to=operators_email)

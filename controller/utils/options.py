@@ -31,7 +31,7 @@ def is_installed(app):
     return app in settings.INSTALLED_APPS
 
 
-def send_mail_template(template, context, to, email_from=None):
+def send_email_template(template, context, to, email_from=None):
     """
     Renders an email template with this format:
         {% if subject %}Subject{% endif %}

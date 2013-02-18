@@ -6,7 +6,7 @@ from django.core import validators
 from django.db import models
 from django.utils import timezone
 
-from controller.utils import send_mail_template
+from controller.utils import send_email_template
 from controller.core.validators import validate_ascii
 
 
@@ -85,11 +85,7 @@ class Roles(models.Model):
         return str(self.group)
     
     def has_role(self, role):
-        attr_map = {
-            'technician': 'is_technician',
-            'admin': 'is_admin',
-            'researcher': 'is_researcher'}
-        return getattr(self, attr_map[role])
+        return getattr(self, 'is_%s' % role)
 
 
 class UserManager(auth_models.BaseUserManager):
@@ -101,9 +97,8 @@ class UserManager(auth_models.BaseUserManager):
         if not username:
             raise ValueError('The given username must be set')
         email = UserManager.normalize_email(email)
-        user = self.model(username=username, email=email, is_active=True, 
-                          is_superuser=False, last_login=now, date_joined=now, 
-                          **extra_fields)
+        user = self.model(username=username, email=email, is_active=True,
+            is_superuser=False, last_login=now, date_joined=now, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -198,13 +193,6 @@ class User(auth_models.AbstractBaseUser):
             return True
         return auth_models._user_has_module_perms(self, app_label)
     
-    def email_user(self, subject, message, from_email=None):
-        """
-        Sends an email to this User.
-        """
-        # TODO Deprecate?
-        send_mail(subject, message, from_email, [self.email])
-    
     def is_staff(self):
         """ All users can loggin to the admin interface """
         return True
@@ -283,19 +271,19 @@ class JoinRequest(models.Model):
         context = { 'request': self, 'site': site }
         to = self.group.get_admin_emails()
         template = 'users/created_join_request.email'
-        send_mail_template(template=template, context=context, to=to)
+        send_email_template(template=template, context=context, to=to)
     
     def send_acceptation_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_join_request.email'
         to = self.user.email
-        send_mail_template(template=template, context=context, to=to)
+        send_email_template(template=template, context=context, to=to)
     
     def send_rejection_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/rejected_join_request.email'
         to = self.user.email
-        send_mail_template(template=template, context=context, to=to)
+        send_email_template(template=template, context=context, to=to)
     
     def accept(self, roles=[]):
         """
@@ -331,13 +319,13 @@ class ResourceRequest(models.Model):
         context = { 'request': self, 'site': site }
         to = settings.SERVER_EMAIL
         template = 'users/created_resource_request.email'
-        send_mail_template(template=template, context=context, to=to)
+        send_email_template(template=template, context=context, to=to)
     
     def send_acceptation_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_resource_request.email'
         to = self.group.get_admin_emails()
-        send_mail_template(template=template, context=context, to=to)
+        send_email_template(template=template, context=context, to=to)
     
     def accept(self):
         """Accept the request updating the group properties

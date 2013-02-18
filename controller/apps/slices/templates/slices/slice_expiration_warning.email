@@ -1,0 +1,13 @@
+{% if subject %}Slice {{ slice.name }} expires in {{ days }} days{% endif %}
+{% if message %}Hi,
+Your slice "{{ slice.name }}" will expire in {{ days }} days.
+
+To update, renew, or delete this slice, please visit
+    https://controller.confine-project.eu{% url 'admin:slices_slice_change' slice.pk %}
+
+
+Thanks,
+Ops team.
+{% endif %}
+
+

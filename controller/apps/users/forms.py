@@ -71,10 +71,6 @@ class GroupAdminForm(forms.ModelForm):
                   'instantiated (false by default). Its value can only be changed '
                   'by testbed superusers.')
     
-    class Meta:
-        # TODO this is redundant if is_approved is deprecated
-        exclude = ('is_approved',)
-    
     def __init__(self, *args, **kwargs):
         super(GroupAdminForm, self).__init__(*args, **kwargs)
         group = kwargs.get('instance', False)

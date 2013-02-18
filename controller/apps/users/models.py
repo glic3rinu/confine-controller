@@ -280,7 +280,7 @@ class JoinRequest(models.Model):
         return '#%s' % self.pk
     
     def save(self, *args, **kwargs):
-        if self.pk:
+        if not self.pk:
             # Notify admins that a new join request is created
             admins = self.group.get_admin_emails()
             self.notify(template='users/created_join_request.email', to=admins)
@@ -343,7 +343,7 @@ class ResourceRequest(models.Model):
         send_mail_template(template=template, context=context, to=to)
 
     def save(self, *args, **kwargs):
-        if self.pk:
+        if not self.pk:
             # Notify testbed operators when the request has been created
             self.notify(template='groups/created_allow_request.email',
                         to=settings.MAINTEINANCE_EMAIL)

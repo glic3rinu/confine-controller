@@ -158,6 +158,7 @@ AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
     'permissions.auth.TestbedPermissionBackend',
+    'users.auth.EmailBackend',
 ]
 
 # A sample logging configuration. The only tangible logging

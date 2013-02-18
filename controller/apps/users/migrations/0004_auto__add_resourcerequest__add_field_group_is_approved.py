@@ -16,18 +16,9 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'users', ['ResourceRequest'])
 
-        # Adding field 'Group.is_approved'
-        db.add_column(u'users_group', 'is_approved',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-
     def backwards(self, orm):
         # Deleting model 'ResourceRequest'
         db.delete_table(u'users_resourcerequest')
-
-        # Deleting field 'Group.is_approved'
-        db.delete_column(u'users_group', 'is_approved')
 
 
     models = {

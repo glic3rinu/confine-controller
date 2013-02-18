@@ -270,8 +270,13 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_SEND_EVENTS = True
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_DISABLE_RATE_LIMITS = True
+# Do not fill the logs with crap
 CELERY_REDIRECT_STDOUTS_LEVEL = 'DEBUG'
-# Use controller logging system instead of celer
+# gevent crashes after a broker timeout is reached, so better keep it disabled
+BROKER_CONNECTION_TIMEOUT = None
+# Send error alerts to admins
+CELERY_SEND_TASK_ERROR_EMAILS = True
+# Use controller logging system instead of celery
 #CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERY_SEND_TASK_ERROR_EMAILS = True
 ## end

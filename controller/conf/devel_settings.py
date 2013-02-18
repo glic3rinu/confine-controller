@@ -4,4 +4,7 @@ from controller.conf.base_settings import *
 
 DEBUG = True
 
-TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
+
+CELERY_SEND_TASK_ERROR_EMAILS = False
+

@@ -39,6 +39,8 @@ class UserSerializer(UriHyperlinkedModelSerializer):
 
 class GroupSerializer(UriHyperlinkedModelSerializer):
     roles = UserRolesSerializer()
+    slices = RelHyperlinkedRelatedField(many=True, source='slices', view_name='slice-detail')
+    nodes = RelHyperlinkedRelatedField(many=True, source='nodes', view_name='node-detail')
     
     class Meta:
         model = Group

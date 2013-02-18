@@ -191,4 +191,4 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
-#admin.site.unregister(AuthGroup)
+admin.site.unregister(AuthGroup)

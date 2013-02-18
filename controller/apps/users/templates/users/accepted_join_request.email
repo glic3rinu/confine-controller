@@ -1,4 +1,4 @@
-{% if subject %}Accepted membership request{% endif %}
+{% if subject %}Accepted {{ request.group.name }} group membership{% endif %}
 {% if message %}Hi,
 admins of {{ request.group.name }} group have accepted your membership request!
 

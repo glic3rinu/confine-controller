@@ -156,4 +156,4 @@ class JoinRequestForm(forms.ModelForm):
             self.instance.reject()
             self.instance.send_rejection_email(site=site)
         elif action == 'ignore':
-            self.instance.ignore()
+            self.instance.delete()

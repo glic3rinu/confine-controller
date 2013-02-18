@@ -154,7 +154,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         if not request.user.is_superuser and obj is not None:
             for resource, verbose in ResourceRequest.RESOURCES:
                 resource = 'allow_%s' % resource
-                if getattr(obj, resource):
+                if getattr(obj, resource) and resource not in fields:
                     fields += (resource,)
         return fields
     

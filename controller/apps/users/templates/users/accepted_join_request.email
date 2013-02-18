@@ -1,2 +1,7 @@
-{% if subject %}Accepted join request{% endif %}
-{% if message %}Email body{% endif %}
+{% if subject %}Accepted membership request{% endif %}
+{% if message %}Hi,
+admins of {{ request.group.name }} group have accepted your membership request!
+
+Have a nice day,
+OPs team.
+{% endif %}

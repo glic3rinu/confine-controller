@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.sites.models import RequestSite
 from django.core.exceptions import ValidationError
 from django.template.defaultfilters import mark_safe
 
@@ -69,11 +70,11 @@ class GroupAdminForm(forms.ModelForm):
         help_text='Whether slices belonging to this group can be created or '
                   'instantiated (false by default). Its value can only be changed '
                   'by testbed superusers.')
-
+    
     class Meta:
         # TODO this is redundant if is_approved is deprecated
         exclude = ('is_approved',)
-
+    
     def __init__(self, *args, **kwargs):
         super(GroupAdminForm, self).__init__(*args, **kwargs)
         group = kwargs.get('instance', False)
@@ -88,25 +89,29 @@ class GroupAdminForm(forms.ModelForm):
                         "(resource requested by the admin of the group)</span>"
                         % self.fields['allow_%s' % resource].label)
                     self.fields['allow_%s' % resource].label = label
-
+    
     def save(self, commit=True):
         group = super(GroupAdminForm, self).save(commit=commit)
         if not commit:
             # for a new group force to save it before creating resource requests
             group.save()
+        site = RequestSite(self.__request__)
         for resource, verbose in ResourceRequest.RESOURCES:
             if self.cleaned_data.get('request_%s' % resource):
                 # Create request if needed
-                ResourceRequest.objects.get_or_create(resource=resource, group=group)
+                req, created = ResourceRequest.objects.get_or_create(resource=resource, group=group)
+                if created:
+                    req.send_creation_email(site=site)
             else:
                 # Delete request if exists
-                group.resource_requests.filter(resource=resource).delete()
+                req = group.resource_requests.filter(resource=resource).delete()
             if self.cleaned_data.get('allow_%s' % resource):
                 # Supperuser has enabled the resource
                 # handling through the request if needed
-                request = group.resource_requests.filter(resource=resource)
-                if request:
-                    request.accept()
+                req = group.resource_requests.filter(resource=resource)
+                if req:
+                    req.accept()
+                    req.send_acceptation_email(site=site)
         return group
 
 
@@ -132,11 +137,23 @@ class JoinRequestForm(forms.ModelForm):
             raise ValidationError('Select only one action')
         return actions[0] if len(actions) == 1 else ''
     
+    def clean(self):
+        action = self.cleaned_data.get('action')
+        roles = self.cleaned_data.get('roles')
+        if not roles and action == 'accept':
+            raise ValidationError('You may want to select a role?')
+        return super(JoinRequestForm, self).clean()
+    
     def save(self, commit=True):
         action = self.cleaned_data.get('action')
         roles = self.cleaned_data.get('roles')
+        site = RequestSite(self.__request__)
         if roles and action in ['accept', '']:
             # Accept if explicit and also when a role is selected without any action
             self.instance.accept(roles=roles)
-        elif action:
-            getattr(self.instance, action)()
+            self.instance.send_acceptation_email(site=site)
+        elif action == 'reject':
+            self.instance.reject()
+            self.instance.send_rejection_email(site=site)
+        elif action == 'ignore':
+            self.instance.ignore()

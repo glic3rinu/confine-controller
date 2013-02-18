@@ -1,2 +1,7 @@
-{% if subject %}Rejected join request{% endif %}
-{% if message %}Email body{% endif %}
+{% if subject %}Rejected membership request{% endif %}
+{% if message %}Hi,
+Your membership request for {{ request.group.name }} has been rejected :(
+
+Have a nice day,
+OPs team.
+{% endif %}

@@ -1,0 +1,7 @@
+{% if subject %}Accepted resource request for group {{ request.group.name }}{% endif %}
+{% if message %}Hi,
+the operators has accepted your {{ request.resource }} resource request.
+
+Have a nice day,
+OPs team.
+{% endif %}

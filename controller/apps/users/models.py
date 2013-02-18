@@ -279,12 +279,23 @@ class JoinRequest(models.Model):
     def __unicode__(self):
         return '#%s' % self.pk
     
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            # Notify admins that a new join request is created
-            admins = self.group.get_admin_emails()
-            self.notify(template='users/created_join_request.email', to=admins)
-        super(JoinRequest, self).save(*args, **kwargs)
+    def send_creation_email(self, site):
+        context = { 'request': self, 'site': site }
+        to = self.group.get_admin_emails()
+        template = 'users/created_join_request.email'
+        send_mail_template(template=template, context=context, to=to)
+    
+    def send_acceptation_email(self, site):
+        context = { 'request': self, 'site': site }
+        template = 'users/accepted_join_request.email'
+        to = self.user.email
+        send_mail_template(template=template, context=context, to=to)
+    
+    def send_rejection_email(self, site):
+        context = { 'request': self, 'site': site }
+        template = 'users/rejected_join_request.email'
+        to = self.user.email
+        send_mail_template(template=template, context=context, to=to)
     
     def accept(self, roles=[]):
         """
@@ -293,8 +304,6 @@ class JoinRequest(models.Model):
         """
         roles_kwargs = dict( ('is_%s' % role, True) for role in roles )
         Roles.objects.create(user=self.user, group=self.group, **roles_kwargs)
-        self.notify(template='users/accepted_join_request.email',
-                    to=self.user.email)
         self.delete()
     
     def reject(self):
@@ -302,17 +311,7 @@ class JoinRequest(models.Model):
         The admin refuse the user's request to join.
         The request is deleted
         """
-        self.notify(template='users/rejected_join_request.email',
-                    to=self.user.email)
         self.delete()
-    
-    def ignore(self, *args, **kwargs):
-        """ Just delete it without sending notifications """
-        self.delete(*args, **kwargs)
-    
-    def notify(self, template, to):
-        context = {'group': self.group}
-        send_mail_template(template=template, context=context, to=to)
 
 
 class ResourceRequest(models.Model):
@@ -324,28 +323,25 @@ class ResourceRequest(models.Model):
     RESOURCES = (
         ('nodes', 'Nodes'),
         ('slices', 'Slices'))
-
+    
     group = models.ForeignKey(Group, related_name='resource_requests')
     resource = models.CharField(max_length=16, choices=RESOURCES)
-
+    
+    def send_creation_email(self, site):
+        context = { 'request': self, 'site': site }
+        to = settings.SERVER_EMAIL
+        template = 'users/created_resource_request.email'
+        send_mail_template(template=template, context=context, to=to)
+    
+    def send_acceptation_email(self, site):
+        context = { 'request': self, 'site': site }
+        template = 'users/accepted_resource_request.email'
+        to = self.group.get_admin_emails()
+        send_mail_template(template=template, context=context, to=to)
+    
     def accept(self):
         """Accept the request updating the group properties
         according to the requests info"""
         setattr(self.group, 'allow_%s' % self.resource, True)
         self.group.save()
-        admin_emails = self.group.get_admin_emails()
-        self.notify('groups/accepted_allow_request.email', admin_emails)
         self.delete()
-
-    def notify(self, template, to):
-        """Send an email rendering the template to thespecified emails"""
-        context = {'instance': self}
-        send_mail_template(template=template, context=context, to=to)
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            # Notify testbed operators when the request has been created
-            self.notify(template='groups/created_allow_request.email',
-                        to=settings.MAINTEINANCE_EMAIL)
-        super(ResourceRequest, self).save(*args, **kwargs)
-

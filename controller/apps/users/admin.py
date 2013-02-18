@@ -79,6 +79,11 @@ class JoinRequestInline(PermissionTabularInline):
         """ Link to related User """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.user))
     user_link.short_description = 'User'
+    
+    def get_formset(self, request, obj=None, **kwargs):
+        """ Hook request for future usage in the inline form """
+        self.form.__request__ = request
+        return super(JoinRequestInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
@@ -128,7 +133,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     change_view_actions = [('join-request', join_request, 'Join request', ''),]
     change_form_template = 'admin/users/group/change_form.html'
     form = GroupAdminForm
-
+    
     def get_form(self, request, obj=None, **kwargs):
         """ Decides whether to show allow_resource or request_resource"""
         form = super(GroupAdmin, self).get_form(request, obj=obj, **kwargs)
@@ -139,8 +144,10 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                 form.base_fields.pop('request_%s' % resource)
             else:
                 form.base_fields.pop('allow_%s' % resource)
+        # Hook request for sending emails on form.save
+        form.__request__ = request
         return form
-
+    
     def get_readonly_fields(self, request, obj=None):
         """ Make allow_resource readonly accordingly """
         fields = super(GroupAdmin, self).get_readonly_fields(request, obj=obj)
@@ -150,7 +157,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                 if getattr(obj, resource):
                     fields += (resource,)
         return fields
-
+    
     def allow_nodes_info(self, instance):
         """Change allow nodes if exists a resource request"""
         if instance.resource_requests.filter(resource='nodes').exists():
@@ -158,7 +165,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return instance.allow_nodes
     allow_nodes_info.boolean = True
     allow_nodes_info.short_description = "Allow nodes"
-
+    
     def allow_slices_info(self, instance):
         """Change allow slices if exists a resource request"""
         if instance.resource_requests.filter(resource='slices').exists():
@@ -166,7 +173,7 @@ class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         return instance.allow_slices
     allow_slices_info.boolean = True
     allow_slices_info.short_description = "Allow slices"
-
+    
     def num_users(self, instance):
         """ return num users as a link to users changelist view """
         num = instance.users.count()

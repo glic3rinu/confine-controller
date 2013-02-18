@@ -125,7 +125,7 @@ class Slice(models.Model):
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
-    group = models.ForeignKey('users.Group')
+    group = models.ForeignKey('users.Group', related_name='slices')
     
     def __unicode__(self):
         return self.name

@@ -105,4 +105,15 @@ class LockFile(object):
     
     def release(self):
         os.remove(self.lockfile)
-
+    
+    def __enter__(self):
+        if not self.acquire():
+            raise self.OperationLocked('%s lock file exists and its mtime is less '
+                'than %s seconds' % (self.lockfile, self.expire))
+        return True
+    
+    def __exit__(self, type, value, traceback):
+        self.release()
+    
+    class OperationLocked(Exception):
+        pass

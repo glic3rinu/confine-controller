@@ -93,7 +93,7 @@ class NodeAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            query = Q( Q(user_roles__is_admin=True) | Q(user_roles__is_technician=True) )
+            query = Q( Q(roles__is_admin=True) | Q(roles__is_technician=True) )
             query = Q( query & Q(allow_nodes=True) )
             if obj and obj.pk:
                 # Add actual group

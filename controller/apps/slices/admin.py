@@ -427,7 +427,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            groups = user.groups.filter(user_roles__is_admin=True, allow_slices=True)
+            groups = user.groups.filter(roles__is_admin=True, allow_slices=True)
             num_groups = groups.count()
             if num_groups >= 1:
                 form.base_fields['group'].queryset = groups

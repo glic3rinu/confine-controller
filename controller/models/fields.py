@@ -78,7 +78,6 @@ class RSAPublicKeyField(models.TextField):
     def __init__(self, *args, **kwargs):
         kwargs['unique'] = kwargs.get('unique', True)
         kwargs['null'] = kwargs.get('null', True)
-        kwargs['blank'] = kwargs.get('blank', True)
         return super(RSAPublicKeyField, self).__init__(*args, **kwargs)
     
     def get_prep_value(self, value):
@@ -88,7 +87,19 @@ class RSAPublicKeyField(models.TextField):
             value = value.strip()
         return super(RSAPublicKeyField, self).get_prep_value(value)
     
-    # TODO to_python returns an rsa key
+    # TODO to_python returns an rsa key?
+
+
+class URIField(models.URLField):
+    def __init__(self, *args, **kwargs):
+        kwargs['unique'] = kwargs.get('unique', True)
+        kwargs['null'] = kwargs.get('null', True)
+        return super(URIField, self).__init__(*args, **kwargs)
+    
+    def get_prep_value(self, value):
+        if value == '':
+            value = None
+        return super(URIField, self).get_prep_value(value)
 
 
 try:
@@ -98,3 +109,4 @@ except ImportError:
 else:
     add_introspection_rules([], ["^controller\.models\.fields\.MultiSelectField"])
     add_introspection_rules([], ["^controller\.models\.fields\.RSAPublicKeyField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.URIField"])

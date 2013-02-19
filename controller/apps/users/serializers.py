@@ -29,7 +29,7 @@ class AuthTokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(UriHyperlinkedModelSerializer):
-    roles = GroupRolesSerializer()
+    group_roles = GroupRolesSerializer()
     auth_tokens = AuthTokenSerializer()
     
     class Meta:
@@ -38,7 +38,7 @@ class UserSerializer(UriHyperlinkedModelSerializer):
 
 
 class GroupSerializer(UriHyperlinkedModelSerializer):
-    roles = UserRolesSerializer()
+    user_roles = UserRolesSerializer()
     slices = RelHyperlinkedRelatedField(many=True, source='slices', view_name='slice-detail')
     nodes = RelHyperlinkedRelatedField(many=True, source='nodes', view_name='node-detail')
     

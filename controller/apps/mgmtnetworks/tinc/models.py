@@ -46,8 +46,8 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = RSAPublicKeyField('Public Key', help_text='PEM-encoded RSA public '
-        'key used on tinc management network.')
+    pubkey = RSAPublicKeyField('Public Key', blank=True,
+        help_text='PEM-encoded RSA public key used on tinc management network.')
     
     class Meta:
         abstract = True

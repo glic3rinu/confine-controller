@@ -39,7 +39,7 @@ class Group(models.Model):
     @property
     def admins(self):
         """ return user queryset containing all admins """
-        admins = User.objects.filter(roles__is_admin=True, roles__group=self)
+        admins = User.objects.filter(group_roles__is_admin=True, group_roles__group=self)
         if not admins.exists():
             raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
         return admins

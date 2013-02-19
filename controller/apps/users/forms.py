@@ -6,7 +6,7 @@ from django.template.defaultfilters import mark_safe
 
 from controller.forms.fields import MultiSelectFormField
 
-from users.models import User, JoinRequest, ResourceRequest
+from users.models import User, Group, JoinRequest, ResourceRequest
 
 
 class UserCreationForm(forms.ModelForm):
@@ -70,7 +70,12 @@ class GroupAdminForm(forms.ModelForm):
         help_text='Whether slices belonging to this group can be created or '
                   'instantiated (false by default). Its value can only be changed '
                   'by testbed superusers.')
-    
+
+    class Meta:
+        model = Group
+        # TODO this is redundant if is_approved is deprecated
+        # exclude = ('is_approved',)
+
     def __init__(self, *args, **kwargs):
         super(GroupAdminForm, self).__init__(*args, **kwargs)
         group = kwargs.get('instance', False)

@@ -216,7 +216,6 @@ class User(auth_models.AbstractBaseUser):
                 break
         if self.is_superuser:
             roles.update(['superuser'])
-        
         return roles
     
     def has_roles(self, roles):

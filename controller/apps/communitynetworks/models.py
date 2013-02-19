@@ -24,8 +24,9 @@ class CnHost(models.Model):
         help_text='Optional URL pointing to a description of this host/device '
                   'in its CN\'s node DB web application.')
     # TODO create URIField # FIXME (clean: null)
-    cndb_uri = models.URLField('Community Network Database URI', blank=True, unique=True,
-        help_text='Optional URI for this host/device in its CN\'s CNDB REST API')
+    cndb_uri = models.URLField('Community Network Database URI', blank=True,
+        unique=True, null=True, help_text='Optional URI for this host/device in '
+                                          'its CN\'s CNDB REST API')
     cndb_cached_on = models.DateTimeField('CNDB cached on', null=True, blank=True,
         help_text='Last date that CNDB information for this host/device was '
                   'successfully retrieved.')

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import textwrap
 
 from celery.task import task, periodic_task
 from celery.task.schedules import crontab

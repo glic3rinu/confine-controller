@@ -65,8 +65,8 @@ class Group(models.Model):
 
 
 class Roles(models.Model):
-    user = models.ForeignKey('users.User', related_name='roles')
-    group = models.ForeignKey(Group, related_name='roles')
+    user = models.ForeignKey('users.User', related_name='group_roles')
+    group = models.ForeignKey(Group, related_name='user_roles')
     is_admin = models.BooleanField(default=False,
         help_text='Whether that user is an administrator in this group. An '
                   'administrator can manage slices and nodes belonging to the group'

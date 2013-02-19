@@ -198,6 +198,10 @@ class User(auth_models.AbstractBaseUser):
         """ All users can loggin to the admin interface """
         return True
     
+    def email_user(self, subject, message, from_email=None):
+        """ Used for django-registration """
+        send_mail(subject, message, from_email, [self.email])
+    
     @property
     def role_set(self):
         roles = set()

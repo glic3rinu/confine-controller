@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from rest_framework import serializers
 
 from api import api
-from api.serializers import UriHyperlinkedModelSerializer
+from api.serializers import UriHyperlinkedModelSerializer, RelHyperlinkedRelatedField
 from nodes.models import Server, Node
 
 from .models import (Island, TincAddress, TincHost, TincClient, TincServer, 
@@ -32,7 +32,7 @@ class IslandSerializer(UriHyperlinkedModelSerializer):
 
 
 class TincAddressSerializer(serializers.ModelSerializer):
-    island = IslandSerializer()
+    island = RelHyperlinkedRelatedField(view_name='island-detail')
     
     class Meta:
         model = TincAddress
@@ -41,7 +41,7 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 class TincClientSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    island = IslandSerializer()
+    island = RelHyperlinkedRelatedField(view_name='island-detail')
     
     class Meta:
         model = TincClient

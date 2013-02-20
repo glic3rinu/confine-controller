@@ -15,7 +15,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "id", 
-        "value": "'%04d' % node.id"
+        "value": "'%.4x' %  node.id"
     }
 },
 {
@@ -124,7 +124,7 @@
     "fields": {
         "priority": 0, 
         "is_active": true, 
-        "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server']).strip()", 
+        "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server'])", 
         "mode": "", 
         "is_optional": false, 
         "path": "/etc/config/confine", 

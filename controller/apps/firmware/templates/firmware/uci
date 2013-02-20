@@ -2,3 +2,4 @@
 config {{ section.grouper }}
 {% for item in section.list %}    option {{ item.option }} '{{ item.value }}'
 {% endfor %}{% endfor %}
+

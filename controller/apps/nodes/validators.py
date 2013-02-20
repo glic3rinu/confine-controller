@@ -38,8 +38,8 @@ def validate_scr(scr, node):
         raise ValidationError('Not a valid SCR')
     
     subject = scr.get_subject()
-    if node.mgmt_addr != IP(subject.CN):
-        raise ValidationError("CN != node.mgmt_addr: %s != %s" % (subject.CN, node.mgmt_addr))
+    if node.mgmt_net.addr != IP(subject.CN):
+        raise ValidationError("CN != node.mgmt_net.addr: %s != %s" % (subject.CN, node.mgmt_net.addr))
     
     if not Group.objects.filter(node=node, user_roles__user__email=subject.emailAddress, user_roles__is_admin=True).exists():
         raise ValidationError("No admin with '%s' email address for this node." % subject.emailAddress)

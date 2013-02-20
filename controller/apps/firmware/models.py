@@ -1,4 +1,4 @@
-import os
+import os, re
 from hashlib import sha256
 
 from celery import states as celery_states
@@ -327,7 +327,10 @@ class ConfigUCI(models.Model):
         Evaluates the 'value' as python code in order to get the current value
         for the given UCI option.
         """
-        safe_locals = {'node': node, 'server': Server.objects.get()}
+        safe_locals = {'node': node,
+                       'server': Server.objects.get(),
+                       're': re,
+                       'settings': project_settings }
         return unicode(eval(self.value, safe_locals))
 
 
@@ -362,7 +365,8 @@ class ConfigFile(models.Model):
         safe_locals = kwargs
         safe_locals.update({'node': node,
                             'self': self,
-                            'server': Server.objects.get()})
+                            'server': Server.objects.get(),
+                            're': re})
         try:
             paths = eval(self.path, safe_locals)
         except (NameError, SyntaxError):

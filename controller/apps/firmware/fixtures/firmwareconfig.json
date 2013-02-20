@@ -4,7 +4,7 @@
     "model": "firmware.config", 
     "fields": {
         "version": "0.1", 
-        "description": "Confine Firmware",
+        "description": "Confine Firmware", 
         "image_name": "confine-firmware-%(node_name)s-%(arch)s-%(version)s-%(build_id)d.img.gz"
     }
 },
@@ -15,7 +15,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "id", 
-        "value": "node.id"
+        "value": "'%04d' % node.id"
     }
 },
 {
@@ -35,7 +35,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "mac_prefix16", 
-        "value": "node.get_sliver_mac_prefix()"
+        "value": "'0x'+':'.join(re.findall('..', node.get_sliver_mac_prefix()[2:6]))"
     }
 },
 {
@@ -45,7 +45,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "priv_ipv4_prefix24", 
-        "value": "node.get_priv_ipv4_prefix()"
+        "value": "node.get_priv_ipv4_prefix().split('.0/24')[0]"
     }
 },
 {
@@ -95,7 +95,7 @@
         "section": "testbed testbed", 
         "config": 1, 
         "option": "mgmt_ipv6_prefix48", 
-        "value": "'fdf5:5351:1dfd'"
+        "value": "settings.TINC_MGMT_IPV6_PREFIX.split('::')[0]"
     }
 },
 {
@@ -231,7 +231,7 @@
         "content": "node.generate_certificate(key=files[0].content, commit=True).strip()", 
         "mode": "", 
         "is_optional": true, 
-        "path": "/etc/config/cert", 
+        "path": "/root/cert", 
         "config": 1
     }
 },

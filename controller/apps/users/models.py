@@ -39,7 +39,7 @@ class Group(models.Model):
     @property
     def admins(self):
         """ return user queryset containing all admins """
-        admins = User.objects.filter(group_roles__is_admin=True, group_roles__group=self)
+        admins = User.objects.filter(roles__is_admin=True, roles__group=self)
         if not admins.exists():
             raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
         return admins
@@ -65,8 +65,8 @@ class Group(models.Model):
 
 
 class Roles(models.Model):
-    user = models.ForeignKey('users.User', related_name='group_roles')
-    group = models.ForeignKey(Group, related_name='user_roles')
+    user = models.ForeignKey('users.User', related_name='roles')
+    group = models.ForeignKey(Group, related_name='roles')
     is_admin = models.BooleanField(default=False,
         help_text='Whether that user is an administrator in this group. An '
                   'administrator can manage slices and nodes belonging to the group'

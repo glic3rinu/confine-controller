@@ -71,6 +71,7 @@ class JoinRequestInline(PermissionTabularInline):
         return False
     
     def has_view_permission(self, request, obj=None):
+        # TODO move to merissions
         if request.user.is_superuser or obj is None:
             return True
         return obj.has_role(request.user, 'admin')

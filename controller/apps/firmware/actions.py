@@ -55,6 +55,7 @@ def get_firmware(modeladmin, request, queryset):
     
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
+    template = 'admin/firmware/get_firmware.html'
     
     if Config.objects.get().get_image(node) is None:
         context.update({
@@ -64,8 +65,7 @@ def get_firmware(modeladmin, request, queryset):
                 "have support for %s architecture :(" % node.arch),
             "can_build": False,
         })
-        return TemplateResponse(request, 'admin/get_firmware.html', context, 
-            current_app=modeladmin.admin_site.name)
+        return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
     
     try:
         build
@@ -81,8 +81,7 @@ def get_firmware(modeladmin, request, queryset):
                     "system to build a fresh one for you, it will take only a few"
                     "seconds."),
             })
-            return TemplateResponse(request, 'admin/get_firmware.html', context, 
-                current_app=modeladmin.admin_site.name)
+            return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
     
     description = {
         Build.REQUESTED: "Build request received.",
@@ -102,7 +101,6 @@ def get_firmware(modeladmin, request, queryset):
     })
     
     # Display the confirmation page
-    return TemplateResponse(request, 'admin/get_firmware.html', context, 
-        current_app=modeladmin.admin_site.name)
+    return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
 
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")

@@ -47,6 +47,7 @@
         </fieldset>
         </div>
         </ul>
+        <p class="deletelink-box"><a href="{% url 'admin:nodes_node_firmware_delete' node.pk %}" class="deletelink">Delete Build</a></p>
         {% endif %}
     {% endif %}
     {% if can_build %}

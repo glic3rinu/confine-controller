@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'change' node.pk %}">{{ node|capfirst }}</a>
+&rsaquo; <a href="{% url 'admin:nodes_node_firmware' node.pk %}">Download Firmware</a>
+&rsaquo; Delete build
+</div>
+{% endblock %}
+
+{% block content %}
+    <p>Are you sure you want to delete the build for node "{{ node.name }}"? </p>
+    <form action="" method="post">{% csrf_token %}
+    <div>
+    <input type="hidden" name="post" value="yes"/>
+    <input type="submit" value="Yes, I'm sure"/>
+    </div>
+    </form>
+{% endblock %}
+

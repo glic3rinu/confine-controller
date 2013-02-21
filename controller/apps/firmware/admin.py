@@ -3,7 +3,9 @@ from __future__ import absolute_import
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
+from django.db import transaction
 from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import simplejson
 from singleton_models.admin import SingletonModelAdmin
 
@@ -12,7 +14,7 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insert_actio
 from nodes.models import Node
 
 from .actions import get_firmware
-from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile, 
+from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
     ConfigFileHelpText, BuildFile)
 
 
@@ -126,17 +128,17 @@ class ConfigAdmin(SingletonModelAdmin):
         """ Make URLs singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
-            url(r'^(?P<object_id>\d+)/history/$', 
+            url(r'^(?P<object_id>\d+)/history/$',
                 self.history_view,
                 name='%s_%s_history' % info),
-            url(r'^(?P<object_id>\d+)/delete/$', 
+            url(r'^(?P<object_id>\d+)/delete/$',
                 self.delete_view, 
                 name='%s_%s_delete' % info),
             url(r'^(?P<object_id>\d+)$',
                 self.change_view, 
                 name='%s_%s_change' % info),
             url(r'^$',
-                self.change_view, {'object_id': '1'}, 
+                self.change_view, {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
         urls = super(ConfigAdmin, self).get_urls()
@@ -190,10 +192,38 @@ def get_urls(self):
                 'version': build.version,}
         return HttpResponse(simplejson.dumps(build_dict), mimetype="application/json")
     
+    @transaction.commit_on_success
+    def delete_build_view(request, node_id):
+        node = get_object_or_404(Node, pk=node_id)
+        build = get_object_or_404(Build, node=node_id)
+        
+        # Check that the user has delete permission for the actual model
+        node_modeladmin = get_modeladmin(Node)
+        if not node_modeladmin.has_change_permission(request, obj=node, view=False):
+            raise PermissionDenied
+        
+        # The user has already confirmed the deletion.
+        # Do the deletion and return a None to display the change list view again.
+        if request.POST.get('post'):
+            build.delete()
+            node_modeladmin.log_change(request, node, "Deleted firmware build")
+            node_modeladmin.message_user(request, "Firmware build has been successfully deleted.")
+            return redirect('admin:nodes_node_firmware', node_id)
+        context = {
+            'opts': node_modeladmin.model._meta,
+            'app_label': node_modeladmin.model._meta.app_label,
+            'title': 'Are your sure?',
+            'build': build,
+            'node': node,}
+        return render(request, 'admin/firmware/delete_build_confirmation.html', context)
+    
     extra_urls = patterns("", 
-        url("^(?P<node_id>\d+)/firmware/build_info/$", 
-        wrap_admin_view(self, build_info_view), 
-        name='build_info'),
+        url("^(?P<node_id>\d+)/firmware/build_info/$",
+            wrap_admin_view(self, build_info_view),
+            name='nodes_node_firmware_build_info'),
+        url("^(?P<node_id>\d+)/firmware/delete/$",
+            wrap_admin_view(self, delete_build_view),
+            name='nodes_node_firmware_delete'),
     )
     return extra_urls + old_get_urls()
 

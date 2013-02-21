@@ -15,7 +15,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "id", 
-        "value": "'%.4x' %  node.id"
+        "value": "'%.4x' % node.id"
     }
 },
 {
@@ -105,7 +105,7 @@
         "section": "server server", 
         "config": 1, 
         "option": "mgmt_pubkey", 
-        "value": "server.tinc.pubkey"
+        "value": "get_ssh_pubkey('confine')"
     }
 },
 {
@@ -124,7 +124,7 @@
     "fields": {
         "priority": 0, 
         "is_active": true, 
-        "content": "self.config.render_uci(node, sections=['node node', 'testbed testbed', 'server server'])", 
+        "content": "self.config.render_uci(node, sections=['node node', 'server server', 'testbed testbed'])", 
         "mode": "", 
         "is_optional": false, 
         "path": "/etc/config/confine", 
@@ -188,7 +188,7 @@
     "model": "firmware.configfile", 
     "fields": {
         "priority": 0, 
-        "is_active": true, 
+        "is_active": false, 
         "content": "node.tinc.get_tinc_up()", 
         "mode": "+x", 
         "is_optional": false, 
@@ -201,7 +201,7 @@
     "model": "firmware.configfile", 
     "fields": {
         "priority": 0, 
-        "is_active": true, 
+        "is_active": false, 
         "content": "node.tinc.get_tinc_down()", 
         "mode": "+x", 
         "is_optional": false, 
@@ -214,7 +214,7 @@
     "model": "firmware.configfile", 
     "fields": {
         "priority": 0, 
-        "is_active": true, 
+        "is_active": false, 
         "content": "self.config.render_uci(node, sections=['tinc-net confine'])", 
         "mode": "", 
         "is_optional": false, 
@@ -231,7 +231,20 @@
         "content": "node.generate_certificate(key=files[0].content, commit=True).strip()", 
         "mode": "", 
         "is_optional": true, 
-        "path": "/root/cert", 
+        "path": "/etc/uhttpd.crt.pem", 
+        "config": 1
+    }
+},
+{
+    "pk": 10, 
+    "model": "firmware.configfile", 
+    "fields": {
+        "priority": 0, 
+        "is_active": true, 
+        "content": "files[0].content", 
+        "mode": "og-rw", 
+        "is_optional": true, 
+        "path": "/etc/uhttpd.key.pem", 
         "config": 1
     }
 },
@@ -251,6 +264,15 @@
         "help_text": "This file contains the certificate for node authentication.\r\nPlease notice that this depends on the RSA keys generated for the tinc overlay, so you must also select the rsa_key.priv if you want a certificate. Also if there is any node.certificate it will be overwritten.", 
         "config": 1, 
         "file": 9
+    }
+},
+{
+    "pk": 3, 
+    "model": "firmware.configfilehelptext", 
+    "fields": {
+        "help_text": "This file contains the node private key for uhttpd service.\r\nYou should also select /etc/tinc/confine/rsa_key.priv for generating this file.\r\n", 
+        "config": 1, 
+        "file": 10
     }
 }
 ]

@@ -1,4 +1,4 @@
-import os, re
+import os
 from hashlib import sha256
 
 from celery import states as celery_states
@@ -21,6 +21,7 @@ from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .tasks import build
+from .context import context
 
 
 private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
@@ -329,8 +330,8 @@ class ConfigUCI(models.Model):
         """
         safe_locals = {'node': node,
                        'server': Server.objects.get(),
-                       're': re,
                        'settings': project_settings }
+        safe_locals.update(context.get())
         return unicode(eval(self.value, safe_locals))
 
 
@@ -365,8 +366,8 @@ class ConfigFile(models.Model):
         safe_locals = kwargs
         safe_locals.update({'node': node,
                             'self': self,
-                            'server': Server.objects.get(),
-                            're': re})
+                            'server': Server.objects.get(),})
+        safe_locals.update(context.get())
         try:
             paths = eval(self.path, safe_locals)
         except (NameError, SyntaxError):

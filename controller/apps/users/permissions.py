@@ -55,8 +55,23 @@ class GroupPermission(Permission):
         return caller.has_role(user, 'admin')
 
 
+class JoinRequestPermission(Permission):
+    def view(self, caller, user):
+        if self._is_class(caller):
+            return True
+        return caller.has_role(user, 'admin')
+    
+    def add(self, caller, user):
+        return False
+    
+    def change(self, caller, user):
+        if self._is_class(caller):
+            return True
+        return caller.group.has_role(user, 'admin')
+
+
 User.has_permission = UserPermission()
 Roles.has_permission = RolesPermission()
 Group.has_permission = GroupPermission()
 AuthToken.has_permission = RelatedPermission('user')
-JoinRequest.has_permission = RelatedPermission('group')
+JoinRequest.has_permission = JoinRequestPermission()

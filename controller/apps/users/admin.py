@@ -70,12 +70,6 @@ class JoinRequestInline(PermissionTabularInline):
     def has_add_permission(self, request):
         return False
     
-    def has_view_permission(self, request, obj=None):
-        # TODO move to merissions
-        if request.user.is_superuser or obj is None:
-            return True
-        return obj.has_role(request.user, 'admin')
-    
     def user_link(self, instance):
         """ Link to related User """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.user))

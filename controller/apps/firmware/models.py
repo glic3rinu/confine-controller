@@ -312,13 +312,13 @@ class ConfigUCI(models.Model):
     section = models.CharField(max_length=32, help_text='UCI config statement',
         default='node')
     option = models.CharField(max_length=32, help_text='UCI option statement')
-    value = models.CharField(max_length=255, 
-        help_text='Python code that will be evaluated for obtining the value '
-                  'from the node. For example: node.properties[\'ip\']')
+    value = models.TextField(max_length=255, help_text='Python code that will be '
+        'evaluated for obtining the value from the node. For example: node.properties[\'ip\']')
     
     class Meta:
         verbose_name_plural = "Config UCI"
         unique_together = ['config', 'section', 'option']
+        ordering = ['section', 'option']
     
     def __unicode__(self):
         return "%s.%s" % (self.section, self.option)
@@ -346,7 +346,7 @@ class ConfigFileQuerySet(models.query.QuerySet):
 class ConfigFile(models.Model):
     config = models.ForeignKey(Config, related_name='files')
     path = models.CharField(max_length=256)
-    content = models.CharField(max_length=256)
+    content = models.TextField()
     mode = models.CharField(max_length=6, blank=True)
     priority = models.IntegerField(default=0)
     is_optional = models.BooleanField(default=False)

@@ -35,7 +35,7 @@
         "section": "node node", 
         "config": 1, 
         "option": "mac_prefix16", 
-        "value": "'0x'+':'.join(re.findall('..', node.get_sliver_mac_prefix()[2:6]))"
+        "value": "':'.join(re.findall('..', node.get_sliver_mac_prefix()[2:6]))"
     }
 },
 {
@@ -105,7 +105,7 @@
         "section": "server server", 
         "config": 1, 
         "option": "mgmt_pubkey", 
-        "value": "get_ssh_pubkey('confine')"
+        "value": "'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCVLzwx7V6PS+XzjELW4HmVsnpeVBztoidyyvXqNhK6qJl5g828AvDhHijcgvPICdLe1p1FAJXo7Wi5/5eqZ4QtY4Yf+QHVhzg3Z/lCg+gwlWeCVpUDD dyqbX/kgFirPCrAeDVd33dnHFg0S8jrum63rPE4ni5YhTL0/+3EFRKvDM7X6tL/SQRIYKEC+ECU3T1XZmgS353ViCoJaQsY/Gt8wyEnDunPkVV4dWgBYBASyNitPRVrWrq7pQiGGUAcJ4sMGNGoX9bGDOQfCYnAzKCw6b/FMTqDrYw+GAbUnY OL9s/1QAj+tz8gf+FjlZmKQeFg7I3TpeWKYdLBFSyB+RqT confine@vct'"
     }
 },
 {
@@ -116,6 +116,26 @@
         "config": 1, 
         "option": "enabled", 
         "value": "'1'"
+    }
+},
+{
+    "pk": 14, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "node node", 
+        "config": 1, 
+        "option": "state", 
+        "value": "'prepared'"
+    }
+},
+{
+    "pk": 15, 
+    "model": "firmware.configuci", 
+    "fields": {
+        "section": "server servrer", 
+        "config": 1, 
+        "option": "base_path", 
+        "value": "'/api'"
     }
 },
 {

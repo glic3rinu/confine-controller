@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
-from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, link, get_admin_link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view,
     docstring_as_help_tip)
@@ -65,7 +65,7 @@ class SliverIfaceInline(PermissionTabularInline):
         return super(SliverIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
+class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['__unicode__', admin_link('node'), admin_link('slice')]
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
@@ -75,6 +75,7 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     inlines = [SliverIfaceInline]
     actions = [reset_selected]
     change_view_actions = [('reset', reset_selected, '', ''),]
+    default_changelist_filter = 'my_slivers'
     
     def __init__(self, *args, **kwargs):
         """ 
@@ -122,15 +123,6 @@ class SliverAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
         """ Hook node reference for future processing in IsolatedIfaceInline """
         request._node_ = obj.node
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
-    
-    def changelist_view(self, request, extra_context=None):
-        """ Default filter as 'my_slivers=True' """
-        if not request.GET.has_key('my_slivers'):
-            q = request.GET.copy()
-            q['my_slivers'] = 'True'
-            request.GET = q
-            request.META['QUERY_STRING'] = request.GET.urlencode()
-        return super(SliverAdmin,self).changelist_view(request, extra_context=extra_context)
     
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changellist """
@@ -355,7 +347,7 @@ class SlicePropInline(PermissionTabularInline):
     verbose_name_plural = mark_safe('Slice Properties %s' % docstring_as_help_tip(SliceProp))
 
 
-class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
+class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['name', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
     list_display_links = ('name',)
@@ -380,6 +372,7 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
     save_and_continue = True
     change_view_actions = [('renew', renew_selected_slices, '', ''),
                            ('reset', reset_selected, '', '')]
+    default_changelist_filter = 'my_slices'
     
     def exp_data_sha256(self, instance):
         return instance.exp_data_sha256
@@ -435,15 +428,6 @@ class SliceAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
                 form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].required = False
         return form
-    
-    def changelist_view(self, request, extra_context=None):
-        """ Default filter as 'my_slices=True' """
-        if not request.GET.has_key('my_slices'):
-            q = request.GET.copy()
-            q['my_slices'] = 'True'
-            request.GET = q
-            request.META['QUERY_STRING'] = request.GET.urlencode()
-        return super(SliceAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
 class TemplateAdmin(PermissionModelAdmin):

@@ -25,7 +25,7 @@ class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
         return super(AddOrChangeInlineFormMixin, self).get_formset(request, obj=obj, **kwargs)
 
 
-class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
+class ChangeViewActions(admin.options.ModelAdmin):
     """
         Make actions visible on the admin change view page.
         Note: If you want to provide a custom change form template then you should
@@ -37,7 +37,7 @@ class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
             modeladmin.set_change_view_action('reboot', reboot_view, '', '')
     """
     def __init__(self, *args, **kwargs):
-        super(ChangeViewActionsModelAdmin, self).__init__(*args, **kwargs)
+        super(ChangeViewActions, self).__init__(*args, **kwargs)
         if not hasattr(self, 'change_view_actions'):
             self.change_view_actions = []
         else:
@@ -48,7 +48,7 @@ class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
     
     def get_urls(self):
         """Returns the additional urls for the change view links"""
-        urls = super(ChangeViewActionsModelAdmin, self).get_urls()
+        urls = super(ChangeViewActions, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
         new_urls = patterns("")
@@ -79,4 +79,25 @@ class ChangeViewActionsModelAdmin(admin.options.ModelAdmin):
             extra_context = {}
         extra_context.update({'object_tools_items': self.get_change_view_actions()})
         kwargs['extra_context'] = extra_context
-        return super(ChangeViewActionsModelAdmin, self).change_view(*args, **kwargs)
+        return super(ChangeViewActions, self).change_view(*args, **kwargs)
+
+
+class ChangeListDefaultFilter(object):
+    """
+    Enables support for default filtering on admin change list pages
+    Your model admin class should define an default_changelist_filter attribute
+    default_changelist_filter = 'my_nodes'
+    """
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_nodes=True' """
+        default = self.default_changelist_filter
+        if not request.GET.has_key(default):
+            q = request.GET.copy()
+            q[default] = 'True'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        # hack response cl context in order to hook default filter awaearness into search_form.html template
+        response = super(ChangeListDefaultFilter, self).changelist_view(request, extra_context=extra_context)
+        if hasattr(response, 'context_data'):
+            response.context_data['cl'].default_changelist_filter = default
+        return response

@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.template.response import TemplateResponse
 
-from controller.admin import ChangeViewActionsModelAdmin 
+from controller.admin import ChangeListDefaultFilter
 from controller.admin.utils import (insert_inline, admin_link, insert_action,
     get_modeladmin, link, wrap_admin_view,)
 from controller.forms.widgets import ReadOnlyWidget
@@ -85,12 +85,13 @@ class GatewayAdmin(PermissionModelAdmin):
     inlines = [TincServerInline]
 
 
-class HostAdmin(PermissionModelAdmin):
+class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['description', 'id', admin_link('owner'), 'address']
     inlines = [TincClientInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
     save_and_continue = True
+    default_changelist_filter = 'my_hosts'
     
     def address(self, instance):
         return instance.tinc.address if instance.tinc else ''
@@ -131,15 +132,6 @@ class HostAdmin(PermissionModelAdmin):
             else:
                 form.base_fields['owner'].initial = user
         return form
-    
-    def changelist_view(self, request, extra_context=None):
-        """ Default filter as 'my_hosts=True' """
-        if not request.GET.has_key('my_hosts'):
-            q = request.GET.copy()
-            q['my_hosts'] = 'True'
-            request.GET = q
-            request.META['QUERY_STRING'] = request.GET.urlencode()
-        return super(HostAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
 admin.site.register(Host, HostAdmin)

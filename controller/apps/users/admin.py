@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin import ChangeViewActions
 from controller.admin.utils import get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
@@ -123,7 +123,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         return fields
 
 
-class GroupAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
+class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
     list_display = ['name', 'description', 'allow_nodes_info', 'allow_slices_info',
                     'num_users']
     list_filter = [MyGroupsListFilter, 'allow_slices', 'allow_nodes']

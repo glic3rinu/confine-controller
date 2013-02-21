@@ -209,12 +209,13 @@ def get_urls(self):
             node_modeladmin.log_change(request, node, "Deleted firmware build")
             node_modeladmin.message_user(request, "Firmware build has been successfully deleted.")
             return redirect('admin:nodes_node_firmware', node_id)
+        
         context = {
             'opts': node_modeladmin.model._meta,
             'app_label': node_modeladmin.model._meta.app_label,
             'title': 'Are your sure?',
             'build': build,
-            'node': node,}
+            'node': node, }
         return render(request, 'admin/firmware/delete_build_confirmation.html', context)
     
     extra_urls = patterns("", 

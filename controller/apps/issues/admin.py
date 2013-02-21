@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.db import models
 from django.db.models import Q
 
-from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin import ChangeViewActions
 from controller.admin.utils import admin_link, colored
 from controller.forms import RequiredInlineFormSet
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
@@ -48,7 +48,7 @@ class TicketInline(PermissionTabularInline):
     max_num = 0
 
 
-class TicketAdmin(ChangeViewActionsModelAdmin, PermissionModelAdmin):
+class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     # TODO Bold (id, subject) when tickets are unread for request.user
     list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
                     admin_link('queue'), colored('priority', PRIORITY_COLORS),

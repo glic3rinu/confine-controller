@@ -68,6 +68,9 @@ class JoinRequestPermission(Permission):
         if self._is_class(caller):
             return True
         return caller.group.has_role(user, 'admin')
+    
+    def delete(self, caller, user):
+        return False
 
 
 User.has_permission = UserPermission()

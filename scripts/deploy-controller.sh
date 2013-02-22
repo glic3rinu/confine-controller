@@ -31,9 +31,10 @@ try_create_system_user() {
     local USER=$1
     local PASSWORD=$2
     
-    if ( ! $(id $USER &> /dev/null) ); then 
-        useradd $USER -p '' -s "/bin/bash"
-        echo "$USER:$PASSWORD"| chpasswd
+    if ( ! $(id $USER &> /dev/null) ); then
+        # disabled user by default
+        useradd $USER -p '*' -s "/bin/bash"
+        [[ $PASSWORD != false ]] && echo "$USER:$PASSWORD"| chpasswd
         mkdir /home/$USER
         chown $USER.$USER /home/$USER
     fi
@@ -417,7 +418,7 @@ print_deploy_help () {
 		            does not exist (default confine)
 		    
 		    ${bold}-p, --password${normal}
-		            password is needed if USER does not exist (default confine)
+		            password is needed if USER does not exist (default user disabled)
 		    
 		    ${bold}-a, --arch${normal}
 		            when debootsraping i.e amd64, i386 ... (amd64 by default)
@@ -477,7 +478,7 @@ function deploy () {
     image_size=false
     directory=false
     USER="confine"
-    PASSWORD="confine"
+    PASSWORD=false
     INSTALL_PATH=false
     ARCH="amd64"
     SUITE="stable"

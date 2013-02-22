@@ -126,6 +126,7 @@ INSTALLED_APPS = (
     'djcelery_email',
     'private_files',
     'registration',
+    'django_google_maps',
     
     # Django.contrib
     'django.contrib.auth',

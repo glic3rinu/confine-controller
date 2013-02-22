@@ -48,6 +48,7 @@ class SliverSerializer(UriHyperlinkedModelSerializer):
     interfaces = IfaceField()
     properties = PropertyField(required=False)
     exp_data = HyperlinkedFileField(source='exp_data', required=False)
+    instance_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Sliver
@@ -73,6 +74,9 @@ class SliceSerializer(UriHyperlinkedModelSerializer):
     slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail', read_only=True)
     properties = PropertyField(required=False)
     exp_data = HyperlinkedFileField(source='exp_data', required=False)
+    instance_sn = serializers.IntegerField(read_only=True)
+    new_sliver_instance_sn = serializers.IntegerField(read_only=True)
+    expires_on = serializers.DateTimeField(read_only=True)
     
     class Meta:
         model = Slice

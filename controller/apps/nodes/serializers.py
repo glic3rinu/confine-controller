@@ -19,11 +19,11 @@ class DirectIface(serializers.ModelSerializer):
 
 class NodeSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    # TODO read_only = False
-    properties = PropertyField(required=False, read_only=True)
+    properties = PropertyField(required=False)
     slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail')
     direct_ifaces = DirectIface()
     cert = serializers.Field()
+    boot_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Node

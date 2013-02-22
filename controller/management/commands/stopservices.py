@@ -17,6 +17,8 @@ class Command(BaseCommand):
                 help='No celeryd.'),
             make_option('--no-celeryevcam', action='store_false', dest='celeryevcam', default=True,
                 help='No celeryevcam.'),
+            make_option('--no-postgresql', action='store_false', dest='postgresql', default=True,
+                help='No postgresql.'),
             )
     
     option_list = BaseCommand.option_list
@@ -32,3 +34,5 @@ class Command(BaseCommand):
             run('service celeryd stop')
         if options.get('celeryevcam'):
             run('service celeryevcam stop')
+        if options.get('postgresql'):
+            run('service postgresql stop')

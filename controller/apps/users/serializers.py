@@ -31,6 +31,10 @@ class AuthTokenSerializer(serializers.ModelSerializer):
 class UserSerializer(UriHyperlinkedModelSerializer):
     group_roles = GroupRolesSerializer(source='roles')
     auth_tokens = AuthTokenSerializer()
+    is_active = serializers.BooleanField(read_only=True)
+    is_superuser = serializers.BooleanField(read_only=True)
+    date_joined = serializers.DateTimeField(read_only=True)
+    last_login = serializers.DateTimeField(read_only=True)
     
     class Meta:
         model = User

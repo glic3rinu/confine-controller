@@ -98,6 +98,6 @@ class ChangeListDefaultFilter(object):
             request.META['QUERY_STRING'] = request.GET.urlencode()
         # hack response cl context in order to hook default filter awaearness into search_form.html template
         response = super(ChangeListDefaultFilter, self).changelist_view(request, extra_context=extra_context)
-        if hasattr(response, 'context_data'):
+        if hasattr(response, 'context_data') and 'cl' in response.context_data:
             response.context_data['cl'].default_changelist_filter = default
         return response

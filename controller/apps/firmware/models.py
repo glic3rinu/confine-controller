@@ -69,7 +69,7 @@ class Build(models.Model):
         ordering = ['-date']
     
     def __unicode__(self):
-        return self.nodes
+        return str(self.node)
     
     def delete(self, *args, **kwargs):
         """

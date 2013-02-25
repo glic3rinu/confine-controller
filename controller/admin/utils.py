@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.functional import update_wrapper
 from django.utils.html import escape
+from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from controller.models.utils import get_field_value
@@ -22,7 +23,8 @@ def insert_inline(model, inline, head=False):
     # Avoid inlines defined on parent class be shared between subclasses
     # Seems that if we use tuples they are lost in some conditions like changing
     # the tuple in modeladmin.__init__ 
-    if not model_admin.inlines: type(model_admin).inlines = []
+    if not model_admin.inlines:
+        type(model_admin).inlines = []
     if head:
         model_admin.inlines = [inline] + model_admin.inlines
     else:
@@ -32,7 +34,8 @@ def insert_inline(model, inline, head=False):
 def insert_list_filter(model, filter):
     """ insert filter to modeladmin.list_filters """
     model_admin = get_modeladmin(model)
-    if not model_admin.list_filter: type(model_admin).list_filter = []
+    if not model_admin.list_filter:
+        type(model_admin).list_filter = []
     model_admin.list_filter += (filter,)
 
 
@@ -46,8 +49,13 @@ def insert_list_display(model, field):
 def insert_action(model, action):
     """ insert action to modeladmin.actions """
     model_admin = get_modeladmin(model)
-    if not model_admin.actions: type(model_admin).actions = [action]
-    else: model_admin.actions.append(action)
+    if model_admin is None:
+        import_module('%s.%s' % (model._meta.app_label, 'admin'))
+        model_admin = get_modeladmin(model)
+    if not model_admin.actions: 
+        type(model_admin).actions = [action]
+    else:
+        model_admin.actions.append(action)
 
 
 def link(attribute, description='', admin_order_field=True, base_url=''):

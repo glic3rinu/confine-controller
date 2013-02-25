@@ -28,15 +28,15 @@ export -f check_root
 try_create_system_user() {
     # USAGE: try_create_system_user user password
     
-    local USER=$1
-    local PASSWORD=$2
+    local USER='confine'
+    local PASSWORD=false
     
-    if ( ! $(id $USER &> /dev/null) ); then
+    if [[ ! $(id $USER &> /dev/null) ]]; then
         # disabled user by default
-        useradd $USER -p '*' -s "/bin/bash"
-        [[ $PASSWORD != false ]] && echo "$USER:$PASSWORD"| chpasswd
-        mkdir /home/$USER
-        chown $USER.$USER /home/$USER
+        run useradd $USER -p '*' -s "/bin/bash"
+        [[ $PASSWORD != false ]] && echo "$USER:$PASSWORD"|chpasswd
+        run mkdir /home/$USER
+        run chown $USER.$USER /home/$USER
     fi
 }
 export -f try_create_system_user
@@ -598,9 +598,8 @@ function deploy () {
     [ $INSTALL_PATH == false ] && INSTALL_PATH="~$USER/$PROJECT_NAME"
     [ $SKELETONE == false ] && SKELETONE=$PROJECT_NAME
     
-    if [[ $TYPE != 'local' ]]; then 
-        
-        if ( $image ); then 
+    if [[ $TYPE != 'local' ]]; then
+        if [[ $image != false ]]; then
             DIRECTORY=$(mktemp -d)
             chmod 0644 $DIRECTORY
             prepare_image $IMAGE $IMAGE_SIZE

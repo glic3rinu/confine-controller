@@ -643,7 +643,7 @@ function deploy () {
         $image && [ -e $DIRECTORY ] && { mountpoint -q $DIRECTORY || rm -fr $DIRECTORY; }
     else
         # local installation
-        VERSION=$(python -c "from controller import get_version; print get_version();")
+        VERSION=$(python -c "from controller import get_version; print get_version();" || echo false)
         run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD" "$BASE_IMAGE_PATH" "$BUILD_PATH"
         run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" \
             "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_ADDRESS" "$TINC_PORT" "$TINC_PRIV_KEY" \

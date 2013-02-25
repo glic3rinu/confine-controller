@@ -35,9 +35,9 @@ class Command(BaseCommand):
                 help='Do not generate tinc keys if exist. Useful combined with --noinput'),
             make_option('--tinc_address', dest='tinc_address', default='0.0.0.0',
                 help='Tinc BindToAddress'),
-            make_option('--tinc_pubkey', dest='pubkey', default=False,
+            make_option('--tinc_pubkey', dest='tinc_pubkey', default=False,
                 help='Do not generate tinc keys. Useful combined with --noinput'),
-            make_option('--tinc_privkey', dest='privkey', default=False,
+            make_option('--tinc_privkey', dest='tinc_privkey', default=False,
                 help='Do not generate tinc keys. Useful combined with --noinput'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
@@ -145,6 +145,7 @@ class Command(BaseCommand):
                 pubkey = '/etc/tinc/%s/hosts/server' % TINC_NET_NAME
             else:
                 r('cp %s /etc/tinc/%s/rsa_key.priv' % (privkey, TINC_NET_NAME))
+                pubkey = options.get('tinc_pubkey')
             # Get created pubkey
             with file(pubkey, 'ro') as server_file:
                 pubkey = ''

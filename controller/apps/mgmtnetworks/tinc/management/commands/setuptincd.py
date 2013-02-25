@@ -33,6 +33,12 @@ class Command(BaseCommand):
                 help='Tinc port default, the settings file will be updated.'),
             make_option('--safe', dest='protect', action='store_true', default=False,
                 help='Do not generate tinc keys if exist. Useful combined with --noinput'),
+            make_option('--tinc_address', dest='tinc_address', default='0.0.0.0',
+                help='Tinc BindToAddress'),
+            make_option('--tinc_pubkey', dest='pubkey', default=False,
+                help='Do not generate tinc keys. Useful combined with --noinput'),
+            make_option('--tinc_privkey', dest='privkey', default=False,
+                help='Do not generate tinc keys. Useful combined with --noinput'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -103,16 +109,17 @@ class Command(BaseCommand):
                 continue
         
         tinc_port = options.get('tinc_port_dflt')
+        tinc_address = options.get('tinc_address')
         mgmt_prefix = options.get('mgmt_prefix')
         update_settings(TINC_MGMT_IPV6_PREFIX=mgmt_prefix)
         update_settings(TINC_PORT_DFLT=tinc_port)
         
         context = {
             'net_name': TINC_NET_NAME,
-            'tinc_conf': ( "BindToAddress = 0.0.0.0\n"
+            'tinc_conf': ( "BindToAddress = %s\n"
                            "Port = %s\n"
                            "Name = server\n"
-                           "StrictSubnets = True" % tinc_port ),
+                           "StrictSubnets = True" % (tinc_address, tinc_port)),
             'tinc_up': tinc_server.get_tinc_up(),
             'tinc_down': tinc_server.get_tinc_down(),
             'mgmt_prefix': mgmt_prefix.split('::')[0],
@@ -130,11 +137,16 @@ class Command(BaseCommand):
         r("chmod +x /etc/tinc/%(net_name)s/tinc-up" % context)
         r("chmod +x /etc/tinc/%(net_name)s/tinc-down" % context)
         
-        if not protect:
+        privkey = options.get('tinc_privkey')
+        if not protect or privkey:
             # Generate new keys
-            r('tincd -n %(net_name)s -K' % context)
+            if not privkey:
+                r('tincd -n %(net_name)s -K' % context)
+                pubkey = '/etc/tinc/%s/hosts/server' % TINC_NET_NAME
+            else:
+                r('cp %s /etc/tinc/%s/rsa_key.priv' % (privkey, TINC_NET_NAME))
             # Get created pubkey
-            with file('/etc/tinc/%s/hosts/server' % TINC_NET_NAME, 'ro') as server_file:
+            with file(pubkey, 'ro') as server_file:
                 pubkey = ''
                 for line in server_file:
                     pubkey += line

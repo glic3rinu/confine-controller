@@ -20,13 +20,13 @@ if is_installed('firmware'):
             return data
     
     class VCTBaseImageInlineForm(forms.ModelForm):
-        image = LocalFileField()
+        image = LocalFileField(required=True, label='Image')
         
         def __init__(self, *args, **kwargs):
             super(VCTBaseImageInlineForm, self).__init__(*args, **kwargs)
             field = BaseImage._meta.get_field_by_name('image')[0]
-            path = os.path.join(field.storage.location, field.upload_to)
-            choices = ( (field.upload_to+name, name) for name in os.listdir(path) \
+            path = os.path.abspath(os.path.join(field.storage.location, field.upload_to))
+            choices = ( (name, name) for name in os.listdir(path) \
                 if name.endswith('.img.gz') )
             self.fields['image'].widget = forms.widgets.Select(choices=choices)
     

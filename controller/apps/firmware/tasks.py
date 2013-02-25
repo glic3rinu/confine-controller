@@ -36,8 +36,8 @@ def build(build_id, exclude=[]):
         'build_id': build_obj.pk,
         'node_id': node.pk,
         'version': config.version }
-    image_name = os.path.join(settings.FIRMWARE_DIR, config.image_name % name_dict)
-    image_path = os.path.join(build_obj.image.storage.location, image_name)
+    image_name = config.image_name % name_dict
+    image_path = os.path.join(settings.FIRMWARE_BUILD_PATH, image_name)
     
     try:
         image.build(path=image_path)

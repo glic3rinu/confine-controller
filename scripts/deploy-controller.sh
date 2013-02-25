@@ -229,6 +229,8 @@ deploy_common () {
     local SKELETONE=$3
     local USER=$4
     local PASSWORD=$5
+    local BASE_IMAGE_PATH=$6
+    local BUILD_PATH=$7
     
     run apt-get update
     run apt-get install -y --force-yes sudo nano python-pip
@@ -252,7 +254,10 @@ deploy_common () {
     cd $PROJECT_NAME
     run python manage.py setupceleryd
     run python manage.py setupapache
-    run python manage.py setupfirmware
+    cmd="run python manage.py setupfirmware"
+        [[ $BASE_IMAGE_PATH != false ]] && cmd="$cmd --base_image_path $BASE_IMAGE_PATH"
+        [[ $BUILD_PATH != false ]] && cmd="$cmd --build_path $BUILD_PATH"
+        $cmd
 }
 export -f deploy_common
 
@@ -266,8 +271,11 @@ deploy_running_services () {
     local DB_USER=$4
     local DB_PASSWORD=$5
     local MGMT_PREFIX=$6
-    local TINC_PORT=$7
-    local VERSION=$8
+    local TINC_ADDRESS=$7
+    local TINC_PORT=$8
+    local TINC_PRIV_KEY=$9
+    local TINC_PUB_KEY=${10}
+    local VERSION=${11}
     
     cd $DIR
     python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
@@ -289,8 +297,11 @@ User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine'
     
     cmd="python $DIR/manage.py setuptincd --noinput --safe"
         [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix $MGMT_PREFIX"
+        [[ $TINC_ADDRESS != false ]] && cmd="$cmd --tinc_address $TINC_ADDRESS"
+        [[ $TINC_PRIV_KEY != false ]] && cmd="$cmd --tinc_privkey $TINC_PRIV_KEY"
+        [[ $TINC_PUB_KEY != false ]] && cmd="$cmd --tinc_pubkey $TINC_PUB_KEY"
         [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
-        $cmd
+        run $cmd
     su $USER -c "python $DIR/manage.py updatetincd"
     python $DIR/manage.py restartservices
     [[ $VERSION != false ]] && run python $DIR/manage.py postupgradecontroller --specifics --from $VERSION
@@ -310,7 +321,10 @@ function deploy_postponed () {
     local DB_USER=$4
     local DB_PASSWORD=$5
     local MGMT_PREFIX=$6
-    local TINC_PORT=$7
+    local TINC_ADDRESS=$7
+    local TINC_PORT=$8
+    local TINC_PRIV_KEY=$9
+    local TINC_PUB_KEY=${10}
     
     cat <<- EOF > /etc/init.d/setup_portal_db
 		#!/bin/sh
@@ -324,7 +338,9 @@ function deploy_postponed () {
 		# Description:       Creates and fills database on first boot
 		### END INIT INFO
 		
-		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT" "false"
+		controller-admin.sh deploy_running_services "$DIR" "$USER" "$DB_NAME" \
+		    "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_ADDRESS" "$TINC_PORT" \
+		    "$TINC_PRIV_KEY" "$TINC_PUB_KEY" "false"
 		insserv -r /etc/init.d/setup_portal_db
 		rm -f \$0
 		EOF
@@ -455,11 +471,26 @@ print_deploy_help () {
 		    ${bold}-l, --skeletone${normal}
 		            project skeletone, default project_name.
 		            
+		    ${bold}-A, --tinc_address${normal}
+		            tinc port
+		    
 		    ${bold}-t, --tinc_port${normal}
 		            tinc port
-		            
+		    
+		    ${bold}-v, --tinc_priv_key${normal}
+		            tinc private key file path
+		    
+		    ${bold}-e, --tinc_pub_key${normal}
+		            tinc pubkey file path
+		    
 		    ${bold}-m, --mgmt_prefix${normal}
 		            management network prefix
+		    
+		    ${bold}-B, --base_image_path${normal}
+		            filesystem path where base images are stored
+		    
+		    ${bold}-b, --build_image${normal}
+		            path where builded images gets stored
 		    
 		${bold}EXAMPLES${normal}
 		    controller-admin.sh deploy --type bootable --image /tmp/server.img --suite squeeze
@@ -472,10 +503,10 @@ export -f print_deploy_help
 
 
 function deploy () {
-    opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N:k:j:t:m:l: -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path:,keyboard_layout:,project_name:,tinc_port:,mgmt_prefix:,skeletone: -- "$@") || exit 1
+    opts=$(getopt -o Cht:i:S:d:u:p:a:s:U:P:H:I:W:N:k:j:a:t:v:e:m:l:B:b -l create,user:,password:,help,type:,image:,image_size:,directory:,suite:,arch:,db_name:,db_user:,db_password:,db_host:,db_port:,install_path:,keyboard_layout:,project_name:,tinc_address:,tinc_port:,tinc_priv_key:,tinc_pub_key:,mgmt_prefix:,skeletone:,base_image_path:,build_path: -- "$@") || exit 1
     set -- $opts
-
-    # Default values    
+    
+    # Default values
     type=false
     image=false
     IMAGE_SIZE="2G"
@@ -495,9 +526,15 @@ function deploy () {
     KEYBOARD_LAYOUT=''
     PROJECT_NAME='confine'
     SKELETONE=false
+    TINC_ADDRESS=false
     TINC_PORT=false
+    TINC_PRIV_KEY=false
+    TINC_PUB_KEY=false
     MGMT_PREFIX=false
-
+    BASE_IMAGE_PATH=false
+    BUILD_PATH=false
+    
+    
     while [ $# -gt 0 ]; do
         case $1 in
             -t|--type) TYPE="${2:1:${#2}-2}"; type=true; shift ;;
@@ -509,7 +546,7 @@ function deploy () {
             -p|--password) PASSWORD="${2:1:${#2}-2}"; shift ;;
             -a|--arch) ARCH="${2:1:${#2}-2}"; shift ;;
             -s|--suite) SUITE="${2:1:${#2}-2}"; shift ;;
-            -U|--db_name) DB_NAME="${2:1:${#2}-2}"; shift ;;
+            -D|--db_name) DB_NAME="${2:1:${#2}-2}"; shift ;;
             -U|--db_user) DB_USER="${2:1:${#2}-2}"; shift ;;
             -W|--db_password) DB_PASSWORD="${2:1:${#2}-2}"; shift ;;
             -S|--db_host) DB_HOST="${2:1:${#2}-2}"; create_db=false; shift ;;
@@ -517,7 +554,12 @@ function deploy () {
             -k|--keyboard_layout) KEYBOARD_LAYOUT="${2:1:${#2}-2}"; shift ;;
             -j|--project_name) PROJECT_NAME="${2:1:${#2}-2}"; shift ;;
             -l|--skeletone) SKELETONE="${2:1:${#2}-2}"; shift ;;
+            -A|--tinc_address) TINC_ADDRESS="${2:1:${#2}-2}"; shift ;;
             -t|--tinc_port) TINC_PORT="${2:1:${#2}-2}"; shift ;;
+            -v|--tinc_priv_key) TINC_PRIV_KEY="${2:1:${#2}-2}"; shift ;;
+            -e|--tinc_pub_key) TINC_PUB_KEY="${2:1:${#2}-2}"; shift ;;
+            -B|--base_image_path) BASE_IMAGE_PATH="${2:1:${#2}-2}"; shift ;;
+            -b|--build_path) BUILD_PATH="${2:1:${#2}-2}"; shift ;;
             -m|--mgmt_prefix) MGMT_PREFIX="${2:1:${#2}-2}"; shift ;;
             -h|--help) print_deploy_help; exit 0 ;;
             (--) shift; break;;
@@ -585,10 +627,11 @@ function deploy () {
             echo -e "#!/bin/sh\nexit 101\n" > $DIRECTORY/usr/sbin/policy-rc.d
             chmod 755 $DIRECTORY/usr/sbin/policy-rc.d
         fi
-        chroot $DIRECTORY /bin/bash -c "deploy_common $PROJECT_NAME $SKELETONE $USER $PASSWORD"
+        chroot $DIRECTORY /bin/bash -c "deploy_common $PROJECT_NAME $SKELETONE $USER $PASSWORD $BASE_IMAGE_PATH $BUILD_PATH"
         rm -fr $DIRECTORY/usr/sbin/policy-rc.d
         
-        chroot $DIRECTORY /bin/bash -c "deploy_postponed $INSTALL_PATH $USER $DB_NAME $DB_USER $DB_PASSWORD $MGMT_PREFIX $TINC_PORT"
+        chroot $DIRECTORY /bin/bash -c "deploy_postponed $INSTALL_PATH $USER $DB_NAME \
+            $DB_USER $DB_PASSWORD $MGMT_PREFIX $TINC_ADDRESS $TINC_PORT $TINC_PRIV_KEY $TINC_PUB_KEY"
         chroot $DIRECTORY /bin/bash -c "generate_ssh_keys_postponed $USER"
         
         # Clean up
@@ -601,8 +644,10 @@ function deploy () {
     else
         # local installation
         VERSION=$(python -c "from controller import get_version; print get_version();")
-        run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD"
-        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_PORT" "$VERSION"
+        run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD" "$BASE_IMAGE_PATH" "$BUILD_PATH"
+        run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" \
+            "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_ADDRESS" "$TINC_PORT" "$TINC_PRIV_KEY" \
+            "$TINC_PUB_KEY" "$VERSION"
     fi
     
     echo -e "\n ... seems that everything went better than expected :)"

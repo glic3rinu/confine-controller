@@ -24,7 +24,8 @@ from .tasks import build
 from .context import context
 
 
-private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
+base_image_storage = FileSystemStorage(location=settings.FIRMWARE_BASE_IMAGE_PATH)
+build_storage = FileSystemStorage(location=settings.FIRMWARE_BUILD_PATH)
 
 
 class BuildQuerySet(models.query.QuerySet):
@@ -57,7 +58,7 @@ class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
-    image = PrivateFileField(upload_to=settings.FIRMWARE_DIR, storage=private_storage,
+    image = PrivateFileField(storage=build_storage, upload_to='.',
         condition=lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node))
     base_image = models.ForeignKey('firmware.BaseImage', null=True)
@@ -279,7 +280,7 @@ class BaseImage(models.Model):
     """
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
-    image = models.FileField(upload_to=settings.FIRMWARE_DIR,
+    image = models.FileField(storage=base_image_storage, upload_to='.',
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Enter a valid name.', 'invalid')])

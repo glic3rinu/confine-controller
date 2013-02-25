@@ -22,7 +22,6 @@ class UserRolesSerializer(serializers.ModelSerializer):
         exclude = ['id', 'group']
 
 
-
 class AuthTokenField(serializers.WritableField):
     def to_native(self, value):
         return [ token.data for token in value.all() ]

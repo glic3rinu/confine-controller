@@ -22,15 +22,15 @@ class UserRolesSerializer(serializers.ModelSerializer):
         exclude = ['id', 'group']
 
 
-class AuthTokenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AuthToken
-        exclude = ['id', 'group']
+
+class AuthTokenField(serializers.WritableField):
+    def to_native(self, value):
+        return [ token.data for token in value.all() ]
 
 
 class UserSerializer(UriHyperlinkedModelSerializer):
     group_roles = GroupRolesSerializer(source='roles')
-    auth_tokens = AuthTokenSerializer()
+    auth_tokens = AuthTokenField()
     is_active = serializers.BooleanField(read_only=True)
     is_superuser = serializers.BooleanField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)

@@ -12,16 +12,16 @@ class ServerSerializer(UriHyperlinkedModelSerializer):
         model = Server
 
 
-class DirectIface(serializers.ModelSerializer):
-    class Meta:
-        model = DirectIface
+class DirectIfaceField(serializers.WritableField):
+    def to_native(self, value):
+        return [ iface.name for iface in value.all() ]
 
 
 class NodeSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     properties = PropertyField(required=False)
     slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail')
-    direct_ifaces = DirectIface()
+    direct_ifaces = DirectIfaceField()
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)
     

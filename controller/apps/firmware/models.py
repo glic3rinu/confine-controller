@@ -224,7 +224,7 @@ class Config(SingletonModel):
     image_name = models.CharField(max_length=255,
         default="firmware-%(node_name)s-%(arch)s-%(version)s-%(build_id)d.img.gz",
         help_text="Image file name. Available variables: %(node_name)s, %(arch)s,"
-                  " %(build_id)d, %(version)s")
+                  " %(build_id)d, %(version)s and %(node_id)d")
     
     class Meta:
         verbose_name = "Firmware Config"

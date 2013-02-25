@@ -281,6 +281,10 @@ if not User.objects.filter(username='confine').exists(): \\
 User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\n\" | $DIR/manage.py shell"
     
     su $USER -c "python $DIR/manage.py loaddata firmwareconfig"
+    PROJECT_NAME=$(echo "from controller.utils import get_project_name; \\
+        print get_project_name();"|python manage.py shell|awk {'print $3'})
+    [[ $PROJECT_NAME = 'vct' ]] && su $USER -c "python $DIR/manage.py loaddata vctfirmwareconfig"
+    
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
     cmd="python $DIR/manage.py setuptincd --noinput --safe"

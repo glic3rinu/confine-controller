@@ -19,7 +19,7 @@ if is_installed('firmware'):
     from firmware.models import BaseImage
     
     class VCTBaseImageInlineForm(forms.ModelForm):
-        image = LocalFileField(required=False)
+        image = LocalFileField()
         
         def __init__(self, *args, **kwargs):
             super(VCTBaseImageInlineForm, self).__init__(*args, **kwargs)

@@ -41,9 +41,8 @@ class Node(models.Model):
     
     name = models.CharField(max_length=256, unique=True,
         help_text='A unique name for this node. A single non-empty line of '
-                  'free-form text with no whitespace surrounding it. matching '
-                  'the regular expression',
-        validators=[validators.RegexValidator('^[\w.@+-]+$', 
+                  'free-form text with no whitespace surrounding it.',
+        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$', 
                     'Enter a valid name.', 'invalid')])
     cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '

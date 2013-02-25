@@ -81,9 +81,9 @@ class Slice(models.Model):
               (ACTIVATE, 'Activate'),)
     
     name = models.CharField(max_length=64, unique=True, 
-        help_text='A unique name for this slice matching the regular expression'
-                  '^[a-z][_0-9a-z]*[0-9a-z]$', 
-        validators=[validators.RegexValidator('^[a-z][_0-9a-z]*[0-9a-z]$', 
+        help_text='A unique name of this slice. A single non-empty line of free-form '
+                  'text with no whitespace surrounding it.',
+        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True, 
         help_text='An optional free-form textual description of this slice.')
@@ -106,18 +106,16 @@ class Slice(models.Model):
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
     exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
-        storage=private_storage, verbose_name='Experiment Data',
+        storage=private_storage, verbose_name='Experiment data',
         condition=lambda request, self: 
                   request.user.has_perm('slices.slice_change', obj=self),
-        help_text='.tar.gz archive containing experiment data for slivers (if '
-                  'they do not explicitly indicate one)', 
-        validators=[validators.RegexValidator('.*\.tar\.gz', 
-                   'Upload a valid .tar.gz file', 'invalid')],)
-    exp_data_uri = models.CharField(max_length=256, blank=True,
+        help_text='File containing experiment data for slivers (if they do not '
+                  'explicitly indicate one)')
+    exp_data_uri = models.CharField(max_length=256, blank=True, verbose_name='Exp. data URI',
         help_text='The URI of a file containing experiment data for slivers (if '
                   'they do not explicitly indicate one). Its format and contents '
                   'depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField(max_length=64, blank=True,
+    exp_data_sha256 = models.CharField(max_length=64, blank=True, verbose_name='Exp. data SHA256',
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
@@ -217,17 +215,15 @@ class Sliver(models.Model):
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).', 
         verbose_name='Instance Sequence Number')
-    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
-        storage=private_storage, verbose_name='Experiment Data',
+    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
+        storage=private_storage, verbose_name='Experiment data',
         condition=lambda request, self: request.user.has_perm('slices.sliver_change', obj=self),
-        help_text='.tar.gz archive containing experiment data for this sliver.',
-        validators=[validators.RegexValidator('.*\.tar\.gz', 
-                   'Upload a valid .tar.gz file', 'invalid')],)
-    exp_data_uri = models.CharField(max_length=256, blank=True,
+        help_text='File containing experiment data for this sliver.')
+    exp_data_uri = models.CharField(max_length=256, blank=True, verbose_name='Exp. data URI',
         help_text='If present, the URI of a file containing experiment data for '
                   'this sliver, instead of the one specified by the slice. Its '
                   'format and contents depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField(max_length=64, blank=True,
+    exp_data_sha256 = models.CharField(max_length=64, blank=True, verbose_name='Exp. data SHA56',
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])

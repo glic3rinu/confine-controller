@@ -4,6 +4,7 @@ from django.conf.urls import patterns, url, include
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
@@ -415,12 +416,13 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         """
         if request.method == 'GET':
             messages.warning(request, 'At this time the testbed is not ready for '
-                'allocating slices. But you are welcomed to try this interface anyway.')
+                'allocating slices. But you are welcome to try this interface anyway.')
         form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            groups = user.groups.filter(roles__is_admin=True, allow_slices=True)
+            groups = user.groups.filter(Q(roles__is_admin=True) | Q(roles__is_researcher=True))
+            groups = groups.filter(allow_slices=True)
             num_groups = groups.count()
             if num_groups >= 1:
                 form.base_fields['group'].queryset = groups

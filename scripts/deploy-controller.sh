@@ -102,7 +102,9 @@ export -f custom_umount
 
 
 clean () {
-    run rm -fr /tmp/*
+    run rm -fr /tmp/pip-*
+    run rm -fr /tmp/build
+    run rm -fr /tmp/src
     run apt-get clean
 }
 export -f clean
@@ -648,6 +650,7 @@ function deploy () {
         run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" \
             "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_ADDRESS" "$TINC_PORT" "$TINC_PRIV_KEY" \
             "$TINC_PUB_KEY" "$VERSION"
+        clean
     fi
     
     echo -e "\n ... seems that everything went better than expected :)"

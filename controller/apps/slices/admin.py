@@ -201,10 +201,11 @@ class SliceSliversAdmin(SliverAdmin):
     """
     Nested Sliver ModelAdmin that provides Slivers management capabilities on Slices
     """
-    fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_sha256']
+    fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_uri',
+              'exp_data_sha256']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
-    readonly_fields = ['instance_sn', 'exp_data_sha256']
+    readonly_fields = ['instance_sn']
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """

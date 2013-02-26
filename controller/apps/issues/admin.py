@@ -89,7 +89,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             qset = Q(visibility=Ticket.PUBLIC)
             qset = Q(qset | Q(visibility=Ticket.PRIVATE, created_by=request.user))
             qset = Q(qset | Q(visibility=Ticket.INTERNAL, created_by__groups__users=request.user))
-            qs = qs.filter(qset)
+            qs = qs.filter(qset).distinct()
         return qs
     
     def get_fieldsets(self, request, obj=None):

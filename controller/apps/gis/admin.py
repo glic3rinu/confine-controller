@@ -4,7 +4,7 @@ from django_google_maps import fields as map_fields
 from django.forms.widgets import TextInput
 
 from controller.admin.utils import insert_inline
-from gis.models import Geolocation
+from gis.models import Geolocation, NodeGeolocation
 from nodes.models import Node
 #from permissions.admin import PermissionGenericTabularInline
 from django.contrib import admin
@@ -20,6 +20,9 @@ class GisInline(admin.TabularInline):
     verbose_name_plural = 'Geolocation'
     can_delete = False
 
+class NodeGisInline(GisInline):
+    model = NodeGeolocation
+
 # Monkey-Patching Section
 
-insert_inline(Node, GisInline)
+insert_inline(Node, NodeGisInline)

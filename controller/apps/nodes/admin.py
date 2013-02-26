@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
-from controller.admin import ChangeViewActions, ChangeListDefaultFilter
+from controller.admin import ChangeViewActionsModelAdmin
 from controller.admin.utils import (link, insert_inline, colored, admin_link,
     docstring_as_help_tip)
 from controller.forms.widgets import ReadOnlyWidget
@@ -70,7 +70,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]
     change_form_template = "admin/controller/change_form.html"
-    default_changelist_filter = 'my_nodes'
     
     def display_cert(self, node):
         """ Display certificate with some contextual help if cert is not present """
@@ -94,7 +93,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            query = Q( Q(roles__is_admin=True) | Q(roles__is_technician=True) )
+            query = Q( Q(user_roles__is_admin=True) | Q(user_roles__is_technician=True) )
             query = Q( query & Q(allow_nodes=True) )
             if obj and obj.pk:
                 # Add actual group
@@ -143,9 +142,18 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                 messages.warning(request, 'This node lacks a valid certificate.')
         return super(NodeAdmin, self).change_view(
             request, object_id, form_url=form_url, extra_context=extra_context)
+    
+    def changelist_view(self, request, extra_context=None):
+        """ Default filter as 'my_nodes=True' """
+        if not request.GET.has_key('my_nodes'):
+            q = request.GET.copy()
+            q['my_nodes'] = 'True'
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super(NodeAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
-class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
+class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
     
     def get_urls(self):

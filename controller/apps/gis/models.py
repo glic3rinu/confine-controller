@@ -21,7 +21,7 @@ class Geolocation(models.Model):
         insert_inline(Foo, GisInline)
     """
     class Meta:
-        asbract = True #TODO
+        abstract = True
 
     address = map_fields.AddressField(max_length=200, blank=True, null=True,
         help_text='Enter the node location name (street, city, region...) '

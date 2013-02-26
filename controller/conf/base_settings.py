@@ -149,6 +149,7 @@ INSTALLED_APPS = (
     'firmware',
 #    'groupregistration',
     'state',
+    'gis',
     
     # Third party apps that should load last
     'rest_framework',

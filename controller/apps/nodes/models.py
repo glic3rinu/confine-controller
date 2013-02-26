@@ -1,5 +1,4 @@
 from django_extensions.db import fields
-from django_google_maps import fields as map_fields
 from django_transaction_signals import defer
 from django.core import validators
 from django.core.exceptions import ValidationError
@@ -114,14 +113,6 @@ class Node(models.Model):
                   'group must have node creation allowed (/allow_nodes=true). '
                   'Administrators and technicians in this group are able to '
                   'manage this node.')
-    # node GIS information (used for show in a map)
-    address = map_fields.AddressField(max_length=200, blank=True, null=True,
-        help_text='Enter the node location name (street, city, region...) '
-                  'The marker will be updated automatically.')
-    geolocation = map_fields.GeoLocationField(max_length=100, blank=True, null=True,
-        help_text='Geographic latitude and longitude. Will be calculated using '
-                  'the address; after that you can use the map to make any '
-                  'correction needed.')
     
     def __unicode__(self):
         return self.name

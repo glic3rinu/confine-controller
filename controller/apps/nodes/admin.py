@@ -1,14 +1,11 @@
 from __future__ import absolute_import
 
-from django_google_maps import widgets as map_widgets
-from django_google_maps import fields as map_fields
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.db import transaction, models
 from django.db.models import Q
-from django.forms.widgets import TextInput
 from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
@@ -56,9 +53,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                        'sliver_pub_ipv6', 'sliver_pub_ipv4',
                        'sliver_pub_ipv4_range', 'set_state'),
         }),
-        ('Location', {
-            'fields': ('address', 'geolocation')
-        }),
         ('Certificate', {
             'classes': ('collapse',),
             'fields': ('display_cert',)
@@ -72,10 +66,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             'fields': ('boot_sn', )
         }),
         )
-    formfield_overrides = {
-        map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget},
-        map_fields.GeoLocationField: {'widget': TextInput(attrs={'readonly': 'readonly'})},
-    }
     actions = [request_cert, reboot_selected]
     change_view_actions = [('reboot', reboot_selected, '', ''),
                            ('request-cert', request_cert, 'Request Certificate', ''),]

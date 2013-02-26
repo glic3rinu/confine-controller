@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.conf.urls import patterns, include, url
 
-from controller.apps.nodes.views import generate_kml
 from controller.utils import is_installed
 
 
@@ -20,8 +19,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin_tools/', include('admin_tools.urls')),
     url(r'^private/', include('private_files.urls')),
-    # KML Nodes Map
-    url(r'^get_nodes_kml/$', generate_kml)
 )
 
 
@@ -43,3 +40,7 @@ if is_installed('api'):
         url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
         url(r'^api-token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
         url(r'^api/', include(api.urls)),)
+
+if is_installed('gis'):
+    urlpatterns += patterns('',
+        url(r'^gis/', include('gis.urls')),)

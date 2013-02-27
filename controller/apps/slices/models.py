@@ -49,6 +49,7 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.SLICES_TEMPLATE_TYPE_DFLT)
+    # TODO nodes_node_arch instead fo template_archs?
     node_archs = MultiSelectField(max_length=32, choices=settings.SLICES_TEMPLATE_ARCHS,
         help_text='The node architectures accepted by this template (as reported '
                   'by uname -m, non-empty). Slivers using this template should '
@@ -74,11 +75,11 @@ class Slice(models.Model):
     several nodes in a testbed which allows researchers to run experiments over it.
     """
     REGISTER = 'register'
-    INSTANTIATE = 'instantiate'
-    ACTIVATE = 'activate'
+    DEPLOY = 'deploy'
+    START = 'start'
     STATES = ((REGISTER, 'Register'),
-              (INSTANTIATE, 'Instantiate'),
-              (ACTIVATE, 'Activate'),)
+              (DEPLOY, 'Deploy'),
+              (START, 'Start'),)
     
     name = models.CharField(max_length=64, unique=True, 
         help_text='A unique name of this slice. A single non-empty line of free-form '
@@ -107,7 +108,7 @@ class Slice(models.Model):
                   'instantiated slice with slivers having isolated interfaces.')
     exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
         storage=private_storage, verbose_name='Experiment data',
-        condition=lambda request, self: 
+        condition=lambda request, self:
                   request.user.has_perm('slices.slice_change', obj=self),
         help_text='File containing experiment data for slivers (if they do not '
                   'explicitly indicate one)')
@@ -119,7 +120,12 @@ class Slice(models.Model):
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
-    set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER)
+    set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
+        help_text='The state set on this slice (set state) and its slivers (if they '
+                  'do not explicitly indicate one). Possible values: register (initial), '
+                  'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
+                  'slice-sliver-states">slice and sliver states</a> for the full '
+                  'description of set states and possible transitions.')
     template = models.ForeignKey(Template, 
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
@@ -130,8 +136,10 @@ class Slice(models.Model):
     
     def save(self, *args, **kwargs):
         # FIXME prevent modifications on vlan_nr once is seted
+        # TODO deploy/start -> register los vlan_nr
+        # TODO send message to user when error happens
         if self.vlan_nr == -1:
-            if self.set_state == self.INSTANTIATE:
+            if self.set_state == self.DEPLOY:
                 self.vlan_nr = self._get_vlan_nr()
             elif not self.set_state == self.REGISTER:
                 raise self.VlanAllocationError('This value can not be setted')
@@ -147,6 +155,9 @@ class Slice(models.Model):
             self.exp_data_sha256 = sha256(self.exp_data.file.read()).hexdigest()
         if self.exp_data_uri and not self.exp_data_sha256:
             raise ValidationError('Missing exp_data_sha256.')
+        # clean set_state:
+        if not self.pk and self.set_state != Slice.REGISTER:
+            raise ValidationError("Initial state must be Register")
     
     def renew(self):
         self.expires_on = get_expires_on()
@@ -178,7 +189,8 @@ class Slice(models.Model):
         else:
             force_slice_update(self.pk)
     
-    class VlanAllocationError(Exception): pass
+    class VlanAllocationError(Exception):
+        pass
 
 
 class SliceProp(models.Model):
@@ -209,15 +221,16 @@ class Sliver(models.Model):
     """
     slice = models.ForeignKey(Slice, related_name='slivers')
     node = models.ForeignKey(Node, related_name='slivers')
-    description = models.TextField(blank=True, 
+    description = models.TextField(blank=True,
         help_text='An optional free-form textual description of this sliver.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The number of times this sliver has been instructed to be '
-                  'reset (instance sequence number).', 
+                  'reset (instance sequence number).',
         verbose_name='Instance Sequence Number')
     exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
         storage=private_storage, verbose_name='Experiment data',
-        condition=lambda request, self: request.user.has_perm('slices.sliver_change', obj=self),
+        condition=lambda request, self:
+            request.user.has_perm('slices.sliver_change', obj=self),
         help_text='File containing experiment data for this sliver.')
     exp_data_uri = models.CharField(max_length=256, blank=True, verbose_name='Exp. data URI',
         help_text='If present, the URI of a file containing experiment data for '
@@ -227,7 +240,13 @@ class Sliver(models.Model):
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
-    template = models.ForeignKey(Template, null=True, blank=True, 
+    set_state = models.CharField(max_length=16, choices=Slice.STATES, blank=True,
+        help_text='If present, the state set on this sliver (set state), instead of '
+                  'the one specified by the slice. Possible values: register (initial), '
+                  'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
+                  'slice-sliver-states">slice and sliver states</a> for the full '
+                  'description of set states and possible transitions.')
+    template = models.ForeignKey(Template, null=True, blank=True,
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')
     
@@ -293,7 +312,7 @@ class Sliver(models.Model):
 
 class SliverProp(models.Model):
     """
-    A mapping of (non-empty) arbitrary sliver property names to their (string) 
+    A mapping of (non-empty) arbitrary sliver property names to their (string)
     values.
     """
     sliver = models.ForeignKey(Sliver, related_name='properties')
@@ -376,7 +395,7 @@ class SliverIface(models.Model):
     @property
     def ipv6_addr(self):
         """
-        Returns IPv6 address of the SliverIfaces that works on L3. 
+        Returns IPv6 address of the SliverIfaces that works on L3.
         Notice that not all L3 ifaces has a predictable IPv6 address, thus might
         depend on the node state which is unknown by the server.
         """
@@ -433,6 +452,8 @@ class SliverIface(models.Model):
             raise self.IfaceAllocationError("No Iface NR space left.")
         return last_nr + 1
     
-    class StateNotAvailable(Exception): pass
+    class StateNotAvailable(Exception):
+        pass
     
-    class IfaceAllocationError(Exception): pass
+    class IfaceAllocationError(Exception):
+        pass

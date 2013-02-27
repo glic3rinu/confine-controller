@@ -51,7 +51,7 @@ class Command(BaseCommand):
     @transaction.commit_on_success
     @check_root
     def handle(self, *args, **options):
-        from mgmtnetworks.tinc.models import TincServer
+        from mgmtnetworks.tinc.models import TincServer, TincAddress
         interactive = options.get('interactive')
         username = options.get('username')
         
@@ -136,6 +136,9 @@ class Command(BaseCommand):
         r("chown %(user)s /etc/tinc/%(net_name)s/hosts" % context)
         r("chmod +x /etc/tinc/%(net_name)s/tinc-up" % context)
         r("chmod +x /etc/tinc/%(net_name)s/tinc-down" % context)
+        
+        if tinc_address != '0.0.0.0':
+            TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address, port=tinc_port)
         
         privkey = options.get('tinc_privkey')
         if not protect or privkey:

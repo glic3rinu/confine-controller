@@ -14,6 +14,8 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--pip', action='store_true', dest='pip_only', default=False,
                 help='Only run "pip install confine-controller --upgrade"'),
+            make_option('--version', dest='version', default=False,
+                help='Specifies what version of the controller you want to install'),
             )
     
     option_list = BaseCommand.option_list
@@ -22,7 +24,11 @@ class Command(BaseCommand):
     
     @check_root
     def handle(self, *args, **options):
+        desired_version = options.get('version')
         current_version = get_version()
+        if current_version == desired_version:
+            raise CommandError("You are already running version %s" % desired_version)
+        
         current_path = get_existing_pip_installation()
         
         if current_path is not None:
@@ -36,9 +42,9 @@ class Command(BaseCommand):
             # collect existing eggs previous to the installation
             eggs = run('ls -d %s' % os.path.join(base_path, 'confine_controller-*.egg-info'))
             eggs = eggs.stdout.splitlines()
-            
+            operation = '==%s' % desired_version if desired_version else ' --upgrade'
             try:
-                run('pip install confine-controller --upgrade', silent=False)
+                run('pip install confine-controller%s' % operation, silent=False)
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)

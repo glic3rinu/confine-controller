@@ -27,9 +27,9 @@ class Geolocation(models.Model):
         help_text='Enter the node location name (street, city, region...) '
                   'The marker will be updated automatically.')
     geolocation = map_fields.GeoLocationField(max_length=100, blank=True, null=True,
-        help_text='Geographic latitude and longitude. Will be calculated using '
-                  'the address; after that you can use the map to make any '
-                  'correction needed.')
+        help_text='Geographic latitude and longitude. Updated automatically '
+                  'using the address. You can drag the marker in the map to '
+                  'make any correction if needed.')
 
 
 class NodeGeolocation(Geolocation):

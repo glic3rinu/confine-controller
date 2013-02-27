@@ -1,0 +1,33 @@
+{% extends iframe|yesno:"iframe_layout.html,admin/index.html" %}
+
+{% load i18n admin_static %}
+
+{% block content_title %}
+    <h1>{% block accounts_title %}GIS map{% endblock %}</h1>
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div id="map_canvas" style="width: 100%; height: 400px"></div>
+</div>
+
+<script  type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBv3aBa5OYPAMSdiGPupOKjjE9CFse-4-o&sensor=false"></script>
+
+<script type="text/javascript">
+//jQuery(document).ready(function($) {
+    var myLatLng = new google.maps.LatLng({{ center.lat }}, {{ center.lng }});
+    var mapOptions = {
+      zoom: {{ zoom }},
+      center: myLatLng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+
+    var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+
+    var ctaLayer = new google.maps.KmlLayer("{{ kml }}");
+    ctaLayer.setMap(map);
+//});
+</script>
+{% endblock %}

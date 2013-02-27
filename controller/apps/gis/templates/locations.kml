@@ -12,11 +12,11 @@
     </Style>
   {% for location in locations %}
     <Placemark>
-        <name>{{ location.name }}</name>
-        <description><![CDATA[{{ location.description }}]]></description>
+        <name>{{ location.node__name }}</name>
+        <description><![CDATA[{{ location.node__description }}]]></description>
         <styleUrl>#markerStyle</styleUrl>
         <Point>
-            <coordinates>{{location.lng}},{{location.lat}}</coordinates>
+            <coordinates>{{location.lng}},{{location.lat}},0.000000</coordinates>
         </Point> 
     </Placemark>
   {% endfor %}

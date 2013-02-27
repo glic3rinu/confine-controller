@@ -14,8 +14,8 @@ class GisInline(admin.TabularInline):
     max_num = 1
     fields = ['address', 'geolocation']
     formfield_overrides = {
-        map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget},
-        map_fields.GeoLocationField: {'widget': TextInput(attrs={'readonly': 'readonly'})},
+        map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget(attrs={'id': 'id_address', 'size':'80'})},
+        map_fields.GeoLocationField: {'widget': TextInput(attrs={'id': 'id_geolocation', 'readonly': 'readonly'})},
     }
     verbose_name_plural = 'Geolocation'
     can_delete = False

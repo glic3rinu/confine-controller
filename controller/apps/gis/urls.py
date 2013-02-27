@@ -2,12 +2,12 @@
 URLconf for gis.
 """
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, url
 
-from controller.apps.nodes.views import generate_kml
+from gis.views import generate_kml, map
 
 urlpatterns = patterns('',
-    # KML Nodes Map
-    url(r'^get_nodes_kml/$', generate_kml, name='gis_kml_nodes'),)
-
+    url(r'^nodes.kml', generate_kml, name='gis_kml_nodes'),
+    url(r'^map/$', map, name='gis_map'),
+)
 

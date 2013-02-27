@@ -240,20 +240,14 @@ deploy_common () {
     # for cleaning pip garbage afterwards
     cd /tmp
     
-    if [[ $VERSION == false ]]; then
-        OPERATION=' --upgrade'
-    else
-        OPERATION='==$VERSION'
-    fi
-    
     if [[ ! $(pip freeze|grep confine-controller) ]]; then
-        run pip install confine-controller${OPERATION}
+        if [[ $VERSION == false ]]; then
+            run pip install confine-controller --upgrade
+        else
+            run pip install confine-controller==$VERSION
+        fi
     else
         run python $DIR/manage.py upgradecontroller --pip --version $VERSION
-        # TODO deprecate when all deployments uses the new upgrade version method
-        if [[ $? != 0 ]]; then
-            run pip install confine-controller --upgrade
-        fi
     fi
     run controller-admin.sh install_requirements
     try_create_system_user $USER $PASSWORD
@@ -653,6 +647,7 @@ function deploy () {
     else
         # local installation
         CURRENT_VERSION=$(python -c "from controller import get_version; print get_version();" || echo false)
+        [[ $CURRENT_VERSION == $VERSION ]] && { echo 'You are currrenlty running $VERSION version'; exit 1; }
         run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD" "$BASE_IMAGE_PATH" "$BUILD_PATH" "$VERSION"
         run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" \
             "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_ADDRESS" "$TINC_PORT" "$TINC_PRIV_KEY" \

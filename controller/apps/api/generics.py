@@ -5,7 +5,7 @@ from .serializers import UriHyperlinkedModelSerializer
 
 class URIListCreateAPIView(generics.ListCreateAPIView):
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method == 'GET' and not hasattr(self, 'response'):
             class DefaultSerializer(UriHyperlinkedModelSerializer):
                 class Meta:
                     model = self.model

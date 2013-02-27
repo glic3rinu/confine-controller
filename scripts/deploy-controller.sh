@@ -33,7 +33,7 @@ try_create_system_user() {
     
     if [[ ! $(id $USER &> /dev/null) ]]; then
         # disabled user by default
-        run useradd $USER -p '*' -s "/bin/bash"
+        run useradd $USER -s "/bin/bash"
         [[ $PASSWORD != false ]] && echo "$USER:$PASSWORD"|chpasswd
         run mkdir /home/$USER
         run chown $USER.$USER /home/$USER

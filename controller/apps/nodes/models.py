@@ -119,9 +119,8 @@ class Node(models.Model):
     
     def clean(self):
         # clean set_state:
-        old = Node.objects.filter(pk=self.pk)
-        if old.exists():
-            old = old.get()
+        if self.pk:
+            old = Node.objects.get(pk=self.pk)
             if old.set_state == Node.DEBUG and self.set_state != Node.DEBUG:
                 raise ValidationError("Can not manually exit from Debug state.")
             elif self.set_state == Node.DEBUG and old.set_state != Node.DEBUG:
@@ -145,7 +144,7 @@ class Node(models.Model):
         elif self.sliver_pub_ipv4 == 'range':
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         
-        if not self.cert == '':
+        if self.cert == '':
             # Empty cert as None instead of empty string (uniqueness)
             self.cert = None
         super(Node, self).clean()

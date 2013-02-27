@@ -27,8 +27,8 @@ from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 STATE_COLORS = { 
     Slice.REGISTER: 'grey',
-    Slice.INSTANTIATE: 'darkorange',
-    Slice.ACTIVATE: 'green' }
+    Slice.DEPLOY: 'darkorange',
+    Slice.START: 'green' }
 
 
 def num_slivers(instance):
@@ -70,7 +70,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     list_display = ['__unicode__', admin_link('node'), admin_link('slice')]
     list_filter = [MySliversListFilter, 'slice__name']
     fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
-              template_link, 'exp_data', 'exp_data_uri', 'exp_data_sha256']
+              template_link, 'exp_data', 'exp_data_uri', 'exp_data_sha256', 'set_state']
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', template_link]
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverIfaceInline]
@@ -202,7 +202,7 @@ class SliceSliversAdmin(SliverAdmin):
     Nested Sliver ModelAdmin that provides Slivers management capabilities on Slices
     """
     fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_uri',
-              'exp_data_sha256']
+              'exp_data_sha256', 'set_state']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
     readonly_fields = ['instance_sn']
@@ -431,6 +431,13 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
                 form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
                 form.base_fields['group'].required = False
         return form
+    
+    def get_readonly_fields(self, request, obj=None):
+        """ Disable set_state transitions when slice is registered """
+        readonly_fields = super(SliceAdmin, self).get_readonly_fields(request, obj=obj)
+        if 'set_state' not in readonly_fields and obj is None:
+            return readonly_fields + ['set_state']
+        return readonly_fields
 
 
 class TemplateAdmin(PermissionModelAdmin):

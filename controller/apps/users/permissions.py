@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions import Permission, RelatedPermission
+from permissions import Permission
 
 from .models import User, AuthToken, Group, Roles, JoinRequest
 
@@ -73,8 +73,30 @@ class JoinRequestPermission(Permission):
         return False
 
 
+class AuthTokenPermission(Permission):
+    def view(self, caller, user):
+        return True
+    
+    def add(self, caller, user):
+        if self._is_class(caller):
+            return True
+        return caller.user == user
+    
+    def change(self, caller, user):
+        if self._is_class(caller):
+            return True
+        return caller.user == user
+    
+    def delete(self, caller, user):
+        if self._is_class(caller):
+            return True
+        return caller.user == user
+
+
 User.has_permission = UserPermission()
 Roles.has_permission = RolesPermission()
 Group.has_permission = GroupPermission()
-AuthToken.has_permission = RelatedPermission('user')
+# RelatedPermission('user') can not be used because of userPerm.add == False
+# TODO maybe relatedPermission can be rethought in a way that match this case?
+AuthToken.has_permission = AuthTokenPermission()
 JoinRequest.has_permission = JoinRequestPermission()

@@ -59,33 +59,39 @@ class CustomMenu(Menu):
             elif user.has_module_perms('tinc'):
                 self.children.append(items.MenuItem('Tinc Hosts', reverse('admin:tinc_host_changelist')))
         
-        administration_models = ()
-        
-        if is_installed('djcelery'):
-            administration_models += ('djcelery.*',)
-        
-        if is_installed('issues'):
-            administration_models += ('issues.*',)
+        if user.is_superuser:
+            administration_models = ()
             
-        if is_installed('firmware'):
-            administration_models += ('firmware.*',)
-        
-        admin_item = items.AppList('Administration', models=administration_models)
-        
-        # Users menu item
-        user_items = [ items.MenuItem('User', reverse('admin:users_user_changelist')),
-                       items.MenuItem('Group', reverse('admin:users_group_changelist'))]
-        
-        if is_installed('registration') and user.has_module_perms('registration'):
-            user_items.append(items.MenuItem('User Registration',
-                              reverse('admin:registration_registrationprofile_changelist')))
-        
-        if is_installed('groupregistration') and user.has_module_perms('groupregistration'):
-            user_items.append(items.MenuItem('Group registration',
-                              reverse('admin:groupregistration_groupregistration_changelist')))
-        
-        admin_item.children.append(items.MenuItem('Users', reverse('admin:app_list', args=['users']),
-            children=user_items))
+            if is_installed('djcelery'):
+                administration_models += ('djcelery.*',)
+            
+            if is_installed('issues'):
+                administration_models += ('issues.*',)
+                
+            if is_installed('firmware'):
+                administration_models += ('firmware.*',)
+            
+            admin_item = items.AppList('Administration', models=administration_models)
+            
+            # Users menu item
+            user_items = [ items.MenuItem('User', reverse('admin:users_user_changelist')),
+                           items.MenuItem('Group', reverse('admin:users_group_changelist'))]
+            
+            if is_installed('registration'):
+                user_items.append(items.MenuItem('User Registration',
+                                  reverse('admin:registration_registrationprofile_changelist')))
+            
+            if is_installed('groupregistration'):
+                user_items.append(items.MenuItem('Group registration',
+                                  reverse('admin:groupregistration_groupregistration_changelist')))
+            
+            admin_item.children.append(items.MenuItem('Users', reverse('admin:app_list', args=['users']),
+                children=user_items))
+        else:
+            admin_item = items.MenuItem('Administration', children=[
+                items.MenuItem('Users', reverse('admin:users_user_changelist')),
+                items.MenuItem('Groups', reverse('admin:users_group_changelist')),
+                items.MenuItem('Tickets', reverse('admin:issues_ticket_changelist'))])
         
         self.children.append(admin_item)
         

@@ -29,7 +29,7 @@ STATES_COLORS = {
 class NodePropInline(PermissionTabularInline):
     model = NodeProp
     extra = 0
-    verbose_name_plural = mark_safe('Node Properties %s' % docstring_as_help_tip(NodeProp))
+    verbose_name_plural = mark_safe('Node properties %s' % docstring_as_help_tip(NodeProp))
 
 
 class DirectIfaceInline(PermissionTabularInline):
@@ -56,7 +56,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             'classes': ('collapse',),
             'fields': ('display_cert',)
         }),
-        ('Optional Prefixes', {
+        ('Optional prefixes', {
             'classes': ('collapse',),
             'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
         }),

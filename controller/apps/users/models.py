@@ -80,7 +80,6 @@ class Roles(models.Model):
     
     class Meta:
         unique_together = ('user', 'group')
-        verbose_name_plural = 'roles'
     
     def __unicode__(self):
         return str(self.group)
@@ -143,10 +142,6 @@ class User(auth_models.AbstractBaseUser):
     
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
-    
-    class Meta:
-        verbose_name = 'user'
-        verbose_name_plural = 'users'
     
     def __unicode__(self):
         return self.username
@@ -243,8 +238,8 @@ class AuthToken(models.Model):
         validators=[validate_ascii])
     
     class Meta:
-        verbose_name = 'Authentication Token'
-        verbose_name_plural = 'Authentication Tokens'
+        verbose_name = 'Authentication token'
+        verbose_name_plural = 'Authentication tokens'
     
     def __unicode__(self):
         return str(self.pk)

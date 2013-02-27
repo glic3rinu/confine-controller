@@ -62,7 +62,8 @@ class Build(models.Model):
         condition=lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node))
     base_image = models.ForeignKey('firmware.BaseImage', null=True)
-    task_id = models.CharField(max_length=36, unique=True, null=True, help_text="Celery Task ID")
+    task_id = models.CharField(max_length=36, unique=True, null=True,
+        help_text="Celery task ID")
     
     objects = generate_chainer_manager(BuildQuerySet)
     
@@ -228,8 +229,8 @@ class Config(SingletonModel):
                   " %(build_id)d, %(version)s and %(node_id)d")
     
     class Meta:
-        verbose_name = "Firmware Config"
-        verbose_name_plural = "Firmware Config"
+        verbose_name = "Firmware config"
+        verbose_name_plural = "Firmware config"
     
     def __unicode__(self):
         return 'Current Firmware Config'
@@ -314,7 +315,7 @@ class ConfigUCI(models.Model):
         default='node')
     option = models.CharField(max_length=32, help_text='UCI option statement')
     value = models.TextField(max_length=255, help_text='Python code that will be '
-        'evaluated for obtining the value from the node. For example: node.properties[\'ip\']')
+        'evaluated for obtining the value from the node. I.e. node.properties[\'ip\']')
     
     class Meta:
         verbose_name_plural = "Config UCI"

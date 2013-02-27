@@ -53,26 +53,26 @@ class Node(models.Model):
     arch = models.CharField('Architecture', max_length=16,
         choices=settings.NODES_NODE_ARCHS, default=settings.NODES_NODE_ARCH_DFLT,
         help_text='Architecture of this RD (as reported by uname -m).',)
-    local_iface = models.CharField('Local Interface', max_length=16, 
+    local_iface = models.CharField('Local interface', max_length=16, 
         default=settings.NODES_NODE_LOCAL_IFACE_DFLT, 
         validators=[validate_net_iface_name],
         help_text='Name of the interface used as a local interface. See <a href='
                   '"wiki.confine-project.eu/arch:node">node architecture</a>.')
-    sliver_pub_ipv6 = models.CharField('Sliver Public IPv6', max_length=8,
+    sliver_pub_ipv6 = models.CharField('Sliver public IPv6', max_length=8,
         help_text='Indicates IPv6 support for public sliver interfaces in the '
                   'local network (see <a href="https://wiki.confine-project.eu/'
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv6 support), dhcp (addresses configured using DHCPv6), '
                   'auto (addresses configured using NDP stateless autoconfiguration).',
         default='none', choices=IPV6_METHODS)
-    sliver_pub_ipv4 = models.CharField('Sliver Public IPv4', max_length=8,
+    sliver_pub_ipv4 = models.CharField('Sliver public IPv4', max_length=8,
         help_text='Indicates IPv4 support for public sliver interfaces in the '
                   'local network (see <a href="https://wiki.confine-project.eu/'
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
         default='none', choices=IPV4_METHODS)
-    sliver_pub_ipv4_range = models.CharField('Sliver Public IPv4 Range', 
+    sliver_pub_ipv4_range = models.CharField('Sliver public IPv4 range', 
         help_text='Describes the public IPv4 range that can be used by sliver '
                   'public interfaces. If /sliver_pub_ipv4 is none, its value is '
                   'null. If /sliver_pub_ipv4 is dhcp, its value is #N, where N '
@@ -82,19 +82,19 @@ class Node(models.Model):
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
         max_length=256, blank=True, null=True)
-    sliver_mac_prefix = models.CharField('Sliver MAC Prefix', null=True,
+    sliver_mac_prefix = models.CharField('Sliver MAC prefix', null=True,
         blank=True, max_length=5, validators=[validate_sliver_mac_prefix],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
                   'values. %s when null.</a>.' % settings.NODES_SLIVER_MAC_PREFIX_DFLT)
-    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 Prefix', 
+    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 prefix', 
         protocol='IPv4', null=True, blank=True,
         help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
                   'prefix. See <a href="http://wiki.confine-project.eu/arch:'
                   'addressing">addressing</a> for legal values. %s When null.' 
                   % settings.NODES_PRIV_IPV4_PREFIX_DFLT)
-    boot_sn = models.IntegerField('Boot Sequence Number', default=0, blank=True, 
+    boot_sn = models.IntegerField('Boot sequence number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=DEBUG,
         help_text='The state set on this node (set state). Possible values: debug '
@@ -235,8 +235,8 @@ class NodeProp(models.Model):
     
     class Meta:
         unique_together = ('node', 'name')
-        verbose_name = 'Node Property'
-        verbose_name_plural = 'Node Properties'
+        verbose_name = 'Node property'
+        verbose_name_plural = 'Node properties'
     
     def __unicode__(self):
         return self.name
@@ -256,8 +256,8 @@ class DirectIface(models.Model):
     
     class Meta:
         unique_together = ['name', 'node']
-        verbose_name = 'Direct Network Interface'
-        verbose_name_plural = 'Direct Network Interfaces'
+        verbose_name = 'Direct network interface'
+        verbose_name_plural = 'Direct network interfaces'
     
     def __unicode__(self):
         return self.name
@@ -271,8 +271,8 @@ class Server(SingletonModel):
         help_text='Free-form textual description of the server.')
     
     class Meta:
-        verbose_name = "server"
-        verbose_name_plural = "server"
+        verbose_name = "Server"
+        verbose_name_plural = "Server"
     
     def __unicode__(self):
         return 'Server'

@@ -90,7 +90,7 @@ def get_firmware(modeladmin, request, queryset):
         Build.AVAILABLE: "Firmware available for download.",
         Build.DELETED: "The firmware is no longer available. Do you want to build a new one?",
         Build.OUTDATED: "The existing firmware is out-dated. You can build a new one.",
-        Build.FAILED: "The last building has failed. The error logs are monitored"
+        Build.FAILED: "The last build has failed. The error logs are monitored "
                       "and this issue will be fixed. But you can try again anyway.",
     }
     context.update({

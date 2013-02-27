@@ -16,7 +16,7 @@ class CnHostInline(PermissionGenericTabularInline):
     max_num = 1
     fields = ['app_url', 'cndb_uri', 'cndb_cached']
     readonly_fields = ['cndb_cached']
-    verbose_name_plural = 'Community Host'
+    verbose_name_plural = 'Community host'
     can_delete = False
      
     def cndb_cached(self, instance):

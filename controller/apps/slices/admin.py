@@ -49,14 +49,14 @@ def template_link(instance):
 class SliverPropInline(PermissionTabularInline):
     model = SliverProp
     extra = 0
-    verbose_name_plural = mark_safe('Sliver Properties %s' % docstring_as_help_tip(SliverProp))
+    verbose_name_plural = mark_safe('Sliver properties %s' % docstring_as_help_tip(SliverProp))
 
 
 class SliverIfaceInline(PermissionTabularInline):
     model = SliverIface
     readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
     extra = 0
-    verbose_name_plural = mark_safe('Sliver Network Interfaces <a href="http://wiki.'
+    verbose_name_plural = mark_safe('Sliver network interfaces <a href="http://wiki.'
         'confine-project.eu/arch:node" onclick="return showAddAnotherPopup(this);">(Help)</a>')
     form = SliverIfaceInlineForm
     
@@ -350,9 +350,9 @@ class SlicePropInline(PermissionTabularInline):
 
 
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['name', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
+    list_display = ['name', 'id', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
-    list_display_links = ('name',)
+    list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', template_link]
     date_hierarchy = 'expires_on'

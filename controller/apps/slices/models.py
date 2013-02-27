@@ -81,25 +81,24 @@ class Slice(models.Model):
               (DEPLOY, 'Deploy'),
               (START, 'Start'),)
     
-    name = models.CharField(max_length=64, unique=True, 
+    name = models.CharField(max_length=64, unique=True,
         help_text='A unique name of this slice. A single non-empty line of free-form '
                   'text with no whitespace surrounding it.',
         validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
                    'Enter a valid name.', 'invalid')])
-    description = models.TextField(blank=True, 
+    description = models.TextField(blank=True,
         help_text='An optional free-form textual description of this slice.')
-    expires_on = models.DateField(null=True, blank=True, 
-        default=get_expires_on,
+    expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
         help_text='Expiration date of this slice. Automatically deleted once '
                   'expires.')
-    instance_sn = models.PositiveIntegerField(default=0, blank=True, 
+    instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='Number of times this slice has been instructed to be reset '
-                  '(instance sequence number).', 
-        verbose_name='Instanse Sequence Number')
-    new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True, 
+                  '(instance sequence number).',
+        verbose_name='Instanse sequence number')
+    new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='Instance sequence number for newly created slivers.',
-        verbose_name='New Sliver Instance Sequence Number')
-    vlan_nr = models.IntegerField('VLAN Number', null=True, blank=True,
+        verbose_name='New sliver instance sequence number')
+    vlan_nr = models.IntegerField('VLAN number', null=True, blank=True,
         help_text='VLAN number allocated to this slice. The only values that can '
                   'be set are null which means that no VLAN is wanted for the '
                   'slice, and -1 which asks the server to allocate for the slice '
@@ -112,11 +111,11 @@ class Slice(models.Model):
                   request.user.has_perm('slices.slice_change', obj=self),
         help_text='File containing experiment data for slivers (if they do not '
                   'explicitly indicate one)')
-    exp_data_uri = models.CharField(max_length=256, blank=True, verbose_name='Exp. data URI',
+    exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
         help_text='The URI of a file containing experiment data for slivers (if '
                   'they do not explicitly indicate one). Its format and contents '
                   'depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField(max_length=64, blank=True, verbose_name='Exp. data SHA256',
+    exp_data_sha256 = models.CharField('Exp. data SHA256', max_length=64, blank=True,
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
@@ -219,8 +218,8 @@ class SliceProp(models.Model):
     
     class Meta:
         unique_together = ('slice', 'name')
-        verbose_name = 'Slice Property'
-        verbose_name_plural = 'Slice Properties'
+        verbose_name = 'Slice property'
+        verbose_name_plural = 'Slice properties'
     
     def __unicode__(self):
         return self.name
@@ -238,17 +237,17 @@ class Sliver(models.Model):
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).',
-        verbose_name='Instance Sequence Number')
-    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
-        storage=private_storage, verbose_name='Experiment data',
+        verbose_name='Instance sequence number')
+    exp_data = PrivateFileField(blank=True, verbose_name='Experiment data',
+        storage=private_storage, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
         condition=lambda request, self:
             request.user.has_perm('slices.sliver_change', obj=self),
         help_text='File containing experiment data for this sliver.')
-    exp_data_uri = models.CharField(max_length=256, blank=True, verbose_name='Exp. data URI',
+    exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
         help_text='If present, the URI of a file containing experiment data for '
                   'this sliver, instead of the one specified by the slice. Its '
                   'format and contents depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField(max_length=64, blank=True, verbose_name='Exp. data SHA56',
+    exp_data_sha256 = models.CharField('Exp. data SHA56', max_length=64, blank=True,
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
@@ -340,8 +339,8 @@ class SliverProp(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
-        verbose_name = 'Sliver Property'
-        verbose_name_plural = 'Sliver Properties'
+        verbose_name = 'Sliver property'
+        verbose_name_plural = 'Sliver properties'
     
     def __unicode__(self):
         return self.name
@@ -384,8 +383,8 @@ class SliverIface(models.Model):
     class Meta:
         unique_together = ('sliver', 'name')
         ordering = ['nr']
-        verbose_name = 'Sliver Interface'
-        verbose_name_plural = 'Sliver Interfaces'
+        verbose_name = 'Sliver interface'
+        verbose_name_plural = 'Sliver interfaces'
     
     def __unicode__(self):
         return self.name

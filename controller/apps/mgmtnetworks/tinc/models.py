@@ -196,7 +196,7 @@ class TincAddress(models.Model):
     server = models.ForeignKey(TincServer, related_name='addresses')
     
     class Meta:
-        verbose_name_plural = 'Tinc Addresses'
+        verbose_name_plural = 'Tinc addresses'
     
     def __unicode__(self):
         return str(self.addr)

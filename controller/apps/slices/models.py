@@ -134,15 +134,22 @@ class Slice(models.Model):
     def __unicode__(self):
         return self.name
     
-    def save(self, *args, **kwargs):
-        # FIXME prevent modifications on vlan_nr once is seted
-        # TODO deploy/start -> register los vlan_nr
-        # TODO send message to user when error happens
+    def update_set_state(self, commit=True):
         if self.vlan_nr == -1:
-            if self.set_state == self.DEPLOY:
-                self.vlan_nr = self._get_vlan_nr()
-            elif not self.set_state == self.REGISTER:
-                raise self.VlanAllocationError('This value can not be setted')
+            if self.set_state in [self.DEPLOY, self.START]:
+                try:
+                    self.vlan_nr = self._get_vlan_nr()
+                except self.VlanAllocationError:
+                    self.set_state = self.REGISTER
+        elif self.vlan_nr > 0 and self.set_state == self.REGISTER:
+            # transition to a register state, deallocating...
+            self.vlan_nr = 0
+        if commit:
+            self.save()
+    
+    def save(self, *args, **kwargs):
+        # TODO send message to user when error happens
+        self.update_set_state(commit=False)
         if not self.pk:
             self.expires_on = datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
         super(Slice, self).save(*args, **kwargs)
@@ -155,9 +162,14 @@ class Slice(models.Model):
             self.exp_data_sha256 = sha256(self.exp_data.file.read()).hexdigest()
         if self.exp_data_uri and not self.exp_data_sha256:
             raise ValidationError('Missing exp_data_sha256.')
-        # clean set_state:
-        if not self.pk and self.set_state != Slice.REGISTER:
-            raise ValidationError("Initial state must be Register")
+        # clean set_state
+        if not self.pk:
+            if self.set_state != Slice.REGISTER:
+                raise ValidationError("Initial state must be Register")
+        else:
+            old = Slice.objects.get(pk=self.pk)
+            if self.vlan_nr != old.vlan_nr and old.set_state != self.REGISTER and self.vlan_nr == '-1':
+                raise ValidationError("Vlan can not be requested in state != register")
     
     def renew(self):
         self.expires_on = get_expires_on()
@@ -266,10 +278,14 @@ class Sliver(models.Model):
             self.exp_data_sha256 = sha256(self.exp_data.file.read()).hexdigest()
         if self.exp_data_uri and not self.exp_data_sha256:
             raise ValidationError('Missing exp_data_sha256.')
-    
-    @property
-    def nr(self):
-        return self.pk # TODO use automatic id? generate?
+        # TODO can slivers be added to slice.set_state != Register?
+#        if self.set_state:
+#            slice = self.slice
+#            msg = 'violating sliver.set_state <= slice.set_state (register < deploy < start)'
+#            if slice.set_state == Slice.REGISTER and self.set_state != Slice.REGISTER:
+#                raise ValidationError(msg)
+#            if slice.set_state == Slice.DEPLOY and self.set_state == Slice.START:
+#                raise ValidationError(msg)
     
     @property
     def max_num_ifaces(self):
@@ -413,26 +429,6 @@ class SliverIface(models.Model):
         if self.type == '':
             return None
         return Sliver.get_registred_iface(self.type).ipv4_addr(self)
-    
-    @property
-    def mac_addr(self):
-        """
-        Expected address calculated in the server (can be different from the
-        one showed in the node, which is the real address)
-        <mac-prefix-msb>:<mac-prefix-lsb>:<node-id-msb>:<node-id-lsb>:<sliver-n>:<interface-n>
-            example 06:ab:04:d2:05:00
-        """
-        node = self.parent.node
-        node_id = int_to_hex_str(node.id, 4)
-        mac_prefix = node.get_sliver_mac_prefix()
-        words = [
-            msb(mac_prefix),
-            lsb(mac_prefix),
-            msb(node_id),
-            lsb(node_id),
-            int_to_hex_str(self.sliver.nr, 2),
-            int_to_hex_str(self.nr, 2)]
-        return ':'.join(words)
     
     def _get_nr(self):
         """ Calculates nr value of the new SliverIface """

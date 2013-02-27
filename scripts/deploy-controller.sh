@@ -647,7 +647,6 @@ function deploy () {
     else
         # local installation
         CURRENT_VERSION=$(python -c "from controller import get_version; print get_version();" || echo false)
-        [[ $CURRENT_VERSION == $VERSION ]] && { echo 'You are currrenlty running $VERSION version'; exit 1; }
         run deploy_common "$INSTALL_PATH" "$PROJECT_NAME" "$SKELETONE" "$USER" "$PASSWORD" "$BASE_IMAGE_PATH" "$BUILD_PATH" "$VERSION"
         run deploy_running_services "$INSTALL_PATH" "$USER" "$DB_NAME" "$DB_USER" \
             "$DB_PASSWORD" "$MGMT_PREFIX" "$TINC_ADDRESS" "$TINC_PORT" "$TINC_PRIV_KEY" \

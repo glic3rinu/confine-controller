@@ -107,7 +107,7 @@ class DebugIface(BaseIface):
 
 class PrivateIface(BaseIface):
     """
-    Describes a Private Interface of an sliver.Traffic from a private interface 
+    Describes a Private Interface of an sliver. Traffic from a private interface 
     will be forwarded to the community network by means of NAT. Every sliver 
     will have at least a private interface.
     """
@@ -127,10 +127,7 @@ class PrivateIface(BaseIface):
     
     def ipv4_addr(self, iface):
         """ {X.Y.Z}.S is the address of sliver #S """
-        prefix = iface.sliver.node.get_priv_ipv4_prefix()
-        ipv4_words = prefix.split('.')[:3]
-        ipv4_words.append('%d' % iface.sliver.nr)
-        return IP('.'.join(ipv4_words))
+        return 'Unknown'
     
     def _get_nr(self, iface):
         return 0

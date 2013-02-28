@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
 from api import ApiRoot
+from controller import settings
 from controller.utils import is_installed
-from nodes import settings as nodes_settings
+
 
 
 class Base(ApiRoot):
@@ -23,8 +24,8 @@ class Base(ApiRoot):
     def get(self, *args, **kwargs):
         response = super(Base, self).get(*args, **kwargs)
         testbed_params = {
-            "priv_ipv4_prefix_dflt": nodes_settings.NODES_PRIV_IPV4_PREFIX_DFLT,
-            "sliver_mac_prefix_dflt": nodes_settings.NODES_SLIVER_MAC_PREFIX_DFLT, }
+            "priv_ipv4_prefix_dflt": settings.PRIV_IPV4_PREFIX_DFLT,
+            "sliver_mac_prefix_dflt": settings.SLIVER_MAC_PREFIX_DFLT, }
         
         if is_installed('mgmtnetworks.tinc'):
             from mgmtnetworks.tinc.settings import TINC_MGMT_IPV6_PREFIX

@@ -9,7 +9,8 @@ from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
-from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX, TINC_PORT_DFLT
+from mgmtnetworks.tinc.settings import (TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX,
+    TINC_PORT_DFLT, TINC_TINCD_ROOT)
 
 
 class Command(BaseCommand):
@@ -73,7 +74,7 @@ class Command(BaseCommand):
             if interactive:
                 msg = ("\nSeems that you already have a tinc server configured.\nThis will "
                        "generate a new tinc public key and delete all the configuration under "
-                       "/etc/tinc/%s.\nDo you want to continue? (yes/no): " % TINC_NET_NAME)
+                       "%s/%s.\nDo you want to continue? (yes/no): " % (TINC_TINCD_ROOT, TINC_NET_NAME))
                 confirm = raw_input(msg)
                 while 1:
                     if confirm == 'no':
@@ -115,7 +116,9 @@ class Command(BaseCommand):
         update_settings(TINC_PORT_DFLT=tinc_port)
         
         context = {
+            'tincd_root': TINC_TINCD_ROOT,
             'net_name': TINC_NET_NAME,
+            'net_root': os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME),
             'tinc_conf': ( "BindToAddress = %s\n"
                            "Port = %s\n"
                            "Name = server\n"
@@ -126,16 +129,16 @@ class Command(BaseCommand):
             'user': username }
         
         r = functools.partial(run, silent=False)
-        if run("grep %(net_name)s /etc/tinc/nets.boot" % context, err_codes=[0,1]).return_code == 1:
-            r("echo %(net_name)s >> /etc/tinc/nets.boot" % context)
-        r("mkdir -p /etc/tinc/%(net_name)s/hosts" % context)
-        r("echo '%(tinc_conf)s' > /etc/tinc/%(net_name)s/tinc.conf" % context)
-        r('echo "Subnet = %(mgmt_prefix)s:0:0:0:0:2/128" > /etc/tinc/%(net_name)s/hosts/server' % context)
-        r("echo '%(tinc_up)s' > /etc/tinc/%(net_name)s/tinc-up" % context)
-        r("echo '%(tinc_down)s' > /etc/tinc/%(net_name)s/tinc-down" % context)
-        r("chown %(user)s /etc/tinc/%(net_name)s/hosts" % context)
-        r("chmod +x /etc/tinc/%(net_name)s/tinc-up" % context)
-        r("chmod +x /etc/tinc/%(net_name)s/tinc-down" % context)
+        if run("grep %(net_name)s %(tincd_root)s/nets.boot" % context, err_codes=[0,1]).return_code == 1:
+            r("echo %(net_name)s >> %(tincd_root)s/nets.boot" % context)
+        r("mkdir -p %(net_root)s/hosts" % context)
+        r("echo '%(tinc_conf)s' > %(net_root)s/tinc.conf" % context)
+        r('echo "Subnet = %(mgmt_prefix)s:0:0:0:0:2/128" > %(net_root)s/hosts/server' % context)
+        r("echo '%(tinc_up)s' > %(net_root)s/tinc-up" % context)
+        r("echo '%(tinc_down)s' > %(net_root)s/tinc-down" % context)
+        r("chown %(user)s %(net_root)s/hosts" % context)
+        r("chmod +x %(net_root)s/tinc-up" % context)
+        r("chmod +x %(net_root)s/tinc-down" % context)
         
         if tinc_address != '0.0.0.0':
             TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address, port=tinc_port)
@@ -145,9 +148,9 @@ class Command(BaseCommand):
             # Generate new keys
             if not privkey:
                 r('tincd -n %(net_name)s -K' % context)
-                pubkey = '/etc/tinc/%s/hosts/server' % TINC_NET_NAME
+                pubkey = '%(net_root)s/hosts/server' % context
             else:
-                r('cp %s /etc/tinc/%s/rsa_key.priv' % (privkey, TINC_NET_NAME))
+                r('cp %s %s/%s/rsa_key.priv' % (privkey, TINC_TINCD_ROOT, TINC_NET_NAME))
                 pubkey = options.get('tinc_pubkey')
             # Get created pubkey
             with file(pubkey, 'ro') as server_file:

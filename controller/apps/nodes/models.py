@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
+from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_prop_name, validate_net_iface_name
 
 from . import settings, ssl
@@ -87,13 +88,13 @@ class Node(models.Model):
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
-                  'values. %s when null.</a>.' % settings.NODES_SLIVER_MAC_PREFIX_DFLT)
+                  'values. %s when null.</a>.' % SLIVER_MAC_PREFIX_DFLT)
     priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 prefix', 
         protocol='IPv4', null=True, blank=True,
         help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
                   'prefix. See <a href="http://wiki.confine-project.eu/arch:'
                   'addressing">addressing</a> for legal values. %s When null.' 
-                  % settings.NODES_PRIV_IPV4_PREFIX_DFLT)
+                  % PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot sequence number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
     set_state = models.CharField(max_length=16, choices=STATES, default=DEBUG,
@@ -179,15 +180,15 @@ class Node(models.Model):
     def get_sliver_mac_prefix(self):
         if self.sliver_mac_prefix: 
             return self.sliver_mac_prefix
-        return settings.NODES_SLIVER_MAC_PREFIX_DFLT
+        return SLIVER_MAC_PREFIX_DFLT
     
     def get_priv_ipv4_prefix(self):
         if self.priv_ipv4_prefix:
             return self.priv_ipv4_prefix
-        return settings.NODES_PRIV_IPV4_PREFIX_DFLT
+        return PRIV_IPV4_PREFIX_DFLT
     
     def get_priv_ipv6_prefix(self):
-        return settings.NODES_PRIV_IPV6_PREFIX
+        return PRIV_IPV6_PREFIX
     
     @property
     def sliver_pub_ipv4_num(self):

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from controller.utils import get_project_name, get_project_root, get_site_root
+from controller.utils import get_project_root, get_site_root
 from controller.utils.system import run, check_root
 
 
@@ -11,9 +11,13 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         username = run("ls -dl|awk {'print $3'}")
-        project_name = get_project_name()
-        project_root = get_project_root()
         site_root = get_site_root()
+        context = { 
+            'project_root': get_project_root(),
+            'site_root': site_root,
+            'media_root': settings.MEDIA_ROOT,
+            'static_root': settings.STATIC_ROOT }
+        
         apache_conf = (
             'WSGIScriptAlias / %(project_root)s/wsgi.py\n'
             'WSGIPythonPath %(site_root)s\n\n'
@@ -23,9 +27,9 @@ class Command(BaseCommand):
             '        Allow from all\n'
             '    </Files>\n'
             '</Directory>\n\n'
-            'Alias /media/ %(site_root)s/media/\n'
-            'Alias /static/ %(site_root)s/static/\n'
-            '<Directory %(site_root)s/static/>\n'
+            'Alias /media/ %(media_root)s\n'
+            'Alias /static/ %(static_root)s\n'
+            '<Directory %(static_root)s>\n'
             '    ExpiresActive On\n'
             '    ExpiresByType image/gif A1209600\n'
             '    ExpiresByType image/jpeg A1209600\n'
@@ -38,8 +42,7 @@ class Command(BaseCommand):
             '        FileETag MTime Size\n'
             '    </FilesMatch>\n'
             '</Directory>\n'
-            'RedirectMatch ^/$ /admin\n' % {'project_root': project_root,
-                                            'site_root': site_root})
+            'RedirectMatch ^/$ /admin\n' % context )
         
         diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1])
         if diff.return_code == 1:

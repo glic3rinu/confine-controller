@@ -15,17 +15,6 @@ NODES_NODE_ARCH_DFLT = getattr(settings, 'NODES_NODE_ARCH_DFLT', 'x86_64')
 
 NODES_NODE_LOCAL_IFACE_DFLT = getattr(settings, 'NODES_NODE_LOCAL_IFACE_DFLT', 'eth0')
 
-#TODO should the following options go into controller.settings ?
-
-# ConfineParams
-NODES_DEBUG_IPV6_PREFIX = getattr(settings, 'NODES_DEBUG_IPV6_PREFIX', 'fd5f:eee5:a6ad::/48')
-NODES_PRIV_IPV6_PREFIX = getattr(settings, 'NODES_PRIV_IPV6_PREFIX', 'aa5f:eee5:a6ad::/48')
-
-
-# TestbedParams
-NODES_PRIV_IPV4_PREFIX_DFLT = getattr(settings, 'NODES_PRIV_IPV4_PREFIX_DFLT', '192.168.157.0/24')
-NODES_SLIVER_MAC_PREFIX_DFLT = getattr(settings, 'NODES_SLIVER_MAC_PREFIX_DFLT', '0x06ab')
-
 
 # Certificate
 # Path where the certificate files are stored

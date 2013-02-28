@@ -1,6 +1,7 @@
-http://www.djangoproject.com/m/releases/1.5/Django-1.5c1.tar.gz
+django
 kombu==2.4.7
 django-celery-email
+django-admin-tools
 django-fluent-dashboard
 south
 djangorestframework
@@ -12,7 +13,6 @@ django_transaction_signals
 django-celery
 markdown
 -e git+https://github.com/alex/django-filter.git#egg=django-filter
-https://bitbucket.org/glic3rinu/django-admin-tools-fixes/get/tip.tar.gz
 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
 pygments
 requests

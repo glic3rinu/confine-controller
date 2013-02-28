@@ -37,6 +37,7 @@ class Command(BaseCommand):
         if run('groups %s|grep fuse' % username, err_codes=[0,1]).return_code == 1: 
             run('adduser %s fuse' % username)
         
+        # TODO remove
         base_image_path = options.get('base_image_path')
         if base_image_path:
             update_settings(FIRMWARE_BASE_IMAGE_PATH=base_image_path)

@@ -6,7 +6,7 @@ from controller.utils import LockFile
 from controller.utils.system import run, touch
 from nodes.models import Server
 
-from .settings import TINC_NET_NAME
+from .settings import TINC_NET_NAME, TINC_TINCD_ROOT
 
 
 @task(name="tinc.update_tincd")
@@ -16,7 +16,7 @@ def update_tincd():
     """
     from .models import TincClient
     
-    hosts_path = '/etc/tinc/%s/hosts/' % TINC_NET_NAME
+    hosts_path = '%s/hosts/' % os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME)
     
     # Dirty mechanism to know if there has been any change while running
     dirtyfile = os.path.join(hosts_path, '.dirty')

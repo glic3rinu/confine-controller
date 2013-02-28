@@ -38,9 +38,9 @@ class Template(models.Model):
         help_text='The unique name of this template. A single line of free-form '
                   'text with no whitespace surrounding it, it can include '
                   'version numbers and other information.',
-        validators=[validators.RegexValidator('^[a-z][_0-9a-z]*[0-9a-z]$', 
+        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
                    'Enter a valid name.', 'invalid')])
-    description = models.TextField(blank=True, 
+    description = models.TextField(blank=True,
         help_text='An optional free-form textual description of this template.')
     type = models.CharField(max_length=32, choices=settings.SLICES_TEMPLATE_TYPES,
         help_text='The system type of this template. Roughly equivalent to the '
@@ -55,7 +55,7 @@ class Template(models.Model):
                   'by uname -m, non-empty). Slivers using this template should '
                   'run on nodes whose architecture is listed here.')
     is_active = models.BooleanField(default=True)
-    image = models.FileField(upload_to=settings.SLICES_TEMPLATE_IMAGE_DIR, 
+    image = models.FileField(upload_to=settings.SLICES_TEMPLATE_IMAGE_DIR,
         help_text='Template\'s image file.')
     
     def __unicode__(self):

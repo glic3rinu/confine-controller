@@ -1,8 +1,9 @@
 from django.core.exceptions import ValidationError
 from IPy import IP
 
+from controller.settings import DEBUG_IPV6_PREFIX
 from controller.utils.ip import int_to_hex_str, split_len
-from nodes.settings import NODES_DEBUG_IPV6_PREFIX
+
 
 from .models import Sliver
 
@@ -99,7 +100,7 @@ class DebugIface(BaseIface):
         nr = '10' + int_to_hex_str(iface.nr, 2)
         node_id = int_to_hex_str(iface.sliver.node_id, 4)
         slice_id = int_to_hex_str(iface.sliver.slice_id, 12)
-        ipv6_words = NODES_DEBUG_IPV6_PREFIX.split(':')[:3]
+        ipv6_words = DEBUG_IPV6_PREFIX.split(':')[:3]
         ipv6_words.extend([node_id, nr])
         ipv6_words.extend(split_len(slice_id, 4))
         return IP(':'.join(ipv6_words))

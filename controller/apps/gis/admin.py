@@ -10,6 +10,10 @@ from nodes.models import Node
 from django.contrib import admin
 
 class GisInline(admin.TabularInline):
+    """ Base class for create an inline that provides geolocation info. """
+    class Meta:
+        abstract = True
+
     model = Geolocation
     max_num = 1
     fields = ['address', 'geolocation']
@@ -21,6 +25,7 @@ class GisInline(admin.TabularInline):
     can_delete = False
 
 class NodeGisInline(GisInline):
+    """ Inline instantiation for node geolocation. """
     model = NodeGeolocation
 
 # Monkey-Patching Section

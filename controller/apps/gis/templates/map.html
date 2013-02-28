@@ -16,7 +16,6 @@
 <script  type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBv3aBa5OYPAMSdiGPupOKjjE9CFse-4-o&sensor=false"></script>
 
 <script type="text/javascript">
-//jQuery(document).ready(function($) {
     var myLatLng = new google.maps.LatLng({{ center.lat }}, {{ center.lng }});
     var mapOptions = {
       zoom: {{ zoom }},
@@ -26,8 +25,7 @@
 
     var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
-    var ctaLayer = new google.maps.KmlLayer("{{ kml }}");
+    var ctaLayer = new google.maps.KmlLayer("{{ kml_url }}");
     ctaLayer.setMap(map);
-//});
 </script>
 {% endblock %}

@@ -41,9 +41,9 @@ class Command(BaseCommand):
             desired_version = options.get('version')
             try:
                 if desired_version:
-                    run('pip install confine-controller==%s' % desired_version, silent=False)
+                    run('pip install confine-controller==%s -b /tmp' % desired_version, silent=False)
                 else:
-                    run('pip install confine-controller --upgrade', silent=False)
+                    run('pip install confine-controller --upgrade -b /tmp', silent=False)
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)

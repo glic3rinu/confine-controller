@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from controller.admin import ChangeViewActionsModelAdmin
+from controller.admin import ChangeViewActions
 
 from groupregistration.actions import approve_group, reject_group
 from groupregistration.models import GroupRegistration
@@ -28,7 +28,7 @@ group_info.allow_tags = True
 user_info.allow_tags = True
 
 
-class GroupRegistrationAdmin(ChangeViewActionsModelAdmin):
+class GroupRegistrationAdmin(ChangeViewActions):
     actions = [approve_group, reject_group]
     change_view_actions = [('approve', approve_group, '', ''),
                            ('reject', reject_group, '', '')]

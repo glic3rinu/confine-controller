@@ -2,23 +2,21 @@ from __future__ import absolute_import
 
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.db import transaction, models
+from django.db import models
 from django.db.models import Q
 from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
-from controller.admin import ChangeViewActionsModelAdmin
-from controller.admin.utils import (link, insert_inline, colored, admin_link,
+from controller.admin import ChangeViewActions, ChangeListDefaultFilter
+from controller.admin.utils import (colored, admin_link,
     docstring_as_help_tip)
 from controller.forms.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
-from .actions import request_cert, reboot_selected
-from .filters import MyNodesListFilter
-from .forms import NodeInlineAdminForm
-from .models import Node, NodeProp, Server, DirectIface
+from nodes.actions import request_cert, reboot_selected
+from nodes.filters import MyNodesListFilter
+from nodes.models import Node, NodeProp, Server, DirectIface
 
 
 STATES_COLORS = {
@@ -44,6 +42,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                     admin_link('group'), 'num_ifaces']
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
+    default_changelist_filter = 'my_nodes'
     search_fields = ['description', 'name']
     readonly_fields = ['boot_sn', 'display_cert']
     inlines = [DirectIfaceInline, NodePropInline]
@@ -93,7 +92,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            query = Q( Q(user_roles__is_admin=True) | Q(user_roles__is_technician=True) )
+            query = Q( Q(users__roles__is_admin=True) | Q(users__roles__is_technician=True) )
             query = Q( query & Q(allow_nodes=True) )
             if obj and obj.pk:
                 # Add actual group
@@ -153,7 +152,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         return super(NodeAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
-class ServerAdmin(ChangeViewActionsModelAdmin, SingletonModelAdmin, PermissionModelAdmin):
+class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
     
     def get_urls(self):

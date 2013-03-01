@@ -46,7 +46,13 @@ class Command(BaseCommand):
             return
         
         version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
-        major, major2, minor = version_re.search(version).groups()
+        minor_release = version_re.search(version)
+        if minor_release is not None:
+            major, major2, minor = version_re.search(version).groups()
+        else:
+            version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
+            major, major2 = version_re.search(version).groups()
+            minor = 0
         # Represent version as two digits per number: 1.2.2 -> 10202
         version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
         if version <= 629:

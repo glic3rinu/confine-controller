@@ -1,4 +1,6 @@
+import os
 from datetime import timedelta
+
 from django.conf import settings
 
 
@@ -23,8 +25,11 @@ SLICES_TEMPLATE_ARCHS = getattr(settings, 'SLICES_TEMPLATE_ARCHS', (
 SLICES_TEMPLATE_ARCH_DFLT = getattr(settings, 'SLICES_TEMPLATE_ARCH_DFLT', 'amd64')
 
 
-SLICES_TEMPLATE_IMAGE_DIR = getattr(settings, 'SLICES_TEMPLATE_IMAGE_DIR', 'templates/')
-SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data/')
+SLICES_TEMPLATE_IMAGE_DIR = getattr(settings, 'SLICES_TEMPLATE_IMAGE_DIR',
+    os.path.join(settings.MEDIA_ROOT, 'templates'))
+    
+SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR',
+    os.path.join(settings.MEDIA_ROOT, 'exp_data'))
 
 
 # 30 days expiration interval

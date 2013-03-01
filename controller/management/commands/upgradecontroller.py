@@ -14,7 +14,7 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--pip', action='store_true', dest='pip_only', default=False,
                 help='Only run "pip install confine-controller --upgrade"'),
-            make_option('--version', dest='version', default=False,
+            make_option('--controller_version', dest='version', default=False,
                 help='Specifies what version of the controller you want to install'),
             )
     
@@ -28,6 +28,9 @@ class Command(BaseCommand):
         current_path = get_existing_pip_installation()
         
         if current_path is not None:
+            desired_version = options.get('version')
+            if current_version == desired_version:
+                raise CommandError("Not upgrading, you already have version %s installed" % desired_version)
             # Create a backup of current installation
             base_path = os.path.abspath(os.path.join(current_path, '..'))
             char_set = string.ascii_uppercase + string.digits
@@ -38,12 +41,11 @@ class Command(BaseCommand):
             # collect existing eggs previous to the installation
             eggs = run('ls -d %s' % os.path.join(base_path, 'confine_controller-*.egg-info'))
             eggs = eggs.stdout.splitlines()
-            desired_version = options.get('version')
             try:
                 if desired_version:
-                    run('pip install confine-controller==%s -b /tmp' % desired_version, silent=False)
+                    run('pip install confine-controller==%s' % desired_version, silent=False)
                 else:
-                    run('pip install confine-controller --upgrade -b /tmp', silent=False)
+                    run('pip install confine-controller --upgrade', silent=False)
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)

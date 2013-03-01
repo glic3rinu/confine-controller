@@ -16,4 +16,4 @@ markdown
 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
 pygments
 requests
--e git+https://github.com/madisona/django-google-maps.git#egg=django-google-maps
+django-google-maps

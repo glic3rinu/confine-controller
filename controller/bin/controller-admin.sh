@@ -127,9 +127,9 @@ function install_requirements () {
         run update-rc.d rabbitmq-server defaults
     fi
     # TODO delete django installation before proceeding
-    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt -b /tmp
+    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
     # Django rest framework has a very active development
-    run pip install djangorestframework --upgrade -b /tmp
+    run pip install djangorestframework --upgrade
 }
 export -f install_requirements
 

@@ -22,8 +22,8 @@ from . import settings
 from .tasks import force_slice_update, force_sliver_update
 
 
-private_storage = FileSystemStorage(location=project_settings.PRIVATE_MEDIA_ROOT)
-
+template_storage = FileSystemStorage(location=settings.SLICES_TEMPLATE_IMAGE_DIR)
+slice_exp_data_storage = FileSystemStorage(location=settings.SLICES_SLICE_EXP_DATA_DIR)
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
@@ -55,7 +55,7 @@ class Template(models.Model):
                   'by uname -m, non-empty). Slivers using this template should '
                   'run on nodes whose architecture is listed here.')
     is_active = models.BooleanField(default=True)
-    image = models.FileField(upload_to=settings.SLICES_TEMPLATE_IMAGE_DIR,
+    image = models.FileField(storage=template_storage, upload_to='.',
         help_text='Template\'s image file.')
     
     def __unicode__(self):
@@ -105,8 +105,8 @@ class Slice(models.Model):
                   'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
-    exp_data = PrivateFileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR, 
-        storage=private_storage, verbose_name='Experiment data',
+    exp_data = PrivateFileField(blank=True, upload_to='.', 
+        storage=slice_exp_data_storage, verbose_name='Experiment data',
         condition=lambda request, self:
                   request.user.has_perm('slices.slice_change', obj=self),
         help_text='File containing experiment data for slivers (if they do not '
@@ -239,7 +239,7 @@ class Sliver(models.Model):
                   'reset (instance sequence number).',
         verbose_name='Instance sequence number')
     exp_data = PrivateFileField(blank=True, verbose_name='Experiment data',
-        storage=private_storage, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
+        storage=slice_exp_data_storage, upload_to='.',
         condition=lambda request, self:
             request.user.has_perm('slices.sliver_change', obj=self),
         help_text='File containing experiment data for this sliver.')

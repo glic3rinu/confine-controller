@@ -8,6 +8,7 @@ from django_transaction_signals import defer
 from IPy import IP
 
 from controller.models.fields import RSAPublicKeyField
+from controller.settings import MGMT_IPV6_PREFIX
 from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, OrValidator
 from nodes.models import Server, Node
@@ -66,14 +67,14 @@ class TincHost(models.Model):
     
     def get_tinc_up(self):
         """ Returns tinc-up file content """
-        ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
+        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
         return ('#!/bin/sh\n'
                 'ip -6 link set "$INTERFACE" up mtu 1400\n'
                 'ip -6 addr add %s dev "$INTERFACE"\n' % ip)
     
     def get_tinc_down(self):
         """ Returns tinc-down file content """
-        ip = "%s/%s" % (self.address, settings.TINC_MGMT_IPV6_PREFIX.split('/')[1])
+        ip = "%s/%s" % (self.address, MGMT_IPV6_PREFIX.split('/')[1])
         return ('#!/bin/sh\n'
                 'ip -6 addr del %s dev "$INTERFACE"\n'
                 'ip -6 link set "$INTERFACE" down\n' % ip)
@@ -132,7 +133,7 @@ class TincServer(TincHost):
     @property
     def address(self):
         """ IPV6 management address """
-        ipv6_words = settings.TINC_MGMT_IPV6_PREFIX.split(':')[:3]
+        ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'server':
             # MGMT_IPV6_PREFIX:0:0000::2/128
             return IP(':'.join(ipv6_words) + '::2')
@@ -234,7 +235,7 @@ class TincClient(TincHost):
     @property
     def address(self):
         """ Calculates IPV6 management address """
-        ipv6_words = settings.TINC_MGMT_IPV6_PREFIX.split(':')[:3]
+        ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'node':
             # MGMT_IPV6_PREFIX:N:0000::2/64 i
             ipv6_words.append(int_to_hex_str(self.object_id, 4))

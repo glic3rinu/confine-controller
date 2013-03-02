@@ -12,7 +12,7 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--pip', action='store_true', dest='pip_only', default=False,
+            make_option('--pip_only', action='store_true', dest='pip_only', default=False,
                 help='Only run "pip install confine-controller --upgrade"'),
             make_option('--controller_version', dest='version', default=False,
                 help='Specifies what version of the controller you want to install'),

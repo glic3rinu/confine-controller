@@ -137,8 +137,6 @@ class ReadPermInlineModelAdminMixin(ReadPermModelAdminMixin):
                 return False
                 # TODO inlines save_model is not called so we have find the way 
                 #      of checking add permissions with the resulting object, shall we?
-        print request.user.has_perm(opts.app_label + '.' + opts.get_add_permission(), obj)
-        print opts.app_label + '.' + opts.get_add_permission(), obj
         return super(ReadPermInlineModelAdminMixin, self).has_add_permission(request, obj=obj)
 
 

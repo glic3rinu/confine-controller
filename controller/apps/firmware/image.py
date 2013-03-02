@@ -47,9 +47,7 @@ class Image(object):
     def sector(self):
         """ sector number of image part_nr """
         context = { 'image': self.image, 'part_nr': self.part_nr }
-        print context
         result = run("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|sed -n %(part_nr)dp" % context)
-        print result
         return int(result.stdout)
     
     @property

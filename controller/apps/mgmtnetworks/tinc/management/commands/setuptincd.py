@@ -4,13 +4,14 @@ from optparse import make_option
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from M2Crypto import BIO, RSA
 
+from controller.settings import MGMT_IPV6_PREFIX
 from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
-from mgmtnetworks.tinc.settings import (TINC_NET_NAME, TINC_MGMT_IPV6_PREFIX,
-    TINC_PORT_DFLT, TINC_TINCD_ROOT)
+from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_PORT_DFLT, TINC_TINCD_ROOT
 
 
 class Command(BaseCommand):
@@ -28,18 +29,12 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default=default_username,
                 help='Specifies the login for the superuser.'),
-            make_option('--mgmt_prefix', dest='mgmt_prefix', default=TINC_MGMT_IPV6_PREFIX,
+            make_option('--mgmt_prefix', dest='mgmt_prefix', default=MGMT_IPV6_PREFIX,
                 help='Mgmt prefix, the settings file will be updated.'),
             make_option('--tinc_port_dflt', dest='tinc_port_dflt', default=TINC_PORT_DFLT,
                 help='Tinc port default, the settings file will be updated.'),
-            make_option('--safe', dest='protect', action='store_true', default=False,
-                help='Do not generate tinc keys if exist. Useful combined with --noinput'),
             make_option('--tinc_address', dest='tinc_address', default='0.0.0.0',
                 help='Tinc BindToAddress'),
-            make_option('--tinc_pubkey', dest='tinc_pubkey', default=False,
-                help='Do not generate tinc keys. Useful combined with --noinput'),
-            make_option('--tinc_privkey', dest='tinc_privkey', default=False,
-                help='Do not generate tinc keys. Useful combined with --noinput'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -64,55 +59,34 @@ class Command(BaseCommand):
                 username = pwd.getpwnam(username).pw_name
             except KeyError:
                 raise CommandError("Username doesn't exists.")
-        
-        server, created = Server.objects.get_or_create(id=1)
-        tinc_server = TincServer.objects.filter(object_id=1, content_type__model='server',
-                                                content_type__app_label='nodes')
-        
-        protect = options.get('protect')
-        if tinc_server.exists():
-            if interactive:
-                msg = ("\nSeems that you already have a tinc server configured.\nThis will "
-                       "generate a new tinc public key and delete all the configuration under "
-                       "%s/%s.\nDo you want to continue? (yes/no): " % (TINC_TINCD_ROOT, TINC_NET_NAME))
-                confirm = raw_input(msg)
-                while 1:
-                    if confirm == 'no':
-                        return
-                    if confirm == 'yes':
-                        protect = False
-                        break
-                    confirm = raw_input('Please enter either "yes" or "no": ')
-            tinc_server = tinc_server[0]
         else:
-            protect = False
-            server_ct = ContentType.objects.get_for_model(Server)
-            tinc_server = TincServer.objects.create(object_id=1, content_type=server_ct)
+            # Prompt for username
+            # Enclose this whole thing in a try/except to trap for a
+            # keyboard interrupt and exit gracefully.
+            prompt_username = None
+            while prompt_username is None:
+                if not prompt_username:
+                    input_msg = "Celeryd username"
+                    if username:
+                        input_msg += " (leave blank to use '%s')" % username
+                    raw_value = raw_input(input_msg + ': ')
+                if username and raw_value == '':
+                    raw_value = username
+                # validate username
+                try:
+                    prompt_username = pwd.getpwnam(raw_value).pw_name
+                except KeyError:
+                    self.stderr.write("Error: %s" % '; '.join(e.messages))
+                    prompt_username = None
+                    continue
         
-        # Prompt for username
-        # Enclose this whole thing in a try/except to trap for a
-        # keyboard interrupt and exit gracefully.
-        prompt_username = None
-        while prompt_username is None and interactive:
-            if not prompt_username:
-                input_msg = "Celeryd username"
-                if username:
-                    input_msg += " (leave blank to use '%s')" % username
-                raw_value = raw_input(input_msg + ': ')
-            if username and raw_value == '':
-                raw_value = username
-            # validate username
-            try:
-                prompt_username = pwd.getpwnam(raw_value).pw_name
-            except KeyError:
-                self.stderr.write("Error: %s" % '; '.join(e.messages))
-                prompt_username = None
-                continue
+        server_ct = ContentType.objects.get_for_model(Server)
+        tinc_server, created = TincServer.objects.get_or_create(object_id=1, content_type=server_ct)
         
         tinc_port = options.get('tinc_port_dflt')
         tinc_address = options.get('tinc_address')
         mgmt_prefix = options.get('mgmt_prefix')
-        update_settings(TINC_MGMT_IPV6_PREFIX=mgmt_prefix)
+        update_settings(MGMT_IPV6_PREFIX=mgmt_prefix)
         update_settings(TINC_PORT_DFLT=tinc_port)
         
         context = {
@@ -143,26 +117,20 @@ class Command(BaseCommand):
         if tinc_address != '0.0.0.0':
             TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address, port=tinc_port)
         
-        privkey = options.get('tinc_privkey')
-        if not protect or privkey:
-            # Generate new keys
-            if not privkey:
-                r('tincd -n %(net_name)s -K' % context)
-                pubkey = '%(net_root)s/hosts/server' % context
-            else:
-                r('cp %s %s/%s/rsa_key.priv' % (privkey, TINC_TINCD_ROOT, TINC_NET_NAME))
-                pubkey = options.get('tinc_pubkey')
-            # Get created pubkey
-            with file(pubkey, 'ro') as server_file:
-                pubkey = ''
-                for line in server_file:
-                    pubkey += line
-                    if line == '-----BEGIN RSA PUBLIC KEY-----\n':
-                        pubkey = line
-                    elif line == '-----END RSA PUBLIC KEY-----\n':
-                        break
-                tinc_server.pubkey = pubkey
-                tinc_server.save()
+        priv_key = os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME, 'rsa_key.priv')
+        try:
+            priv_key = RSA.load_key(priv_key)
+        except:
+            # generate a new key
+            r('tincd -c %(net_root)s -K' % context)
+            priv_key = RSA.load_key(priv_key)
+        
+        bio = BIO.MemoryBuffer()
+        priv_key.save_pub_key_bio(bio)
+        pub_key = bio.getvalue()
+        
+        tinc_server.pubkey = pub_key
+        tinc_server.save()
+        
         
         self.stdout.write('Tincd server successfully created and configured.')
-        self.stdout.write(' * You may want to start it: /etc/init.d/tinc restart')

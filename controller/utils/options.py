@@ -99,11 +99,15 @@ def update_settings(**options):
     for name, value in options.iteritems():
         if getattr(settings, name, None) != value:
             settings_file = os.path.join(get_project_root(), 'settings.py')
-            if run("grep '%s' %s" % (name, settings_file), err_codes=[0,1]):
+            context = {
+                'name': name,
+                'value': value,
+                'settings': settings_file,}
+            if run("grep '%(name)s' %(settings)s" % context, err_codes=[0,1]):
                 # Update existing settings_file
-                run("sed -i \"s/%s = '\w*'/%s = '%s'/\" %s" % (name, name, value, settings_file))
+                run("sed -i \"s/%(name)s = '\w*'/%(name)s = '%(value)s'/\" %(settings)s" % context)
             else:
-                run("echo \"%s = '%s'\" >> %s" % (name, value, settings_file))
+                run("echo \"%(name)s = '%(value)s'\" >> %(settings)s" % context)
 
 
 class LockFile(object):

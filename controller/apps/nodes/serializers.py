@@ -21,7 +21,7 @@ class NodeSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     properties = PropertyField(required=False)
     slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail')
-    direct_ifaces = DirectIfaceField()
+    direct_ifaces = DirectIfaceField(required=False)
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)
     

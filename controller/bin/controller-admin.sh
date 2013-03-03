@@ -190,7 +190,7 @@ function clone () {
         if [[ -d $CONTROLLER_PATH/projects/$SKELETONE ]]; then
             echo "INSTALLED_APPS = ('controller.projects.$SKELETONE',) + INSTALLED_APPS" >> $PROJECT_NAME/$PROJECT_NAME/settings.py
         fi
-        # FIXME This is a workaround for this issue https://github.com/pypa/pip/issues/317
+        # This is a workaround for this issue https://github.com/pypa/pip/issues/317
         run chmod +x $PROJECT_NAME/manage.py
         # End of workaround ###
     else

@@ -5,10 +5,10 @@ from controller.admin.utils import action_to_view
 
 
 class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
-    """ 
-        Inline class providing support for independent change and add inline forms
-            add_form = AddSystemUserInlineForm
-            change_form = ChangeSystemUserInlineForm
+    """
+    Inline class providing support for independent change and add inline forms
+        add_form = AddSystemUserInlineForm
+        change_form = ChangeSystemUserInlineForm
     """
     def get_formset(self, request, obj=None, **kwargs):
         # Determine if we need to use add_form or change_form
@@ -27,21 +27,22 @@ class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
 
 class ChangeViewActions(admin.options.ModelAdmin):
     """
-        Make actions visible on the admin change view page.
-        Note: If you want to provide a custom change form template then you should
-            specify it with modeladmin.change_form_template = "your template"
-        Usage 1:
-            change_view_actions = [('reboot', reboot_view, 'Reboot', 'historylink'), 
-                                 ('reboot', 'reboot_view', '', '')]
-        Usage 2: 
-            modeladmin.set_change_view_action('reboot', reboot_view, '', '')
+    Make actions visible on the admin change view page.
+    Note: If you want to provide a custom change form template then you should
+        specify it with modeladmin.change_form_template = "your template"
+    Usage 1:
+        change_view_actions = [('reboot', reboot_view, 'Reboot', 'historylink'),
+                               ('reboot', 'reboot_view', '', '')]
+    Usage 2: 
+        modeladmin.set_change_view_action('reboot', reboot_view, '', '')
     """
     def __init__(self, *args, **kwargs):
         super(ChangeViewActions, self).__init__(*args, **kwargs)
         if not hasattr(self, 'change_view_actions'):
             self.change_view_actions = []
         else:
-            links = [ self._prepare_change_view_action(*link) for link in self.change_view_actions ]
+            actions = self.change_view_actions
+            links = [ self._prepare_change_view_action(*link) for link in actions ]
             self.change_view_actions = links
         if not self.change_form_template:
             self.change_form_template = "admin/controller/change_form.html"
@@ -53,7 +54,8 @@ class ChangeViewActions(admin.options.ModelAdmin):
         opts = self.model._meta
         new_urls = patterns("")
         for link in self.change_view_actions:
-            new_urls += patterns("", url("^(?P<object_id>\d+)/%s/$" % link[0], admin_site.admin_view(link[1]), 
+            new_urls += patterns("", url("^(?P<object_id>\d+)/%s/$" % link[0],
+                admin_site.admin_view(link[1]),
                 name='%s_%s_%s' % (opts.app_label, opts.module_name, link[0])))
         return new_urls + urls
     
@@ -61,7 +63,8 @@ class ChangeViewActions(admin.options.ModelAdmin):
         return self.change_view_actions
     
     def set_change_view_action(self, name, view, description, css_class):
-        self.change_view_actions.append(self._prepare_change_view_action(name, view, description, css_class))
+        action = self._prepare_change_view_action(name, view, description, css_class)
+        self.change_view_actions.append(action)
     
     def _prepare_change_view_action(self, name, action, description, css_class):
         if isinstance(action, str) or isinstance(action, unicode):

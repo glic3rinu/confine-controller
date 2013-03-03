@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_static %}
+{% load i18n admin_static utils %}
 
 {% block extrastyle %}
     {{ block.super }}
@@ -66,7 +66,8 @@ document.getElementById('id_username').focus()
 
 {% block footer %}<div id="footer">
 <div class="register-links">
-  <a href="{% url 'password_reset' %}">Forgot password?</a> &nbsp; <a href="{% url 'registration_register' %}">Create an account</a>
-  {# disable groupregistration<a href="{% url 'registration_group_register' %}">Register a new group</a>#}
+  <a href="{% url 'password_reset' %}">Forgot password?</a> &nbsp; 
+  {% if 'registration'|isinstalled %}<a href="{% url 'registration_register' %}">Create an account</a>{% endif %}
+  {% if 'groupregistration'|isinstalled %}<a href="{% url 'registration_group_register' %}">Register a new group</a>{% endif %}
 </div>
 </div>{% endblock %}

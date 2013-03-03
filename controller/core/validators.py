@@ -34,18 +34,19 @@ def validate_rsa_pubkey(value):
 
 def validate_net_iface_name(value):
     validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'),
-                              'Enter a valid network interface name.', 'invalid')(value)
+        'Enter a valid network interface name.', 'invalid')(value)
 
 
 def validate_host_name(value):
-    ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$"
+    ValidHostnameRegex = ("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)"
+                          "*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$")
     validators.RegexValidator(re.compile(ValidHostnameRegex),
-                              'Insert a valid host name.', 'invalid')(value)
+        'Insert a valid host name.', 'invalid')(value)
 
 
 def validate_prop_name(value):
     validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'),
-                              'Enter a valid property name.', 'invalid')(value)
+        'Enter a valid property name.', 'invalid')(value)
 
 
 def validate_ascii(value):

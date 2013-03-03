@@ -41,7 +41,6 @@ class Command(BaseCommand):
             'db_host': options.get('db_host'),
             'db_port': options.get('db_port') }
         
-        run('service postgresql start')
         run('su postgres -c "psql -c \\"CREATE USER %(db_user)s PASSWORD \'%(db_password)s\';\\""' % context, err_codes=[0,1])
         run('su postgres -c "psql -c \\"CREATE DATABASE %(db_name)s OWNER %(db_user)s;\\""' % context, err_codes=[0,1])
         

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.utils.functional import update_wrapper
 from django.utils.html import escape
 from django.utils.importlib import import_module
@@ -10,52 +10,53 @@ from controller.models.utils import get_field_value
 
 
 def get_modeladmin(model):
-    """ return the model registred ModelAdmin """
+    """ returns the modeladmin registred for model """
     for k,v in admin.site._registry.iteritems():
         if k is model: return v
 
 
 def insert_inline(model, inline, head=False):
-    """ Insert model inline into an existing model_admin """
-    model_admin = get_modeladmin(model)
+    """ Inserts model inline into an existing modeladmin """
+    modeladmin = get_modeladmin(model)
     if hasattr(inline, 'inline_identify'):
         delete_inline(model, inline.inline_identify)
     # Avoid inlines defined on parent class be shared between subclasses
     # Seems that if we use tuples they are lost in some conditions like changing
-    # the tuple in modeladmin.__init__ 
-    if not model_admin.inlines:
-        type(model_admin).inlines = []
+    # the tuple in modeladmin.__init__
+    if not modeladmin.inlines:
+        type(modeladmin).inlines = []
     if head:
-        model_admin.inlines = [inline] + model_admin.inlines
+        modeladmin.inlines = [inline] + modeladmin.inlines
     else:
-        model_admin.inlines.append(inline)
+        modeladmin.inlines.append(inline)
 
 
 def insert_list_filter(model, filter):
-    """ insert filter to modeladmin.list_filters """
-    model_admin = get_modeladmin(model)
-    if not model_admin.list_filter:
-        type(model_admin).list_filter = []
-    model_admin.list_filter += (filter,)
+    """ inserts filter to modeladmin.list_filters """
+    modeladmin = get_modeladmin(model)
+    if not modeladmin.list_filter:
+        type(modeladmin).list_filter = []
+    modeladmin.list_filter += (filter,)
 
 
 def insert_list_display(model, field):
-    """ insert field to modeladmin.list_display """
-    model_admin = get_modeladmin(model)
-    if not model_admin.list_display: type(model_admin).list_display = []
-    model_admin.list_display += (field,)    
+    """ inserts field to modeladmin.list_display """
+    modeladmin = get_modeladmin(model)
+    if not modeladmin.list_display:
+        type(modeladmin).list_display = []
+    modeladmin.list_display += (field,)
 
 
 def insert_action(model, action):
-    """ insert action to modeladmin.actions """
-    model_admin = get_modeladmin(model)
-    if model_admin is None:
+    """ inserts action to modeladmin.actions """
+    modeladmin = get_modeladmin(model)
+    if modeladmin is None:
         import_module('%s.%s' % (model._meta.app_label, 'admin'))
-        model_admin = get_modeladmin(model)
-    if not model_admin.actions: 
-        type(model_admin).actions = [action]
+        modeladmin = get_modeladmin(model)
+    if not modeladmin.actions:
+        type(modeladmin).actions = [action]
     else:
-        model_admin.actions.append(action)
+        modeladmin.actions.append(action)
 
 
 def link(attribute, description='', admin_order_field=True, base_url=''):
@@ -88,10 +89,13 @@ def admin_link(field_name, app_model='', href_name=''):
         if field == '': rel = obj
         else:
             rel = get_field_value(obj, field)
-        if not rel: return ''
-        if not app_model: app_model = rel._meta.db_table
+        if not rel:
+            return ''
+        if not app_model:
+            app_model = rel._meta.db_table
         url = reverse('admin:%s_change' % app_model, args=(rel.pk,))
-        if not href_name: href_name = rel
+        if not href_name:
+            href_name = rel
         return mark_safe("<a href='%s'>%s</a>" % (url, href_name))
     link.short_description = field_name.capitalize()
     link.allow_tags = True
@@ -101,12 +105,12 @@ def admin_link(field_name, app_model='', href_name=''):
 
 
 def get_admin_link(obj, href_name=''):
-    """ return the admin change view of obj formatted as url """
+    """ returns the admin change view of obj formatted as url """
     return admin_link('', href_name=href_name)(obj)
 
 
 def colored(field_name, colours, description='', verbose=False):
-    """ return a method that will render obj with colored html """
+    """ returns a method that will render obj with colored html """
     def colored_field(obj, field=field_name, colors=colours, verbose=verbose):
         value = escape(get_field_value(obj, field))
         color = colors.get(value, "black")
@@ -123,13 +127,13 @@ def colored(field_name, colours, description='', verbose=False):
 
 
 def action_to_view(action, modeladmin):
-    """ Convert modeladmin action as to view function """
+    """ Converts modeladmin action to view function """
     def action_view(request, object_id, modeladmin=modeladmin, action=action):
         queryset = modeladmin.model.objects.filter(pk=object_id)
         response = action(modeladmin, request, queryset)
         if not response:
             opts = modeladmin.model._meta
-            return HttpResponseRedirect(reverse('admin:%s_%s_change' % (opts.app_label, opts.module_name), args=[object_id]))
+            return redirect('admin:%s_%s_change' % (opts.app_label, opts.module_name), object_id)
         return response
     return action_view
 
@@ -144,5 +148,6 @@ def wrap_admin_view(modeladmin, view):
 def docstring_as_help_tip(cls):
     """ return cls docstring as html help tip for use in admin """
     docstring = cls.__doc__.strip()
-    img = '<img src="/static/admin/img/icon-unknown.gif" class="help help-tooltip" width="10" height="10" alt="(%s)" title="%s"/>'
+    img = ('<img src="/static/admin/img/icon-unknown.gif" class="help help-tooltip" '
+           'width="10" height="10" alt="(%s)" title="%s"/>')
     return mark_safe(img % (docstring, docstring))

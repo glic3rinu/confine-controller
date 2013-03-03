@@ -89,7 +89,7 @@ def run(command, display=True, err_codes=[0], silent=True):
 
 
 def get_default_celeryd_username():
-    """ Introspect celeryd defaults file in order to get default celeryd username """
+    """ Introspect celeryd defaults file in order to get its username """
     user = None
     try:
         with open('/etc/default/celeryd') as celeryd_defaults:

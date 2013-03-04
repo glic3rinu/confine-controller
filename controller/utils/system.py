@@ -43,7 +43,7 @@ def run(command, display=True, err_codes=[0], silent=True):
     out_stream = subprocess.PIPE
     err_stream = subprocess.PIPE
     
-    p = subprocess.Popen(command, shell=True, stdout=out_stream, stderr=err_stream)
+    p = subprocess.Popen(command, shell=True, executable='/bin/bash', stdout=out_stream, stderr=err_stream)
     make_async(p.stdout)
     make_async(p.stderr)
     

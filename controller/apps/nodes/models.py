@@ -72,8 +72,8 @@ class Node(models.Model):
                   'arch:node">node architecture</a>). Possible values: none (no '
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
-        default='none', choices=IPV4_METHODS)
-    sliver_pub_ipv4_range = models.CharField('Sliver public IPv4 range', 
+        default=settings.NODES_NODE_SLIVER_PUB_IPV4_DFLT, choices=IPV4_METHODS)
+    sliver_pub_ipv4_range = models.CharField('Sliver public IPv4 range', max_length=256,
         help_text='Describes the public IPv4 range that can be used by sliver '
                   'public interfaces. If /sliver_pub_ipv4 is none, its value is '
                   'null. If /sliver_pub_ipv4 is dhcp, its value is #N, where N '
@@ -82,7 +82,7 @@ class Node(models.Model):
                   'where N is the decimal integer number of consecutive addresses '
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
-        max_length=256, blank=True, null=True)
+        blank=True, null=True, default=settings.NODES_NODE_SLIVER_PUB_IPV4_RANGE_DFLT)
     sliver_mac_prefix = models.CharField('Sliver MAC prefix', null=True,
         blank=True, max_length=5, validators=[validate_sliver_mac_prefix],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '

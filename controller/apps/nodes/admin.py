@@ -31,11 +31,29 @@ class NodePropInline(PermissionTabularInline):
     extra = 0
     verbose_name_plural = mark_safe('Node properties %s' % docstring_as_help_tip(NodeProp))
 
+from django.forms.models import BaseInlineFormSet
+class DirectIfaceInlineFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        kwargs['initial'] = [{ 'name': 'eth1', }, {'name': 'eth2'},] # supply your list here
+        super(DirectIfaceInlineFormSet, self).__init__(*args, **kwargs)
+
+    def save_new_objects(self, commit=True):
+        self.new_objects = []
+        for form in self.extra_forms:
+            # If someone has marked an add form for deletion, don't save the
+            # object.
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            self.new_objects.append(self.save_new(form, commit=commit))
+            if not commit:
+                self.saved_forms.append(form)
+        return self.new_objects
+
 
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
-    extra = 1
-
+#    extra = 1
+    formset = DirectIfaceInlineFormSet
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True),
@@ -97,7 +115,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             if obj and obj.pk:
                 # Add actual group
                 query = Q( query | Q(pk=obj.group.pk) )
-            groups = user.groups.filter(query)
+            groups = user.groups.filter(query).distinct()
             num_groups = len(groups)
             if num_groups >= 1:
                 # User has can add nodes in more than one group

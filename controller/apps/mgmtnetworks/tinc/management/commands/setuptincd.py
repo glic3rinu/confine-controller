@@ -132,5 +132,4 @@ class Command(BaseCommand):
         tinc_server.pubkey = pub_key
         tinc_server.save()
         
-        
         self.stdout.write('Tincd server successfully created and configured.')

@@ -19,6 +19,9 @@ NODES_NODE_SLIVER_PUB_IPV4_DFLT = getattr(settings, 'NODES_NODE_SLIVER_PUB_IPV4_
 
 NODES_NODE_SLIVER_PUB_IPV4_RANGE_DFLT = getattr(settings, 'NODES_NODE_SLIVER_PUB_IPV4_RANGE_DFLT', '')
 
+NODES_NODE_DIRECT_IFACES_DFLT = getattr(settings, 'NODES_NODE_DIRECT_IFACES_DFLT', [])
+
+
 # Certificate
 # Path where the certificate files are stored
 NODES_CERT_PRIVATE_KEY_PATH = getattr(settings, 'NODES_CERT_PRIVATE_KEY_PATH', 

@@ -80,14 +80,21 @@ class Command(BaseCommand):
                     prompt_username = None
                     continue
         
+        server, created = Server.objects.get_or_create(pk=1)
+        if not server.description:
+            server.description = run('hostname').stdout
+            server.save()
+        
         server_ct = ContentType.objects.get_for_model(Server)
         tinc_server, created = TincServer.objects.get_or_create(object_id=1, content_type=server_ct)
         
         tinc_port = options.get('tinc_port_dflt')
         tinc_address = options.get('tinc_address')
         mgmt_prefix = options.get('mgmt_prefix')
-        update_settings(MGMT_IPV6_PREFIX=mgmt_prefix)
-        update_settings(TINC_PORT_DFLT=tinc_port)
+        if mgmt_prefix != MGMT_IPV6_PREFIX:
+            update_settings(MGMT_IPV6_PREFIX=mgmt_prefix)
+        if tinc_port != TINC_PORT_DFLT:
+            update_settings(TINC_PORT_DFLT=tinc_port)
         
         context = {
             'tincd_root': TINC_TINCD_ROOT,

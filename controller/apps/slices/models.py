@@ -94,7 +94,7 @@ class Slice(models.Model):
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='Number of times this slice has been instructed to be reset '
                   '(instance sequence number).',
-        verbose_name='Instanse sequence number')
+        verbose_name='instanse sequence number')
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='Instance sequence number for newly created slivers.',
         verbose_name='New sliver instance sequence number')
@@ -106,7 +106,7 @@ class Slice(models.Model):
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
     exp_data = PrivateFileField(blank=True, upload_to='.', 
-        storage=slice_exp_data_storage, verbose_name='Experiment data',
+        storage=slice_exp_data_storage, verbose_name='experiment data',
         condition=lambda request, self:
                   request.user.has_perm('slices.slice_change', obj=self),
         help_text='File containing experiment data for slivers (if they do not '
@@ -218,8 +218,8 @@ class SliceProp(models.Model):
     
     class Meta:
         unique_together = ('slice', 'name')
-        verbose_name = 'Slice property'
-        verbose_name_plural = 'Slice properties'
+        verbose_name = 'slice property'
+        verbose_name_plural = 'slice properties'
     
     def __unicode__(self):
         return self.name
@@ -237,8 +237,8 @@ class Sliver(models.Model):
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).',
-        verbose_name='Instance sequence number')
-    exp_data = PrivateFileField(blank=True, verbose_name='Experiment data',
+        verbose_name='instance sequence number')
+    exp_data = PrivateFileField(blank=True, verbose_name='experiment data',
         storage=slice_exp_data_storage, upload_to='.',
         condition=lambda request, self:
             request.user.has_perm('slices.sliver_change', obj=self),
@@ -339,8 +339,8 @@ class SliverProp(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
-        verbose_name = 'Sliver property'
-        verbose_name_plural = 'Sliver properties'
+        verbose_name = 'sliver property'
+        verbose_name_plural = 'sliver properties'
     
     def __unicode__(self):
         return self.name
@@ -358,7 +358,7 @@ class SliverIface(models.Model):
     There must exist a first interface of type private. See node architecture.
     """
     sliver = models.ForeignKey(Sliver, related_name='interfaces')
-    nr = models.PositiveIntegerField('Number',
+    nr = models.PositiveIntegerField('number',
         help_text='The unique 8-bit, positive integer number of this interface '
                   'in this sliver. Interface #0 is always the private interface.')
     name = models.CharField(max_length=10,
@@ -383,8 +383,8 @@ class SliverIface(models.Model):
     class Meta:
         unique_together = ('sliver', 'name')
         ordering = ['nr']
-        verbose_name = 'Sliver interface'
-        verbose_name_plural = 'Sliver interfaces'
+        verbose_name = 'sliver interface'
+        verbose_name_plural = 'sliver interfaces'
     
     def __unicode__(self):
         return self.name

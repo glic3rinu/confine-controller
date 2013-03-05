@@ -238,8 +238,8 @@ class AuthToken(models.Model):
         validators=[validate_ascii])
     
     class Meta:
-        verbose_name = 'Authentication token'
-        verbose_name_plural = 'Authentication tokens'
+        verbose_name = 'authentication token'
+        verbose_name_plural = 'authentication tokens'
     
     def __unicode__(self):
         return str(self.pk)

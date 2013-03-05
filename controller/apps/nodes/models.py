@@ -236,8 +236,8 @@ class NodeProp(models.Model):
     
     class Meta:
         unique_together = ('node', 'name')
-        verbose_name = 'Node property'
-        verbose_name_plural = 'Node properties'
+        verbose_name = 'node property'
+        verbose_name_plural = 'node properties'
     
     def __unicode__(self):
         return self.name
@@ -257,8 +257,8 @@ class DirectIface(models.Model):
     
     class Meta:
         unique_together = ['name', 'node']
-        verbose_name = 'Direct network interface'
-        verbose_name_plural = 'Direct network interfaces'
+        verbose_name = 'direct network interface'
+        verbose_name_plural = 'direct network interfaces'
     
     def __unicode__(self):
         return self.name
@@ -272,8 +272,8 @@ class Server(SingletonModel):
         help_text='Free-form textual description of the server.')
     
     class Meta:
-        verbose_name = "Server"
-        verbose_name_plural = "Server"
+        verbose_name = "server"
+        verbose_name_plural = "server"
     
     def __unicode__(self):
         return 'Server'

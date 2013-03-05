@@ -23,7 +23,7 @@ class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
     readonly_fields = ['tinc_compatible_address']
-    verbose_name_plural = 'Tinc client'
+    verbose_name_plural = 'tinc client'
     
     def tinc_compatible_address(self, instance):
         """ return instance.address in a format compatible with tinc daemon """
@@ -50,14 +50,14 @@ class TincServerInline(PermissionGenericTabularInline):
     #      one client without alternative path
     model = TincServer
     max_num = 1
-    verbose_name_plural = 'Tinc server'
+    verbose_name_plural = 'tinc server'
     readonly_fields = ['address']
 
 
 class TincAddressInline(PermissionTabularInline):
     model = TincAddress
     max_num = 1
-    verbose_name_plural = 'Tinc address'
+    verbose_name_plural = 'tinc address'
 
 
 class ReadOnlyTincAddressInline(PermissionTabularInline):

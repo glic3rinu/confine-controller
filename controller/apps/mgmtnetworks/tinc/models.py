@@ -47,7 +47,7 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = RSAPublicKeyField('Public Key', blank=True,
+    pubkey = RSAPublicKeyField('public Key', blank=True,
         help_text='PEM-encoded RSA public key used on tinc management network.')
     
     class Meta:
@@ -186,7 +186,7 @@ class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
     """
-    addr = models.CharField('Address', max_length=128,
+    addr = models.CharField('address', max_length=128,
         help_text='The tinc IP address or host name of the host this one connects to.',
         validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
     port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT, 
@@ -197,7 +197,7 @@ class TincAddress(models.Model):
     server = models.ForeignKey(TincServer, related_name='addresses')
     
     class Meta:
-        verbose_name_plural = 'Tinc addresses'
+        verbose_name_plural = 'tinc addresses'
     
     def __unicode__(self):
         return str(self.addr)

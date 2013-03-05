@@ -16,6 +16,7 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from nodes.actions import request_cert, reboot_selected
 from nodes.filters import MyNodesListFilter
+from nodes.forms import DirectIfaceInlineFormSet
 from nodes.models import Node, NodeProp, Server, DirectIface
 
 
@@ -35,6 +36,7 @@ class NodePropInline(PermissionTabularInline):
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
     extra = 1
+    formset = DirectIfaceInlineFormSet
 
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):

@@ -19,15 +19,18 @@ def join_request(modeladmin, request, queryset):
     app_label = opts.app_label
     
     using = router.db_for_write(modeladmin.model)
+    user = request.user
     
     # check if user is alreday in the group
     for group in queryset:
-        user = request.user
         if group.users.filter(pk=user.id).exists():
             messages.error(request, "You already are member of group (%s)" % group)
             return
+        if JoinRequest.objects.filter(user=user, group=group).exists():
+            messages.error(request, "You alreday have sent a request to this group (%s)" % group)
+            return
     
-    # The user has already confirmed the join request.
+    # The user has already confirmed the join requests
     if request.POST.get('post'):
         n = queryset.count()
         if n:
@@ -37,8 +40,6 @@ def join_request(modeladmin, request, queryset):
                     site = RequestSite(request)
                     jrequest.send_creation_email(site)
                     modeladmin.message_user(request, "Your join request has been sent (%s)" % group)
-                else:
-                    modeladmin.message_user(request, "You have alreday sent a request to this group (%s)" % group, messages.ERROR)
             return None
     
     if len(queryset) == 1:

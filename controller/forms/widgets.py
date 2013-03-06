@@ -34,7 +34,6 @@ class ReadOnlyWidget(forms.Widget):
     def __init__(self, original_value, display_value):
         self.original_value = original_value
         self.display_value = display_value
-        
         super(ReadOnlyWidget, self).__init__()
     
     def render(self, name, value, attrs=None):

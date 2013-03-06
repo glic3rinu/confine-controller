@@ -50,6 +50,7 @@ def reboot_selected(modeladmin, request, queryset):
         "title": "Are you sure?",
         "content_message": "Are you sure you want to reboot the selected nodes?",
         "action_name": 'Reboot',
+        "action_value": 'reboot_selected',
         "deletable_objects": queryset,
         'queryset': queryset,
         "opts": opts,
@@ -58,7 +59,7 @@ def reboot_selected(modeladmin, request, queryset):
     }
     
     # Display the confirmation page
-    return TemplateResponse(request, 'admin/nodes/node/reboot_confirmation.html', 
+    return TemplateResponse(request, 'admin/generic_confirmation.html', 
         context, current_app=modeladmin.admin_site.name)
 
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")

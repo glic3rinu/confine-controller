@@ -24,7 +24,7 @@ NODES_NODE_DIRECT_IFACES_DFLT = getattr(settings, 'NODES_NODE_DIRECT_IFACES_DFLT
 
 # Certificate
 # Path where the certificate files are stored
-NODES_CERT_PRIVATE_KEY_PATH = getattr(settings, 'NODES_CERT_PRIVATE_KEY_PATH', 
+NODES_CERT_PRIVATE_KEY_PATH = getattr(settings, 'NODES_CERT_PRIVATE_KEY_PATH',
     '/etc/apache2/ssl/generic.confine-project.eu/generic.confine-project.eu.key')
 # expiration time for generated certificates (4years)
 NODES_CERT_EXPIRATION = getattr(settings, 'NODES_CERT_EXPIRATION', 60*60*24*365*4)

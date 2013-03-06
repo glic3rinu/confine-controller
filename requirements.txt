@@ -11,7 +11,7 @@ django-extensions
 django_transaction_signals
 django-celery
 markdown
--e git+https://github.com/alex/django-filter.git#egg=django-filter
+django-filter
 https://bitbucket.org/glic3rinu/django-admin-tools-fixes/get/tip.tar.gz
 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
 pygments

@@ -20,7 +20,8 @@ class DirectIfaceField(serializers.WritableField):
 class NodeSerializer(UriHyperlinkedModelSerializer):
     id = serializers.Field()
     properties = PropertyField(required=False)
-    slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail')
+    slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail',
+        read_only=True)
     direct_ifaces = DirectIfaceField(required=False)
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)

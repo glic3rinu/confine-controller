@@ -24,7 +24,7 @@ class NodeInlineAdminForm(forms.ModelForm):
         if 'instance' in kwargs:
             instance = kwargs['instance']
             node_change = reverse('admin:nodes_node_change', args=(instance.pk,))
-            self.initial['node'] = mark_safe("""<a href='%s' id='add_id_user' 
+            self.initial['node'] = mark_safe("""<a href='%s' id='add_id_user'
                 onclick='return showAddAnotherPopup(this);'>%s </a>""" % (node_change, instance))
             self.initial['pk'] = instance.pk
             self.initial['arch'] = instance.arch

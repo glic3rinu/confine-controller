@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime
 from hashlib import sha256
 
@@ -312,6 +313,8 @@ class Sliver(models.Model):
     
     @classmethod
     def get_registred_iface_type(cls, iface):
+        if not inspect.isclass(iface):
+            iface = type(iface)
         for k,v in cls._iface_registry.iteritems():
             if type(v) is iface:
                 return k

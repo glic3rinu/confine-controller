@@ -11,7 +11,6 @@ class SliceAdminForm(forms.ModelForm):
         1) If state is register: checkbox
         2) If state is not register: read only integer
     """
-    # TODO this is not coding, this is hacking, please refactor this shit.
     request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False, 
         help_text='VLAN number allocated to this slice by the server.')
     
@@ -44,6 +43,23 @@ class SliceAdminForm(forms.ModelForm):
         return vlan_nr
 
 
+class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
+    """ Provides initial Direct ifaces """
+    def __init__(self, *args, **kwargs):
+        if not kwargs['instance'].pk and 'data' not in kwargs:
+            ifaces = [ iface for iface in Sliver.get_registred_ifaces() if iface.AUTO_CREATE ]
+            total = len(ifaces)
+            initial_data = {
+                'interfaces-TOTAL_FORMS': unicode(total),
+                'interfaces-INITIAL_FORMS': u'0',
+                'interfaces-MAX_NUM_FORMS': u'',}
+            for num, iface in enumerate(ifaces):
+                initial_data['interfaces-%d-name' % num] = iface.DEFAULT_NAME
+                initial_data['interfaces-%d-type' % num] = Sliver.get_registred_iface_type(iface)
+            kwargs['data'] = initial_data
+        super(SliverIfaceInlineFormSet, self).__init__(*args, **kwargs)
+
+
 class SliverIfaceInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """ Restrict parent FK to sliver.node """
@@ -57,11 +73,20 @@ class SliverIfaceInlineForm(forms.ModelForm):
 class SliverIfaceBulkForm(forms.Form):
     """ Display available ifaces on add sliver bulk action """
     def __init__(self, *args, **kwargs):
+        from django.contrib.admin.templatetags.admin_list import _boolean_icon
         super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
         for iface_type in Sliver.get_registred_iface_types():
             iface_type = iface_type[0]
             iface = Sliver.get_registred_iface(iface_type)
             if iface.ALLOW_BULK:
-                self.fields[iface_type] = forms.BooleanField(label=iface_type, 
-                    required=False, help_text=iface.__doc__.strip())
+                kwargs = {
+                    'label': iface_type,
+                    'required': False,
+                    'help_text': iface.__doc__.strip() }
+                if iface.AUTO_CREATE:
+                    kwargs['initial'] = _boolean_icon(True)
+                    kwargs['widget'] = ShowText()
+                self.fields[iface_type] = forms.BooleanField(**kwargs)
+
+
 

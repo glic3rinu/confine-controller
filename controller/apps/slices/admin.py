@@ -51,11 +51,12 @@ class SliverPropInline(PermissionTabularInline):
     extra = 0
     verbose_name_plural = mark_safe('Sliver properties %s' % docstring_as_help_tip(SliverProp))
 
-
+from .forms import SliverIfaceInlineFormSet
 class SliverIfaceInline(PermissionTabularInline):
     model = SliverIface
     readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
     extra = 0
+    formset = SliverIfaceInlineFormSet
     verbose_name_plural = mark_safe('Sliver network interfaces <a href="http://wiki.'
         'confine-project.eu/arch:node" onclick="return showAddAnotherPopup(this);">(Help)</a>')
     form = SliverIfaceInlineForm

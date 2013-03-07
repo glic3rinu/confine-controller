@@ -43,11 +43,14 @@ class Command(BaseCommand):
             '</Directory>\n'
             'RedirectMatch ^/$ /admin\n' % context )
         
-        diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1])
-        if diff.return_code == 1:
-            # save the old one if it is different
-            run("cp /etc/apache2/httpd.conf /etc/apache2/httpd.conf.save")
+        diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1,2])
+        if diff.return_code == 2:
+            # File does not exist
             run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
+        elif diff.return_code == 1:
+            # File is different, save the old one
+            run("cp /etc/apache2/httpd.conf /etc/apache2/httpd.conf.save")
+            run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)    
             print ("\033[1;31mA new version of /etc/apache2/httpd.conf has been installed. "
                    "The old version has been placed at /etc/apache2/httpd.conf.save\033[m")
         

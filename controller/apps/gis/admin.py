@@ -1,4 +1,4 @@
-from django_google_maps import widgets as map_widgets
+from gis import widgets as map_widgets
 from django_google_maps import fields as map_fields
 
 from django.forms.widgets import TextInput
@@ -19,7 +19,7 @@ class GisInline(admin.TabularInline):
     fields = ['address', 'geolocation']
     formfield_overrides = {
         map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget(attrs={'id': 'id_address', 'size':'80'})},
-        map_fields.GeoLocationField: {'widget': TextInput(attrs={'id': 'id_geolocation', 'readonly': 'readonly'})},
+        map_fields.GeoLocationField: {'widget': TextInput(attrs={'id': 'id_geolocation'})},
     }
     verbose_name_plural = 'Geolocation'
     can_delete = False

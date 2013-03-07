@@ -13,11 +13,15 @@ def generate_kml(request):
     the nodes gelocation information.
     """
     locations = NodeGeolocation.objects.all().values('node__name', 'node__description', 'geolocation')
-
+    places = []
     for loc in locations:
-        loc['lat'], loc['lng'] = loc['geolocation'].split(',')
+        try:
+            loc['lat'], loc['lng'] = loc['geolocation'].split(',')
+        except: # ignore not well
+            continue
+        places.append(loc)
 
-    return render_to_kml('locations.kml', {'locations':locations})
+    return render_to_kml('locations.kml', {'locations':places})
 
 def map(request):
     """

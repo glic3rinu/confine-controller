@@ -117,9 +117,9 @@ function install_requirements () {
     fi
     
     run apt-get update
-    run apt-get install -y "$MINIMAL_APT"
+    run apt-get install -y $MINIMAL_APT
     if ! $minimal; then
-        run apt-get install -y "$EXTENDED_APT"
+        run apt-get install -y $EXTENDED_APT
     
         # Some versions of rabbitmq-server will not start automatically by default unless ...
         sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server

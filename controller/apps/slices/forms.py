@@ -87,9 +87,3 @@ class SliverIfaceBulkForm(forms.Form):
                     kwargs['initial'] = _boolean_icon(True)
                     kwargs['widget'] = ShowText()
                 self.fields[iface_type] = forms.BooleanField(**kwargs)
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> a0c68002f2b88b923c9a52e79dc7ea14757f3aa7

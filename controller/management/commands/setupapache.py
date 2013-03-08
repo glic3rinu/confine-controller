@@ -44,7 +44,8 @@ class Command(BaseCommand):
             '</Directory>\n'
             'RedirectMatch ^/$ /admin\n' % context )
         
-        if run("grep '^Include httpd.conf' /etc/apache2/apache2.conf", err_codes=[0,1]).return_code == 1:
+        include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
+        if include_httpd.return_code == 1:
             run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
         
         diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1,2])

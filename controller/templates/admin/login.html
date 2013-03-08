@@ -4,6 +4,7 @@
 {% block extrastyle %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "controller/css/registration.css" %}" />
 {% endblock %}
 
 {% block adminextraprettystyle %}{% endblock %}
@@ -65,8 +66,8 @@ document.getElementById('id_username').focus()
 {% block footer %}<div id="footer">
   <div class="register-links">
     <a href="{% url 'password_reset' %}">Forgot password?</a> &nbsp;
-    {% if 'registration'|isinstalled %}<a href="{% url 'registration_register' %}">Create an acco    unt</a>{% endif %}
-    {% if 'groupregistration'|isinstalled %}<a href="{% url 'registration_group_register' %}">Reg    ister a new group</a>{% endif %}
+    {% if 'registration'|isinstalled %}<a href="{% url 'registration_register' %}">Create an account</a>{% endif %}
+    {% if 'groupregistration'|isinstalled %}<a href="{% url 'registration_group_register' %}">Register a new group</a>{% endif %}
   </div>
  </div>{% endblock %}
 

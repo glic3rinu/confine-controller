@@ -12,7 +12,7 @@ django_transaction_signals
 django-celery
 markdown
 django-filter
-https://bitbucket.org/glic3rinu/django-admin-tools-fixes/get/tip.tar.gz
+django-admin-tools
 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
 pygments
 requests

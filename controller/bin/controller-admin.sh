@@ -114,6 +114,7 @@ function install_requirements () {
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then
         run sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
         run locale-gen
+        update-locale LANG=en_US.UTF-8
     fi
     
     run apt-get update
@@ -127,7 +128,7 @@ function install_requirements () {
         run update-rc.d rabbitmq-server defaults
     fi
     # TODO delete django installation before proceeding
-    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
+    # run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements
 

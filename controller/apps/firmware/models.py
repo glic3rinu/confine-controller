@@ -30,9 +30,7 @@ build_storage = FileSystemStorage(location=settings.FIRMWARE_BUILD_PATH)
 
 class BuildQuerySet(models.query.QuerySet):
     def get_current(self, node):
-        """
-        Given an node returns an up-to-date builded image, if exists.
-        """ 
+        """ Given an node returns an up-to-date builded image, if exists """
         build = Build.objects.get(node=node)
         config = Config.objects.get()
         if build.state != Build.AVAILABLE: 
@@ -44,9 +42,7 @@ class BuildQuerySet(models.query.QuerySet):
 
 
 class Build(models.Model):
-    """
-    Represents a builded image for a research device.
-    """
+    """ Represents a builded image for a research device """
     REQUESTED = 'REQUESTED'
     QUEUED = 'QUEUED'
     BUILDING = 'BUILDING'
@@ -74,9 +70,7 @@ class Build(models.Model):
         return str(self.node)
     
     def delete(self, *args, **kwargs):
-        """
-        Deletes the build and also the image file stored on the file system
-        """
+        """ Deletes the build and also the image file stored on the file system """
         super(Build, self).delete(*args, **kwargs)
         try:
             os.remove(self.image.path)
@@ -89,9 +83,7 @@ class Build(models.Model):
     
     @property
     def task(self):
-        """
-        Returns the celery task responsible for 'self' image build.
-        """
+        """ Returns the celery task responsible for 'self' image build """
         if not self.task_id:
             return None
         try:
@@ -122,25 +114,18 @@ class Build(models.Model):
         return self.FAILED
     
     @property
-    def is_processing(self):
-        """
-        Abstract state, useful for rendering the appropiate message on the build page
-        """
-        return self.state in [self.REQUESTED, self.QUEUED, self.BUILDING]
-    
-    @property
-    def is_available(self):
-        """
-        Abstract state, useful for rendering the appropiate message on the build page
-        """
-        return self.state == self.AVAILABLE
-    
-    @property
-    def is_unavailable(self):
-        """
-        Abstract state, useful for rendering the appropiate message on the build page
-        """
-        return self.state in [self.OUTDATED, self.DELETED, self.FAILED]
+    def state_description(self):
+        description = {
+            Build.REQUESTED: "Building task received.",
+            Build.QUEUED: "Building task queued for processing.",
+            Build.BUILDING: "Your task is now being processed, this can take a while.",
+            Build.AVAILABLE: "Firmware available for download.",
+            Build.DELETED: "The firmware is no longer available. Do you want to build a new one?",
+            Build.OUTDATED: "The existing firmware is out-dated. You can build a new one.",
+            Build.FAILED: "The last build has failed. The error logs are monitored "
+                          "and this issue will be fixed. But you can try again anyway.",
+        }
+        return description.get(self.state, '')
     
     @property
     def image_sha256(self):
@@ -148,6 +133,23 @@ class Build(models.Model):
             return sha256(self.image.file.read()).hexdigest()
         except:
             return None
+    
+    def get_image_name(self):
+        """ Generates image name """
+        config = Config.objects.get()
+        context = {
+            'node_name': self.node.name,
+            'arch': self.node.arch,
+            'build_id': self.pk,
+            'node_id': self.node.pk,
+            'version': config.version }
+        return config.image_name % context
+    
+    def get_dest_path(self):
+        """ image destination path """
+        image_name = self.get_image_name()
+        base_path = settings.FIRMWARE_BUILD_PATH
+        return os.path.join(base_path, image_name)
     
     @classmethod
     def build(cls, node, async=False, exclude=[]):
@@ -189,13 +191,10 @@ class Build(models.Model):
     
     class ConcurrencyError(Exception):
         """ Exception related to building images concurrently (not supported) """
-        pass
 
 
 class BuildFile(models.Model):
-    """ 
-    Describes a file of a builded image
-    """
+    """ Describes a file of a builded image """
     build = models.ForeignKey(Build, related_name='files')
     config = models.ForeignKey('firmware.ConfigFile', related_name='files')
     path = models.CharField(max_length=256)
@@ -218,9 +217,7 @@ class BuildFile(models.Model):
 
 
 class Config(SingletonModel):
-    """
-    Describes the configuration used for building images
-    """
+    """ Describes the configuration used for building images """
     description = models.CharField(max_length=255)
     version = models.CharField(max_length=64)
     image_name = models.CharField(max_length=255,
@@ -265,9 +262,7 @@ class Config(SingletonModel):
         return uci.render(context)
     
     def get_image(self, node):
-        """
-        Returns the correct base image file according to the node architecture
-        """
+        """ Returns the correct base image file according to the node architecture """
         arch_regex = "(^|,)%s(,|$)" % node.arch
         images = self.images.filter(architectures__regex=arch_regex)
         if len(images) == 0:
@@ -276,9 +271,7 @@ class Config(SingletonModel):
 
 
 class BaseImage(models.Model):
-    """
-    Describes the image used for generating per node customized images.
-    """
+    """ Describes the image used for generating per node customized images """
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(storage=base_image_storage, upload_to='.',

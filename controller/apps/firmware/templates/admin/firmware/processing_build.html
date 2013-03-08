@@ -1,0 +1,41 @@
+{% extends "admin/firmware/base_build.html" %}
+{% load staticfiles %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "controller/css/jquery-ui.css" %}" />
+    <script src="{% static "controller/js/jquery-1.9.1.js" %}"></script>
+    <script src="{% static "controller/js/jquery-ui.js" %}"></script>
+    <script>
+    $(function() {
+        $( "#description" ).html('Waiting for your task to begin ...');
+        $( "#progressbar" ).progressbar({ value: 0 });
+        var freq = 1000;
+        var progress_url = '{% url 'admin:nodes_node_firmware_build_info' node.pk %}';
+        function update_progress_info() {
+            $.getJSON(progress_url, function(data, status){
+                if (data) {
+                    console.log(data);
+                    $( "#progressbar" ).progressbar({ value: data.progress });
+                    $( "#description" ).html(data.description);
+                    $( "#content_message" ).html(data.content_message);
+                    if ( data.state != 'PROCESS') {
+                        window.location = window.location.href;
+                        return true;
+                    }
+                }
+                window.setTimeout(update_progress_info, freq);
+            });
+        };
+        window.setTimeout(update_progress_info, freq);
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <p></p>
+    <div id="description"></div>
+    <div id="progressbar"></div>
+{% endblock %}
+

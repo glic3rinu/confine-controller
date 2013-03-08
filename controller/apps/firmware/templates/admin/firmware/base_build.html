@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Home</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'change' node.pk %}">{{ node|capfirst }}</a>
+&rsaquo; Download Firmware
+</div>
+{% endblock %}
+
+{% block content_title %}<h1>{{ content_title }}</h1>{% endblock %}
+
+{% block content %}
+    <style>code,pre {font-size:1.1em; }</style>
+    <p></p>
+    <p><div id="content_message">{{ content_message }}</div></p>
+{% endblock %}
+

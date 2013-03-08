@@ -110,37 +110,9 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    # Prioritizing static files and templates
+    # confine-controller apps
     'controller',
-    # Avoiding problems with admin_tools migrations
-    'users',
-    
-    # Third Party APPS
-    'south',
-    'fluent_dashboard',
-    'admin_tools',
-    'admin_tools.theming',
-    'admin_tools.menu',
-    'admin_tools.dashboard',
-    'singleton_models',
-    'django_extensions',
-    'djcelery',
-    'djcelery_email',
-    'private_files',
-    'registration',
-    'django_google_maps',
-    
-    # Django.contrib
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.admin',
-    
-    # Confine
     'api',
-    'permissions',
     'nodes',
     'slices',
     'issues',
@@ -151,10 +123,35 @@ INSTALLED_APPS = (
 #    'groupregistration',
     'state',
     'gis',
+    'users',
     
-    # Third party apps that should load last
+    # Third-party apps
+    'south',
+    'singleton_models',
+    'django_extensions',
+    'djcelery',
+    'djcelery_email',
+    'private_files',
+    'registration',
+    'django_google_maps',
     'rest_framework',
     'rest_framework.authtoken',
+    'fluent_dashboard',
+    'admin_tools',
+    'admin_tools.theming',
+    'admin_tools.menu',
+    'admin_tools.dashboard',
+    
+    # Django.contrib
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.admin',
+    
+    # confine-controller apps that should load last
+    'permissions', # because of overriding admin templates
 )
 
 AUTH_USER_MODEL = 'users.User'

@@ -104,32 +104,39 @@ class Image(object):
         shutil.move(self.image, dst)
         self.image = dst
     
-    def build(self, path=None):
-        """ build the new image """
-        # create temporary dirs
-        self.prepare()
-        # extract the image
+    def gunzip(self):
+        """ extract the image """
         r("cat '%s' | gunzip -c > '%s'" % (self.base_image, self.image))
-        self.mount()
-        
-        # create the added files
-        for f in self.files:
-            dest_path = self.mnt + f.name
-            dest_dir = os.path.dirname(dest_path)
-            if not os.path.exists(dest_dir):
-                os.makedirs(dest_dir)
-            if os.path.exists(dest_path):
-                os.remove(dest_path)
-            with open(dest_path, 'w+') as dest_file:
-                dest_file.write(f.content)
-            if f.config.mode:
-                r("chmod %s '%s'" % (f.config.mode, dest_path))
-        
-        self.umount()
-        # compress the generated image with gzip
+    
+    def gzip(self):
+        """ compress the image """
         r("gzip " + self.image)
         self.image += '.gz'
+    
+    def create_file(self, build_file):
+        dest_path = self.mnt + build_file.name
+        dest_dir = os.path.dirname(dest_path)
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        if os.path.exists(dest_path):
+            os.remove(dest_path)
+        with open(dest_path, 'w+') as dest_file:
+            dest_file.write(build_file.content)
+        if build_file.config.mode:
+            r("chmod %s '%s'" % (build_file.config.mode, dest_path))
+    
+    def build(self, path=None):
+        """ build the new image """
+        self.prepare()
+        self.gunzip()
+        self.mount()
         
-        # move the image to the destination path if required
+        for f in self.files:
+            self.create_file(f)
+        
+        self.umount()
+        self.gzip()
+        
         if path is not None:
+            # move the image to the destination path if required
             self.move(path)

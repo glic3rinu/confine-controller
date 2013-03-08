@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from celery.result import AsyncResult
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
@@ -183,14 +184,18 @@ def get_urls(self):
         except Build.DoesNotExist:
             build_dict = {}
         else:
-            build_dict = {
-                'state': build.state,
-                'date': build.date.strftime("%Y-%m-%d %H:%M:%S"),
-                'image': build.image.name,
-                'sha256': build.image_sha256,
+            task = AsyncResult(build.task_id)
+            result = task.result or {}
+            state = build.state
+            if state in [Build.REQUESTED, Build.QUEUED, Build.BUILDING]:
+                state = 'PROCESS'
+            info = {
+                'state': state,
+                'progress': result.get('progress', 0),
+                'description': "%s ..." % result.get('description', 'Waiting for your build task to begin.'),
                 'id': build.pk,
-                'version': build.version,}
-        return HttpResponse(simplejson.dumps(build_dict), mimetype="application/json")
+                'content_message': build.state_description }
+        return HttpResponse(simplejson.dumps(info), mimetype="application/json")
     
     @transaction.commit_on_success
     def delete_build_view(request, node_id):
@@ -219,7 +224,7 @@ def get_urls(self):
         return render(request, 'admin/firmware/delete_build_confirmation.html', context)
     
     extra_urls = patterns("", 
-        url("^(?P<node_id>\d+)/firmware/build_info/$",
+        url("^(?P<node_id>\d+)/firmware/info/$",
             wrap_admin_view(self, build_info_view),
             name='nodes_node_firmware_build_info'),
         url("^(?P<node_id>\d+)/firmware/delete/$",

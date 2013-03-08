@@ -54,7 +54,7 @@ class Command(BaseCommand):
         elif diff.return_code == 1:
             # File is different, save the old one
             run("cp /etc/apache2/httpd.conf /etc/apache2/httpd.conf.save")
-            run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
+            run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)    
             print ("\033[1;31mA new version of /etc/apache2/httpd.conf has been installed. "
                    "The old version has been placed at /etc/apache2/httpd.conf.save\033[m")
         

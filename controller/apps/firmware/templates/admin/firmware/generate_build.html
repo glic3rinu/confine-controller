@@ -1,0 +1,35 @@
+{% extends "admin/firmware/base_build.html" %}
+
+{% block content %}
+    {{ block.super }}
+    <form action="" method="post">{% csrf_token %}
+    <div>
+    <div style="margin-left:20px; margin-bottom:20px; margin-top:20px;">
+    <fieldset class="module aligned">
+        <h2>Optional files</h2>
+            <div class="form-row field-name">
+       <table border="1">
+         <thead><tr> <th></th> <th>Image</th> <th>Help</th> </tr></thead>
+         <tbody>
+        {% for field in form %}
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                <tr><td>{{ field }}</td><td><b>{{ field.label_tag }}</b></td><td>{{ field.help_text|linebreaks }}</td></tr>
+            </div>
+        {% endfor %}
+        </tbody>
+        </table>
+        </div>
+    </fieldset>
+    </div>
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}" />
+    {% endfor %}
+    <input type="hidden" name="action" value="get_firmware" />
+    <input type="hidden" name="post" value="yes" />
+    <div style="float:left;">
+    <input type="submit" class="default" value="Build firmware !"/>
+    </div>
+    </div>
+    </form>
+{% endblock %}

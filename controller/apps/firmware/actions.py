@@ -12,11 +12,6 @@ from .forms import OptionalFilesForm
 from .models import Build, Config
 
 
-# TODO implement an AJAX based feedback (triggering a refresh when there is an
-#      state change should be enough)
-#      build info in JSON format is available at <node_id>/firmware/build_info
-
-
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:
@@ -25,6 +20,7 @@ def get_firmware(modeladmin, request, queryset):
     
     opts = modeladmin.model._meta
     app_label = opts.app_label
+    site_name = modeladmin.admin_site.name
     
     using = router.db_for_write(modeladmin.model)
     node = queryset.get()
@@ -33,6 +29,21 @@ def get_firmware(modeladmin, request, queryset):
     if not request.user.has_perm('nodes.getfirmware_node', node):
         raise PermissionDenied
     
+    
+    node_url = reverse("admin:nodes_node_change", args=[node.pk])
+    node_link = '<a href="%s">%s</a>' % (node_url, node)
+    
+    context = {
+        "title": "Download firmware for your research device %s" % node,
+        "content_title":  mark_safe("Download firmware for your research device %s" % node_link),
+        "action_name": 'Firmware',
+        'queryset': queryset,
+        "opts": opts,
+        "app_label": app_label,
+        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+        'node': node,
+        'form': OptionalFilesForm(),
+    }
     # User has requested a firmware build
     if request.POST.get('post'):
         form = OptionalFilesForm(request.POST)
@@ -42,65 +53,39 @@ def get_firmware(modeladmin, request, queryset):
             build = Build.build(node, async=True, exclude=exclude)
             modeladmin.log_change(request, node, "Build firmware")
     
-    context = {
-        "action_name": 'Firmware',
-        'queryset': queryset,
-        "opts": opts,
-        "app_label": app_label,
-        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-        'node': node,
-        'form': OptionalFilesForm(),
-        'can_build': True,
-    }
-    
-    node_url = reverse("admin:nodes_node_change", args=[node.pk])
-    node_link = '<a href="%s">%s</a>' % (node_url, node)
-    template = 'admin/firmware/get_firmware.html'
-    
-    if Config.objects.get().get_image(node) is None:
-        context.update({
-            "title": "Build firmware for '%s' Research Device" % node,
-            "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
-            "content_message": mark_safe("Sorry but currently we do not "
-                "have support for %s architecture :(" % node.arch),
-            "can_build": False,
-        })
-        return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
-    
     try:
-        build
-    except NameError:
-        try:
-            build = Build.objects.get_current(node=node)
-        except Build.DoesNotExist:
-            context.update({
-                "title": "Build firmware for '%s' Research Device" % node,
-                "content_title":  mark_safe("Build firmware for '%s' Research Device" % node_link),
-                "content_message": mark_safe("There is no pre-build up-to-date"
-                    "firmware for this research device, but you can instruct the"
-                    "system to build a fresh one for you, it will take only a few"
-                    "seconds."),
-            })
-            return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
+        build = Build.objects.get_current(node=node)
+    except Build.DoesNotExist:
+        state = False
+    else:
+        state = build.state
     
-    description = {
-        Build.REQUESTED: "Build request received.",
-        Build.QUEUED: "Build task queued for building.",
-        Build.BUILDING: "Building image ...",
-        Build.AVAILABLE: "Firmware available for download.",
-        Build.DELETED: "The firmware is no longer available. Do you want to build a new one?",
-        Build.OUTDATED: "The existing firmware is out-dated. You can build a new one.",
-        Build.FAILED: "The last build has failed. The error logs are monitored "
-                      "and this issue will be fixed. But you can try again anyway.",
-    }
+    # Build a new firmware
+    if not state or state in [Build.DELETED, Build.OUTDATED, Build.FAILED]:
+        context["content_message"] = ("There is no pre-build up-to-date firmware for "
+            "this research device, but you can instruct the system to build a fresh "
+            "one for you, it will take only a few seconds.")
+        template = 'admin/firmware/generate_build.html'
+        return TemplateResponse(request, template, context, current_app=site_name)
+    
     context.update({
-        "title": "Research Device Firmware for '%s'" % node,
-        "content_title": mark_safe("Research Device Firmware for '%s'" % node_link),
-        "content_message": description[build.state],
+        "content_message": build.state_description,
         "build": build,
     })
     
-    # Display the confirmation page
+    # Available for download
+    if state in [Build.AVAILABLE]:
+        template = 'admin/firmware/download_build.html'
+        return TemplateResponse(request, template, context, current_app=site_name)
+    
+    # No architecture support
+    if Config.objects.get().get_image(node) is None:
+        context["content_message"] = "Sorry but currently we do not support %s architectures :(" % node.arch,
+        template = 'admin/firmware/base_build.html'
+        return TemplateResponse(request, template, context, current_app=site_name)
+    
+    # Processing
+    template = 'admin/firmware/processing_build.html'
     return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
-
+    
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")

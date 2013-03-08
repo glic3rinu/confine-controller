@@ -11,7 +11,7 @@ class SliceAdminForm(forms.ModelForm):
         1) If state is register: checkbox
         2) If state is not register: read only integer
     """
-    request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False, 
+    request_vlan = forms.BooleanField(label='Request VLAN', initial=False, required=False,
         help_text='VLAN number allocated to this slice by the server.')
     
     class Meta:
@@ -87,6 +87,3 @@ class SliverIfaceBulkForm(forms.Form):
                     kwargs['initial'] = _boolean_icon(True)
                     kwargs['widget'] = ShowText()
                 self.fields[iface_type] = forms.BooleanField(**kwargs)
-
-
-

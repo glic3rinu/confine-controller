@@ -59,7 +59,7 @@ def reboot_selected(modeladmin, request, queryset):
     }
     
     # Display the confirmation page
-    return TemplateResponse(request, 'admin/generic_confirmation.html',
+    return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
         context, current_app=modeladmin.admin_site.name)
 
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")

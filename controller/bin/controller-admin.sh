@@ -114,12 +114,13 @@ function install_requirements () {
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then
         run sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
         run locale-gen
+        update-locale LANG=en_US.UTF-8
     fi
     
     run apt-get update
-    run apt-get install -y "$MINIMAL_APT"
+    run apt-get install -y $MINIMAL_APT
     if ! $minimal; then
-        run apt-get install -y "$EXTENDED_APT"
+        run apt-get install -y $EXTENDED_APT
     
         # Some versions of rabbitmq-server will not start automatically by default unless ...
         sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
@@ -127,7 +128,7 @@ function install_requirements () {
         run update-rc.d rabbitmq-server defaults
     fi
     # TODO delete django installation before proceeding
-    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
+    # run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements
 

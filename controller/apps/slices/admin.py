@@ -146,7 +146,7 @@ class NodeListAdmin(NodeAdmin):
     Nested Node ModelAdmin that provides a list of available nodes for adding 
     slivers hooked on Slice
     """
-    list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'), 
+    list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'),
                     'arch', colored('set_state', STATES_COLORS, verbose=True),
                     admin_link('group'), 'num_ifaces', num_slivers, 
                     'display_sliver_pub_ipv4_range']
@@ -229,7 +229,7 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = sliver.node_id
         context = { 'slice': slice }
         context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).change_view(request, object_id, 
+        return super(SliceSliversAdmin, self).change_view(request, object_id,
             form_url=form_url, extra_context=context)
     
     def save_model(self, request, obj, *args, **kwargs):
@@ -397,7 +397,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
                 wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view),
                 name='slices_slice_add_sliver'),
             url("^(?P<slice_id>\d+)/add_sliver/(?P<node_id>\d+)/$",
-                wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).add_view), 
+                wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).add_view),
                 name='slices_slice_add_sliver'),
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/$",
                 wrap_admin_view(self, SliceSliversAdmin(Sliver, admin_site).change_view),
@@ -447,7 +447,7 @@ class TemplateAdmin(PermissionModelAdmin):
     list_filter = ['is_active', 'type', 'node_archs']
     #FIXME node_archs: contains rather than exact
     search_fields = ['name', 'description', 'type', 'node_archs']
-    fields = ['name', 'description', 'type', 'node_archs', 'image', 'image_sha256', 
+    fields = ['name', 'description', 'type', 'node_archs', 'image', 'image_sha256',
               'is_active']
     readonly_fields = ['image_sha256']
     

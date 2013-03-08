@@ -243,6 +243,10 @@ class AuthToken(models.Model):
     
     def __unicode__(self):
         return str(self.pk)
+    
+    def clean(self):
+        super(AuthToken, self).clean()
+        self.data = self.data.strip()
 
 
 class JoinRequest(models.Model):

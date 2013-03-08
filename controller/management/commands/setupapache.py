@@ -5,6 +5,7 @@ from controller.utils import get_project_root, get_site_root, is_installed
 from controller.utils.system import run, check_root
 from slices.settings import SLICES_TEMPLATE_IMAGE_DIR, SLICES_SLICE_EXP_DATA_DIR
 
+
 class Command(BaseCommand):
     help = 'Configures Apache2 to run with your controller instance.'
     
@@ -43,9 +44,15 @@ class Command(BaseCommand):
             '</Directory>\n'
             'RedirectMatch ^/$ /admin\n' % context )
         
-        diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1])
-        if diff.return_code == 1:
-            # save the old one if it is different
+        if run("grep '^Include httpd.conf' /etc/apache2/apache2.conf", err_codes=[0,1]).return_code == 1:
+            run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
+        
+        diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1,2])
+        if diff.return_code == 2:
+            # File does not exist
+            run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
+        elif diff.return_code == 1:
+            # File is different, save the old one
             run("cp /etc/apache2/httpd.conf /etc/apache2/httpd.conf.save")
             run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)
             print ("\033[1;31mA new version of /etc/apache2/httpd.conf has been installed. "

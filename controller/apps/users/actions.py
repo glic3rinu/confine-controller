@@ -60,7 +60,7 @@ def join_request(modeladmin, request, queryset):
     }
     
     # Display the confirmation page
-    return TemplateResponse(request, 'admin/generic_confirmation.html',
+    return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
         context, current_app=modeladmin.admin_site.name)
 
 join_request.short_description = "Request to join the selected groups"

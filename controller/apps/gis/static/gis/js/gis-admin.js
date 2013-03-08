@@ -21,57 +21,49 @@ This script expects:
 
 */
 
-function googleMapAdmin() {
+function openLayersAdmin() {
 
     var map;
-    var marker;
-    var markers;
+    var vectors;
+
+    epsg4326 = new OpenLayers.Projection("EPSG:4326");
+    epsg900913 = new OpenLayers.Projection("EPSG:900913");
 
     var self = {
         initialize: function() {
-            var lat = 0;
-            var lon = 0;
-            var zoom = 2;
+            var lat = 0, lon = 0, zoom = 2;
+            
             // set up initial map to be world view. also, add change
-            // event so changing address will update the map
-            existinglocation = self.getExistingLocation();
+            var existinglocation = self.getExistingLocation();
             if (existinglocation) {
                 lat = existinglocation.lat;
                 lon = existinglocation.lon;
                 zoom = 12;
             }
+            
+            map = new OpenLayers.Map("map_canvas");
 
-            map = new OpenLayers.Map('map_canvas', {
-                controls: [
-                    new OpenLayers.Control.PanZoom(),
-                    new OpenLayers.Control.Permalink(),
-                    new OpenLayers.Control.Navigation()
-                ]
-            });
-            map.addLayer(new OpenLayers.Layer.OSM("OpenStreetMap"));
+            var osm = new OpenLayers.Layer.OSM("OpenStreetMap");
+            vectors = new OpenLayers.Layer.Vector("Vector Layer");
+            map.addLayers([osm, vectors]);
 
-            var lonlat = new OpenLayers.LonLat(lon, lat).transform(
-                    new OpenLayers.Projection("EPSG:4326"),
-                    map.getProjectionObject()
-                );
-            map.setCenter(lonlat, zoom);
-
-            // init markers layer
-            markers = new OpenLayers.Layer.Markers("Markers");
-            map.addLayer(markers);
+            var center = new OpenLayers.LonLat(lon, lat).transform(epsg4326, epsg900913);
+            self.setMarker(center);
+            self.addMarkerDrag();
+            
+            map.setCenter(center, zoom);
 
             if (existinglocation) {
-                self.setMarker(lonlat);
+                self.setMarker(center);
             }
 
+            // add listeners to manage form fields changes
             $("#id_address").change(function() {self.codeAddress();});
             $("#id_geolocation").change(function() {
                 var location = self.getExistingLocation();
                 if(location) {
-                    lonlat = new OpenLayers.LonLat(location.lon, location.lat).transform(
-                            new OpenLayers.Projection("EPSG:4326"),
-                            map.getProjectionObject()
-                        );
+                    lonlat = new OpenLayers.LonLat(location.lon, location.lat)
+                        .transform(epsg4326, epsg900913);
                     self.setMarker(lonlat);
                     map.setCenter(lonlat, 12);
                 }
@@ -79,6 +71,7 @@ function googleMapAdmin() {
         },
 
         getExistingLocation: function() {
+            /** checks (and returns if any) initial geolocation data **/
             var geolocation = $("#id_geolocation").val();
             if (geolocation) {
                 var latlon = geolocation.split(',');
@@ -91,6 +84,7 @@ function googleMapAdmin() {
         },
 
         codeAddress: function() {
+            /** geocoding based on address form field value  **/
             var address = $("#id_address").val();
             OpenLayers.Request.GET({
                url:  "http://nominatim.openstreetmap.org/search/" + address,
@@ -110,10 +104,8 @@ function googleMapAdmin() {
             var output = format.read(response.responseText);
             if (output[0]) {
                 var geometry = {lat: output[0].lat, lon: output[0].lon};
-                var foundPosition = new OpenLayers.LonLat(geometry.lon, geometry.lat).transform(
-                            new OpenLayers.Projection("EPSG:4326"),
-                            map.getProjectionObject()
-                        );
+                var foundPosition = new OpenLayers.LonLat(geometry.lon, geometry.lat)
+                        .transform(epsg4326, epsg900913);
                 map.setCenter(foundPosition, 14);
                 self.setMarker(foundPosition);
                 self.updateGeolocation(geometry);
@@ -122,25 +114,37 @@ function googleMapAdmin() {
             }
         },
 
-        setMarker: function(location) {
-            markers.clearMarkers();
-   	    var size = new OpenLayers.Size(21,25);
-            var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-            var icon = new OpenLayers.Icon('http://www.openlayers.org/dev/img/marker.png',size,offset);
-            markers.addMarker(new OpenLayers.Marker(location, icon.clone()));
-
-            /* TODO!!! --> use Feature for making it draggable
-            var draggable = Options.draggable || false;
-            if (draggable) {
-                self.addMarkerDrag(marker);
-            }*/
+        setMarker: function(center) {
+            /**
+             * update the marker position (clear + create strategy)
+             * @param center: coords in map projection (epsg900913)
+             **/
+            vectors.removeAllFeatures();
+            var point = new OpenLayers.Geometry.Point(center.lon, center.lat);
+            vectors.addFeatures([
+                new OpenLayers.Feature.Vector(point/*, {vcid:'3243223'}, {
+                    externalGraphic: 'http://www.openlayers.org/dev/img/marker.png',
+                        graphicWidth: 21, graphicHeight: 25
+                    }*/)
+            ]);
         },
 
-        addMarkerDrag: function(marker) {
-            // TODO
+        addMarkerDrag: function() {
+            /** add drag feature for vectors layer **/
+            drag = new OpenLayers.Control.DragFeature(vectors, {
+                autoActivate: true,
+                onComplete: function() {
+                    // clone the geometry for not change the marker!
+                    var coord = this.feature.geometry.clone();
+                    coord.transform(epsg900913, epsg4326);
+                    self.updateGeolocation(new OpenLayers.LonLat(coord.x, coord.y));
+                }
+            });
+            map.addControl(drag);
         },
 
         updateGeolocation: function(location) {
+            /** update geolocation form field with new location coordinates **/
             $("#id_geolocation").val(location.lat + "," + location.lon);
         }
     }
@@ -149,6 +153,6 @@ function googleMapAdmin() {
 }
 
 $(document).ready(function() {
-    var googlemap = googleMapAdmin();
-    googlemap.initialize();
+    var openmap = openLayersAdmin();
+    openmap.initialize();
 });

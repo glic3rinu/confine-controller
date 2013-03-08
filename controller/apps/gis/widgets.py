@@ -12,7 +12,6 @@ class GoogleMapsAddressWidget(widgets.TextInput):#TODO rename OSMAddressWidget
         css = {'all': (settings.STATIC_URL + 'gis/css/gis-admin.css',),}
         js = (
             'https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
-            #'http://maps.google.com/maps/api/js?sensor=false',
             'http://openlayers.org/api/OpenLayers.js',
             settings.STATIC_URL + 'gis/js/gis-admin.js',
         )

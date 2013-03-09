@@ -12,11 +12,19 @@
         $( "#progressbar" ).progressbar({ value: 0 });
         var freq = 1000;
         var progress_url = '{% url 'admin:nodes_node_firmware_build_info' node.pk %}';
+        var last = 1;
+        var current = 0;
         function update_progress_info() {
             $.getJSON(progress_url, function(data, status){
                 if (data) {
                     console.log(data);
-                    $( "#progressbar" ).progressbar({ value: data.progress });
+                    if (data.progress == last && data.next > current) {
+                        current++;
+                    } else {
+                        current = data.progress;
+                    }
+                    last = data.progress
+                    $( "#progressbar" ).progressbar({ value: current });
                     $( "#description" ).html(data.description);
                     $( "#content_message" ).html(data.content_message);
                     if ( data.state != 'PROCESS') {

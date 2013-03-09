@@ -5,9 +5,9 @@ from celery.task import task
 from .image import Image
 
 
-def update_state(build, progress, description):
+def update_state(build, progress, next, description):
     build.update_state(state='PROGRESS',
-        meta={'progress': progress, 'description': description})
+        meta={'progress': progress, 'next': next, 'description': description})
 
 
 @task(name="firmware.build")
@@ -17,7 +17,7 @@ def build(build_id, exclude=[]):
     from .models import Build, Config
     
     # retrieve the existing build instance, used for user feedback
-    update_state(build, 1, 'Build started')
+    update_state(build, 1, 4, 'Build started')
     build_obj = Build.objects.get(pk=build_id)
     build_obj.task_id = build.request.id
     build_obj.save()
@@ -31,27 +31,29 @@ def build(build_id, exclude=[]):
         image = Image(base_image.image.path)
         image.prepare()
         
-        update_state(build, 5, 'Unpackaging base image')
+        update_state(build, 5, 14, 'Unpackaging base image')
         image.gunzip()
         
-        update_state(build, 10, 'Preparing image file system')
+        update_state(build, 15, 29, 'Preparing image file system')
         image.mount()
         
         files = config.eval_files(node, exclude=exclude, image=image)
         total = len(files)
         for num, build_file in enumerate(files):
-            update_state(build, 10 + num/total*30, 'Generating %s file' % build_file.name)
+            current = 30 + num/total*25
+            next = min(30 + (num+1)/total*25, 59)
+            update_state(build, current, next, 'Generating %s file' % build_file.name)
             image.create_file(build_file)
             build_file.build = build_obj
             build_file.save()
         
-        update_state(build, 50, 'Unmounting image file system')
+        update_state(build, 60, 74, 'Unmounting image file system')
         image.umount()
         
-        update_state(build, 60, 'Compressing image')
+        update_state(build, 75, 94, 'Compressing image')
         image.gzip()
         
-        update_state(build, 90, 'Cleaning up')
+        update_state(build, 95, 99, 'Cleaning up')
         dest_path = build_obj.get_dest_path()
         image.move(dest_path)
     finally:

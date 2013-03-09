@@ -14,7 +14,7 @@ class IfaceField(serializers.WritableField):
     def to_native(self, value):
         return [ {'type': iface.type,
                   'name': iface.name,
-                  'parent': iface.parent } for iface in value.all() ]
+                  'parent': None if not iface.parent else iface.parent.name } for iface in value.all() ]
     
     def from_native(self, value):
         parent = self.parent

@@ -128,13 +128,13 @@ function install_requirements () {
         run update-rc.d rabbitmq-server defaults
     fi
     # TODO delete django installation before proceeding
-    # run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
+    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements
 
 
 print_clone_help () {
-    cat <<- EOF 
+    cat <<- EOF
 		
 		${bold}NAME${normal}
 		    ${bold}controller-admin.sh clone${normal} - Create a new Confine-Controller instance

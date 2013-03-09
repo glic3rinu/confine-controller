@@ -9,8 +9,7 @@ ugettext = lambda s: s
 
 SLICES_TEMPLATE_TYPES = getattr(settings, 'SLICES_TEMPLATE_TYPES', (
     ('debian6', 'Debian 6'), 
-    ('fedora12', 'Fedora 12'), 
-    ('susele6', 'SUSE Linux Enterprise 6'),
+    ('openwrt-backfire', 'OpenWRT Backfire'), 
 ))
 
 SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', 'debian6')

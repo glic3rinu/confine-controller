@@ -12,6 +12,11 @@ from .forms import OptionalFilesForm
 from .models import Build, Config
 
 
+# TODO task failure tolerance
+# TODO api failure tolerance
+# TODO timeout for retrying
+
+
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:

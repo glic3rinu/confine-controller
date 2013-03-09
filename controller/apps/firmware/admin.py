@@ -192,6 +192,7 @@ def get_urls(self):
             info = {
                 'state': state,
                 'progress': result.get('progress', 0),
+                'next': result.get('next', 0),
                 'description': "%s ..." % result.get('description', 'Waiting for your build task to begin.'),
                 'id': build.pk,
                 'content_message': build.state_description }

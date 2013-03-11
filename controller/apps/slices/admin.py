@@ -20,7 +20,7 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import renew_selected_slices, reset_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter
-from .forms import SliceAdminForm, SliverIfaceInlineForm
+from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet
 from .helpers import wrap_action, remove_slice_id
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
@@ -51,7 +51,7 @@ class SliverPropInline(PermissionTabularInline):
     extra = 0
     verbose_name_plural = mark_safe('Sliver properties %s' % docstring_as_help_tip(SliverProp))
 
-from .forms import SliverIfaceInlineFormSet
+
 class SliverIfaceInline(PermissionTabularInline):
     model = SliverIface
     readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']

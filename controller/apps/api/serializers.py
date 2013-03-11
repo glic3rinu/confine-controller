@@ -47,7 +47,7 @@ class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
 class HyperlinkedFileField(serializers.FileField):
     def to_native(self, value):
         if value:
-            request = self.context.get('request', None)
+            request = self.context.get('request')
             return request.build_absolute_uri(value.url)
 
 

@@ -6,7 +6,6 @@ from django import template
 from django.conf import settings as project_settings
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.template import Template, Context
 from django_transaction_signals import defer
@@ -15,17 +14,13 @@ from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
 
 from controller.models.fields import MultiSelectField
-from controller.models.utils import generate_chainer_manager
+from controller.models.utils import generate_chainer_manager, get_file_field_base_path
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .tasks import build
 from .context import context
-
-
-base_image_storage = FileSystemStorage(location=settings.FIRMWARE_BASE_IMAGE_PATH)
-build_storage = FileSystemStorage(location=settings.FIRMWARE_BUILD_PATH)
 
 
 class BuildQuerySet(models.query.QuerySet):
@@ -54,7 +49,8 @@ class Build(models.Model):
     node = models.OneToOneField('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
-    image = PrivateFileField(storage=build_storage, upload_to='.',
+    image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
+        upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH,
         condition=lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node))
     base_image = models.ForeignKey('firmware.BaseImage', null=True)
@@ -148,7 +144,7 @@ class Build(models.Model):
     def get_dest_path(self):
         """ image destination path """
         image_name = self.get_image_name()
-        base_path = settings.FIRMWARE_BUILD_PATH
+        base_path = get_file_field_base_path(Build, 'image')
         return os.path.join(base_path, image_name)
     
     @classmethod
@@ -274,7 +270,8 @@ class BaseImage(models.Model):
     """ Describes the image used for generating per node customized images """
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
-    image = models.FileField(storage=base_image_storage, upload_to='.',
+    image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
+        upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Enter a valid name.', 'invalid')])

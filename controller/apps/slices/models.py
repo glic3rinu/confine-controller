@@ -7,10 +7,8 @@ from django.conf import settings as project_settings
 from django.contrib.auth import get_user_model
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.core.files.storage import FileSystemStorage
 from django.db import models
 from IPy import IP
-from private_files import PrivateFileField
 
 from controller.models.fields import MultiSelectField
 from controller.utils.ip import lsb, msb, int_to_hex_str
@@ -22,9 +20,6 @@ from nodes.models import Node
 from . import settings
 from .tasks import force_slice_update, force_sliver_update
 
-
-template_storage = FileSystemStorage(location=settings.SLICES_TEMPLATE_IMAGE_DIR)
-slice_exp_data_storage = FileSystemStorage(location=settings.SLICES_SLICE_EXP_DATA_DIR)
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
@@ -56,7 +51,7 @@ class Template(models.Model):
                   'by uname -m, non-empty). Slivers using this template should '
                   'run on nodes whose architecture is listed here.')
     is_active = models.BooleanField(default=True)
-    image = models.FileField(storage=template_storage, upload_to='.',
+    image = models.FileField(upload_to=settings.SLICES_TEMPLATE_IMAGE_DIR,
         help_text='Template\'s image file.')
     
     def __unicode__(self):
@@ -106,10 +101,8 @@ class Slice(models.Model):
                   'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
-    exp_data = PrivateFileField(blank=True, upload_to='.', 
-        storage=slice_exp_data_storage, verbose_name='experiment data',
-        condition=lambda request, self:
-                  request.user.has_perm('slices.slice_change', obj=self),
+    exp_data = models.FileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
+        verbose_name='experiment data',
         help_text='File containing experiment data for slivers (if they do not '
                   'explicitly indicate one)')
     exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
@@ -239,10 +232,8 @@ class Sliver(models.Model):
         help_text='The number of times this sliver has been instructed to be '
                   'reset (instance sequence number).',
         verbose_name='instance sequence number')
-    exp_data = PrivateFileField(blank=True, verbose_name='experiment data',
-        storage=slice_exp_data_storage, upload_to='.',
-        condition=lambda request, self:
-            request.user.has_perm('slices.sliver_change', obj=self),
+    exp_data = models.FileField(blank=True, verbose_name='experiment data',
+        upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
         help_text='File containing experiment data for this sliver.')
     exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
         help_text='If present, the URI of a file containing experiment data for '

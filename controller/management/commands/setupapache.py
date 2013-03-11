@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from controller.models.utils import get_file_field_base_path
 from controller.utils import get_project_root, get_site_root, is_installed
 from controller.utils.system import run, check_root
-from slices.settings import SLICES_TEMPLATE_IMAGE_DIR, SLICES_SLICE_EXP_DATA_DIR
 
 
 class Command(BaseCommand):
@@ -66,8 +66,11 @@ class Command(BaseCommand):
         # Give upload file permissions to apache
         username = run("stat -c %%U %(project_root)s" % context)
         run('adduser www-data %s' % username)
-        run('chmod g+w %s' % SLICES_TEMPLATE_IMAGE_DIR)
-        run('chmod g+w %s' % SLICES_SLICE_EXP_DATA_DIR)
+        
+        if is_installed('slices'):
+            from slices.models import Template, Slice
+            run('chmod g+w %s' % get_file_field_base_path(Template, 'image'))
+            run('chmod g+w %s' % get_file_field_base_path(Slice, 'exp_data'))
         if is_installed('firmware'):
-            from firmware.settings import FIRMWARE_BASE_IMAGE_PATH
-            run('chmod g+w %s' % FIRMWARE_BASE_IMAGE_PATH)
+            from firmware.models import BaseImage
+            run('chmod g+w %s' % get_file_field_base_path(BaseImage, 'image'))

@@ -43,9 +43,9 @@ class Node(models.Model):
     name = models.CharField(max_length=256, unique=True,
         help_text='A unique name for this node. A single non-empty line of '
                   'free-form text with no whitespace surrounding it.',
-        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$', 
+        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
                     'Enter a valid name.', 'invalid')])
-    cert = models.TextField('Certificate', unique=True, null=True, blank=True, 
+    cert = models.TextField('Certificate', unique=True, null=True, blank=True,
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
                   'by clients and services accessing the node API.')
@@ -93,7 +93,7 @@ class Node(models.Model):
         protocol='IPv4', null=True, blank=True,
         help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
                   'prefix. See <a href="http://wiki.confine-project.eu/arch:'
-                  'addressing">addressing</a> for legal values. %s When null.' 
+                  'addressing">addressing</a> for legal values. %s When null.'
                   % PRIV_IPV4_PREFIX_DFLT)
     boot_sn = models.IntegerField('Boot sequence number', default=0, blank=True, 
         help_text='Number of times this RD has been instructed to be rebooted.')
@@ -202,7 +202,7 @@ class Node(models.Model):
         return 0
     
     def sign_cert_request(self, scr, commit=True):
-        self.cert = ssl.sign_cert_request(scr)
+        self.cert = ssl.sign_cert_request(scr).strip()
         if commit:
             self.save()
         return self.cert

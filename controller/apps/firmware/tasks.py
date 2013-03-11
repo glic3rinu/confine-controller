@@ -59,7 +59,7 @@ def build(build_id, exclude=[]):
     finally:
         image.clean()
     
-    build_obj.image = build_obj.get_image_name()
+    build_obj.image = dest_path
     build_obj.base_image = base_image
     build_obj.save()
     

@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.admin.templatetags.admin_list import _boolean_icon
 
 from controller.forms.widgets import ShowText
 
@@ -73,7 +74,6 @@ class SliverIfaceInlineForm(forms.ModelForm):
 class SliverIfaceBulkForm(forms.Form):
     """ Display available ifaces on add sliver bulk action """
     def __init__(self, *args, **kwargs):
-        from django.contrib.admin.templatetags.admin_list import _boolean_icon
         super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
         for iface_type in Sliver.get_registred_iface_types():
             iface_type = iface_type[0]

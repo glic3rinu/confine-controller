@@ -8,27 +8,24 @@ ugettext = lambda s: s
 
 
 SLICES_TEMPLATE_TYPES = getattr(settings, 'SLICES_TEMPLATE_TYPES', (
-    ('debian6', 'Debian 6'), 
-    ('openwrt-backfire', 'OpenWRT Backfire'), 
+    ('debian6', 'Debian 6'),
+    ('openwrt-backfire', 'OpenWRT Backfire'),
 ))
 
 SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', 'debian6')
 
 
 SLICES_TEMPLATE_ARCHS = getattr(settings, 'SLICES_TEMPLATE_ARCHS', (
-    ('amd64', 'amd64'), 
-    ('ia64', 'ia64'), 
+    ('amd64', 'amd64'),
+    ('ia64', 'ia64'),
     ('x86', 'x86'),
 ))
 
 SLICES_TEMPLATE_ARCH_DFLT = getattr(settings, 'SLICES_TEMPLATE_ARCH_DFLT', 'amd64')
 
+SLICES_TEMPLATE_IMAGE_DIR = getattr(settings, 'SLICES_TEMPLATE_IMAGE_DIR', 'templates')
 
-SLICES_TEMPLATE_IMAGE_DIR = getattr(settings, 'SLICES_TEMPLATE_IMAGE_DIR',
-    os.path.join(settings.MEDIA_ROOT, 'templates'))
-    
-SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR',
-    os.path.join(settings.MEDIA_ROOT, 'exp_data'))
+SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data')
 
 
 # 30 days expiration interval

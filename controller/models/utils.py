@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 
 
@@ -8,10 +10,10 @@ def generate_chainer_manager(qs_class):
         def __init__(self):
             super(ChainerManager,self).__init__()
             self.queryset_class = qs_class
-
+        
         def get_query_set(self):
             return self.queryset_class(self.model)
-
+        
         def __getattr__(self, attr, *args):
             try:
                 return getattr(type(self), attr, *args)
@@ -30,3 +32,10 @@ def get_field_value(obj, field_name):
             # maybe it is a query manager
             rel = getattr(rel.get(), name)
     return rel
+
+
+def get_file_field_base_path(model, field_name):
+    field = model._meta.get_field_by_name(field_name)[0]
+    storage_location = field.storage.base_location
+    upload_to = field.upload_to
+    return os.path.join(storage_location, upload_to)

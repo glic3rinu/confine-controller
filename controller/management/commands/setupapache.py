@@ -69,8 +69,11 @@ class Command(BaseCommand):
         
         if is_installed('slices'):
             from slices.models import Template, Slice
+            run('mkdir -p %s' % get_file_field_base_path(Template, 'image'))
             run('chmod g+w %s' % get_file_field_base_path(Template, 'image'))
+            run('mkdir -p %s' % get_file_field_base_path(Slice, 'exp_data'))
             run('chmod g+w %s' % get_file_field_base_path(Slice, 'exp_data'))
         if is_installed('firmware'):
             from firmware.models import BaseImage
+            run('mkdir -p %s' % get_file_field_base_path(BaseImage, 'image'))
             run('chmod g+w %s' % get_file_field_base_path(BaseImage, 'image'))

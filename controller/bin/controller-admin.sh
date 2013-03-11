@@ -107,7 +107,7 @@ function install_requirements () {
     check_root
     CONTROLLER_PATH=$(get_controller_dir)
     
-    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-gevent"
+    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-gevent python-dev gcc"
     EXTENDED_APT="libapache2-mod-wsgi git mercurial fuseext2 screen openssh-server tinc"
     
     # Make sure locales are in place before installing postgres
@@ -197,7 +197,7 @@ function clone () {
     fi
     # Install bash autocompletition for django commands
     if [[ ! $(grep 'source $HOME/.django_bash_completion.sh' ~/.bashrc &> /dev/null) ]]; then
-        run wget https://raw.github.com/django/django/master/extras/django_bash_completion --no-check-certificate -O ~/.django_bash_completion2.sh
+        run wget https://raw.github.com/django/django/master/extras/django_bash_completion --no-check-certificate -O ~/.django_bash_completion.sh
         echo 'source $HOME/.django_bash_completion.sh' >> ~/.bashrc
     fi
 

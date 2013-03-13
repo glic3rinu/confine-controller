@@ -86,7 +86,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
                     'group_links', 'is_superuser', 'is_active', )
     list_filter = ('is_superuser', 'is_active', 'groups')
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
+        (None, {'fields': ('username', )}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email',
                                       'description',)}),
         ('Permissions', {'fields': ('is_active', 'is_superuser',)}),

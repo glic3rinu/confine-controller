@@ -35,7 +35,11 @@ def get_field_value(obj, field_name):
 
 
 def get_file_field_base_path(model, field_name):
+    """ only works with static upload_to """
     field = model._meta.get_field_by_name(field_name)[0]
-    storage_location = field.storage.base_location
     upload_to = field.upload_to
+    if hasattr(upload_to, '__call__'):
+        # This is a controller's convention for getting upload_to base path
+        upload_to = upload_to(None, None)
+    storage_location = field.storage.base_location
     return os.path.join(storage_location, upload_to)

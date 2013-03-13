@@ -13,6 +13,7 @@ from djcelery.models import TaskState
 from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
 
+from controller import settings as controller_settings
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager, get_file_field_base_path
 from nodes.models import Server
@@ -321,8 +322,11 @@ class ConfigUCI(models.Model):
         for the given UCI option.
         """
         safe_locals = {'node': node,
-                       'server': Server.objects.get(),
-                       'settings': project_settings }
+                       'server': Server.objects.get(),}
+        safe_locals.update(dict((setting, getattr(controller_settings, setting))
+            for setting in dir(controller_settings) if setting.isupper() ))
+        safe_locals.update(dict((setting, getattr(project_settings, setting))
+            for setting in dir(project_settings) if setting.isupper() ))
         safe_locals.update(context.get())
         return unicode(eval(self.value, safe_locals))
 

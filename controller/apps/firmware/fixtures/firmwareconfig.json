@@ -95,7 +95,7 @@
         "section": "testbed testbed", 
         "config": 1, 
         "option": "mgmt_ipv6_prefix48", 
-        "value": "settings.MGMT_IPV6_PREFIX.split('::')[0]"
+        "value": "MGMT_IPV6_PREFIX.split('::')[0]"
     }
 },
 {

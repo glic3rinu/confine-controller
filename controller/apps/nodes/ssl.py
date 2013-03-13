@@ -43,4 +43,4 @@ def generate_certificate(key, **subject):
     cert.set_not_after(expire_time)
     # self signing a certificate
     cert.sign(pkey, md="sha256")
-    return cert.as_pem()
+    return cert.as_pem().strip()

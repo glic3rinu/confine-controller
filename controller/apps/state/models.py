@@ -9,6 +9,7 @@ from nodes.models import Node
 class NodeState(models.Model):
     ONLINE = 'ONLINE'
     OFFLINE = 'OFFLINE'
+#    debug, safe, production, failure.
     
     node = models.OneToOneField(Node, related_name='state')
     last_success_on = models.DateTimeField(null=True)

@@ -1,4 +1,4 @@
-import inspect
+import inspect, os, tempfile
 from datetime import datetime
 from hashlib import sha256
 
@@ -16,6 +16,7 @@ from controller.utils import autodiscover
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
     validate_sha256)
 from nodes.models import Node
+from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .tasks import force_slice_update, force_sliver_update
@@ -26,11 +27,26 @@ def get_expires_on():
     return datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
 
 
+def make_upload_to(field_name, base_path, file_name):
+    """ dynamically generate file names with randomnes for upload_to args """
+    def upload_path(instance, filename, base_path=base_path, file_name=file_name, field_name=field_name):
+        if not file_name or instance is None:
+            return base_path
+        field = type(instance)._meta.get_field_by_name(field_name)[0]
+        storage_location = field.storage.base_location
+        abs_path = os.path.join(storage_location, base_path)
+        prefix, suffix = file_name.split('%(rand)s')
+        with tempfile.NamedTemporaryFile(dir=abs_path, prefix=prefix, suffix=suffix) as f:
+            name = f.name.split('/')[-1]
+        return os.path.join(base_path, name)
+    return upload_path
+
+
 class Template(models.Model):
     """
     Describes a template available in the testbed for slices and slivers to use.
     """
-    name = models.CharField(max_length=32, unique=True, 
+    name = models.CharField(max_length=32, unique=True,
         help_text='The unique name of this template. A single line of free-form '
                   'text with no whitespace surrounding it, it can include '
                   'version numbers and other information.',
@@ -45,14 +61,15 @@ class Template(models.Model):
                   'Linux Enterprise...). To instantiate a sliver based on a '
                   'template, the research device must support its type.',
         default=settings.SLICES_TEMPLATE_TYPE_DFLT)
-    # TODO nodes_node_arch instead fo template_archs?
-    node_archs = MultiSelectField(max_length=32, choices=settings.SLICES_TEMPLATE_ARCHS,
+    node_archs = MultiSelectField(max_length=256, choices=NODES_NODE_ARCHS,
         help_text='The node architectures accepted by this template (as reported '
                   'by uname -m, non-empty). Slivers using this template should '
-                  'run on nodes whose architecture is listed here.')
+                  'run on nodes whose architecture is listed here.',
+        default='i586,')
     is_active = models.BooleanField(default=True)
-    image = models.FileField(upload_to=settings.SLICES_TEMPLATE_IMAGE_DIR,
-        help_text='Template\'s image file.')
+    image = models.FileField(help_text='Template\'s image file.',
+        upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
+                                 settings.SLICES_TEMPLATE_IMAGE_NAME))
     
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.type)
@@ -101,8 +118,9 @@ class Slice(models.Model):
                   'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
-    exp_data = models.FileField(blank=True, upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
-        verbose_name='experiment data',
+    exp_data = models.FileField(blank=True, verbose_name='experiment data',
+        upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
+                                 settings.SLICES_SLICE_EXP_DATA_NAME,),
         help_text='File containing experiment data for slivers (if they do not '
                   'explicitly indicate one)')
     exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
@@ -119,7 +137,7 @@ class Slice(models.Model):
                   'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
                   'slice-sliver-states">slice and sliver states</a> for the full '
                   'description of set states and possible transitions.')
-    template = models.ForeignKey(Template, 
+    template = models.ForeignKey(Template,
         help_text='The template to be used by the slivers of this slice (if they '
                   'do not explicitly indicate one).')
     group = models.ForeignKey('users.Group', related_name='slices')
@@ -174,15 +192,19 @@ class Slice(models.Model):
     
     @property
     def max_vlan_nr(self):
-        return int('ffff', 16)
+        return int('fff', 16)
+    
+    @property
+    def min_vlan_nr(self):
+        return int('100', 16)
     
     def _get_vlan_nr(self):
         last_nr = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')[0].vlan_nr
-        if last_nr < 2:
-            return 2
+        if last_nr < self.min_vlan_nr:
+            return self.min_vlan_nr
         if last_nr >= self.max_vlan_nr:
             # Try to recycle old values ( very, very ineficient )
-            for new_nr in range(2, self.max_vlan_nr):
+            for new_nr in range(self.min_vlan_nr, self.max_vlan_nr):
                 if not Slice.objects.filter(vlan_nr=new_nr).exists():
                     return new_nr
             raise self.VlanAllocationError("No VLAN address space left.")
@@ -230,10 +252,11 @@ class Sliver(models.Model):
         help_text='An optional free-form textual description of this sliver.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The number of times this sliver has been instructed to be '
-                  'reset (instance sequence number).',
+                  'updated (instance sequence number).',
         verbose_name='instance sequence number')
     exp_data = models.FileField(blank=True, verbose_name='experiment data',
-        upload_to=settings.SLICES_SLICE_EXP_DATA_DIR,
+        upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
+                                 settings.SLICES_SLIVER_EXP_DATA_NAME),
         help_text='File containing experiment data for this sliver.')
     exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
         help_text='If present, the URI of a file containing experiment data for '
@@ -282,7 +305,7 @@ class Sliver(models.Model):
     def max_num_ifaces(self):
         return 256 # limited by design -> #nr: unsigned 8 bits
     
-    def reset(self):
+    def update(self):
         self.instance_sn += 1
         self.save()
     

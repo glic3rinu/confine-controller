@@ -18,7 +18,7 @@ from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
-from .actions import renew_selected_slices, reset_selected, create_slivers
+from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter
 from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet
 from .helpers import wrap_action, remove_slice_id
@@ -75,8 +75,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     readonly_fields = ['instance_sn', 'slice_link', 'node_link', template_link]
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverIfaceInline]
-    actions = [reset_selected]
-    change_view_actions = [('reset', reset_selected, '', ''),]
+    actions = [update_selected]
+    change_view_actions = [('update', update_selected, '', ''),]
     default_changelist_filter = 'my_slivers'
     
     def __init__(self, *args, **kwargs):
@@ -405,8 +405,8 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/history",
                 wrap_admin_view(self, remove_slice_id(SliceSliversAdmin(Sliver,
                     admin_site).history_view)),),
-            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/reset",
-                wrap_admin_view(self, wrap_action(reset_selected,
+            url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/update",
+                wrap_admin_view(self, wrap_action(update_selected,
                     SliceSliversAdmin(Sliver, admin_site))),)
         )
         return extra_urls + urls

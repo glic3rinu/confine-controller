@@ -43,6 +43,20 @@ reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_
 
 
 @transaction.commit_on_success
+def update_selected(modeladmin, request, queryset):
+    # TODO queryset.update() ?
+    for obj in queryset:
+        if not modeladmin.has_change_permission(request, obj=obj):
+            raise PermissionDenied
+        obj.update()
+        modeladmin.log_change(request, obj, "Instructed to update")
+    verbose_name_plural = force_text(obj._meta.verbose_name_plural)
+    msg = "%s selected %s has been updated" % (queryset.count(), verbose_name_plural)
+    modeladmin.message_user(request, msg)
+reset_selected.short_description = ugettext_lazy("Update selected %(verbose_name_plural)s")
+
+
+@transaction.commit_on_success
 def create_slivers(modeladmin, request, queryset):
     """ Create slivers in selected nodes """
     opts = modeladmin.model._meta

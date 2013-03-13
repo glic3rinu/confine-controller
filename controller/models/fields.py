@@ -8,7 +8,7 @@ from controller.forms.fields import MultiSelectFormField
 
 #### MultiCSelect #####
 # New version of this snippet http://djangosnippets.org/snippets/1200/
-# tested with Django 1.4
+
 
 class MultiSelectField(models.Field):
     __metaclass__ = models.SubfieldBase
@@ -25,10 +25,11 @@ class MultiSelectField(models.Field):
     
     def formfield(self, **kwargs):
         # don't call super, as that overrides default widget if it has choices
-        defaults = {'required': not self.blank,
-                    'label': capfirst(self.verbose_name),
-                    'help_text': self.help_text,
-                    'choices': self.choices }
+        defaults = {
+            'required': not self.blank,
+            'label': capfirst(self.verbose_name),
+            'help_text': self.help_text,
+            'choices': self.choices }
         if self.has_default():
             defaults['initial'] = self.get_default()
         defaults.update(kwargs)

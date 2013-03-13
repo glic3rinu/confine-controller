@@ -23,7 +23,7 @@ def reject_tickets(modeladmin, request, queryset):
 def take_tickets(modeladmin, request, queryset):
     queryset.take(owner=request.user)
     for obj in queryset:
-        modeladmin.log_change(request, obj, "Taked")
+        modeladmin.log_change(request, obj, "Taken")
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 

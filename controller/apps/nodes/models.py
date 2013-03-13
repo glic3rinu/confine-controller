@@ -148,6 +148,10 @@ class Node(models.Model):
         if self.cert == '':
             # Empty cert as None instead of empty string (uniqueness)
             self.cert = None
+        if self.sliver_mac_prefix == '':
+            self.sliver_mac_prefix = None
+        if self.priv_ipv4_prefix == '':
+            self.priv_ipv4_prefix = None
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
@@ -202,7 +206,7 @@ class Node(models.Model):
         return 0
     
     def sign_cert_request(self, scr, commit=True):
-        self.cert = ssl.sign_cert_request(scr).strip()
+        self.cert = ssl.sign_cert_request(scr)
         if commit:
             self.save()
         return self.cert

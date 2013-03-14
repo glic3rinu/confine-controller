@@ -25,10 +25,10 @@ def build(build_id, exclude=[]):
     config = Config.objects.get()
     node = build_obj.node
     base_image = config.get_image(node)
+    image = Image(base_image.image.path)
     
     try:
         # Build the image
-        image = Image(base_image.image.path)
         image.prepare()
         
         update_state(build, 5, 14, 'Unpackaging base image')

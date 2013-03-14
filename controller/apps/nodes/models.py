@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from singleton_models.models import SingletonModel
 
+from controller.models.fields import NullableCharField, NullableTextField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_prop_name, validate_net_iface_name
 
@@ -45,7 +46,7 @@ class Node(models.Model):
                   'free-form text with no whitespace surrounding it.',
         validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
                     'Enter a valid name.', 'invalid')])
-    cert = models.TextField('Certificate', unique=True, null=True, blank=True,
+    cert = NullableTextField('Certificate', unique=True, null=True, blank=True,
         help_text='X.509 PEM-encoded certificate for this RD. The certificate '
                   'may be signed by a CA recognised in the testbed and required '
                   'by clients and services accessing the node API.')
@@ -73,7 +74,7 @@ class Node(models.Model):
                   'public IPv4 support), dhcp (addresses configured using DHCP), '
                   'range (addresses chosen from a range, see sliver_pub_ipv4_range).',
         default=settings.NODES_NODE_SLIVER_PUB_IPV4_DFLT, choices=IPV4_METHODS)
-    sliver_pub_ipv4_range = models.CharField('Sliver public IPv4 range', max_length=256,
+    sliver_pub_ipv4_range = NullableCharField('Sliver public IPv4 range', max_length=256,
         help_text='Describes the public IPv4 range that can be used by sliver '
                   'public interfaces. If /sliver_pub_ipv4 is none, its value is '
                   'null. If /sliver_pub_ipv4 is dhcp, its value is #N, where N '
@@ -83,13 +84,13 @@ class Node(models.Model):
                   'reserved for slivers after and including the range\'s base '
                   'address BASE_IP (an IP address in the local network).',
         blank=True, null=True, default=settings.NODES_NODE_SLIVER_PUB_IPV4_RANGE_DFLT)
-    sliver_mac_prefix = models.CharField('Sliver MAC prefix', null=True,
+    sliver_mac_prefix = NullableCharField('Sliver MAC prefix', null=True,
         blank=True, max_length=5, validators=[validate_sliver_mac_prefix],
         help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                   'used as the node sliver MAC prefix. See <a href="http://wiki.'
                   'confine-project.eu/arch:addressing">addressing</a> for legal '
                   'values. %s when null.</a>.' % SLIVER_MAC_PREFIX_DFLT)
-    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 prefix', 
+    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 prefix',
         protocol='IPv4', null=True, blank=True,
         help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
                   'prefix. See <a href="http://wiki.confine-project.eu/arch:'
@@ -128,30 +129,18 @@ class Node(models.Model):
                 raise ValidationError("Can not manually enter to Debug state.")
             elif self.set_state == Node.PRODUCTION and old.set_state != Node.SAFE:
                 raise ValidationError("Can not make changes nor  manually enter to "
-                                      "Production state from another state different "
-                                      "than Safe.")
+                    "Production state from another state different than Safe.")
         elif self.set_state != Node.DEBUG:
             raise ValidationError("Initial state must be Debug")
         # clean sliver_pub_ipv4 and _range
         if self.sliver_pub_ipv4 == 'none':
-            if not self.sliver_pub_ipv4_range:
-                # make sure empty sliver_pub_ipv4_range is None
-                self.sliver_pub_ipv4_range = None
-            else:
+            if self.sliver_pub_ipv4_range:
                 raise ValidationError("If Sliver Public IPv4 is 'none' then Sliver "
                                       "Public IPv4 Range must be empty")
         elif self.sliver_pub_ipv4 == 'dhcp':
             validate_dhcp_range(self.sliver_pub_ipv4_range)
         elif self.sliver_pub_ipv4 == 'range':
             validate_ipv4_range(self.sliver_pub_ipv4_range)
-        
-        if self.cert == '':
-            # Empty cert as None instead of empty string (uniqueness)
-            self.cert = None
-        if self.sliver_mac_prefix == '':
-            self.sliver_mac_prefix = None
-        if self.priv_ipv4_prefix == '':
-            self.priv_ipv4_prefix = None
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
@@ -254,7 +243,7 @@ class DirectIface(models.Model):
     See node architecture: http://wiki.confine-project.eu/arch:node
     """
     name = models.CharField(max_length=16, validators=[validate_net_iface_name],
-        help_text='he name of the interface used as a local interface (non-empty). '
+        help_text='The name of the interface used as a local interface (non-empty). '
                   'See <a href="https://wiki.confine-project.eu/arch:node">node '
                   'architecture</a>.')
     node = models.ForeignKey(Node, related_name='direct_ifaces')

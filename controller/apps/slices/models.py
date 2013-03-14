@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from IPy import IP
 
-from controller.models.fields import MultiSelectField
+from controller.models.fields import MultiSelectField, NullableCharField
 from controller.utils.ip import lsb, msb, int_to_hex_str
 from controller.utils import autodiscover
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
@@ -29,7 +29,8 @@ def get_expires_on():
 
 def make_upload_to(field_name, base_path, file_name):
     """ dynamically generate file names with randomnes for upload_to args """
-    def upload_path(instance, filename, base_path=base_path, file_name=file_name, field_name=field_name):
+    def upload_path(instance, filename, base_path=base_path, file_name=file_name,
+                    field_name=field_name):
         if not file_name or instance is None:
             return base_path
         field = type(instance)._meta.get_field_by_name(field_name)[0]
@@ -115,7 +116,7 @@ class Slice(models.Model):
         help_text='VLAN number allocated to this slice. The only values that can '
                   'be set are null which means that no VLAN is wanted for the '
                   'slice, and -1 which asks the server to allocate for the slice '
-                  'a new VLAN number (2 <= vlan_nr < 0xFFF) while the slice is '
+                  'a new VLAN number (100 <= vlan_nr < 0xFFF) while the slice is '
                   'instantiated (or active). It cannot be changed on an '
                   'instantiated slice with slivers having isolated interfaces.')
     exp_data = models.FileField(blank=True, verbose_name='experiment data',
@@ -123,11 +124,11 @@ class Slice(models.Model):
                                  settings.SLICES_SLICE_EXP_DATA_NAME,),
         help_text='File containing experiment data for slivers (if they do not '
                   'explicitly indicate one)')
-    exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
+    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
         help_text='The URI of a file containing experiment data for slivers (if '
                   'they do not explicitly indicate one). Its format and contents '
                   'depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('Exp. data SHA256', max_length=64, blank=True,
+    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
@@ -258,20 +259,20 @@ class Sliver(models.Model):
         upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
                                  settings.SLICES_SLIVER_EXP_DATA_NAME),
         help_text='File containing experiment data for this sliver.')
-    exp_data_uri = models.CharField('Exp. data URI', max_length=256, blank=True,
+    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
         help_text='If present, the URI of a file containing experiment data for '
                   'this sliver, instead of the one specified by the slice. Its '
                   'format and contents depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('Exp. data SHA56', max_length=64, blank=True,
+    exp_data_sha256 = models.CharField('exp. data SHA56', max_length=64, blank=True,
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
-    set_state = models.CharField(max_length=16, choices=Slice.STATES, blank=True,
+    set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
         help_text='If present, the state set on this sliver (set state), instead of '
                   'the one specified by the slice. Possible values: register (initial), '
                   'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
                   'slice-sliver-states">slice and sliver states</a> for the full '
-                  'description of set states and possible transitions.')
+                  'description of set states and possible transitions.', null=True)
     template = models.ForeignKey(Template, null=True, blank=True,
         help_text='If present, the template to be used by this sliver, instead '
                   'of the one specified by the slice.')

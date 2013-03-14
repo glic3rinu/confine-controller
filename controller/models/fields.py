@@ -4,13 +4,11 @@ from django.utils.text import capfirst
 
 from controller.core.validators import validate_rsa_pubkey
 from controller.forms.fields import MultiSelectFormField
-
-
-#### MultiCSelect #####
-# New version of this snippet http://djangosnippets.org/snippets/1200/
+from controller.utils import is_installed
 
 
 class MultiSelectField(models.Field):
+    """ http://djangosnippets.org/snippets/1200/ """
     __metaclass__ = models.SubfieldBase
     
     def get_internal_type(self):
@@ -80,8 +78,6 @@ class RSAPublicKeyField(models.TextField):
     default_validators = [validate_rsa_pubkey]
     
     def __init__(self, *args, **kwargs):
-        kwargs['unique'] = kwargs.get('unique', True)
-        kwargs['null'] = kwargs.get('null', True)
         return super(RSAPublicKeyField, self).__init__(*args, **kwargs)
     
     def get_prep_value(self, value):
@@ -106,11 +102,20 @@ class URIField(models.URLField):
         return super(URIField, self).get_prep_value(value)
 
 
-try:
+class NullableCharField(models.CharField):
+     def get_db_prep_value(self, value, connection=None, prepared=False):
+         return value or None
+
+
+class NullableTextField(models.TextField):
+     def get_db_prep_value(self, value, connection=None, prepared=False):
+         return value or None
+
+
+if is_installed('south'):
     from south.modelsinspector import add_introspection_rules
-except ImportError:
-    pass
-else:
     add_introspection_rules([], ["^controller\.models\.fields\.MultiSelectField"])
     add_introspection_rules([], ["^controller\.models\.fields\.RSAPublicKeyField"])
     add_introspection_rules([], ["^controller\.models\.fields\.URIField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.NullableCharField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.NullableTextField"])

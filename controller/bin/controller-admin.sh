@@ -119,15 +119,15 @@ function install_requirements () {
     
     run apt-get update
     run apt-get install -y $MINIMAL_APT
+    
     if ! $minimal; then
         run apt-get install -y $EXTENDED_APT
-    
         # Some versions of rabbitmq-server will not start automatically by default unless ...
         sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
         sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
         run update-rc.d rabbitmq-server defaults
     fi
-    # TODO delete django installation before proceeding
+    
     run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements
@@ -186,9 +186,6 @@ function clone () {
     CONTROLLER_PATH=$(get_controller_dir)
     if [[ ! -e $PROJECT_NAME/manage.py ]]; then
         run django-admin.py startproject $PROJECT_NAME --template="${CONTROLLER_PATH}/conf/project_template"
-        if [[ -d $CONTROLLER_PATH/projects/$SKELETONE ]]; then
-            echo "INSTALLED_APPS = ('controller.projects.$SKELETONE',) + INSTALLED_APPS" >> $PROJECT_NAME/$PROJECT_NAME/settings.py
-        fi
         # This is a workaround for this issue https://github.com/pypa/pip/issues/317
         run chmod +x $PROJECT_NAME/manage.py
         # End of workaround ###

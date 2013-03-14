@@ -51,7 +51,7 @@ class Build(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
-        upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH,
+        upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH, max_length=256,
         condition=lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node))
     base_image = models.ForeignKey('firmware.BaseImage', null=True)

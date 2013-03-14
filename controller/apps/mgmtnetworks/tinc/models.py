@@ -47,7 +47,7 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
-    pubkey = RSAPublicKeyField('public Key', blank=True,
+    pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
         help_text='PEM-encoded RSA public key used on tinc management network.')
     
     class Meta:
@@ -106,7 +106,7 @@ class TincServer(TincHost):
     Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
     the testbed server itself.
     """
-    is_active = models.BooleanField(default=True, 
+    is_active = models.BooleanField(default=True,
         help_text="Whether this tinc server is active. It should only be made "
                   "false if there are other tinc servers with addresses in the "
                   "same islands of the addresses provided by this server.")

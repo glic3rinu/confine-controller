@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from controller.core.validators import validate_uuid, validate_rsa_pubkey
+from controller.models.fields import RSAPublicKeyField, NullableCharField
 from nodes.models import Node
 from slices.models import Slice
 from users.models import User, Group
@@ -10,12 +11,12 @@ from users.models import User, Group
 
 class SfaObject(models.Model):
     """ SFA-related data """
-    uuid = models.CharField(max_length=36, unique=True, blank=True, null=True,
+    uuid = NullableCharField(max_length=36, unique=True, blank=True, null=True,
         help_text='A universally unique identifier (UUID, RFC 4122) for this node. '
                   'This is optional, but once set to a valid UUID it can not be '
                   'changed.',
         validators=[validate_uuid])
-    pubkey = models.TextField('Public Key', unique=True, null=True, blank=True, 
+    pubkey = RSAPublicKeyField('public key', unique=True, null=True, blank=True,
         help_text='A unique PEM-encoded RSA public key for this node. See /set_state '
                   'for more information on changing this key.',
         validators=[validate_rsa_pubkey])
@@ -29,14 +30,6 @@ class SfaObject(models.Model):
     
     def __unicode__(self):
         return str(self.content_object)
-    
-    def clean(self):
-        """ 
-        Empty pubkey and uuid as NULL instead of empty string.
-        """
-        if self.pubkey == '': self.pubkey = None
-        if self.uuid == '': self.uuid = None
-        super(SfaObject, self).clean()
 
 
 # Hook SfaObject support for related models

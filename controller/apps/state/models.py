@@ -69,7 +69,7 @@ class BaseState(models.Model):
                     return json.loads(self.data).get('state', 'online')
                 except ValueError:
                     pass
-            return cls.UNKNOWN_STATE
+            return 'unknown'
         return 'offline'
     
     @property
@@ -91,9 +91,7 @@ class NodeState(BaseState):
         ('safe', 'SAFE'),
         ('production', 'PRODUCTION'),
         ('failure', 'FAILURE'),
-        ('online', 'ONLINE'),)
-    
-    UNKNOWN_STATE = 'online'
+        ('unknown', 'UNKNOWN'),)
     
     node = models.OneToOneField('nodes.Node', related_name='state')
     
@@ -111,8 +109,6 @@ class SliverState(BaseState):
         ('fail_alloc', 'FAIL_ALLOC'),
         ('fail_deploy', 'FAIL_DEPLOY'),
         ('fail_start', 'FAIL_START'),)
-    
-    UNKNOWN_STATE = 'unknown'
     
     sliver = models.OneToOneField('slices.Sliver', related_name='state')
     

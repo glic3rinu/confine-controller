@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from rest_framework.reverse import reverse
+
 from api import ApiRoot
 from controller import settings
 from controller.utils import is_installed
@@ -35,3 +37,6 @@ class Base(ApiRoot):
             "testbed_params": testbed_params,
             "confine_params": confine_params })
         return response
+
+
+

@@ -18,14 +18,14 @@ from .models import NodeState, SliverState
 
 STATES_COLORS = {
     'offline': 'red',
-    'debug': 'orange',
-    'safe': 'green',
+    'debug': 'darkorange',
+    'safe': 'grey',
     'production': 'green',
     'failure': 'red',
     'online': 'green',
     'unknown': 'grey',
     'registered': 'grey',
-    'deployed': 'orange',
+    'deployed': 'darkorange',
     'started': 'green',
     'fail_alloc': 'red',
     'fail_deploy': 'red',

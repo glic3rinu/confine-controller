@@ -4,6 +4,7 @@ from django.db import models
 
 from nodes.models import Node
 
+
 class Geolocation(models.Model):
     """
     Base class for introduce geolocation info into a model.
@@ -34,4 +35,4 @@ class Geolocation(models.Model):
 
 class NodeGeolocation(Geolocation):
     """ Class for append geolocation information to a Node """
-    node = models.ForeignKey(Node, unique=True, related_name='node', null=True, blank=True)
+    node = models.OneToOneField(Node, related_name='gis', null=True, blank=True)

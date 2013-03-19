@@ -11,6 +11,8 @@ from rest_framework.reverse import reverse
 
 from controller.utils import autodiscover
 
+from .utils import link_header
+
 
 class ApiRoot(APIView):
     """ 
@@ -25,13 +27,9 @@ class ApiRoot(APIView):
     -H "Accept: application/json; indent=4"`
     """
     def get(base_view, request, format=None):
-        output = {}
-        for model in api._registry:
-            name = force_unicode(model._meta.verbose_name)
-            name_plural = force_unicode(model._meta.verbose_name_plural)
-            output.update({'%s_uri' % name_plural: reverse('%s-list' % name,
-                args=[], request=request)})
-        return Response(output)
+        relations = [ '%s-list' % force_unicode(model._meta.verbose_name) for model in api._registry ]
+        headers = {'Link': link_header(relations, request)}
+        return Response({}, headers=headers)
 
 
 class RestApi(object):
@@ -43,12 +41,10 @@ class RestApi(object):
         self._registry.update({model: args})
     
     def base(self):
-        try: api_root = settings.CUSTOM_API_ROOT
-        except AttributeError: api_root = ApiRoot
-        else: 
-            mod, inst = api_root.rsplit('.', 1)
-            mod = import_module(mod)
-            api_root = getattr(mod, inst)
+        api_root = getattr(settings, 'CUSTOM_API_ROOT', 'api.ApiRoot')
+        mod, inst = api_root.rsplit('.', 1)
+        mod = import_module(mod)
+        api_root = getattr(mod, inst)
         return api_root.as_view()
     
     @property

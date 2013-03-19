@@ -4,6 +4,7 @@ from django.http import Http404
 from rest_framework import generics
 
 from api import api
+from api.utils import link_header
 from api.generics import URIListCreateAPIView
 from permissions.api import ApiPermissionsMixin
 
@@ -23,6 +24,11 @@ class NodeList(ApiPermissionsMixin, URIListCreateAPIView):
     model = Node
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
+    
+    def get(self, request, format=None):
+        response = super(NodeList, self).get(request, format=format)
+        response['link'] = link_header(['base', 'node-list'], request)
+        return response
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

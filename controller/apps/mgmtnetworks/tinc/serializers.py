@@ -32,7 +32,7 @@ class IslandSerializer(UriHyperlinkedModelSerializer):
 
 
 class TincAddressSerializer(serializers.ModelSerializer):
-    island = RelHyperlinkedRelatedField(view_name='island-detail')
+    island = RelHyperlinkedRelatedField(view_name='api:island-detail')
     
     class Meta:
         model = TincAddress
@@ -41,7 +41,7 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 class TincClientSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    island = RelHyperlinkedRelatedField(view_name='island-detail')
+    island = RelHyperlinkedRelatedField(view_name='api:island-detail')
     
     class Meta:
         model = TincClient

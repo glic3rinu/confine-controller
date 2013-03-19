@@ -47,7 +47,7 @@ class GroupSerializer(UriHyperlinkedModelSerializer):
     slices = RelHyperlinkedRelatedField(many=True, source='slices', read_only=True,
         view_name='slice-detail')
     nodes = RelHyperlinkedRelatedField(many=True, source='nodes', read_only=True,
-        view_name='node-detail')
+        view_name='api:node-detail')
     
     class Meta:
         model = Group

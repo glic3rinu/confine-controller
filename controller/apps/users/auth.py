@@ -18,4 +18,3 @@ class EmailBackend(object):
             return UserModel._default_manager.get(pk=user_id)
         except UserModel.DoesNotExist:
             return None
-

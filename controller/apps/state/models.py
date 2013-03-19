@@ -1,41 +1,121 @@
-from datetime import datetime
+import json
+from datetime import datetime, timedelta
 from time import time, mktime
 
 from django.db import models
 
-from nodes.models import Node
+from . import settings
 
 
-class NodeState(models.Model):
-    ONLINE = 'ONLINE'
-    OFFLINE = 'OFFLINE'
-#    debug, safe, production, failure.
+class BaseState(models.Model):
+    data = models.TextField()
+    metadata = models.TextField()
+    last_seen_on = models.DateTimeField(null=True)
+    last_try_on = models.DateTimeField(auto_now=True)
     
-    node = models.OneToOneField(Node, related_name='state')
-    last_success_on = models.DateTimeField(null=True)
-    last_retry_on = models.DateTimeField(auto_now=True)
-    metadata = models.CharField(max_length=256)
+    class Meta:
+        abstract = True
+    
+    def __unicode__(self):
+        return str(getattr(self, type(self).get_related_field_name())) + ' state'
     
     @classmethod
-    def store_glet(cls, node, glet, get_data=lambda g: g.value):
-        data = get_data(glet)
-        state, created = cls.objects.get_or_create(node=node)
-        if data is not None:
-            state.last_success_on = datetime.now()
-        state.metadata = {
-            'exception': glet._exception,
-            'value': get_data(glet), }
+    def get_related_field_name(cls):
+        """ very hacky """
+        return cls._meta.fields[-1].name
+    
+    @classmethod
+    def get_related_model(cls):
+        return cls._meta.fields[-1].rel.to
+    
+    @property
+    def next_retry_on(self):
+        freq = type(self).get_setting('FREQUENCY')
+        time = self.last_try_on + timedelta(seconds=freq)
+        return time.strftime("%B %d, %Y, %I:%M %p.")
+    
+    @classmethod
+    def get_setting(cls, setting):
+        name = cls.__name__.upper()
+        return getattr(settings, "STATE_%s_%s" % (name, setting))
+    
+    @classmethod
+    def store_glet(cls, obj, glet, get_data=lambda g: g.value):
+        response = get_data(glet)
+        field_name = cls.get_related_field_name()
+        state, created = cls.objects.get_or_create(**{field_name: obj})
+        metadata = {'exception': str(glet._exception)}
+        if response is not None:
+            state.last_seen_on = datetime.now()
+            state.data = response.content
+            metadata.update({
+                'url': response.url,
+                'headers': response.headers})
+        state.metadata = json.dumps(metadata, indent=4)
         state.save()
     
     @property
     def current(self):
-        def heartbeat_expires(timestamp, freq=300, expire_window=200):
+        cls = type(self)
+        freq = cls.get_setting('FREQUENCY')
+        expire_window = cls.get_setting('EXPIRE_WINDOW')
+        
+        def heartbeat_expires(timestamp, freq=freq, expire_window=expire_window):
             return timestamp + freq * (expire_window / 1e2)
         
-        if self.last_success_on and time() < heartbeat_expires(self.last_success_timestamp):
-            return self.ONLINE
-        return self.OFFLINE
+        if self.last_seen_on and time() < heartbeat_expires(self.last_seen_timestamp):
+            if self.data:
+                try:
+                    return json.loads(self.data).get('state', 'online')
+                except ValueError:
+                    pass
+            return cls.UNKNOWN_STATE
+        return 'offline'
     
     @property
-    def last_success_timestamp(self):
-        return mktime(self.last_success_on.timetuple())
+    def last_seen_timestamp(self):
+        return mktime(self.last_seen_on.timetuple())
+    
+    def get_current_display(self):
+        current = self.current
+        for name,verbose in type(self).STATES:
+            if name == current:
+                return verbose
+        return current
+
+
+class NodeState(BaseState):
+    STATES = (
+        ('offline', 'OFFLINE'),
+        ('debug', 'DEBUG'),
+        ('safe', 'SAFE'),
+        ('production', 'PRODUCTION'),
+        ('failure', 'FAILURE'),
+        ('online', 'ONLINE'),)
+    
+    UNKNOWN_STATE = 'online'
+    
+    node = models.OneToOneField('nodes.Node', related_name='state')
+    
+    def get_node(self):
+        return self.node
+
+
+class SliverState(BaseState):
+    STATES = (
+        ('offline', 'OFFLINE'),
+        ('unknown', 'UNKNOWN'),
+        ('registered', 'REGISTERED'),
+        ('deployed', 'DEPLOYED'),
+        ('started', 'STARTED'),
+        ('fail_alloc', 'FAIL_ALLOC'),
+        ('fail_deploy', 'FAIL_DEPLOY'),
+        ('fail_start', 'FAIL_START'),)
+    
+    UNKNOWN_STATE = 'unknown'
+    
+    sliver = models.OneToOneField('slices.Sliver', related_name='state')
+    
+    def get_node(self):
+        return self.sliver.node
+

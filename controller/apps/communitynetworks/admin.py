@@ -33,7 +33,6 @@ app_url_link = link('related_cnhost__app_url', description='CN URL')
 
 insert_inline(Node, CnHostInline)
 insert_inline(Server, CnHostInline)
-insert_list_display(Node, app_url_link)
 
 if is_installed('mgmtnetworks.tinc'):
     from mgmtnetworks.tinc.models import Gateway

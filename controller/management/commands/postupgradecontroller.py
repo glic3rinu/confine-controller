@@ -58,3 +58,13 @@ class Command(BaseCommand):
         if version <= 629:
             # Clean existing sessions because of change on auth backend
             run('echo "delete from django_session;" | python manage.py dbshell')
+        if version < 801:
+            # Deprecate ping.state
+            from djcelery.models import PeriodicTask
+            PeriodicTask.objects.filter(name='state.ping').delete()
+            run('rabbitmqctl stop_app')
+            run('rabbitmqctl reset')
+            run('rabbitmqctl start_app')
+            run('service celeryd restart')
+            run('service celeryevcam restart')
+

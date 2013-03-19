@@ -41,6 +41,7 @@ if is_installed('api'):
         url(r'^api-token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
         url(r'^api/', include(api.urls)),)
 
+
 if is_installed('gis'):
     urlpatterns += patterns('',
         url(r'^gis/', include('gis.urls')),)

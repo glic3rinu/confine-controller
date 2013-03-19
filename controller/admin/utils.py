@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.shortcuts import redirect
 from django.utils.functional import update_wrapper
 from django.utils.html import escape
@@ -17,7 +18,7 @@ def get_modeladmin(model):
 
 def insert_inline(model, inline, head=False):
     """ Inserts model inline into an existing modeladmin """
-    modeladmin = get_modeladmin(model)
+    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
     if hasattr(inline, 'inline_identify'):
         delete_inline(model, inline.inline_identify)
     # Avoid inlines defined on parent class be shared between subclasses
@@ -33,7 +34,7 @@ def insert_inline(model, inline, head=False):
 
 def insert_list_filter(model, filter):
     """ inserts filter to modeladmin.list_filters """
-    modeladmin = get_modeladmin(model)
+    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
     if not modeladmin.list_filter:
         type(modeladmin).list_filter = []
     modeladmin.list_filter += (filter,)
@@ -41,7 +42,7 @@ def insert_list_filter(model, filter):
 
 def insert_list_display(model, field):
     """ inserts field to modeladmin.list_display """
-    modeladmin = get_modeladmin(model)
+    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
     if not modeladmin.list_display:
         type(modeladmin).list_display = []
     modeladmin.list_display += (field,)
@@ -49,7 +50,7 @@ def insert_list_display(model, field):
 
 def insert_action(model, action):
     """ inserts action to modeladmin.actions """
-    modeladmin = get_modeladmin(model)
+    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
     if modeladmin is None:
         import_module('%s.%s' % (model._meta.app_label, 'admin'))
         modeladmin = get_modeladmin(model)

@@ -1,36 +1,46 @@
-import requests, gevent
+import requests, gevent, os
 from celery.task import periodic_task
-from celery.task.schedules import crontab
+from django.db.models import get_model
 from gevent import monkey
 
 from controller.utils import LockFile
-from nodes.models import Node
+
+from .settings import STATE_LOCK_DIR, STATE_NODESTATE_CRONTAB, STATE_SLIVERSTATE_CRONTAB
 
 
-def _ping(url):
-    head = requests.head(url)
-    return head
-
-
-@periodic_task(name="state.ping", run_every=crontab(minute='*/5', hour='*'))
-def ping():
+def get_state(state_module):
+    state_model = get_model(*state_module.split('.'))
+    lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
+    freq = state_model.get_setting('FREQUENCY')
+    
     # Prevent concurrent executions
-    # TODO calculate expire based on run_every
-    with LockFile('/dev/shm/.state.ping.lock', expire=4*60):
-        from .models import NodeState
-        nodes = Node.objects.all()
+    with LockFile(lock_file, expire=freq-(freq*0.2)):
+        objects = state_model.get_related_model().objects.all()
+        URI = state_model.get_setting('URI')
+        node = lambda obj: obj.node if hasattr(obj, 'node') else obj
         
         # enable async execution
         monkey.patch_all(thread=False, select=False)
         
-        # create greenlets, with requests.get as a callback function
-        glets = [ gevent.spawn(_ping, 'http://[%s]' % node.tinc.address) for node in nodes ]
+        # create greenlets
+        glets = [ gevent.spawn(requests.get, URI % {'mgmt_addr': node(obj).mgmt_net.addr,
+                                                    'object_id': obj.pk, }) for obj in objects ]
         
         # wait for all greenlets to finish
         gevent.joinall(glets)
         
         # look at the results
-        for node, glet in zip(nodes, glets):
-            NodeState.store_glet(node, glet)
+        for obj, glet in zip(objects, glets):
+            state_model.store_glet(obj, glet)
     
-    return
+    return len(objects)
+
+
+@periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_CRONTAB)
+def node_state():
+    return get_state('state.NodeState')
+
+
+@periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_CRONTAB)
+def node_state():
+    return get_state('state.SliverState')

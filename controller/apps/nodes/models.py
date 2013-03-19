@@ -25,20 +25,20 @@ class Node(models.Model):
     SAFE = 'safe'
     PRODUCTION = 'production'
     STATES = (
-        (DEBUG, 'Debug'),
-        (SAFE, 'Safe'),
-        (PRODUCTION, 'Production'),
-        (FAILURE, 'Failure'),
+        (DEBUG, 'DEBUG'),
+        (SAFE, 'SAFE'),
+        (PRODUCTION, 'PRODUCTION'),
+        (FAILURE, 'FAILURE'),
     )
     IPV6_METHODS = (
-        ('none', 'none'),
-        ('dhcp', 'dhcp'),
-        ('auto', 'auto'),
+        ('none', 'None'),
+        ('dhcp', 'DHCP'),
+        ('auto', 'Auto'),
     )
     IPV4_METHODS = (
-        ('none', 'none'),
-        ('dhcp', 'dhcp'),
-        ('range', 'range'),
+        ('none', 'None'),
+        ('dhcp', 'DHCP'),
+        ('range', 'Range'),
     )
     
     name = models.CharField(max_length=256, unique=True,

@@ -119,3 +119,4 @@ if is_installed('south'):
     add_introspection_rules([], ["^controller\.models\.fields\.URIField"])
     add_introspection_rules([], ["^controller\.models\.fields\.NullableCharField"])
     add_introspection_rules([], ["^controller\.models\.fields\.NullableTextField"])
+

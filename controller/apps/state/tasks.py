@@ -36,11 +36,13 @@ def get_state(state_module):
     return len(objects)
 
 
-@periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_SCHEDULE)
+@periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_SCHEDULE,
+    expires=STATE_NODESTATE_SCHEDULE)
 def node_state():
     return get_state('state.NodeState')
 
 
-@periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_SCHEDULE)
+@periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_SCHEDULE,
+   expires=STATE_SLIVERSTATE_SCHEDULE)
 def sliver_state():
     return get_state('state.SliverState')

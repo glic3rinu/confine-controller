@@ -5,14 +5,14 @@ from gevent import monkey
 
 from controller.utils import LockFile
 
-from .settings import STATE_LOCK_DIR, STATE_NODESTATE_CRONTAB, STATE_SLIVERSTATE_CRONTAB
+from .settings import STATE_LOCK_DIR, STATE_NODESTATE_SCHEDULE, STATE_SLIVERSTATE_SCHEDULE
 
 
 def get_state(state_module):
     state_model = get_model(*state_module.split('.'))
     lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
-    freq = state_model.get_setting('FREQUENCY')
-    
+    freq = state_model.get_setting('SCHEDULE')
+
     # Prevent concurrent executions
     with LockFile(lock_file, expire=freq-(freq*0.2)):
         objects = state_model.get_related_model().objects.all()
@@ -36,11 +36,11 @@ def get_state(state_module):
     return len(objects)
 
 
-@periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_CRONTAB)
+@periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_SCHEDULE)
 def node_state():
     return get_state('state.NodeState')
 
 
-@periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_CRONTAB)
-def node_state():
+@periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_SCHEDULE)
+def sliver_state():
     return get_state('state.SliverState')

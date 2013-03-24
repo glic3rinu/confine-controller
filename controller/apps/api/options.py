@@ -63,7 +63,7 @@ class RestApi(object):
                 url(r'^%s/$' % name_plural,
                     resource[0].as_view(),
                     name='%s-list' % name),
-                url(r'^%s/(?P<pk>[0-9]+)$' % name_plural, 
+                url(r'^%s/(?P<pk>[0-9]+)$' % name_plural,
                     resource[1].as_view(),
                     name="%s-detail" % name),
             )
@@ -80,7 +80,7 @@ class RestApi(object):
         if model in self._registry:
             self._registry[model][0].serializer_class.base_fields.update({name: field()})
             self._registry[model][1].serializer_class.base_fields.update({name: field()})
-
+    
 
 # singleton
 api = RestApi()

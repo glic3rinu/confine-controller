@@ -91,9 +91,9 @@ class Slice(models.Model):
     REGISTER = 'register'
     DEPLOY = 'deploy'
     START = 'start'
-    STATES = ((REGISTER, 'Register'),
-              (DEPLOY, 'Deploy'),
-              (START, 'Start'),)
+    STATES = ((REGISTER, 'REGISTER'),
+              (DEPLOY, 'DEPLOY'),
+              (START, 'START'),)
     
     name = models.CharField(max_length=64, unique=True,
         help_text='A unique name of this slice. A single non-empty line of free-form '

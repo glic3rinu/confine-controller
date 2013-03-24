@@ -87,7 +87,8 @@ def admin_link(field_name, app_model='', href_name=''):
     Useful for specify a ModelAdmin.list_display member
     """
     def link(obj, field=field_name, app_model=app_model, href_name=href_name):
-        if field == '': rel = obj
+        if field == '':
+            rel = obj
         else:
             rel = get_field_value(obj, field)
         if not rel:

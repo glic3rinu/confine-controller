@@ -81,11 +81,7 @@ class RSAPublicKeyField(models.TextField):
         return super(RSAPublicKeyField, self).__init__(*args, **kwargs)
     
     def get_prep_value(self, value):
-        if not value:
-            value = None
-        else:
-            value = value.strip()
-        return super(RSAPublicKeyField, self).get_prep_value(value)
+        return value.strip() if value else None
     
     # TODO to_python returns an rsa key?
 
@@ -97,9 +93,7 @@ class URIField(models.URLField):
         return super(URIField, self).__init__(*args, **kwargs)
     
     def get_prep_value(self, value):
-        if value == '':
-            value = None
-        return super(URIField, self).get_prep_value(value)
+        return value or None
 
 
 class NullableCharField(models.CharField):

@@ -30,7 +30,7 @@ class BaseState(models.Model):
     
     @property
     def next_retry_on(self):
-        freq = type(self).get_setting('FREQUENCY')
+        freq = type(self).get_setting('SCHEDULE')
         time = self.last_try_on + timedelta(seconds=freq)
         return time.strftime("%B %d, %Y, %I:%M %p.")
     
@@ -57,7 +57,7 @@ class BaseState(models.Model):
     @property
     def current(self):
         cls = type(self)
-        freq = cls.get_setting('FREQUENCY')
+        freq = cls.get_setting('SCHEDULE')
         expire_window = cls.get_setting('EXPIRE_WINDOW')
         
         def heartbeat_expires(timestamp, freq=freq, expire_window=expire_window):
@@ -66,7 +66,7 @@ class BaseState(models.Model):
         if self.last_seen_on and time() < heartbeat_expires(self.last_seen_timestamp):
             if self.data:
                 try:
-                    return json.loads(self.data).get('state', 'online')
+                    return json.loads(self.data).get('state', 'unknown')
                 except ValueError:
                     pass
             return 'unknown'

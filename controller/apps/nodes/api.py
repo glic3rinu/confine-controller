@@ -25,9 +25,9 @@ class NodeList(ApiPermissionsMixin, URIListCreateAPIView):
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
     
-    def get(self, request, format=None):
-        response = super(NodeList, self).get(request, format=format)
-        response['link'] = link_header(['base', 'node-list'], request)
+    def get(self, request, *args, **kwargs):
+        response = super(NodeList, self).get(request, *args, **kwargs)
+        response['Link'] = link_header(['base', 'node-list'], request)
         return response
 
 
@@ -42,6 +42,11 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
+    
+    def get(self, request, *args, **kwargs):
+        response = super(NodeDetail, self).get(request, *args, **kwargs)
+        response['Link'] = link_header(['base', 'node-list'], request)
+        return response
 
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):

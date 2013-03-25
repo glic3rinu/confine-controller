@@ -41,7 +41,6 @@ class BaseStateAdmin(PermissionModelAdmin):
                        'current',)
         }),
         ('Details', {
-            'classes': ('collapse',),
             'fields': ('display_metadata', 'display_data')
         }),)
     
@@ -82,7 +81,6 @@ class SliverStateAdmin(BaseStateAdmin):
                        'next_retry_on', 'current',)
         }),
         ('Details', {
-            'classes': ('collapse',),
             'fields': ('display_metadata', 'display_data')
         }),)
     change_form_template = 'admin/state/sliverstate/change_form.html'
@@ -110,6 +108,7 @@ def state(*args):
         url = reverse('admin:state_%s_change' % cls_name, args=[state.pk])
         return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
 state.admin_order_field = 'state__last_seen_on'
+
 
 insert_list_display(Node, state)
 insert_list_display(Sliver, state)

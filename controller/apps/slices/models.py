@@ -155,7 +155,7 @@ class Slice(models.Model):
                     self.set_state = self.REGISTER
         elif self.vlan_nr > 0 and self.set_state == self.REGISTER:
             # transition to a register state, deallocating...
-            self.vlan_nr = 0
+            self.vlan_nr = None
         if commit:
             self.save()
     

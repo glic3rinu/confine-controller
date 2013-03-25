@@ -12,9 +12,10 @@ from .models import Slice, Sliver, Template, SliverIface
 
 class IfaceField(serializers.WritableField):
     def to_native(self, value):
-        return [ {'type': iface.type,
+        return [ {'nr': iface.nr,
+                  'type': iface.type,
                   'name': iface.name,
-                  'parent': None if not iface.parent else iface.parent.name } for iface in value.all() ]
+                  'parent_name': None if not iface.parent else iface.parent.name } for iface in value.all() ]
     
     def from_native(self, value):
         parent = self.parent

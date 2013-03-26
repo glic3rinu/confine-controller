@@ -1,0 +1,10 @@
+fieldset {
+    overflow: auto;
+    max-width: 1100px;
+}
+
+.form-row {
+    overflow: visible;
+}
+
+

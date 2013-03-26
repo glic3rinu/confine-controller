@@ -39,9 +39,11 @@ class SliceAdminForm(forms.ModelForm):
     def clean_vlan_nr(self):
         """ Return -1 if user requests vlan_nr """
         vlan_nr = self.cleaned_data['vlan_nr']
-        if isinstance(vlan_nr, bool) and vlan_nr:
-            return -1
-        return vlan_nr
+        if isinstance(vlan_nr, bool):
+            # Register state
+            return None if not vlan_nr else -1
+        # ! Register state: return the old value
+        return Slice.objects.get(pk=self.instance.pk).vlan_nr
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):

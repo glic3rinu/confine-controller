@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 
-from rest_framework import serializers
-
-from api.serializers import UriHyperlinkedModelSerializer, PropertyField, RelHyperlinkedRelatedField
+from api import serializers
 
 from .models import Server, Node, DirectIface
 
 
-class ServerSerializer(UriHyperlinkedModelSerializer):
+class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Server
 
@@ -17,11 +15,11 @@ class DirectIfaceField(serializers.WritableField):
         return [ iface.name for iface in value.all() ]
 
 
-class NodeSerializer(UriHyperlinkedModelSerializer):
+class NodeSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    properties = PropertyField(required=False)
-    slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail',
-        read_only=True)
+    properties = serializers.PropertyField(required=False)
+    slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
+        view_name='sliver-detail')
     direct_ifaces = DirectIfaceField(required=False)
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)

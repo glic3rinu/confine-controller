@@ -1,8 +1,6 @@
 from __future__ import absolute_import
 
-from rest_framework import serializers
-
-from api import api
+from api import api, serializers
 from nodes.models import Node
 from slices.models import Slice
 from users.models import User, Group

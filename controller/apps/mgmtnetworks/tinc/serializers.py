@@ -1,12 +1,9 @@
 from __future__ import absolute_import
 
-from rest_framework import serializers
-
-from api import api
-from api.serializers import UriHyperlinkedModelSerializer, RelHyperlinkedRelatedField
+from api import api, serializers
 from nodes.models import Server, Node
 
-from .models import (Island, TincAddress, TincHost, TincClient, TincServer, 
+from .models import (Island, TincAddress, TincHost, TincClient, TincServer,
     Gateway, Host)
 
 
@@ -24,7 +21,7 @@ class TincConnectToSerializer(serializers.ModelSerializer):
         exclude = ('id', 'server', 'island')
 
 
-class IslandSerializer(UriHyperlinkedModelSerializer):
+class IslandSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     
     class Meta:
@@ -32,7 +29,7 @@ class IslandSerializer(UriHyperlinkedModelSerializer):
 
 
 class TincAddressSerializer(serializers.ModelSerializer):
-    island = RelHyperlinkedRelatedField(view_name='island-detail')
+    island = serializers.RelHyperlinkedRelatedField(view_name='island-detail')
     
     class Meta:
         model = TincAddress
@@ -41,7 +38,7 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 class TincClientSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    island = RelHyperlinkedRelatedField(view_name='island-detail')
+    island = serializers.RelHyperlinkedRelatedField(view_name='island-detail')
     
     class Meta:
         model = TincClient
@@ -64,7 +61,7 @@ class MgmtNetConfSerializer(serializers.Serializer):
     tinc_server = TincServerSerializer()
 
 
-class GatewaySerializer(UriHyperlinkedModelSerializer):
+class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfSerializer()
     
@@ -72,7 +69,7 @@ class GatewaySerializer(UriHyperlinkedModelSerializer):
         model = Gateway
 
 
-class HostSerializer(UriHyperlinkedModelSerializer):
+class HostSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfSerializer()
     

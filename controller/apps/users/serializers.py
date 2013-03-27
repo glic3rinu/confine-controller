@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 
-from rest_framework import serializers
-
-from api.serializers import UriHyperlinkedModelSerializer, RelHyperlinkedRelatedField
+from api import serializers
 from users.models import User, Group, Roles, AuthToken
 
 
 class GroupRolesSerializer(serializers.ModelSerializer):
-    group = RelHyperlinkedRelatedField(view_name='group-detail')
+    group = serializers.RelHyperlinkedRelatedField(view_name='group-detail')
     
     class Meta:
         model = Roles
@@ -15,7 +13,7 @@ class GroupRolesSerializer(serializers.ModelSerializer):
 
 
 class UserRolesSerializer(serializers.ModelSerializer):
-    user = RelHyperlinkedRelatedField(view_name='user-detail')
+    user = serializers.RelHyperlinkedRelatedField(view_name='user-detail')
     
     class Meta:
         model = Roles
@@ -27,7 +25,7 @@ class AuthTokenField(serializers.WritableField):
         return [ token.data for token in value.all() ]
 
 
-class UserSerializer(UriHyperlinkedModelSerializer):
+class UserSerializer(serializers.UriHyperlinkedModelSerializer):
     group_roles = GroupRolesSerializer(source='roles')
     auth_tokens = AuthTokenField()
     is_active = serializers.BooleanField(read_only=True)
@@ -40,14 +38,14 @@ class UserSerializer(UriHyperlinkedModelSerializer):
         exclude = ['password', 'groups']
 
 
-class GroupSerializer(UriHyperlinkedModelSerializer):
+class GroupSerializer(serializers.UriHyperlinkedModelSerializer):
     user_roles = UserRolesSerializer(source='roles')
     allow_nodes = serializers.BooleanField(read_only=True)
     allow_slices = serializers.BooleanField(read_only=True)
-    slices = RelHyperlinkedRelatedField(many=True, source='slices', read_only=True,
-        view_name='slice-detail')
-    nodes = RelHyperlinkedRelatedField(many=True, source='nodes', read_only=True,
-        view_name='node-detail')
+    slices = serializers.RelHyperlinkedRelatedField(many=True, source='slices',
+        read_only=True, view_name='slice-detail')
+    nodes = serializers.RelHyperlinkedRelatedField(many=True, source='nodes',
+        read_only=True, view_name='node-detail')
     
     class Meta:
         model = Group

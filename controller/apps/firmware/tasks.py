@@ -54,7 +54,7 @@ def build(build_id, exclude=[]):
         image.gzip()
         
         update_state(build, 95, 99, 'Cleaning up')
-        dest_path = build_obj.get_dest_path()
+        dest_path = config.get_dest_path(node, build=build_obj)
         image.move(dest_path)
     finally:
         image.clean()

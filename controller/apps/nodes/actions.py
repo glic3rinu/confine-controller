@@ -63,6 +63,7 @@ def reboot_selected(modeladmin, request, queryset):
         context, current_app=modeladmin.admin_site.name)
 
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
+reboot_selected.url_name = 'reboot'
 
 
 @transaction.commit_on_success
@@ -107,4 +108,6 @@ def request_cert(modeladmin, request, queryset):
     # Display the confirmation page
     return TemplateResponse(request, 'admin/nodes/node/request_certificate.html', context, 
         current_app=modeladmin.admin_site.name)
-    
+
+request_cert.url_name = 'request-cert'
+request_cert.verbose_name = 'Request Certificate'

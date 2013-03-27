@@ -26,6 +26,7 @@ def renew_selected_slices(modeladmin, request, queryset):
     msg = "%s selected slices has been renewed for %s on" % (queryset.count(), \
         SLICES_SLICE_EXP_INTERVAL)
     modeladmin.message_user(request, msg)
+renew_selected_slices.url_name = 'renew'
 
 
 @transaction.commit_on_success
@@ -40,6 +41,7 @@ def reset_selected(modeladmin, request, queryset):
     msg = "%s selected %s has been reseted" % (queryset.count(), verbose_name_plural)
     modeladmin.message_user(request, msg)
 reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_plural)s")
+reset_selected.url_name = 'reset'
 
 
 @transaction.commit_on_success
@@ -53,7 +55,8 @@ def update_selected(modeladmin, request, queryset):
     verbose_name_plural = force_text(obj._meta.verbose_name_plural)
     msg = "%s selected %s has been updated" % (queryset.count(), verbose_name_plural)
     modeladmin.message_user(request, msg)
-reset_selected.short_description = ugettext_lazy("Update selected %(verbose_name_plural)s")
+update_selected.short_description = ugettext_lazy("Update selected %(verbose_name_plural)s")
+update_selected.url_name = 'update'
 
 
 @transaction.commit_on_success

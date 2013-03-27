@@ -4,7 +4,8 @@
 {% block object-tools-items %}
 {% if has_change_permission %}
     {% for item in object_tools_items %}
-        <li><a href="{{item.0}}/" class="{{item.3}}">{{item.2}}</a></li>
+        {{ item.name }}
+        <li><a href="{{item.url_name}}/" class="{{item.css_class}}">{{item.verbose_name}}</a></li>
     {% endfor %}
 {% endif %}
 <li><a href="history/" class="historylink">{% trans "History" %}</a></li>

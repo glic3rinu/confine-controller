@@ -60,9 +60,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
                      'queue', 'owner__username']
     inlines = [MessageInline]
     actions = [reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
-    change_view_actions = [('reject', reject_tickets, '', ''),
-                           ('resolve', resolve_tickets, '', ''),
-                           ('take', take_tickets, '', ''),]
+    change_view_actions = [reject_tickets, resolve_tickets, take_tickets]
     change_form_template = "admin/issues/ticket/change_form.html"
     readonly_fields = ('created_by', 'state')
     fieldsets = (

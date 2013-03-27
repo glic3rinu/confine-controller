@@ -131,23 +131,6 @@ class Build(models.Model):
         except:
             return None
     
-    def get_image_name(self):
-        """ Generates image name """
-        config = Config.objects.get()
-        context = {
-            'node_name': self.node.name,
-            'arch': self.node.arch,
-            'build_id': self.pk,
-            'node_id': self.node.pk,
-            'version': config.version }
-        return config.image_name % context
-    
-    def get_dest_path(self):
-        """ image destination path """
-        image_name = self.get_image_name()
-        base_path = get_file_field_base_path(Build, 'image')
-        return os.path.join(base_path, image_name)
-    
     @classmethod
     def build(cls, node, async=False, exclude=[]):
         """
@@ -265,6 +248,21 @@ class Config(SingletonModel):
         if len(images) == 0:
             return None
         return images[0]
+    
+    def get_image_name(self, node, build=None):
+        context = {
+            'node_name': node.name,
+            'arch': node.arch,
+            'build_id': build.id if build else 0,
+            'node_id': node.pk,
+            'version': self.version }
+        return self.image_name % context
+    
+    def get_dest_path(self, node, build=None):
+        """ image destination path """
+        image_name = self.get_image_name(node, build)
+        base_path = get_file_field_base_path(Build, 'image')
+        return os.path.join(base_path, image_name)
 
 
 class BaseImage(models.Model):

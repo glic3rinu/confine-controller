@@ -172,7 +172,7 @@ admin.site.register(Build, BuildAdmin)
 insert_action(Node, get_firmware)
 
 node_modeladmin = get_modeladmin(Node)
-node_modeladmin.set_change_view_action('firmware', get_firmware, 'Download Firmware', 'viewsitelink')
+node_modeladmin.set_change_view_action(get_firmware)
 
 old_get_urls = node_modeladmin.get_urls
 

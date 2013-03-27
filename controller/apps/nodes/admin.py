@@ -68,8 +68,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         }),
         )
     actions = [request_cert, reboot_selected]
-    change_view_actions = [('reboot', reboot_selected, '', ''),
-                           ('request-cert', request_cert, 'Request Certificate', '')]
+    change_view_actions = [reboot_selected, request_cert]
     change_form_template = "admin/controller/change_form.html"
     
     def display_cert(self, node):

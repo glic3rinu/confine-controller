@@ -64,4 +64,4 @@ def join_request(modeladmin, request, queryset):
         context, current_app=modeladmin.admin_site.name)
 
 join_request.short_description = "Request to join the selected groups"
-
+join_request.url_name = 'join-request'

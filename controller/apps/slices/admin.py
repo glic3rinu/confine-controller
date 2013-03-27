@@ -76,7 +76,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverIfaceInline]
     actions = [update_selected]
-    change_view_actions = [('update', update_selected, '', ''),]
+    change_view_actions = [update_selected]
     default_changelist_filter = 'my_slivers'
     
     def __init__(self, *args, **kwargs):
@@ -373,8 +373,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     save_and_continue = True
-    change_view_actions = [('renew', renew_selected_slices, '', ''),
-                           ('reset', reset_selected, '', '')]
+    change_view_actions = [renew_selected_slices, reset_selected]
     default_changelist_filter = 'my_slices'
     
     def exp_data_sha256(self, instance):

@@ -31,10 +31,9 @@ class ChangeViewActions(admin.options.ModelAdmin):
     Note: If you want to provide a custom change form template then you should
         specify it with modeladmin.change_form_template = "your template"
     Usage 1:
-        change_view_actions = [('reboot', reboot_view, 'Reboot', 'historylink'),
-                               ('reboot', 'reboot_view', '', '')]
+        change_view_actions = [reboot_view, 'request_certificate']
     Usage 2: 
-        modeladmin.set_change_view_action('reboot', reboot_view, '', '')
+        modeladmin.set_change_view_action(reboot_view)
     """
     def __init__(self, *args, **kwargs):
         super(ChangeViewActions, self).__init__(*args, **kwargs)
@@ -42,8 +41,8 @@ class ChangeViewActions(admin.options.ModelAdmin):
             self.change_view_actions = []
         else:
             actions = self.change_view_actions
-            links = [ self._prepare_change_view_action(*link) for link in actions ]
-            self.change_view_actions = links
+            views = [self._prepare_change_view_action(action) for action in actions]
+            self.change_view_actions = views
         if not self.change_form_template:
             self.change_form_template = "admin/controller/change_form.html"
     
@@ -53,34 +52,42 @@ class ChangeViewActions(admin.options.ModelAdmin):
         admin_site = self.admin_site
         opts = self.model._meta
         new_urls = patterns("")
-        for link in self.change_view_actions:
-            new_urls += patterns("", url("^(?P<object_id>\d+)/%s/$" % link[0],
-                admin_site.admin_view(link[1]),
-                name='%s_%s_%s' % (opts.app_label, opts.module_name, link[0])))
+        for action in self.change_view_actions:
+            new_urls += patterns("",
+                url("^(?P<object_id>\d+)/%s/$" % action.url_name,
+                    admin_site.admin_view(action),
+                    name='%s_%s_%s' % (opts.app_label, opts.module_name, action.url_name)))
         return new_urls + urls
     
-    def get_change_view_actions(self):
-        return self.change_view_actions
-    
-    def set_change_view_action(self, name, view, description, css_class):
-        action = self._prepare_change_view_action(name, view, description, css_class)
-        self.change_view_actions.append(action)
-    
-    def _prepare_change_view_action(self, name, action, description, css_class):
+    def _prepare_change_view_action(self, action):
         if isinstance(action, str) or isinstance(action, unicode):
             action = getattr(self, action)
         view = action_to_view(action, self)
-        if description == '':
-            description = name.capitalize()
-        if css_class == '':
-            css_class = 'historylink' 
-        return (name, view, description, css_class)
+        view.url_name = getattr(action, 'url_name', action.__name__)
+        view.verbose_name = getattr(action, 'verbose_name', view.url_name)
+        view.css_class = getattr(action, 'css_class', 'historylink')
+        return view
+    
+    def get_change_view_actions_as_class(self):
+        class ActionWrapper():
+            """ wrapper class for access function attributes on django templates """
+        actions = []
+        for action in self.change_view_actions:
+            a = ActionWrapper()
+            a.url_name = action.url_name
+            a.verbose_name = action.verbose_name
+            a.css_class = action.css_class
+            actions.append(a)
+        return actions
+    
+    def set_change_view_action(self, action):
+        self.change_view_actions.append(self._prepare_change_view_action(action))
     
     def change_view(self, *args, **kwargs):
         extra_context = kwargs['extra_context'] if 'extra_context' in kwargs else {}
         if extra_context is None:
             extra_context = {}
-        extra_context.update({'object_tools_items': self.get_change_view_actions()})
+        extra_context.update({'object_tools_items': self.get_change_view_actions_as_class()})
         kwargs['extra_context'] = extra_context
         return super(ChangeViewActions, self).change_view(*args, **kwargs)
 

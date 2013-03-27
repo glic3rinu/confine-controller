@@ -125,7 +125,7 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]
     actions = [join_request]
-    change_view_actions = [('join-request', join_request, 'Join request', ''),]
+    change_view_actions = [join_request]
     change_form_template = 'admin/users/group/change_form.html'
     form = GroupAdminForm
     

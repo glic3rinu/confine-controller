@@ -54,6 +54,8 @@ class BaseStateAdmin(PermissionModelAdmin):
     
     def display_data(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
+        # TODO render data according to header content-type
+        #      (when it becomes available in the node)
         return mark_safe(style + highlight(instance.data, JsonLexer(), HtmlFormatter()))
     display_data.short_description = 'data'
     

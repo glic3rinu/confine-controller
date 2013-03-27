@@ -8,6 +8,7 @@ def resolve_tickets(modeladmin, request, queryset):
         modeladmin.log_change(request, obj, "Marked as Resolved")
     msg = "%s selected tickets are now resolved" % queryset.count()
     modeladmin.message_user(request, msg)
+resolve_tickets.url_name = 'resolve'
 
 
 @transaction.commit_on_success
@@ -17,6 +18,7 @@ def reject_tickets(modeladmin, request, queryset):
         modeladmin.log_change(request, obj, "Marked as Rejected")
     msg = "%s selected tickets are now rejected" % queryset.count()
     modeladmin.message_user(request, msg)
+reject_tickets.url_name = 'reject'
 
 
 @transaction.commit_on_success
@@ -26,6 +28,7 @@ def take_tickets(modeladmin, request, queryset):
         modeladmin.log_change(request, obj, "Taken")
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
+take_tickets.url_name = 'take'
 
 
 @transaction.commit_on_success

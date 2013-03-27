@@ -17,7 +17,7 @@ def get_state(state_module):
     with LockFile(lock_file, expire=freq-(freq*0.2)):
         objects = state_model.get_related_model().objects.all()
         URI = state_model.get_setting('URI')
-        node = lambda obj: obj.node if hasattr(obj, 'node') else obj
+        node = lambda obj: getattr(obj, 'node', obj)
         
         # enable async execution
         monkey.patch_all(thread=False, select=False)

@@ -1,16 +1,13 @@
 from __future__ import absolute_import
 
-from rest_framework import generics
-
-from api import api
-from api.generics import URIListCreateAPIView
+from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Island, Host, Gateway
 from .serializers import IslandSerializer, HostSerializer, GatewaySerializer
 
 
-class IslandList(ApiPermissionsMixin, URIListCreateAPIView):
+class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Island.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#island_at_server)
@@ -39,7 +36,7 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = IslandSerializer
 
 
-class HostList(ApiPermissionsMixin, URIListCreateAPIView):
+class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.HostList.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#hostlist_at_server)
@@ -64,7 +61,7 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = HostSerializer
 
 
-class GatewayList(ApiPermissionsMixin, URIListCreateAPIView):
+class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)

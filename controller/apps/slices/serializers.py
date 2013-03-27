@@ -2,10 +2,7 @@ from __future__ import absolute_import
 
 import ast
 
-from rest_framework import serializers
-
-from api.serializers import (UriHyperlinkedModelSerializer, HyperlinkedFileField,
-    RelHyperlinkedRelatedField, PropertyField)
+from api import serializers
 
 from .models import Slice, Sliver, Template, SliverIface
 
@@ -45,10 +42,10 @@ class IfaceField(serializers.WritableField):
         return ifaces
 
 
-class SliverSerializer(UriHyperlinkedModelSerializer):
+class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     interfaces = IfaceField()
-    properties = PropertyField(required=False)
-    exp_data = HyperlinkedFileField(source='exp_data', required=False)
+    properties = serializers.PropertyField(required=False)
+    exp_data = serializers.HyperlinkedFileField(source='exp_data', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
@@ -70,11 +67,12 @@ class SliverSerializer(UriHyperlinkedModelSerializer):
         return instance
 
 
-class SliceSerializer(UriHyperlinkedModelSerializer):
+class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    slivers = RelHyperlinkedRelatedField(many=True, view_name='sliver-detail', read_only=True)
-    properties = PropertyField(required=False)
-    exp_data = HyperlinkedFileField(source='exp_data', required=False)
+    slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True, 
+        view_name='sliver-detail')
+    properties = serializers.PropertyField(required=False)
+    exp_data = serializers.HyperlinkedFileField(source='exp_data', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     expires_on = serializers.DateTimeField(read_only=True)
@@ -94,10 +92,10 @@ class SliceSerializer(UriHyperlinkedModelSerializer):
         return instance
 
 
-class TemplateSerializer(UriHyperlinkedModelSerializer):
+class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     image_sha256 = serializers.CharField(read_only=True)
-    image_uri = HyperlinkedFileField(source='image')
+    image_uri = serializers.HyperlinkedFileField(source='image')
     
     class Meta:
         model = Template

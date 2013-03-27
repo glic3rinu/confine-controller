@@ -1,16 +1,13 @@
 from __future__ import absolute_import
 
-from rest_framework import generics
-
-from api import api
-from api.generics import URIListCreateAPIView
+from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import User, Group
 from .serializers import UserSerializer, GroupSerializer
 
 
-class UserList(ApiPermissionsMixin, URIListCreateAPIView):
+class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.User.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#user_at_server)
@@ -35,7 +32,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 
-class GroupList(ApiPermissionsMixin, URIListCreateAPIView):
+class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Group.v0+json`](http://
     wiki.confine-project.eu/arch:rest-api?&#group_at_server)

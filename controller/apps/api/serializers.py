@@ -1,11 +1,11 @@
 import ast
 
-from rest_framework import serializers
+from rest_framework.serializers import *
 
 # Haking rest_framework in order to meet our crazy design specifications
 
 
-class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
+class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
     """ 
     HyperlinkedRelatedField field providing a relation object rather than flat URL 
     """
@@ -21,11 +21,11 @@ class RelHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
         return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 
-class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
+class UriHyperlinkedModelSerializer(HyperlinkedModelSerializer):
     """ 
     Like HyperlinkedModelSerializer but renaming url field to uri 
     """
-    uri = serializers.HyperlinkedIdentityField()
+    uri = HyperlinkedIdentityField()
     
     def __init__(self, *args, **kwargs):
         super(UriHyperlinkedModelSerializer, self).__init__(*args, **kwargs)
@@ -44,14 +44,14 @@ class UriHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
         return RelHyperlinkedRelatedField(**kwargs)
 
 
-class HyperlinkedFileField(serializers.FileField):
+class HyperlinkedFileField(FileField):
     def to_native(self, value):
         if value:
             request = self.context.get('request')
             return request.build_absolute_uri(value.url)
 
 
-class PropertyField(serializers.WritableField):
+class PropertyField(WritableField):
     """
     Dict-like representation of a Property Model
     A bit hacky, objects get deleted on from_native method and Serializer will

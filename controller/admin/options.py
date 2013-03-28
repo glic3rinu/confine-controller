@@ -3,6 +3,8 @@ from django.conf.urls import patterns, url
 
 from controller.admin.utils import action_to_view
 
+from .helpers import FuncAttrWrapper
+
 
 class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
     """
@@ -64,21 +66,12 @@ class ChangeViewActions(admin.options.ModelAdmin):
             action = getattr(self, action)
         view = action_to_view(action, self)
         view.url_name = getattr(action, 'url_name', action.__name__)
-        view.verbose_name = getattr(action, 'verbose_name', view.url_name)
+        view.verbose_name = getattr(action, 'verbose_name', view.url_name).capitalize()
         view.css_class = getattr(action, 'css_class', 'historylink')
         return view
     
     def get_change_view_actions_as_class(self):
-        class ActionWrapper():
-            """ wrapper class for access function attributes on django templates """
-        actions = []
-        for action in self.change_view_actions:
-            a = ActionWrapper()
-            a.url_name = action.url_name
-            a.verbose_name = action.verbose_name
-            a.css_class = action.css_class
-            actions.append(a)
-        return actions
+        return [ FuncAttrWrapper(action) for action in self.change_view_actions ]
     
     def set_change_view_action(self, action):
         self.change_view_actions.append(self._prepare_change_view_action(action))

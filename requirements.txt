@@ -3,7 +3,7 @@ kombu==2.4.7
 django-celery-email
 django-fluent-dashboard
 south
-djangorestframework==2.2.1
+djangorestframework==2.2.5
 django-private-files
 IPy
 django-singletons

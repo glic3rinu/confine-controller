@@ -77,7 +77,7 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Server
     serializer_class = ServerSerializer
     
-    def get_object(self):
+    def get_object(self, *args, **kwargs):
         try:
             return Server.objects.get()
         except Server.DoesNotExist:

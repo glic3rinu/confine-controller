@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from M2Crypto import BIO, RSA
 
-from controller.settings import MGMT_IPV6_PREFIX
+from controller import settings
 from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
@@ -29,16 +29,19 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default=default_username,
                 help='Specifies the login for the superuser.'),
-            make_option('--mgmt_prefix', dest='mgmt_prefix', default=MGMT_IPV6_PREFIX,
+            make_option('--mgmt_prefix', dest='mgmt_prefix',
+                default=settings.MGMT_IPV6_PREFIX,
                 help='Mgmt prefix, the settings file will be updated.'),
-            make_option('--tinc_port_dflt', dest='tinc_port_dflt', default=TINC_PORT_DFLT,
+            make_option('--tinc_port_dflt', dest='tinc_port_dflt',
+                default=TINC_PORT_DFLT,
                 help='Tinc port default, the settings file will be updated.'),
             make_option('--tinc_address', dest='tinc_address', default='0.0.0.0',
                 help='Tinc BindToAddress'),
-            make_option('--noinput', action='store_false', dest='interactive', default=True,
+            make_option('--noinput', action='store_false', dest='interactive',
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
-                     'cleeryd process owner, which is the user how will perform tincd updates'),
+                     'cleeryd process owner, which is the user how will perform '
+                     'tincd updates', default=True),
             )
     
     option_list = BaseCommand.option_list
@@ -86,13 +89,15 @@ class Command(BaseCommand):
             server.save()
         
         server_ct = ContentType.objects.get_for_model(Server)
-        tinc_server, created = TincServer.objects.get_or_create(object_id=1, content_type=server_ct)
+        tinc_server, created = TincServer.objects.get_or_create(object_id=1,
+            content_type=server_ct)
         
         tinc_port = options.get('tinc_port_dflt')
         tinc_address = options.get('tinc_address')
         mgmt_prefix = options.get('mgmt_prefix')
-        if mgmt_prefix != MGMT_IPV6_PREFIX:
-            update_settings(MGMT_IPV6_PREFIX=mgmt_prefix)
+        if mgmt_prefix != settings.MGMT_IPV6_PREFIX:
+            update_settings(MGMT_IPV6_PREFIX=mgmt_prefix,
+                            monkey_patch='controller.settings')
         if tinc_port != TINC_PORT_DFLT:
             update_settings(TINC_PORT_DFLT=tinc_port)
         
@@ -110,7 +115,8 @@ class Command(BaseCommand):
             'user': username }
         
         r = functools.partial(run, silent=False)
-        if run("grep %(net_name)s %(tincd_root)s/nets.boot" % context, err_codes=[0,1]).return_code == 1:
+        boots = run("grep %(net_name)s %(tincd_root)s/nets.boot" % context, err_codes=[0,1])
+        if boots.return_code == 1:
             r("echo %(net_name)s >> %(tincd_root)s/nets.boot" % context)
         r("mkdir -p %(net_root)s/hosts" % context)
         r("echo '%(tinc_conf)s' > %(net_root)s/tinc.conf" % context)
@@ -122,7 +128,8 @@ class Command(BaseCommand):
         r("chmod +x %(net_root)s/tinc-down" % context)
         
         if tinc_address != '0.0.0.0':
-            TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address, port=tinc_port)
+            TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address,
+                port=tinc_port)
         
         priv_key = os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME, 'rsa_key.priv')
         try:

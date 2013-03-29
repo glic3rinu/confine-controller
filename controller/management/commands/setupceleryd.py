@@ -16,12 +16,11 @@ class Command(BaseCommand):
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
-                     'cleeryd process owner, which is the user how will perform tincd updates'),
+                     'cleleryd process owner, which is the user how will perform tincd updates'),
             )
     
     option_list = BaseCommand.option_list
     help = 'Configure Celeryd to run with your controller instance.'
-    
     
     @check_root
     def handle(self, *args, **options):

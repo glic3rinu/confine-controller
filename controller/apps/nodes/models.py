@@ -9,6 +9,8 @@ from controller.models.fields import NullableCharField, NullableTextField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_prop_name, validate_net_iface_name
 
+from pki import ca, Bob
+
 from . import settings, ssl
 from .utils import get_mgmt_backend
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
@@ -195,7 +197,7 @@ class Node(models.Model):
         return 0
     
     def sign_cert_request(self, scr, commit=True):
-        self.cert = ssl.sign_cert_request(scr)
+        self.cert = ca.sign_request(scr).as_pem().strip()
         if commit:
             self.save()
         return self.cert
@@ -205,10 +207,9 @@ class Node(models.Model):
             # We pick one pseudo-random admin
             user = self.group.admins[0]
         addr = str(self.mgmt_net.addr)
-        self.cert = ssl.generate_certificate(key, Email=user.email, CN=addr)
-        if commit:
-            self.save()
-        return self.cert
+        bob = Bob(key)
+        scr = bob.create_request(Email=user.email, CN=addr)
+        return self.sign_cert_request(scr, commit=commit)
     
     def revoke_certificate(self):
         self.cert = None

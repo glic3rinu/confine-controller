@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     'state',
     'gis',
     'users',
+    'pki',
     
     # Third-party apps
     'south',

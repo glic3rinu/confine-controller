@@ -5,7 +5,7 @@ from firmware.models import Config
 def debug_build(node, exclude=[]):
     """ 
     Function used for debuging the firmware generation
-    
+        from firmware.debug import debug_build
         from nodes.models import Node
         debug_build(Node.objects.all()[0])
     """

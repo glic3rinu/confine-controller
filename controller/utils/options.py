@@ -69,21 +69,6 @@ def send_email_template(template, context, to, email_from=None):
     send_mail(subject, message, email_from, to)
 
 
-def get_project_root():
-    """ Return the current project path site/project """
-    return os.path.dirname(os.path.normpath(os.sys.modules[settings.SETTINGS_MODULE].__file__))
-
-
-def get_project_name():
-    """ Returns current project name """
-    return os.path.basename(get_project_root())
-
-
-def get_site_root():
-    """ Returns project site path """
-    return os.path.abspath(os.path.join(get_project_root(), '..'))
-
-
 def get_existing_pip_installation():
     """ returns current pip installation path """
     if run("pip freeze|grep confine-controller", err_codes=[0,1]).return_code == 0:

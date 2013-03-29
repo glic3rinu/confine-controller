@@ -67,4 +67,7 @@ class Command(BaseCommand):
             run('rabbitmqctl start_app')
             run('service celeryd restart')
             run('service celeryevcam restart')
-
+        if version < 890:
+            # Add pki directory
+            from controller.utils.paths import get_site_root
+            run('mkdir %s/pki' % get_site_root())

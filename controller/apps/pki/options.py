@@ -1,4 +1,4 @@
-import time
+import time, sys, random
 
 from M2Crypto import RSA, X509, EVP, ASN1
 
@@ -60,6 +60,9 @@ class CA(object):
         ca_priv_evp.assign_rsa(self.get_key())
         cert = X509.X509()
         cert.set_version(3)
+        # Set Serial number
+        serial = random.randrange(1, sys.maxint)
+        cert.set_serial_number(serial)
         # Set Cert validity time
         cur_time = ASN1.ASN1_UTCTIME()
         cur_time.set_time(int(time.time()))

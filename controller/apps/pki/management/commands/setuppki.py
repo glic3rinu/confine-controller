@@ -79,7 +79,7 @@ class Command(BaseCommand):
                 msg = 'Organization Name (eg, company) [%s]: ' % org_name
                 org_name = raw_input(msg) or org_name
                 
-                msg = 'Organizational Unit Name (eg, section) [%s]: ' % org_name
+                msg = 'Organizational Unit Name (eg, section) [%s]: ' % org_unit
                 org_unit = raw_input(msg) or org_unit
                 
                 msg = 'Email Address [%s]: ' % email

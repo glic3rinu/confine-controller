@@ -2,8 +2,11 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from controller.models.utils import get_file_field_base_path
-from controller.utils import get_project_root, get_site_root, is_installed
+from controller.utils import is_installed
+from controller.utils.paths import get_project_root, get_site_root
 from controller.utils.system import run, check_root
+
+from pki import ca
 
 
 class Command(BaseCommand):
@@ -16,7 +19,9 @@ class Command(BaseCommand):
             'project_root': get_project_root(),
             'site_root': site_root,
             'media_root': settings.MEDIA_ROOT,
-            'static_root': settings.STATIC_ROOT }
+            'static_root': settings.STATIC_ROOT,
+            'cert_path': ca.cert_path,
+            'cert_key_path': ca.priv_key_path }
         
         apache_conf = (
             'WSGIScriptAlias / %(project_root)s/wsgi.py\n'
@@ -42,14 +47,13 @@ class Command(BaseCommand):
             '        FileETag MTime Size\n'
             '    </FilesMatch>\n'
             '</Directory>\n'
-            'RedirectMatch ^/$ /admin\n' % context )
-        
-#        ssl_config = (
-#            'SSLEngine on\n'
-#            'SSLCertificateFile %(cert_path)s\n'
-#            'SSLCertificateKeyFile %(cert_key_path)s\'
-#            'SSLCACertificateFile %(cert_path)s\n'
-#            'SSLVerifyClient None\n' % context )
+            'RedirectMatch ^/$ /admin\n'
+            '\n'
+            'SSLEngine on\n'
+            'SSLCertificateFile %(cert_path)s\n'
+            'SSLCertificateKeyFile %(cert_key_path)s\n'
+            'SSLCACertificateFile %(cert_path)s\n'
+            'SSLVerifyClient None\n' % context )
         
         include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
         if include_httpd.return_code == 1:
@@ -69,8 +73,12 @@ class Command(BaseCommand):
         # run('a2ensite %s' % project_name)
         run('a2enmod expires')
         run('a2enmod deflate')
+        run('a2enmod ssl')
         
         # Give upload file permissions to apache
         username = run("stat -c %%U %(project_root)s" % context)
         run('adduser www-data %s' % username)
         run('chmod g+w %(media_root)s' % context)
+        
+        # Give read permissions to cert key file
+        run('chmod g+r %(cert_key_path)s' % context)

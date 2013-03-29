@@ -18,6 +18,7 @@ def get_site_root():
     """ Returns project site path """
     return os.path.abspath(os.path.join(get_project_root(), '..'))
 
+
 def abs_or_reltosite(path):
     if not os.path.isabs(path):
         return os.path.join(get_site_root(), path)

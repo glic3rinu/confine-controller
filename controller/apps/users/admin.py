@@ -82,7 +82,7 @@ class JoinRequestInline(PermissionTabularInline):
 
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 
+    list_display = ('username', 'email', 'first_name', 'last_name',
                     'group_links', 'is_superuser', 'is_active', )
     list_filter = ('is_superuser', 'is_active', 'groups')
     fieldsets = (

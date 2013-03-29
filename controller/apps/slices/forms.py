@@ -43,7 +43,7 @@ class SliceAdminForm(forms.ModelForm):
             # Register state
             return None if not vlan_nr else -1
         # ! Register state: return the old value
-        return Slice.objects.get(pk=self.instance.pk).vlan_nr
+        return self.initial["vlan_nr"]
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):

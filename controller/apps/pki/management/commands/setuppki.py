@@ -11,23 +11,20 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--overide', dest='overide', action='store_true',
                 default=False, help='Force overide cert and keys if exists.'),
-            make_option('--country', dest='dn_country',
-                default=settings.PKI_DN_COUNTRY_DFLT,
+            make_option('--country', dest='dn_country', default='',
                 help='Certificate Distinguished Name Country.'),
-            make_option('--state', dest='dn_state',
-                default=settings.PKI_DN_STATE_DFLT,
+            make_option('--state', dest='dn_state', default='',
                 help='Certificate Distinguished Name STATE.'),
-            make_option('--locality', dest='dn_locality',
-                default=settings.PKI_DN_LOCALITY_DFLT,
+            make_option('--locality', dest='dn_locality', default='',
                 help='Certificate Distinguished Name Country.'),
-            make_option('--org_name', dest='dn_org_name',
-                default=settings.PKI_DN_ORG_NAME_DFLT,
+            make_option('--org_name', dest='dn_org_name', default='',
                 help='Certificate Distinguished Name Organization Name.'),
-            make_option('--org_unit', dest='dn_org_unit',
-                default=settings.PKI_DN_ORG_UNIT_DFLT,
+            make_option('--org_unit', dest='dn_org_unit', default='',
                 help='Certificate Distinguished Name Organization Unity.'),
             make_option('--email', dest='dn_email', default='',
                 help='Certificate Distinguished Name Email Address.'),
+            make_option('--common_name', dest='dn_common_name', default=None,
+                help='Certificate Distinguished Name Common Name.'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -48,18 +45,10 @@ class Command(BaseCommand):
             overide = True
         
         if overide or not ca.get_cert():
-            # TODO only if interactive
-            msg = ('-----\n'
-                'You are about to be asked to enter information that\n'
-                'will be incorporated\n'
-                'into your certificate request.\n'
-                'What you are about to enter is what is called a\n'
-                'Distinguished Name or a DN.\n'
-                'There are quite a few fields but you can leave some blank\n'
-                'For some fields there will be a default value,\n'
-                'If you enter \'.\', the field will be left blank.\n'
-                '-----\n')
-            self.stdout.write(msg)
+            # Avoid import errors
+            from mgmtnetworks.tinc.models import TincServer
+            server = TincServer.objects.get()
+            common_name = options.get('common_name') or str(server.address)
             country = options.get('dn_country')
             state = options.get('dn_state')
             locality = options.get('dn_locality')
@@ -68,6 +57,16 @@ class Command(BaseCommand):
             email = options.get('dn_email')
             
             if interactive:
+                msg = ('-----\n'
+                    'You are about to be asked to enter information that\n'
+                    'will be incorporated\n'
+                    'into your certificate request.\n'
+                    'What you are about to enter is what is called a\n'
+                    'Distinguished Name or a DN.\n'
+                    'There are quite a few fields but you can leave some blank\n'
+                    '-----\n')
+                self.stdout.write(msg)
+                
                 msg = 'Country Name (2 letter code) [%s]: ' % country
                 country = raw_input(msg) or country
                 
@@ -86,9 +85,6 @@ class Command(BaseCommand):
                 msg = 'Email Address [%s]: ' % email
                 email = raw_input(msg) or email
             
-            # Avoid import errors
-            from mgmtnetworks.tinc.models import TincServer
-            common_name = str(TincServer.objects.get().address)
             self.stdout.write('Common Name: %s' % common_name)
             subject = {
                 'C': country,

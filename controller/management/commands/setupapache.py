@@ -44,11 +44,18 @@ class Command(BaseCommand):
             '</Directory>\n'
             'RedirectMatch ^/$ /admin\n' % context )
         
+#        ssl_config = (
+#            'SSLEngine on\n'
+#            'SSLCertificateFile %(cert_path)s\n'
+#            'SSLCertificateKeyFile %(cert_key_path)s\'
+#            'SSLCACertificateFile %(cert_path)s\n'
+#            'SSLVerifyClient None\n' % context )
+        
         include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
         if include_httpd.return_code == 1:
             run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
         
-        diff = run("echo '%s'| diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1,2])
+        diff = run("echo '%s'|diff - /etc/apache2/httpd.conf" % apache_conf, err_codes=[0,1,2])
         if diff.return_code == 2:
             # File does not exist
             run("echo '%s' > /etc/apache2/httpd.conf" % apache_conf)

@@ -272,5 +272,6 @@ class Server(SingletonModel):
     def __unicode__(self):
         return 'Server'
     
+    @property
     def mgmt_net(self):
         return get_mgmt_backend(self)

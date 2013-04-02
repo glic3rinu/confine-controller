@@ -11,7 +11,7 @@ from controller.core.validators import validate_prop_name, validate_net_iface_na
 
 from pki import ca, Bob
 
-from . import settings, ssl
+from . import settings
 from .utils import get_mgmt_backend
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
 

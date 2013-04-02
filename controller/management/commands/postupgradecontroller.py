@@ -71,3 +71,8 @@ class Command(BaseCommand):
             # Add pki directory
             from controller.utils.paths import get_site_root
             run('mkdir %s/pki' % get_site_root())
+            self.stdout.write('\nHTTPS certificate support for the management network '
+                'has been introduced in version 0.8.9.\n'
+                'In order to use it you sould run:\n'
+                '  > manage.py setuppki\n'
+                '  > manage.py setupapache\n')

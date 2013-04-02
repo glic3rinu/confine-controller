@@ -1,6 +1,7 @@
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
+from django.utils.six.moves import input
 
 from pki import ca, settings
 
@@ -46,9 +47,9 @@ class Command(BaseCommand):
         
         if overide or not ca.get_cert():
             # Avoid import errors
-            from mgmtnetworks.tinc.models import TincServer
-            server = TincServer.objects.get()
-            common_name = options.get('common_name') or str(server.address)
+            from nodes.models import Server
+            server = Server.objects.get()
+            common_name = options.get('common_name') or str(server.mgmt_net.addr)
             country = options.get('dn_country')
             state = options.get('dn_state')
             locality = options.get('dn_locality')
@@ -68,22 +69,22 @@ class Command(BaseCommand):
                 self.stdout.write(msg)
                 
                 msg = 'Country Name (2 letter code) [%s]: ' % country
-                country = raw_input(msg) or country
+                country = input(msg) or country
                 
                 msg = 'State or Province Name (full name) [%s]: ' % state
-                state = raw_input(msg) or state
+                state = input(msg) or state
                 
                 msg = 'Locality Name (eg, city) [%s]: ' % locality
-                locality = raw_input(msg) or locality
+                locality = input(msg) or locality
                 
                 msg = 'Organization Name (eg, company) [%s]: ' % org_name
-                org_name = raw_input(msg) or org_name
+                org_name = input(msg) or org_name
                 
                 msg = 'Organizational Unit Name (eg, section) [%s]: ' % org_unit
-                org_unit = raw_input(msg) or org_unit
+                org_unit = input(msg) or org_unit
                 
                 msg = 'Email Address [%s]: ' % email
-                email = raw_input(msg) or email
+                email = input(msg) or email
             
             self.stdout.write('Common Name: %s' % common_name)
             subject = {

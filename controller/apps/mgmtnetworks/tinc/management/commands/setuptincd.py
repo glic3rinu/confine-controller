@@ -4,6 +4,7 @@ from optparse import make_option
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.six.moves import input
 from M2Crypto import BIO, RSA
 
 from controller import settings
@@ -72,12 +73,12 @@ class Command(BaseCommand):
                     input_msg = "Celeryd username"
                     if username:
                         input_msg += " (leave blank to use '%s')" % username
-                    raw_value = raw_input(input_msg + ': ')
-                if username and raw_value == '':
-                    raw_value = username
+                    value = input(input_msg + ': ')
+                if username and value == '':
+                    value = username
                 # validate username
                 try:
-                    prompt_username = pwd.getpwnam(raw_value).pw_name
+                    prompt_username = pwd.getpwnam(value).pw_name
                 except KeyError:
                     self.stderr.write("Error: %s" % '; '.join(e.messages))
                     prompt_username = None

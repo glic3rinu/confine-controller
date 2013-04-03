@@ -19,7 +19,6 @@ def get_site_root():
     return os.path.abspath(os.path.join(get_project_root(), '..'))
 
 
-def abs_or_reltosite(path):
-    if not os.path.isabs(path):
-        return os.path.join(get_site_root(), path)
-    return path
+def get_controller_root():
+    """ Returns controller base path """
+    return os.path.dirname(os.path.realpath(controller.__file__))

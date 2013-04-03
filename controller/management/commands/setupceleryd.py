@@ -3,7 +3,7 @@ from optparse import make_option
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from controller.utils.paths import get_site_root
+from controller.utils.paths import get_site_root, get_controller_root()
 from controller.utils.system import run, check_root
 
 
@@ -24,11 +24,10 @@ class Command(BaseCommand):
     
     @check_root
     def handle(self, *args, **options):
-        run("wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' "
-            "--no-check-certificate -O /etc/init.d/celeryd")
-        
         context = {'site_root': get_site_root(),
-                   'username': options.get('username')}
+                   'username': options.get('username'),
+                   'bin_path': os.path.join(get_controller_root(), 'bin') }
+        
         celery_config = (
             '# Name of nodes to start, here we have a single node\n'
             'CELERYD_NODES="w1"\n'
@@ -76,10 +75,14 @@ class Command(BaseCommand):
             'CELERYD_STATE_DB="$CELERYD_CHDIR/persistent_revokes"\n' % context)
         
         run("echo '%s' > /etc/default/celeryd" % celery_config)
+        # run("wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' "
+        #     "--no-check-certificate -O /etc/init.d/celeryd")
+        run('cp %(bin_path)s/celeryd /etc/init.d/celeryd')
         run('chmod +x /etc/init.d/celeryd')
         run('update-rc.d celeryd defaults')
-        run('wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam" '
-            '--no-check-certificate -O /etc/init.d/celeryevcam')
+        # run('wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam" '
+        #     '--no-check-certificate -O /etc/init.d/celeryevcam')
+        run('cp %(bin_path)s/celeryevcam /etc/init.d/celeryd')
         run('chmod +x /etc/init.d/celeryevcam')
         run('update-rc.d celeryevcam defaults')
         

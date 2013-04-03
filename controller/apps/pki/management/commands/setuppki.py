@@ -3,7 +3,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.utils.six.moves import input
 
-from pki import ca, settings
+from pki import ca
 
 
 class Command(BaseCommand):
@@ -27,9 +27,7 @@ class Command(BaseCommand):
             make_option('--common_name', dest='dn_common_name', default=None,
                 help='Certificate Distinguished Name Common Name.'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
-                help='Tells Django to NOT prompt the user for input of any kind. '
-                     'You must use --username with --noinput, and must contain the '
-                     'cleeryd process owner, which is the user how will perform tincd updates'),
+                help='Tells Django to NOT prompt the user for input of any kind. '),
             )
     
     option_list = BaseCommand.option_list

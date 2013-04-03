@@ -68,11 +68,18 @@ class Command(BaseCommand):
             run('service celeryd restart')
             run('service celeryevcam restart')
         if version < 890:
-            # Add pki directory
+            # Add PKI directories
+            from pki import ca
             from controller.utils.paths import get_site_root
-            run('mkdir %s/pki' % get_site_root())
+            from os import path
+            site_root = get_site_root()
+            username = run("stat -c %%U %s" % site_root)
+            get_dir = lambda f: path.dirname(getattr(ca, f+'_path'))
+            for d in set( get_dir(f) for f in ['priv_key', 'pub_key', 'cert'] ):
+                run('mkdir -p %s' % d)
+                run('chown %s %s' % (username, d))
             self.stdout.write('\nHTTPS certificate support for the management network '
                 'has been introduced in version 0.8.9.\n'
                 'In order to use it you sould run:\n'
-                '  > manage.py setuppki\n'
-                '  > manage.py setupapache\n')
+                '  > python manage.py setuppki\n'
+                '  > sudo python manage.py setupapache\n')

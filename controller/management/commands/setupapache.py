@@ -44,6 +44,7 @@ class Command(BaseCommand):
             'project_name': get_project_name(),
             'project_root': get_project_root(),
             'site_root': get_site_root(),
+            # TODO end with single /
             'media_root': settings.MEDIA_ROOT,
             'static_root': settings.STATIC_ROOT,
             'cert_path': ca.cert_path,
@@ -66,8 +67,8 @@ class Command(BaseCommand):
             '        Allow from all\n'
             '    </Files>\n'
             '</Directory>\n\n'
-            'Alias /media/ %(media_root)s\n'
-            'Alias /static/ %(static_root)s\n'
+            'Alias /media/ %(media_root)s/\n'
+            'Alias /static/ %(static_root)s/\n'
             '<Directory %(static_root)s>\n'
             '    ExpiresActive On\n'
             '    ExpiresByType image/gif A1209600\n'

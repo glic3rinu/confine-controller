@@ -2,8 +2,7 @@ import time, sys, random
 
 from M2Crypto import RSA, X509, EVP, ASN1
 
-from controller.utils.system import run
-from controller.utils.paths import abs_or_reltosite
+from controller.utils.paths import get_site_root
 
 from . import settings
 
@@ -11,15 +10,15 @@ from . import settings
 class CA(object):
     @property
     def priv_key_path(self):
-        return abs_or_reltosite(settings.PKI_CA_PRIV_KEY_PATH)
+        return settings.PKI_CA_PRIV_KEY_PATH % { 'site_root': get_site_root() }
     
     @property
     def pub_key_path(self):
-        return abs_or_reltosite(settings.PKI_CA_PUB_KEY_PATH)
+        return settings.PKI_CA_PUB_KEY_PATH % { 'site_root': get_site_root() }
     
     @property
     def cert_path(self):
-        return abs_or_reltosite(settings.PKI_CA_CERT_PATH)
+        return settings.PKI_CA_CERT_PATH % { 'site_root': get_site_root() }
     
     @property
     def cert_exp_days(self):

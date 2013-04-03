@@ -194,7 +194,9 @@ function clone () {
     fi
     # Install bash autocompletition for django commands
     if [[ ! $(grep 'source $HOME/.django_bash_completion.sh' ~/.bashrc &> /dev/null) ]]; then
-        run wget https://raw.github.com/django/django/master/extras/django_bash_completion --no-check-certificate -O ~/.django_bash_completion.sh
+        # run wget https://raw.github.com/django/django/master/extras/django_bash_completion \
+        #    --no-check-certificate -O ~/.django_bash_completion.sh
+        cp ${CONTROLLER_PATH}/bin/django_bash_completion.sh ~/.django_bash_completion.sh
         echo 'source $HOME/.django_bash_completion.sh' >> ~/.bashrc
     fi
 

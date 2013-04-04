@@ -71,11 +71,15 @@ class SliverIfaceInlineForm(forms.ModelForm):
             # readonly forms doesn't have model fields
             # TODO handle this on the permission application?
             self.fields['parent'].queryset = self.node.direct_ifaces
+            # TODO: this is very hacky
+            # Hook slice for future processing on iface.model_clean()
+            self.instance.slice = self.slice
 
 
 class SliverIfaceBulkForm(forms.Form):
     """ Display available ifaces on add sliver bulk action """
     def __init__(self, *args, **kwargs):
+        # TODO: isolated iface requires vlan_nr
         super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
         for iface_type in Sliver.get_registred_iface_types():
             iface_type = iface_type[0]

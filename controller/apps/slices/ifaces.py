@@ -48,9 +48,10 @@ class IsolatedIface(BaseIface):
     ALLOW_BULK = False
     
     def clean_model(self, iface):
-        # TODO isolated iface must have slice.vlan_nr
+        if not iface.slice.vlan_nr:
+            raise ValidationError("Slice vlan_nr is mandatory for isolated interfaces.")
         if not iface.parent:
-            raise ValidationError("parent is mandatory for isolated interfaces.")
+            raise ValidationError("Parent is mandatory for isolated interfaces.")
 
 
 class Pub4Iface(BaseIface):

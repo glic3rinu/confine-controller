@@ -7,11 +7,13 @@ from users.models import Group
 
 
 def validate_sliver_mac_prefix(value):
-    # TODO also limit to 16 bits
     try: 
-        int(value, 16)
-    except: 
-        raise ValidationError('%s is not a hex value.' % value)
+        int_value = int(value, 16)
+    except:
+        raise ValidationError('%s is not a correct hex value.' % value)
+    # Check if fits in 16 bits
+    if int_value > 65535:
+        raise ValidationError('%s is not a 16-bit integer number in hex' % value)
 
 
 def validate_ipv4_range(value):

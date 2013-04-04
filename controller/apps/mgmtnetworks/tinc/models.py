@@ -7,8 +7,9 @@ from django.db import models
 from django_transaction_signals import defer
 from IPy import IP
 
-from controller.models.fields import RSAPublicKeyField
 from controller import settings as controller_settings
+from controller.models.fields import RSAPublicKeyField
+from controller.models.utils import generate_chainer_manager
 from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, OrValidator
 from nodes.models import Server, Node
@@ -105,6 +106,12 @@ class Gateway(models.Model):
         return backend(self)
 
 
+class TincServerQuerySet(models.query.QuerySet):
+    def gateways(self, *args, **kwargs):
+        server_ct = ContentType.objects.get_for_model(Server)
+        return self.exclude(content_type=server_ct).filter(*args, **kwargs)
+
+
 class TincServer(TincHost):
     """
     Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
@@ -118,6 +125,7 @@ class TincServer(TincHost):
     object_id = models.PositiveIntegerField()
     
     content_object = generic.GenericForeignKey()
+    objects = generate_chainer_manager(TincServerQuerySet)
     
     class Meta:
         unique_together = ('content_type', 'object_id')

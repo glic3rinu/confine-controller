@@ -4,7 +4,6 @@ from celery.task import task
 
 from controller.utils import LockFile
 from controller.utils.system import run, touch
-from nodes.models import Server
 
 from .settings import TINC_NET_NAME, TINC_TINCD_ROOT
 
@@ -14,7 +13,7 @@ def update_tincd():
     """
     Generates all local tinc/hosts/* and reloads tincd
     """
-    from .models import TincClient
+    from .models import TincClient, TincServer
     
     hosts_path = '%s/hosts/' % os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME)
     
@@ -25,19 +24,18 @@ def update_tincd():
     
     # File-based lock mechanism to prevent concurrency problems
     with LockFile(hosts_path+'.lock', expire=60):
-        # TODO generate also TincServers/Gateways on tinc/hosts ??
-        server = Server.objects.get().tinc
         clients = TincClient.objects.all()
-        
+        gateways = TincServer.objects.gateways()
+        hosts = list(clients) + list(gateways)
         # Batch processing of tinc clients for efficiency/max_arg_length tradeoff
         scripts = []
-        total = clients.count()
+        total = len(hosts)
         for start in range(0, total, 100):
             end = min(start + 100, total)
             script = ''
-            for client in clients[start:end]:
-                host_file = os.path.join(hosts_path, client.name)
-                script += 'echo -e "%s" > %s;\n' % (client.get_host(), host_file)
+            for host in hosts[start:end]:
+                host_file = os.path.join(hosts_path, host.name)
+                script += 'echo -e "%s" > %s;\n' % (host.get_host(), host_file)
             scripts.append(script)
         
         # delete all tinc hosts

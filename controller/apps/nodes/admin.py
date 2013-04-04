@@ -13,6 +13,7 @@ from controller.admin.utils import (colored, admin_link,
     docstring_as_help_tip)
 from controller.forms.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from users.models import Group
 
 from nodes.actions import request_cert, reboot_selected
 from nodes.filters import MyNodesListFilter
@@ -98,7 +99,11 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             if obj and obj.pk:
                 # Add actual group
                 query = Q( query | Q(pk=obj.group.pk) )
-            groups = user.groups.filter(query).distinct()
+            if user.is_superuser:
+                # TODO filter only user related groups + current node group?
+                groups = Group.objects.filter(query).distinct()
+            else:
+                groups = user.groups.filter(query).distinct()
             num_groups = len(groups)
             if num_groups >= 1:
                 # User has can add nodes in more than one group

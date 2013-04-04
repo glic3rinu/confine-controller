@@ -11,16 +11,6 @@ def msb(u16):
     return '%.2x' % (u16 >> 8)
 
 
-def int_to_ipv6(number):
-    # TODO deprecate ?
-    words = [
-        number_to_hex_str(number >> 32, 4),
-        number_to_hex_str((number >> 16) & 0xffff, 4),
-        number_to_hex_str(number & 0xffff, 4)
-        ]
-    return ':'.join(words, )
-
-
 def int_to_hex_str(number, digits):
     """ Convert an integer number to a HEX string of length digits """
     hex_str = ('%.' + str(digits) + 'x') % number

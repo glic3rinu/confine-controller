@@ -64,6 +64,7 @@ class SliverIfaceInline(PermissionTabularInline):
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
         self.form.node = request._node_
+        self.form.slice = request._slice_
         return super(SliverIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
@@ -122,7 +123,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return False
     
     def get_form(self, request, obj=None, **kwargs):
-        """ Hook node reference for future processing in IsolatedIfaceInline """
+        """ Hook node reference for future processing in SliverIfaceInline """
         request._node_ = obj.node
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
@@ -278,11 +279,15 @@ class SliceSliversAdmin(SliverAdmin):
         """ Hook node reference for future processing in IsolatedIfaceInline """
         if obj: 
             request._node_ = obj.node
+            request._slice_ = obj.slice
         else:
-            # TODO gatting node_id like this is really embarassing...
+            # TODO gatting node_id/slice_id like this is really embarassing...
             node_id = request.path.split('/')[-2]
             node = Node.objects.get(pk=node_id)
             request._node_ = node
+            slice_id = request.path.split('/')[-4]
+            slice = Slice.objects.get(pk=slice_id)
+            request._slice_ = slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
 

@@ -58,7 +58,7 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
 
 class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True, 
+    slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     properties = serializers.PropertyField(required=False)
     exp_data = serializers.HyperlinkedFileField(source='exp_data', required=False)

@@ -1,6 +1,21 @@
 {% extends "registration/layout.html" %}
+{% load users_registration %}
 
 {% block accounts %}
-    <p>Congratulations, your account has been enabled.</p>
-    <p><a href='/'>Home</a></p>
+    
+    {% get_settings_value "USERS_REGISTRATION_MODE" as registration_mode %}
+    {% get_settings_value "EMAIL_REGISTRATION_APPROVE" as support_email %}
+
+    {% if registration_mode == 'RESTRICTED' %}
+    <p>Congratulations, your email has been confirmed. Due to site
+    policy an administrator must enable your account before you can
+    access to the site.</p>
+    <p>If after a few days you have not received any response, please
+    contact <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>        
+
+    {% else %} {# REGISTRATION OPEN #}
+        <p>Congratulations, your account has been enabled.</p>
+    {% endif %}
+
+    <p><a href='{% url 'admin:index' %}'>home</a></p>
 {% endblock %}

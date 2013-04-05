@@ -29,7 +29,7 @@ TIME_ZONE = 'UTC'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
+SITE_ID = 1 # FIXME DELETE? controller is NOT using django.contrib.site
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -289,6 +289,8 @@ PRIVATE_MEDIA_ROOT = ''
 # Django-Registration
 ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = '/admin/'
+USERS_REGISTRATION_MODE = 'CLOSED' # [OPEN|RESTRICTED|CLOSED]
+EMAIL_REGISTRATION_APPROVE = 'support@confine-project.eu' # Only required if USERS_REGISTRATION_MODE = RESTRICTED
 
 # rest_framework
 REST_FRAMEWORK = {

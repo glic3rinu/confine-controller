@@ -1,0 +1,8 @@
+{% extends "registration/layout.html" %}
+{% load users_registration %}
+
+{% block accounts %}
+    {% get_settings_value "EMAIL_REGISTRATION_APPROVE" as support_email %}
+    Sorry, but registrations on this site are disabled. You can 
+    <a href="mailto:{{ support_email }}">contact us</a> for more details.
+{% endblock %}

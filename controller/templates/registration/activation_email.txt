@@ -2,7 +2,7 @@ Hi, welcome to {{ site }}:
 
 Please, enable your account at:
 
-https://{{ site }}/accounts/activate/{{ activation_key }}
+http://{{ site }}/accounts/activate/{{ activation_key }}
 
 
 Thank you!

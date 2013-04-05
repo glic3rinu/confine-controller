@@ -1,0 +1,9 @@
+{% if subject %}Your account has been enabled{% endif %}
+{% if message %}Dear user,
+Congratulations, the testbed operators have enabled your account.
+Now you can login to the testbed website with the user and password provided.
+http://{{ site }}{% url 'admin:index' %}
+
+Have a nice day,
+Testbed management team.
+{% endif %}

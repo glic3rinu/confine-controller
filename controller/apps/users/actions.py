@@ -2,11 +2,12 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.sites.models import RequestSite
 from django.db import router, transaction
+from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 
 from users.models import JoinRequest
-
+from controller.utils.options import send_email_template
 
 @transaction.commit_on_success
 def join_request(modeladmin, request, queryset):
@@ -65,3 +66,25 @@ def join_request(modeladmin, request, queryset):
 
 join_request.short_description = "Request to join the selected groups"
 join_request.url_name = 'join-request'
+
+
+@transaction.commit_on_success
+def enable_account(modeladmin, request, queryset):
+    """
+    The testbed operators can enable the users
+    """
+    opts = modeladmin.model._meta
+    
+    # check if the selected user is alreday enabled
+    for user in queryset:
+        if user.is_active:
+            messages.error(request, "This user is alreday active (%s)" % user)
+            continue
+        user.is_active = True
+        user.save()
+        # notify the user its account is enabled
+        site = RequestSite(request)
+        send_email_template('registration/account_approved.email', {'site': site}, user.email)
+        modeladmin.message_user(request, "The user has been enabled (%s)" % user)
+    
+enable_account.short_description = "Enable selected users"

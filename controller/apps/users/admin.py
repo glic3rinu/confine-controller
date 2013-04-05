@@ -11,7 +11,7 @@ from controller.admin import ChangeViewActions
 from controller.admin.utils import get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
-from .actions import join_request
+from .actions import join_request, enable_account
 from .filters import MyGroupsListFilter
 from .forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm, GroupAdminForm
 from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
@@ -100,6 +100,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
     
     search_fields = ('username', 'email', 'first_name', 'last_name')
     inlines = [AuthTokenInline, ReadOnlyRolesInline]
+    actions = [enable_account]
     filter_horizontal = ()
     form = UserChangeForm
     add_form = UserCreationForm
@@ -116,6 +117,14 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         if not request.user.is_superuser:
             fields += ('last_login', 'date_joined', 'is_active', 'is_superuser')
         return fields
+        
+    def get_actions(self, request):
+        """ Manage users actions. Only superusers can enable accounts """
+        actions = super(UserAdmin, self).get_actions(request)
+        if not request.user.is_superuser:
+            if 'enable_account' in actions:
+                del actions['enable_account']
+        return actions
 
 
 class GroupAdmin(ChangeViewActions, PermissionModelAdmin):

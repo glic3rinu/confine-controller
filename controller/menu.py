@@ -86,6 +86,9 @@ class CustomMenu(Menu):
             if is_installed('firmware'):
                 administration_models += ('firmware.*',)
             
+            if is_installed('maintenance'):
+                administration_models += ('maintenance.*',)
+            
             admin_item = items.AppList('Administration', models=administration_models)
             
             # Users menu item

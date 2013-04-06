@@ -108,7 +108,7 @@ function install_requirements () {
     CONTROLLER_PATH=$(get_controller_dir)
     
     MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-gevent python-dev gcc"
-    EXTENDED_APT="libapache2-mod-wsgi fuseext2 tinc file"
+    EXTENDED_APT="libapache2-mod-wsgi fuseext2 tinc file python-paramiko"
     
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then

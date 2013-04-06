@@ -2,7 +2,9 @@ import json
 from datetime import datetime, timedelta
 from time import time, mktime
 
+import django.dispatch
 from django.db import models
+from django.dispatch import Signal
 
 from . import settings
 
@@ -10,8 +12,10 @@ from . import settings
 class BaseState(models.Model):
     data = models.TextField()
     metadata = models.TextField()
-    last_seen_on = models.DateTimeField(null=True)
-    last_try_on = models.DateTimeField(auto_now=True)
+    last_seen_on = models.DateTimeField(null=True, help_text='Last time the state '
+        'retrieval was successfull')
+    last_try_on = models.DateTimeField(auto_now=True, null=True, help_text='Last '
+        'time the state retrieval operation has been executed')
     
     class Meta:
         abstract = True
@@ -21,12 +25,12 @@ class BaseState(models.Model):
     
     @classmethod
     def get_related_field_name(cls):
-        """ very hacky """
-        return cls._meta.fields[-1].name
+        raise NotImplementedError
     
     @classmethod
     def get_related_model(cls):
-        return cls._meta.fields[-1].rel.to
+        field_name = cls.get_related_field_name()
+        return cls._meta.get_field(field_name).rel.to
     
     @property
     def next_retry_on(self):
@@ -94,9 +98,22 @@ class NodeState(BaseState):
         ('unknown', 'UNKNOWN'),)
     
     node = models.OneToOneField('nodes.Node', related_name='state')
+    last_contact_on = models.DateTimeField(null=True, help_text='Last API pull from '
+        'this node.')
     
     def get_node(self):
         return self.node
+    
+    @classmethod
+    def register_heartbeat(cls, node):
+        node_state = cls.objects.get_or_create(node=node)
+        node_state.last_contact = datetime.now()
+        node_state.save()
+        node_heartbeat.send(sender=cls, node=node)
+    
+    @classmethod
+    def get_related_field_name(cls):
+        return 'node'
 
 
 class SliverState(BaseState):
@@ -114,4 +131,10 @@ class SliverState(BaseState):
     
     def get_node(self):
         return self.sliver.node
+    
+    @classmethod
+    def get_related_field_name(cls):
+        return 'sliver'
 
+
+node_heartbeat = Signal(providing_args=["instance", "node"])

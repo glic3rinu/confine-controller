@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'gis',
     'users',
     'pki',
+    'maintenance',
     
     # Third-party apps
     'south',
@@ -232,6 +233,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'issues.models.Ticket',
             'djcelery.models.TaskState',
             'firmware.models.Config',
+            'maintenance.models.Operation',
         ),
         'collapsible': True,
     }),
@@ -260,6 +262,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'issues/ticket': "Ticket_star.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
+    'maintenance/operation': "tango_terminal.png",
 }
 
 

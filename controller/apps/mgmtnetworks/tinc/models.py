@@ -236,6 +236,7 @@ class TincClient(TincHost):
         help_text='An optional island used to hint where this tinc client reaches to.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
+    
     content_object = generic.GenericForeignKey()
     
     class Meta:

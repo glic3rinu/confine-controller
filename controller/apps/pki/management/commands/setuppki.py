@@ -34,6 +34,7 @@ class Command(BaseCommand):
     help = 'Creates an RSA key and the testbed CA (root) certificate'
     
     def handle(self, *args, **options):
+        # TODO correct key file permissions
         overide = options.get('overide')
         interactive = options.get('interactive')
         

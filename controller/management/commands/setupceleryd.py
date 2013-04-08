@@ -42,7 +42,7 @@ class Command(BaseCommand):
             'CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"\n'
             '\n'
             '# Extra arguments to celeryd\n'
-            'CELERYD_OPTS="-P:w1 processes -P:w2 gevent -c:w1 8 -c:w2 500 \\\n'
+            'CELERYD_OPTS="-P:w1 processes -P:w2 gevent -c:w1 8 -c:w2 1000 \\\n'
             '              -Q:w1 celery -Q:w2 gevent --time-limit=400"\n'
             '\n'
             '# Name of the celery config module.\n'

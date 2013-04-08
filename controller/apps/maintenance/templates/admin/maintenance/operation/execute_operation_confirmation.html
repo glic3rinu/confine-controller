@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='maintenance' %}">Maintenance</a>
+&rsaquo; <a href="{% url 'admin:maintenance_operation_changelist' %}">Operations</a>
+&rsaquo; <a href="{% url 'admin:maintenance_operation_change' operation.pk %}">{{ operation }}</a>
+&rsaquo; 'Execute Operation'
+</div>
+{% endblock %}
+
+
+{% block content %}
+    <p>Are you sure you want to execute <a href="{% url 'admin:maintenance_operation_change' operation.pk %}">{{ operation }}</a> operation on the following selected nodes?</p>
+    {% for deletable_object in deletable_objects %}
+        <ul>{{ deletable_object|unordered_list }}</ul>
+    {% endfor %}
+    <form action="" method="post">{% csrf_token %}
+    <div>
+    
+    <div style="margin-left:20px; margin-bottom:20px; margin-top:20px;">
+            {% for field in form %}
+                <div class="fieldWrapper">
+                    {{ field.errors }}
+                    {{ field }}<b>{{ field.label_tag }}</b>{{ field.help_text|linebreaks }}
+                </div>
+            {% endfor %}
+        </div>
+    
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+    {% endfor %}
+    <input type="hidden" name="action" value="execute_operation" />
+    <input type="hidden" name="post" value="yes" />
+    <input type="submit" value="{% trans "Yes, create slivers" %}" />
+    </div>
+    </form>
+{% endblock %}
+

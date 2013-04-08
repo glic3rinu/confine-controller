@@ -184,8 +184,8 @@ class NodeListAdmin(NodeAdmin):
         context = {'title': mark_safe(title),
                    'slice': slice, }
         context.update(extra_context or {})
-        # call super.super to avoid my_nodes default NodeAdmin changelist filter
-        return super(NodeAdmin, self).changelist_view(request, extra_context=context)
+        # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter
+        return admin.ModelAdmin.changelist_view(self, request, extra_context=context)
     
     def queryset(self, request):
         """ Filter node list excluding nodes with already slivers of the slice """

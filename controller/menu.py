@@ -86,9 +86,6 @@ class CustomMenu(Menu):
             if is_installed('firmware'):
                 administration_models += ('firmware.*',)
             
-            if is_installed('maintenance'):
-                administration_models += ('maintenance.*',)
-            
             admin_item = items.AppList('Administration', models=administration_models)
             
             # Users menu item
@@ -115,6 +112,20 @@ class CustomMenu(Menu):
                     reverse('admin:app_list', args=['users']),
                     children=user_items)
             )
+            
+            if is_installed('maintenance'):
+                maintenance_items = [
+                    items.MenuItem('Operation',
+                        reverse('admin:maintenance_operation_changelist')),
+                    items.MenuItem('Instance',
+                        reverse('admin:maintenance_instance_changelist'))
+                ]
+                admin_item.children.append(
+                    items.MenuItem('Maintenance',
+                        reverse('admin:app_list', args=['maintenance']),
+                        children=maintenance_items)
+                    )
+            
         else:
             admin_item = items.MenuItem('Administration',
                 children=[

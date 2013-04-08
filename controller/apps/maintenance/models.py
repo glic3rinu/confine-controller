@@ -28,9 +28,12 @@ class Operation(models.Model):
         Execution.objects.filter(operation=self, is_active=True).update(is_active=False)
         execution = Execution.objects.create(operation=self, script=self.script,
             include_new_nodes=include_new_nodes)
+        instances = []
         for node in nodes:
             instance = Instance.create(execution=execution, node=node)
             instance.run()
+            instances.append(instance)
+        return instances
 
 
 class Execution(models.Model):

@@ -207,7 +207,7 @@ class Node(models.Model):
             # We pick one pseudo-random admin
             user = self.group.admins[0]
         addr = str(self.mgmt_net.addr)
-        bob = Bob(key)
+        bob = Bob(key=key)
         scr = bob.create_request(Email=user.email, CN=addr)
         return self.sign_cert_request(scr, commit=commit)
     

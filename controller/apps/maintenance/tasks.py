@@ -10,6 +10,8 @@ from .settings import MAINTENANCE_KEY_PATH
 def run_instance(instance_id):
     from .models import Instance
     instance = Instance.objects.get(pk=instance_id)
+    if not instance.execution.is_active:
+        return
     instance.state = Instance.STARTED
     instance.last_try = datetime.now()
     instance.save()

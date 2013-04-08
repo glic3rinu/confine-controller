@@ -13,7 +13,8 @@ from controller.models.utils import get_field_value
 def get_modeladmin(model):
     """ returns the modeladmin registred for model """
     for k,v in admin.site._registry.iteritems():
-        if k is model: return v
+        if k is model:
+            return v
 
 
 def insert_inline(model, inline, head=False):
@@ -72,12 +73,10 @@ def link(attribute, description='', admin_order_field=True, base_url=''):
             return ''
         link_url = "%s%s" % (base_url, url) if base_url else url
         return '<a href="%s">%s' % (link_url, url)
-    admin_link.short_description = description if description else attribute.capitalize()
+    admin_link.short_description = description or attribute.capitalize()
     admin_link.allow_tags = True
-    
     if admin_order_field:
         admin_link.admin_order_field = attribute
-    
     return admin_link
 
 
@@ -102,7 +101,6 @@ def admin_link(field_name, app_model='', href_name=''):
     link.short_description = field_name.capitalize()
     link.allow_tags = True
     link.admin_order_field = field_name
-    
     return link
 
 
@@ -120,11 +118,11 @@ def colored(field_name, colours, description='', verbose=False):
             # Get the human-readable value of a choice field
             value = getattr(obj, 'get_%s_display' % field)()
         return """<b><span style="color: %s;">%s</span></b>""" % (color, value)
-    if not description: description = field_name.split('__').pop().replace('_', ' ').capitalize()
+    if not description:
+        description = field_name.split('__').pop().replace('_', ' ').capitalize()
     colored_field.short_description = description
     colored_field.allow_tags = True
     colored_field.admin_order_field = field_name
-    
     return colored_field
 
 

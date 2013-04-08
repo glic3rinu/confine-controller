@@ -43,3 +43,10 @@ class ReadOnlyWidget(forms.Widget):
     
     def value_from_datadict(self, data, files, name):
         return self.original_value
+
+
+class ReadOnlyBooleanWidget(forms.Widget):
+    def render(self, name, value, attrs=None):
+        if value:
+            return mark_safe('<img src="/static/admin/img/icon-yes.gif" alt="True" />')
+        return mark_safe('<img src="/static/admin/img/icon-no.gif" alt="False" />')

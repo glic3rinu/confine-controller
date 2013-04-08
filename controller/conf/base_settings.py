@@ -262,7 +262,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'issues/ticket': "Ticket_star.png",
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
-    'maintenance/operation': "tango_terminal.png",
+    'maintenance/operation': "gnome-terminal.png",
 }
 
 

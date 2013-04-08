@@ -1,4 +1,4 @@
-import os
+import os, re
 from hashlib import sha256
 
 from celery import states as celery_states
@@ -7,6 +7,7 @@ from django.conf import settings as project_settings
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.dispatch import Signal, receiver
 from django.template import Template, Context
 from django_transaction_signals import defer
 from djcelery.models import TaskState
@@ -319,13 +320,8 @@ class ConfigUCI(models.Model):
         Evaluates the 'value' as python code in order to get the current value
         for the given UCI option.
         """
-        safe_locals = {'node': node,
-                       'server': Server.objects.get(),}
-        safe_locals.update(dict((setting, getattr(controller_settings, setting))
-            for setting in dir(controller_settings) if setting.isupper() ))
-        safe_locals.update(dict((setting, getattr(project_settings, setting))
-            for setting in dir(project_settings) if setting.isupper() ))
-        safe_locals.update(context.get())
+        safe_locals = {'node': node, 'self': self}
+        construct_safe_locals.send(sender=type(self), safe_locals=safe_locals)
         return unicode(eval(self.value, safe_locals))
 
 
@@ -358,9 +354,8 @@ class ConfigFile(models.Model):
     def get_files(self, node, **kwargs):
         """ Generates all the files related to self ConfigFile """
         safe_locals = kwargs
-        safe_locals.update({'node': node,
-                            'self': self,
-                            'server': Server.objects.get(),})
+        kwargs.update({'node': node, 'self': self})
+        construct_safe_locals.send(sender=type(self), safe_locals=safe_locals)
         safe_locals.update(context.get())
         try:
             paths = eval(self.path, safe_locals)
@@ -400,3 +395,13 @@ class ConfigFileHelpText(models.Model):
         return str(self.file)
 
 
+construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])
+
+
+@receiver(construct_safe_locals)
+def update_safe_locals(sender, safe_locals, **kwargs):
+    safe_locals.update({'server': Server.objects.get(), 're': re})
+    safe_locals.update(dict((setting, getattr(controller_settings, setting))
+        for setting in dir(controller_settings) if setting.isupper() ))
+    safe_locals.update(dict((setting, getattr(project_settings, setting))
+        for setting in dir(project_settings) if setting.isupper() ))

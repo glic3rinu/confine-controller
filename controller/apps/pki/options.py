@@ -1,6 +1,7 @@
-import time, sys, random
+import time, sys, random, os
+from base64 import b64encode
 
-from M2Crypto import RSA, X509, EVP, ASN1
+from M2Crypto import RSA, X509, EVP, ASN1, BIO
 
 from controller.utils.paths import get_site_root
 
@@ -25,16 +26,19 @@ class CA(object):
         return settings.PKI_CA_CERT_EXP_DAYS
     
     def get_key(self):
-        try:
-            return RSA.load_key(self.priv_key_path)
-        except:
-            return None
+        return RSA.load_key(self.priv_key_path)
+        # FIXME
+#        return getattr(self, 'key', RSA.load_key(self.priv_key_path))
     
     def gen_key(self, commit=False):
-        key = RSA.gen_key(2048, 65537)
+        bob = Bob()
+        key = bob.gen_key()
+        # FIXME segfault here
+#        self.key = bob.gen_key()
+#        self.key.as_pem(cipher=None)
         if commit:
-            key.save_pem(self.priv_key_path, cipher=None)
-            key.save_pub_key(self.pub_key_path)
+            bob.store_key(self.priv_key_path)
+            bob.store_pub_key(self.pub_key_path)
         return key
     
     def get_cert(self):
@@ -45,7 +49,7 @@ class CA(object):
     
     def gen_cert(self, **kwargs):
         commit = kwargs.pop('commit', False)
-        bob = Bob(self.get_key())
+        bob = Bob(key=self.get_key())
         request = bob.create_request(**kwargs)
         cert = self.sign_request(request, ca=True)
         if commit:
@@ -87,15 +91,52 @@ ca = CA()
 
 
 class Bob(object):
-    def __init__(self, key):
-        # we allow key to be a file, an string or a RSA object
+    def __init__(self, key=None):
+        if key is not None:
+            self.load_key(key)
+    
+    def load_key(self, key):
+        # Key can be a file, an string or an RSA object
         if not isinstance(key, RSA.RSA):
             try:
                 key = RSA.load_key(key)
             except:
                 key = RSA.load_key_string(key)
+        self.key = key
         self.pkey = EVP.PKey()
         self.pkey.assign_rsa(key)
+    
+    def gen_key(self, path=None):
+        new_key = RSA.gen_key(2048, 65537)
+        self.load_key(new_key)
+        if path is not None:
+            self.store_key(path)
+        return new_key
+    
+    def store_key(self, path):
+        self.key.save_pem(path, cipher=None)
+    
+    def store_pub_key(self, path):
+        self.key.save_pub_key(path)
+    
+    def get_key(self, format='X.501'):
+        if format == 'X.501':
+            mem = BIO.MemoryBuffer()
+            self.key.save_key_bio(mem, cipher=None)
+            return mem.getvalue()
+        raise self.FormatError('format "%s" not supported' % format)
+    
+    def get_pub_key(self, format='X.501'):
+        if format == 'OpenSSH':
+            b64key = b64encode('\x00\x00\x00\x07ssh-rsa%s%s' % (self.key.e, self.key.n))
+            username = os.getlogin()
+            hostname = os.uname()[1]
+            return 'ssh-rsa %s %s@%s' % (b64key, username, hostname)
+        if format == 'X.501':
+            mem = BIO.MemoryBuffer()
+            self.key.save_pub_key_bio(mem)
+            return mem.getvalue()
+        raise self.FormatError('format "%s" not supported' % format)
     
     def create_request(self, **subject):
         request = X509.Request()
@@ -106,3 +147,5 @@ class Bob(object):
         request.set_pubkey(pkey=self.pkey)
         request.sign(self.pkey, md="sha256")
         return request
+    
+    class FormatError(Exception): pass

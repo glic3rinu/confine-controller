@@ -38,10 +38,15 @@ class Command(BaseCommand):
         overide = options.get('overide')
         interactive = options.get('interactive')
         
-        if overide or not ca.get_key():
-            ca.gen_key(commit=True)
+        try:
+            key = ca.get_key()
+        except IOError:
+            key = False
+        
+        if overide or not key:
             self.stdout.write('writing new private key to \'%s\'' % ca.priv_key_path)
             self.stdout.write('writing new public key to \'%s\'' % ca.pub_key_path)
+            ca.gen_key(commit=True)
             overide = True
         
         if overide or not ca.get_cert():

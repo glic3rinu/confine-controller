@@ -19,11 +19,11 @@ def submit_row(context):
                               and change and context.get('show_delete', True)),
         'show_save_as_new': not is_popup and change and save_as,
         'show_save_and_add_another': (change and context['has_change_permission'] and context['has_add_permission'] ) or 
-                       (context['add'] and context['has_add_permission'] and not context['save_and_continue']),
+                       (context['add'] and context['has_add_permission'] and not context.get('save_and_continue', False)),
         'show_save_and_continue': not is_popup and context['has_change_permission'],
         'is_popup': is_popup,
         'show_save': (change and context['has_change_permission']) or 
-                       (context['add'] and context['has_add_permission'] and not context['save_and_continue'])
+                       (context['add'] and context['has_add_permission'] and not context.get('save_and_continue', False))
     }
     if context.get('original') is not None:
         ctx['original'] = context['original']

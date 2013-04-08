@@ -1,4 +1,3 @@
-import M2Crypto
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -13,6 +12,7 @@ from controller.models.utils import generate_chainer_manager
 from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, OrValidator
 from nodes.models import Server, Node
+from pki import Bob
 
 from . import settings, backend
 from .tasks import update_tincd
@@ -292,15 +292,12 @@ class TincClient(TincHost):
         return '\n'.join(config)
     
     def generate_key(self, commit=False):
-        key = M2Crypto.RSA.gen_key(2048, 65537)
-        mem = M2Crypto.BIO.MemoryBuffer()
-        key.save_key_bio(mem, cipher=None)
-        private = mem.getvalue()
+        bob = Bob()
+        bob.gen_key()
         if commit:
-            key.save_pub_key_bio(mem)
-            self.pubkey = mem.getvalue()
+            self.pubkey = bob.get_pub_key(format='X.501')
             self.save()
-        return private
+        return bob.get_key(format='X.501')
 
 
 # Monkey-Patching Section

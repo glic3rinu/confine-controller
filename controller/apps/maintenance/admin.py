@@ -72,20 +72,10 @@ class NodeListAdmin(NodeAdmin):
     Nested Node ModelAdmin that provides a list of available nodes for adding 
     slivers hooked on Operation
     """
-    list_display = ['execute_operation_link'] + NodeAdmin.list_display
-    list_display_links = ['execute_operation_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/maintenance/operation/list_nodes.html'
     actions = [execute_operation]
     actions_on_bottom = True
-    
-    def execute_operation_link(self, instance):
-        """ Link to add operation to related node """
-        kwargs = { 'operation_id': self.operation_id }
-        url = reverse('admin:maintenance_operation_execute', kwargs=kwargs)
-        return '<a href="%s">%s<a>' % (url, instance.name)
-    execute_operation_link.allow_tags = True
-    execute_operation_link.short_description = 'Execute on Node'
     
     def get_actions(self, request):
         """ Avoid inherit NodeAdmin actions """
@@ -106,7 +96,6 @@ class NodeListAdmin(NodeAdmin):
     def has_add_permission(self, *args, **kwargs):
         """ Prevent node addition on this ModelAdmin """
         return False
-
 
 
 class OperationAdmin(admin.ModelAdmin):

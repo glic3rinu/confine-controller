@@ -109,7 +109,7 @@ class Command(BaseCommand):
             'tinc_conf': ( "BindToAddress = %s\n"
                            "Port = %s\n"
                            "Name = server\n"
-                           "StrictSubnets = True" % (tinc_address, tinc_port)),
+                           "StrictSubnets = yes" % (tinc_address, tinc_port)),
             'tinc_up': tinc_server.get_tinc_up(),
             'tinc_down': tinc_server.get_tinc_down(),
             'mgmt_prefix': mgmt_prefix.split('::')[0],

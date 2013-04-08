@@ -72,6 +72,7 @@ def execute_on_new_nodes(sender, instance, signal, *args, **kwargs):
     """ creates needed execution instances when a new node is added """
     for execution in Execution.objects.filter(is_active=True, include_new_nodes=True):
         instance, new = Instance.objects.get_or_create(execution=execution, node=instance)
+        instance.run()
 
 
 class Instance(models.Model):
@@ -125,10 +126,14 @@ class Instance(models.Model):
         self.state = self.REVOKED
         self.save()
     
+    @property
+    def script(self):
+        return self.execution.script
+    
     class ConcurrencyError(Exception): pass
 
 
-@receiver(node_heartbeat, sender=NodeState)
+@receiver(node_heartbeat, sender=NodeState, dispatch_uid="maintenance.retry_pending_operations")
 def retry_pending_operations(sender, node, **kwargs):
     """ runs timeout instances when a node heart beat is received """
     instances = Instance.objects.filter(node=node, state=Instance.TIMEOUT,
@@ -139,7 +144,7 @@ def retry_pending_operations(sender, node, **kwargs):
 
 if is_installed('firmware'):
     from firmware.models import construct_safe_locals
-    @receiver(construct_safe_locals)
+    @receiver(construct_safe_locals, dispatch_uid="maintenance.update_safe_locals")
     def update_safe_locals(sender, safe_locals, **kwargs):
         safe_locals.update(dict((setting, getattr(settings, setting))
             for setting in dir(settings) if setting.isupper() ))

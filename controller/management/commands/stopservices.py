@@ -32,6 +32,8 @@ class Command(BaseCommand):
             run('service apache2 stop')
         if options.get('celeryd'):
             run('service celeryd stop')
+        if options.get('celerybeat'):
+            run('service celerybeat stop')
         if options.get('celeryevcam'):
             run('service celeryevcam stop')
         if options.get('postgresql'):

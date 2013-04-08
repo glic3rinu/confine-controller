@@ -12,7 +12,7 @@ def get_state(state_module):
     state_model = get_model(*state_module.split('.'))
     lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
     freq = state_model.get_setting('SCHEDULE')
-
+    
     # Prevent concurrent executions
     with LockFile(lock_file, expire=freq-(freq*0.2)):
         objects = state_model.get_related_model().objects.all()

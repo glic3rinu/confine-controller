@@ -34,6 +34,8 @@ class Command(BaseCommand):
             run('service apache2 restart')
         if options.get('celeryd'):
             run('service celeryd restart')
+        if options.get('celerybeat'):
+            run('service celerybeat restart')
         if options.get('celeryevcam'):
             run('service celeryevcam restart')
         if options.get('postgresql'):

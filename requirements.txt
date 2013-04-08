@@ -17,3 +17,4 @@ https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
 pygments
 requests
 https://github.com/madisona/django-google-maps/archive/master.zip
+paramiko

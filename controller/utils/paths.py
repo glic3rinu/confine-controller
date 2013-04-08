@@ -2,6 +2,8 @@ import os
 
 from django.conf import settings
 
+import controller
+
 
 def get_project_root():
     """ Return the current project path site/project """

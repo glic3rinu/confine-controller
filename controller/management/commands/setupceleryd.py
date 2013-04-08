@@ -1,11 +1,14 @@
 from optparse import make_option
+from os import path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from controller.utils.paths import get_site_root, get_controller_root()
+from controller.utils.paths import get_site_root, get_controller_root
 from controller.utils.system import run, check_root
 
+
+#TODO rename -> setupcelery 
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
@@ -26,11 +29,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         context = {'site_root': get_site_root(),
                    'username': options.get('username'),
-                   'bin_path': os.path.join(get_controller_root(), 'bin') }
+                   'bin_path': path.join(get_controller_root(), 'bin') }
         
         celery_config = (
             '# Name of nodes to start, here we have a single node\n'
-            'CELERYD_NODES="w1"\n'
+            'CELERYD_NODES="w1 w2"\n'
             '\n'
             '# Where to chdir at start.\n'
             'CELERYD_CHDIR="%(site_root)s"\n'
@@ -39,7 +42,8 @@ class Command(BaseCommand):
             'CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"\n'
             '\n'
             '# Extra arguments to celeryd\n'
-            'CELERYD_OPTS="--time-limit=300 --concurrency=8 -B"\n'
+            'CELERYD_OPTS="-P:w1 processes -P:w2 gevent -c:w1 8 -c:w2 500 \\\n'
+            '              -Q:w1 celery -Q:w2 gevent --time-limit=400"\n'
             '\n'
             '# Name of the celery config module.\n'
             'CELERY_CONFIG_MODULE="celeryconfig"\n'
@@ -69,22 +73,21 @@ class Command(BaseCommand):
             'CELERYEV_CAM="djcelery.snapshot.Camera"\n'
             '\n'
             '# Celerybeat\n'
-            '#CELERY_OPTS="$CELERY_OPTS -B -S djcelery.schedulers.DatabaseScheduler"\n'
+            'CELERYBEAT_CHDIR="$CELERYD_CHDIR"\n'
+            'CELERYBEAT="${CELERYBEAT_CHDIR}/manage.py celerybeat"\n'
+            'CELERYBEAT_OPTS="--schedule=/var/run/celerybeat-schedule"\n'
             '\n'
             '# Persistent revokes\n'
             'CELERYD_STATE_DB="$CELERYD_CHDIR/persistent_revokes"\n' % context)
         
         run("echo '%s' > /etc/default/celeryd" % celery_config)
-        # run("wget 'https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryd' "
-        #     "--no-check-certificate -O /etc/init.d/celeryd")
-        run('cp %(bin_path)s/celeryd /etc/init.d/celeryd')
-        run('chmod +x /etc/init.d/celeryd')
-        run('update-rc.d celeryd defaults')
-        # run('wget "https://raw.github.com/ask/celery/master/contrib/generic-init.d/celeryevcam" '
-        #     '--no-check-certificate -O /etc/init.d/celeryevcam')
-        run('cp %(bin_path)s/celeryevcam /etc/init.d/celeryd')
-        run('chmod +x /etc/init.d/celeryevcam')
-        run('update-rc.d celeryevcam defaults')
+        
+        # https://raw.github.com/celery/celery/master/extra/generic-init.d/
+        for script in ['celeryd', 'celeryevcam', 'celerybeat']:
+            context['script'] = script
+            run('cp %(bin_path)s/%(script)s /etc/init.d/%(script)s' % context)
+            run('chmod +x /etc/init.d/%(script)s' % context)
+            run('update-rc.d %(script)s defaults' % context)
         
         rotate = ('/var/log/celery/*.log {\n'
                   '    weekly\n'

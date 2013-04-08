@@ -72,6 +72,15 @@ class BaseStateAdmin(PermissionModelAdmin):
 
 
 class NodeStateAdmin(BaseStateAdmin):
+    readonly_fields = ['last_contact_on'] + BaseStateAdmin.readonly_fields
+    fieldsets = (
+        (None, {
+            'fields': ('node_link', 'last_seen_on', 'last_contact_on',
+                       'last_try_on', 'next_retry_on', 'current',)
+        }),
+        ('Details', {
+            'fields': ('display_metadata', 'display_data')
+        }),)
     change_form_template = 'admin/state/nodestate/change_form.html'
 
 

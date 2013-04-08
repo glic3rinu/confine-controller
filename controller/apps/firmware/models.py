@@ -398,7 +398,7 @@ class ConfigFileHelpText(models.Model):
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])
 
 
-@receiver(construct_safe_locals)
+@receiver(construct_safe_locals, dispatch_uid="firmware.update_safe_locals")
 def update_safe_locals(sender, safe_locals, **kwargs):
     safe_locals.update({'server': Server.objects.get(), 're': re})
     safe_locals.update(dict((setting, getattr(controller_settings, setting))

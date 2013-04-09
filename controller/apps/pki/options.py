@@ -42,10 +42,7 @@ class CA(object):
         return key
     
     def get_cert(self):
-        try:
-            return X509.load_cert(self.cert_path)
-        except:
-            return None
+        return X509.load_cert(self.cert_path)
     
     def gen_cert(self, **kwargs):
         commit = kwargs.pop('commit', False)

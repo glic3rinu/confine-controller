@@ -2,6 +2,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
+from controller.utils.paths import get_site_root
 from pki import Bob
 
 from maintenance.settings import MAINTENANCE_KEY_PATH, MAINTENANCE_PUB_KEY_PATH
@@ -27,8 +28,11 @@ class Command(BaseCommand):
         
         bob = Bob()
         
+        key_path = MAINTENANCE_KEY_PATH
+        pub_key_path = MAINTENANCE_PUB_KEY_PATH
+        
         try:
-            bob.load_key(MAINTENANCE_KEY_PATH)
+            bob.load_key(key_path)
         except:
             overide = True
         

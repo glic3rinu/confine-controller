@@ -7,13 +7,19 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 
 from controller.admin.utils import get_admin_link, get_modeladmin
+
+from .forms import ExecutionForm
 from .models import Operation, Instance
 
-from django import forms
 
-class ExecutionForm(forms.Form):
-    include_new_nodes = forms.BooleanField(required=False, help_text='If selected '
-        'the operation will be executed on newly created nodes')
+@transaction.commit_on_success
+def execute_operation_changelist(modeladmin, request, queryset):
+    if queryset.count() != 1:
+        messages.warning(request, "One operation at a time")
+        return
+    operation = queryset.get()
+    return redirect('admin:maintenance_operation_execute', operation.pk)
+execute_operation_changelist.short_description = 'Execute operation'
 
 @transaction.commit_on_success
 def execute_operation(modeladmin, request, queryset):
@@ -41,6 +47,8 @@ def execute_operation(modeladmin, request, queryset):
             # Return None to display the change list page again.
             return redirect('admin:maintenance_operation_change', operation.pk)
     
+    include_new_nodes = operation.executions.filter(include_new_nodes=True).exists()
+    
     context = {
         "title": "Are you sure?",
         "operation": operation,
@@ -49,7 +57,7 @@ def execute_operation(modeladmin, request, queryset):
         "opts": opts,
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-        'form': ExecutionForm(),
+        'form': ExecutionForm(initial={'include_new_nodes': include_new_nodes}),
     }
     
     return TemplateResponse(request, "admin/maintenance/operation/execute_operation_confirmation.html",

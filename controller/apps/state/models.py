@@ -98,8 +98,8 @@ class NodeState(BaseState):
         ('unknown', 'UNKNOWN'),)
     
     node = models.OneToOneField('nodes.Node', related_name='state')
-    last_contact_on = models.DateTimeField(null=True, help_text='Last API pull from '
-        'this node.')
+    last_contact_on = models.DateTimeField(null=True, help_text='Last API pull '
+        'received from this node.')
     
     def get_node(self):
         return self.node

@@ -8,7 +8,8 @@ from controller.admin.utils import get_admin_link, colored, admin_link, wrap_adm
 from nodes.admin import NodeAdmin
 from nodes.models import Node
 
-from .actions import execute_operation, revoke_instance, run_instance
+from .actions import ( execute_operation, execute_operation_changelist, run_instance,
+    revoke_instance )
 from .forms import ExecutionInlineForm
 from .models import Operation, Execution, Instance
 
@@ -100,10 +101,11 @@ class NodeListAdmin(NodeAdmin):
 
 class OperationAdmin(admin.ModelAdmin):
     list_display = ['name', 'identifier', 'num_executions', 'has_active_executions',
-                    'has_include_new_nodes', 'num_active_instances']
+                    'has_include_new_nodes', 'num_instances']
     list_display_links = ['name', 'identifier']
     list_filter = ['executions__is_active']
     inlines = [ExecutionInline]
+    actions = [execute_operation_changelist]
     
     def num_executions(self, instance):
         num = instance.executions.count()
@@ -122,12 +124,16 @@ class OperationAdmin(admin.ModelAdmin):
     has_include_new_nodes.short_description = 'include new nodes'
     has_include_new_nodes.boolean = True
     
-    def num_active_instances(self, instance):
-        execution = instance.executions.filter(is_active=True)
-        if execution:
-            return num_instances(execution[0])
-        return ''
-    num_active_instances.short_description = 'active instances'
+    def num_instances(self, instance):
+        base_instances = Instance.objects.filter(execution__operation=instance,
+            execution__is_active=True)
+        total = base_instances.count()
+        done = base_instances.exclude(state__in=[Instance.TIMEOUT, Instance.RECEIVED,
+            Instance.STARTED]).count()
+        url = reverse('admin:maintenance_instance_changelist')
+        url += '?operation=%s' % instance.pk
+        return mark_safe('<b><a href="%s">%d out of %d</a></b>' % (url, done, total))
+    num_instances.short_description = 'instances'
     
     def get_urls(self):
         urls = super(OperationAdmin, self).get_urls()
@@ -151,7 +157,7 @@ class ExecutionAdmin(admin.ModelAdmin):
 class InstanceAdmin(ChangeViewActions):
     list_display = ['__unicode__', admin_link('execution__operation'), admin_link('execution'),
                     admin_link('node'), colored('state', STATE_COLORS), 'last_try']
-    list_filter = ['state', 'execution__operation__identifier']
+    list_filter = ['state', 'execution__operation__identifier', 'execution__is_active']
     readonly_fields = ['execution', 'node', 'last_try', 'stdout', 'stderr',
                        'exit_code', 'traceback', 'state']
     actions = [revoke_instance, run_instance]

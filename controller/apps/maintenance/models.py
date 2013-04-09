@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -10,6 +11,8 @@ from state.models import NodeState, node_heartbeat
 from . import settings
 from .tasks import run_instance
 
+# TODO do not deactivate executions !!
+# TODO script detail on operation overview
 
 class Operation(models.Model):
     """ Defines an operation to be executed over a subset of nodes """
@@ -24,15 +27,7 @@ class Operation(models.Model):
         return self.identifier
     
     def execute(self, nodes, include_new_nodes=False):
-        # TODO overide only if nodes are include in new execution
-        Execution.objects.filter(operation=self, is_active=True).update(is_active=False)
-        execution = Execution.objects.create(operation=self, script=self.script,
-            include_new_nodes=include_new_nodes)
-        instances = []
-        for node in nodes:
-            instance = Instance.create(execution=execution, node=node)
-            instance.run()
-            instances.append(instance)
+        instances = Execution.create(self, nodes, include_new_nodes)
         return instances
 
 
@@ -65,10 +60,24 @@ class Execution(models.Model):
     
     @property
     def state(self):
-        if self.instances.filter(state=Instance.TIMEOUT).exists():
+        progress = [Instance.RECEIVED, Instance.STARTED, Instance.TIMEOUT]
+        if self.instances.filter(state__in=progress).exists():
             return self.PROGRESS
         return self.COMPLETE
-
+    
+    @classmethod
+    def create(cls, operation, nodes, include_new_nodes):
+        cls.objects.filter(operation=operation,
+            include_new_nodes=include_new_nodes).update(include_new_nodes=False)
+        execution = cls.objects.create(operation=operation, script=operation.script,
+            include_new_nodes=include_new_nodes)
+        instances = []
+        for node in nodes:
+            instance = Instance.create(execution=execution, node=node)
+            instance.run()
+            instances.append(instance)
+        return instances
+        
 
 @receiver(post_save, sender=Node)
 def execute_on_new_nodes(sender, instance, signal, *args, **kwargs):

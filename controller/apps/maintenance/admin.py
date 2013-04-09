@@ -44,14 +44,17 @@ colored_state.short_description = 'State'
 
 class ExecutionInline(admin.TabularInline):
     model = Execution
-    fields = [num_instances, 'is_active', 'include_new_nodes', 'created_on', colored_state]
-    readonly_fields = ['created_on', num_instances, colored_state]
+    fields = [num_instances, 'is_active', 'include_new_nodes', 'created_on', 
+              'details', colored_state]
+    readonly_fields = ['created_on', num_instances, colored_state, 'details']
     extra = 0
     form = ExecutionInlineForm
     
     def has_add_permission(self, *args, **kwargs):
         return False
 
+    def details(self, instance):
+        return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name='details'))
 
 class InstanceInline(admin.TabularInline):
     model = Instance
@@ -120,7 +123,7 @@ class OperationAdmin(admin.ModelAdmin):
     has_active_executions.boolean = True
     
     def has_include_new_nodes(self, instance):
-        return instance.executions.filter(is_active=True, include_new_nodes=True).exists()
+        return instance.executions.filter(include_new_nodes=True).exists()
     has_include_new_nodes.short_description = 'include new nodes'
     has_include_new_nodes.boolean = True
     
@@ -131,7 +134,7 @@ class OperationAdmin(admin.ModelAdmin):
         done = base_instances.exclude(state__in=[Instance.TIMEOUT, Instance.RECEIVED,
             Instance.STARTED]).count()
         url = reverse('admin:maintenance_instance_changelist')
-        url += '?operation=%s' % instance.pk
+        url += '?execution__operation=%s' % instance.pk
         return mark_safe('<b><a href="%s">%d out of %d</a></b>' % (url, done, total))
     num_instances.short_description = 'instances'
     
@@ -150,9 +153,21 @@ class ExecutionAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', admin_link('operation'), 'is_active',
                     'include_new_nodes', num_instances]
     inlines = [InstanceInline]
-    readonly_fields = ['operation', 'script']
+    readonly_fields = ['operation_link', 'display_script']
     list_filter = ['is_active', 'include_new_nodes']
+    fields = ['operation_link', 'display_script', 'is_active', 'include_new_nodes']
 
+    def display_script(self, instance):
+        from pygments import highlight
+        from pygments.lexers import BashLexer
+        from pygments.formatters import HtmlFormatter
+        style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
+        return mark_safe(style + highlight(instance.script, BashLexer(), HtmlFormatter()))
+    display_script.short_description = 'script'
+
+    def operation_link(self, instance):
+        return mark_safe("<b>%s</b>" % get_admin_link(instance.operation))
+    operation_link.short_description = 'operation'
 
 class InstanceAdmin(ChangeViewActions):
     list_display = ['__unicode__', admin_link('execution__operation'), admin_link('execution'),
@@ -162,6 +177,11 @@ class InstanceAdmin(ChangeViewActions):
                        'exit_code', 'traceback', 'state']
     actions = [revoke_instance, run_instance]
     change_view_actions = [revoke_instance, run_instance]
+
+    def lookup_allowed(self, key, value):
+        if key == 'execution__operation':
+            return True
+        return super(InstanceAdmin, self).lookup_allowed(key, value)
 
 
 admin.site.register(Operation, OperationAdmin)

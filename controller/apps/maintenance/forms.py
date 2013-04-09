@@ -10,11 +10,8 @@ class ExecutionInlineForm(forms.ModelForm):
         super(ExecutionInlineForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             execution = kwargs.get('instance')
-#            if not execution.state == Execution.PROGRESS:
-#            self.fields['is_active'].widget = ReadOnlyBooleanWidget()
             if Execution.objects.filter(created_on__gt=execution.created_on,
-                                        operation=execution.operation,
-                                        is_active=True).exists():
+                            operation=execution.operation, is_active=True).exists():
                 self.fields['include_new_nodes'].widget = ReadOnlyBooleanWidget()
 
 

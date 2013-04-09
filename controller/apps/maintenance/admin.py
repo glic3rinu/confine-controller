@@ -156,12 +156,16 @@ class ExecutionAdmin(admin.ModelAdmin):
     readonly_fields = ['operation_link', 'display_script']
     list_filter = ['is_active', 'include_new_nodes']
     fields = ['operation_link', 'display_script', 'is_active', 'include_new_nodes']
-
+    
+    class Media:
+        css = { "all": ("controller/css/github.css", "state/admin/css/details.css") }
+    
     def display_script(self, instance):
         from pygments import highlight
         from pygments.lexers import BashLexer
         from pygments.formatters import HtmlFormatter
-        style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
+        style = ('<style>code,pre {font-size:1.13em;}</style>'
+                 '<div style="padding-left:100px;">')
         return mark_safe(style + highlight(instance.script, BashLexer(), HtmlFormatter()))
     display_script.short_description = 'script'
 

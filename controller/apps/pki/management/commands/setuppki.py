@@ -49,6 +49,11 @@ class Command(BaseCommand):
             ca.gen_key(commit=True)
             overide = True
         
+        try:
+            ca.get_cert()
+        except IOError:
+            overide = True
+        
         if overide or not ca.get_cert():
             # Avoid import errors
             from nodes.models import Server

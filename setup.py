@@ -39,6 +39,9 @@ setup(
     url = 'http://wiki.confine-project.eu/soft:server',
     author = 'Confine Project',
     author_email = 'support@confine-project.eu',
+    install_requires=[
+        'paramiko',
+    ],
     classifiers = [
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

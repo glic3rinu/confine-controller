@@ -92,6 +92,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'state.middlewares.NodePullHeartBeat',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS =(
@@ -283,6 +284,11 @@ CELERY_SEND_TASK_ERROR_EMAILS = True
 # Use controller logging system instead of celery
 #CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERY_SEND_TASK_ERROR_EMAILS = True
+# Route state tasks to avoid gevent polluting other tasks
+CELERY_ROUTES = {
+         'state.nodestate': {'queue': 'gevent'},
+         'state.sliverstate': {'queue': 'gevent'},
+},
 ## end
 
 # django-private-files

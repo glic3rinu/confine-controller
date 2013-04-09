@@ -67,7 +67,7 @@ class Command(BaseCommand):
             run('rabbitmqctl start_app')
             run('service celeryd restart')
             run('service celeryevcam restart')
-        if version < 890:
+        if version < 809:
             # Add PKI directories
             from pki import ca
             from controller.utils.paths import get_site_root
@@ -83,3 +83,9 @@ class Command(BaseCommand):
                 'In order to use it you sould run:\n'
                 '  > python manage.py setuppki\n'
                 '  > sudo python manage.py setupapache\n')
+        if version < '818':
+            self.stdout.write('\nNew Celeryd workers configuration has been introduced '
+                'in 0.8.18. It is strongly recommended to upgrade by:\n'
+                '  > sudo python manage.py setupceleryd\n'
+                '  > sudo python manage.py restartservices\n')
+            

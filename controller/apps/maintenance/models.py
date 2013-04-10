@@ -11,8 +11,6 @@ from state.models import NodeState, node_heartbeat
 from . import settings
 from .tasks import run_instance
 
-# TODO do not deactivate executions !!
-# TODO script detail on operation overview
 
 class Operation(models.Model):
     """ Defines an operation to be executed over a subset of nodes """

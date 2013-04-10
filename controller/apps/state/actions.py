@@ -1,6 +1,5 @@
 from django.db import transaction
 from django.db.models import get_model
-#from django_transaction_signals import defer
 
 from .tasks import get_state
 

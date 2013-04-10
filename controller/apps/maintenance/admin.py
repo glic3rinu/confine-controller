@@ -2,11 +2,15 @@ from django.conf.urls import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
+from pygments import highlight
+from pygments.lexers import BashLexer
+from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import get_admin_link, colored, admin_link, wrap_admin_view
 from nodes.admin import NodeAdmin
 from nodes.models import Node
+from permissions.admin import PermissionModelAdmin
 
 from .actions import ( execute_operation, execute_operation_changelist, run_instance,
     revoke_instance )
@@ -52,9 +56,10 @@ class ExecutionInline(admin.TabularInline):
     
     def has_add_permission(self, *args, **kwargs):
         return False
-
+    
     def details(self, instance):
         return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name='details'))
+
 
 class InstanceInline(admin.TabularInline):
     model = Instance
@@ -90,7 +95,7 @@ class NodeListAdmin(NodeAdmin):
         """ Just fixing title and breadcrumbs """
         self.operation_id = operation_id
         operation = Operation.objects.get(pk=operation_id)
-        title = 'Select one or more nodes for creating %s slivers' % get_admin_link(operation)
+        title = 'Select one or more nodes for executing %s operation' % get_admin_link(operation)
         context = {'title': mark_safe(title),
                    'operation': operation, }
         context.update(extra_context or {})
@@ -102,13 +107,16 @@ class NodeListAdmin(NodeAdmin):
         return False
 
 
-class OperationAdmin(admin.ModelAdmin):
+class OperationAdmin(PermissionModelAdmin):
     list_display = ['name', 'identifier', 'num_executions', 'has_active_executions',
                     'has_include_new_nodes', 'num_instances']
     list_display_links = ['name', 'identifier']
     list_filter = ['executions__is_active']
     inlines = [ExecutionInline]
     actions = [execute_operation_changelist]
+    save_and_continue = True
+    # TODO fix this annoying mandatory declaration once and for all
+    change_form_template = "admin/maintenance/operation/change_form.html"
     
     def num_executions(self, instance):
         num = instance.executions.count()
@@ -149,6 +157,7 @@ class OperationAdmin(admin.ModelAdmin):
         )
         return extra_urls + urls
 
+
 class ExecutionAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', admin_link('operation'), 'is_active',
                     'include_new_nodes', num_instances]
@@ -161,17 +170,15 @@ class ExecutionAdmin(admin.ModelAdmin):
         css = { "all": ("controller/css/github.css", "state/admin/css/details.css") }
     
     def display_script(self, instance):
-        from pygments import highlight
-        from pygments.lexers import BashLexer
-        from pygments.formatters import HtmlFormatter
         style = ('<style>code,pre {font-size:1.13em;}</style>'
                  '<div style="padding-left:100px;">')
         return mark_safe(style + highlight(instance.script, BashLexer(), HtmlFormatter()))
     display_script.short_description = 'script'
-
+    
     def operation_link(self, instance):
         return mark_safe("<b>%s</b>" % get_admin_link(instance.operation))
     operation_link.short_description = 'operation'
+
 
 class InstanceAdmin(ChangeViewActions):
     list_display = ['__unicode__', admin_link('execution__operation'), admin_link('execution'),
@@ -181,7 +188,7 @@ class InstanceAdmin(ChangeViewActions):
                        'exit_code', 'traceback', 'state']
     actions = [revoke_instance, run_instance]
     change_view_actions = [revoke_instance, run_instance]
-
+    
     def lookup_allowed(self, key, value):
         if key == 'execution__operation':
             return True

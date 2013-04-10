@@ -1,11 +1,11 @@
+import socket
 from datetime import datetime
 
-import paramiko, socket
+import paramiko
 from celery.task import task
 
 from .settings import MAINTENANCE_KEY_PATH
 
-# TODO paramiko does not work with celery in process mode + state task using gevent
 
 @task(name="maintenance.run_instance")
 def run_instance(instance_id):

@@ -9,13 +9,13 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (insert_list_display, get_admin_link, colored,
-    insert_list_filter)
+    insert_list_filter, insert_action)
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin
 from slices.models import Sliver
 
-from .actions import refresh
+from .actions import refresh, refresh_state
 from .models import NodeState, SliverState
 from .settings import STATE_NODE_SOFT_VERSION_URL
 
@@ -104,7 +104,7 @@ class SliverStateAdmin(BaseStateAdmin):
     
     def sliver_link(self, instance):
         """ Link to related sliver used on change_view """
-        return mark_safe("<b>%s</b>" % get_admin_link(instance))
+        return mark_safe("<b>%s</b>" % get_admin_link(instance.sliver))
     sliver_link.short_description = 'Sliver'
 
 
@@ -146,6 +146,8 @@ insert_list_display(NodeListAdmin, soft_version)
 insert_list_display(Node, state)
 insert_list_display(NodeListAdmin, state)
 insert_list_display(Sliver, state)
+insert_action(Node, refresh_state)
+insert_action(Sliver, refresh_state)
 insert_list_filter(Node, 'state__soft_version')
 SliverInline.sliver_state = state
 SliverInline.readonly_fields.append('sliver_state')

@@ -84,7 +84,8 @@ def execute_on_new_nodes(sender, instance, signal, *args, **kwargs):
     """ creates needed execution instances when a new node is added """
     for execution in Execution.objects.filter(is_active=True, include_new_nodes=True):
         new_instance, new = Instance.objects.get_or_create(execution=execution, node=instance)
-        new_instance.run()
+        if new:
+            new_instance.run()
 
 
 class Instance(models.Model):

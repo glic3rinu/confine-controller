@@ -57,6 +57,11 @@ class BaseState(models.Model):
                 'headers': response.headers})
         state.metadata = json.dumps(metadata, indent=4)
         state.save()
+        state.post_store_glet(obj, glet)
+        return state
+    
+    def post_store_glet(self, obj, glet):
+        pass
     
     @property
     def current(self):
@@ -100,6 +105,7 @@ class NodeState(BaseState):
     node = models.OneToOneField('nodes.Node', related_name='state')
     last_contact_on = models.DateTimeField(null=True, help_text='Last API pull '
         'received from this node.')
+    soft_version = models.CharField(max_length=32, blank=True)
     
     def get_node(self):
         return self.node
@@ -116,6 +122,14 @@ class NodeState(BaseState):
     @classmethod
     def get_related_field_name(cls):
         return 'node'
+    
+    def post_store_glet(self, obj, glet):
+        try:
+            self.soft_version = json.loads(self.data).get('soft_version', '')
+        except ValueError:
+            pass
+        else:
+            self.save()
 
 
 class SliverState(BaseState):

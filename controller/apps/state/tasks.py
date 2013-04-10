@@ -1,5 +1,5 @@
 import requests, gevent, os
-from celery.task import periodic_task
+from celery.task import periodic_task, task
 from django.db.models import get_model
 from gevent import monkey
 
@@ -8,14 +8,16 @@ from controller.utils import LockFile
 from .settings import STATE_LOCK_DIR, STATE_NODESTATE_SCHEDULE, STATE_SLIVERSTATE_SCHEDULE
 
 
-def get_state(state_module):
+@task(name="state.get_state")
+def get_state(state_module, ids=[]):
     state_model = get_model(*state_module.split('.'))
     lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
     freq = state_model.get_setting('SCHEDULE')
-    
     # Prevent concurrent executions
     with LockFile(lock_file, expire=freq-(freq*0.2)):
         objects = state_model.get_related_model().objects.all()
+        if ids:
+            objects = objects.filter(id__in=ids)
         URI = state_model.get_setting('URI')
         node = lambda obj: getattr(obj, 'node', obj)
         
@@ -31,18 +33,19 @@ def get_state(state_module):
         
         # look at the results
         for obj, glet in zip(objects, glets):
+            print obj
             state_model.store_glet(obj, glet)
     
     return len(objects)
 
 
 @periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_SCHEDULE,
-    expires=STATE_NODESTATE_SCHEDULE)
+               expires=STATE_NODESTATE_SCHEDULE)
 def node_state():
     return get_state('state.NodeState')
 
 
 @periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_SCHEDULE,
-   expires=STATE_SLIVERSTATE_SCHEDULE)
+               expires=STATE_SLIVERSTATE_SCHEDULE)
 def sliver_state():
     return get_state('state.SliverState')

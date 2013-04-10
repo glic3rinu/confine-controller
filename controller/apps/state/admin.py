@@ -7,13 +7,17 @@ from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import HtmlFormatter
 
-from controller.admin.utils import insert_list_display, get_admin_link, colored
+from controller.admin import ChangeViewActions
+from controller.admin.utils import (insert_list_display, get_admin_link, colored,
+    insert_list_filter)
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
-from slices.admin import SliverInline
+from slices.admin import SliverInline, NodeListAdmin
 from slices.models import Sliver
 
+from .actions import refresh
 from .models import NodeState, SliverState
+from .settings import STATE_NODE_SOFT_VERSION_URL
 
 
 STATES_COLORS = {
@@ -32,7 +36,7 @@ STATES_COLORS = {
     'fail_start': 'red' }
 
 
-class BaseStateAdmin(PermissionModelAdmin):
+class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     readonly_fields = ['node_link', 'last_seen_on', 'last_try_on', 'next_retry_on',
         'current', 'display_metadata', 'display_data']
     fieldsets = (
@@ -43,6 +47,8 @@ class BaseStateAdmin(PermissionModelAdmin):
         ('Details', {
             'fields': ('display_metadata', 'display_data')
         }),)
+    change_view_actions = [refresh]
+    change_form_template = "admin/controller/change_form.html"
     
     class Media:
         css = { "all": ("controller/css/github.css", "state/admin/css/details.css") }
@@ -105,6 +111,7 @@ class SliverStateAdmin(BaseStateAdmin):
 admin.site.register(NodeState, NodeStateAdmin)
 admin.site.register(SliverState, SliverStateAdmin)
 
+
 # Monkey Patch section
 
 def state(*args):
@@ -121,9 +128,25 @@ def state(*args):
 state.admin_order_field = 'state__last_seen_on'
 
 
+def soft_version(node):
+    try:
+        version = node.state.soft_version
+    except NodeState.DoesNotExist:
+        return 'No data'
+    else:
+        if not version:
+            return 'No data'
+        url = STATE_NODE_SOFT_VERSION_URL(version)
+        return mark_safe('<a href="%s">%s</a>' % (url, version))
+soft_version.admin_order_field = 'state__soft_version'
+
+
+insert_list_display(Node, soft_version)
+insert_list_display(NodeListAdmin, soft_version)
 insert_list_display(Node, state)
+insert_list_display(NodeListAdmin, state)
 insert_list_display(Sliver, state)
+insert_list_filter(Node, 'state__soft_version')
 SliverInline.sliver_state = state
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')
-

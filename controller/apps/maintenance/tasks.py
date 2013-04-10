@@ -1,8 +1,10 @@
-import socket
+import socket, sys
 from datetime import datetime
 
 import paramiko
+from celery.datastructures import ExceptionInfo
 from celery.task import task
+
 
 from .settings import MAINTENANCE_KEY_PATH
 
@@ -39,5 +41,5 @@ def run_instance(instance_id):
         instance.save()
     except:
         instance.state = Instance.FAILURE
+        instance.traceback = ExceptionInfo(sys.exc_info()).traceback
         instance.save()
-        raise

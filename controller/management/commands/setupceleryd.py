@@ -51,6 +51,7 @@ class Command(BaseCommand):
             '# %%n will be replaced with the nodename.\n'
             'CELERYD_LOG_FILE="/var/log/celery/%%n.log"\n'
             'CELERYD_PID_FILE="/var/run/celery/%%n.pid"\n'
+            'CELERY_CREATE_DIRS=1\n'
             '\n'
             '# Full path to the celeryd logfile.\n'
             'CELERYEV_LOG_FILE="/var/log/celery/celeryev.log"\n'
@@ -96,5 +97,3 @@ class Command(BaseCommand):
                   '    copytruncate\n'
                   '}')
         run("echo '%s' > /etc/logrotate.d/celeryd" % rotate)
-        run("mkdir /var/log/celery")
-        run("chown -R %(username)s /var/log/celery")

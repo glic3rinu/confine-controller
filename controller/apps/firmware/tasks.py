@@ -62,5 +62,5 @@ def build(build_id, exclude=[]):
     build_obj.image = dest_path
     build_obj.base_image = base_image
     build_obj.save()
-    
+    raise
     return { 'progress': 99, 'description': 'Redirecting', 'result': dest_path }

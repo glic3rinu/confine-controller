@@ -88,4 +88,8 @@ class Command(BaseCommand):
                 'in 0.8.18. It is strongly recommended to upgrade by:\n'
                 '  > sudo python manage.py setupceleryd\n'
                 '  > sudo python manage.py restartservices\n')
-            
+        if version < 831:
+            from controller.utils import is_installed
+            if is_installed('firmware'):
+                from firmware.models import Build
+                Build.objects.filter(base_image=None).update(base_image='')

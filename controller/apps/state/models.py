@@ -114,9 +114,8 @@ class NodeState(BaseState):
     @classmethod
     def register_heartbeat(cls, node):
         node_state, new = cls.objects.get_or_create(node=node)
-        now = now()
-        node_state.last_contact_on = now
-        node_state.last_seen_on = now
+        node_state.last_seen_on = now()
+        node_state.last_contact_on = node_state.last_seen_on
         node_state.save()
         node_heartbeat.send(sender=cls, node=node)
     

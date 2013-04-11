@@ -4,44 +4,13 @@
 {% block extrahead %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "controller/css/jquery-ui.css" %}" />
-    <script src="{% static "controller/js/jquery-1.9.1.js" %}"></script>
-    <script src="{% static "controller/js/jquery-ui.js" %}"></script>
+    <script src="{% static "controller/js/jquery-1.9.1.js" %}"type="text/javascript"></script>
+    <script src="{% static "controller/js/jquery-ui.js" %}"type="text/javascript"></script>
+    <script src="{% static "firmware/progress_bar.js" %}" type="text/javascript"></script>
     <script>
-    $(function() {
-        $( "#description" ).html('Waiting for your task to begin ...');
-        $( "#progressbar" ).progressbar({ value: 0 });
-        var freq = 1000;
-        var progress_url = '{% url 'admin:nodes_node_firmware_build_info' node.pk %}';
-        var last = 1;
-        var current = 0;
-        function update_progress_info() {
-            $.getJSON(progress_url, function(data, status){
-                if (data) {
-                    console.log(data);
-                    if (data.progress == last && data.next > current){
-                        current++;
-                    } else {
-                        current = data.progress;
-                    }
-                    last = data.progress
-                    $( "#progressbar" ).progressbar({ value: current });
-                    $( "#description" ).html(data.description);
-                    $( "#content_message" ).html(data.content_message);
-                    if ( data.state != 'PROCESS') {
-                        window.location = window.location.href;
-                        return true;
-                    }
-                }
-                window.setTimeout(update_progress_info, freq);
-            })
-            .error(function(data, status) { 
-                window.location = window.location.href;
-                return true;
-            });
-        };
-        window.setTimeout(update_progress_info, freq);
-    });
+    progress_bar('{% url 'admin:nodes_node_firmware_build_info' node.pk %}');
     </script>
+
 {% endblock %}
 
 {% block content %}

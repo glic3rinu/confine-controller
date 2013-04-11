@@ -1,5 +1,4 @@
 import inspect, os, tempfile
-from datetime import datetime
 from hashlib import sha256
 
 from django_transaction_signals import defer
@@ -8,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.timezone import now
 from IPy import IP
 
 from controller.models.fields import MultiSelectField, NullableCharField
@@ -24,7 +24,7 @@ from .tasks import force_slice_update, force_sliver_update
 
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
-    return datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
+    return now() + settings.SLICES_SLICE_EXP_INTERVAL
 
 
 def make_upload_to(field_name, base_path, file_name):
@@ -163,7 +163,7 @@ class Slice(models.Model):
         # TODO send message to user when error happens
         self.update_set_state(commit=False)
         if not self.pk:
-            self.expires_on = datetime.now() + settings.SLICES_SLICE_EXP_INTERVAL
+            self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):

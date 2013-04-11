@@ -1,10 +1,9 @@
 import socket, sys
-from datetime import datetime
 
 import paramiko
 from celery.datastructures import ExceptionInfo
 from celery.task import task
-
+from django.utils.timezone import now
 
 from .settings import MAINTENANCE_KEY_PATH
 
@@ -16,7 +15,12 @@ def run_instance(instance_id):
     if not instance.execution.is_active:
         return 'no active'
     instance.state = Instance.STARTED
-    instance.last_try = datetime.now()
+    instance.last_try = now()
+    # Make sure to have cleaned feedback fields (re-executing an instance)
+    instance.exit_code = None
+    instance.stderr = ''
+    instance.stdout = ''
+    instance.traceback = ''
     instance.save()
     try:
         # ssh connection

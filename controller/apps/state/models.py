@@ -1,10 +1,11 @@
 import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 from time import time, mktime
 
 import django.dispatch
 from django.db import models
 from django.dispatch import Signal
+from django.utils.timezone import now
 
 from . import settings
 
@@ -50,7 +51,7 @@ class BaseState(models.Model):
         state, created = cls.objects.get_or_create(**{field_name: obj})
         metadata = {'exception': str(glet._exception)}
         if response is not None:
-            state.last_seen_on = datetime.now()
+            state.last_seen_on = now()
             state.data = response.content
             metadata.update({
                 'url': response.url,
@@ -113,7 +114,7 @@ class NodeState(BaseState):
     @classmethod
     def register_heartbeat(cls, node):
         node_state, new = cls.objects.get_or_create(node=node)
-        now = datetime.now()
+        now = now()
         node_state.last_contact_on = now
         node_state.last_seen_on = now
         node_state.save()

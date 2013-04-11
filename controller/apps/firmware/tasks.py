@@ -25,7 +25,7 @@ def build(build_id, exclude=[]):
     config = Config.objects.get()
     node = build_obj.node
     base_image = config.get_image(node)
-    image = Image(base_image.image.path)
+    image = Image(base_image.path)
     
     try:
         # Build the image
@@ -62,5 +62,4 @@ def build(build_id, exclude=[]):
     build_obj.image = dest_path
     build_obj.base_image = base_image
     build_obj.save()
-    raise
     return { 'progress': 99, 'description': 'Redirecting', 'result': dest_path }

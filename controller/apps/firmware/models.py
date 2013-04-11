@@ -55,7 +55,7 @@ class Build(models.Model):
         upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH, max_length=256,
         condition=lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node))
-    base_image = models.ForeignKey('firmware.BaseImage', null=True)
+    base_image = models.CharField(max_length=256)
     task_id = models.CharField(max_length=36, unique=True, null=True,
         help_text="Celery task ID")
     
@@ -248,7 +248,7 @@ class Config(SingletonModel):
         images = self.images.filter(architectures__regex=arch_regex)
         if len(images) == 0:
             return None
-        return images[0]
+        return images[0].image
     
     def get_image_name(self, node, build=None):
         context = {

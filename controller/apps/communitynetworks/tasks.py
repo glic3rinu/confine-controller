@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from celery.task import periodic_task, task
+from django.utils.timezone import now
 
 from .settings import COMMUNITYNETWORKS_CACHE_NODE_DB_SCHEDULE as SCHEDULE
 
@@ -18,7 +17,7 @@ def cache_node_db(obj):
     from .models import CnHost
     fresh_obj = type(obj).objects.get(pk=obj.pk)
     if fresh_obj.cndb_uri:
-        fresh_obj.cndb_cached_on = datetime.now()
+        fresh_obj.cndb_cached_on = now()
         fresh_obj.save()
     return "NOT IMPLEMENTED"
 

@@ -33,7 +33,6 @@ def get_state(state_module, ids=[]):
         
         # look at the results
         for obj, glet in zip(objects, glets):
-            print obj
             state_model.store_glet(obj, glet)
     
     return len(objects)

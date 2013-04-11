@@ -71,10 +71,10 @@ class Command(BaseCommand):
             'CELERYEV_OPTS="celeryev"\n'
             '\n'
             '# Celerybeat\n'
+            'CELERYBEAT="${CELERYD_CHDIR}/manage.py celerybeat"\n'
             'CELERYBEAT_USER="$CELERYD_USER"\n'
             'CELERYBEAT_GROUP="$CELERYD_USER"\n'
             'CELERYBEAT_CHDIR="$CELERYD_CHDIR"\n'
-            'CELERYBEAT="${CELERYBEAT_CHDIR}/manage.py celerybeat"\n'
             'CELERYBEAT_OPTS="--schedule=/var/run/celerybeat-schedule"\n' % context)
         
         run("echo '%s' > /etc/default/celeryd" % celery_config)
@@ -96,3 +96,5 @@ class Command(BaseCommand):
                   '    copytruncate\n'
                   '}')
         run("echo '%s' > /etc/logrotate.d/celeryd" % rotate)
+        run("mkdir /var/log/celery")
+        run("chown -R %(username)s /var/log/celery")

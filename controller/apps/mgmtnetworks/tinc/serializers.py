@@ -59,6 +59,7 @@ class MgmtNetConfSerializer(serializers.Serializer):
     backend = serializers.CharField(source='name')
     tinc_client = TincClientSerializer()
     tinc_server = TincServerSerializer()
+    native = serializers.Field()
 
 
 class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):

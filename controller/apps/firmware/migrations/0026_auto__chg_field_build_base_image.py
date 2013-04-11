@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         # Renaming column for 'Build.base_image' to match new field type.
         db.rename_column(u'firmware_build', 'base_image_id', 'base_image')
         # Changing field 'Build.base_image'
-        db.alter_column(u'firmware_build', 'base_image', self.gf('django.db.models.fields.CharField')(default='', max_length=256, null=True))
+        db.alter_column(u'firmware_build', 'base_image', self.gf('django.db.models.fields.CharField')(default='', max_length=256))
         # Removing index on 'Build', fields ['base_image']
         db.delete_index(u'firmware_build', ['base_image_id'])
 

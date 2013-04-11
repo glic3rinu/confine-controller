@@ -24,6 +24,26 @@ class Command(BaseCommand):
     
     @check_root
     def handle(self, *args, **options):
+        version = options.get('version')
+        if version:
+            # Pre version specific upgrades
+            version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
+            minor_release = version_re.search(version)
+            if minor_release is not None:
+                major, major2, minor = version_re.search(version).groups()
+            else:
+                version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
+                major, major2 = version_re.search(version).groups()
+                minor = 0
+            # Represent version as two digits per number: 1.2.2 -> 10202
+            version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
+            if version < 835:
+                # prevent schema migrations from failing
+                from controller.utils import is_installed
+                if is_installed('firmware'):
+                    from firmware.models import Build
+                    Build.objects.filter(base_image=None).update(base_image='')
+        
         if not options.get('specifics_only'):
             # Common stuff
             minimal = options.get('minimal')
@@ -38,23 +58,11 @@ class Command(BaseCommand):
             run("python manage.py migrate")
             run("python manage.py restartservices")
         
-        # Version specific
-        version = options.get('version')
         if not version:
             self.stderr.write('\nNext time you migth want to provide a --from argument '
                               'in order to run version specific upgrade operations\n')
             return
         
-        version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
-        minor_release = version_re.search(version)
-        if minor_release is not None:
-            major, major2, minor = version_re.search(version).groups()
-        else:
-            version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
-            major, major2 = version_re.search(version).groups()
-            minor = 0
-        # Represent version as two digits per number: 1.2.2 -> 10202
-        version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
         if version <= 629:
             # Clean existing sessions because of change on auth backend
             run('echo "delete from django_session;" | python manage.py dbshell')
@@ -88,8 +96,4 @@ class Command(BaseCommand):
                 'in 0.8.18. It is strongly recommended to upgrade by:\n'
                 '  > sudo python manage.py setupceleryd\n'
                 '  > sudo python manage.py restartservices\n')
-        if version < 831:
-            from controller.utils import is_installed
-            if is_installed('firmware'):
-                from firmware.models import Build
-                Build.objects.filter(base_image=None).update(base_image='')
+

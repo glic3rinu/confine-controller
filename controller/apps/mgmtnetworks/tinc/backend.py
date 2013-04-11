@@ -18,3 +18,7 @@ class TincBackend(object):
     
     def tinc_server(self):
         return self.obj.tinc if self.name == 'tinc_server' else None
+    
+    @property
+    def native(self):
+        return None

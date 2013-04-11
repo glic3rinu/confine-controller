@@ -22,8 +22,9 @@ class Base(ApiRoot):
     For example: `curl -X GET https://controller.confine-project.eu/api/
     -H "Accept: application/json; indent=4"`
     """
-    def get(self, *args, **kwargs):
-        response = super(Base, self).get(*args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        response = super(Base, self).get(request, *args, **kwargs)
+        
         testbed_params = {
             "priv_ipv4_prefix_dflt": settings.PRIV_IPV4_PREFIX_DFLT,
             "sliver_mac_prefix_dflt": settings.SLIVER_MAC_PREFIX_DFLT,
@@ -34,6 +35,7 @@ class Base(ApiRoot):
             "priv_ipv6_prefix": settings.PRIV_IPV6_PREFIX
         }
         response.data.update({
+            "uri": reverse('base', request=request),
             "testbed_params": testbed_params,
             "confine_params": confine_params })
         return response

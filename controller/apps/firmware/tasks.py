@@ -36,7 +36,7 @@ def build(build_id, exclude=[]):
         
         update_state(build, 15, 29, 'Preparing image file system')
         image.mount()
-        
+
         files = config.eval_files(node, exclude=exclude, image=image)
         total = len(files)
         for num, build_file in enumerate(files):

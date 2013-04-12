@@ -79,6 +79,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     actions = [update_selected]
     change_view_actions = [update_selected]
     default_changelist_filter = 'my_slivers'
+    change_form_template = "admin/controller/change_form.html"
     
     def __init__(self, *args, **kwargs):
         """ 
@@ -125,6 +126,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def get_form(self, request, obj=None, **kwargs):
         """ Hook node reference for future processing in SliverIfaceInline """
         request._node_ = obj.node
+        request._slice_ = obj.slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
     def queryset(self, request):

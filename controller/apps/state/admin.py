@@ -9,13 +9,13 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (insert_list_display, get_admin_link, colored,
-    insert_list_filter, insert_action)
+    insert_list_filter, insert_action, get_modeladmin)
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
-from slices.admin import SliverInline, NodeListAdmin
+from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin
 from slices.models import Sliver
 
-from .actions import refresh, refresh_state
+from .actions import refresh, refresh_state, state_action
 from .models import NodeState, SliverState
 from .settings import STATE_NODE_SOFT_VERSION_URL
 
@@ -114,7 +114,7 @@ admin.site.register(SliverState, SliverStateAdmin)
 
 # Monkey Patch section
 
-def state(*args):
+def state_link(*args):
     obj = args[-1]
     color = colored('current', STATES_COLORS, verbose=True)
     try:
@@ -122,10 +122,11 @@ def state(*args):
     except (NodeState.DoesNotExist, SliverState.DoesNotExist):
         return 'No data'
     else:
-        cls_name = type(state).__name__.lower()
-        url = reverse('admin:state_%s_change' % cls_name, args=[state.pk])
+        app_label = obj._meta.app_label
+        model_name = obj._meta.verbose_name_raw
+        url = reverse('admin:%s_%s_state' % (app_label, model_name), args=[obj.pk])
         return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
-state.admin_order_field = 'state__last_seen_on'
+state_link.admin_order_field = 'state__last_seen_on'
 
 
 def soft_version(node):
@@ -143,12 +144,20 @@ soft_version.admin_order_field = 'state__soft_version'
 
 insert_list_display(Node, soft_version)
 insert_list_display(NodeListAdmin, soft_version)
-insert_list_display(Node, state)
-insert_list_display(NodeListAdmin, state)
-insert_list_display(Sliver, state)
+insert_list_display(Node, state_link)
+insert_list_display(NodeListAdmin, state_link)
+insert_list_display(Sliver, state_link)
 insert_action(Node, refresh_state)
 insert_action(Sliver, refresh_state)
 insert_list_filter(Node, 'state__soft_version')
-SliverInline.sliver_state = state
+SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')
+
+node_modeladmin = get_modeladmin(Node)
+node_modeladmin.set_change_view_action(state_action)
+sliver_modeladmin = get_modeladmin(Sliver)
+sliver_modeladmin.set_change_view_action(state_action)
+# TODO
+#actions = getattr(SliceSliversAdmin, 'change_view_actions', [])
+#SliceSliversAdmin.change_view_actions = actions + [state_action]

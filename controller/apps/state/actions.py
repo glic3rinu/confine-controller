@@ -3,6 +3,8 @@ from threading import Thread
 from django.db import transaction
 from django.db.models import get_model
 
+from controller.admin.utils import get_modeladmin
+
 from .tasks import get_state
 
 
@@ -22,6 +24,7 @@ def refresh(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 
 
+@transaction.commit_on_success
 def refresh_state(modeladmin, request, queryset):
     """ gate_state from Node/Sliver queryset synchronously """
     opts = queryset.model._meta
@@ -34,3 +37,10 @@ def refresh_state(modeladmin, request, queryset):
     thread.join()
     msg = 'The state of %d %ss has been updated' % (queryset.count(), opts.object_name)
     modeladmin.message_user(request, msg)
+
+
+def state_action(modeladmin, request, queryset):
+    obj = queryset.get()
+    state_modeladmin = get_modeladmin(type(obj.state))
+    return state_modeladmin.change_view(request, str(obj.pk))
+state_action.url_name = 'state'

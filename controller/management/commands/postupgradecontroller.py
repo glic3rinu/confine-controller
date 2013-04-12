@@ -26,7 +26,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         version = options.get('version')
         if version:
-            # Pre version specific upgrades
             version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
             minor_release = version_re.search(version)
             if minor_release is not None:
@@ -37,6 +36,8 @@ class Command(BaseCommand):
                 minor = 0
             # Represent version as two digits per number: 1.2.2 -> 10202
             version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
+
+            # Pre version specific upgrade operations
             if version < 835:
                 # prevent schema migrations from failing
                 from controller.utils import is_installed
@@ -62,7 +63,8 @@ class Command(BaseCommand):
             self.stderr.write('\nNext time you migth want to provide a --from argument '
                               'in order to run version specific upgrade operations\n')
             return
-        
+
+        # Post version specific operations
         if version <= 629:
             # Clean existing sessions because of change on auth backend
             run('echo "delete from django_session;" | python manage.py dbshell')
@@ -92,6 +94,7 @@ class Command(BaseCommand):
                 '  > python manage.py setuppki\n'
                 '  > sudo python manage.py setupapache\n')
         if version < 818:
+            # warn user about some additional steps required for upgrading
             self.stdout.write('\nNew Celeryd workers configuration has been introduced '
                 'in 0.8.18. It is strongly recommended to upgrade by:\n'
                 '  > sudo python manage.py setupceleryd\n'

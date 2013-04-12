@@ -5,7 +5,8 @@
 <a href="{% url 'admin:index' %}">Home</a>
 &rsaquo; <a href="{% url 'admin:app_list' app_label='slices' %}">Slices</a>
 &rsaquo; <a href="{% url 'admin:slices_sliver_changelist' %}">Slivers</a>
-&rsaquo; {{ original|truncatewords:"18" }}
+&rsaquo; <a href="{% url 'admin:slices_sliver_change' original.sliver.pk %}">{{ original.sliver|truncatewords:"18" }}</a>
+&rsaquo; State
 </div>
 {% endblock %}
 

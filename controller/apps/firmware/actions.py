@@ -12,11 +12,6 @@ from .forms import OptionalFilesForm
 from .models import Build, Config
 
 
-# TODO task failure tolerance
-# TODO api failure tolerance
-# TODO timeout for retrying
-
-
 @transaction.commit_on_success
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:
@@ -67,9 +62,15 @@ def get_firmware(modeladmin, request, queryset):
     
     # Build a new firmware
     if not state or state in [Build.DELETED, Build.OUTDATED, Build.FAILED]:
-        context["content_message"] = ("There is no pre-build up-to-date firmware for "
-            "this research device, but you can instruct the system to build a fresh "
-            "one for you, it will take only a few seconds.")
+        if state == Build.FAILED:
+            msg = ("<b>The last build for this research device has failed</b>. "
+                   "This problem has been reported to the operators, but you can "
+                   "try to build again the image")
+        else:
+            msg = ("There is no pre-build up-to-date firmware for this research "
+                   "device, but you can instruct the system to build a fresh one "
+                   "for you, it will take only a few seconds.")
+        context["content_message"] = mark_safe(msg)
         template = 'admin/firmware/generate_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
     
@@ -92,7 +93,7 @@ def get_firmware(modeladmin, request, queryset):
     # Processing
     template = 'admin/firmware/processing_build.html'
     return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
-    
+
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")
 get_firmware.url_name = 'firmware'
 get_firmware.verbose_name = 'Download Firmware'

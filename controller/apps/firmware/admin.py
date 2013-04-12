@@ -182,7 +182,7 @@ def get_urls(self):
         try:
             build = Build.objects.get(node=node_id)
         except Build.DoesNotExist:
-            build_dict = {}
+            info = {}
         else:
             task = AsyncResult(build.task_id)
             result = task.result or {}

@@ -122,9 +122,8 @@ def state_link(*args):
     except (NodeState.DoesNotExist, SliverState.DoesNotExist):
         return 'No data'
     else:
-        app_label = obj._meta.app_label
         model_name = obj._meta.verbose_name_raw
-        url = reverse('admin:%s_%s_state' % (app_label, model_name), args=[obj.pk])
+        url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
         return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
 state_link.admin_order_field = 'state__last_seen_on'
 

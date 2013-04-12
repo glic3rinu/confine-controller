@@ -2,6 +2,7 @@ from threading import Thread
 
 from django.db import transaction
 from django.db.models import get_model
+from django.shortcuts import redirect
 
 from controller.admin.utils import get_modeladmin
 
@@ -41,6 +42,6 @@ def refresh_state(modeladmin, request, queryset):
 
 def state_action(modeladmin, request, queryset):
     obj = queryset.get()
-    state_modeladmin = get_modeladmin(type(obj.state))
-    return state_modeladmin.change_view(request, str(obj.pk))
+    model_name = obj._meta.verbose_name_raw
+    return redirect('admin:state_%sstate_change' % model_name, obj.state.pk)
 state_action.url_name = 'state'

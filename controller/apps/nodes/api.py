@@ -25,23 +25,36 @@ class ApiFunction(View):
 #    return api_function
 
 
-class RebootFunction(ApiFunction):
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+
+# TODO create FunctionAPIView or somehting that handles permissions and all
+class Reboot(APIView):
+    """
+    **Relation type:** [`http://confine-project.eu/rel/server/do-reboot`](
+        http://confine-project.eu/rel/server/do-reboot)
+    
+    Endpoint containing the function URI used to reboot this node.
+    
+    POST data: `null`
+    """
+    url_name = 'reboot'
+    
     def post(self, request, *args, **kwargs):
-        action = action_to_api_function(request_cert, Node)
-        response = action(request, *args, **kwargs)
-        return super(RebootAction, self).post(request, *args, **kwargs)
-
-
-
-class RequestCertFunction(ApiFunction):
-    def post(self, request, *args, **kwargs):
-        pass
+        if not request.DATA:
+            obj = get_object_or_404(Node, pk=kwargs.get('pk'))
+            response_data = {'detail': 'Node instructed to reboot'}
+            return Response(response_data, status=status.HTTP_202_ACCEPTED)
+        response_data = {'error': 'This endpoint only accepts empty data'}
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """ 
     **Media type:** [`application/vnd.confine.server.Node.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#node_at_server)
+        wiki.confine-project.eu/arch:rest-api?&#node_at_server)
     
     This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
     api?&#node_at_server) available in the testbed and provides API URIs to 
@@ -50,14 +63,12 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Node
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
-#    functions = [RebootFunction, RequestCertFunction]
-
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Node.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#node_at_server)
+        wiki.confine-project.eu/arch:rest-api?&#node_at_server)
     
     This resource describes a node in the testbed as well as listing the 
     [slivers](http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
@@ -65,12 +76,13 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
+    ctl = [Reboot]
 
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """ 
     **Media type:** [`application/vnd.confine.server.Server.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+        wiki.confine-project.eu/arch:rest-api?&#server_at_server)
     
     This resource describes the testbed server (controller).
     """

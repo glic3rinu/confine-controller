@@ -56,17 +56,24 @@ class RestApi(object):
             url(r'^$', self.base(), name='base'),)
         
         for model, resource in six.iteritems(self._registry):
-            # TODO Support for nested resources on urls /api/nodes/1111/ctl
             name = force_unicode(model._meta.verbose_name)
             name_plural = force_unicode(model._meta.verbose_name_plural)
+            list_view, detail_view = resource
+            for endpoint in getattr(detail_view, 'ctl', []):
+                urlpatterns += patterns('',
+                    url(r'^%s/(?P<pk>[0-9]+)/ctl/%s/$' % (name_plural, endpoint.url_name),
+                        endpoint.as_view(),
+                        name="%s-ctl-%s" % (name, endpoint.url_name)),
+                )
             urlpatterns += patterns('',
                 url(r'^%s/$' % name_plural,
-                    resource[0].as_view(),
+                    list_view.as_view(),
                     name='%s-list' % name),
                 url(r'^%s/(?P<pk>[0-9]+)$' % name_plural,
-                    resource[1].as_view(),
+                    detail_view.as_view(),
                     name="%s-detail" % name),
             )
+
         return urlpatterns
     
     def autodiscover(self):

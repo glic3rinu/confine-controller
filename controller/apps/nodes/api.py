@@ -11,20 +11,6 @@ from .serializers import ServerSerializer, NodeSerializer
 
 from django.views.generic import View
 
-class ApiFunction(View):
-    url_prefix = 'ctl/'
-
-
-#def action_to_api_function(action, model):
-#    """ Converts modeladmin action to api view function """
-#    modeladmin = get_modeladmin(model)
-#    def api_function(request, object_id, modeladmin=modeladmin, action=action):
-#        queryset = model.objects.filter(pk=object_id)
-#        response = action(modeladmin, request, queryset)
-#        return response
-#    return api_function
-
-
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response

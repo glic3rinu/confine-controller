@@ -42,7 +42,7 @@ class Reset(APIView):
     
     POST data: `null`
     """
-    url_name = 'renew'
+    url_name = 'reset'
     
     def post(self, request, *args, **kwargs):
         if request.DATA is None:
@@ -54,32 +54,33 @@ class Reset(APIView):
         raise exceptions.ParseError(detail='This endpoint only accepts null data')
 
 
-class UploadExpData(APIView):
-    """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-upload-exp-data`](
-        http://confine-project.eu/rel/server/do-upload-exp-data)
-    
-    Contains the function URI used to upload this slice's experiment data file
-    to some remote storage. The URI of the stored file will be placed in the
-    `exp_data_uri` member and its hash in `exp_data_sha256`.
-    
-    POST data: `the contents of the file`
-    
-    Example:
-    `curl -X POST -F "exp_data=@experiment_data.tgz" ...`
-    """
-    url_name = 'upload-exp-data'
-    
-    def post(self, request, *args, **kwargs):
-        if request.FILES and 'exp_data' in request.FILES:
-            slice = get_object_or_404(Slice, pk=kwargs.get('pk'))
-            self.check_object_permissions(self.request, slice)
-            slice.exp_data.save('exp_data', request.FILES.get('exp_data'))
-            slice.clean()
-            slice.save()
-            response_data = {'detail': 'File uploaded correctly'}
-            return Response(response_data, status=status.HTTP_200_OK)
-        raise exceptions.ParseError(detail='This endpoint only accepts null data')
+def make_upload_exp_data(model):
+    class UploadExpData(APIView):
+        """
+        **Relation type:** [`http://confine-project.eu/rel/server/do-upload-exp-data`](
+            http://confine-project.eu/rel/server/do-upload-exp-data)
+        
+        Contains the function URI used to upload this resource's experiment data file
+        to some remote storage. The URI of the stored file will be placed in the
+        `exp_data_uri` member and its hash in `exp_data_sha256`.
+        
+        POST data: `the contents of the file`
+        
+        Example: `curl -X POST -F "exp_data=@experiment_data.tgz" ...`
+        """
+        url_name = 'upload-exp-data'
+        
+        def post(self, request, *args, **kwargs):
+            if request.FILES and 'exp_data' in request.FILES:
+                obj = get_object_or_404(model, pk=kwargs.get('pk'))
+                self.check_object_permissions(self.request, obj)
+                obj.exp_data.save('exp_data', request.FILES.get('exp_data'))
+                obj.clean()
+                obj.save()
+                response_data = {'detail': 'File uploaded correctly'}
+                return Response(response_data, status=status.HTTP_200_OK)
+            raise exceptions.ParseError(detail='This endpoint only accepts null data')
+    return UploadExpData
 
 
 class Update(APIView):
@@ -128,7 +129,7 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Slice
     serializer_class = SliceSerializer
-    ctl = [Renew, Reset, UploadExpData]
+    ctl = [Renew, Reset, make_upload_exp_data(Slice)]
 
 
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -157,7 +158,7 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
-    ctl = [Update, UploadExpData]
+    ctl = [Update, make_upload_exp_data(Sliver)]
 
 
 class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -190,4 +191,3 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
 api.register(SliceList, SliceDetail)
 api.register(SliverList, SliverDetail)
 api.register(TemplateList, TemplateDetail)
-

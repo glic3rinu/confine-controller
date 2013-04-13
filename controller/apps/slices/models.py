@@ -27,6 +27,7 @@ def get_expires_on():
     return now() + settings.SLICES_SLICE_EXP_INTERVAL
 
 
+# TODO by id instead of random!!! then we override old files
 def make_upload_to(field_name, base_path, file_name):
     """ dynamically generate file names with randomnes for upload_to args """
     def upload_path(instance, filename, base_path=base_path, file_name=file_name,

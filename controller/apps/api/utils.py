@@ -20,3 +20,10 @@ def link_header(relations, request):
             rel = 'do-%s' % url.split('/')[-2]
         links.append('<%s>; rel="%s"' % (url, reverse_rel(rel)))
     return ', '.join(links)
+
+
+def insert_ctl(detail_class, clt_class):
+    if hasattr(detail_class, 'ctl'):
+        detail_class.ctl.append(clt_class)
+    else:
+        detail_class.ctl = [clt_class]

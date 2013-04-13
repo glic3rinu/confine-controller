@@ -1,4 +1,4 @@
-from threading import Thread
+from multiprocessing import Process
 
 from django.db import transaction
 from django.db.models import get_model
@@ -16,10 +16,10 @@ def refresh(modeladmin, request, queryset):
     state_module = '%s.%s' % (opts.app_label, opts.object_name)
     field_name = queryset.model.get_related_field_name()
     ids = queryset.values_list('%s__id' % field_name , flat=True)
-    # Execute get_state isolated on a thread because gevent is only usable from a single thread
-    thread = Thread(target=get_state, args=(state_module,), kwargs={'ids':ids})
-    thread.start()
-    thread.join()
+    # Execute get_state isolated on a process to avoid gevent wsgi pollution
+    process = Process(target=get_state, args=(state_module,), kwargs={'ids':ids})
+    process.start()
+    process.join()
     related_model_name = queryset.model.get_related_model()._meta.object_name
     msg = 'The state of %d %ss has been updated' % (queryset.count(), related_model_name)
     modeladmin.message_user(request, msg)
@@ -32,10 +32,10 @@ def refresh_state(modeladmin, request, queryset):
     state_module = 'state.%sState' % opts.object_name
     state_model = get_model(*state_module.split('.'))
     ids = queryset.values_list('state__id', flat=True)
-    # Execute get_state isolated on a thread because gevent is only usable from a single thread
-    thread = Thread(target=get_state, args=(state_module,), kwargs={'ids':ids})
-    thread.start()
-    thread.join()
+    # Execute get_state isolated on a process to avoid gevent wsgi pollution
+    process = Process(target=get_state, args=(state_module,), kwargs={'ids':ids})
+    process.start()
+    process.join()
     msg = 'The state of %d %ss has been updated' % (queryset.count(), opts.object_name)
     modeladmin.message_user(request, msg)
 

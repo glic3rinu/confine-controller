@@ -55,18 +55,10 @@ class ChangeViewActions(admin.options.ModelAdmin):
         opts = self.model._meta
         new_urls = patterns("")
         for action in self.change_view_actions:
-            if not action.nested_url_name:
-                new_urls += patterns("",
-                    url("^(.+)/%s/$" % action.url_name,
-                        admin_site.admin_view(action),
-                        name='%s_%s_%s' % (opts.app_label, opts.module_name, action.url_name)))
-        for action in self.change_view_actions:
-            if action.nested_url_name:
-                new_urls += patterns("",
-                    url("^(.+)/%s/%s/$" % (action.nested_url_name, action.url_name),
-                        admin_site.admin_view(action),
-                        name='%s_%s_%s' % (opts.app_label, opts.module_name, action.url_name)))
-        print new_urls
+            new_urls += patterns("",
+                url("^(.+)/%s/$" % action.url_name,
+                    admin_site.admin_view(action),
+                    name='%s_%s_%s' % (opts.app_label, opts.module_name, action.url_name)))
         return new_urls + urls
     
     def _prepare_change_view_action(self, action):
@@ -76,7 +68,6 @@ class ChangeViewActions(admin.options.ModelAdmin):
         view.url_name = getattr(action, 'url_name', action.__name__)
         view.verbose_name = getattr(action, 'verbose_name', view.url_name).capitalize()
         view.css_class = getattr(action, 'css_class', 'historylink')
-        view.nested_url_name = getattr(action, 'nested_url_name', '')
         return view
     
     def get_change_view_actions_as_class(self):

@@ -32,7 +32,7 @@ def make_upload_to(field_name, base_path, file_name):
     def upload_path(instance, filename, base_path=base_path, file_name=file_name,
                     field_name=field_name):
         if not file_name or instance is None:
-            return base_path
+            return os.path.join(base_path, filename)
         field = type(instance)._meta.get_field_by_name(field_name)[0]
         storage_location = field.storage.base_location
         abs_path = os.path.join(storage_location, base_path)

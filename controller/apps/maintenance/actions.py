@@ -21,6 +21,7 @@ def execute_operation_changelist(modeladmin, request, queryset):
     return redirect('admin:maintenance_operation_execute', operation.pk)
 execute_operation_changelist.short_description = 'Execute operation'
 
+
 @transaction.commit_on_success
 def execute_operation(modeladmin, request, queryset):
     if not request.user.is_superuser:

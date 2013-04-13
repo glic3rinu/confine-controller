@@ -57,7 +57,7 @@ class Command(BaseCommand):
             
             run("python manage.py syncdb")
             run("python manage.py migrate")
-            run("python manage.py restartservices")
+            run("python manage.py restartservices --no-postgresql")
         
         if not version:
             self.stderr.write('\nNext time you migth want to provide a --from argument '

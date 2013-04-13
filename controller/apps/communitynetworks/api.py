@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.utils import insert_ctl
@@ -29,8 +30,8 @@ class CacheCNDB(APIView):
             node = get_object_or_404(Node, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, node)
             node.cn.cache_node_db()
-            response_data = {'detail': 'Server instructed to cache CNDB for this node'}
-            return Response(response_data, status=status.HTTP_202_ACCEPTED)
+            response_data = {'detail': 'Node description updated according to CNDB description'}
+            return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='This endpoint only accepts null data')
 
 

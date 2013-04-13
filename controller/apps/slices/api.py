@@ -64,12 +64,22 @@ class UploadExpData(APIView):
     `exp_data_uri` member and its hash in `exp_data_sha256`.
     
     POST data: `the contents of the file`
+    
+    Example:
+    `curl -X POST -F "exp_data=@experiment_data.tgz" ...`
     """
     url_name = 'upload-exp-data'
     
     def post(self, request, *args, **kwargs):
-        pass 
-        # TODO implement!!
+        if request.FILES and 'exp_data' in request.FILES:
+            slice = get_object_or_404(Slice, pk=kwargs.get('pk'))
+            self.check_object_permissions(self.request, slice)
+            slice.exp_data.save('exp_data', request.FILES.get('exp_data'))
+            slice.clean()
+            slice.save()
+            response_data = {'detail': 'File uploaded correctly'}
+            return Response(response_data, status=status.HTTP_200_OK)
+        raise exceptions.ParseError(detail='This endpoint only accepts null data')
 
 
 class Update(APIView):

@@ -1,22 +1,18 @@
 from __future__ import absolute_import
 
-from django.http import Http404
+from django.shortcuts import get_object_or_404
+from rest_framework import status, exceptions
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
 from .serializers import ServerSerializer, NodeSerializer
+from .validators import validate_scr
 
 
-from django.views.generic import View
-
-from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-
-# TODO create FunctionAPIView or somehting that handles permissions and all
 class Reboot(APIView):
     """
     **Relation type:** [`http://confine-project.eu/rel/server/do-reboot`](
@@ -29,12 +25,38 @@ class Reboot(APIView):
     url_name = 'reboot'
     
     def post(self, request, *args, **kwargs):
-        if not request.DATA:
-            obj = get_object_or_404(Node, pk=kwargs.get('pk'))
+        if request.DATA is None:
+            node = get_object_or_404(Node, pk=kwargs.get('pk'))
+            self.check_object_permissions(self.request, node)
+            node.reboot()
             response_data = {'detail': 'Node instructed to reboot'}
             return Response(response_data, status=status.HTTP_202_ACCEPTED)
-        response_data = {'error': 'This endpoint only accepts empty data'}
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        raise exceptions.ParseError(detail='This endpoint only accepts null data')
+
+
+class RequestCert(APIView):
+    """
+    **Relation type:** [`http://confine-project.eu/rel/server/do-request-cert`](
+        http://confine-project.eu/rel/server/do-request-cert)
+    
+    Contains the function URI used to upload this node's certificate request to 
+    be signed by the testbed CA and set as the node's certificate.
+    
+    POST data: `ASCII-armored PEM representation of the SCR as a string.`
+    """
+    url_name = 'request-cert'
+    
+    def post(self, request, *args, **kwargs):
+        scr = request.DATA
+        node = get_object_or_404(Node, pk=kwargs.get('pk'))
+        self.check_object_permissions(self.request, node)
+        try:
+            validate_scr(scr, node)
+        except:
+            raise exceptions.ParseError(detail='Malformed SCR')
+        node.sign_cert_request(scr.strip())
+        response_data = {'detail': 'Sign certificate request accepted'}
+        return Response(response_data, status=status.HTTP_202_ACCEPTED)
 
 
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -62,7 +84,7 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
-    ctl = [Reboot]
+    ctl = [Reboot, RequestCert]
 
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -76,10 +98,7 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServerSerializer
     
     def get_object(self, *args, **kwargs):
-        try:
-            return Server.objects.get()
-        except Server.DoesNotExist:
-            raise Http404
+        return get_object_or_404(Server)
 
 
 api.register(NodeList, NodeDetail)

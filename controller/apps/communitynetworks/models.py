@@ -56,6 +56,10 @@ class CnHost(models.Model):
 
 
 # Hook Community Network support for related models
+@property
+def cn(self):
+    return self.cn_generic.get()
+
 for model in related_models:
     model.add_to_class('cn_generic', generic.GenericRelation('communitynetworks.CnHost'))
-    model.cn = lambda node: node.cn_generic.get()
+    model.cn = cn

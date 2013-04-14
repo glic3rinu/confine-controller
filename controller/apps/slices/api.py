@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
-from rest_framework import status, exceptions
+from rest_framework import status, exceptions, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -55,7 +55,11 @@ class Reset(APIView):
 
 
 def make_upload_exp_data(model):
-    class UploadExpData(APIView):
+    class ExpDataSerializer(serializers.Serializer):
+        """ Just for the browsable API """
+        exp_data = serializers.FileField()
+    
+    class UploadExpData(generics.CreateAPIView):
         """
         **Relation type:** [`http://confine-project.eu/rel/server/do-upload-exp-data`](
             http://confine-project.eu/rel/server/do-upload-exp-data)
@@ -69,6 +73,7 @@ def make_upload_exp_data(model):
         Example: `curl -X POST -F "exp_data=@experiment_data.tgz" ...`
         """
         url_name = 'upload-exp-data'
+        serializer_class = ExpDataSerializer
         
         def post(self, request, *args, **kwargs):
             if request.FILES and 'exp_data' in request.FILES:

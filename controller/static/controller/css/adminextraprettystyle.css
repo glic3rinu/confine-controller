@@ -2,6 +2,34 @@ body {
     background:#FBFAF9 url(/static/page-gradient.png)top left repeat-x;
 }
 
+#header #branding h1 {
+    margin: 0;
+    padding: 5px 10px;
+    background: transparent url(../../confine-logo.png) 10px 5px no-repeat;
+    text-indent: 0;
+    height: 31px;
+    width: 420px;
+    font-size: 18px;
+    color: whitesmoke;
+    font-weight: bold;
+    padding-left: 50px;
+    line-height: 30px;
+}
+
+.version:before {
+    content: "v";
+    opacity: 0.6;
+    padding-right: 0.25em;
+}
+
+.version {
+  font-size: 60%;
+}
+
+#header #branding:hover a {
+    text-decoration: none;
+}
+
 #header-branding {
     background-image: url(/static/admin_tools/images/admin-tools.png);
     width: 100%;
@@ -9,7 +37,6 @@ body {
     height: 41px;
     position: absolute;
 }
-
 
 #header-menu {
     background: url(/static/admin_tools/images/admin-tools.png) 0 295px;
@@ -19,7 +46,6 @@ body {
     height: 41px;
     position: absolute;
 }
-
 
 #header-breadcrumb {
     width: 100%;
@@ -54,12 +80,10 @@ body {
     padding-right: 0;
 }
 
-
 #container {
     max-width:1100px;
     margin:0 auto;
 }
-
 
 #header {
     background:none;

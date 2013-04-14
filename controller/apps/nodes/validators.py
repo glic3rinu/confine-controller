@@ -33,6 +33,7 @@ def validate_dhcp_range(value):
         raise ValidationError('Range %s has not a valid format (#N).' % value)
 
 
+# TODO rename to csr and replace everywhere else
 def validate_scr(scr, node):
     try:
         scr = X509.load_request_string(str(scr))

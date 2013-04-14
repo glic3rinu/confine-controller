@@ -27,8 +27,8 @@ def admin_url(context):
     args = []
     if model:
         url = 'admin:%s_%s' % (model._meta.app_label, model._meta.object_name.lower())
-        if hasattr(view, 'kwargs'):
-            pk = view.kwargs.get('pk')
+        if hasattr(view, 'pk_url_kwarg'):
+            pk = view.kwargs.get(view.pk_url_kwarg)
             url += '_change'
             args = [pk]
         else:

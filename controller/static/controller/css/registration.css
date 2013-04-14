@@ -1,7 +1,7 @@
 #header #branding h1 {
     margin: 0;
     padding: 5px 10px;
-    background: transparent url(../../confine-logo.png) 10px 5px no-repeat;
+    background: transparent url(/static/controller/images/confine-logo.png) 10px 5px no-repeat;
     text-indent: 0;
     height: 31px;
     width: 420px;

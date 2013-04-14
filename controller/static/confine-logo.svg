@@ -10,13 +10,13 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="346"
+   width="36"
    height="31"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="header.svg"
-   inkscape:export-filename="/home/glic3rinu/confine-controller/controller/static/header.png"
+   inkscape:export-filename="/home/glic3rinu/confine-controller/controller/static/confine-logo.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -146,8 +146,8 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1024"
+     inkscape:window-width="1280"
+     inkscape:window-height="745"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1" />
@@ -227,16 +227,5 @@
         </g>
       </g>
     </g>
-    <text
-       xml:space="preserve"
-       style="font-size:17.86894798px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       x="40.303661"
-       y="1042.7031"
-       id="text3114"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         x="40.303661"
-         y="1042.7031"
-         id="tspan3944">Confine Testbed Management</tspan></text>
   </g>
 </svg>

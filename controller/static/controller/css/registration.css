@@ -1,3 +1,25 @@
+#header #branding h1 {
+    margin: 0;
+    padding: 5px 10px;
+    background: transparent url(../../confine-logo.png) 10px 5px no-repeat;
+    text-indent: 0;
+    height: 31px;
+    width: 420px;
+    font-size: 18px;
+    color: whitesmoke;
+    font-weight: bold;
+    padding-left: 50px;
+    line-height: 30px;
+}
+
+.version {
+  font-size: 0%;
+}
+
+#header #branding:hover a {
+    text-decoration: none;
+}
+
 .login #container #content h1 {
     text-align: center;
 }
@@ -8,6 +30,4 @@
 
 .login .register-links {
     text-align: right
-}
-
 }

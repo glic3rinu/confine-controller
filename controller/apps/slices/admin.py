@@ -35,7 +35,7 @@ def num_slivers(instance):
     """ return num slivers as a link to slivers changelist view """
     num = instance.slivers.count()
     url = reverse('admin:slices_sliver_changelist')
-    url += '?%s=%s' % (instance._meta.module_name, instance.pk)
+    url += '?my_slivers=False&%s=%s' % (instance._meta.module_name, instance.pk)
     return mark_safe('<a href="%s">%d</a>' % (url, num))
 num_slivers.short_description = 'Slivers'
 num_slivers.admin_order_field = 'sliver__count'

@@ -22,7 +22,7 @@ def refresh(modeladmin, request, queryset):
     try:
         result.get()
     except:
-    # FIXME except LockFile.OperationLocked():
+    # FIXME why in motherfucking hell LockFile.OperationLocked does not get caught?
         msg = 'This operation is currently being executed by another process'
         messages.error(request, msg)
     else:
@@ -42,7 +42,7 @@ def refresh_state(modeladmin, request, queryset):
         result = get_state.delay(state_module, ids=ids)
         result.get()
     except:
-    # FIXME except LockFile.OperationLocked():
+    # FIXME why in motherfucking hell LockFile.OperationLocked does not get caught?
         msg = 'This operation is currently being executed by another process'
         messages.error(request, msg)
     else:

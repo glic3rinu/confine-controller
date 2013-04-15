@@ -59,6 +59,7 @@ def make_upload_exp_data(model):
         """ Just for the browsable API """
         exp_data = serializers.FileField()
     
+    # TODO ApiPermissionsMixin
     class UploadExpData(generics.CreateAPIView):
         """
         **Relation type:** [`http://confine-project.eu/rel/server/do-upload-exp-data`](

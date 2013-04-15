@@ -17,7 +17,7 @@ from singleton_models.models import SingletonModel
 from controller import settings as controller_settings
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager, get_file_field_base_path
-from controller.utils.auth import logged_or_basicauth
+from controller.utils.auth import any_auth_method
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
@@ -54,7 +54,7 @@ class Build(models.Model):
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
         upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH, max_length=256,
-        condition=logged_or_basicauth(lambda request, self:
+        condition=any_auth_method(lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node)))
     base_image = models.CharField(max_length=256)
     task_id = models.CharField(max_length=36, unique=True, null=True,

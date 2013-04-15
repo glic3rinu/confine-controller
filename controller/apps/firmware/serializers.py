@@ -20,7 +20,7 @@ class FirmwareSerializer(serializers.Serializer):
         super(FirmwareSerializer, self).__init__(build, **kwargs)
         config = Config.objects.get()
         for f in config.files.active().optional():
-            field_name = '%s_%d' % (f.path.split('/')[-1].split('.')[0], f.pk)
+            field_name = '%s_%d' % (f.path.split('/')[-1].replace('.', '_'), f.pk)
             setattr(build, field_name, False)
             self.fields["%s" % field_name] = serializers.BooleanField(required=False)
         if build.pk:

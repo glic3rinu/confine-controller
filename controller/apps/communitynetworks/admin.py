@@ -3,12 +3,14 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
-from controller.admin.utils import insert_inline, insert_list_display, link
+from controller.admin.utils import (insert_action, insert_change_view_action,
+    insert_inline, insert_list_display, link)
 from controller.utils import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
 
-from .models import CnHost
+from communitynetworks.actions import cache_node_db
+from communitynetworks.models import CnHost
 
 
 class CnHostInline(PermissionGenericTabularInline):
@@ -30,6 +32,9 @@ class CnHostInline(PermissionGenericTabularInline):
 # Monkey-Patching Section
 
 app_url_link = link('related_cnhost__app_url', description='CN URL')
+
+insert_action(Node, cache_node_db)
+insert_change_view_action(Node, cache_node_db)
 
 insert_inline(Node, CnHostInline)
 insert_inline(Server, CnHostInline)

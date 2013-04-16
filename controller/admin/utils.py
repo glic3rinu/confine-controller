@@ -60,6 +60,13 @@ def insert_action(model, action):
     else:
         modeladmin.actions.append(action)
 
+def insert_change_view_action(model, action):
+    """ inserts action to modeladmin.change_view_actions """
+    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
+    if modeladmin is None:
+        import_module('%s.%s' % (model._meta.app_label, 'admin'))
+        modeladmin = get_modeladmin(model)
+    modeladmin.set_change_view_action(action)
 
 def link(attribute, description='', admin_order_field=True, base_url=''):
     """

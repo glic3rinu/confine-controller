@@ -1,13 +1,16 @@
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils import simplejson
 
 from controller.models.fields import URIField
 from controller.utils import is_installed
 from nodes.models import Node, Server
 
-from .tasks import cache_node_db
+from communitynetworks.actions import cache_node_db
 
+import datetime
+import requests
 
 # Hook Community Network support for related models
 # This must be at the begining in order to avoid wired import problems
@@ -54,6 +57,34 @@ class CnHost(models.Model):
         else:
             cache_node_db(self)
 
+    def get_cache(self):
+        """
+        Query the nodeDB using the defined URI.
+        @return a dictionary:
+            dict.error: there are some problem making the request to nodeDB?
+            dict.text: if error --> textual information about the error
+                       otherwise --> response in JSON format
+        @url nodeDB API: http://ffm.gg32.com/Doc/FFM/
+        """
+        try:
+            response = requests.get(self.cndb_uri, verify=False) # TODO SSL certificate error
+        except Exception as e:
+            return {
+                'error': True,
+                'text': "Error query CNDB '%s'" % e }
+        try:
+            text = simplejson.loads(response.text)
+        except simplejson.JSONDecodeError:
+            return {
+                'error': True,
+                'text': "Error updating CNDB cache: invalid JSON as response." }
+
+        # update last cached time
+        self.cndb_cached_on = datetime.datetime.now()
+        self.save()
+        return {
+            'error': False,
+            'text': text }
 
 # Hook Community Network support for related models
 @property

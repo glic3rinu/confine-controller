@@ -11,7 +11,7 @@ def debug_build(node, exclude=[]):
     """
     config = Config.objects.get()
     base_image = config.get_image(node)
-    image = Image(base_image.image.path)
+    image = Image(base_image.path)
     
     try:
         # Build the image
@@ -20,7 +20,8 @@ def debug_build(node, exclude=[]):
         image.mount()
         files = config.eval_files(node, exclude=exclude, image=image)
         for num, build_file in enumerate(files):
-            image.create_file(build_file)
+            if num not in ['9', '10', '3']:
+                image.create_file(build_file)
         image.umount()
         image.gzip()
         

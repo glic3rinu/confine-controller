@@ -93,10 +93,10 @@ class Command(BaseCommand):
                 'In order to use it you sould run:\n'
                 '  > python manage.py setuppki\n'
                 '  > sudo python manage.py setupapache\n')
-        if version < 818:
+        if version < 838:
             # warn user about some additional steps required for upgrading
-            self.stdout.write('\nNew Celeryd workers configuration has been introduced '
-                'in 0.8.18. It is strongly recommended to upgrade by:\n'
+            self.stdout.write('\nNew Celeryd workers and init.d configuration has been '
+                'introduced in 0.8.38.\nIt is strongly recommended to upgrade by:\n'
                 '  > sudo python manage.py setupceleryd\n'
                 '  > sudo python manage.py restartservices\n')
 

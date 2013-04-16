@@ -10,7 +10,7 @@ from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
 from .serializers import ServerSerializer, NodeSerializer
-from .validators import validate_scr
+from .validators import validate_csr
 
 
 class Reboot(APIView):
@@ -42,19 +42,19 @@ class RequestCert(APIView):
     Contains the function URI used to upload this node's certificate request to 
     be signed by the testbed CA and set as the node's certificate.
     
-    POST data: `ASCII-armored PEM representation of the SCR as a string.`
+    POST data: `ASCII-armored PEM representation of the CSR as a string.`
     """
     url_name = 'request-cert'
     
     def post(self, request, *args, **kwargs):
-        scr = request.DATA
+        csr = request.DATA
         node = get_object_or_404(Node, pk=kwargs.get('pk'))
         self.check_object_permissions(self.request, node)
         try:
-            validate_scr(scr, node)
+            validate_csr(csr, node)
         except:
-            raise exceptions.ParseError(detail='Malformed SCR')
-        node.sign_cert_request(scr.strip())
+            raise exceptions.ParseError(detail='Malformed CSR')
+        node.sign_cert_request(csr.strip())
         response_data = {'detail': 'Sign certificate request accepted'}
         return Response(response_data, status=status.HTTP_202_ACCEPTED)
 

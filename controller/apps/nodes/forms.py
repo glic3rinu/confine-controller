@@ -7,7 +7,7 @@ from controller.core.validators import validate_rsa_pubkey
 from controller.forms.widgets import ShowText
 
 from nodes.settings import NODES_NODE_DIRECT_IFACES_DFLT
-from .validators import validate_scr
+from .validators import validate_csr
 
 
 class NodeInlineAdminForm(forms.ModelForm):
@@ -32,12 +32,12 @@ class NodeInlineAdminForm(forms.ModelForm):
 
 
 class RequestCertificateForm(forms.Form):
-    scr = forms.CharField(widget=forms.Textarea(attrs={'cols': '70', 'rows': '20'}))
+    csr = forms.CharField(widget=forms.Textarea(attrs={'cols': '70', 'rows': '20'}))
     
-    def clean_scr(self):
-        scr = self.cleaned_data['scr']
-        validate_scr(scr, self.node)
-        return scr.strip()
+    def clean_csr(self):
+        csr = self.cleaned_data['csr']
+        validate_csr(csr, self.node)
+        return csr.strip()
 
 
 class DirectIfaceInlineFormSet(BaseInlineFormSet):

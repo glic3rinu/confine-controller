@@ -5,7 +5,7 @@
     "fields": {
         "version": "0.1", 
         "description": "Confine Firmware", 
-        "image_name": "confine-firmware-%(node_name)s-%(arch)s-%(version)s-%(build_id)d.img.gz"
+        "image_name": "confine-firmware-%(node_name)s-%(arch)s.img.gz"
     }
 },
 {

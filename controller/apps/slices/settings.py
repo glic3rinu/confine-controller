@@ -29,11 +29,13 @@ SLICES_TEMPLATE_IMAGE_NAME = getattr(settings, 'SLICES_TEMPLATE_IMAGE_NAME', '')
 
 SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data')
 
-SLICES_SLICE_EXP_DATA_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME', 'slice-experiment-%(rand)s.data')
+SLICES_SLICE_EXP_DATA_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
+    'slice-%(pk)d-exp-data.%(suffix)s')
 
 SLICES_SLIVER_EXP_DATA_DIR = getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data')
 
-SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME', 'sliver-experiment-%(rand)s.data')
+SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME',
+    'sliver-%(pk)d-exp-data.%(suffix)s')
 
 
 # 30 days expiration interval
@@ -42,4 +44,6 @@ SLICES_SLICE_EXP_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_INTERVAL', timed
 SLICES_SLICE_EXP_WARN_DAYS = getattr(settings, 'SLICES_SLICE_EXP_WARN_DAYS', 4)
 
 # List of disabled sliver ifaces. i.e. ['management', 'public4']
+# FIXME this doesn't work :(
+# TODO maybe rethink the sliver interface for register ifaces?
 SLICES_DISABLED_SLIVER_IFACES = getattr(settings, 'SLICES_DISABLED_SLIVER_IFACES', [])

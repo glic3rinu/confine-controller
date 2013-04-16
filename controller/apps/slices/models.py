@@ -27,7 +27,6 @@ def get_expires_on():
     return now() + settings.SLICES_SLICE_EXP_INTERVAL
 
 
-# TODO by id instead of random!!! then we override old files
 def make_upload_to(field_name, base_path, file_name):
     """ dynamically generate file names with randomnes for upload_to args """
     def upload_path(instance, filename, base_path=base_path, file_name=file_name,
@@ -37,9 +36,19 @@ def make_upload_to(field_name, base_path, file_name):
         field = type(instance)._meta.get_field_by_name(field_name)[0]
         storage_location = field.storage.base_location
         abs_path = os.path.join(storage_location, base_path)
-        prefix, suffix = file_name.split('%(rand)s')
-        with tempfile.NamedTemporaryFile(dir=abs_path, prefix=prefix, suffix=suffix) as f:
-            name = f.name.split('/')[-1]
+        splited = filename.split('.')
+        context = {'pk': instance.pk,
+                   'original': filename,
+                   'prefix': splited[0],
+                   'suffix': splited[1] if len(splited) > 1 else ''}
+        if '%(rand)s' in file_name:
+            prefix, suffix = file_name.split('%(rand)s')
+            prefix = prefix % context
+            suffix = suffix % context
+            with tempfile.NamedTemporaryFile(dir=abs_path, prefix=prefix, suffix=suffix) as f:
+                name = f.name.split('/')[-1]
+        else:
+            name = file_name % context
         return os.path.join(base_path, name)
     return upload_path
 

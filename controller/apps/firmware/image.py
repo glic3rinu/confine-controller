@@ -46,9 +46,12 @@ class Image(object):
     @property
     def sector(self):
         """ sector number of image part_nr """
-        context = { 'image': self.image, 'part_nr': self.part_nr }
-        result = r("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|sed -n %(part_nr)dp" % context)
-        return int(result.stdout)
+        if not hasattr(self, '_sector'):
+            context = { 'image': self.image, 'part_nr': self.part_nr }
+            result = r("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
+                       "sed -n %(part_nr)dp" % context)
+            self._sector = int(result.stdout)
+        return self._sector
     
     @property
     def mount_context(self):

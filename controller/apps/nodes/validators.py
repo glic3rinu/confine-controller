@@ -34,13 +34,13 @@ def validate_dhcp_range(value):
 
 
 # TODO rename to csr and replace everywhere else
-def validate_scr(scr, node):
+def validate_csr(csr, node):
     try:
-        scr = X509.load_request_string(str(scr))
+        csr = X509.load_request_string(str(csr))
     except:
-        raise ValidationError('Not a valid SCR')
+        raise ValidationError('Not a valid CSR')
     
-    subject = scr.get_subject()
+    subject = csr.get_subject()
     if not subject.CN or node.mgmt_net.addr != IP(subject.CN):
         raise ValidationError("CN != node.mgmt_net.addr: %s != %s" % (subject.CN, node.mgmt_net.addr))
     

@@ -91,7 +91,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                 def display_ifaces(instance, iface_type=iface_type):
                     return instance.interfaces.filter(type=iface_type).count()
                 display_ifaces.short_description = iface_type_verbose
-                display_ifaces.boolean = True if iface.UNIQUE else False
+                display_ifaces.boolean = iface.UNIQUE
                 setattr(self, iface_type, display_ifaces)
                 self.list_display.append(iface_type)
         super(SliverAdmin, self).__init__(*args, **kwargs)
@@ -320,7 +320,8 @@ class SliverInline(PermissionTabularInline):
             return [(None, {'fields': ['sliver_note1']})]
         # The slices is registred: display add button in the inline header
         if self.has_change_permission(request, obj, view=False):
-            self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">(Add another Sliver)</a>')
+            self.verbose_name_plural = mark_safe('Slivers <a href="add_sliver">'
+                                                 '(Add another Sliver)</a>')
         if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]
     

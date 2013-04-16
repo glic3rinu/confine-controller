@@ -36,8 +36,8 @@ def run_instance(instance_id):
         channel = ssh.get_transport().open_session()
         channel.exec_command(instance.script)
         #stderr = channel.recv_stderr(1024)
-        instance.stdout = ''.join(channel.makefile('rb', -1).readlines())
-        instance.stderr = ''.join(channel.makefile_stderr('rb', -1).readlines())
+        instance.stdout = channel.makefile('rb', -1).read()
+        instance.stderr = channel.makefile_stderr('rb', -1).read()
         instance.exit_code = exit_code = channel.recv_exit_status()
         instance.state = Instance.SUCCESS if exit_code == 0 else Instance.FAILURE
         channel.close()

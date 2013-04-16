@@ -19,14 +19,14 @@ def controller_version():
 
 
 @register.simple_tag(name="admin_url", takes_context=True)
-def admin_url(context):
+def rest_to_admin_url(context):
     """ returns the admin equivelent url of the current REST API view """
     view = context['view']
     model = getattr(view, 'model', None)
     url = 'admin:index'
     args = []
     if model:
-        url = 'admin:%s_%s' % (model._meta.app_label, model._meta.object_name.lower())
+        url = 'admin:%s_%s' % (model._meta.app_label, model._meta.module_name)
         if hasattr(view, 'pk_url_kwarg'):
             pk = view.kwargs.get(view.pk_url_kwarg)
             url += '_change'

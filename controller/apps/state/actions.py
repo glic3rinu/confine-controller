@@ -4,7 +4,7 @@ from django.db.models import get_model
 from django.shortcuts import redirect
 
 from controller.admin.utils import get_modeladmin
-from controller.utils import LockFile
+from controller.core.exceptions import OperationLocked
 
 from .tasks import get_state
 
@@ -21,8 +21,7 @@ def refresh(modeladmin, request, queryset):
     result = get_state.delay(state_module, ids=ids)
     try:
         result.get()
-    except:
-    # FIXME why in motherfucking hell LockFile.OperationLocked does not get caught?
+    except OperationLocked:
         msg = 'This operation is currently being executed by another process'
         messages.error(request, msg)
     else:
@@ -41,8 +40,7 @@ def refresh_state(modeladmin, request, queryset):
     try:
         result = get_state.delay(state_module, ids=ids)
         result.get()
-    except:
-    # FIXME why in motherfucking hell LockFile.OperationLocked does not get caught?
+    except OperationLocked:
         msg = 'This operation is currently being executed by another process'
         messages.error(request, msg)
     else:

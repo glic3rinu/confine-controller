@@ -22,8 +22,9 @@ from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
-from .tasks import build
+from .exceptions import ConcurrencyError
 from .context import context
+from .tasks import build
 
 
 class BuildQuerySet(models.query.QuerySet):
@@ -145,7 +146,7 @@ class Build(models.Model):
             pass
         else: 
             if old_build.state == cls.BUILDING:
-                raise cls.ConcurrencyError("One build at a time.")
+                raise ConcurrencyError("One build at a time.")
             old_build.delete()
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
@@ -170,9 +171,6 @@ class Build(models.Model):
         old_files = set( (f.path,f.content) for f in self.files.exclude(config__pk__in=exclude) )
         new_files = set( (f.path,f.content) for f in config.eval_files(self.node, exclude=exclude) )
         return new_files == old_files
-    
-    class ConcurrencyError(Exception):
-        """ Exception related to building images concurrently (not supported) """
 
 
 class BuildFile(models.Model):

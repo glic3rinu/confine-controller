@@ -9,6 +9,7 @@ from nodes.models import Node
 from state.models import NodeState, node_heartbeat
 
 from . import settings
+from .exceptions import ConcurrencyError
 from .tasks import run_instance
 
 
@@ -127,7 +128,7 @@ class Instance(models.Model):
     
     def run(self, async=True):
         if self.state == self.STARTED:
-            raise self.ConcurrencyError("One run at a time.")
+            raise ConcurrencyError("One run at a time.")
         if async:
             defer(run_instance.delay, self.pk)
         else:
@@ -140,8 +141,6 @@ class Instance(models.Model):
     @property
     def script(self):
         return self.execution.script
-    
-    class ConcurrencyError(Exception): pass
 
 
 @receiver(node_heartbeat, sender=NodeState, dispatch_uid="maintenance.retry_pending_operations")

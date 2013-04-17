@@ -210,7 +210,8 @@ class Slice(models.Model):
         return int('100', 16)
     
     def _get_vlan_nr(self):
-        last_nr = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')[0].vlan_nr
+        qset = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')
+        last_nr = qset[0].vlan_nr if qset else 0
         if last_nr < self.min_vlan_nr:
             return self.min_vlan_nr
         if last_nr >= self.max_vlan_nr:

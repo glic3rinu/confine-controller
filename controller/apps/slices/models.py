@@ -19,6 +19,7 @@ from nodes.models import Node
 from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
+from .exceptions import VlanAllocationError, IfaceAllocationError
 from .tasks import force_slice_update, force_sliver_update
 
 
@@ -161,7 +162,7 @@ class Slice(models.Model):
             if self.set_state in [self.DEPLOY, self.START]:
                 try:
                     self.vlan_nr = self._get_vlan_nr()
-                except self.VlanAllocationError:
+                except VlanAllocationError:
                     self.set_state = self.REGISTER
         elif self.vlan_nr > 0 and self.set_state == self.REGISTER:
             # transition to a register state, deallocating...
@@ -219,7 +220,7 @@ class Slice(models.Model):
             for new_nr in range(self.min_vlan_nr, self.max_vlan_nr):
                 if not Slice.objects.filter(vlan_nr=new_nr).exists():
                     return new_nr
-            raise self.VlanAllocationError("No VLAN address space left.")
+            raise VlanAllocationError("No VLAN address space left.")
         return last_nr + 1
     
     def force_update(self, async=False):
@@ -228,8 +229,7 @@ class Slice(models.Model):
         else:
             force_slice_update(self.pk)
     
-    class VlanAllocationError(Exception):
-        pass
+
 
 
 class SliceProp(models.Model):
@@ -473,11 +473,5 @@ class SliverIface(models.Model):
             for new_nr in range(1, self.max_nr):
                 if not Slice.objects.filter(sliver=self.sliver, vlan_nr=new_nr).exists():
                     return new_nr
-            raise self.IfaceAllocationError("No Iface NR space left.")
+            raise IfaceAllocationError("No Iface NR space left.")
         return last_nr + 1
-    
-    class StateNotAvailable(Exception):
-        pass
-    
-    class IfaceAllocationError(Exception):
-        pass

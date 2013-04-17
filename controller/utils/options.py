@@ -8,6 +8,7 @@ from django.template import Context
 from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
+from controller.core.exceptions import OperationLocked
 from controller.utils.system import run, touch
 
 
@@ -120,12 +121,9 @@ class LockFile(object):
     
     def __enter__(self):
         if not self.acquire():
-            raise self.OperationLocked('%s lock file exists and its mtime is less '
+            raise OperationLocked('%s lock file exists and its mtime is less '
                 'than %s seconds' % (self.lockfile, self.expire))
         return True
     
     def __exit__(self, type, value, traceback):
         self.release()
-    
-    class OperationLocked(Exception):
-        pass

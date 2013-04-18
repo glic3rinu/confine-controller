@@ -14,6 +14,7 @@ class MgmtIface(BaseIface):
     """
     DEFAULT_NAME = 'mgmt0'
     UNIQUE = True
+    CREATE_BY_DEFAULT = True
     
     def ipv6_addr(self, iface):
         """ MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64 """

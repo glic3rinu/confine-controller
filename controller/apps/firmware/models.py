@@ -256,7 +256,8 @@ class Config(SingletonModel):
             'build_id': build.id if build else 0,
             'node_id': node.pk,
             'version': self.version }
-        return self.image_name % context
+        name = self.image_name % context
+        return name.replace(' ', '_')
     
     def get_dest_path(self, node, build=None):
         """ image destination path """

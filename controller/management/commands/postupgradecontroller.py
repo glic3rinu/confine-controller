@@ -12,8 +12,10 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--minimal', action='store_true', dest='minimal', default=False,
                 help='Only install minimal requirements'),
-            make_option('--specifics', action='store_true', dest='specifics_only', default=False,
-                help='Only run version specific operations'),
+            make_option('--specifics', action='store_true', dest='specifics_only',
+                default=False, help='Only run version specific operations'),
+            make_option('--no-upgrade-notes', action='store_false', default=True,
+                dest='print_upgrade_notes', help='Do not print specific upgrade notes'),
             make_option('--from', dest='version', default=False,
                 help="Controller's version from where you are upgrading, i.e 0.6.32"),
             )
@@ -25,8 +27,7 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         version = options.get('version')
-        bold=`tput bold`
-        normal=`tput sgr0`
+        upgrade_notes = []
         if version:
             version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
             minor_release = version_re.search(version)
@@ -38,7 +39,7 @@ class Command(BaseCommand):
                 minor = 0
             # Represent version as two digits per number: 1.2.2 -> 10202
             version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
-
+            
             # Pre version specific upgrade operations
             if version < 835:
                 # prevent schema migrations from failing
@@ -90,15 +91,22 @@ class Command(BaseCommand):
             for d in set( get_dir(f) for f in ['priv_key', 'pub_key', 'cert'] ):
                 run('mkdir -p %s' % d)
                 run('chown %s %s' % (username, d))
-            self.stdout.write('\n\033[1mHTTPS certificate support for the management '
+            upgrade_notes.append('HTTPS certificate support for the management '
                 'network has been introduced in version 0.8.9.\n'
                 'In order to use it you sould run:\n'
                 '  > python manage.py setuppki\n'
-                '  > sudo python manage.py setupapache\n\033[m')
+                '  > sudo python manage.py setupapache\n')
         if version < 838:
             # warn user about some additional steps required for upgrading
-            self.stdout.write('\n\033[1mNew Celeryd workers and init.d configuration has been '
+            upgrade_notes.append('New Celeryd workers and init.d configuration has been '
                 'introduced in 0.8.38.\nIt is strongly recommended to upgrade by:\n'
                 '  > sudo python manage.py setupceleryd\n'
-                '  > sudo python manage.py restartservices\n\033[m')
+                '  > sudo python manage.py restartservices\n')
+        
+        if upgrade_notes and options.get('print_upgrade_notes'):
+            self.stdout.write('\n\033[1m\n'
+                '===================\n
+                '** UPGRADE NOTES **\n'
+                '===================\n\n' +
+                '\n'.join(upgrade_notes) + '\033[m\n')
 

@@ -150,7 +150,7 @@ class NodeListAdmin(NodeAdmin):
     """
     list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'),
                     'arch', colored('set_state', STATES_COLORS, verbose=True),
-                    admin_link('group'), 'num_ifaces', num_slivers, 
+                    admin_link('group'), 'num_ifaces', num_slivers,
                     'display_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
@@ -245,10 +245,11 @@ class SliceSliversAdmin(SliverAdmin):
     
     def response_add(self, request, obj, post_url_continue=None):
         """ Customizations needed for being nested to slices """
+        # "save and continue" correction
         post_url_continue = reverse('admin:slices_slice_slivers', args=(obj.slice.pk, obj.pk))
         response = super(SliceSliversAdmin, self).response_add(request, obj,
             post_url_continue=post_url_continue)
-        # save and continue correction
+        # "save and continue" correction
         if response._headers.get('location')[1] == request.path:
             return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver', args=(obj.slice.pk,)))
         return response
@@ -256,7 +257,7 @@ class SliceSliversAdmin(SliverAdmin):
     def response_change(self, request, obj):
         """ Customizations needed for being nested to slices """
         response = super(SliceSliversAdmin, self).response_change(request, obj)
-        # save and add another correction
+        # "save and add another" correction
         if response._headers.get('location')[1] == reverse('admin:slices_sliver_add'):
             return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver', args=(obj.slice.pk,)))
         return response
@@ -365,7 +366,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         }),
         ('Debug info', {
             'classes': ('collapse',),
-            'fields': ('instance_sn', 'new_sliver_instance_sn',)
+            'fields': ('instance_sn', 'new_sliver_instance_sn')
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     save_and_continue = True
@@ -408,7 +409,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     
     def get_form(self, request, *args, **kwargs):
         """ 
-        Request.user as default node admin and Warn the user that the testbed is 
+        Request.user as default node admin and Warn the user that the testbed is
         not ready for allocating shit
         """
         if request.method == 'GET':
@@ -437,7 +438,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
 
 
 class TemplateAdmin(PermissionModelAdmin):
-    list_display = ['name', 'description', 'type', 'node_archs_str', 'image', 
+    list_display = ['name', 'description', 'type', 'node_archs_str', 'image',
                     'is_active']
     list_filter = ['is_active', 'type', 'node_archs']
     #FIXME node_archs: contains rather than exact

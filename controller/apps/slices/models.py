@@ -329,29 +329,14 @@ class Sliver(models.Model):
     
     @classmethod
     def register_iface(cls, iface, name):
+        """ Stored iface in { 'iface_type': iface_object } format """
         if name not in settings.SLICES_DISABLED_SLIVER_IFACES:
             cls._iface_registry[name] = iface()
     
     @classmethod
-    def get_registred_iface_types(cls):
-        types = cls._iface_registry.keys() 
-        return zip(types, [ iface.capitalize() for iface in types ])
-    
-    @classmethod
-    def get_registred_iface_type(cls, iface):
-        if not inspect.isclass(iface):
-            iface = type(iface)
-        for k,v in cls._iface_registry.iteritems():
-            if type(v) is iface:
-                return k
-    
-    @classmethod
-    def get_registred_iface(cls, type_):
-        return cls._iface_registry[type_]
-    
-    @classmethod
-    def get_registred_ifaces(cls):
-        return cls._iface_registry.values()
+    def get_registered_ifaces(cls):
+        """ Return {'iface_type': iface_object} dict with registered ifaces """
+        return cls._iface_registry
 
 
 class SliverProp(models.Model):
@@ -376,10 +361,10 @@ class SliverProp(models.Model):
 
 
 # Autodiscover sliver ifaces
-# Done just before entering to the SliverIface definition because we want 
-# type(choices=Sliver.get_registred_iface_types...) to be properly filled
+# Done just before entering to the SliverIface definition
 autodiscover('ifaces')
-
+names = Sliver.get_registered_ifaces().keys()
+TYPE_CHOICES = tuple( (name, name.capitalize()) for name in names )
 
 class SliverIface(models.Model):
     """
@@ -394,7 +379,7 @@ class SliverIface(models.Model):
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
         validators=[validate_net_iface_name])
-    type = models.CharField(max_length=16, choices=Sliver.get_registred_iface_types(),
+    type = models.CharField(max_length=16, choices=TYPE_CHOICES,
         help_text="The type of this interface. Types public4 and public6 are only "
                   "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 "
                   "respectively are not none. There can only be one interface of "
@@ -421,7 +406,7 @@ class SliverIface(models.Model):
     def clean(self):
         super(SliverIface, self).clean()
         if self.type:
-            Sliver.get_registred_iface(self.type).clean_model(self)
+            Sliver.get_registered_ifaces()[self.type].clean_model(self)
     
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -445,7 +430,7 @@ class SliverIface(models.Model):
         """
         if self.type == '':
             return None
-        return Sliver.get_registred_iface(self.type).ipv6_addr(self)
+        return Sliver.get_registered_ifaces()[self.type].ipv6_addr(self)
     
     @property
     def ipv4_addr(self):
@@ -456,11 +441,11 @@ class SliverIface(models.Model):
         """
         if self.type == '':
             return None
-        return Sliver.get_registred_iface(self.type).ipv4_addr(self)
+        return Sliver.get_registered_ifaces()[self.type].ipv4_addr(self)
     
     def _get_nr(self):
         """ Calculates nr value of the new SliverIface """
-        iface = Sliver.get_registred_iface(self.type)
+        iface = Sliver.get_registered_ifaces()[self.type]
         # first check if iface has defined its own _get_nr()
         if hasattr(iface, '_get_nr'):
             return iface._get_nr(self)

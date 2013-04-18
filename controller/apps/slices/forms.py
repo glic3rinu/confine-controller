@@ -50,15 +50,17 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
     """ Provides initial Direct ifaces """
     def __init__(self, *args, **kwargs):
         if not kwargs['instance'].pk and 'data' not in kwargs:
-            ifaces = [ iface for iface in Sliver.get_registred_ifaces() if iface.AUTO_CREATE ]
-            total = len(ifaces)
+            all_ifaces = Sliver.get_registered_ifaces()
+            auto_ifaces = [ (t,o) for t,o in all_ifaces.items() if o.AUTO_CREATE ]
+            total = len(auto_ifaces)
             initial_data = {
                 'interfaces-TOTAL_FORMS': unicode(total),
                 'interfaces-INITIAL_FORMS': u'0',
                 'interfaces-MAX_NUM_FORMS': u'',}
-            for num, iface in enumerate(ifaces):
-                initial_data['interfaces-%d-name' % num] = iface.DEFAULT_NAME
-                initial_data['interfaces-%d-type' % num] = Sliver.get_registred_iface_type(iface)
+            for num, iface in enumerate(auto_ifaces):
+                iface_type, iface_object = iface
+                initial_data['interfaces-%d-name' % num] = iface_object.DEFAULT_NAME
+                initial_data['interfaces-%d-type' % num] = iface_type
             kwargs['data'] = initial_data
         super(SliverIfaceInlineFormSet, self).__init__(*args, **kwargs)
 
@@ -81,15 +83,13 @@ class SliverIfaceBulkForm(forms.Form):
     def __init__(self, *args, **kwargs):
         # TODO: isolated iface requires vlan_nr
         super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
-        for iface_type in Sliver.get_registred_iface_types():
-            iface_type = iface_type[0]
-            iface = Sliver.get_registred_iface(iface_type)
-            if iface.ALLOW_BULK:
+        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+            if iface_object.ALLOW_BULK:
                 kwargs = {
                     'label': iface_type,
                     'required': False,
-                    'help_text': iface.__doc__.strip() }
-                if iface.AUTO_CREATE:
+                    'help_text': iface_object.__doc__.strip() }
+                if iface_object.AUTO_CREATE:
                     kwargs['initial'] = _boolean_icon(True)
                     kwargs['widget'] = ShowText()
                 self.fields[iface_type] = forms.BooleanField(**kwargs)

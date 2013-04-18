@@ -88,7 +88,7 @@ def create_slivers(modeladmin, request, queryset):
                     raise PermissionDenied
                 sliver.save()
                 for iface_type in requested_ifaces:
-                    iface = Sliver.get_registred_iface(iface_type)
+                    iface = Sliver.get_registered_ifaces()[iface_type]
                     SliverIface.objects.create(sliver=sliver, name=iface.DEFAULT_NAME, type=iface_type)
                 slice_modeladmin = get_modeladmin(Slice)
                 msg = 'Added sliver "%s"' % force_text(sliver)

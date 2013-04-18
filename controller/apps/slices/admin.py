@@ -85,13 +85,12 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         """ 
         For each sliver iface type show number of requested ifaces on sliver changelist
         """
-        for iface_type, iface_type_verbose in Sliver.get_registred_iface_types():
-            iface = Sliver.get_registred_iface(iface_type)
-            if not iface_type in self.list_display and not iface.AUTO_CREATE:
+        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+            if not iface_type in self.list_display and not iface_object.AUTO_CREATE:
                 def display_ifaces(instance, iface_type=iface_type):
                     return instance.interfaces.filter(type=iface_type).count()
-                display_ifaces.short_description = iface_type_verbose
-                display_ifaces.boolean = iface.UNIQUE
+                display_ifaces.short_description = iface_type.capitalize()
+                display_ifaces.boolean = iface_object.UNIQUE
                 setattr(self, iface_type, display_ifaces)
                 self.list_display.append(iface_type)
         super(SliverAdmin, self).__init__(*args, **kwargs)
@@ -137,10 +136,10 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def log_addition(self, request, object):
         """ AUTO_CREATE SliverIfaces """
-        for iface in Sliver.get_registred_ifaces():
-            iface_type = Sliver.get_registred_iface_type(type(iface))
-            if iface.AUTO_CREATE and not object.interfaces.filter(type=iface_type).exists():
-                SliverIface.objects.create(sliver=object, type=iface_type, name=iface.DEFAULT_NAME)
+        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+            if iface_object.AUTO_CREATE and not object.interfaces.filter(type=iface_type).exists():
+                SliverIface.objects.create(sliver=object, type=iface_type,
+                    name=iface_object.DEFAULT_NAME)
         super(SliverAdmin, self).log_addition(request, object)
 
 

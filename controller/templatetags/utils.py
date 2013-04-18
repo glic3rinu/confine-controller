@@ -28,9 +28,9 @@ def rest_to_admin_url(context):
     if model:
         url = 'admin:%s_%s' % (model._meta.app_label, model._meta.module_name)
         if hasattr(view, 'pk_url_kwarg'):
-            pk = view.kwargs.get(view.pk_url_kwarg)
             url += '_change'
-            args = [pk]
+            pk = view.kwargs.get(view.pk_url_kwarg)
+            args = [pk] if pk else []
         else:
             url += '_changelist'
     return reverse(url, args=args)

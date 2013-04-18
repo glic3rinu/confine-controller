@@ -30,6 +30,7 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         """ Add link header """
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
         name = force_unicode(self.model._meta.verbose_name)
+        # TODO singleton objects do not have relation %s-list (ie. server)
         links = ['base', '%s-list' % name]
         object_id = kwargs.get('pk')
         for endpoint in getattr(self, 'ctl', []):

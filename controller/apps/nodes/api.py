@@ -61,11 +61,11 @@ class RequestCert(APIView):
 
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """ 
-    **Media type:** [`application/vnd.confine.server.Node.v0+json`](http://
-        wiki.confine-project.eu/arch:rest-api?&#node_at_server)
+    **Media type:** [`application/vnd.confine.server.Node.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#node_at_server)
     
     This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
-    api?&#node_at_server) available in the testbed and provides API URIs to 
+    api?&#node_at_server) available in the testbed and provides API URIs to
     navigate to them.
     """
     model = Node
@@ -75,10 +75,10 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Node.v0+json`](http://
-        wiki.confine-project.eu/arch:rest-api?&#node_at_server)
+    **Media type:** [`application/vnd.confine.server.Node.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#node_at_server)
     
-    This resource describes a node in the testbed as well as listing the 
+    This resource describes a node in the testbed as well as listing the
     [slivers](http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
     intended to run on it with API URIs to navigate to them.
     """
@@ -89,8 +89,8 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """ 
-    **Media type:** [`application/vnd.confine.server.Server.v0+json`](http://
-        wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+    **Media type:** [`application/vnd.confine.server.Server.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
     
     This resource describes the testbed server (controller).
     """

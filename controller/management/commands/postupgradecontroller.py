@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 
 from controller.utils.system import run, check_root
 
+
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -21,7 +22,7 @@ class Command(BaseCommand):
     
     option_list = BaseCommand.option_list
     help = 'Upgrades confine-controller installation'
-    # This command may run within an environment with unsatisfied dependencies
+    # This command must be able to run in an environment with unsatisfied dependencies
     can_import_settings = False
     requires_model_validation = False
     
@@ -100,14 +101,14 @@ class Command(BaseCommand):
         if version < 838:
             # warn user about some additional steps required for upgrading
             upgrade_notes.append('New Celeryd workers and init.d configuration has been '
-                'introduced in 0.8.38.\nIt is strongly recommended to upgrade by:\n'
+                'introduced in 0.8.38.\nIt is strongly recommended to upgrade by\n'
                 '  > sudo python manage.py setupceleryd\n'
                 '  > sudo python manage.py restartservices\n')
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'
-                '===================\n'
-                '** UPGRADE NOTES **\n'
-                '===================\n\n'
+                '    ===================\n'
+                '    ** UPGRADE NOTES **\n'
+                '    ===================\n\n' +
                 '\n'.join(upgrade_notes) + '\033[m\n')
 

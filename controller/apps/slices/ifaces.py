@@ -15,6 +15,7 @@ class BaseIface(object):
     DEFAULT_NAME = 'eth0'
     ALLOW_BULK = True
     AUTO_CREATE = False
+    CREATE_BY_DEFAULT = False
     UNIQUE = False
     
     def clean_model(self, iface):
@@ -92,7 +93,7 @@ class DebugIface(BaseIface):
     to other nodes and slivers in the same local network, which should be useful 
     for debugging purposes
     """
-    DEFAULT_NAME = 'deb0'
+    DEFAULT_NAME = 'dbg0'
     
     def ipv6_addr(self, iface):
         """ DEBUG_IPV6_PREFIX:N:10ii:ssss:ssss:ssss """

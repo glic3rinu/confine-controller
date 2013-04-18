@@ -51,7 +51,8 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         if not kwargs['instance'].pk and 'data' not in kwargs:
             all_ifaces = Sliver.get_registered_ifaces()
-            auto_ifaces = [ (t,o) for t,o in all_ifaces.items() if o.AUTO_CREATE ]
+            auto_ifaces = [ (t,o) for t,o in all_ifaces.items()
+                            if o.AUTO_CREATE or o.CREATE_BY_DEFAULT ]
             total = len(auto_ifaces)
             initial_data = {
                 'interfaces-TOTAL_FORMS': unicode(total),
@@ -92,4 +93,6 @@ class SliverIfaceBulkForm(forms.Form):
                 if iface_object.AUTO_CREATE:
                     kwargs['initial'] = _boolean_icon(True)
                     kwargs['widget'] = ShowText()
+                if iface_object.CREATE_BY_DEFAULT:
+                    kwargs['initial'] = True
                 self.fields[iface_type] = forms.BooleanField(**kwargs)

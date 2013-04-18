@@ -50,6 +50,7 @@ def make_upload_to(field_name, base_path, file_name):
                 name = f.name.split('/')[-1]
         else:
             name = file_name % context
+        name = name.replace(' ', '_')
         return os.path.join(base_path, name)
     return upload_path
 

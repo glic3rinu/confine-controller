@@ -38,10 +38,10 @@ class BaseIface(object):
 
 class IsolatedIface(BaseIface):
     """
-    Describes an Isolated interface of an sliver: It is used for sharing the 
-    same physical interface but isolated at L3, by means of tagging all the 
-    outgoing traffic with a VLAN tag per slice. By means of using an isolated 
-    interface, the researcher will be able to configure it at L3, but several 
+    Describes an Isolated interface of an sliver: It is used for sharing the
+    same physical interface but isolated at L3, by means of tagging all the
+    outgoing traffic with a VLAN tag per slice. By means of using an isolated
+    interface, the researcher will be able to configure it at L3, but several
     slices may share the same physical interface.
     """
     DEFAULT_NAME = 'iso0'
@@ -86,11 +86,11 @@ class Pub6Iface(BaseIface):
 
 class DebugIface(BaseIface):
     """
-    Debug interface and address whose host side veth interface will be placed in 
-    the local bridge, thus allowing access to the debug network. The address is 
-    easily predictable and computed according to the address scheme, and no 
-    gateway is expected to exist in this network. This interface allows connections 
-    to other nodes and slivers in the same local network, which should be useful 
+    Debug interface and address whose host side veth interface will be placed in
+    the local bridge, thus allowing access to the debug network. The address is
+    easily predictable and computed according to the address scheme, and no
+    gateway is expected to exist in this network. This interface allows connections
+    to other nodes and slivers in the same local network, which should be useful
     for debugging purposes
     """
     DEFAULT_NAME = 'dbg0'
@@ -109,8 +109,8 @@ class DebugIface(BaseIface):
 
 class PrivateIface(BaseIface):
     """
-    Describes a Private Interface of an sliver. Traffic from a private interface 
-    will be forwarded to the community network by means of NAT. Every sliver 
+    Describes a Private Interface of an sliver. Traffic from a private interface
+    will be forwarded to the community network by means of NAT. Every sliver
     will have at least a private interface.
     """
     DEFAULT_NAME = 'priv'

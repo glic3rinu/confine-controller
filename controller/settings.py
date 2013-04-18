@@ -16,4 +16,9 @@ MGMT_IPV6_PREFIX = getattr(settings, 'MGMT_IPV6_PREFIX', '2001:db8:cafe::/48')
 
 
 # Disable CSRF on login form allowing integration with other services
+# TODO can this be replaced for CSRF_COOKIE_DOMAIN ?
 DISABLE_LOGIN_CSRF_FROM = getattr(settings, 'DISABLE_LOGIN_CSRF_FROM', [])
+
+# Domain name used when it will not be possible to infere the domain from a request
+# For example in periodic tasks
+DOMAIN_NAME = getattr(settings, 'DOMAIN_NAME', 'example.com')

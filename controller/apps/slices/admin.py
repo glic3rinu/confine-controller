@@ -243,34 +243,23 @@ class SliceSliversAdmin(SliverAdmin):
         slice_modeladmin = SliceAdmin(slice, self.admin_site)
         slice_modeladmin.log_change(request, slice, 'Added sliver "%s"' % obj)
     
-    def response_add(self, request, obj, post_url_continue='../%s/'):
+    def response_add(self, request, obj, post_url_continue=None):
         """ Customizations needed for being nested to slices """
-        opts = obj._meta
-        verbose_name = force_text(opts.verbose_name)
-        msg = 'The %s "%s" was added successfully.' % (verbose_name, force_text(obj))
-        if "_addanother" in request.POST:
-            msg += ' ' + ("You may add another %s below.") % verbose_name
-            self.message_user(request, msg)
-            return HttpResponseRedirect('../')
-        else:
-            self.message_user(request, msg)
-            if self.has_change_permission(request, None):
-                post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
-            else:
-                post_url = reverse('admin:index', current_app=self.admin_site.name)
-            return HttpResponseRedirect(post_url)
+        post_url_continue = reverse('admin:slices_slice_slivers', args=(obj.slice.pk, obj.pk))
+        response = super(SliceSliversAdmin, self).response_add(request, obj,
+            post_url_continue=post_url_continue)
+        # save and continue correction
+        if response._headers.get('location')[1] == request.path:
+            return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver', args=(obj.slice.pk,)))
+        return response
     
     def response_change(self, request, obj):
         """ Customizations needed for being nested to slices """
-        opts = obj._meta
-        verbose_name = force_text(opts.verbose_name)
-        msg = 'The %s "%s" was changed successfully.' % (verbose_name, force_text(obj))
-        self.message_user(request, msg)
-        if self.has_change_permission(request, None):
-            post_url = reverse('admin:slices_slice_change', args=(self.slice_id,))
-        else:
-            post_url = reverse('admin:index', current_app=self.admin_site.name)
-        return HttpResponseRedirect(post_url)
+        response = super(SliceSliversAdmin, self).response_change(request, obj)
+        # save and add another correction
+        if response._headers.get('location')[1] == reverse('admin:slices_sliver_add'):
+            return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver', args=(obj.slice.pk,)))
+        return response
     
     def has_add_permission(self, *args, **kwargs):
         """ Skip SliverAdmin.has_add_permission definition """

@@ -44,6 +44,4 @@ SLICES_SLICE_EXP_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_INTERVAL', timed
 SLICES_SLICE_EXP_WARN_DAYS = getattr(settings, 'SLICES_SLICE_EXP_WARN_DAYS', 4)
 
 # List of disabled sliver ifaces. i.e. ['management', 'public4']
-# FIXME this doesn't work :(
-# TODO maybe rethink the sliver interface for register ifaces?
 SLICES_DISABLED_SLIVER_IFACES = getattr(settings, 'SLICES_DISABLED_SLIVER_IFACES', [])

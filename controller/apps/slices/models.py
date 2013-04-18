@@ -363,8 +363,7 @@ class SliverProp(models.Model):
 # Autodiscover sliver ifaces
 # Done just before entering to the SliverIface definition
 autodiscover('ifaces')
-names = Sliver.get_registered_ifaces().keys()
-TYPE_CHOICES = tuple( (name, name.capitalize()) for name in names )
+TYPE_CHOICES = tuple( (name, name.capitalize()) for name in Sliver.get_registered_ifaces() )
 
 class SliverIface(models.Model):
     """

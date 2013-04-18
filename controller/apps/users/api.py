@@ -9,11 +9,11 @@ from .serializers import UserSerializer, GroupSerializer
 
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.User.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#user_at_server)
+    **Media type:** [`application/vnd.confine.server.User.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#user_at_server)
     
     This resource lists the [users](http://wiki.confine-project.eu/arch:rest-api
-    ?&#user_at_server) present in the testbed and provides API URIs to navigate 
+    ?&#user_at_server) present in the testbed and provides API URIs to navigate
     to them.
     """
     model = User
@@ -23,8 +23,8 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.User.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#user_at_server)
+    **Media type:** [`application/vnd.confine.server.User.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#user_at_server)
     
     This resource describes a person using the testbed.
     """
@@ -34,8 +34,8 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Group.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#group_at_server)
+    **Media type:** [`application/vnd.confine.server.Group.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#group_at_server)
     
     This resource describes a group of users using the testbed.
     """
@@ -46,8 +46,8 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Group.v0+json`](http://
-    wiki.confine-project.eu/arch:rest-api?&#group_at_server)
+    **Media type:** [`application/vnd.confine.server.Group.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#group_at_server)
     
     This resource describes a group of users using the testbed.
     """

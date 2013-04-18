@@ -22,8 +22,7 @@ class BaseIface(object):
         if iface.parent:
             raise ValidationError("parent not allowed for this type of iface")
         if self.UNIQUE:
-            iface_type = Sliver.get_registred_iface_type(type(self))
-            private_qs = iface.__class__.objects.filter(sliver=iface.sliver, type=iface_type)
+            private_qs = type(iface).objects.filter(sliver=iface.sliver, type=iface.type)
             if iface.pk:
                 private_qs = private_qs.exclude(pk=iface.pk)
             if private_qs.exists():

@@ -228,8 +228,6 @@ class Slice(models.Model):
             defer(force_slice_update.delay, self.pk)
         else:
             force_slice_update(self.pk)
-    
-
 
 
 class SliceProp(models.Model):
@@ -329,13 +327,13 @@ class Sliver(models.Model):
     
     @classmethod
     def register_iface(cls, iface, name):
-        """ Stored iface in { 'iface_type': iface_object } format """
+        """ Stores iface in { 'iface_type': iface_object } format """
         if name not in settings.SLICES_DISABLED_SLIVER_IFACES:
             cls._iface_registry[name] = iface()
     
     @classmethod
     def get_registered_ifaces(cls):
-        """ Return {'iface_type': iface_object} dict with registered ifaces """
+        """ Returns {'iface_type': iface_object} with registered ifaces """
         return cls._iface_registry
 
 
@@ -361,9 +359,10 @@ class SliverProp(models.Model):
 
 
 # Autodiscover sliver ifaces
-# Done just before entering to the SliverIface definition
 autodiscover('ifaces')
-TYPE_CHOICES = tuple( (name, name.capitalize()) for name in Sliver.get_registered_ifaces() )
+IFACE_TYPE_CHOICES = tuple(
+    (name, name.capitalize()) for name in Sliver.get_registered_ifaces() )
+
 
 class SliverIface(models.Model):
     """
@@ -378,7 +377,7 @@ class SliverIface(models.Model):
         help_text='The name of this interface. It must match the regular '
                   'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
         validators=[validate_net_iface_name])
-    type = models.CharField(max_length=16, choices=TYPE_CHOICES,
+    type = models.CharField(max_length=16, choices=IFACE_TYPE_CHOICES,
         help_text="The type of this interface. Types public4 and public6 are only "
                   "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 "
                   "respectively are not none. There can only be one interface of "

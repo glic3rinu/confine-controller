@@ -25,6 +25,8 @@ class Command(BaseCommand):
     @check_root
     def handle(self, *args, **options):
         version = options.get('version')
+        bold=`tput bold`
+        normal=`tput sgr0`
         if version:
             version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
             minor_release = version_re.search(version)
@@ -88,15 +90,15 @@ class Command(BaseCommand):
             for d in set( get_dir(f) for f in ['priv_key', 'pub_key', 'cert'] ):
                 run('mkdir -p %s' % d)
                 run('chown %s %s' % (username, d))
-            self.stdout.write('\nHTTPS certificate support for the management network '
-                'has been introduced in version 0.8.9.\n'
+            self.stdout.write('\n\033[1mHTTPS certificate support for the management '
+                'network has been introduced in version 0.8.9.\n'
                 'In order to use it you sould run:\n'
                 '  > python manage.py setuppki\n'
-                '  > sudo python manage.py setupapache\n')
+                '  > sudo python manage.py setupapache\n\033[m')
         if version < 838:
             # warn user about some additional steps required for upgrading
-            self.stdout.write('\nNew Celeryd workers and init.d configuration has been '
+            self.stdout.write('\n\033[1mNew Celeryd workers and init.d configuration has been '
                 'introduced in 0.8.38.\nIt is strongly recommended to upgrade by:\n'
                 '  > sudo python manage.py setupceleryd\n'
-                '  > sudo python manage.py restartservices\n')
+                '  > sudo python manage.py restartservices\n\033[m')
 

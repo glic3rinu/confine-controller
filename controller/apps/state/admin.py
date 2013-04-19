@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import re
+
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
@@ -62,7 +64,12 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
         # TODO render data according to header content-type
         #      (when it becomes available in the node)
-        return mark_safe(style + highlight(instance.data, JsonLexer(), HtmlFormatter()))
+        data = highlight(instance.data, JsonLexer(), HtmlFormatter())
+        for url in re.findall('&quot;http(.*)&quot;', data): # urlize
+            link = '&quot;<a href="http%s" rel="nofollow">http%s</a>&quot;' % (url, url)
+            url = '&quot;http%s&quot;' % url
+            data = data.replace(url, link)
+        return mark_safe(style + data)
     display_data.short_description = 'data'
     
     def display_metadata(self, instance):

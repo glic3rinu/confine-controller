@@ -12,6 +12,7 @@ from pygments.formatters import HtmlFormatter
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (insert_list_display, get_admin_link, colored,
     insert_list_filter, insert_action, get_modeladmin)
+from controller.utils.html import urlize_escaped_html
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin
@@ -65,16 +66,13 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         # TODO render data according to header content-type
         #      (when it becomes available in the node)
         data = highlight(instance.data, JsonLexer(), HtmlFormatter())
-        for url in re.findall('&quot;http(.*)&quot;', data): # urlize
-            link = '&quot;<a href="http%s" rel="nofollow">http%s</a>&quot;' % (url, url)
-            url = '&quot;http%s&quot;' % url
-            data = data.replace(url, link)
-        return mark_safe(style + data)
+        return mark_safe(style + urlize_escaped_html(data))
     display_data.short_description = 'data'
     
     def display_metadata(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
-        return mark_safe(style + highlight(instance.metadata, JsonLexer(), HtmlFormatter()))
+        metadata = highlight(instance.metadata, JsonLexer(), HtmlFormatter())
+        return mark_safe(style + urlize_escaped_html(metadata))
     display_metadata.short_description = 'metadata'
     
     def current(self, instance):

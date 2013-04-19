@@ -1,11 +1,21 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.template.response import TemplateResponse
 
+from communitynetworks.models import CnHost
+
+
 @transaction.commit_on_success
 def cache_node_db(modeladmin, request, queryset):
+    """
+    Update CNDB cache for the selected nodes. This actions makes a
+    query to resource specified at cndb_uri and updates the object
+    data with the received response.
+    + List of updated fields: arch, sliver_pub_{ipv6,ipv4,ipv4_range}, gis
+    NOTE: manually defined data will be overrided
+
+    """
     opts = modeladmin.model._meta
     app_label = opts.app_label
 
@@ -16,19 +26,36 @@ def cache_node_db(modeladmin, request, queryset):
             return None
 
     if request.POST.get('post'):
-        n = queryset.count()
-        if n:
-            #FIXME ASK user which fields want to UPDATE??
+        errors = success = 0
+        if queryset:
+            #FIXME Ask user which fields want to update?
             for node in queryset:
-                _update_node(modeladmin, request, node)
+                try:
+                    # TODO fields_to_update: arch, sliver_pub_{ipv6,ipv4,ipv4_range}
+                    node.cn.cache_cndb('gis')
+                except CnHost.DoesNotExist:
+                    pass
+                except CnHost.CNDBFetchError as e:
+                    errors += 1
+                    modeladmin.log_change(request, node, "Error updating CNDB Cache: %s" % e)
+                else:
+                    success += 1
+                    modeladmin.log_change(request, node, "Updated CNDB Cache")
 
+        if errors:
+            messages.error(request, "CNDB Cache update has failed for %d node(s). \
+                See node history for details." % errors)
+        if success:
+            messages.info(request, "Updated CNDB Cache for %d node(s)" % success)
+        else:
+            messages.warning(request, "No nodes have been updated.")
         return None
 
     context = {
         "title": "Are you sure?",
-        "content_message": "Are you sure you want to update cache of the selected nodes using node DB?",
+        "content_message": "Are you sure you want to update CNDB cache of the selected nodes?",
         "action_name": 'Cache node DB',
-        "action_value": 'cache_node_db_selected',
+        "action_value": 'cache_node_db',
         "deletable_objects": queryset,
         'queryset': queryset,
         "opts": opts,
@@ -43,37 +70,36 @@ def cache_node_db(modeladmin, request, queryset):
 cache_node_db.url_name = 'do-cache-cndb'
 cache_node_db.verbose_name = 'Update CNDB cache'
 
-def _update_node(modeladmin, request, node):
-    # check if uri is defined
-    if not node.cn.exists() or not node.cn.get().cndb_uri:
-        return # nothing to do cause there are not CN host relationated
-
-    # query the cndb
-    cn = node.cn.get()
-    cache = cn.get_cache()
-
-    if cache.get('error'):
-        messages.error(request, cache.get('text'))
-        return
-
-    json = cache.get('text')
-
-    #### NODE specific STAFF ####
-    # fields_to_update: arch, sliver_pub_{ipv6,ipv4,ipv4_range}, gis
-    # select the desired data from the jsonized data # TODO how to define which?
-    pos = json.get('attributes').get('position')
-    lat, lon = pos.get('lat'), pos.get('lon')
-
-    # update the node info
-    try:
-        node.gis # exist related object?
-    except ObjectDoesNotExist:
-        from gis.models import NodeGeolocation
-        node.gis = NodeGeolocation()
-        
-    node.gis.geolocation = "%s,%s" % (lat, lon)
-    node.gis.save()
-    node.save()
-
-    messages.info(request, "Updated CNDB Cache of node '%s'" % node)
-    modeladmin.log_change(request, node, "Updated CNDB Cache")
+#def _update_node(modeladmin, request, node):
+#    # check if uri is defined
+#    if not node.cn.exists() or not node.cn.get().cndb_uri:
+#        return # nothing to do cause there are not CN host relationated
+#
+#    # query the cndb
+#    cn = node.cn.get()
+#    cache = cn.get_cache()
+#
+#    if cache.get('error'):
+#        messages.error(request, cache.get('text'))
+#        return
+#
+#    json = cache.get('text')
+#
+#
+#    # select the desired data from the jsonized data # TODO how to define which?
+#    pos = json.get('attributes').get('position')
+#    lat, lon = pos.get('lat'), pos.get('lon')
+#
+#    # update the node info
+#    try:
+#        node.gis # exist related object?
+#    except ObjectDoesNotExist:
+#        from gis.models import NodeGeolocation
+#        node.gis = NodeGeolocation()
+#
+#    node.gis.geolocation = "%s,%s" % (lat, lon)
+#    node.gis.save()
+#    node.save()
+#
+#    messages.info(request, "Updated CNDB Cache of node '%s'" % node)
+#    modeladmin.log_change(request, node, "Updated CNDB Cache")

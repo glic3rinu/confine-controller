@@ -1,16 +1,15 @@
+import requests
+
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.utils import simplejson
+from django.utils.timezone import now
 
+from communitynetworks import settings
 from controller.models.fields import URIField
 from controller.utils import is_installed
 from nodes.models import Node, Server
 
-from communitynetworks.actions import cache_node_db
-
-import datetime
-import requests
 
 # Hook Community Network support for related models
 # This must be at the begining in order to avoid wired import problems
@@ -51,40 +50,64 @@ class CnHost(models.Model):
                 self.cndb_cached_on = None
         super(CnHost, self).save(*args, **kwargs)
     
-    def cache_node_db(self, async=False):
-        if async:
-            defer(cache_node_db.delay, self)
-        else:
-            cache_node_db(self)
+    def fetch_cndb(self):
+        """
+        Queries the nodeDB using cndb_uri.
+        @CNDB API: http://ffm.gg32.com/Doc/FFM/
+        """
+        try:
+            # TODO Avoid SSL certificate verification hardcoded (define setting)
+            # python-requests uses its own cacert file (e.g. Debian 
+            # /usr/local/lib/python2.6/dist-packages/requests/cacert.pem)
+            # cause it not contains cacert.org certificate, we include it
+            # with the source 
+            # http://hearsum.ca/blog/python-and-ssl-certificate-verification/#comment-443
 
-    def get_cache(self):
-        """
-        Query the nodeDB using the defined URI.
-        @return a dictionary:
-            dict.error: there are some problem making the request to nodeDB?
-            dict.text: if error --> textual information about the error
-                       otherwise --> response in JSON format
-        @url nodeDB API: http://ffm.gg32.com/Doc/FFM/
-        """
-        try:
-            response = requests.get(self.cndb_uri, verify=False) # TODO SSL certificate error
+            ## another dirname approach
+            # http://blog.elsdoerfer.name/2008/06/06/django-finding-the-current-projects-path/
+            ca_bundle = settings.COMMUNITYNETWORKS_CNDB_CA_BUNDLE
+            cndb_data = requests.get(self.cndb_uri, verify=ca_bundle).json()
         except Exception as e:
-            return {
-                'error': True,
-                'text': "Error query CNDB '%s'" % e }
-        try:
-            text = simplejson.loads(response.text)
-        except simplejson.JSONDecodeError:
-            return {
-                'error': True,
-                'text': "Error updating CNDB cache: invalid JSON as response." }
+            raise CnHost.CNDBFetchError(str(e))
+        return cndb_data
+
+    def cache_cndb(self, *fields):
+        """ fetches fields from cndb and stores it into the database """
+        cndb = self.fetch_cndb()
+
+        for field in fields:
+            node = self.content_object
+            if field == 'gis' and is_installed('gis'):
+                from gis.models import NodeGeolocation
+                position = cndb.get('attributes').get('position')
+                lat, lon = position.get('lat'), position.get('lon')
+                # update the node info
+                try:
+                    gis = node.gis # exist related object?
+                except NodeGeolocation.DoesNotExist:
+                    gis = NodeGeolocation.objects.create(node=node)
+                gis.geolocation = "%s,%s" % (lat, lon)
+                gis.save()
+            else:
+                # TODO can be generic? (proposal)
+                value = cndb.get(CNDB_FIELD_MAP[field])
+                setattr(node, field, value)
+                node.save()
+#               # another generalization proposal:
+#                CNDB_FIELD_MAP = {
+#                    'arch': lambda j: j.get('machine').get('architecture'),
+#                    'sliver_pub_ipv4': lambda j: j.get('sliver_pub_ipv4'),
+#                    'sliver_pub_ipv4_range': lambda j: '#%d' % len(j.get('ips'))
+#                }
+#                value = CNDB_FIELD_MAP[field](cndb)
 
         # update last cached time
-        self.cndb_cached_on = datetime.datetime.now()
+        # use timezone aware datetime
+        self.cndb_cached_on = now()
         self.save()
-        return {
-            'error': False,
-            'text': text }
+
+    class CNDBFetchError(Exception):
+        pass
 
 # Hook Community Network support for related models
 @property

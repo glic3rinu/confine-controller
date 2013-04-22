@@ -10,10 +10,14 @@ from django.utils.safestring import mark_safe
 from controller.models.utils import get_field_value
 
 
-def get_modeladmin(model):
+def get_modeladmin(model, import_module=True):
     """ returns the modeladmin registred for model """
     for k,v in admin.site._registry.iteritems():
         if k is model:
+            if v is None and import_module:
+                # Sometimes the admin module is not yet imported
+                import_module('%s.%s' % (model._meta.app_label, 'admin'))
+                get_modeladmin(model, import_module=False)
             return v
 
 
@@ -52,21 +56,17 @@ def insert_list_display(model, field):
 def insert_action(model, action):
     """ inserts action to modeladmin.actions """
     modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
-    if modeladmin is None:
-        import_module('%s.%s' % (model._meta.app_label, 'admin'))
-        modeladmin = get_modeladmin(model)
     if not modeladmin.actions:
         type(modeladmin).actions = [action]
     else:
         modeladmin.actions.append(action)
 
+
 def insert_change_view_action(model, action):
     """ inserts action to modeladmin.change_view_actions """
     modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
-    if modeladmin is None:
-        import_module('%s.%s' % (model._meta.app_label, 'admin'))
-        modeladmin = get_modeladmin(model)
     modeladmin.set_change_view_action(action)
+
 
 def link(attribute, description='', admin_order_field=True, base_url=''):
     """

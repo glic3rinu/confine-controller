@@ -276,6 +276,7 @@ class JoinRequest(models.Model):
         template = 'users/created_join_request.email'
         send_email_template(template=template, context=context, to=to)
     
+    # TODO rename to approbation or something better
     def send_acceptation_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_join_request.email'

@@ -12,7 +12,7 @@ def any_auth_method(condition):
             auth = request.META['HTTP_AUTHORIZATION'].split()
             if len(auth) == 2:
                 method, digest = auth
-                if method == "basic":
+                if method == "Basic":
                     uname, passwd = base64.b64decode(digest).split(':')
                     user = authenticate(username=uname, password=passwd)
                     if user is not None:

@@ -69,37 +69,3 @@ def cache_node_db(modeladmin, request, queryset):
 
 cache_node_db.url_name = 'do-cache-cndb'
 cache_node_db.verbose_name = 'Update CNDB cache'
-
-#def _update_node(modeladmin, request, node):
-#    # check if uri is defined
-#    if not node.cn.exists() or not node.cn.get().cndb_uri:
-#        return # nothing to do cause there are not CN host relationated
-#
-#    # query the cndb
-#    cn = node.cn.get()
-#    cache = cn.get_cache()
-#
-#    if cache.get('error'):
-#        messages.error(request, cache.get('text'))
-#        return
-#
-#    json = cache.get('text')
-#
-#
-#    # select the desired data from the jsonized data # TODO how to define which?
-#    pos = json.get('attributes').get('position')
-#    lat, lon = pos.get('lat'), pos.get('lon')
-#
-#    # update the node info
-#    try:
-#        node.gis # exist related object?
-#    except ObjectDoesNotExist:
-#        from gis.models import NodeGeolocation
-#        node.gis = NodeGeolocation()
-#
-#    node.gis.geolocation = "%s,%s" % (lat, lon)
-#    node.gis.save()
-#    node.save()
-#
-#    messages.info(request, "Updated CNDB Cache of node '%s'" % node)
-#    modeladmin.log_change(request, node, "Updated CNDB Cache")

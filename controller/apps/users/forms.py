@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.template.defaultfilters import mark_safe
 
 from controller.forms.fields import MultiSelectFormField
+from controller.admin.utils import get_admin_link
+from controller.forms.widgets import ReadOnlyWidget
 
 from users.models import User, Group, JoinRequest, ResourceRequest
 
@@ -53,11 +55,23 @@ class RolesFormSet(forms.models.BaseInlineFormSet):
     def clean(self):
         super(RolesFormSet, self).clean()
         # Only checking in change forms
-        if self.__obj__ is not None:
+        if self.group is not None:
             for form in self.forms:
                 if form.cleaned_data.get('is_admin'):
                     return
             raise ValidationError('The group must have at least one admin')
+
+
+class RolesInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RolesInlineForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance:
+            self.fields['user'].widget = ReadOnlyWidget(original_value=instance.user.pk,
+                display_value=mark_safe('<b>'+get_admin_link(instance.user)))
+        elif self.group:
+            users = User.objects.exclude(roles__group=self.group).distinct()
+            self.fields['user'].queryset = users
 
 
 class GroupAdminForm(forms.ModelForm):

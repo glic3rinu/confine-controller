@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
 from django.db import models
 from django.utils.safestring import mark_safe
 
@@ -13,7 +13,8 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request, enable_account
 from .filters import MyGroupsListFilter
-from .forms import UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm, GroupAdminForm
+from .forms import (UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm,
+    GroupAdminForm, RolesInlineForm)
 from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
 
 
@@ -26,6 +27,7 @@ class RolesInline(PermissionTabularInline):
     model = Roles
     extra = 0
     formset = RolesFormSet
+    form = RolesInlineForm
     
     def get_formset(self, request, obj=None, **kwargs):
         """
@@ -33,8 +35,15 @@ class RolesInline(PermissionTabularInline):
         can validate correctly that each group has at least one admin, except
         during the add process which will be added automatically
         """
-        self.formset.__obj__ = obj
+        self.formset.group = obj
+        self.form.group = obj
         return super(RolesInline, self).get_formset(request, obj=obj, **kwargs)
+    
+    def has_add_permission(self, request):
+        """ Disable add roles when adding a new group """
+        if resolve(request.path).url_name == 'users_group_add':
+            return False
+        return super(RolesInline, self).has_add_permission(request)
 
 
 class ReadOnlyRolesInline(PermissionTabularInline):
@@ -137,6 +146,7 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
     change_view_actions = [join_request]
     change_form_template = 'admin/users/group/change_form.html'
     form = GroupAdminForm
+    save_and_continue = True
     
     def get_form(self, request, obj=None, **kwargs):
         """ Decides whether to show allow_resource or request_resource"""

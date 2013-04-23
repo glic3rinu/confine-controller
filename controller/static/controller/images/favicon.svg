@@ -15,7 +15,10 @@
    id="svg3160"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="favicon.svg">
+   sodipodi:docname="favicon.svg"
+   inkscape:export-filename="/home/glic3rinu/confine-controller/controller/static/favicon.png"
+   inkscape:export-xdpi="90.739998"
+   inkscape:export-ydpi="90.739998">
   <defs
      id="defs3162">
     <clipPath
@@ -157,7 +160,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>

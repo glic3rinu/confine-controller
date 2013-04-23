@@ -38,8 +38,8 @@ class ReadOnlyWidget(forms.Widget):
     
     def render(self, name, value, attrs=None):
         if self.display_value is not None:
-            return unicode(self.display_value)
-        return unicode(self.original_value)
+            return mark_safe(self.display_value)
+        return mark_safe(self.original_value)
     
     def value_from_datadict(self, data, files, name):
         return self.original_value

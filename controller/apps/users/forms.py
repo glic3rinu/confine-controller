@@ -63,6 +63,7 @@ class RolesFormSet(forms.models.BaseInlineFormSet):
 
 
 class RolesInlineForm(forms.ModelForm):
+    """ Display user as link """
     def __init__(self, *args, **kwargs):
         super(RolesInlineForm, self).__init__(*args, **kwargs)
         instance = kwargs.get('instance', None)

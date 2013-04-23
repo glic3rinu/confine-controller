@@ -63,7 +63,7 @@ class RolesFormSet(forms.models.BaseInlineFormSet):
 
 
 class RolesInlineForm(forms.ModelForm):
-    """ Display user as link """
+    """ Display user as link and limits user queryset to the remaining ones """
     def __init__(self, *args, **kwargs):
         super(RolesInlineForm, self).__init__(*args, **kwargs)
         instance = kwargs.get('instance', None)

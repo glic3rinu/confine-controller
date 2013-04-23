@@ -1,6 +1,11 @@
 {% extends "rest_framework/base.html" %}
 {% load rest_framework utils %}
 
+{% block head %}
+    {{ block.super }}
+    <link rel="icon" href="{% static "controller/images/favicon.png" %}" type="image/png" />
+{% endblock %}
+
 {% block title %}Confine Controller REST API{% endblock %}
 {% block branding %}<a href="{% url 'base' %}">Confine controller REST API <span class="version">{% version %}</span></a>{% endblock %}
 {% block userlinks %}

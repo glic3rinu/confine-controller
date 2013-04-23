@@ -99,11 +99,16 @@ class Command(BaseCommand):
                 '  > python manage.py setuppki\n'
                 '  > sudo python manage.py setupapache\n')
         if version < 837:
-            # warn user about some additional steps required for upgrading
             upgrade_notes.append('New Celeryd workers and init.d configuration has been '
                 'introduced in 0.8.37.\nIt is strongly recommended to upgrade by\n'
                 '  > sudo python manage.py setupceleryd\n'
                 '  > sudo python manage.py restartservices\n')
+        if version < 838:
+            upgrade_notes.append('In order to support Base authentication while downloading '
+                'firmwares you should add "WSGIPassAuthorization On" on your apache config.\n'
+                'Alternatively you can perform this operation with the following command\n'
+                '  > sudo python manage.py setupapache\n'
+                '  > /etc/init.d/apache2 reload\n')
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

@@ -137,9 +137,10 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def log_addition(self, request, object):
         """ AUTO_CREATE SliverIfaces """
         for iface_type, iface_object in Sliver.get_registered_ifaces().items():
-            if iface_object.AUTO_CREATE and not object.interfaces.filter(type=iface_type).exists():
-                SliverIface.objects.create(sliver=object, type=iface_type,
-                    name=iface_object.DEFAULT_NAME)
+            if (iface_object.AUTO_CREATE and
+                not object.interfaces.filter(type=iface_type).exists()):
+                    SliverIface.objects.create(sliver=object, type=iface_type,
+                        name=iface_object.DEFAULT_NAME)
         super(SliverAdmin, self).log_addition(request, object)
 
 
@@ -221,7 +222,8 @@ class SliceSliversAdmin(SliverAdmin):
         context = {'title': mark_safe(title),
                    'slice': slice,}
         context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).add_view(request, form_url='', extra_context=context)
+        return super(SliceSliversAdmin, self).add_view(request, form_url='',
+            extra_context=context)
     
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
@@ -246,12 +248,14 @@ class SliceSliversAdmin(SliverAdmin):
     def response_add(self, request, obj, post_url_continue=None):
         """ Customizations needed for being nested to slices """
         # "save and continue" correction
-        post_url_continue = reverse('admin:slices_slice_slivers', args=(obj.slice.pk, obj.pk))
+        post_url_continue = reverse('admin:slices_slice_slivers',
+            args=(obj.slice.pk, obj.pk))
         response = super(SliceSliversAdmin, self).response_add(request, obj,
             post_url_continue=post_url_continue)
         # "save and continue" correction
         if response._headers.get('location')[1] == request.path:
-            return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver', args=(obj.slice.pk,)))
+            return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver',
+                args=(obj.slice.pk,)))
         return response
     
     def response_change(self, request, obj):
@@ -259,7 +263,8 @@ class SliceSliversAdmin(SliverAdmin):
         response = super(SliceSliversAdmin, self).response_change(request, obj)
         # "save and add another" correction
         if response._headers.get('location')[1] == reverse('admin:slices_sliver_add'):
-            return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver', args=(obj.slice.pk,)))
+            return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver',
+                args=(obj.slice.pk,)))
         return response
     
     def has_add_permission(self, *args, **kwargs):
@@ -292,7 +297,7 @@ class SliverInline(PermissionTabularInline):
     
     def sliver_note1(self, instance):
         """
-        <p>The slice must be saved before creating slivers.
+        <p>This slice must be saved before creating slivers.
         <input type="submit" value="Save" name="_continue" /></p>
         """
     sliver_note1.short_description = mark_safe(sliver_note1.__doc__)

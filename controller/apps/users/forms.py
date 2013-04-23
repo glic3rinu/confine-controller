@@ -66,13 +66,15 @@ class RolesInlineForm(forms.ModelForm):
     """ Display user as link and limits user queryset to the remaining ones """
     def __init__(self, *args, **kwargs):
         super(RolesInlineForm, self).__init__(*args, **kwargs)
-        instance = kwargs.get('instance', None)
-        if instance:
-            self.fields['user'].widget = ReadOnlyWidget(original_value=instance.user.pk,
-                display_value=mark_safe('<b>'+get_admin_link(instance.user)))
-        elif self.group:
-            users = User.objects.exclude(roles__group=self.group).distinct()
-            self.fields['user'].queryset = users
+        if 'user' in self.fields:
+            # readonly forms doesn't have fields
+            instance = kwargs.get('instance', None)
+            if instance:
+                self.fields['user'].widget = ReadOnlyWidget(original_value=instance.user.pk,
+                    display_value=mark_safe('<b>'+get_admin_link(instance.user)))
+            elif self.group:
+                users = User.objects.exclude(roles__group=self.group).distinct()
+                self.fields['user'].queryset = users
 
 
 class GroupAdminForm(forms.ModelForm):

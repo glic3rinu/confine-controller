@@ -48,8 +48,12 @@ def refresh_state(modeladmin, request, queryset):
         modeladmin.message_user(request, msg)
 
 
-def state_action(modeladmin, request, queryset):
+def show_state(modeladmin, request, queryset):
+    """ links to state information (state change view) """
     obj = queryset.get()
     model_name = obj._meta.verbose_name_raw
-    return redirect('admin:state_%sstate_change' % model_name, obj.state.pk)
-state_action.url_name = 'state'
+    # Create state if not exists yet
+    state_model = type(obj)._meta.get_field_by_name('state')[0].model
+    state, created = state_model.objects.get_or_create(**{model_name: obj})
+    return redirect('admin:state_%sstate_change' % model_name, state.pk)
+show_state.url_name = 'state'

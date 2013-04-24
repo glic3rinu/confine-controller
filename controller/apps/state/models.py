@@ -15,7 +15,7 @@ class BaseState(models.Model):
     metadata = models.TextField()
     last_seen_on = models.DateTimeField(null=True, help_text='Last time the state '
         'retrieval was successfull')
-    last_try_on = models.DateTimeField(auto_now=True, null=True, help_text='Last '
+    last_try_on = models.DateTimeField(null=True, help_text='Last '
         'time the state retrieval operation has been executed')
     
     class Meta:
@@ -49,6 +49,7 @@ class BaseState(models.Model):
         response = get_data(glet)
         field_name = cls.get_related_field_name()
         state, created = cls.objects.get_or_create(**{field_name: obj})
+        state.last_try_on = now()
         metadata = {'exception': str(glet._exception)}
         if response is not None:
             state.last_seen_on = now()

@@ -60,7 +60,7 @@ class Command(BaseCommand):
             '                  threads=%(threads)d python-path=%(site_root)s \\\n'
             '                  display-name=%%{GROUP}\n'
             'WSGIProcessGroup %(project_name)s\n'
-            'WSGIScriptAlias / %(project_root)s/wsgi.py\n
+            'WSGIScriptAlias / %(project_root)s/wsgi.py\n'
             'WSGIPassAuthorization On\n\n'
             '<Directory %(project_root)s>\n'
             '    <Files wsgi.py>\n'

@@ -41,7 +41,7 @@ def cache_node_db(modeladmin, request, queryset):
         context, current_app=modeladmin.admin_site.name)
 
 cache_node_db.url_name = 'do-cache-cndb'
-cache_node_db.verbose_name = 'Update CNDB cache'
+cache_node_db.verbose_name = 'Cache CNDB'
 
 def _update_node(modeladmin, request, node):
     # check if uri is defined

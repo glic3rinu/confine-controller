@@ -17,7 +17,7 @@ from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin
 from slices.models import Sliver
 
-from .actions import refresh, refresh_state, state_action
+from .actions import refresh, refresh_state, show_state
 from .models import NodeState, SliverState
 from .settings import STATE_NODE_SOFT_VERSION_URL
 from .utils import urlize_escaped_html
@@ -159,9 +159,9 @@ SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')
 
 node_modeladmin = get_modeladmin(Node)
-node_modeladmin.set_change_view_action(state_action)
+node_modeladmin.set_change_view_action(show_state)
 sliver_modeladmin = get_modeladmin(Sliver)
-sliver_modeladmin.set_change_view_action(state_action)
+sliver_modeladmin.set_change_view_action(show_state)
 # TODO
 #actions = getattr(SliceSliversAdmin, 'change_view_actions', [])
 #SliceSliversAdmin.change_view_actions = actions + [state_action]

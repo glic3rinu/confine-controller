@@ -29,8 +29,6 @@ TIME_ZONE = 'UTC'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1 # FIXME DELETE? controller is NOT using django.contrib.site
-
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
@@ -102,6 +100,7 @@ TEMPLATE_CONTEXT_PROCESSORS =(
     "django.core.context_processors.media",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
+    "controller.core.context_processors.site",
 )
 
 TEMPLATE_DIRS = (
@@ -195,12 +194,6 @@ LOGGING = {
 
 # Email config
 EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
-EMAIL_HOST = 'smtp.confine-project.eu'
-#EMAIL_PORT = ''
-#EMAIL_HOST_USER = ''
-#EMAIL_HOST_PASSWORD = ''
-#EMAIL_USE_TLS = False
-DEFAULT_FROM_EMAIL = 'controller@confine-project.eu'
 
 
 #################################
@@ -299,7 +292,7 @@ PRIVATE_MEDIA_ROOT = ''
 ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = '/admin/'
 USERS_REGISTRATION_MODE = 'OPEN' # [OPEN|RESTRICTED|CLOSED]
-EMAIL_REGISTRATION_APPROVE = 'support@confine-project.eu' # Only required if USERS_REGISTRATION_MODE = RESTRICTED
+EMAIL_REGISTRATION_APPROVE = '' # Only required if USERS_REGISTRATION_MODE = RESTRICTED
 
 # rest_framework
 REST_FRAMEWORK = {

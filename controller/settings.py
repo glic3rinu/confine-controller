@@ -21,5 +21,7 @@ DISABLE_LOGIN_CSRF_FROM = getattr(settings, 'DISABLE_LOGIN_CSRF_FROM', [])
 
 # Domain name used when it will not be possible to infere the domain from a request
 # For example in periodic tasks
-# TODO include protocol: http/s 
-DOMAIN_NAME = getattr(settings, 'DOMAIN_NAME', 'example.com')
+SITE_URL = getattr(settings, 'SITE_URL', 'http://localhost')
+SITE_NAME = getattr(settings, 'SITE_NAME', 'confine')
+SITE_VERBOSE_NAME = getattr(settings, 'SITE_VERBOSE_NAME',
+    '%s Testbed Management' % SITE_NAME.capitalize())

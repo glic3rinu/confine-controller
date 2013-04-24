@@ -62,7 +62,7 @@ class Command(BaseCommand):
             
             run("python manage.py syncdb")
             run("python manage.py migrate")
-            run("python manage.py restartservices --no-postgresql")
+            run("python manage.py restartservices")
         
         if not version:
             self.stderr.write('\nNext time you migth want to provide a --from argument '
@@ -81,7 +81,6 @@ class Command(BaseCommand):
             run('rabbitmqctl reset')
             run('rabbitmqctl start_app')
             run('service celeryd restart')
-            run('service celeryevcam restart')
         if version < 809:
             # Add PKI directories
             from pki import ca
@@ -98,12 +97,17 @@ class Command(BaseCommand):
                 'In order to use it you sould run:\n'
                 '  > python manage.py setuppki\n'
                 '  > sudo python manage.py setupapache\n')
-        if version < 837:
-            upgrade_notes.append('New Celeryd workers and init.d configuration has been '
-                'introduced in 0.8.37.\nIt is strongly recommended to upgrade by\n'
-                '  > sudo python manage.py setupceleryd\n'
-                '  > sudo python manage.py restartservices\n')
         if version < 838:
+            # Purge communitynetworks.periodic_cache_node_db
+            from djcelery.models import PeriodicTask
+            PeriodicTask.objects.filter(name='communitynetworks.periodic_cache_node_db').delete()
+            run('rabbitmqctl stop_app')
+            run('rabbitmqctl reset')
+            run('rabbitmqctl start_app')
+            run('service celeryd restart')
+            upgrade_notes.append('New Celeryd init.d configuration has been '
+                'introduced in 0.8.38.\nIt is strongly recommended to upgrade by\n'
+                '  > sudo python manage.py setupceleryd\n')
             upgrade_notes.append('In order to support Base authentication while downloading '
                 'firmwares you should add "WSGIPassAuthorization On" on your apache config.\n'
                 'Alternatively you can perform this operation with the following command\n'

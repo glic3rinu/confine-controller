@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% load admin_tools_menu_tags utils %}
 
-{% block title %}{{ title }} | Confine Testbed Management {% endblock %}
+{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME }} {% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block branding %}
-<a href="{% url 'admin:index' %}"><h1 id="site-name">Confine Testbed Management <span class="version">{% version %}</span></a>
+<a href="{% url 'admin:index' %}"><h1 id="site-name">{{ SITE_VERBOSE_NAME }}<span class="version">{% version %}</span></a>
 {% endblock %}
 
 {% block nav-global %}

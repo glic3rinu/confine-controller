@@ -59,3 +59,4 @@ STATIC_ROOT = '{{ project_directory }}/static/'
 # DEFAULT_FROM_EMAIL = 'controller@confine-project.eu'
 
 
+SITE_NAME = {{ project_name }}

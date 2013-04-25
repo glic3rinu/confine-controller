@@ -5,7 +5,6 @@ from celery import states as celery_states
 from django import template
 from django.conf import settings as project_settings
 from django.core import validators
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.dispatch import Signal, receiver
 from django.template import Template, Context
@@ -22,8 +21,9 @@ from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
-from .exceptions import ConcurrencyError
 from .context import context
+from .exceptions import ConcurrencyError
+from .helpers import filename_handler
 from .tasks import build
 
 
@@ -266,32 +266,21 @@ class Config(SingletonModel):
         return os.path.join(base_path, image_name)
 
 
+
 class BaseImage(models.Model):
     """ Describes the image used for generating per node customized images """
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
-        upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
+        #upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
+        upload_to=filename_handler,
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
-                    'Enter a valid name.', 'invalid')])
+                    'Invalid file extension (only accepted *.img.gz)', 'invalid')])
     
     def __unicode__(self):
         return str(self.image)
     
-    def clean(self):
-        """ Prevents repeated architectures """
-        #TODO: move this logic to formset validation
-        for arch in self.architectures:
-            arch_regex = "(^|\s)%s(,|$)" % arch
-            try:
-                existing = BaseImage.objects.filter(architectures__regex=arch_regex)
-            except BaseImage.DoesNotExist:
-                pass
-            else:
-                if existing and (not self.pk or existing[0].pk != self.pk):
-                    raise ValidationError("%s already present" % arch)
-        super(BaseImage, self).clean()
 
 
 class ConfigUCI(models.Model):

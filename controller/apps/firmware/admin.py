@@ -15,6 +15,7 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insert_actio
 from nodes.models import Node
 
 from .actions import get_firmware
+from .forms import BaseImageFormSet
 from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
     ConfigFileHelpText, BuildFile)
 
@@ -32,6 +33,7 @@ STATE_COLORS = {
 class BaseImageInline(admin.TabularInline):
     model = BaseImage
     extra = 0
+    formset = BaseImageFormSet
 
 
 class ConfigUCIInline(admin.TabularInline):

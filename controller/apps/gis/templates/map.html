@@ -14,7 +14,7 @@
 </div>
 
 {# OpenLayers #}
-<script src="http://openlayers.org/api/OpenLayers.js"></script>
+<script src="{% static "gis/openlayers/OpenLayers.js" %}"></script>
 <script>
 // KML Layer for displaying nodes //
 var kml_layer = new OpenLayers.Layer.Vector("KML", {
@@ -83,12 +83,4 @@ selectControl = new OpenLayers.Control.SelectFeature(kml_layer);
 map.addControl(selectControl);
 selectControl.activate();
 </script>
-<style>
-.olControlAttribution {
-    background: white;
-    background: rgba(255,255,255, 0.7);
-    bottom: 3px;
-    padding: 3px 8px;
-}
-</style>
 {% endblock %}

@@ -56,15 +56,11 @@ class CnHost(models.Model):
         @CNDB API: http://ffm.gg32.com/Doc/FFM/
         """
         try:
-            # TODO Avoid SSL certificate verification hardcoded (define setting)
             # python-requests uses its own cacert file (e.g. Debian 
             # /usr/local/lib/python2.6/dist-packages/requests/cacert.pem)
             # cause it not contains cacert.org certificate, we include it
-            # with the source 
+            # with the app source 
             # http://hearsum.ca/blog/python-and-ssl-certificate-verification/#comment-443
-
-            ## another dirname approach
-            # http://blog.elsdoerfer.name/2008/06/06/django-finding-the-current-projects-path/
             ca_bundle = settings.COMMUNITYNETWORKS_CNDB_CA_BUNDLE
             cndb_data = requests.get(self.cndb_uri, verify=ca_bundle).json()
         except Exception as e:
@@ -89,10 +85,12 @@ class CnHost(models.Model):
                 gis.geolocation = "%s,%s" % (lat, lon)
                 gis.save()
             else:
-                # TODO can be generic? (proposal)
-                value = cndb.get(CNDB_FIELD_MAP[field])
-                setattr(node, field, value)
-                node.save()
+                raise NotImplementedError("'%s' field cannot be cached from CNDB." % field)
+                # TODO How to get other info from CNDB API?
+                # can be generic? (proposal)
+#                value = cndb.get(CNDB_FIELD_MAP[field])
+#                setattr(node, field, value)
+#                node.save()
 #               # another generalization proposal:
 #                CNDB_FIELD_MAP = {
 #                    'arch': lambda j: j.get('machine').get('architecture'),

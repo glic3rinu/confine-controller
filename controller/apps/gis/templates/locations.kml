@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.2">
 <Document>
@@ -6,7 +7,7 @@
     <Style id="markerStyle">
 	    <IconStyle>
 		    <Icon>
-		        <href>https://dl.dropbox.com/u/36866466/mapicons/wifi.png</href>
+		        <href>{% static "gis/openlayers/img/marker-wifi.png" %}</href>
 	        </Icon>
 	    </IconStyle>
     </Style>

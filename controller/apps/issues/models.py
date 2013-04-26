@@ -65,7 +65,7 @@ class Ticket(models.Model):
     created_by = models.ForeignKey(get_user_model(), related_name='created_tickets')
     owner = models.ForeignKey(get_user_model(), null=True, blank=True,
         related_name='owned_tickets')
-    queue = models.ForeignKey(Queue, related_name='Tickets')
+    queue = models.ForeignKey(Queue, related_name='tickets')
     subject = models.CharField(max_length=256)
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES,
         default=PUBLIC)

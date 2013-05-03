@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 
 from django.contrib import admin
+from django.contrib.auth import get_user_model 
 from django.db import models
 from django.db.models import Q
+from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import admin_link, colored
@@ -62,11 +64,12 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     actions = [reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
     change_view_actions = [reject_tickets, resolve_tickets, take_tickets]
     change_form_template = "admin/issues/ticket/change_form.html"
-    readonly_fields = ('created_by', 'state')
+    readonly_fields = ('created_by', 'state', 'colored_state')
+    #exclude = ('state', )
     fieldsets = (
         (None, {
             'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority',
-                       'visibility', 'state'))
+                       'visibility', 'colored_state'))
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -74,12 +77,19 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         }),)
     add_fieldsets = (
         (None, {
-            'fields': ('subject', ('owner', 'queue'), ('priority', 'visibility', 'state'))
+            'fields': ('subject', ('owner', 'queue'), ('priority', 'visibility', 
+                       'colored_state'))
         }),
         ('CC', {
             'classes': ('collapse',),
             'fields': ('cc',)
         }),)
+    
+    def colored_state(self, instance):
+        """ State colored for change_form """
+        return  mark_safe(colored(instance.state, STATE_COLORS)(instance))
+    colored_state.short_description = "State"
+    colored_state.allow_tags = True
     
     def queryset(self, request):
         qs = super(TicketAdmin, self).queryset(request)
@@ -125,6 +135,19 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             request.META['QUERY_STRING'] = request.GET.urlencode()
         return super(TicketAdmin,self).changelist_view(request, extra_context=extra_context)
 
+    def get_actions(self, request):
+        """ Only superusers can manage tickets """
+        actions = super(TicketAdmin, self).get_actions(request)
+        if not request.user.is_superuser:
+            actions = []
+        return actions
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """ Filter owner choices to be only superusers """
+        if db_field.name == 'owner':
+            User = get_user_model()
+            kwargs['queryset'] = User.objects.exclude(is_superuser=False)
+        return super(TicketAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 class QueueAdmin(PermissionModelAdmin):
     list_display = ['name', 'default', 'num_tickets']

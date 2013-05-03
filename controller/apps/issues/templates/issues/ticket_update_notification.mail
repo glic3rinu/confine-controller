@@ -1,0 +1,15 @@
+{% if subject %}
+Community-Lab Testbed - ticket #{{ ticket.id }} updated
+{% endif %}
+
+{% if message %}
+Dear user,
+
+The ticket #{{ ticket.id }} has been updated to state {{ ticket.state}}.
+You can get more details at testbed site.
+http://{{ site.name }}{% url 'admin:issues_ticket_change' ticket.id %}
+
+Best regards,
+
+The Community-Lab Testbed
+{% endif %}

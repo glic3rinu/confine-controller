@@ -1,0 +1,19 @@
+{% if subject %}
+Community-Lab Testbed - new ticket #{{ ticket.id }}
+{% endif %}
+
+{% if message %}
+Dear operator,
+
+A new ticket #{{ ticket.id }} has been reported at {{ ticket.created_on }}:
+* Subject: {{ ticket.subject}}
+* Queue: {{ ticket.queue }}
+* Priority: {{ ticket.priority }}
+
+You can get more details at testbed site.
+http://{{ site.domain }}{% url 'admin:issues_ticket_change' ticket.id %}
+
+Best regards,
+
+The Community-Lab Testbed
+{% endif %}

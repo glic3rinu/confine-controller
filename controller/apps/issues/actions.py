@@ -39,6 +39,15 @@ def reject_tickets(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 reject_tickets.url_name = 'reject'
 
+@is_operator_deco
+def open_tickets(modeladmin, request, queryset):
+    site = RequestSite(request)
+    queryset.open(site)
+    for obj in queryset:
+        modeladmin.log_change(request, obj, "Marked as Open")
+    msg = "%s selected tickets are now open" % queryset.count()
+    modeladmin.message_user(request, msg)
+open_tickets.url_name = 'open'
 
 @is_operator_deco
 @transaction.commit_on_success
@@ -49,7 +58,6 @@ def take_tickets(modeladmin, request, queryset):
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 take_tickets.url_name = 'take'
-
 
 @transaction.commit_on_success
 def mark_as_unread(modeladmin, request, queryset):

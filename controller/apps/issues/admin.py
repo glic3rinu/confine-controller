@@ -10,7 +10,7 @@ from controller.admin import ChangeViewActions
 from controller.admin.utils import admin_link, colored
 from controller.forms import RequiredInlineFormSet
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
-    mark_as_unread)
+    open_tickets, mark_as_unread)
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from .filters import MyTicketsListFilter
@@ -61,11 +61,10 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
                      'queue', 'owner__username']
     inlines = [MessageInline]
-    actions = [reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
-    change_view_actions = [reject_tickets, resolve_tickets, take_tickets]
+    actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]#, mark_as_unread]
+    change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
     change_form_template = "admin/issues/ticket/change_form.html"
     readonly_fields = ('created_by', 'state', 'colored_state')
-    #exclude = ('state', )
     fieldsets = (
         (None, {
             'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority',
@@ -118,7 +117,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         else:
             request.META['QUERY_STRING'] = query_string
         return super(TicketAdmin, self).get_form(request, *args, **kwargs)
-    
+
     def get_readonly_fields(self, request, obj=None):
         """ Only superusers can change owner field """
         readonly_fields = super(TicketAdmin, self).get_readonly_fields(request, obj=obj)
@@ -126,6 +125,20 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             readonly_fields += ('owner',)
         return readonly_fields
     
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Filter change view actions based on ticket state """
+        act = self.change_view_actions
+        instance = Ticket.objects.get(pk=object_id)
+        if instance.state in ['NEW', 'OPEN']:
+            actions_filter = [a.url_name for a in act if a.url_name != 'open']
+        else:
+            actions_filter = [a.url_name for a in act if a.url_name == 'open']
+
+        extra_context = extra_context or {}
+        extra_context['actions_filter'] = actions_filter
+        return super(TicketAdmin, self).change_view(request, object_id,
+            form_url, extra_context=extra_context)
+
     def changelist_view(self, request, extra_context=None):
         """ Default filter as 'my_tickets=True' """
         if not request.GET.has_key('my_tickets'):
@@ -142,6 +155,17 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             actions = []
         return actions
 
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        """ 
+        Normal users can only select public or private visibility.
+        Internal visibility is reserved for operators staff
+        """
+        if db_field.name == "visibility" and not request.user.is_superuser:
+            kwargs['choices'] = (
+                (Ticket.PUBLIC,  "Public"),
+                (Ticket.PRIVATE, "Private"),
+            )
+        return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """ Filter owner choices to be only superusers """
         if db_field.name == 'owner':

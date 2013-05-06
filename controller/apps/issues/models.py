@@ -34,8 +34,10 @@ class TicketQuerySet(models.query.QuerySet):
         self.notify_users(site)
         return result
     
-    def open(self):
-        return self.update(state=Ticket.OPEN)
+    def open(self, site):
+        result = self.update(state=Ticket.OPEN)
+        self.notify_users(site)
+        return result
         
     def reject(self, site):
         result = self.update(state=Ticket.REJECTED)

@@ -27,7 +27,7 @@ STATE_COLORS = {
     Ticket.NEW: 'grey',
     Ticket.OPEN: 'darkorange',
     Ticket.RESOLVED: 'green',
-    Ticket.REJECTED: 'yellow' }
+    Ticket.REJECTED: 'firebrick'}
 
 
 class MessageInline(PermissionTabularInline):

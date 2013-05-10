@@ -9,13 +9,13 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeViewActions
 from controller.admin.utils import admin_link, colored
 from controller.forms import RequiredInlineFormSet
-from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
-    open_tickets, mark_as_unread)
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
-from .filters import MyTicketsListFilter
-from .forms import MessageInlineForm, TicketInlineForm
-from .models import Ticket, Queue, Message
+from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
+    open_tickets, mark_as_unread, set_default_queue)
+from issues.filters import MyTicketsListFilter
+from issues.forms import MessageInlineForm, TicketInlineForm, TicketForm
+from issues.models import Ticket, Queue, Message
 
 
 PRIORITY_COLORS = { 
@@ -51,6 +51,12 @@ class TicketInline(PermissionTabularInline):
 
 
 class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
+    class Media:
+        js = ('issues/js/admin-ticket.js',)
+        css = {
+             'all': ('issues/css/admin-ticket.css',)
+        }
+    form = TicketForm
     # TODO Bold (id, subject) when tickets are unread for request.user
     list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
                     admin_link('queue'), colored('priority', PRIORITY_COLORS),
@@ -60,15 +66,15 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
                      'queue', 'owner__username']
-    inlines = [MessageInline]
     actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]#, mark_as_unread]
     change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
     change_form_template = "admin/issues/ticket/change_form.html"
-    readonly_fields = ('created_by', 'state', 'colored_state')
+    readonly_fields = ('abstract', 'colored_state', 'created_by', 'state')
     fieldsets = (
         (None, {
-            'fields': ('created_by', 'subject', ('owner', 'queue'), ('priority',
-                       'visibility', 'colored_state'))
+            'classes': ('relative',),
+            'fields': (('abstract', 'subject'), 'description',
+                      ('queue','priority', 'visibility', 'owner'))
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -76,20 +82,36 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         }),)
     add_fieldsets = (
         (None, {
-            'fields': ('subject', ('owner', 'queue'), ('priority', 'visibility', 
-                       'colored_state'))
+            'classes': ('relative',),
+            'fields': (('subject', 'colored_state'), 'description',
+                      ('queue', 'priority', 'visibility','owner'))
         }),
         ('CC', {
             'classes': ('collapse',),
             'fields': ('cc',)
         }),)
     
+    def abstract(self, instance):
+        """ Provide a ticket abstract: subject, creator and state """
+        created_by_url = admin_link('created_by')(instance)
+        created_on = instance.created_on.strftime("%Y-%m-%d")
+        state = self.colored_state(instance)
+        subject = "%s<a id='subject-edit' href='#' title='edit'></a>" % instance.subject
+        return "<div class='field-box'>\
+                    <span class='h3'>Issue #%s - %s</span><br/>\
+                    <span class='created_by'>created by %s at %s</span>\
+                </div>\
+                <div class='field-box field-state'>%s</div> " % \
+            (instance.id, subject, created_by_url, created_on, state)
+    abstract.short_description = ""
+    abstract.allow_tags = True
+    
     def colored_state(self, instance):
         """ State colored for change_form """
         return  mark_safe(colored(instance.state, STATE_COLORS)(instance))
     colored_state.short_description = "State"
     colored_state.allow_tags = True
-    
+
     def queryset(self, request):
         qs = super(TicketAdmin, self).queryset(request)
         if not request.user.is_superuser:
@@ -98,26 +120,19 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             qset = Q(qset | Q(visibility=Ticket.INTERNAL, created_by__groups__users=request.user))
             qs = qs.filter(qset).distinct()
         return qs
+
+    def get_actions(self, request):
+        """ Only superusers can manage tickets """
+        actions = super(TicketAdmin, self).get_actions(request)
+        if not request.user.is_superuser:
+            actions = []
+        return actions
     
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
         return super(TicketAdmin, self).get_fieldsets(request, obj)
     
-    def save_model(self, request, obj, *args, **kwargs):
-        obj.created_by = request.user
-        super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
-    
-    def get_form(self, request, *args, **kwargs):
-        """ Ugly trick for providing default ticket queue """
-        try:
-            query_string = 'queue=%s' % Queue.objects.get_default().id
-        except Queue.DoesNotExist:
-            pass
-        else:
-            request.META['QUERY_STRING'] = query_string
-        return super(TicketAdmin, self).get_form(request, *args, **kwargs)
-
     def get_readonly_fields(self, request, obj=None):
         """ Only superusers can change owner field """
         readonly_fields = super(TicketAdmin, self).get_readonly_fields(request, obj=obj)
@@ -125,11 +140,28 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             readonly_fields += ('owner',)
         return readonly_fields
     
+    def add_view(self, request, form_url='', extra_context=None):
+        """ 
+        Hack for only include messages inline for change view 
+        http://stackoverflow.com/a/2236002/1538221
+        """
+        self.inlines = []
+        if hasattr(self, 'inline_instances'): #workaround for first init
+            self.inline_instances = []
+        return super(TicketAdmin, self).add_view(request, form_url, extra_context)
+
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Filter change view actions based on ticket state """
+        # only include messages inline for change view
+        self.inlines = [MessageInline]
+        if hasattr(self, 'inline_instances'): #workaround for first init
+            for inline_class in self.inlines:
+                inline_instance = inline_class(self.model, self.admin_site)
+                self.inline_instances.append(inline_instance)
+
         act = self.change_view_actions
         instance = Ticket.objects.get(pk=object_id)
-        if instance.state in ['NEW', 'OPEN']:
+        if instance.state in [Ticket.NEW, Ticket.OPEN]:
             actions_filter = [a.url_name for a in act if a.url_name != 'open']
         else:
             actions_filter = [a.url_name for a in act if a.url_name == 'open']
@@ -148,13 +180,6 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             request.META['QUERY_STRING'] = request.GET.urlencode()
         return super(TicketAdmin,self).changelist_view(request, extra_context=extra_context)
 
-    def get_actions(self, request):
-        """ Only superusers can manage tickets """
-        actions = super(TicketAdmin, self).get_actions(request)
-        if not request.user.is_superuser:
-            actions = []
-        return actions
-
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         """ 
         Normal users can only select public or private visibility.
@@ -166,6 +191,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
                 (Ticket.PRIVATE, "Private"),
             )
         return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """ Filter owner choices to be only superusers """
         if db_field.name == 'owner':
@@ -173,10 +199,17 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             kwargs['queryset'] = User.objects.exclude(is_superuser=False)
         return super(TicketAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def save_model(self, request, obj, *args, **kwargs):
+        obj.created_by = request.user
+        super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
+    
+
 class QueueAdmin(PermissionModelAdmin):
+    actions = [set_default_queue]
     list_display = ['name', 'default', 'num_tickets']
-    list_editable = ['default']
+    #list_editable = ['default']
     inlines = [TicketInline]
+    ordering = ['name']
     
     def num_tickets(self, queue):
         return queue.tickets.count()
@@ -187,7 +220,6 @@ class QueueAdmin(PermissionModelAdmin):
         qs = super(QueueAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('tickets'))
         return qs
-
 
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)

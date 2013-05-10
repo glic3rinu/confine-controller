@@ -75,10 +75,10 @@ class Ticket(models.Model):
     
     created_by = models.ForeignKey(get_user_model(), related_name='created_tickets')
     owner = models.ForeignKey(get_user_model(), null=True, blank=True,
-        related_name='owned_tickets', help_text="Staff member that takes the \
-        ticket and becomes responsible of solving the issue.")
+        related_name='owned_tickets', verbose_name="Assigned to")
     queue = models.ForeignKey(Queue, related_name='tickets')
     subject = models.CharField(max_length=256)
+    description = models.TextField()
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES,
         default=PUBLIC, help_text="Internal: for the testbed operation staff<br/>\
                                    Public: for all RG researchers<br/>\

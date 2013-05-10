@@ -1,6 +1,8 @@
 {% extends "admin/controller/change_form.html" %}
 {% load i18n %}
 
+{% block bodyclass %}{{ super }}{% if user.is_superuser or user == original.created_by %}editable{% else %}readonly{% endif %}{% endblock %}
+
 {% block object-tools-items %}
 {% if user.is_superuser %}
     {% for item in object_tools_items %}

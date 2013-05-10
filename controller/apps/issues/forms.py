@@ -3,6 +3,8 @@ from django import forms
 from controller.forms.utils import colored_field, admin_link
 from controller.forms.widgets import ShowText
 
+from issues.models import Queue, Ticket
+from issues.helpers import format_date
 
 class MessageInlineForm(forms.ModelForm):
     author = forms.CharField(label="Author", widget=ShowText(bold=True), required=False)
@@ -17,7 +19,7 @@ class MessageInlineForm(forms.ModelForm):
         if 'content' in self.fields:
             if message:
                 self.initial['author'] = '</b>'+admin_link(message.author)
-                self.initial['created_on'] = message.created_on.strftime("%Y-%m-%d %H:%M:%S")
+                self.initial['created_on'] = format_date(message.created_on)
                 self.fields['content'].widget = ShowText()
                 self.fields['content'].required = False
             else:
@@ -58,4 +60,18 @@ class TicketInlineForm(forms.ModelForm):
             self.initial['created_on'] = instance.created_on.strftime("%Y-%m-%d %H:%M:%S")
             self.initial['last_modified_on'] = instance.last_modified_on.strftime("%Y-%m-%d %H:%M:%S")
 
+class TicketForm(forms.ModelForm):
+    queue = forms.ModelChoiceField(queryset = Queue.objects.all())
+
+    class Meta:
+        model = Ticket
+
+    def __init__(self, *args, **kwargs):
+        """ Provide default ticket queue for new tickets """
+        super(TicketForm, self).__init__(*args, **kwargs)
+        if not 'instance' in kwargs:
+            try:
+                self.initial['queue'] = Queue.objects.get_default().id
+            except Queue.DoesNotExist:
+                pass      
 

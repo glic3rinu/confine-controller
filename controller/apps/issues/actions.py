@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib.sites.models import RequestSite
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
-from issues.models import Message
+from issues.helpers import log_as_message
+from issues.models import Message, Queue
 
 def user_has_perm(func):
     """ 
@@ -25,6 +27,7 @@ def resolve_tickets(modeladmin, request, queryset):
     queryset.resolve(site)
     for obj in queryset:
         modeladmin.log_change(request, obj, "Marked as Resolved")
+        log_as_message(modeladmin, obj, request.user)
     msg = "%s selected tickets are now resolved" % queryset.count()
     modeladmin.message_user(request, msg)
 resolve_tickets.url_name = 'resolve'
@@ -37,26 +40,21 @@ def reject_tickets(modeladmin, request, queryset):
     from django.template.response import TemplateResponse
     opts = modeladmin.model._meta
     app_label = opts.app_label
-    print "APP_LABEL: %s" % (app_label)
 
     if queryset.count() != 1:
         messages.warning(request, "Please, one ticket at a time.")
         return
-    
 
     # The user has alreday confirmed the reject
     if request.POST.get('post'):
-        #create new message with reject reason (message)
-        reason = request.POST.get('reason')
-        if reason:
-            ticket = queryset.get()
-            reason = "REJECT REASON: %s" % reason
-            message = Message(ticket=ticket, author=request.user, content=reason)
-            message.save()
+        obj = queryset.get()
         site = RequestSite(request)
+        reason = request.POST.get('reason') or ''
+
         queryset.reject(site) 
-        for obj in queryset:
-            modeladmin.log_change(request, obj, "Marked as Rejected")
+        modeladmin.log_change(request, obj, "Marked as Rejected")
+        log_as_message(modeladmin, obj, request.user, reason)
+
         msg = "%s selected tickets are now rejected" % queryset.count()
         modeladmin.message_user(request, msg)
         return
@@ -83,6 +81,7 @@ def open_tickets(modeladmin, request, queryset):
     queryset.open(site)
     for obj in queryset:
         modeladmin.log_change(request, obj, "Marked as Open")
+        log_as_message(modeladmin, obj, request.user)
     msg = "%s selected tickets are now open" % queryset.count()
     modeladmin.message_user(request, msg)
 open_tickets.url_name = 'open'
@@ -99,6 +98,22 @@ take_tickets.url_name = 'take'
 
 @transaction.commit_on_success
 def mark_as_unread(modeladmin, request, queryset):
-    #TODO Implement mark a ticket as unread
+    #TODO? Implement mark a ticket as unread
     raise NotImplementedError("Sorry, but `mark_as_unread` operation is not implemented yet.")
+
+## Queue actions
+@user_has_perm
+@transaction.commit_on_success
+def set_default_queue(modeladmin, request, queryset):
+    """ Set a queue as default issues queue """
+    if queryset.count() != 1:
+        messages.warning(request, "Please, select only one queue.")
+        return
+    Queue.objects.filter(default=True).update(default=False)
+    #queryset.update(default=True)
+    queue = queryset.get()
+    queue.default = True
+    queue.save()
+    modeladmin.log_change(request, queue, "Choosed as default.")
+    messages.info(request, "Choosed '%s' as default queue." % queue)
 

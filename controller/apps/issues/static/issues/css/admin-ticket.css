@@ -1,0 +1,92 @@
+/** ticket abstract styling **/
+#ticket_form .field-abstract div {
+    text-align: right;
+}
+
+#ticket_form .field-abstract .h3 {
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#ticket_form .field-abstract .created_by {
+    padding-right: 24px;
+}
+
+#ticket_form .field-abstract p {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+#ticket_form .field-box.field-abstract label {
+    display: none;
+}
+
+.form-row.field-abstract .field-box.field-subject {
+    display: none;
+    line-height: 2.5em;
+}
+
+#subject-edit {
+    background: url('../images/btn_edit.gif') no-repeat;
+    display: inline-block;
+    margin-left: 8px;
+    width: 17px;
+    height: 16px;
+}
+
+body.readonly #subject-edit {
+    display: none;
+}
+
+
+/** two columns layout **/
+.form-row.field-description {
+    float: left;
+}
+
+.form-row.field-priority {
+    border-bottom: 0;
+    float: left;
+    width: 300px;
+}
+
+.form-row.field-priority.field-visibility.field-owner label {
+    text-align: right; 
+}
+
+/** field-visibility help styling **/
+fieldset.relative {
+    position: relative;
+}
+
+#ticket_form .form-row.field-visibility {
+    padding: 20px 12px;
+}
+
+#ticket_form .field-box.field-visibility .help {
+    background-color: rgba(100, 100, 100, 0.8);
+    color: #f5f5f5;
+    
+    display: none;
+    padding: 5px;
+    width: 200px;    
+    
+    position: absolute;
+    bottom: 2.5em;
+    right: -50px;
+    z-index: 1000;
+}
+
+.form-row.field-description {
+    border-bottom: 0;
+}
+
+/*** messages format ***/
+.timesince {
+    background: url(../../admin/img/icon-unknown.gif) 0 50% no-repeat;
+    font-size: 11px;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+}

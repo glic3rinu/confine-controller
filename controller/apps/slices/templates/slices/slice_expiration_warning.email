@@ -3,7 +3,7 @@
 Your slice "{{ slice.name }}" will expire in {{ days }} days.
 
 To update, renew, or delete this slice, please visit
-    {% site %}{% url 'admin:slices_slice_change' slice.pk %}
+    http://{{ site.domain }}{% url 'admin:slices_slice_change' slice.pk %}
 
 
 Thanks,

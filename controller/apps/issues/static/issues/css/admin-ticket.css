@@ -42,16 +42,16 @@ body.readonly #subject-edit {
 
 /** two columns layout **/
 .form-row.field-description {
-    float: left;
+    /*float: left; */
 }
 
 .form-row.field-priority {
     border-bottom: 0;
-    float: left;
+    float: right;
     width: 300px;
 }
 
-.form-row.field-priority.field-visibility.field-owner label {
+.form-row.field-priority label {
     text-align: right; 
 }
 
@@ -83,10 +83,26 @@ fieldset.relative {
 }
 
 /*** messages format ***/
-.timesince {
+#messages-group .timesince {
     background: url(../../admin/img/icon-unknown.gif) 0 50% no-repeat;
     font-size: 11px;
     display: inline-block;
     width: 10px;
     height: 10px;
+}
+
+#messages-group td.field-author {
+    min-width: 80px;
+}
+#messages-group td.field-created_on {
+    min-width: 126px;
+}
+
+/** hidde message id http://stackoverflow.com/a/5556813/1538221 **/
+#messages-group td.original p {
+  visibility: hidden
+}
+
+.inline-group .tabular tr.has_original td {
+    padding-top: 0.8em;
 }

@@ -1,0 +1,8 @@
+/** hidde message id http://stackoverflow.com/a/5556813/1538221 **/
+#tickets-group td.original p {
+  visibility: hidden
+}
+
+.inline-group .tabular tr.has_original td {
+    padding-top: 0.8em;
+}

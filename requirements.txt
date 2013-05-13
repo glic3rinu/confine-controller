@@ -1,5 +1,5 @@
 django
-kombu==2.4.7
+kombu>=2.5.10
 django-celery-email
 django-fluent-dashboard
 south

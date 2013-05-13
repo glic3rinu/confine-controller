@@ -73,8 +73,8 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     fieldsets = (
         (None, {
             'classes': ('relative',),
-            'fields': (('abstract', 'subject'), 'description',
-                      ('queue','priority', 'visibility', 'owner'))
+            'fields': (('abstract', 'subject'), 
+                      ('queue','priority', 'visibility', 'owner'), 'description')
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -83,8 +83,8 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('relative',),
-            'fields': (('subject', 'colored_state'), 'description',
-                      ('queue', 'priority', 'visibility','owner'))
+            'fields': (('subject', 'colored_state'),
+                      ('queue', 'priority', 'visibility','owner'), 'description')
         }),
         ('CC', {
             'classes': ('collapse',),
@@ -205,9 +205,12 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     
 
 class QueueAdmin(PermissionModelAdmin):
+    class Media:
+        css = {
+             'all': ('issues/css/admin-queue.css',)
+        }
     actions = [set_default_queue]
     list_display = ['name', 'default', 'num_tickets']
-    #list_editable = ['default']
     inlines = [TicketInline]
     ordering = ['name']
     

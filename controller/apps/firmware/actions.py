@@ -44,6 +44,14 @@ def get_firmware(modeladmin, request, queryset):
         'node': node,
         'form': OptionalFilesForm(),
     }
+
+    # No architecture support
+    if Config.objects.get().get_image(node) is None:
+        context["content_message"] = "Sorry but currently we do not support \
+                                      %s architectures :(" % node.arch
+        template = 'admin/firmware/base_build.html'
+        return TemplateResponse(request, template, context, current_app=site_name)
+    
     # User has requested a firmware build
     if request.POST.get('post'):
         form = OptionalFilesForm(request.POST)
@@ -82,12 +90,6 @@ def get_firmware(modeladmin, request, queryset):
     # Available for download
     if state in [Build.AVAILABLE]:
         template = 'admin/firmware/download_build.html'
-        return TemplateResponse(request, template, context, current_app=site_name)
-    
-    # No architecture support
-    if Config.objects.get().get_image(node) is None:
-        context["content_message"] = "Sorry but currently we do not support %s architectures :(" % node.arch,
-        template = 'admin/firmware/base_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
     
     # Processing

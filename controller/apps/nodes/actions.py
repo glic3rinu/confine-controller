@@ -36,7 +36,7 @@ def reboot_selected(modeladmin, request, queryset):
             for obj in queryset:
                 obj.reboot()
                 modeladmin.log_change(request, obj, "Instructed to reboot")
-            msg = "%s selected nodes are instructed to reboot." % queryset.count()
+            msg = "%s selected nodes have been instructed to reboot." % queryset.count()
             modeladmin.message_user(request, msg)
         # Return None to display the change list page again.
         return None

@@ -1,7 +1,7 @@
 import os
 
-from celery.task import task
 from celery import states
+from celery.task import task
 
 from .image import Image
 

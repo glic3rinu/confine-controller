@@ -81,7 +81,7 @@ class Command(BaseCommand):
         run("echo '%s' > /etc/default/celeryd" % celery_config)
         
         # https://raw.github.com/celery/celery/master/extra/generic-init.d/
-        for script in ['celeryd', 'celeryevcam', 'celerybeat']:
+        for script in ['celeryevcam', 'celeryd', 'celerybeat']:
             context['script'] = script
             run('cp %(bin_path)s/%(script)s /etc/init.d/%(script)s' % context)
             run('chmod +x /etc/init.d/%(script)s' % context)

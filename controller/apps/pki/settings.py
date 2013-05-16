@@ -1,6 +1,5 @@
 from django.conf import settings
 
-ugettext = lambda s: s
 
 PKI_CA_PRIV_KEY_PATH = getattr(settings, 'PKI_CA_PRIV_KEY_PATH', '%(site_root)s/pki/key.priv')
 PKI_CA_PUB_KEY_PATH = getattr(settings, 'PKI_CA_PUB_KEY_PATH', '%(site_root)s/pki/key.pub')

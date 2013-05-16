@@ -4,9 +4,6 @@ from datetime import timedelta
 from django.conf import settings
 
 
-ugettext = lambda s: s
-
-
 SLICES_TEMPLATE_TYPES = getattr(settings, 'SLICES_TEMPLATE_TYPES', (
     ('debian6', 'Debian 6'),
     ('openwrt-backfire', 'OpenWRT Backfire'),

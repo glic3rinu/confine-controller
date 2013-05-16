@@ -1,7 +1,5 @@
 from django.conf import settings
 
-ugettext = lambda s: s
-
 
 NODES_NODE_ARCHS = getattr(settings, 'NODES_NODE_ARCHS', (
     ('x86_64', 'x86_64'),

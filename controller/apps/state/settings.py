@@ -1,8 +1,6 @@
 #from celery.task.schedules import crontab
 from django.conf import settings
 
-ugettext = lambda s: s
-
 
 STATE_LOCK_DIR = getattr(settings, 'STATE_LOCK_DIR', '/dev/shm/')
 

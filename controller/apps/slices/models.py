@@ -121,7 +121,7 @@ class Slice(models.Model):
         help_text='The number of times this slice has been instructed to be reset '
                   '(instance sequence number). Automatically incremented by the '
                   'reset function.',
-        verbose_name='instanse sequence number')
+        verbose_name='instance sequence number')
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
         help_text='The instance sequence number that newly created slivers will '
                   'get. Automatically incremented whenever a sliver of this slice '

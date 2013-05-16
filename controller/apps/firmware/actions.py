@@ -8,6 +8,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
+from .exceptions import BaseImageNotAvailable
 from .forms import OptionalFilesForm
 from .models import Build, Config
 
@@ -46,7 +47,9 @@ def get_firmware(modeladmin, request, queryset):
     }
 
     # No architecture support
-    if Config.objects.get().get_image(node) is None:
+    try:
+        Config.objects.get().get_image(node)
+    except BaseImageNotAvailable:
         context["content_message"] = "Sorry but currently we do not support \
                                       %s architectures :(" % node.arch
         template = 'admin/firmware/base_build.html'

@@ -91,9 +91,9 @@ class BuildAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_filter = ['version']
     fields = ['node_link', 'base_image', 'image_link', 'image_sha256', 'version',
-              'build_date', 'state', 'task_link']
+              'build_date', 'state', 'task_link', 'task_id']
     readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256',
-                       'version', 'build_date', 'task_link', 'base_image']
+                       'version', 'build_date', 'task_link', 'task_id', 'base_image']
     inlines = [BuildFileInline]
     
     def build_date(self, build):
@@ -105,8 +105,8 @@ class BuildAdmin(admin.ModelAdmin):
     
     def task_link(self, build):
         """ Display Celery task change view if exists """
-        if build.task:
-            return get_admin_link(build.task, href_name=build.task.task_id)
+        if build.db_task:
+            return get_admin_link(build.db_task, href_name=build.db_task.task_id)
     task_link.allow_tags = True
     task_link.short_description = "Task"
     

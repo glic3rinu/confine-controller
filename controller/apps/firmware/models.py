@@ -22,7 +22,7 @@ from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .context import context
-from .exceptions import ConcurrencyError
+from .exceptions import ConcurrencyError, BaseImageNotAvailable
 from .helpers import filename_handler
 from .tasks import build
 
@@ -82,7 +82,7 @@ class Build(models.Model):
         return self.image.name.split('/')[-1]
     
     @property
-    def task(self):
+    def db_task(self):
         """ Returns the celery task responsible for 'self' image build """
         if not self.task_id:
             return None
@@ -90,6 +90,10 @@ class Build(models.Model):
             return TaskState.objects.get(task_id=self.task_id)
         except TaskState.DoesNotExist:
             return None
+    
+    @property
+    def task(self):
+        return build.AsyncResult(self.task_id)
     
     @property
     def state(self):
@@ -246,7 +250,7 @@ class Config(SingletonModel):
         arch_regex = "(^|,)%s(,|$)" % node.arch
         images = self.images.filter(architectures__regex=arch_regex)
         if len(images) == 0:
-            return None
+            raise BaseImageNotAvailable('No base image for %s architecture' % node.arch)
         return images[0].image
     
     def get_image_name(self, node, build=None):

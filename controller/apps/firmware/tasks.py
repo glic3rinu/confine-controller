@@ -1,13 +1,13 @@
 import os
 
 from celery.task import task
-from django.core.exceptions import ImproperlyConfigured
+from celery import states
 
 from .image import Image
 
 
 def update_state(build, progress, next, description):
-    build.update_state(state='PROGRESS',
+    build.update_state(state=states.STARTED,
         meta={'progress': progress, 'next': next, 'description': description})
 
 
@@ -26,9 +26,6 @@ def build(build_id, exclude=[]):
     config = Config.objects.get()
     node = build_obj.node
     base_image = config.get_image(node)
-    if base_image is None: # this should be avoided before running this task
-        raise ImproperlyConfigured("Error building the firmware. Does not \
-            exists a base image for %s arch (node %s)" % (node.arch, node.id))
     image = Image(base_image.path)
     
     try:

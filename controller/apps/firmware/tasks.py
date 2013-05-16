@@ -26,6 +26,9 @@ def build(build_id, exclude=[]):
     config = Config.objects.get()
     node = build_obj.node
     base_image = config.get_image(node)
+    if base_image is None: # this should be avoided before running this task
+        raise ImproperlyConfigured("Error building the firmware. Does not \
+            exists a base image for %s arch (node %s)" % (node.arch, node.id))
     image = Image(base_image.path)
     
     try:

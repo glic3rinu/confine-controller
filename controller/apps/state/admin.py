@@ -78,6 +78,10 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     def current(self, instance):
         return mark_safe(colored('current', STATES_COLORS, verbose=True)(instance))
     
+    def has_add_permission(self, request):
+        """ Object states can not be manually created """
+        return False
+    
     def has_delete_permission(self, *args, **kwargs):
         return False
 

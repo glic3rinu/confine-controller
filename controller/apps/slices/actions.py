@@ -38,7 +38,7 @@ def reset_selected(modeladmin, request, queryset):
         obj.reset()
         modeladmin.log_change(request, obj, "Instructed to reset")
     verbose_name_plural = force_text(obj._meta.verbose_name_plural)
-    msg = "%s selected %s have been instructed to reset" % (queryset.count(), verbose_name_plural)
+    msg = "%s selected %s have been instructed to reset." % (queryset.count(), verbose_name_plural)
     modeladmin.message_user(request, msg)
 reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_plural)s")
 reset_selected.url_name = 'reset'
@@ -53,7 +53,7 @@ def update_selected(modeladmin, request, queryset):
         obj.update()
         modeladmin.log_change(request, obj, "Instructed to update")
     verbose_name_plural = force_text(obj._meta.verbose_name_plural)
-    msg = "%s selected %s have been instructed to update" % (queryset.count(), verbose_name_plural)
+    msg = "%s selected %s have been instructed to update." % (queryset.count(), verbose_name_plural)
     modeladmin.message_user(request, msg)
 update_selected.short_description = ugettext_lazy("Update selected %(verbose_name_plural)s")
 update_selected.url_name = 'update'

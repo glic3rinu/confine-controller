@@ -65,8 +65,7 @@ def create_slivers(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    slice_id = request.path.split('/')[-3]
-    slice = Slice.objects.get(pk=slice_id)
+    slice = Slice.objects.get(pk=modeladmin.slice_id)
     
     if not modeladmin.has_change_permission(request, obj=slice):
         raise PermissionDenied
@@ -74,7 +73,7 @@ def create_slivers(modeladmin, request, queryset):
     n = queryset.count()
     if n == 1:
         node = queryset.get()
-        return redirect('admin:slices_slice_add_sliver', slice_id, node.pk)
+        return redirect('admin:slices_slice_add_sliver', modeladmin.slice_id, node.pk)
     
     if request.POST.get('post'):
         form = SliverIfaceBulkForm(request.POST)

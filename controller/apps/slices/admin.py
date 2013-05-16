@@ -71,9 +71,17 @@ class SliverIfaceInline(PermissionTabularInline):
 class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['__unicode__', admin_link('node'), admin_link('slice')]
     list_filter = [MySliversListFilter, 'slice__name']
-    fields = ['description', 'slice_link', 'node_link', 'instance_sn', 'template',
-              template_link, 'exp_data', 'exp_data_uri', 'exp_data_sha256', 'set_state']
-    readonly_fields = ['instance_sn', 'slice_link', 'node_link', template_link]
+    fieldsets = (
+        (None, {
+            'fields': ('description', 'slice_link', 'node_link', ('template',
+                       template_link), 'exp_data', 'exp_data_uri', 'exp_data_sha256',
+                       'set_state')
+        }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('new_instance_sn',)
+        }),)
+    readonly_fields = ['new_instance_sn', 'slice_link', 'node_link', template_link]
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverIfaceInline]
     actions = [update_selected]
@@ -98,7 +106,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def total_num_ifaces(self, instance):
         """ Total number of sliver ifaces used on list_display """
         return instance.interfaces.count()
-    total_num_ifaces.short_description = 'Total Ifaces'
+    total_num_ifaces.short_description = 'Total ifaces'
     total_num_ifaces.admin_order_field = 'interfaces__count'
     
     def slice_link(self, instance):
@@ -114,7 +122,13 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def exp_data_sha256(self, instance):
         """ Experiment data SHA256 used on change_view """
         return instance.exp_data_sha256
-    exp_data_sha256.short_description = 'Experiment Data SHA256'
+    exp_data_sha256.short_description = 'Experiment data SHA256'
+    
+    def new_instance_sn(self, instance):
+        if instance.pk:
+            return instance.instance_sn
+        return instance.slice.new_sliver_instance_sn
+    new_instance_sn.short_description ='Instance sequence number'
     
     def has_add_permission(self, *args, **kwargs):
         """ 
@@ -205,11 +219,22 @@ class SliceSliversAdmin(SliverAdmin):
     """
     Nested Sliver ModelAdmin that provides Slivers management capabilities on Slices
     """
-    fields = ['description', 'instance_sn', 'template', 'exp_data', 'exp_data_uri',
-              'exp_data_sha256', 'set_state']
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
-    readonly_fields = ['instance_sn']
+    
+    def slice_link(self, instance):
+        """ Link to related slice used on change_view """
+        if not instance.slice_id:
+            instance.slice_id = self.slice_id
+        return super(SliceSliversAdmin, self).slice_link(instance)
+    slice_link.short_description = 'Slice'
+    
+    def node_link(self, instance):
+        """ Link to related node used on change_view """
+        if not instance.node_id:
+            instance.node_id = self.node_id
+        return super(SliceSliversAdmin, self).node_link(instance)
+    node_link.short_description = 'Node'
     
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
@@ -277,12 +302,9 @@ class SliceSliversAdmin(SliverAdmin):
             request._node_ = obj.node
             request._slice_ = obj.slice
         else:
-            # TODO gatting node_id/slice_id like this is really embarassing...
-            node_id = request.path.split('/')[-2]
-            node = Node.objects.get(pk=node_id)
+            node = Node.objects.get(pk=self.node_id)
             request._node_ = node
-            slice_id = request.path.split('/')[-4]
-            slice = Slice.objects.get(pk=slice_id)
+            slice = Slice.objects.get(pk=self.slice_id)
             request._slice_ = slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 
@@ -367,9 +389,9 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         (None, {
             'fields': ('name', 'description', ('template', template_link),
                        ('exp_data', 'exp_data_uri'), 'exp_data_sha256', 'set_state',
-                       'vlan_nr', 'expires_on', 'group'),
+                        'vlan_nr', 'expires_on', 'group'),
         }),
-        ('Debug info', {
+        ('Advanced', {
             'classes': ('collapse',),
             'fields': ('instance_sn', 'new_sliver_instance_sn')
         }),)

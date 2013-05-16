@@ -52,21 +52,13 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'group', 'arch', 'local_iface',
-                       'sliver_pub_ipv6', 'sliver_pub_ipv4',
-                       'sliver_pub_ipv4_range', 'set_state'),
+                       'sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'set_state'),
         }),
-        ('Certificate', {
+        ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('display_cert',)
-        }),
-        ('Optional prefixes', {
-            'classes': ('collapse',),
-            'fields': ('priv_ipv4_prefix', 'sliver_mac_prefix')
-        }),
-        ('Debug info', {
-            'classes': ('collapse',),
-            'fields': ('boot_sn', )
-        }),
+            'fields': ('display_cert', 'priv_ipv4_prefix', 'sliver_mac_prefix',
+                       'sliver_pub_ipv6', 'boot_sn')
+        }), 
         )
     actions = [request_cert, reboot_selected]
     change_view_actions = [reboot_selected, request_cert]

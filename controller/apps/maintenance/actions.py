@@ -30,8 +30,7 @@ def execute_operation(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    operation_id = request.path.split('/')[-3]
-    operation = Operation.objects.get(pk=operation_id)
+    operation = Operation.objects.get(pk=modeladmin.operation_id)
     
     if request.POST.get('post'):
         form = ExecutionForm(request.POST)

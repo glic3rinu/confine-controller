@@ -118,11 +118,14 @@ class Slice(models.Model):
         help_text='Expiration date of this slice. Automatically deleted once '
                   'expires.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
-        help_text='Number of times this slice has been instructed to be reset '
-                  '(instance sequence number).',
+        help_text='The number of times this slice has been instructed to be reset '
+                  '(instance sequence number). Automatically incremented by the '
+                  'reset function.',
         verbose_name='instanse sequence number')
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
-        help_text='Instance sequence number for newly created slivers.',
+        help_text='The instance sequence number that newly created slivers will '
+                  'get. Automatically incremented whenever a sliver of this slice '
+                  'is instructed to be updated.',
         verbose_name='New sliver instance sequence number')
     vlan_nr = models.IntegerField('VLAN number', null=True, blank=True,
         help_text='VLAN number allocated to this slice. The only values that can '
@@ -312,6 +315,11 @@ class Sliver(models.Model):
 #            if slice.set_state == Slice.DEPLOY and self.set_state == Slice.START:
 #                raise ValidationError(msg)
     
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.instance_sn = self.slice.new_sliver_instance_sn
+        super(Sliver, self).save(*args, **kwargs)
+    
     @property
     def max_num_ifaces(self):
         return 256 # limited by design -> #nr: unsigned 8 bits
@@ -319,6 +327,8 @@ class Sliver(models.Model):
     def update(self):
         self.instance_sn += 1
         self.save()
+        self.slice.new_sliver_instance_sn += 1
+        self.slice.save()
     
     def force_update(self, async=False):
         if async:

@@ -39,7 +39,7 @@ def update_tincd():
             scripts.append(script)
         
         # delete all tinc hosts
-        run('rm %s{host_,node_}*' % hosts_path, err_codes=[0,1])
+        run('rm -f -- %s{host_,node_}*' % hosts_path, err_codes=[0,1])
         
         # create all tinc hosts
         for script in scripts:

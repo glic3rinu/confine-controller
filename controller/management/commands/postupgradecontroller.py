@@ -108,6 +108,9 @@ class Command(BaseCommand):
             upgrade_notes.append('New Celeryd init.d configuration has been '
                 'introduced in 0.8.38.\nIt is strongly recommended to upgrade by\n'
                 '  > sudo python manage.py setupceleryd\n')
+            # Deprecate x86 architecture
+            from nodes.models import Node
+            Node.objects.filter(arch='x86').update(arch='i686')
             upgrade_notes.append('In order to support Base authentication while downloading '
                 'firmwares you should add "WSGIPassAuthorization On" on your apache config.\n'
                 'Alternatively you can perform this operation with the following command\n'

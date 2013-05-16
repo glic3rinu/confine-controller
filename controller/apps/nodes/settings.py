@@ -5,10 +5,7 @@ ugettext = lambda s: s
 
 NODES_NODE_ARCHS = getattr(settings, 'NODES_NODE_ARCHS', (
     ('amd64', 'amd64'),
-    ('ia64', 'ia64'),
-    ('x86', 'x86'),
     ('x86_64', 'x86_64'),
-    ('ar71xx', 'ar71xx'),
     ('i586', 'i586'),
     ('i686', 'i686'),
 ))

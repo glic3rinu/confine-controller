@@ -40,6 +40,6 @@ def get_file_field_base_path(model, field_name):
     upload_to = field.upload_to
     if hasattr(upload_to, '__call__'):
         # This is a controller's convention for getting upload_to base path
-        upload_to = upload_to(None, None)
+        upload_to = upload_to(None, '')
     storage_location = field.storage.base_location
     return os.path.join(storage_location, upload_to)

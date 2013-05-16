@@ -20,6 +20,7 @@ def refresh(modeladmin, request, queryset):
     # Execute get_state isolated on a process to avoid gevent polluting the stack
     result = get_state.delay(state_module, ids=ids)
     try:
+        # Block until finish
         result.get()
     except OperationLocked:
         msg = 'This operation is currently being executed by another process'

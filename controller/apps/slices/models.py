@@ -167,7 +167,7 @@ class Slice(models.Model):
                     self.set_state = self.REGISTER
         elif self.vlan_nr > 0 and self.set_state == self.REGISTER:
             # transition to a register state, deallocating...
-            self.vlan_nr = None
+            self.vlan_nr = -1
         if commit:
             self.save()
     
@@ -273,7 +273,7 @@ class Sliver(models.Model):
         help_text='If present, the URI of a file containing experiment data for '
                   'this sliver, instead of the one specified by the slice. Its '
                   'format and contents depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('exp. data SHA56', max_length=64, blank=True,
+    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
         help_text='The SHA256 hash of the previous file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])

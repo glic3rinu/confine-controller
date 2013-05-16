@@ -105,7 +105,7 @@
         "section": "server server", 
         "config": 1, 
         "option": "mgmt_pubkey", 
-        "value": "open(MAINTENANCE_PUB_KEY_PATH, 'r').readline()"
+        "value": "open(MAINTENANCE_PUB_KEY_PATH, 'r').readline().strip()"
     }
 },
 {

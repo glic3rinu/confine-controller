@@ -110,10 +110,11 @@ def update_settings(monkey_patch=None, **options):
 
 class LockFile(object):
     """ File-based lock mechanism used for preventing concurrency problems """
-    def __init__(self, lockfile, expire=5*60):
+    def __init__(self, lockfile, expire=5*60, unlocked=False):
         """ /dev/shm/ can be a good place for storing locks ;) """
         self.lockfile = lockfile
         self.expire = expire
+        self.unlocked = unlocked
     
     def acquire(self):
         if os.path.exists(self.lockfile):
@@ -128,10 +129,12 @@ class LockFile(object):
         os.remove(self.lockfile)
     
     def __enter__(self):
-        if not self.acquire():
-            raise OperationLocked('%s lock file exists and its mtime is less '
-                'than %s seconds' % (self.lockfile, self.expire))
+        if not self.unlocked:
+            if not self.acquire():
+                raise OperationLocked('%s lock file exists and its mtime is less '
+                    'than %s seconds' % (self.lockfile, self.expire))
         return True
     
     def __exit__(self, type, value, traceback):
-        self.release()
+        if not self.unlocked:
+            self.release()

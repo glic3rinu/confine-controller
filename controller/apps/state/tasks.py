@@ -9,12 +9,12 @@ from .settings import STATE_LOCK_DIR, STATE_NODESTATE_SCHEDULE, STATE_SLIVERSTAT
 
 
 @task(name="state.get_state")
-def get_state(state_module, ids=[]):
+def get_state(state_module, ids=[], lock=True):
     state_model = get_model(*state_module.split('.'))
     lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
     freq = state_model.get_setting('SCHEDULE')
     # Prevent concurrent executions
-    with LockFile(lock_file, expire=freq-(freq*0.2)):
+    with LockFile(lock_file, expire=freq-(freq*0.2), unlocked=not lock):
         objects = state_model.get_related_model().objects.all()
         if ids:
             objects = objects.filter(id__in=ids)

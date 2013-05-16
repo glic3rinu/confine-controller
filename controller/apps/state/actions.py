@@ -18,7 +18,7 @@ def refresh(modeladmin, request, queryset):
     ids = queryset.values_list('%s__id' % field_name , flat=True)
     related_model_name = queryset.model.get_related_model()._meta.object_name
     # Execute get_state isolated on a process to avoid gevent polluting the stack
-    result = get_state.delay(state_module, ids=ids)
+    result = get_state.delay(state_module, ids=ids, lock=False)
     try:
         # Block until finish
         result.get()

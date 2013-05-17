@@ -68,7 +68,7 @@ def send_email_template(template, context, to, email_from=None):
         from controller import settings as controller_settings
         from urlparse import urlparse
         url = urlparse(controller_settings.SITE_URL)
-        site = {'domain': url.netloc, 'name': controller_settings.SITE_NAME }
+        site = { 'domain': url.netloc, 'name': controller_settings.SITE_NAME }
         email_context = {'site': site}
         context.update(email_context)
 

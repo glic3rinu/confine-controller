@@ -48,5 +48,3 @@ def update_tincd():
     # retry if there is any pending modification
     if os.path.getmtime(dirtyfile) > now:
         raise update_tincd.retry(countdown=1)
-    
-    run("/etc/init.d/tinc reload", silent=False)

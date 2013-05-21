@@ -114,8 +114,9 @@ function install_requirements () {
                  django-singletons django-extensions django_transaction_signals django-celery \
                  markdown django-filter django-admin-tools pygments requests==1.2.0 \
                  djangorestframework==2.2.6 \
-                 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz"
-    EXTENDED_PIP="paramiko https://github.com/madisona/django-google-maps/archive/master.zip"
+                 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \
+                 https://github.com/madisona/django-google-maps/archive/master.zip"
+    EXTENDED_PIP="paramiko"
     
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then

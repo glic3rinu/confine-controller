@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import admin_link, colored
-from controller.forms import RequiredInlineFormSet
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
@@ -34,7 +33,6 @@ class MessageInline(PermissionTabularInline):
     model = Message
     extra = 1
     form = MessageInlineForm
-    formset = RequiredInlineFormSet
     can_delete = False
     fields = ['content', 'author_link', 'created_on']
     
@@ -201,7 +199,9 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         return super(TicketAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request, obj, *args, **kwargs):
-        obj.created_by = request.user
+        """ Define creator for new tickets """
+        if obj.pk is None:
+            obj.created_by = request.user
         super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
     
 

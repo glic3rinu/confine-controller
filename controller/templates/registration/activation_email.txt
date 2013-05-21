@@ -1,9 +1,13 @@
+{% load users_registration %}
+{% get_settings_value "ACCOUNT_ACTIVATION_DAYS" as activation_days %}
+
 Hi, welcome to {{ site }}:
 
-Please, enable your account at:
+Please, validate your email using the link below:
 
 http://{{ site }}/accounts/activate/{{ activation_key }}
 
+You have {{ activation_days }} days remaining to activate your account.
 
-Thank you!
-Community-lab operations team.
+Thanks!
+the Community-lab operations team.

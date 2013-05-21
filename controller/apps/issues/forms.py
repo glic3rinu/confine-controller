@@ -7,24 +7,27 @@ from issues.models import Queue, Ticket
 from issues.helpers import format_date
 
 class MessageInlineForm(forms.ModelForm):
-    author = forms.CharField(label="Author", widget=ShowText(bold=True), required=False)
+    author_link = forms.CharField(label="Author", widget=ShowText(bold=True), required=False)
     created_on = forms.CharField(label="Created On", widget=ShowText(), required=False)
     
     class Meta:
-        fields = ('content', )
+        fields = ('content',)
     
     def __init__(self, *args, **kwargs):
         super(MessageInlineForm, self).__init__(*args, **kwargs)
         message = kwargs.get('instance', False)
-        if 'content' in self.fields:
-            if message:
-                self.initial['author'] = '</b>'+admin_link(message.author)
-                self.initial['created_on'] = format_date(message.created_on)
+        if message:
+            # Display message form
+            self.initial['author_link'] = '</b>'+admin_link(message.author)
+            self.initial['created_on'] = format_date(message.created_on)
+            if 'content' in self.fields:
+                # read only fields doesn't have content
                 self.fields['content'].widget = ShowText()
                 self.fields['content'].required = False
-            else:
-                self.initial['author'] = '</b>'+admin_link(self.user)
-                self.initial['created_on'] = ''
+        else:
+            # Add message form
+            self.initial['author_link'] = '</b>'+admin_link(self.user)
+            self.initial['created_on'] = ''
     
     def save(self, *args, **kwargs):
         if self.instance.pk is None:

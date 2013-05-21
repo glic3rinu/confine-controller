@@ -36,6 +36,7 @@ class MessageInline(PermissionTabularInline):
     form = MessageInlineForm
     formset = RequiredInlineFormSet
     can_delete = False
+    fields = ['content', 'author_link', 'created_on']
     
     def get_formset(self, request, obj=None, **kwargs):
         """ hook request.user on the inline form """

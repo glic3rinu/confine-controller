@@ -110,6 +110,13 @@ function install_requirements () {
     MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-gevent python-dev gcc"
     EXTENDED_APT="libapache2-mod-wsgi fuseext2 tinc file"
     
+    MINIMAL_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
+                 django-singletons django-extensions django_transaction_signals django-celery \
+                 markdown django-filter django-admin-tools pygments requests \
+                 djangorestframework==2.2.6 \
+                 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz"
+    EXTENDED_PIP="paramiko https://github.com/madisona/django-google-maps/archive/master.zip"
+    
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then
         run sed -i "s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
@@ -119,6 +126,7 @@ function install_requirements () {
     
     run apt-get update
     run apt-get install -y $MINIMAL_APT
+    run pip install $MINIMAL_PIP
     
     if ! $minimal; then
         run apt-get install -y $EXTENDED_APT
@@ -126,9 +134,14 @@ function install_requirements () {
         sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
         sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
         run update-rc.d rabbitmq-server defaults
+        run pip install $EXTENDED_PIP
     fi
     
-    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
+    if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
+        # Install kombu version compatible with old amq protocol
+        run pip install celery==3.0.10 django-celery==3.0.10 kombu==2.4.7
+    fi
+#    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements
 

@@ -96,16 +96,16 @@ class Command(BaseCommand):
         context.update({'apache_conf': apache_conf})
         
         diff = run("echo '%(apache_conf)s'|"
-                   "diff - /etc/apache2/httpd.conf" % context,
+                   "diff - /etc/apache2/conf.d/%(project_name)s.conf" % context,
                    err_codes=[0,1,2])
         if diff.return_code == 2:
             # File does not exist
-            run("echo '%(apache_conf)s' > /etc/apache2/httpd.conf" % context)
+            run("echo '%(apache_conf)s' > /etc/apache2/conf.d/%(project_name)s.conf" % context)
         elif diff.return_code == 1:
             # File is different, save the old one
             if interactive:
-                msg = ("\n\nFile /etc/apache2/httpd.conf should be updated, do you like "
-                       "to overide it? (yes/no): ")
+                msg = ("\n\nFile /etc/apache2/conf.d/%(project_name)s.conf should "
+                       "be updated, do you like to overide it? (yes/no): " % context)
                 confirm = input(msg)
                 while 1:
                     if confirm not in ('yes', 'no'):
@@ -114,16 +114,16 @@ class Command(BaseCommand):
                     if confirm == 'no':
                         return
                     break
-            run("cp /etc/apache2/httpd.conf "
-                "/etc/apache2/httpd.conf.save" % context)
-            run("echo '%(apache_conf)s' > /etc/apache2/httpd.conf" % context)
-            self.stdout.write("\033[1;31mA new version of /etc/apache2/httpd.conf "
+            run("cp /etc/apache2/conf.d/%(project_name)s.conf "
+                "/etc/apache2/conf.d/%(project_name)s.conf.save" % context)
+            run("echo '%(apache_conf)s' > /etc/apache2/conf.d/%(project_name)s.conf" % context)
+            self.stdout.write("\033[1;31mA new version of /etc/apache2/conf.d/%(project_name)s.conf "
                               "has been installed.\n The old version has been placed at "
-                              "/etc/apache2/httpd.conf.save\033[m" % context)
+                              "/etc/apache2/conf.d/%(project_name)s.conf.save\033[m" % context)
         
-        include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
-        if include_httpd.return_code == 1:
-            run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
+#        include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
+#        if include_httpd.return_code == 1:
+#            run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
         
         # run('a2ensite %s' % project_name)
         run('a2enmod expires')

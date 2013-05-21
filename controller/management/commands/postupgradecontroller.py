@@ -122,6 +122,9 @@ class Command(BaseCommand):
                 '/etc/apache2/conf.d/<project_name>.conf. It is convenient for you '
                 'to migrate your current configuration located on /etc/apache2/httpd.conf '
                 'to this new location.\n')
+            upgrade_notes.append('Celery workers configuration has been updated. '
+                'Please update it by running:\n'
+                '  > sudo python manage.py setupceleryd\n')
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'
                 '    ===================\n'

@@ -273,7 +273,7 @@ CELERY_REDIRECT_STDOUTS_LEVEL = 'DEBUG'
 # gevent crashes after a broker timeout is reached, so better keep it disabled
 BROKER_CONNECTION_TIMEOUT = None
 # Send error alerts to admins
-CELERY_SEND_TASK_ERROR_EMAILS = True
+#CELERY_SEND_TASK_ERROR_EMAILS = True
 # Use controller logging system instead of celery
 #CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERY_SEND_TASK_ERROR_EMAILS = True

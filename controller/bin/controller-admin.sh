@@ -112,7 +112,7 @@ function install_requirements () {
     
     MINIMAL_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
                  django-singletons django-extensions django_transaction_signals django-celery \
-                 markdown django-filter django-admin-tools pygments requests \
+                 markdown django-filter django-admin-tools pygments requests==1.2.0 \
                  djangorestframework==2.2.6 \
                  https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz"
     EXTENDED_PIP="paramiko https://github.com/madisona/django-google-maps/archive/master.zip"
@@ -138,10 +138,9 @@ function install_requirements () {
     fi
     
     if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
-        # Install kombu version compatible with old amq protocol
+        # Debian squeeze compat: Install kombu version compatible with old amq protocol
         run pip install celery==3.0.10 django-celery==3.0.10 kombu==2.4.7
     fi
-#    run pip install -r http://redmine.confine-project.eu/projects/controller/repository/revisions/master/raw/requirements.txt
 }
 export -f install_requirements
 

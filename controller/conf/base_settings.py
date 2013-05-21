@@ -281,6 +281,7 @@ CELERY_SEND_TASK_ERROR_EMAILS = True
 CELERY_ROUTES = {
          'state.nodestate': {'queue': 'gevent'},
          'state.sliverstate': {'queue': 'gevent'},
+         'state.get_state': {'queue': 'gevent'},
 },
 ## end
 

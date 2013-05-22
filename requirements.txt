@@ -1,5 +1,7 @@
 django
 kombu==2.4.7
+celery==3.0.10
+django-celery==3.0.10
 django-celery-email
 django-fluent-dashboard
 south
@@ -9,7 +11,6 @@ IPy
 django-singletons
 django-extensions
 django_transaction_signals
-django-celery
 markdown
 django-filter
 django-admin-tools

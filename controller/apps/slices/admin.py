@@ -439,9 +439,6 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         Request.user as default node admin and Warn the user that the testbed is
         not ready for allocating shit
         """
-        if request.method == 'GET':
-            messages.warning(request, 'At this time the testbed is not ready for '
-                'allocating slices. But you are welcome to try this interface anyway.')
         form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset

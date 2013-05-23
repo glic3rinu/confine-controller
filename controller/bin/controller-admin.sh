@@ -140,7 +140,7 @@ function install_requirements () {
     
     if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
         # Debian squeeze compat: Install kombu version compatible with old amq protocol
-        run pip install celery==3.0.10 django-celery==3.0.10 kombu==2.4.7
+        run pip install celery==3.0.10 django-celery==3.0.10 kombu==2.4.7 --upgrade
     fi
 }
 export -f install_requirements

@@ -117,7 +117,7 @@ class Command(BaseCommand):
                 'Alternatively you can perform this operation with the following command\n'
                 '  > sudo python manage.py setupapache\n'
                 '  > /etc/init.d/apache2 reload\n')
-        if version < 839:
+        if version < 900:
             upgrade_notes.append('Apache configuration is now placed under '
                 '/etc/apache2/conf.d/<project_name>.conf. It is convenient for you '
                 'to migrate your current configuration located on /etc/apache2/httpd.conf '

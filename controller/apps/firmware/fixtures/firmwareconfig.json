@@ -272,7 +272,7 @@
     "pk": 1, 
     "model": "firmware.configfilehelptext", 
     "fields": {
-        "help_text": "This file is the private key for the management overlay. \r\nNotice that the node public key will be automatically updated and your node will lose connectivity to the management network until the new image is not installed.\r\n", 
+        "help_text": "This file is the private key for the management overlay. \r\nNotice that the node public key will be automatically updated and your node may lose connectivity to the management network until the new image is installed.\r\n", 
         "config": 1, 
         "file": 3
     }

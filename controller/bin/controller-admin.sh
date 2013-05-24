@@ -107,13 +107,13 @@ function install_requirements () {
     check_root
     CONTROLLER_PATH=$(get_controller_dir)
     
-    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-gevent python-dev gcc"
+    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-dev gcc libevent-dev"
     EXTENDED_APT="libapache2-mod-wsgi fuseext2 tinc file"
     
     MINIMAL_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
                  django-singletons django-extensions django_transaction_signals django-celery \
                  markdown django-filter django-admin-tools pygments requests==1.2.0 \
-                 djangorestframework==2.2.6 \
+                 djangorestframework==2.2.6 gevent \
                  https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \
                  https://github.com/madisona/django-google-maps/archive/master.zip"
     EXTENDED_PIP="paramiko"
@@ -140,7 +140,7 @@ function install_requirements () {
     
     if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
         # Debian squeeze compat: Install kombu version compatible with old amq protocol
-        run pip install celery==3.0.10 django-celery==3.0.10 kombu==2.4.7 --upgrade
+        run pip install celery==3.0.17 kombu==2.4.7 gevent --upgrade
     fi
 }
 export -f install_requirements

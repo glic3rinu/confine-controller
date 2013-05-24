@@ -106,3 +106,19 @@ fieldset.relative {
 .inline-group .tabular tr.has_original td {
     padding-top: 0.8em;
 }
+
+#messages-group { margin-bottom: 0; }
+#messages-2-group { margin-top: 0; }
+#messages-2-group h2,
+#messages-2-group thead {
+    display: none;
+}
+#id_messages-2-0-content {
+    width: 100%;
+}
+#content-preview {
+    border: 1px solid #ccc;
+    padding: 2px 5px;
+    /*width: 300px;
+    height: 80px;*/
+}

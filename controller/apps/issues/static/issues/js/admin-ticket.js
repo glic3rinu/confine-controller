@@ -12,5 +12,14 @@
         $('#subject-edit').click(function() { 
             $('.field-box.field-subject').show();
         });
+        
+        $('#load-preview').click(function() {
+            var data = { 
+                'data': $('#id_messages-2-0-content').val(),
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]', '#ticket_form').val(),
+            }
+            $('#content-preview').load("/admin/issues/ticket/preview/", data);
+            return false;
+        });
     });
 })(django.jQuery);

@@ -1,9 +1,12 @@
 from __future__ import absolute_import
 
+from django.conf.urls.defaults import patterns
 from django.contrib import admin
 from django.contrib.auth import get_user_model 
 from django.db import models
 from django.db.models import Q
+from django.http import HttpResponse
+from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
@@ -29,18 +32,51 @@ STATE_COLORS = {
     Ticket.REJECTED: 'firebrick'}
 
 
+class MessageReadOnlyInline(admin.TabularInline):
+    model = Message
+    extra = 0
+    can_delete = False
+    fields = ['content_html', 'author_link', 'created_on_html']
+    readonly_fields = ('content_html', 'author_link', 'created_on_html')
+
+    def author_link(self, obj):
+        return admin_link('author')(obj)
+    author_link.short_description = "Author"
+
+    def content_html(self, obj):
+        from markdown import markdown
+        return markdown(obj.content)
+    content_html.allow_tags = True
+    content_html.short_description = "Content"
+
+    def created_on_html(self, obj):
+        from issues.helpers import format_date
+        return format_date(obj.created_on)
+    created_on_html.allow_tags = True
+    created_on_html.short_description = "Created on"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 class MessageInline(PermissionTabularInline):
     model = Message
     extra = 1
     form = MessageInlineForm
     can_delete = False
-    fields = ['content', 'author_link', 'created_on']
+    fields = ['content',]
     
     def get_formset(self, request, obj=None, **kwargs):
         """ hook request.user on the inline form """
         self.form.user = request.user
         return super(MessageInline, self).get_formset(request, obj, **kwargs)
 
+    def queryset(self, request):
+        """ Don't show any message """
+        qs = super(MessageInline, self).queryset(request)
+        return qs.none()
 
 class TicketInline(PermissionTabularInline):
     model = Ticket
@@ -152,7 +188,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Filter change view actions based on ticket state """
         # only include messages inline for change view
-        self.inlines = [MessageInline]
+        self.inlines = [MessageReadOnlyInline, MessageInline]
         if hasattr(self, 'inline_instances'): #workaround for first init
             for inline_class in self.inlines:
                 inline_instance = inline_class(self.model, self.admin_site)
@@ -204,6 +240,22 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             obj.created_by = request.user
         super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
     
+    ## markdown preview staff ##
+    def get_urls(self):
+        """ add markdown preview url """
+        urls = super(TicketAdmin, self).get_urls()
+        my_urls = patterns('',
+            (r'^preview/$', self.preview)
+        )
+        return my_urls + urls
+
+    def preview(self, request):
+        """ markdown preview render via ajax """
+        from markdown import markdown
+        data = request.POST.get("data")
+        markdown = markdown(strip_tags(data))
+        return HttpResponse(markdown)
+
 
 class QueueAdmin(PermissionModelAdmin):
     class Media:

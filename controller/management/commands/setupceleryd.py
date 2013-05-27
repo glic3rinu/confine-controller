@@ -43,7 +43,7 @@ class Command(BaseCommand):
             '\n'
             '# Extra arguments to celeryd\n'
             'CELERYD_OPTS="-P:w1 processes -c:w1 5 -Q:w1 celery \\\n'
-            '              -P:w2 gevent -c:w2 1000 -Q:w2 gevent --time-limit=200"\n'
+            '              -P:w2 gevent -c:w2 1000 -Q:w2 gevent --time-limit=300"\n'
             '\n'
             '# Name of the celery config module.\n'
             'CELERY_CONFIG_MODULE="celeryconfig"\n'

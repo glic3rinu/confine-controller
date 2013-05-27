@@ -51,6 +51,7 @@ class Image(object):
             result = r("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
                        "sed -n %(part_nr)dp" % context)
             self._sector = int(result.stdout)
+            #TODO raise if sector != ^[0-9]+$
         return self._sector
     
     @property

@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from controller.utils import is_installed
 
 
-def _api_link(context):
+def api_link(context):
     """ Dynamically generates API related URL """
     if 'opts' in context:
         opts = context['opts']
@@ -140,7 +140,7 @@ class CustomMenu(Menu):
         self.children.append(admin_item)
         
         if is_installed('api'):
-            self.children.append(items.MenuItem('API', _api_link(context)))
+            self.children.append(items.MenuItem('API', api_link(context)))
         
         self.children.append(items.MenuItem('Documentation',
             'http://wiki.confine-project.eu/soft:server'))

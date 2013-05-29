@@ -5,7 +5,7 @@ from celery.task import task
 from controller.utils import LockFile
 from controller.utils.system import run, touch
 
-from .settings import TINC_NET_NAME, TINC_TINCD_ROOT
+from .settings import TINC_NET_NAME, TINC_TINCD_ROOT, TINC_TINCD_BIN
 
 
 @task(name="tinc.update_tincd")
@@ -48,3 +48,9 @@ def update_tincd():
     # retry if there is any pending modification
     if os.path.getmtime(dirtyfile) > now:
         raise update_tincd.retry(countdown=1)
+    
+    # In some systems it is mandatory to send a HUP signal in order to reload new subnets
+    # We fail silently because we don't want to bother most users
+    context = { 'tincd_bin': TINC_TINCD_BIN, 'net_name': TINC_NET_NAME }
+    return run("sudo %(tincd_bin)s -kHUP -n %(net_name)s" % context, err_codes=[0,1]).stderr
+

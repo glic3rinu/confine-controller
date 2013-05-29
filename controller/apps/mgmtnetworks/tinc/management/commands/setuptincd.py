@@ -12,7 +12,8 @@ from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
-from mgmtnetworks.tinc.settings import TINC_NET_NAME, TINC_PORT_DFLT, TINC_TINCD_ROOT
+from mgmtnetworks.tinc.settings import (TINC_NET_NAME, TINC_PORT_DFLT,
+    TINC_TINCD_ROOT, TINC_TINCD_BIN)
 
 
 class Command(BaseCommand):
@@ -104,6 +105,7 @@ class Command(BaseCommand):
         
         context = {
             'tincd_root': TINC_TINCD_ROOT,
+            'tincd_bin': TINC_TINCD_BIN,
             'net_name': TINC_NET_NAME,
             'net_root': os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME),
             'tinc_conf': ( "BindToAddress = %s\n"
@@ -146,5 +148,12 @@ class Command(BaseCommand):
         
         tinc_server.pubkey = pub_key
         tinc_server.save()
+        
+        sudoers_hup = ("%(user)s\s\s*ALL=NOPASSWD:\s\s*%(tincd_bin)s\s\s*"
+                       "-kHUP\s\s*-n %(net_name)s") % context
+        sudoers_exists = run('grep "%s" /etc/sudoers' % sudoers_hup, err_codes=[0,1,2])
+        if sudoers_exists.return_code == 1:
+            cmd = "%(user)s ALL=NOPASSWD: %(tincd_bin)s -kHUP -n %(net_name)s" % context
+            r("echo '%s' >> /etc/sudoers" % cmd)
         
         self.stdout.write('Tincd server successfully created and configured.')

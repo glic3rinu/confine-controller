@@ -74,14 +74,14 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     fieldsets = (
         (None, {
             'fields': ('description', 'slice_link', 'node_link', ('template',
-                       template_link), 'exp_data', 'exp_data_uri', 'exp_data_sha256',
-                       'set_state')
+                       template_link), 'exp_data', 'exp_data_sha256', 'set_state')
         }),
         ('Advanced', {
             'classes': ('collapse',),
             'fields': ('new_instance_sn',)
         }),)
-    readonly_fields = ['new_instance_sn', 'slice_link', 'node_link', template_link]
+    readonly_fields = ['new_instance_sn', 'slice_link', 'node_link', template_link,
+                       'exp_data_sha256']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverIfaceInline]
     actions = [update_selected]
@@ -379,7 +379,8 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
                     num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
-    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on', template_link]
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on',
+                       'exp_data_sha256', template_link]
     date_hierarchy = 'expires_on'
     search_fields = ['name']
     inlines = [SliverInline]
@@ -388,7 +389,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     fieldsets = (
         (None, {
             'fields': ('name', 'description', ('template', template_link),
-                       ('exp_data', 'exp_data_uri'), 'exp_data_sha256', 'set_state',
+                       ('exp_data',), 'exp_data_sha256', 'set_state',
                         'vlan_nr', 'expires_on', 'group'),
         }),
         ('Advanced', {

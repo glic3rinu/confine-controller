@@ -18,7 +18,7 @@ class GisInline(admin.TabularInline):
     max_num = 1
     fields = ['address', 'geolocation']
     formfield_overrides = {
-        map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget(attrs={'id': 'id_address', 'size':'80'})},
+        map_fields.AddressField: {'widget': map_widgets.OSMAddressWidget(attrs={'id': 'id_address', 'size':'80'})},
         map_fields.GeoLocationField: {'widget': TextInput(attrs={'id': 'id_geolocation'})},
     }
     verbose_name_plural = 'Geolocation'
@@ -29,5 +29,4 @@ class NodeGisInline(GisInline):
     model = NodeGeolocation
 
 # Monkey-Patching Section
-
 insert_inline(Node, NodeGisInline)

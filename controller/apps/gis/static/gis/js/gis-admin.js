@@ -1,6 +1,6 @@
 
 /*
-Integration for Google Maps in the django admin.
+Integration for Open Street Maps in the django admin.
 
 How it works:
 
@@ -17,7 +17,7 @@ This script expects:
 <input type="text" name="address" id="id_address" />
 <input type="text" name="geolocation" id="id_geolocation" />
 
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="OpenLayers.js"></script>
 
 */
 

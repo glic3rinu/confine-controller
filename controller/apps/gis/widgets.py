@@ -5,14 +5,15 @@ from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 
-class GoogleMapsAddressWidget(widgets.TextInput):#TODO rename OSMAddressWidget
+class OSMAddressWidget(widgets.TextInput):
     "a widget that will place a google map right after the #id_address field"
     
     class Media:
         css = {'all': (settings.STATIC_URL + 'gis/css/gis-admin.css',),}
         js = (
-            'https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js',
-            'http://openlayers.org/api/OpenLayers.js',
+            # OpenLayers requires jQuery1.4.4+ and django-admin.jquery is 1.4.2
+            'https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js', 
+            settings.STATIC_URL + 'gis/openlayers/OpenLayers.js',
             settings.STATIC_URL + 'gis/js/gis-admin.js',
         )
 

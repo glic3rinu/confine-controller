@@ -2,6 +2,7 @@ import requests
 
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.timezone import now
 
@@ -50,6 +51,27 @@ class CnHost(models.Model):
                 self.cndb_cached_on = None
         super(CnHost, self).save(*args, **kwargs)
     
+    def auth_cndb(self):
+        """ Get auth cookie for the nodeDB API """
+        ca_bundle = settings.COMMUNITYNETWORKS_CNDB_CA_BUNDLE
+        url_auth = settings.COMMUNITYNETWORKS_CNDB_URL_AUTH
+        username = settings.COMMUNITYNETWORKS_CNDB_USER
+        password = settings.COMMUNITYNETWORKS_CNDB_PASS
+        if not username or not password:
+            from django.core.exceptions import ImproperlyConfigured
+            raise ImproperlyConfigured(
+                    "No CNDB credentials defined, are COMMUNITYNETWORKS_CNDB_USER"
+                    " and COMMUNITYNETWORKS_CNDB_PASS at settings?"
+            )
+
+        data = {'username': username, 'password': password }
+        try:
+            auth = requests.post(url_auth, data, verify=ca_bundle)
+        except Exception as e:
+            raise CnHost.CNDBFetchError(str(e))
+        print auth.json()
+        return auth
+
     def fetch_cndb(self):
         """
         Queries the nodeDB using cndb_uri.
@@ -62,10 +84,18 @@ class CnHost(models.Model):
             # with the app source 
             # http://hearsum.ca/blog/python-and-ssl-certificate-verification/#comment-443
             ca_bundle = settings.COMMUNITYNETWORKS_CNDB_CA_BUNDLE
-            cndb_data = requests.get(self.cndb_uri, verify=ca_bundle).json()
+            cookies = self.auth_cndb().json()
+            resp = requests.get(self.cndb_uri, cookies=cookies, verify=ca_bundle)
+        except ImproperlyConfigured as e:
+            raise ImproperlyConfigured(str(e))
         except Exception as e:
             raise CnHost.CNDBFetchError(str(e))
-        return cndb_data
+
+        if resp.status_code != requests.codes.ok:
+            raise CnHost.CNDBFetchError("%i - %s" % (resp.status_code, resp.json().get('description')))
+
+        print resp.json()
+        return resp.json()
 
     def cache_cndb(self, *fields):
         """ fetches fields from cndb and stores it into the database """
@@ -73,7 +103,9 @@ class CnHost(models.Model):
 
         for field in fields:
             node = self.content_object
-            if field == 'gis' and is_installed('gis'):
+            if field == 'gis':
+                if not is_installed('gis'):
+                    raise ImproperlyConfigured("'%s' field cannot be cached from CNDB (gis app is not installed)." % field)
                 from gis.models import NodeGeolocation
                 position = cndb.get('attributes').get('position')
                 lat, lon = position.get('lat'), position.get('lon')

@@ -80,7 +80,8 @@ def make_upload_exp_data(model):
             if request.FILES and 'exp_data' in request.FILES:
                 obj = get_object_or_404(model, pk=kwargs.get('pk'))
                 self.check_object_permissions(self.request, obj)
-                obj.exp_data.save('exp_data', request.FILES.get('exp_data'))
+                uploaded_file = request.FILES.get('exp_data')
+                obj.exp_data.save(uploaded_file.name, uploaded_file)
                 obj.clean()
                 obj.save()
                 response_data = {'detail': 'File uploaded correctly'}

@@ -49,26 +49,30 @@ class IfaceField(serializers.WritableField):
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     interfaces = IfaceField()
     properties = serializers.PropertyField(required=False)
-    exp_data = serializers.HyperlinkedFileField(source='exp_data', required=False)
+    exp_data_uri = serializers.HyperlinkedFileField(source='exp_data', required=False,
+        read_only=True)
+    exp_data_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Sliver
-
+        exclude = ('exp_data',)
 
 class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     properties = serializers.PropertyField(required=False)
-    exp_data = serializers.HyperlinkedFileField(source='exp_data', required=False)
+    exp_data_uri = serializers.HyperlinkedFileField(source='exp_data', required=False,
+        read_only=True)
+    exp_data_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     expires_on = serializers.DateTimeField(read_only=True)
     
     class Meta:
         model = Slice
-
+        exclude = ('exp_data',)
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()

@@ -38,12 +38,10 @@ def make_upload_to(field_name, base_path, file_name):
         storage_location = field.storage.base_location
         abs_path = os.path.join(storage_location, base_path)
         splited = filename.split('.')
-        print splited
         context = {'pk': instance.pk,
                    'original': filename,
                    'prefix': splited[0],
                    'suffix': splited[1] if len(splited) > 1 else ''}
-        print context
         if '%(rand)s' in file_name:
             prefix, suffix = file_name.split('%(rand)s')
             prefix = prefix % context

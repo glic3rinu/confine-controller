@@ -12,9 +12,9 @@ class OSMAddressWidget(widgets.TextInput):
         css = {'all': (settings.STATIC_URL + 'gis/css/gis-admin.css',),}
         js = (
             # OpenLayers requires jQuery1.4.4+ and django-admin.jquery is 1.4.2
-            'https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js', 
-            settings.STATIC_URL + 'gis/openlayers/OpenLayers.js',
-            settings.STATIC_URL + 'gis/js/gis-admin.js',
+            'admin/js/jquery.min.js',
+            'gis/openlayers/OpenLayers.js',
+            'gis/js/gis-admin.js',
         )
 
     def render(self, name, value, attrs=None):

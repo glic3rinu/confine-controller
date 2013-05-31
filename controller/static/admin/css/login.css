@@ -8,15 +8,16 @@ body.login {
     background: white;
     border: 1px solid #ccc;
     width: 28em;
-    min-width: 445px;
+    min-width: 460px;
     margin-left: auto;
     margin-right: auto;
     margin-top: 100px;
 }
 
 .login #content-main {
-    width: 80%;
-    padding-left: 45px;
+    padding: 0 40px;
+    /*width: 80%;
+    padding-left: 45px; */
 }
 
 .login form {
@@ -29,9 +30,10 @@ body.login {
     width: 100%;
 }
 
-.login .form-row label {
+.login .form-row label,
+.login .submit-row label {
     float: left;
-    width: 9em;
+    width: 10em;
     padding-right: 0.5em;
     line-height: 2em;
     text-align: right;
@@ -39,7 +41,11 @@ body.login {
     color: #333;
 }
 
-.login .form-row #id_username, .login .form-row #id_password {
+.login .form-row #id_username, 
+.login .form-row #id_password,
+.login .form-row #id_email,
+.login .form-row #id_password,
+.login .form-row #id_password2, {
     width: 14em;
 }
 
@@ -50,10 +56,21 @@ body.login {
 
 .login .submit-row {
     clear: both;
-    padding: 1em 0 0 9.4em;
 }
 
 .login .password-reset-link {
     text-align: center;
 }
 
+.login input[type=submit] {
+    font-size: 1.2em;
+    padding: 10px 20px;
+}
+
+img.captcha {
+    vertical-align: middle;
+}
+input#id_captcha_1 {
+    height: 22px;
+    text-transform: uppercase;
+}

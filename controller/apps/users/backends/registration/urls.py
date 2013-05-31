@@ -26,6 +26,7 @@ from registration.views import activate
 from registration.views import register
 
 from users.backends.registration import BackendFactory
+from users.backends.registration.forms import RegistrationCaptchaForm
 
 backend = BackendFactory.create()
 urlpatterns = patterns('',
@@ -42,7 +43,7 @@ urlpatterns = patterns('',
                            name='registration_activate'),
                        url(r'^register/$',
                            register,
-                           {'form_class': RegistrationFormUniqueEmail,
+                           {'form_class': RegistrationCaptchaForm,
                             'backend': backend},
                            name='registration_register'),
                        url(r'^register/complete/$',

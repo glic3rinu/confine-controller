@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'djcelery_email',
     'private_files',
     'registration',
+    'captcha', 
     'django_google_maps',
     'rest_framework',
     'rest_framework.authtoken',

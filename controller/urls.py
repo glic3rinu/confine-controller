@@ -26,6 +26,10 @@ if is_installed('registration'):
     urlpatterns += patterns('',
         url(r'^accounts/', include('users.backends.registration.urls')),)
         
+if is_installed('captcha'):
+    urlpatterns += patterns('',
+        url(r'^captcha/', include('captcha.urls')),
+    )
 
 if is_installed('api'):
     from api import api

@@ -2,6 +2,8 @@ from django.utils.encoding import force_unicode
 from rest_framework import generics
 from rest_framework.generics import *
 
+from controller.models.utils import is_singleton
+
 from . import serializers
 from .utils import link_header
 
@@ -30,8 +32,7 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         """ Add link header """
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
         name = force_unicode(self.model._meta.verbose_name)
-        # TODO singleton objects do not have relation %s-list (ie. server)
-        links = ['base', '%s-list' % name]
+        links = ['base', name if is_singleton(self.model) else '%s-list' % name]
         object_id = kwargs.get('pk')
         for endpoint in getattr(self, 'ctl', []):
             links.append(('%s-ctl-%s' % (name, endpoint.url_name), object_id))

@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from controller.models.utils import is_singleton
 from controller.utils import autodiscover
 
 from .utils import link_header
@@ -27,7 +28,10 @@ class ApiRoot(APIView):
     -H "Accept: application/json; indent=4"`
     """
     def get(base_view, request, format=None):
-        relations = [ '%s-list' % force_unicode(model._meta.verbose_name) for model in api._registry ]
+        relations = []
+        for model in api._registry:
+            name = force_unicode(model._meta.verbose_name)
+            relations.append(name if is_singleton(model) else '%s-list' % name)
         headers = {'Link': link_header(relations, request)}
         return Response({}, headers=headers)
 
@@ -68,7 +72,7 @@ class RestApi(object):
             urlpatterns += patterns('',
                 url(r'^%s/$' % name_plural,
                     list_view.as_view(),
-                    name='%s-list' % name),
+                    name=name if is_singleton(model) else '%s-list' % name),
                 url(r'^%s/(?P<pk>[0-9]+)$' % name_plural,
                     detail_view.as_view(),
                     name="%s-detail" % name),

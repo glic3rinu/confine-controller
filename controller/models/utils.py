@@ -1,6 +1,7 @@
 import os
 
 from django.db import models
+from singleton_models.models import SingletonModel
 
 
 def generate_chainer_manager(qs_class):
@@ -43,3 +44,7 @@ def get_file_field_base_path(model, field_name):
         upload_to = upload_to(None, '')
     storage_location = field.storage.base_location
     return os.path.join(storage_location, upload_to)
+
+
+def is_singleton(model):
+    return SingletonModel in model.__mro__

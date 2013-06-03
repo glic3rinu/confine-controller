@@ -113,7 +113,7 @@ function install_requirements () {
     MINIMAL_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
                  django-singletons django-extensions django_transaction_signals django-celery \
                  markdown django-filter django-admin-tools pygments requests==1.2.0 \
-                 djangorestframework==2.2.6 gevent \
+                 djangorestframework==2.2.6 gevent django-simple-captcha \
                  https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \
                  https://github.com/madisona/django-google-maps/archive/master.zip"
     EXTENDED_PIP="paramiko"

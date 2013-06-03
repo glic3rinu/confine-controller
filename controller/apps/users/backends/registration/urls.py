@@ -21,12 +21,15 @@ up your own URL patterns for these views instead.
 from django.conf.urls.defaults import *
 from django.views.generic import TemplateView
 
-from registration.forms import RegistrationFormUniqueEmail
 from registration.views import activate
 from registration.views import register
 
+from controller.utils import is_installed
 from users.backends.registration import BackendFactory
-from users.backends.registration.forms import RegistrationCaptchaForm
+if is_installed('captcha'):
+    from users.backends.registration.forms import RegistrationCaptchaForm as RegistrationForm
+else:
+    from registration.forms import RegistrationFormUniqueEmail as RegistrationForm
 
 backend = BackendFactory.create()
 urlpatterns = patterns('',
@@ -43,7 +46,7 @@ urlpatterns = patterns('',
                            name='registration_activate'),
                        url(r'^register/$',
                            register,
-                           {'form_class': RegistrationCaptchaForm,
+                           {'form_class': RegistrationForm,
                             'backend': backend},
                            name='registration_register'),
                        url(r'^register/complete/$',

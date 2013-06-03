@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.utils import reverse_rel
 from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
@@ -85,6 +86,15 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Node
     serializer_class = NodeSerializer
     ctl = [Reboot, RequestCert]
+    
+    def get(self, request, *args, **kwargs):
+        """ Add link header """
+        response = super(NodeDetail, self).get(request, *args, **kwargs)
+        # Dirty hack to enable node-base link
+        node = self.get_object()
+        url = 'http://[%s]/confine/api' % node.mgmt_net.addr
+        response['Link'] += ', <%s>; rel="%s"' % (url, reverse_rel('node-base'))
+        return response
 
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):

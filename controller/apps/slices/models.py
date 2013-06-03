@@ -179,11 +179,12 @@ class Slice(models.Model):
         self.update_set_state(commit=False)
         if not self.pk:
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
-            # Dirty hack in order to allow pk values on exp_data filename
-            exp_data = self.exp_data
-            self.exp_data = None
-            super(Slice, self).save(*args, **kwargs)
-            self.exp_data = exp_data
+            if self.exp_data:
+                # Dirty hack in order to allow pk values on exp_data filename
+                exp_data = self.exp_data
+                self.exp_data = None
+                super(Slice, self).save(*args, **kwargs)
+                self.exp_data = exp_data
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):

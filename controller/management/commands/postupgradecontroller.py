@@ -10,8 +10,10 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--minimal', action='store_true', dest='minimal', default=False,
-                help='Only install minimal requirements'),
+            make_option('--development', action='store_true', dest='development', default=False,
+                help='Only install development requirements'),
+            make_option('--local', action='store_true', dest='local', default=False,
+                help='Only install local requirements'),
             make_option('--specifics', action='store_true', dest='specifics_only',
                 default=False, help='Only run version specific operations'),
             make_option('--no-upgrade-notes', action='store_false', default=True,
@@ -52,12 +54,15 @@ class Command(BaseCommand):
         
         if not options.get('specifics_only'):
             # Common stuff
-            minimal = options.get('minimal')
+            development = options.get('development')
+            local = options.get('local')
             
-            if minimal:
-                run("controller-admin.sh install_requirements --minimal")
+            
+            if local:
+                run("controller-admin.sh install_requirements --local")
             else:
-                run("controller-admin.sh install_requirements")
+                extra = '--development' if development else ''
+                run("controller-admin.sh install_requirements " + extra)
                 run("python manage.py collectstatic --noinput")
             
             run("python manage.py syncdb")

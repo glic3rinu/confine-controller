@@ -58,6 +58,7 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         model = Sliver
         exclude = ('exp_data',)
 
+
 class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
@@ -73,6 +74,7 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Slice
         exclude = ('exp_data',)
+
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()

@@ -76,8 +76,14 @@ function print_install_requirements_help () {
 		    ${bold}controller-admin.sh install_requirements${normal} - Installs all the controller requirements using apt-get and pip
 		
 		${bold}OPTIONS${normal}
-		    ${bold}-m, --minimal${normal}
-		        Installs all the controller requirements using apt-get and pip
+		    ${bold}-d, --development${normal}
+		        Installs minimal controller requirements using apt-get and pip
+		    
+		    ${bold}-l, --local${normal}
+		        Installs controller requirements for local deployments, i.e. VCT
+		    
+		    ${bold}-p, --production${normal}
+		        Installs all controller requirements using apt-get and pip (default)
 		    
 		    ${bold}-h, --help${normal}
 		        Displays this help text
@@ -87,13 +93,17 @@ function print_install_requirements_help () {
 
 
 function install_requirements () {
-    opts=$(getopt -o mh -l minimal,help -- "$@") || exit 1
+    opts=$(getopt -o dlph -l development,local,production,help -- "$@") || exit 1
     set -- $opts
-    minimal=false
+    development=false
+    local=false
+    production=true
     
     while [ $# -gt 0 ]; do
         case $1 in
-            -m|--minimal) minimal=true; shift ;;
+            -d|--development) development=true; production=false; shift ;;
+            -l|--local) local=true; production=false; shift ;;
+            -p|--production) production=true; shift ;;
             -h|--help) print_deploy_help; exit 0 ;;
             (--) shift; break;;
             (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
@@ -107,16 +117,18 @@ function install_requirements () {
     check_root
     CONTROLLER_PATH=$(get_controller_dir)
     
-    MINIMAL_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server python-dev gcc libevent-dev"
-    EXTENDED_APT="libapache2-mod-wsgi fuseext2 tinc file"
+    DEVELOPMENT_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server \
+                     python-dev gcc"
+    LOCAL_APT="libapache2-mod-wsgi fuseext2 tinc file libevent-dev"
+    PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev"
     
-    MINIMAL_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
-                 django-singletons django-extensions django_transaction_signals django-celery \
-                 markdown django-filter django-admin-tools pygments requests==1.2.0 \
-                 djangorestframework==2.2.6 gevent django-simple-captcha \
-                 https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \
-                 https://github.com/madisona/django-google-maps/archive/master.zip"
-    EXTENDED_PIP="paramiko"
+    DEVELOPMENT_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
+                     django-singletons django-extensions django_transaction_signals django-celery \
+                     markdown django-filter django-admin-tools djangorestframework==2.2.6 "
+    LOCAL_PIP="paramiko pygments requests==1.2.0 gevent"
+    PRODUCTION_PIP="django-simple-captcha \
+                    https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \
+                    https://github.com/madisona/django-google-maps/archive/master.zip"
     
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then
@@ -126,21 +138,35 @@ function install_requirements () {
     fi
     
     run apt-get update
-    run apt-get install -y $MINIMAL_APT
-    run pip install $MINIMAL_PIP
+    run apt-get install -y $DEVELOPMENT_APT
+    run pip install $DEVELOPMENT_PIP
     
-    if ! $minimal; then
-        run apt-get install -y $EXTENDED_APT
-        # Some versions of rabbitmq-server will not start automatically by default unless ...
-        sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
-        sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
-        run update-rc.d rabbitmq-server defaults
-        run pip install $EXTENDED_PIP
+    # Some versions of rabbitmq-server will not start automatically by default unless ...
+    sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
+    sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
+    run update-rc.d rabbitmq-server defaults
+    
+    if ! $development; then
+        run apt-get install -y $LOCAL_APT
+        run pip install $LOCAL_PIP
+    fi
+    if $production; then
+        run apt-get install -y $PRODUCTION_APT
+        # PIL has some mental problems with library paths
+        [ ! -e /usr/lib/libjpeg.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libjpeg.so /usr/lib
+        [ ! -e /usr/lib/libfreetype.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libfreetype.so /usr/lib
+        [ ! -e /usr/lib/libz.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libz.so /usr/lib
+        run pip install $PRODUCTION_PIP
     fi
     
     if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
         # Debian squeeze compat: Install kombu version compatible with old amq protocol
-        run pip install celery==3.0.17 kombu==2.4.7 gevent --upgrade
+        run pip install celery==3.0.17 kombu==2.4.7 --upgrade
+        if ! $development; then
+            # Make sure gevent is a recent version 
+            # TODO: remove when all deployments have been upgraded
+            run pip install gevent --upgrade
+        fi
     fi
 }
 export -f install_requirements
@@ -177,7 +203,6 @@ function clone () {
     
     opts=$(getopt -o s:h -l skeletone:,help -- "$@") || exit 1
     set -- $opts
-    minimal=false
     
     set -- $opts
     while [ $# -gt 0 ]; do

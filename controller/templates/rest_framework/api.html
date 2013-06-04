@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block title %}{{ SITE_NAME|capfirst }} Controller REST API{% endblock %}
-{% block branding %}<a href="{% url 'base' %}">{{ SITE_NAME|capfirst }} controller REST API <span class="version">{% version %}</span></a>{% endblock %}
+{% block branding %}<a class='brand' href="{% url 'base' %}">{{ SITE_NAME|capfirst }} controller REST API <span class="version">{% version %}</span></a>{% endblock %}
 {% block userlinks %}
     <li><a href="http://wiki.confine-project.eu/arch:rest-api"><b>API Description</b></a></li>
     <li><a href="{% admin_url %}">Admin</a></li>

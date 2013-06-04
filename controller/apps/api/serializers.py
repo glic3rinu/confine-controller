@@ -25,24 +25,14 @@ class UriHyperlinkedModelSerializer(HyperlinkedModelSerializer):
     """ 
     Like HyperlinkedModelSerializer but renaming url field to uri 
     """
-    uri = HyperlinkedIdentityField()
+    uri = Field()
+    _hyperlink_field_class = RelHyperlinkedRelatedField
     
+
     def __init__(self, *args, **kwargs):
         super(UriHyperlinkedModelSerializer, self).__init__(*args, **kwargs)
-        self.fields.pop('url', None)
-    
-    def get_related_field(self, model_field, to_many):
-        """
-        Same as DRF2 but returning RelXxxxXxxx
-        """
-        rel = model_field.rel.to
-        kwargs = {
-            'null': model_field.null,
-            'queryset': rel._default_manager,
-            'view_name': self._get_default_view_name(rel)
-        }
-        return RelHyperlinkedRelatedField(**kwargs)
-
+        self.fields['uri'] = self.fields.pop('url', None)
+   
 
 class HyperlinkedFileField(FileField):
     def to_native(self, value):

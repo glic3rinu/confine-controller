@@ -124,7 +124,7 @@ function install_requirements () {
     
     DEVELOPMENT_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
                      django-singletons django-extensions django_transaction_signals django-celery \
-                     markdown django-filter django-admin-tools djangorestframework==2.2.6 "
+                     markdown django-filter django-admin-tools djangorestframework==2.3.5 "
     LOCAL_PIP="paramiko pygments requests==1.2.0 gevent"
     PRODUCTION_PIP="django-simple-captcha \
                     https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \

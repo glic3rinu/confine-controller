@@ -11,6 +11,7 @@ from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
 from .serializers import ServerSerializer, NodeSerializer
+from .settings import NODES_NODE_API_NODE_BASE_URL
 from .validators import validate_csr
 
 
@@ -88,11 +89,10 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     ctl = [Reboot, RequestCert]
     
     def get(self, request, *args, **kwargs):
-        """ Add link header """
+        """ Add node-base relation to link header """
         response = super(NodeDetail, self).get(request, *args, **kwargs)
-        # Dirty hack to enable node-base link
         node = self.get_object()
-        url = 'http://[%s]/confine/api' % node.mgmt_net.addr
+        url = NODES_NODE_API_NODE_BASE_URL % {'mgmt_addr': node.mgmt_net.addr}
         response['Link'] += ', <%s>; rel="%s"' % (url, reverse_rel('node-base'))
         return response
 

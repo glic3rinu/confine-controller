@@ -1,7 +1,10 @@
 import os, sys
+
+
 CONTROLLER_ROOT = os.path.dirname(os.path.realpath(__file__))
 CONTROLLER_ROOT = os.path.abspath(os.path.join(CONTROLLER_ROOT, '..'))
 sys.path.insert(0, os.path.join(CONTROLLER_ROOT, 'apps'))
+
 
 # Django settings for controller project.
 
@@ -83,6 +86,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

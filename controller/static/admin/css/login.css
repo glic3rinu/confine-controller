@@ -14,10 +14,15 @@ body.login {
     margin-top: 100px;
 }
 
+.login #container #content p.help {
+    padding: 0 50px;
+    width: 100%
+}
+
 .login #content-main {
-    padding: 0 40px;
-    /*width: 80%;
-    padding-left: 45px; */
+    width: 80%;
+    padding-left: 45px;
+    padding-left: 45px;
 }
 
 .login form {

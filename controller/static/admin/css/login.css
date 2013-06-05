@@ -68,8 +68,8 @@ body.login {
 }
 
 .login input[type=submit] {
-    font-size: 1.2em;
-    padding: 10px 20px;
+    font-size: 1em;
+    padding: 5px 12px;
 }
 
 img.captcha {

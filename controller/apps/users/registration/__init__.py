@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.contrib.sites.models import RequestSite
 from django.core.exceptions import ImproperlyConfigured
+from registration.backends.default import DefaultBackend
 
 from controller.utils import send_email_template
 
-from registration.backends.default import DefaultBackend
 
 class BackendFactory(object):
     """
@@ -12,16 +12,15 @@ class BackendFactory(object):
     """
     @classmethod
     def create(cls):
-        mode = settings.USERS_REGISTRATION_MODE
-        if mode == 'OPEN':
-            return 'users.backends.registration.OpenBackend' #OpenBackend()
-        elif mode == 'RESTRICTED':
-            return 'users.backends.registration.RestrictedBackend' #RestrictedBackend()
-        elif mode == 'CLOSED':
-            return 'users.backends.registration.ClosedBackend' #ClosedBackend()
-        else:
-            raise ImproperlyConfigured('USERS_REGISTRATION_MODE value is "%s" '
-                'but valid options are "OPEN", "RESTRICTED" or "CLOSED".' % mode)
+        modes = {
+            'OPEN': 'users.registration.OpenBackend',
+            'RESTRICTED': 'users.registration.RestrictedBackend',
+            'CLOSED': 'users.registration.ClosedBackend' }
+        try:
+            return modes.get(settings.USERS_REGISTRATION_MODE)
+        except KeyError:
+            raise ImproperlyConfigured('"%s" is not a valid mode for USERS_REGISTRATION_MODE'
+                ' Available modes are %s' % (mode, ','.join(modes.keys())))
 
     
 class OpenBackend(DefaultBackend):
@@ -32,6 +31,7 @@ class OpenBackend(DefaultBackend):
     3. Once the user has visited the link its account is enabled
     """
     pass
+
 
 class RestrictedBackend(DefaultBackend):
     """
@@ -57,6 +57,7 @@ class RestrictedBackend(DefaultBackend):
             send_email_template(template=template, context=context, to=to)
 
         return activated
+
 
 class ClosedBackend(DefaultBackend):
     """

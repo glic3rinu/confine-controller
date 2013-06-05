@@ -24,7 +24,7 @@ urlpatterns = patterns('',
 
 if is_installed('registration'):
     urlpatterns += patterns('',
-        url(r'^accounts/', include('users.backends.registration.urls')),)
+        url(r'^accounts/', include('users.registration.urls')),)
         
 if is_installed('captcha'):
     urlpatterns += patterns('',

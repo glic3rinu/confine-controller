@@ -162,6 +162,16 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
         form.__request__ = request
         return form
     
+    def get_inline_instances(self, request, obj=None):
+        """ show/hide inlines depending on user permissions and is a new obj """
+        inlines = super(GroupAdmin, self).get_inline_instances(request, obj=obj)
+        if obj is None:
+            return [] 
+        elif self.has_change_permission(request, obj, view=False):
+            return inlines
+        else:
+            return inlines[:1] #remove(JoinRequestInline)
+
     def get_readonly_fields(self, request, obj=None):
         """ Make allow_resource readonly accordingly """
         fields = super(GroupAdmin, self).get_readonly_fields(request, obj=obj)

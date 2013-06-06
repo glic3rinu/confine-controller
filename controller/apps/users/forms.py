@@ -141,17 +141,11 @@ class JoinRequestForm(forms.ModelForm):
         ('technician', 'Technician'),
         ('researcher', 'Researcher'))
     
-    action = MultiSelectFormField(label='Action', choices=ACTIONS, required=False)
+    action = forms.ChoiceField(label='Action', choices=ACTIONS, required=False, widget=forms.RadioSelect)
     roles = MultiSelectFormField(label='Roles', choices=ROLES, required=False)
     
     class Meta:
         model = JoinRequest
-    
-    def clean_action(self):
-        actions = self.cleaned_data.get('action')
-        if len(actions) > 1:
-            raise ValidationError('Select only one action')
-        return actions[0] if len(actions) == 1 else ''
     
     def clean(self):
         action = self.cleaned_data.get('action')

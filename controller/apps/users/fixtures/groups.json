@@ -1,0 +1,22 @@
+[
+{
+    "pk": 1, 
+    "model": "users.group", 
+    "fields": {
+        "name": "group", 
+        "allow_nodes": false, 
+        "allow_slices": false, 
+        "description": "Bar research group"
+    }
+},
+{
+    "pk": 2, 
+    "model": "users.group", 
+    "fields": {
+        "name": "FooGroup", 
+        "allow_nodes": false, 
+        "allow_slices": false, 
+        "description": "Foo research group"
+    }
+}
+]

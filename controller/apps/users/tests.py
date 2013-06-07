@@ -1,7 +1,9 @@
+from sys import stderr
+
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from users.models import Group, Roles, User, ResourceRequest
+from users.models import Group, Roles, User, ResourceRequest, JoinRequest
 
 
 SERVER_URL = 'http://testserver'
@@ -18,29 +20,55 @@ Tests:
     3. accept request
 """
 
-class FormTestCase(TestCase):
+class BaseTestCase(TestCase):
+    fixtures = ['groups.json', 'users.json', 'roles.json']
+
+    class Meta:
+        abstract = True
+
+    def setUp(self):
+        """
+        By default the tests are executed as unprivileged user
+        """
+        # Update the passwords to be usable during testing 
+        # because fixture and test can have different PASSWORD_HASHERS
+        for user in User.objects.all():
+            user.set_password("%spass" % user.username)
+            user.save()
+
+        self._login()
+
+    def _login(self, superuser=False, admin=False, tech=False):
+        """ Login a user to the system """
+        self.client.logout()
+        if superuser:
+            user='super'
+        elif admin:
+            user='admin'
+        elif tech:
+            user='tech'
+        else:
+            user='user'
+        pwd = "%spass" % user
+        res = self.client.login(username=user, password=pwd)
+        self.assertTrue(res, "Logging in user %s, pwd %s failed." % (user, pwd))
+
+
+class GroupFormTestCase(BaseTestCase):
     """
     Test the interaction with the group registration form
     used for requesting the registration of a new group in
     the testbed.
 
     """
-    def setUp(self):
-        """
-        By default the tests are executed as normal user
-        """
-        User.objects.create_superuser('admin', 'admin@test.com', 'adminpassword')
-        u = User.objects.create_user('user', 'user@test.com', 'userpassword')
-        g = Group(name='group', description='foo')
-        g.save()
-
-        self._login()
-
     def test_add_form(self):
         """
         Test if the new group form is generated successfully
 
         """
+        
+        #print >> stderr, self.client.login(username='super', password='superpass')
+        
         url = reverse('admin:users_group_add')
         resp = self.client.get(url)
 
@@ -57,6 +85,12 @@ class FormTestCase(TestCase):
         post = {
             'name': 'somegroup',
             'description': 'somedescription',
+            'roles-TOTAL_FORMS': 0,
+            'roles-INITIAL_FORMS': 0,
+            'roles-MAX_NUM_FORMS': 0,
+            'join_requests-TOTAL_FORMS': 0,
+            'join_requests-INITIAL_FORMS': 0,
+            'join_requests-MAX_NUM_FORMS': 0,
         }
         resp = self.client.post(url, post)
         url_complete = test_reverse('admin:users_group_changelist')
@@ -90,7 +124,13 @@ class FormTestCase(TestCase):
         post = {
             'name': 'somegroup',
             'description': 'somedescription',
-            'request_nodes': True
+            'request_nodes': True,
+            'roles-TOTAL_FORMS': 0,
+            'roles-INITIAL_FORMS': 0,
+            'roles-MAX_NUM_FORMS': 0,
+            'join_requests-TOTAL_FORMS': 0,
+            'join_requests-INITIAL_FORMS': 0,
+            'join_requests-MAX_NUM_FORMS': 0,
         }
         resp = self.client.post(url, post)
         url_complete = test_reverse('admin:users_group_changelist')
@@ -162,8 +202,6 @@ class FormTestCase(TestCase):
             'description': group.description,
             'allow_nodes': group.allow_nodes,
             'allow_slices': True,
-#            'request_nodes': False,
-#            'request_slices': True,
             'roles-TOTAL_FORMS': 0,
             'roles-INITIAL_FORMS': 0,
             'roles-MAX_NUM_FORMS': 0,
@@ -179,10 +217,85 @@ class FormTestCase(TestCase):
         self.assertFalse(qs_req.exists())
 
 
-    def _login(self, superuser=False):
-        """ Login a user to the system """
-        self.client.logout()
-        if superuser:
-            self.client.login(username='admin', password='adminpassword')
-        else:
-            self.client.login(username='user', password='userpassword')
+class GroupJoinTestCase(BaseTestCase):
+    """ Join request (to a group) tests """
+
+    def test_create_join_request(self):
+        self._login()
+        gid = 1
+        uid = self.client.session['_auth_user_id']
+
+        url = reverse('admin:users_group_join-request', args=[gid])
+        post = {
+            'action': 'join_request',
+            'post': 'yes',
+            '_selected_action': 2,
+        }
+        resp = self.client.post(url, post)
+        url_complete = test_reverse('admin:users_group_change', args=[gid])
+    
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], url_complete)
+
+        self.assertTrue(JoinRequest.objects.filter(user=uid, group=gid).exists())
+
+    def _do_action_join_request(self, action, roles=[]):
+        self.test_create_join_request() #create a JoinRequest
+        uid = 3
+        gid = 1
+        self._login(admin=True)
+        url = reverse('admin:users_group_change', args=[gid])
+
+        resp = self.client.get(url)
+        group_form = resp.context['adminform'].form
+        post = {
+            "name": group_form['name'].value(),
+            "description": group_form['description'].value(),
+            "request_slices": group_form['request_slices'].value(),
+            "request_nodes": group_form['request_nodes'].value(),
+            #roles formset
+            "roles-TOTAL_FORMS": 1,
+            "roles-0-id": 8,
+            "roles-0-group": 1,
+            "roles-0-is_admin": "on",
+            "roles-INITIAL_FORMS": 1,
+            "roles-MAX_NUM_FORMS": 1000,
+            #joinrequest formset
+            "join_requests-TOTAL_FORMS": 1,
+            "join_requests-INITIAL_FORMS": 1, 
+            "join_requests-MAX_NUM_FORMS": 0,
+            "join_requests-0-id": 1,
+            "join_requests-0-group": gid,
+            "join_requests-0-roles": roles,
+            "join_requests-0-action": action, 
+            "_save": "Save" #admin submit action
+        }
+        resp = self.client.post(url, post)
+        url_complete = test_reverse('admin:users_group_changelist')
+        
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], url_complete)
+
+        # join requests not exists 
+        self.assertFalse(JoinRequest.objects.filter(user=uid, group=gid).exists())
+
+
+    def test_join_request_accept(self):
+        uid = 3
+        gid = 1
+        self._do_action_join_request(action='accept', roles=['researcher'])
+
+        # has been created a role to user at the group
+        roles_qs = Roles.objects.filter(user=uid, group=gid)
+        self.assertTrue(roles_qs.exists())
+        self.assertTrue(roles_qs.get().is_researcher)
+
+    def test_join_request_reject(self):
+        uid = 3
+        gid = 1
+        self._do_action_join_request('reject')
+        
+    def test_join_request_ignore(self):
+        uid = 3
+        gid = 1
+        self._do_action_join_request('ignore')

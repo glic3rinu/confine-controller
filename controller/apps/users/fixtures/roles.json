@@ -1,0 +1,13 @@
+[
+{
+    "pk": 8,
+    "model": "users.roles",
+    "fields": {
+        "user": 2,
+        "group": 1,
+        "is_admin": true,
+        "is_technician": false,
+        "is_researcher": false
+    }
+}
+]

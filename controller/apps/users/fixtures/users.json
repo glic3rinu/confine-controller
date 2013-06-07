@@ -1,0 +1,82 @@
+[
+{
+    "pk": 1, 
+    "model": "users.user", 
+    "fields": {
+        "username": "super",
+        "first_name": "", 
+        "last_name": "", 
+        "description": "", 
+        "is_active": true, 
+        "is_superuser": true, 
+        "last_login": "2013-01-24T19:23:25.809Z", 
+        "password": "pbkdf2_sha256$10000$tFqzrDhbyYbW$pe1DiioNK4zZ8p2SKiEYhwxKeupxiJZ/5rTtMLKfXeQ=",
+        "email": "super@testmail.com",
+        "date_joined": "2013-01-14T11:41:11.682Z"
+    }
+},
+{
+    "pk": 2, 
+    "model": "users.user", 
+    "fields": {
+        "username": "admin",
+        "first_name": "", 
+        "last_name": "", 
+        "description": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "last_login": "2013-01-24T19:23:25.809Z", 
+        "password": "pbkdf2_sha256$10000$vh6quqNDGBRu$E6a+zmEKkpJllXXZiF5o4MwpwzxksbVZpI2pkGAV/zY=",
+        "email": "admin@testmail.com",
+        "date_joined": "2013-01-14T11:41:11.682Z"
+    }
+},
+{
+    "pk": 3, 
+    "model": "users.user", 
+    "fields": {
+        "username": "user",
+        "first_name": "", 
+        "last_name": "", 
+        "description": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "last_login": "2013-01-24T19:23:25.809Z", 
+        "password": "pbkdf2_sha256$10000$XkrzKXGYAORH$lkn0JfVRYr+6bUtKFC9THiZxtgXaPCivv7NTX2asA0k=",
+        "email": "user@testmail.com",
+        "date_joined": "2013-01-14T11:41:11.682Z"
+    }
+},
+{
+    "pk": 4, 
+    "model": "users.user", 
+    "fields": {
+        "username": "tech",
+        "first_name": "", 
+        "last_name": "", 
+        "description": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "last_login": "2013-01-24T19:23:25.809Z", 
+        "password": "pbkdf2_sha256$10000$n7nS67zyUyFB$uBjWoFvTcLD5SAdUpjQ5no5b8QIJdCs/ho7ca+pXl90=",
+        "email": "tech@testmail.com",
+        "date_joined": "2013-01-14T11:41:11.682Z"
+    }
+},
+{
+    "pk": 5, 
+    "model": "users.user", 
+    "fields": {
+        "username": "researcher",
+        "first_name": "", 
+        "last_name": "", 
+        "description": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "last_login": "2013-01-24T19:23:25.809Z", 
+        "password": "pbkdf2_sha256$10000$O1qvKZruNP55$b7i8yfOXQr+uEnSQIwZEnW/UOoyLV70InSVzYevA8+c=",
+        "email": "researcher@testmail.com",
+        "date_joined": "2013-01-14T11:41:11.682Z"
+    }
+}
+]

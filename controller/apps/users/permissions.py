@@ -57,9 +57,9 @@ class GroupPermission(Permission):
 
 class JoinRequestPermission(Permission):
     def view(self, caller, user):
-       if self._is_class(caller):
-           return user.has_role('admin')
-       return caller.group.has_role(user, 'admin')
+        if self._is_class(caller):
+            return user.has_role('admin')
+        return caller.group.has_role(user, 'admin')
     
     def add(self, caller, user):
         return False

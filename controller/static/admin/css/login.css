@@ -72,6 +72,10 @@ body.login {
     padding: 5px 12px;
 }
 
+.form-row.captcha label {
+    line-height: 31px;
+}
+
 img.captcha {
     vertical-align: middle;
 }
@@ -79,4 +83,6 @@ img.captcha {
 input#id_captcha_1 {
     height: 22px;
     text-transform: uppercase;
+    float: left;
+    margin-right: 1em;
 }

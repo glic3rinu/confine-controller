@@ -4,7 +4,7 @@
 <form action="." method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in form %}
-        <div class="form-row">
+        <div class="form-row {{ field.name }}">
             {{ field.errors }}
             <label for="{{ field.auto_id }}" class="required">{{ field.label }}:</label>
             {{ field }}

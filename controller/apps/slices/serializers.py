@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import ast
 
+from rest_framework.exceptions import ParseError
+
 from api import serializers
 
 from .models import Slice, Sliver, Template, SliverIface
@@ -16,16 +18,28 @@ class IfaceField(serializers.WritableField):
     
     def from_native(self, value):
         parent = self.parent
+        node = parent.fields['node'].from_native(parent.init_data['node'])
+        
+        def get_node_iface(iface):
+            """ helper function """
+            iface_name = iface.get('parent', None)
+            if iface_name is not None:
+                return node.direct_ifaces.get(name=iface_name)
+            return None
+        
         related_manager = getattr(parent.object, self.source or 'interfaces', False)
         ifaces = []
         if value:
             model = getattr(parent.opts.model, self.source or 'interfaces').related.model
-            list_ifaces = ast.literal_eval(str(value))
+            try:
+                list_ifaces = ast.literal_eval(str(value))
+            except SyntaxError as e:
+                raise ParseError("Malformed Iface: %s" % str(value))
             if not related_manager:
                 # POST (new parent object
                 return [ model(name=iface['name'],
                                type=iface['type'],
-                               parent=iface.get('parent', None)) for iface in list_ifaces ]
+                               parent=get_node_iface(iface)) for iface in list_ifaces ]
             # PUT
             for iface in list_ifaces:
                 try:
@@ -35,10 +49,10 @@ class IfaceField(serializers.WritableField):
                     # Create a new one
                     iface = model(name=iface['name'],
                                   type=iface['type'],
-                                  parent=iface.get('parent', None))
+                                  parent=get_node_iface(iface))
                 else:
                     iface.type = iface['type']
-                    iface.parent = iface['parent']
+                    iface.parent = get_node_iface(iface)
                 ifaces.append(iface)
         # Discart old values
         if related_manager:

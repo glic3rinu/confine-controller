@@ -127,15 +127,19 @@ class CustomMenu(Menu):
                     )
             
         else:
-            admin_item = items.MenuItem('Administration',
-                children=[
-                    items.MenuItem('Users',
-                        reverse('admin:users_user_changelist')),
-                    items.MenuItem('Groups',
-                        reverse('admin:users_group_changelist')),
+            admin_items = [
+                items.MenuItem('Users',
+                    reverse('admin:users_user_changelist')),
+                items.MenuItem('Groups',
+                    reverse('admin:users_group_changelist')),
+                ]
+            if is_installed('issues'):
+                admin_items.append(
                     items.MenuItem('Tickets',
                         reverse('admin:issues_ticket_changelist'))
-                ])
+                    )
+            admin_item = items.MenuItem('Administration',
+                children=admin_items)
         
         self.children.append(admin_item)
         

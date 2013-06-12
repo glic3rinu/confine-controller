@@ -98,8 +98,11 @@ take_tickets.url_name = 'take'
 
 @transaction.commit_on_success
 def mark_as_unread(modeladmin, request, queryset):
-    #TODO? Implement mark a ticket as unread
-    raise NotImplementedError("Sorry, but `mark_as_unread` operation is not implemented yet.")
+    """ Mark a ticket as unread """
+    for obj in queryset:
+        obj.mark_as_read(request.user, is_read=False)
+    msg = "%s selected tickets has been marked as unread" % queryset.count()
+    modeladmin.message_user(request, msg)
 
 ## Queue actions
 @user_has_perm

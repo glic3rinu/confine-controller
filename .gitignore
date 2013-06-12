@@ -4,5 +4,6 @@
 *.pyc
 *~
 *.save
+*.swp
 dist/
 src/

@@ -92,16 +92,16 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
              'all': ('issues/css/admin-ticket.css',)
         }
     form = TicketForm
-    # TODO Bold (id, subject) when tickets are unread for request.user
-    list_display = ['id', 'subject', admin_link('created_by'), admin_link('owner'),
-                    admin_link('queue'), colored('priority', PRIORITY_COLORS),
+    list_display = ['id', 'subject_tracked', admin_link('created_by'),
+                    admin_link('owner'), admin_link('queue'), 
+                    colored('priority', PRIORITY_COLORS),
                     colored('state', STATE_COLORS), 'last_modified_on']
-    list_display_links = ('id', 'subject')
+    list_display_links = ('id', 'subject_tracked')
     list_filter = [MyTicketsListFilter, 'queue__name', 'priority', 'state', 'visibility']
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
                      'queue', 'owner__username']
-    actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]#, mark_as_unread]
+    actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets, mark_as_unread]
     change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
     change_form_template = "admin/issues/ticket/change_form.html"
     readonly_fields = ('abstract', 'colored_state', 'created_by', 'state')
@@ -125,7 +125,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             'classes': ('collapse',),
             'fields': ('cc',)
         }),)
-    
+
     def abstract(self, instance):
         """ Provide a ticket abstract: subject, creator and state """
         created_by_url = admin_link('created_by')(instance)
@@ -146,6 +146,14 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         return  mark_safe(colored(instance.state, STATE_COLORS)(instance))
     colored_state.short_description = "State"
     colored_state.allow_tags = True
+    
+    def subject_tracked(self, obj):
+        """ Bold subject when tickets are unread for request.user """
+        if obj.is_read(self.user):
+            return obj.subject
+        return "<strong class='unread'>%s</strong>" % obj.subject
+    subject_tracked.allow_tags = True
+    subject_tracked.short_description = "Subject"
 
     def queryset(self, request):
         qs = super(TicketAdmin, self).queryset(request)
@@ -157,10 +165,14 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         return qs
 
     def get_actions(self, request):
-        """ Only superusers can manage tickets """
+        """ Exclude manage tickets actions for NOT superusers """
         actions = super(TicketAdmin, self).get_actions(request)
         if not request.user.is_superuser:
-            actions = []
+            su_actions = ['delete_selected', 'open_tickets', 'reject_tickets',
+                          'resolve_tickets', 'take_tickets']
+            for action in su_actions:
+                if action in actions:
+                    del actions[action]
         return actions
     
     def get_fieldsets(self, request, obj=None):
@@ -200,6 +212,8 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             actions_filter = [a.url_name for a in act if a.url_name != 'open']
         else:
             actions_filter = [a.url_name for a in act if a.url_name == 'open']
+        # update tracker state (if any)
+        instance.mark_as_read(request.user)
 
         extra_context = extra_context or {}
         extra_context['actions_filter'] = actions_filter
@@ -213,6 +227,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
             q['my_tickets'] = 'True' if not request.user.is_superuser else 'False'
             request.GET = q
             request.META['QUERY_STRING'] = request.GET.urlencode()
+        self.user = request.user #hook the user for the tracker
         return super(TicketAdmin,self).changelist_view(request, extra_context=extra_context)
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -238,6 +253,9 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         """ Define creator for new tickets """
         if obj.pk is None:
             obj.created_by = request.user
+
+        from issues.models import ticket_save
+        ticket_save.send(sender=Ticket, instance=obj, created=(obj.pk is None), user=request.user)
         super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
     
     ## markdown preview staff ##

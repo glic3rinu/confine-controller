@@ -2,9 +2,7 @@ from __future__ import absolute_import
 
 import ast
 
-from rest_framework.exceptions import ParseError
-
-from api import serializers
+from api import serializers, exceptions
 
 from .models import Slice, Sliver, Template, SliverIface
 
@@ -22,9 +20,13 @@ class IfaceField(serializers.WritableField):
         
         def get_node_iface(iface):
             """ helper function """
-            iface_name = iface.get('parent', None)
+            iface_name = iface.get('parent_name', None)
             if iface_name is not None:
-                return node.direct_ifaces.get(name=iface_name)
+                try:
+                    return node.direct_ifaces.get(name=iface_name)
+                except node.direct_ifaces.model.DoesNotExist:
+                    raise exceptions.UnprocessableEntity('Direct Iface whit name "%s" '
+                        'does not exists for this node.' % iface_name)
             return None
         
         related_manager = getattr(parent.object, self.source or 'interfaces', False)
@@ -34,7 +36,7 @@ class IfaceField(serializers.WritableField):
             try:
                 list_ifaces = ast.literal_eval(str(value))
             except SyntaxError as e:
-                raise ParseError("Malformed Iface: %s" % str(value))
+                raise exceptions.ParseError("Malformed Iface: %s" % str(value))
             if not related_manager:
                 # POST (new parent object
                 return [ model(name=iface['name'],

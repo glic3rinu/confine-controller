@@ -4,6 +4,7 @@ import re
 
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from pygments import highlight
 from pygments.lexers import JsonLexer
@@ -84,6 +85,13 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def has_delete_permission(self, *args, **kwargs):
         return False
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        context = { 'title': force_text(self.opts.verbose_name).capitalize() }
+        context.update(extra_context or {})
+        return super(BaseStateAdmin, self).change_view(
+            request, object_id, form_url=form_url, extra_context=context)
+
 
 
 class NodeStateAdmin(BaseStateAdmin):

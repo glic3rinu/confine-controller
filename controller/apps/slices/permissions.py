@@ -6,28 +6,27 @@ from .models import Slice, Sliver, SliceProp, SliverProp, Template, SliverIface
 
 
 class SlicePermission(Permission):
+    admins = ('admin', 'researcher')
+    
     def view(self, caller, user):
         return True
     
     def add(self, caller, user):
-        """ Admins can add """
         if self._is_class(caller):
             allow_slices = user.groups.filter(allow_slices=True).exists()
-            return user.has_roles(('admin',)) and allow_slices
-        return caller.group.allow_slices and caller.group.has_role(user, 'admin')
+            return user.has_roles(self.admins) and allow_slices
+        return caller.group.allow_slices and caller.group.has_roles(user, self.admins)
     
     def change(self, caller, user):
-        """ group admins can change """
         if self._is_class(caller):
-            return user.has_roles(('admin',))
+            return user.has_roles(self.admins)
         allow_slices = user.groups.filter(allow_slices=True).exists()
-        return caller.group.has_role(user, 'admin') and allow_slices
+        return caller.group.has_roles(user, self.admins) and allow_slices
     
     def delete(self, caller, user):
-        """ group admins can delete """
         if self._is_class(caller):
-            return user.has_roles(('admin',))
-        return caller.group.has_role(user, 'admin')
+            return user.has_roles(self.admins)
+        return caller.group.has_roles(user, self.admins)
 
 
 Slice.has_permission = SlicePermission()

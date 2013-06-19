@@ -22,11 +22,11 @@ from controller.utils.auth import any_auth_method
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
-from . import settings
-from .context import context
-from .exceptions import ConcurrencyError, BaseImageNotAvailable
-from .helpers import filename_handler
-from .tasks import build
+from firmware import settings
+from firmware.context import context
+from firmware.exceptions import ConcurrencyError, BaseImageNotAvailable
+from firmware.helpers import filename_handler
+from firmware.tasks import build
 
 
 class BuildQuerySet(models.query.QuerySet):

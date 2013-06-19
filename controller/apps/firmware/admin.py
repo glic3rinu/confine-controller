@@ -9,10 +9,10 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insert_actio
     colored, wrap_admin_view)
 from nodes.models import Node
 
-from .actions import get_firmware
-from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
+from firmware.actions import get_firmware
+from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
     ConfigFileHelpText, BuildFile)
-from .views import build_info_view, delete_build_view, get_firmware_view
+from firmware.views import build_info_view, delete_build_view, get_firmware_view
 
 
 STATE_COLORS = {

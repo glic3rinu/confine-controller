@@ -1,9 +1,7 @@
-import os
-
 from celery import states
 from celery.task import task
 
-from .image import Image
+from firmware.image import Image
 
 
 def update_state(build, progress, next, description):
@@ -15,7 +13,7 @@ def update_state(build, progress, next, description):
 def build(build_id, exclude=[], base_image=None):
     """ Builds a firmware image for build.node, excluding exclude files """
     # Avoid circular imports
-    from .models import Build, Config
+    from firmware.models import Build, Config
     
     # retrieve the existing build instance, used for user feedback
     update_state(build, 1, 4, 'Build started')

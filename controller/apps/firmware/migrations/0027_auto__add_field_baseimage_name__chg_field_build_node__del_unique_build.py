@@ -23,7 +23,6 @@ class Migration(SchemaMigration):
             base_image.save()
         db.commit_transaction()
 
-        #TODO FIXME something gives an error
         # Adding unique constraint to 'BaseImage.name'
         db.create_unique(u'firmware_baseimage', ['name'])
 

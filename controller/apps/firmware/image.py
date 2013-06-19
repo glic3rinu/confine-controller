@@ -1,4 +1,7 @@
-import gzip, os, tempfile, shutil, functools
+import functools
+import os
+import shutil
+import tempfile
 
 from controller.utils.system import run
 

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import BaseImage, Config
+from firmware.models import BaseImage, Config
 
 
 class OptionalFilesForm(forms.Form):

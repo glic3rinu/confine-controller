@@ -8,8 +8,8 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from .forms import BaseImageForm
-from .models import BaseImage
+from firmware.forms import BaseImageForm
+from firmware.models import BaseImage
 
 
 @transaction.commit_on_success

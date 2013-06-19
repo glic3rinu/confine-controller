@@ -23,7 +23,6 @@ from nodes.settings import NODES_NODE_ARCHS
 from . import settings
 from .context import context
 from .exceptions import ConcurrencyError, BaseImageNotAvailable
-from .helpers import filename_handler
 from .tasks import build
 
 
@@ -276,8 +275,7 @@ class BaseImage(models.Model):
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
-        #upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
-        upload_to=filename_handler,
+        upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Invalid file extension (only accepted *.img.gz)', 'invalid')])

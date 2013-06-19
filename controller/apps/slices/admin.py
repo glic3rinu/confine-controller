@@ -258,8 +258,8 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = sliver.node_id
         context = { 'slice': slice }
         context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).change_view(request, object_id,
-            form_url=form_url, extra_context=context)
+        return super(SliceSliversAdmin, self).change_view(
+            request, object_id, form_url=form_url, extra_context=context)
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Provde node and slice attributes to obj sliver """

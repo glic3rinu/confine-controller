@@ -52,6 +52,7 @@ class Command(BaseCommand):
                 run('mv %s %s' % (backup, current_path))
                 raise CommandError("Problem runing pip upgrade, aborting...")
             else:
+                # Some old versions of pip do not performe this cleaning ...
                 # Remove all backups
                 run('rm -fr %s' % os.path.join(base_path, 'controller\.*'))
                 # Clean old egg files
@@ -59,7 +60,7 @@ class Command(BaseCommand):
                 for egg in eggs:
                     # Do not remove the actual egg file when upgrading twice the same version
                     if egg.split('/')[-1] != "confine_controller-%s.egg-info" % version:
-                        run('rm -r %s' % egg)
+                        run('rm -fr %s' % egg)
         else:
             raise CommandError("You don't seem to have any previous PIP installation")
         

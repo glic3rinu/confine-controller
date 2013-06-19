@@ -85,13 +85,13 @@ class Command(BaseCommand):
                     prompt_username = None
                     continue
         
-        server, created = Server.objects.get_or_create(pk=1)
+        server, __ = Server.objects.get_or_create(pk=1)
         if not server.description:
             server.description = run('hostname').stdout
             server.save()
         
         server_ct = ContentType.objects.get_for_model(Server)
-        tinc_server, created = TincServer.objects.get_or_create(object_id=1,
+        tinc_server, __ = TincServer.objects.get_or_create(object_id=1,
             content_type=server_ct)
         
         tinc_port = options.get('tinc_port_dflt')

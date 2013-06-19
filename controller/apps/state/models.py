@@ -48,7 +48,7 @@ class BaseState(models.Model):
     def store_glet(cls, obj, glet, get_data=lambda g: g.value):
         response = get_data(glet)
         field_name = cls.get_related_field_name()
-        state, created = cls.objects.get_or_create(**{field_name: obj})
+        state, __ = cls.objects.get_or_create(**{field_name: obj})
         state.last_try_on = now()
         metadata = {'exception': str(glet._exception)}
         if response is not None:
@@ -114,7 +114,7 @@ class NodeState(BaseState):
     
     @classmethod
     def register_heartbeat(cls, node):
-        node_state, new = cls.objects.get_or_create(node=node)
+        node_state, __ = cls.objects.get_or_create(node=node)
         node_state.last_seen_on = now()
         node_state.last_contact_on = node_state.last_seen_on
         node_state.save()

@@ -35,7 +35,7 @@ class Host(models.Model):
     @property
     def tinc(self):
         ct = ContentType.objects.get_for_model(self)
-        obj, created = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
+        obj, __ = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
     
     @property
@@ -99,7 +99,7 @@ class Gateway(models.Model):
     @property
     def tinc(self):
         ct = ContentType.objects.get_for_model(self)
-        obj, created = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
+        obj, __ = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
     
     def mgmt_net(self):
@@ -306,7 +306,7 @@ class TincClient(TincHost):
 @property
 def tinc(self):
     ct = ContentType.objects.get_for_model(self)
-    obj, created = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
+    obj, __ = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
 Node.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
@@ -316,7 +316,7 @@ Node.add_to_class('tinc', tinc)
 @property
 def tinc(self):
     ct = ContentType.objects.get_for_model(self)
-    obj, created = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
+    obj, __ = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
 Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))

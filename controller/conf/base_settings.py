@@ -200,7 +200,7 @@ LOGGING = {
 # Email config
 EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 
-
+# Storage configuration
 DEFAULT_FILE_STORAGE = 'controller.core.storage.DoubleExtensionAwareFileSystemStorage'
 
 

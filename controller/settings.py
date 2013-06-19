@@ -27,5 +27,6 @@ SITE_VERBOSE_NAME = getattr(settings, 'SITE_VERBOSE_NAME',
     '%s Testbed Management' % SITE_NAME.capitalize())
 
 
-
+# Storage settings
+# Extensions supported for renaming when uploading existing filenames
 DOUBLE_EXTENSIONS = ('tar.gz', 'img.gz')

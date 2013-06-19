@@ -12,7 +12,7 @@ def update_state(build, progress, next, description):
 
 
 @task(name="firmware.build")
-def build(build_id, exclude=[]):
+def build(build_id, exclude=[], base_image=None):
     """ Builds a firmware image for build.node, excluding exclude files """
     # Avoid circular imports
     from .models import Build, Config
@@ -25,7 +25,10 @@ def build(build_id, exclude=[]):
     
     config = Config.objects.get()
     node = build_obj.node
-    base_image = config.get_image(node)
+    if base_image is None:
+        base_image = config.get_image(node) # backwards compatibility
+    else:
+        base_image = base_image.image
     if base_image is None: # this should be avoided before running this task
         raise ImproperlyConfigured("Error building the firmware. Does not \
             exists a base image for %s arch (node %s)" % (node.arch, node.id))

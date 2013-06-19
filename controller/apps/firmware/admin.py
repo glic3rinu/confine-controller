@@ -1,13 +1,8 @@
 from __future__ import absolute_import
 
-from celery.result import AsyncResult
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
-from django.db import transaction
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import simplejson
 from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin.utils import (get_modeladmin, get_admin_link, insert_action,
@@ -15,9 +10,9 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insert_actio
 from nodes.models import Node
 
 from .actions import get_firmware
-from .forms import BaseImageFormSet
 from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
     ConfigFileHelpText, BuildFile)
+from .views import build_info_view, delete_build_view, get_firmware_view
 
 
 STATE_COLORS = {
@@ -33,7 +28,6 @@ STATE_COLORS = {
 class BaseImageInline(admin.TabularInline):
     model = BaseImage
     extra = 0
-    formset = BaseImageFormSet
 
 
 class ConfigUCIInline(admin.TabularInline):
@@ -178,58 +172,14 @@ node_modeladmin.set_change_view_action(get_firmware)
 old_get_urls = node_modeladmin.get_urls
 
 def get_urls(self):
-    """ Hook JSON representation of a Build to NodeModeladmin """
-    def build_info_view(request, node_id):
-        try:
-            build = Build.objects.get(node=node_id)
-        except Build.DoesNotExist:
-            info = {}
-        else:
-            task = AsyncResult(build.task_id)
-            result = task.result or {}
-            state = build.state
-            if state in [Build.REQUESTED, Build.QUEUED, Build.BUILDING]:
-                state = 'PROCESS'
-            info = {
-                'state': state,
-                'progress': result.get('progress', 0),
-                'next': result.get('next', 0),
-                'description': "%s ..." % result.get('description', 'Waiting for your build task to begin.'),
-                'id': build.pk,
-                'content_message': build.state_description }
-        return HttpResponse(simplejson.dumps(info), mimetype="application/json")
-    
-    @transaction.commit_on_success
-    def delete_build_view(request, node_id):
-        node = get_object_or_404(Node, pk=node_id)
-        build = get_object_or_404(Build, node=node_id)
-        
-        # Check that the user has delete permission for the actual model
-        node_modeladmin = get_modeladmin(Node)
-        if not node_modeladmin.has_change_permission(request, obj=node, view=False):
-            raise PermissionDenied
-        
-        # The user has already confirmed the deletion.
-        # Do the deletion and return a None to display the change list view again.
-        if request.POST.get('post'):
-            build.delete()
-            node_modeladmin.log_change(request, node, "Deleted firmware build")
-            node_modeladmin.message_user(request, "Firmware build has been successfully deleted.")
-            return redirect('admin:nodes_node_firmware', node_id)
-        
-        context = {
-            'opts': node_modeladmin.model._meta,
-            'app_label': node_modeladmin.model._meta.app_label,
-            'title': 'Are your sure?',
-            'build': build,
-            'node': node, }
-        return render(request, 'admin/firmware/delete_build_confirmation.html', context)
-    
     extra_urls = patterns("", 
-        url("^(?P<node_id>\d+)/firmware/info/$",
+        url("^(?P<node_id>\d+)/firmware/(?P<bimg_id>\d+)/info/$",
             wrap_admin_view(self, build_info_view),
             name='nodes_node_firmware_build_info'),
-        url("^(?P<node_id>\d+)/firmware/delete/$",
+        url("^(?P<node_id>\d+)/firmware/(?P<bimg_id>\d+)/$",
+            wrap_admin_view(self, get_firmware_view),
+            name='nodes_node_firmware_get'),
+        url("^(?P<node_id>\d+)/firmware/(?P<bimg_id>\d+)/delete/$",
             wrap_admin_view(self, delete_build_view),
             name='nodes_node_firmware_delete'),
     )

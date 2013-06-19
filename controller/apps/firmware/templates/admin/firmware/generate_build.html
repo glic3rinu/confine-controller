@@ -5,9 +5,23 @@
     <form action="" method="post">{% csrf_token %}
     <div>
     <div style="margin-left:20px; margin-bottom:20px; margin-top:20px;">
+    {% comment %}<fieldset class="module aligned">
+        <h2>Base Image</h2>
+        {% if base_img_form.errors %}
+            ERROR!!!
+            {{ base_img_form.TE }}
+        {% endif %}
+        {{ base_img_form.TE }}
+        {% for field in base_img_form %}
+        <div class="form-row">
+            {{ field.errors|striptags }}
+            {{ field.label_tag }} {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+        </div>
+        {% endfor %}
+    </fieldset>{% endcomment %}
     <fieldset class="module aligned">
         <h2>Optional files</h2>
-            <div class="form-row field-name">
        <table border="1">
          <thead><tr> <th></th> <th>Image</th> <th>Help</th> </tr></thead>
          <tbody>
@@ -19,7 +33,6 @@
         {% endfor %}
         </tbody>
         </table>
-        </div>
     </fieldset>
     </div>
     {% for obj in queryset %}

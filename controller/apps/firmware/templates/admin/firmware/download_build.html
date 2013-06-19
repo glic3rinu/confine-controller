@@ -31,5 +31,8 @@ wget --user {{ user }} --ask-password --auth-no-challenge --no-check-certificate
     </fieldset>
     </div>
     </ul>
-    <p class="deletelink-box"><a href="{% url 'admin:nodes_node_firmware_delete' node.pk %}" class="deletelink">Delete build</a></p>
+    <p class="deletelink-box">
+        <a href="{% url 'admin:nodes_node_firmware_delete' node.pk base_image.pk %}"
+           class="deletelink">Delete build</a>
+    </p>
 {% endblock %}

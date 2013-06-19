@@ -48,10 +48,15 @@ class Image(object):
         """ sector number of image part_nr """
         if not hasattr(self, '_sector'):
             context = { 'image': self.image, 'part_nr': self.part_nr }
-            result = r("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
+            #BUGFIX: file -k option for keep looking and getting all file image info
+            # different output at UNIX `file` between version 5.11 and 5.14
+            result = r("file -k %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
                        "sed -n %(part_nr)dp" % context)
-            self._sector = int(result.stdout)
-            #TODO raise if sector != ^[0-9]+$
+            try:
+                self._sector = int(result.stdout)
+            except ValueError: #raise if sector != ^[0-9]+$
+                raise Exception("Failed getting image start sector (value '%s'). "\
+                        "Has selected base image a valid image file?" % result.stdout)
         return self._sector
     
     @property

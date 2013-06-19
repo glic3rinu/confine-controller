@@ -11,9 +11,9 @@ from django.utils.safestring import mark_safe
 from controller.admin.utils import get_modeladmin
 from nodes.models import Node
 
-from .exceptions import BaseImageNotAvailable
-from .forms import OptionalFilesForm
-from .models import BaseImage, Build, Config
+from firmware.exceptions import BaseImageNotAvailable
+from firmware.forms import OptionalFilesForm
+from firmware.models import BaseImage, Build, Config
 
 def build_info_view(request, node_id, bimg_id):
     """ Hook JSON representation of a Build to NodeModeladmin """

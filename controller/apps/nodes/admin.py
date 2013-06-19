@@ -9,7 +9,7 @@ from django.utils.safestring import mark_safe
 from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
-from controller.admin.utils import (colored, admin_link,
+from controller.admin.utils import (colored, admin_link, wrap_admin_view,
     docstring_as_help_tip)
 from controller.forms.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -158,19 +158,21 @@ class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
             url(r'^(?P<object_id>\d+)/history/$',
-                self.history_view,
+                wrap_admin_view(self, self.history_view),
                 name='%s_%s_history' % info),
             url(r'^(?P<object_id>\d+)/delete/$',
-                self.delete_view,
+                wrap_admin_view(self, self.delete_view),
                 name='%s_%s_delete' % info),
             url(r'^(?P<object_id>\d+)$',
-                self.change_view,
+                wrap_admin_view(self, self.change_view),
                 name='%s_%s_change' % info),
             url(r'^$',
-                self.change_view, {'object_id': '1'},
+                wrap_admin_view(self, self.change_view),
+                {'object_id': '1'},
                 name='%s_%s_change' % info),
             url(r'^$',
-                self.change_view, {'object_id': '1'},
+                wrap_admin_view(self, self.change_view),
+                {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
         urls = super(ServerAdmin, self).get_urls()

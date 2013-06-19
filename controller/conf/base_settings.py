@@ -201,6 +201,9 @@ LOGGING = {
 EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 
 
+DEFAULT_FILE_STORAGE = 'controller.core.storage.DoubleExtensionAwareFileSystemStorage'
+
+
 #################################
 ## 3RD PARTY APPS CONIGURATION ##
 #################################

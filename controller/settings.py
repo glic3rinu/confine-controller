@@ -25,3 +25,7 @@ SITE_URL = getattr(settings, 'SITE_URL', 'http://localhost')
 SITE_NAME = getattr(settings, 'SITE_NAME', 'confine')
 SITE_VERBOSE_NAME = getattr(settings, 'SITE_VERBOSE_NAME',
     '%s Testbed Management' % SITE_NAME.capitalize())
+
+
+
+DOUBLE_EXTENSIONS = ('tar.gz', 'img.gz')

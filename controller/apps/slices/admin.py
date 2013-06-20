@@ -192,6 +192,12 @@ class NodeListAdmin(NodeAdmin):
     display_sliver_pub_ipv4_range.short_description = 'IPv4 Range'
     display_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
     
+    def has_change_permission(self, request, obj=None, view=True):
+        """ Permissions for actions, and do not let casual users to view """
+        if request.method == 'POST':
+            return request.user.has_perm('slices.change_slice', obj)
+        return super(NodeListAdmin, self).has_change_permission(request, obj=obj, view=False)
+    
     def changelist_view(self, request, slice_id, extra_context=None):
         """ Just fixing title and breadcrumbs """
         self.slice_id = slice_id

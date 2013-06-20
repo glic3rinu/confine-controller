@@ -158,3 +158,16 @@ def docstring_as_help_tip(cls):
     img = ('<img src="/static/admin/img/icon-unknown.gif" class="help help-tooltip" '
            'width="10" height="10" alt="(%s)" title="%s"/>')
     return mark_safe(img % (docstring, docstring))
+
+
+def set_default_filter(queryarg, request, value):
+    """ set default filters for changelist_view """
+    if not request.GET.has_key(queryarg):
+        q = request.GET.copy()
+        if callable(value):
+            value = value(request)
+        q[queryarg] = value
+        request.GET = q
+        request.META['QUERY_STRING'] = request.GET.urlencode()
+
+

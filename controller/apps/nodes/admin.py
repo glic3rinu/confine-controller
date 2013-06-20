@@ -45,7 +45,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                     admin_link('group'), 'num_ifaces']
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
-    default_changelist_filter = 'my_nodes'
+    default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name']
     readonly_fields = ['boot_sn', 'display_cert']
     inlines = [DirectIfaceInline, NodePropInline]
@@ -139,15 +139,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                 messages.warning(request, 'This node lacks a valid certificate.')
         return super(NodeAdmin, self).change_view(
             request, object_id, form_url=form_url, extra_context=extra_context)
-    
-    def changelist_view(self, request, extra_context=None):
-        """ Default filter as 'my_nodes=True' """
-        if not request.GET.has_key('my_nodes'):
-            q = request.GET.copy()
-            q['my_nodes'] = 'True'
-            request.GET = q
-            request.META['QUERY_STRING'] = request.GET.urlencode()
-        return super(NodeAdmin,self).changelist_view(request, extra_context=extra_context)
 
 
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):

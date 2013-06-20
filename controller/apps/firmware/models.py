@@ -143,7 +143,7 @@ class Build(models.Model):
             return None
     
     @classmethod
-    def build(cls, node, async=False, exclude=[], base_image=None):
+    def build(cls, node, base_image, async=False, exclude=[]):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
@@ -157,7 +157,7 @@ class Build(models.Model):
                 raise ConcurrencyError("One build at a time.")
             old_build.delete()
         config = Config.objects.get()
-        build_obj = Build.objects.create(node=node, version=config.version, base_image=base_image)
+        build_obj = Build.objects.create(node=node, version=config.version, base_image=base_image.image)
         if async:
             defer(build.delay, build_obj.pk, exclude=exclude, base_image=base_image)
         else:
@@ -252,6 +252,8 @@ class Config(SingletonModel):
     def get_image(self, node, base_image=None):
         """ Returns the correct base image file according to the node architecture """
         images = self.get_images(node, base_image)
+        if len(images) == 0:
+            raise BaseImageNotAvailable('No base image for %s architecture' % node.arch)
         if len(images) > 1: 
             raise MultipleObjectsReturned('There are several images for %s architecture' % node.arch)
         return images[0]
@@ -265,8 +267,6 @@ class Config(SingletonModel):
         images = self.images.filter(architectures__regex=arch_regex)
         if base_image:
             images = images.filter(image=base_image.image)
-        if len(images) == 0:
-            raise BaseImageNotAvailable('No base image for %s architecture' % node.arch)
         return [image.image for image in images]
     
     def get_image_name(self, node, build=None):

@@ -7,9 +7,6 @@
         <h2>Base Image</h2>
         {% for field in form %}
         <div class="form-row">
-            <p>There are several base images that supports the architecture of
-            the node "{{ node.name }}". Please choose one them for getting the
-            firmware.</p>
             {{ field.errors }}
             {{ field }}
             <p class="help">{{ field.help_text }}</p>

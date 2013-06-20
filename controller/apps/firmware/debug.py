@@ -2,7 +2,7 @@ from firmware.image import Image
 from firmware.models import Config
 
 
-def debug_build(node, exclude=[]):
+def debug_build(node, base_image=None, exclude=[]):
     """ 
     Function used for debuging the firmware generation
         from firmware.debug import debug_build
@@ -10,7 +10,10 @@ def debug_build(node, exclude=[]):
         debug_build(Node.objects.all()[0])
     """
     config = Config.objects.get()
-    base_image = config.get_image(node)
+    if base_image is None:
+        base_image = config.get_image(node)
+    else:
+        base_image = base_image.image
     image = Image(base_image.path)
     
     try:

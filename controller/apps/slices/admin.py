@@ -86,7 +86,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     inlines = [SliverIfaceInline]
     actions = [update_selected]
     change_view_actions = [update_selected]
-    default_changelist_filter = 'my_slivers'
+    default_changelist_filters = (('my_slivers', 'True'),)
     change_form_template = "admin/controller/change_form.html"
     
     def __init__(self, *args, **kwargs):
@@ -399,7 +399,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     change_form_template = "admin/slices/slice/change_form.html"
     save_and_continue = True
     change_view_actions = [renew_selected_slices, reset_selected]
-    default_changelist_filter = 'my_slices'
+    default_changelist_filters = (('my_slices', 'True'),)
     
     def exp_data_sha256(self, instance):
         return instance.exp_data_sha256

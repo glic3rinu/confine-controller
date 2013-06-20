@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.conf.urls import patterns, url
 
-from controller.admin.utils import action_to_view
+from controller.admin.utils import action_to_view, set_default_filter
 
 from .helpers import FuncAttrWrapper
 
@@ -88,19 +88,19 @@ class ChangeViewActions(admin.options.ModelAdmin):
 class ChangeListDefaultFilter(object):
     """
     Enables support for default filtering on admin change list pages
-    Your model admin class should define an default_changelist_filter attribute
-    default_changelist_filter = 'my_nodes'
+    Your model admin class should define an default_changelist_filters attribute
+    default_changelist_filters = (('my_nodes', 'True'),)
     """
+    default_changelist_filters = ()
+    
     def changelist_view(self, request, extra_context=None):
         """ Default filter as 'my_nodes=True' """
-        default = self.default_changelist_filter
-        if not request.GET.has_key(default):
-            q = request.GET.copy()
-            q[default] = 'True'
-            request.GET = q
-            request.META['QUERY_STRING'] = request.GET.urlencode()
+        defaults = []
+        for queryarg, value in self.default_changelist_filters:
+             set_default_filter(queryarg, request, value)
+             defaults.append(queryarg)
         # hack response cl context in order to hook default filter awaearness into search_form.html template
         response = super(ChangeListDefaultFilter, self).changelist_view(request, extra_context=extra_context)
         if hasattr(response, 'context_data') and 'cl' in response.context_data:
-            response.context_data['cl'].default_changelist_filter = default
+            response.context_data['cl'].default_changelist_filters = defaults
         return response

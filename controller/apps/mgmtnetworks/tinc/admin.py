@@ -91,7 +91,7 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
     save_and_continue = True
-    default_changelist_filter = 'my_hosts'
+    default_changelist_filters = (('my_hosts', 'True'),)
     
     def address(self, instance):
         return instance.tinc.address if instance.tinc else ''

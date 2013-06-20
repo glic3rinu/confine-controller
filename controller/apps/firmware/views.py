@@ -85,7 +85,7 @@ def get_firmware_view(request, node_id, bimg_id):
 
     context = {
         "title": "Download firmware for your research device %s" % node,
-        "content_title":  mark_safe("Download firmware for your research device %s" % node_link),
+        "content_title":  mark_safe("Download firmware for your research device %s (%s)" % (node_link, base_image.name)),
         "action_name": 'Firmware',
         "opts": opts,
         "app_label": app_label,
@@ -110,7 +110,7 @@ def get_firmware_view(request, node_id, bimg_id):
         if form.is_valid():
             optional_fields = form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
-            build = Build.build(node, async=True, exclude=exclude, base_image=base_image)
+            build = Build.build(node, base_image, async=True, exclude=exclude)
             modeladmin.log_change(request, node, "Build firmware")
     try:
         build = Build.objects.get_current(node=node, base_image=base_image)

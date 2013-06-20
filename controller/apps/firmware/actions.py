@@ -36,6 +36,7 @@ def get_firmware(modeladmin, request, queryset):
     context = {
         "title": "Download firmware for your research device %s" % node,
         "content_title":  mark_safe("Download firmware for your research device %s" % node_link),
+        "content_message": "Please, choose the base image which you want to get the firmware.",
         "action_name": 'Firmware',
         'queryset': queryset,
         "opts": opts,
@@ -62,9 +63,9 @@ def get_firmware(modeladmin, request, queryset):
         return TemplateResponse(request, template, context, current_app=site_name)
 
     # Only one base image, redirect to next step
-    elif qs_base_image.count() == 1:
-        base_image = qs_base_image[0]
-        return redirect('admin:nodes_node_firmware_get', node.id, base_image.id)
+    #elif qs_base_image.count() == 1:
+    #    base_image = qs_base_image[0]
+    #    return redirect('admin:nodes_node_firmware_get', node.id, base_image.id)
     
     # Show form for choosing the base image
     template = 'admin/firmware/select_base_image.html'

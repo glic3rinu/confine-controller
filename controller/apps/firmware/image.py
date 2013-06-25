@@ -5,6 +5,7 @@ from controller.utils.system import run
 
 r = functools.partial(run, silent=False)
 
+# TODO rename self.image to self.file or something  path ? !
 
 class Image(object):
     """ 

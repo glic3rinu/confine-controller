@@ -12,10 +12,12 @@ def update_state(build, progress, next, description):
 
 
 @task(name="firmware.build")
-def build(build_id, exclude=[]):
+def build(build_id, *args, **kwargs):
     """ Builds a firmware image for build.node, excluding exclude files """
     # Avoid circular imports
     from .models import Build, Config
+    
+    exclude = kwargs.get('exclude', [])
     
     # retrieve the existing build instance, used for user feedback
     update_state(build, 1, 4, 'Build started')
@@ -27,8 +29,8 @@ def build(build_id, exclude=[]):
     node = build_obj.node
     base_image = config.get_image(node)
     if base_image is None: # this should be avoided before running this task
-        raise ImproperlyConfigured("Error building the firmware. Does not \
-            exists a base image for %s arch (node %s)" % (node.arch, node.id))
+        raise ImproperlyConfigured("Error building the firmware. Does not"
+            "exists a base image for %s arch (node %s)" % (node.arch, node.id))
     image = Image(base_image.path)
     
     try:
@@ -40,7 +42,7 @@ def build(build_id, exclude=[]):
         
         update_state(build, 15, 29, 'Preparing image file system')
         image.mount()
-
+        
         files = config.eval_files(node, exclude=exclude, image=image)
         total = len(files)
         for num, build_file in enumerate(files):
@@ -51,10 +53,22 @@ def build(build_id, exclude=[]):
             build_file.build = build_obj
             build_file.save()
         
+        plugins = config.plugins.filter(is_active=True)
+        total = len(plugins)
+        for num, plugin in enumerate(plugins):
+            plugin.instance.pre_umount(image, build_obj, *args, **kwargs)
+        
         update_state(build, 60, 74, 'Unmounting image file system')
         image.umount()
         
-        update_state(build, 75, 94, 'Compressing image')
+        for num, plugin in enumerate(plugins):
+            current = 75 + num/total*25
+            next = min(75 + (num+1)/total*25, 80)
+            instance = plugin.instance
+            update_state(build, current, netx, instance.post_umount.description)
+            instance.post_umount(image, build_obj, *args, **kwargs)
+        
+        update_state(build, 80, 94, 'Compressing image')
         image.gzip()
         
         update_state(build, 95, 99, 'Cleaning up')

@@ -49,7 +49,7 @@ class Build(models.Model):
     DELETED = 'DELETED'
     FAILED = 'FAILED'
     
-    node = models.OneToOneField('nodes.Node')
+    node = models.OneToOneField('nodes.Node', primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
@@ -256,7 +256,7 @@ class Config(SingletonModel):
         context = {
             'node_name': node.name,
             'arch': node.arch,
-            'build_id': build.id if build else 0,
+            'build_id': build.pk if build else 0,
             'node_id': node.pk,
             'version': self.version }
         name = self.image_name % context
@@ -267,7 +267,6 @@ class Config(SingletonModel):
         image_name = self.get_image_name(node, build)
         base_path = get_file_field_base_path(Build, 'image')
         return os.path.join(base_path, image_name)
-
 
 
 class BaseImage(models.Model):
@@ -282,7 +281,6 @@ class BaseImage(models.Model):
     
     def __unicode__(self):
         return str(self.image)
-    
 
 
 class ConfigUCI(models.Model):
@@ -379,11 +377,26 @@ class ConfigFile(models.Model):
 
 class ConfigFileHelpText(models.Model):
     config = models.ForeignKey(Config)
-    file = models.OneToOneField(ConfigFile)
+    file = models.OneToOneField(ConfigFile, related_name='help_text')
     help_text = models.TextField()
     
     def __unicode__(self):
         return str(self.file)
+
+
+class ConfigPlugin(models.Model):
+    config = models.ForeignKey(Config, related_name='plugins')
+    is_active = models.BooleanField(default=False)
+    label = models.CharField(max_length=128, blank=True, unique=True)
+    
+    def __unicode__(self):
+        return self.label
+    
+    @property
+    def instance(self):
+        module = __import__('firmware.plugins')
+        plugin_class = getattr(module.plugins, self.label)
+        return plugin_class()
 
 
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])

@@ -30,7 +30,7 @@ def get_firmware(modeladmin, request, queryset):
     if not request.user.has_perm('nodes.getfirmware_node', node):
         raise PermissionDenied
     
-    
+    config = Config.objects.get()
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     
@@ -44,11 +44,12 @@ def get_firmware(modeladmin, request, queryset):
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
         'form': OptionalFilesForm(),
+        'plugins': config.plugins.filter(is_active=True)
     }
 
     # No architecture support
     try:
-        Config.objects.get().get_image(node)
+        config.get_image(node)
     except BaseImageNotAvailable:
         context["content_message"] = "Sorry but currently we do not support \
                                       %s architectures :(" % node.arch

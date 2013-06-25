@@ -104,7 +104,7 @@ class NodeState(BaseState):
         ('failure', 'FAILURE'),
         ('unknown', 'UNKNOWN'),)
     
-    node = models.OneToOneField('nodes.Node', related_name='state')
+    node = models.OneToOneField('nodes.Node', related_name='state', primary_key=True)
     last_contact_on = models.DateTimeField(null=True, help_text='Last API pull '
         'received from this node.')
     soft_version = models.CharField(max_length=32, blank=True)
@@ -144,7 +144,7 @@ class SliverState(BaseState):
         ('fail_deploy', 'FAIL_DEPLOY'),
         ('fail_start', 'FAIL_START'),)
     
-    sliver = models.OneToOneField('slices.Sliver', related_name='state')
+    sliver = models.OneToOneField('slices.Sliver', related_name='state', primary_key=True)
     
     def get_node(self):
         return self.sliver.node

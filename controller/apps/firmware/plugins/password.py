@@ -1,5 +1,7 @@
 from django import forms
 
+from controller.utils.system import run
+
 from firmware.plugins import FirmwarePlugin
 
 
@@ -21,6 +23,7 @@ class PasswordPlugin(FirmwarePlugin):
                 if password1 and password2 and password1 != password2:
                     raise forms.ValidationError("Passwords don't match")
                 return password2
+        
         return PasswordForm
     
     def process_form_post(self, form):
@@ -30,5 +33,6 @@ class PasswordPlugin(FirmwarePlugin):
         """ Configuring image password """
         context = {
             'pwd': kwargs.get('password', 'confine'),
-            'path': image.imgae }
-        run('chroot %(path)s/bin/bash -c \'echo "root:%(pwd)s"|chpasswd\'' % context)
+            'path': image.mnt }
+        run('chroot %(path)s/bin/bash -c \'echo -e "%(pwd)s\n%(pwd)s"|passwd\'' % context)
+        run('rm -f %(path)s/etc/uci-defaults/confine-passwd.sh' % context)

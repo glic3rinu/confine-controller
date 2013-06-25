@@ -71,7 +71,6 @@ def get_firmware(modeladmin, request, queryset):
         if all_valid and form.is_valid():
             optional_fields = form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
-            print kwargs
             build = Build.build(node, async=True, exclude=exclude, **kwargs)
             modeladmin.log_change(request, node, "Build firmware")
         else:

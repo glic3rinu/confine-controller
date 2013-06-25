@@ -1,5 +1,6 @@
 from django import template
 from django.core.urlresolvers import reverse
+from django.forms import CheckboxInput
 
 from controller import get_version
 from controller.utils import is_installed
@@ -34,3 +35,11 @@ def rest_to_admin_url(context):
         else:
             url += '_changelist'
     return reverse(url, args=args)
+
+
+@register.filter(name='is_checkbox')
+def is_checkbox(field):
+    print field.field.widget, CheckboxInput
+    print isinstance(field.field.widget, CheckboxInput)
+    return isinstance(field.field.widget, CheckboxInput)
+

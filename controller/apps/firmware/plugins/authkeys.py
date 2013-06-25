@@ -7,12 +7,16 @@ from firmware.plugins import FirmwarePlugin
 
 
 class AuthKeysPlugin(FirmwarePlugin):
-    description = 'Enables the inclusion of user auth_tokens'
+    verbose_name = 'SSH Authorized Keys'
+    description = 'Enables the inclusion of user SSH Authorized Keys'
     
     def get_form(self):
         class AuthKeysForm(forms.Form):
-            auth_keys = forms.CharField(required=False,
-                widget=forms.Textarea(attrs={'cols': 70, 'rows': 5}))
+            auth_keys = forms.CharField(required=False, help_text='Enter the SSH '
+                'keys allowed to log in as root (in "authorized_keys" format). '
+                'You may leave the default keys to allow centralized management '
+                'of your node.',
+            widget=forms.Textarea(attrs={'cols': 70, 'rows': 5}))
         
             def clean_auth_keys(self):
                 auth_keys = self.cleaned_data.get("auth_keys").strip()

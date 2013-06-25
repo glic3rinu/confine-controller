@@ -10,12 +10,14 @@ from firmware.settings import FIRMWARE_PLUGINS_PASSWORD_DEFAULT
 
 
 class PasswordPlugin(FirmwarePlugin):
+    verbose_name = 'Root password'
     description = 'Enables password setting before building the image'
     
     def get_form(self):
         class PasswordForm(forms.Form):
             password1 = forms.CharField(label='Password', required=False,
-                help_text='Default password is %s' % FIRMWARE_PLUGINS_PASSWORD_DEFAULT,
+                help_text='Enter a password to be set for the root user. The '
+                    'default password is %s.' % FIRMWARE_PLUGINS_PASSWORD_DEFAULT,
                 widget=forms.PasswordInput)
             password2 = forms.CharField(label='Password confirmation', required=False,
                 widget=forms.PasswordInput)

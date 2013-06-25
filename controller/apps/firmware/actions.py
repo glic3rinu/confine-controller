@@ -47,14 +47,6 @@ def get_firmware(modeladmin, request, queryset):
         'plugins': config.plugins.active(),
     }
     
-    for plugin in config.plugins.active():
-        form = plugin.instance.form()
-        for field in form:
-            print dir(field)
-            print field.label
-            print field.label_tag
-#            print field.field.widget.input_type
-    
     # No architecture support
     try:
         config.get_image(node)

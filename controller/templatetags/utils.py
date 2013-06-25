@@ -39,7 +39,4 @@ def rest_to_admin_url(context):
 
 @register.filter(name='is_checkbox')
 def is_checkbox(field):
-    print field.field.widget, CheckboxInput
-    print isinstance(field.field.widget, CheckboxInput)
     return isinstance(field.field.widget, CheckboxInput)
-

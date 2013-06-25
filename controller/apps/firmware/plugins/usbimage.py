@@ -1,28 +1,31 @@
 from django import forms
 
+from controller.utils.paths import get_site_root
 from controller.utils.system import run
 
 from firmware.image import Image
 from firmware.plugins import FirmwarePlugin
+from firmware.settings import FIRMWARE_PLUGINS_USB_IMAGE
 
 
 class USBImagePlugin(FirmwarePlugin):
     description = 'Optionally puts the firmware image into confine-install USB image'
     
-    @property
-    def form(self):
+    def get_form(self):
         class USBImageForm(forms.Form):
-            usb_image = forms.BooleanField(label='USB Image', help_text='Select '
-                'this option if you want to flash the image into a USB rather '
-                'than flashing the image directly to your node')
+            usb_image = forms.BooleanField(label='USB Image', required=False,
+                help_text='Select this option if you want to flash the image into '
+                    'a USB rather than flashing the image directly to your node')
         return USBImageForm
     
     def process_form_post(self, form):
         return {'usb_image': form.cleaned_data['usb_image']}
     
     def post_umount(self, image, build, *args, **kwargs):
+        """ Creating confine-install USB image """
         if kwargs.get('usb_image', False):
-            install = Image('/tmp/confine-install.img.gz')
+            context = {'site_root': get_site_root()}
+            install = Image(FIRMWARE_PLUGINS_USB_IMAGE % context)
             try:
                 install.prepare()
                 install.gunzip()
@@ -36,6 +39,6 @@ class USBImagePlugin(FirmwarePlugin):
                 image.image = install.image
             except:
                 install.clean()
-    post_umount.description = 'Creating confine-install USB image'
     
-    # TODO hook get_dest_path 
+    def update_image_name(self, image_name, **kwargs):
+        return 'USB-'+image_name if kwargs.get('usb_image', False) else image_name

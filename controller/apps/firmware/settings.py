@@ -15,4 +15,5 @@ FIRMWARE_BUILD_IMAGE_STORAGE = getattr(settings, 'FIRMWARE_BUILD_IMAGE_STORAGE',
 
 FIRMWARE_BUILD_IMAGE_PATH = getattr(settings, 'FIRMWARE_BUILD_IMAGE_PATH', 'firmwares')
 
-# TODO confine-install
+FIRMWARE_PLUGINS_USB_IMAGE = getattr(settings, 'FIRMWARE_PLUGINS_USB_IMAGE',
+    '%(site_root)s/confine-install.img.gz')

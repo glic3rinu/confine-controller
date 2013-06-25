@@ -4,6 +4,7 @@ from django.forms.models import BaseInlineFormSet
 
 from .models import Config
 
+
 class BaseImageFormSet(BaseInlineFormSet):
     def clean(self):
         """ Prevents repeated architectures """
@@ -15,6 +16,7 @@ class BaseImageFormSet(BaseInlineFormSet):
                     raise ValidationError("Architecture '%s' selected twice or more times." % arch)
             current_archs += archs
         super(BaseImageFormSet, self).clean()
+
 
 class OptionalFilesForm(forms.Form):
     def __init__(self, *args, **kwargs):

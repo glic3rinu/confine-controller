@@ -15,7 +15,7 @@ from singleton_models.models import SingletonModel
 
 from controller import settings as controller_settings
 from controller.models.fields import MultiSelectField
-from controller.models.utils import generate_chainer_manager, get_file_field_base_path
+from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
@@ -138,7 +138,7 @@ class Build(models.Model):
             return None
     
     @classmethod
-    def build(cls, node, async=False, exclude=[]):
+    def build(cls, node, async=False, exclude=[], **kwargs):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
@@ -154,9 +154,9 @@ class Build(models.Model):
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version)
         if async:
-            defer(build.delay, build_obj.pk, exclude=exclude)
+            defer(build.delay, build_obj.pk, exclude=exclude, **kwargs)
         else:
-            build_obj = build(build_obj.pk, exclude=exclude)
+            build_obj = build(build_obj.pk, exclude=exclude, **kwargs)
         return build_obj
     
     def add_file(self, path, content, config):
@@ -261,12 +261,6 @@ class Config(SingletonModel):
             'version': self.version }
         name = self.image_name % context
         return name.replace(' ', '_')
-    
-    def get_dest_path(self, node, build=None):
-        """ image destination path """
-        image_name = self.get_image_name(node, build)
-        base_path = get_file_field_base_path(Build, 'image')
-        return os.path.join(base_path, image_name)
 
 
 class BaseImage(models.Model):
@@ -381,7 +375,12 @@ class ConfigFileHelpText(models.Model):
     help_text = models.TextField()
     
     def __unicode__(self):
-        return str(self.file)
+        return str(self.help_text)
+
+
+class ConfigPluginQuerySet(models.query.QuerySet):
+    def active(self, **kwargs):
+        return self.filter(is_active=True, **kwargs)
 
 
 class ConfigPlugin(models.Model):
@@ -389,14 +388,18 @@ class ConfigPlugin(models.Model):
     is_active = models.BooleanField(default=False)
     label = models.CharField(max_length=128, blank=True, unique=True)
     
+    objects = generate_chainer_manager(ConfigPluginQuerySet)
+    
     def __unicode__(self):
         return self.label
     
     @property
     def instance(self):
-        module = __import__('firmware.plugins')
-        plugin_class = getattr(module.plugins, self.label)
-        return plugin_class()
+        if not hasattr(self, '_instance'):
+            module = __import__('firmware.plugins')
+            plugin_class = getattr(module.plugins, self.label)
+            self._instance = plugin_class()
+        return self._instance
 
 
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])

@@ -8,7 +8,16 @@ class FirmwarePlugin(object):
     
     __metaclass__ = PluginMount
     
-    def get_form(self, *args, **kwargs):
+    @property
+    def form(self):
+        self._form = getattr(self, '_form', self.get_form())
+        return self._form
+    
+    @form.setter
+    def form(self, value):
+        self._form = value
+    
+    def get_form(self):
         pass
     
     def pre_umount(self, image, build, *args, **kwargs):
@@ -19,6 +28,9 @@ class FirmwarePlugin(object):
     
     def build_display(self, build):
         pass
+    
+    def update_image_name(self, image_name, **kwargs):
+        return image_name
 
 
 modules = glob.glob(os.path.join(os.path.dirname(__file__), '*.py'))

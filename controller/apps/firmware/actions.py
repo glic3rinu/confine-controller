@@ -44,7 +44,7 @@ def get_firmware(modeladmin, request, queryset):
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
         'form': OptionalFilesForm(),
-        'plugins': config.plugins.filter(is_active=True)
+        'plugins': config.plugins.active()
     }
 
     # No architecture support
@@ -58,13 +58,25 @@ def get_firmware(modeladmin, request, queryset):
     
     # User has requested a firmware build
     if request.POST.get('post'):
+        kwargs = {}
+        all_valid = True
+        for plugin in context['plugins']:
+            form = plugin.instance.form(request.POST)
+            plugin.instance.form = form
+            if form.is_valid():
+                kwargs.update(plugin.instance.process_form_post(form))
+            else:
+                all_valid = False
         form = OptionalFilesForm(request.POST)
-        if form.is_valid():
+        if all_valid and form.is_valid():
             optional_fields = form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
-            build = Build.build(node, async=True, exclude=exclude)
+            print kwargs
+            build = Build.build(node, async=True, exclude=exclude, **kwargs)
             modeladmin.log_change(request, node, "Build firmware")
-    
+        else:
+            template = 'admin/firmware/generate_build.html'
+            return TemplateResponse(request, template, context, current_app=site_name)
     try:
         build = Build.objects.get_current(node=node)
     except Build.DoesNotExist:

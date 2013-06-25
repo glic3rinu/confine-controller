@@ -3,6 +3,8 @@ import os
 from celery import states
 from celery.task import task
 
+from controller.models.utils import get_file_field_base_path
+
 from .image import Image
 
 
@@ -53,7 +55,7 @@ def build(build_id, *args, **kwargs):
             build_file.build = build_obj
             build_file.save()
         
-        plugins = config.plugins.filter(is_active=True)
+        plugins = config.plugins.active()
         total = len(plugins)
         for num, plugin in enumerate(plugins):
             plugin.instance.pre_umount(image, build_obj, *args, **kwargs)
@@ -61,18 +63,25 @@ def build(build_id, *args, **kwargs):
         update_state(build, 60, 74, 'Unmounting image file system')
         image.umount()
         
+        # Post umount
         for num, plugin in enumerate(plugins):
             current = 75 + num/total*25
             next = min(75 + (num+1)/total*25, 80)
             instance = plugin.instance
-            update_state(build, current, netx, instance.post_umount.description)
+            update_state(build, current, next, instance.post_umount.__doc__)
             instance.post_umount(image, build_obj, *args, **kwargs)
         
         update_state(build, 80, 94, 'Compressing image')
         image.gzip()
         
         update_state(build, 95, 99, 'Cleaning up')
-        dest_path = config.get_dest_path(node, build=build_obj)
+        
+        # Image name
+        image_name = config.get_image_name(node, build_obj)
+        for plugin in config.plugins.active():
+            image_name = plugin.instance.update_image_name(image_name, **kwargs)
+        base_path = get_file_field_base_path(Build, 'image')
+        dest_path = os.path.join(base_path, image_name)
         image.move(dest_path)
     finally:
         image.clean()

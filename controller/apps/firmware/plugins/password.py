@@ -1,8 +1,12 @@
+import string, random, crypt, os
+from datetime import datetime
+
 from django import forms
 
 from controller.utils.system import run
 
 from firmware.plugins import FirmwarePlugin
+from firmware.settings import FIRMWARE_PLUGINS_PASSWORD_DEFAULT
 
 
 class PasswordPlugin(FirmwarePlugin):
@@ -11,6 +15,7 @@ class PasswordPlugin(FirmwarePlugin):
     def get_form(self):
         class PasswordForm(forms.Form):
             password1 = forms.CharField(label='Password', required=False,
+                help_text='Default password is %s' % FIRMWARE_PLUGINS_PASSWORD_DEFAULT,
                 widget=forms.PasswordInput)
             password2 = forms.CharField(label='Password confirmation', required=False,
                 widget=forms.PasswordInput)
@@ -31,8 +36,33 @@ class PasswordPlugin(FirmwarePlugin):
     
     def pre_umount(self, image, build, *args, **kwargs):
         """ Configuring image password """
+        
+        password = kwargs.get('password', FIRMWARE_PLUGINS_PASSWORD_DEFAULT)
+        
+        hash_type = 6 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
+        salt_chars = string.ascii_letters + string.digits
+        salt_length = random.randint(1, 16)
+        salt = ''.join(random.choice(salt_chars) for x in range(salt_length))
+        
+        # days since Jan 1, 1970 from now
+        epoch = datetime.utcfromtimestamp(0)
+        today = datetime.today()
+        d = today - epoch
+        
+        # generate root line for shadow file
         context = {
-            'pwd': kwargs.get('password', 'confine'),
-            'path': image.mnt }
-        run('chroot %(path)s/bin/bash -c \'echo -e "%(pwd)s\n%(pwd)s"|passwd\'' % context)
-        run('rm -f %(path)s/etc/uci-defaults/confine-passwd.sh' % context)
+            'pwd': crypt.crypt(password, "$%i$%s$" % (hash_type, salt)),
+            'user': 'root',
+            'last_changed': d.days,
+            'min_days': 0,
+            'max_days': 99999,
+            'warn_days': 7 }
+        
+        line = '%(user)s:%(pwd)s:%(last_changed)i:%(min_days)i:%(max_days)i:%(warn_days)i:::' % context
+        context = {
+            'line': line.replace('/', '\/'),
+            'shadow': os.path.join(image.mnt, 'etc/shadow'),
+            'image': image.mnt }
+        
+        run("sed -i 's/^root:.*/%(line)s/' %(shadow)s" % context)
+        run('rm -f %(image)s/etc/uci-defaults/confine-passwd.sh' % context)

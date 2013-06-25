@@ -1,4 +1,4 @@
-import re, string
+import re, string, base64, struct
 from uuid import UUID
 
 from django.core import validators
@@ -30,6 +30,17 @@ def validate_rsa_pubkey(value):
             RSA.load_pub_key_bio(bio)
         except:
             raise ValidationError('This is not a valid RSA (X.501 or PKCS#1) public key.')
+
+
+def validate_ssh_pubkey(value):
+    try:
+        type, key_string, comment = value.split()
+        data = base64.decodestring(key_string)
+        int_len = 4
+        str_len = struct.unpack('>I', data[:int_len])[0] # this should return 7
+        assert data[int_len:int_len+str_len] == type
+    except:
+        raise ValidationError('This is not a valid SSH public key.')
 
 
 def validate_net_iface_name(value):

@@ -9,7 +9,7 @@ from firmware.settings import FIRMWARE_PLUGINS_USB_IMAGE
 
 
 class USBImagePlugin(FirmwarePlugin):
-    verbose_name = 'USB Image'
+    verbose_name = 'USB image'
     description = 'Optionally puts the firmware image into confine-install USB image'
     
     def get_form(self):
@@ -36,10 +36,10 @@ class USBImagePlugin(FirmwarePlugin):
                 run('mv %s %s' % (image.image, dst))
                 install.umount()
                 image.umount()
-                image.clean()
                 image.image = install.image
-            except:
+            finally:
                 install.clean()
     
     def update_image_name(self, image_name, **kwargs):
+        """ Updating confine-install USB image name """
         return 'USB-'+image_name if kwargs.get('usb_image', False) else image_name

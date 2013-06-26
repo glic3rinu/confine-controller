@@ -7,7 +7,7 @@ from firmware.plugins import FirmwarePlugin
 
 
 class AuthKeysPlugin(FirmwarePlugin):
-    verbose_name = 'SSH Authorized Keys'
+    verbose_name = 'SSH authorized keys'
     description = 'Enables the inclusion of user SSH Authorized Keys'
     
     def get_form(self):
@@ -36,5 +36,5 @@ class AuthKeysPlugin(FirmwarePlugin):
             context = {
                 'auth_keys': auth_keys,
                 'image': image.mnt }
-            run('mkdir %(image)s/root/.ssh' % context)
-            run('echo "%(auth_keys)s" >> %(image)s/root/.ssh/authorized_keys' % context)
+            run('echo "%(auth_keys)s" >> %(image)s/etc/dropbear/authorized_keys' % context)
+            run('chmod 0600 %(image)s/etc/dropbear/authorized_keys' % context)

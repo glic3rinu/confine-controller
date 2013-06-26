@@ -74,6 +74,7 @@ def get_firmware(modeladmin, request, queryset):
             build = Build.build(node, async=True, exclude=exclude, **kwargs)
             modeladmin.log_change(request, node, "Build firmware")
         else:
+            # Display form validation errors
             template = 'admin/firmware/generate_build.html'
             return TemplateResponse(request, template, context, current_app=site_name)
     try:

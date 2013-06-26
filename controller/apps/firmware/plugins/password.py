@@ -34,12 +34,12 @@ class PasswordPlugin(FirmwarePlugin):
         return PasswordForm
     
     def process_form_post(self, form):
-        return {'password': form.cleaned_data['password2']}
+        return {'password': form.cleaned_data['password2'] or FIRMWARE_PLUGINS_PASSWORD_DEFAULT}
     
     def pre_umount(self, image, build, *args, **kwargs):
         """ Configuring image password """
         
-        password = kwargs.get('password', FIRMWARE_PLUGINS_PASSWORD_DEFAULT)
+        password = kwargs.get('password')
         
         hash_type = 6 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
         salt_chars = string.ascii_letters + string.digits

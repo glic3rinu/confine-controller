@@ -92,7 +92,7 @@ class ConfigFileHelpTextInline(admin.TabularInline):
 class ConfigPluginInline(admin.TabularInline):
     model = ConfigPlugin
     extra = 0
-    readonly_fields = ('label', 'description')
+    readonly_fields = ('label', 'module', 'description')
     
     def description(self, plugin):
         return plugin.instance.description

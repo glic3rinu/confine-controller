@@ -19,8 +19,9 @@ class Command(BaseCommand):
         existing_pks = []
         for plugin in FirmwarePlugin.plugins:
             label = plugin.__name__
+            module = plugin.__module__
             obj, __ = ConfigPlugin.objects.get_or_create(config=config, label=label,
-                description=plugin.description)
+                module=module)
             existing_pks.append(obj.pk)
         # Delete unused plugins
         ConfigPlugin.objects.exclude(pk__in=existing_pks).delete()

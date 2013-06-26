@@ -65,6 +65,7 @@ def build(build_id, *args, **kwargs):
         
         # Post umount
         for num, plugin in enumerate(plugins):
+            # FIXME this progress is not correct
             current = 75 + num/total*25
             next = min(75 + (num+1)/total*25, 80)
             instance = plugin.instance

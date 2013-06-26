@@ -346,7 +346,10 @@ class ConfigFile(models.Model):
             paths = eval("self.path", safe_locals)
         
         # get contents
-        contents = eval(self.content, safe_locals)
+        try:
+            contents = eval(self.content, safe_locals)
+        except IndexError:
+            contents ='The content of this file depends on another file that is not present'
         
         # path and contents can be or not an iterator (multiple files)
         if not hasattr(paths, '__iter__'):
@@ -387,7 +390,7 @@ class ConfigPlugin(models.Model):
     config = models.ForeignKey(Config, related_name='plugins')
     is_active = models.BooleanField(default=False)
     label = models.CharField(max_length=128, blank=True, unique=True)
-    
+    module = models.CharField(max_length=256, blank=True)
     objects = generate_chainer_manager(ConfigPluginQuerySet)
     
     def __unicode__(self):
@@ -396,8 +399,8 @@ class ConfigPlugin(models.Model):
     @property
     def instance(self):
         if not hasattr(self, '_instance'):
-            module = __import__('firmware.plugins')
-            plugin_class = getattr(module.plugins, self.label)
+            module = __import__(self.module, fromlist=[self.label])
+            plugin_class = getattr(module, self.label)
             self._instance = plugin_class()
         return self._instance
 

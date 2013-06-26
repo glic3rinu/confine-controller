@@ -1,3 +1,5 @@
+import os
+
 from django import forms
 
 from controller.utils.paths import get_site_root
@@ -25,9 +27,9 @@ class USBImagePlugin(FirmwarePlugin):
     def post_umount(self, image, build, *args, **kwargs):
         """ Creating confine-install USB image """
         if kwargs.get('usb_image', False):
-            context = { 'site_root': get_site_root() }
-            install = Image(FIRMWARE_PLUGINS_USB_IMAGE % context)
             try:
+                context = { 'site_root': get_site_root() }
+                install = Image(FIRMWARE_PLUGINS_USB_IMAGE % context)
                 install.prepare()
                 install.gunzip()
                 install.mount()
@@ -35,10 +37,11 @@ class USBImagePlugin(FirmwarePlugin):
                 dst = run('ls %s' % path).stdout
                 run('mv %s %s' % (image.image, dst))
                 install.umount()
-                image.umount()
-                image.image = install.image
-            finally:
+            except:
                 install.clean()
+            image.clean()
+            image.image = install.image
+            image.tmp = install.tmp
     
     def update_image_name(self, image_name, **kwargs):
         """ Updating confine-install USB image name """

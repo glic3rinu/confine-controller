@@ -23,5 +23,6 @@ class Command(BaseCommand):
             obj, __ = ConfigPlugin.objects.get_or_create(config=config, label=label,
                 module=module)
             existing_pks.append(obj.pk)
+            self.stdout.write('Found %s (%s)' % (label, module))
         # Delete unused plugins
         ConfigPlugin.objects.exclude(pk__in=existing_pks).delete()

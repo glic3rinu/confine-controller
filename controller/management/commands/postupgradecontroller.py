@@ -56,8 +56,6 @@ class Command(BaseCommand):
             # Common stuff
             development = options.get('development')
             local = options.get('local')
-            
-            
             if local:
                 run("controller-admin.sh install_requirements --local")
             else:

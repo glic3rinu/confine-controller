@@ -63,9 +63,9 @@ def get_firmware(modeladmin, request, queryset):
         return TemplateResponse(request, template, context, current_app=site_name)
     
     # Only one base image, redirect to next step
-    #elif base_images.count() == 1:
-    #    base_image = base_images[0]
-    #    return redirect('admin:nodes_node_firmware_get', node.id, base_image.id)
+    elif base_images.count() == 1:
+        base_image = base_images.get()
+        return redirect('admin:nodes_node_firmware_get', node.pk, base_image.pk)
     
     # Show form for choosing the base image
     template = 'admin/firmware/select_base_image.html'

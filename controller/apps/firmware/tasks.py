@@ -1,3 +1,5 @@
+import os
+
 from celery import states
 from celery.task import task
 

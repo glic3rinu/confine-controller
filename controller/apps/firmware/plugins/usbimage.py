@@ -35,6 +35,7 @@ class USBImagePlugin(FirmwarePlugin):
                 install.mount()
                 path = os.path.join(install.mnt, 'confine/*img.gz')
                 dst = run('ls %s' % path).stdout
+                image.gzip()
                 run('mv %s %s' % (image.image, dst))
                 install.umount()
             except:

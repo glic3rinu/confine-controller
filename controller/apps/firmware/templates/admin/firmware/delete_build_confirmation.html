@@ -14,12 +14,13 @@
 {% endblock %}
 
 {% block content %}
-    <p>Are you sure you want to delete the build for node "{{ node.name }}"? </p>
+    <p>Are you sure you want to delete the build for node "<b>{{ node.name }}</b>"
+    and base image "<b>{{ base_image.name }}</b> ({{ base_image.image }})"? </p>
     <form action="" method="post">{% csrf_token %}
-    <div>
-    <input type="hidden" name="post" value="yes"/>
-    <input type="submit" value="Yes, I'm sure"/>
-    </div>
+      <div>
+        <input type="hidden" name="post" value="yes"/>
+        <input type="submit" value="Yes, I'm sure"/>
+      </div>
     </form>
 {% endblock %}
 

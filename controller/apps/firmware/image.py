@@ -1,4 +1,7 @@
-import gzip, os, tempfile, shutil, functools
+import functools
+import os
+import shutil
+import tempfile
 
 from controller.utils.system import run
 
@@ -48,10 +51,15 @@ class Image(object):
         """ sector number of image part_nr """
         if not hasattr(self, '_sector'):
             context = { 'image': self.image, 'part_nr': self.part_nr }
-            result = r("file %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
+            #BUGFIX: file -k option for keep looking and getting all file image info
+            # different output at UNIX `file` between version 5.11 and 5.14
+            result = r("file -k %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
                        "sed -n %(part_nr)dp" % context)
-            self._sector = int(result.stdout)
-            #TODO raise if sector != ^[0-9]+$
+            try:
+                self._sector = int(result.stdout)
+            except ValueError: #raise if sector != ^[0-9]+$
+                raise Exception("Failed getting image start sector (value '%s'). "\
+                        "Has selected base image a valid image file?" % result.stdout)
         return self._sector
     
     @property
@@ -79,10 +87,11 @@ class Image(object):
         # raising an exception if fuseext2 didn't succeed
         r("mountpoint -q %(mnt)s" % context)
     
-    def umount(self):
+    def umount(self, quiet=False):
         """ umount image partition """
         context = self.mount_context
-        r("fusermount -u %(mnt)s" % context)
+        err_codes = [0, 1] if quiet else [0]
+        r("fusermount -u %(mnt)s" % context, err_codes=err_codes)
         r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
 
     def add_file(self, file):
@@ -97,7 +106,7 @@ class Image(object):
     def clean(self):
         """ remove temporary files """
         try:
-            self.umount()
+            self.umount(quiet=True) # silent error entry not found in /etc/mtab
         except:
             pass
         finally:

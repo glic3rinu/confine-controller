@@ -1,13 +1,15 @@
-import os, re
+import os
+import re
 from hashlib import sha256
 
 from celery import states as celery_states
 from django import template
 from django.conf import settings as project_settings
 from django.core import validators
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import models
 from django.dispatch import Signal, receiver
-from django.template import Template, Context
+from django.template import Context
 from django_transaction_signals import defer
 from djcelery.models import TaskState
 from private_files import PrivateFileField
@@ -20,16 +22,19 @@ from controller.utils.auth import any_auth_method
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
-from . import settings
-from .context import context
-from .exceptions import ConcurrencyError, BaseImageNotAvailable
-from .tasks import build
+from firmware import settings
+from firmware.context import context
+from firmware.exceptions import ConcurrencyError, BaseImageNotAvailable
+from firmware.tasks import build
 
 
 class BuildQuerySet(models.query.QuerySet):
-    def get_current(self, node):
+    def get_current(self, node, base_image=None):
         """ Given an node returns an up-to-date builded image, if exists """
-        build = Build.objects.get(node=node)
+        if base_image is None:
+            build = Build.objects.get(node=node)
+        else:
+            build = Build.objects.get(node=node, base_image=base_image.image)
         config = Config.objects.get()
         if build.state != Build.AVAILABLE: 
             return build
@@ -49,7 +54,7 @@ class Build(models.Model):
     DELETED = 'DELETED'
     FAILED = 'FAILED'
     
-    node = models.OneToOneField('nodes.Node')
+    node = models.ForeignKey('nodes.Node')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
@@ -138,13 +143,13 @@ class Build(models.Model):
             return None
     
     @classmethod
-    def build(cls, node, async=False, exclude=[]):
+    def build(cls, node, base_image, async=False, exclude=[]):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
         """
         try:
-            old_build = cls.objects.get(node=node)
+            old_build = cls.objects.get(node=node, base_image=base_image.image)
         except cls.DoesNotExist:
             pass
         else: 
@@ -152,11 +157,11 @@ class Build(models.Model):
                 raise ConcurrencyError("One build at a time.")
             old_build.delete()
         config = Config.objects.get()
-        build_obj = Build.objects.create(node=node, version=config.version)
+        build_obj = Build.objects.create(node=node, version=config.version, base_image=base_image.image)
         if async:
-            defer(build.delay, build_obj.pk, exclude=exclude)
+            defer(build.delay, build_obj.pk, exclude=exclude, base_image=base_image)
         else:
-            build_obj = build(build_obj.pk, exclude=exclude)
+            build_obj = build(build_obj.pk, exclude=exclude, base_image=base_image)
         return build_obj
     
     def add_file(self, path, content, config):
@@ -167,7 +172,7 @@ class Build(models.Model):
         """ Checks if a a given build is up-to-date or not """
         if self.version != config.version:
             return False
-        if not self.base_image or self.base_image != config.get_image(self.node):
+        if not self.base_image or self.base_image not in config.get_images(self.node):
             return False
         config = Config.objects.get()
         exclude = config.files.optional().values_list('pk', flat=True)
@@ -244,13 +249,25 @@ class Config(SingletonModel):
         context = Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
     
-    def get_image(self, node):
+    def get_image(self, node, base_image=None):
         """ Returns the correct base image file according to the node architecture """
-        arch_regex = "(^|,)%s(,|$)" % node.arch
-        images = self.images.filter(architectures__regex=arch_regex)
+        images = self.get_images(node, base_image)
         if len(images) == 0:
             raise BaseImageNotAvailable('No base image for %s architecture' % node.arch)
-        return images[0].image
+        if len(images) > 1: 
+            raise MultipleObjectsReturned('There are several images for %s architecture' % node.arch)
+        return images[0]
+
+    def get_images(self, node, base_image=None):
+        """ 
+        Returns a list of base image files according to the node architecture.
+        Optionally, can be filtered by base image.
+        """
+        arch_regex = "(^|,)%s(,|$)" % node.arch
+        images = self.images.filter(architectures__regex=arch_regex)
+        if base_image:
+            images = images.filter(image=base_image.image)
+        return [image.image for image in images]
     
     def get_image_name(self, node, build=None):
         context = {
@@ -268,10 +285,18 @@ class Config(SingletonModel):
         base_path = get_file_field_base_path(Build, 'image')
         return os.path.join(base_path, image_name)
 
-
-
+class BaseImageQuerySet(models.query.QuerySet):
+    def filter_by_arch(self, arch):
+        arch_regex = "(^|,)%s(,|$)" % arch
+        return self.filter(architectures__regex=arch_regex)
+        
 class BaseImage(models.Model):
     """ Describes the image used for generating per node customized images """
+    name = models.CharField(max_length=256, unique=True,
+        help_text='Unique name for this base image.A single non-empty line of '
+                  'free-form text with no whitespace surrounding it. ',
+        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
+                    'Enter a valid name.', 'invalid')])
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
@@ -280,8 +305,10 @@ class BaseImage(models.Model):
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Invalid file extension (only accepted *.img.gz)', 'invalid')])
     
+    objects = generate_chainer_manager(BaseImageQuerySet)
+
     def __unicode__(self):
-        return str(self.image)
+        return "%s (%s)" % (self.name, self.image)
     
 
 

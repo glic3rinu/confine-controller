@@ -1,4 +1,10 @@
 {% extends "admin/firmware/base_build.html" %}
+{% load staticfiles utils %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+{% endblock %}
 
 {% block content %}
 {{ block.super }}
@@ -10,23 +16,37 @@
   </ul>
     <div style="margin:20px;">
     <fieldset class="module aligned">
-       <h2>Optional files</h2>
-       <table border="1">
-         <thead><tr> <th></th> <th>Image</th> <th>Help</th> </tr></thead>
-         <tbody>
-         {% for field in form %}
-            <div class="fieldWrapper">
-                {{ field.errors }}
-                <tr>
-                    <td>{{ field }}</td>
-                    <td><b>{{ field.label_tag }}</b></td>
-                    <td>{{ field.help_text|linebreaks }}</td>
-                </tr>
+        <h2>Optional files</h2>
+        {% for field in form %}
+        <div class="form-row ">
+            <div >
+            {{ field.errors }}
+            {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
+            <p class="help">{{ field.help_text|safe }}</p>
             </div>
-         {% endfor %}
-         </tbody>
-       </table>
+        </div>
+        {% endfor %}
     </fieldset>
+    
+    {% for plugin in plugins %}
+    <fieldset class="module aligned ">
+      <h2>{{ plugin.instance.verbose_name }}</h2>
+        {% for field in plugin.instance.form %}
+        <div class="form-row ">
+            <div >
+            {{ field.errors }}
+            {% if field|is_checkbox %}
+                {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
+            {% else %}
+                {{ field.label_tag }} {{ field }}
+            {% endif %}
+            <p class="help">{{ field.help_text|safe }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </fieldset>
+    {% endfor %}
+    
     </div>
       <input type="hidden" name="action" value="get_firmware" />
       <input type="hidden" name="post" value="yes" />

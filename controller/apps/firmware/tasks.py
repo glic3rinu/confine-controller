@@ -1,6 +1,8 @@
 from celery import states
 from celery.task import task
 
+from controller.models.utils import get_file_field_base_path
+
 from firmware.image import Image
 
 
@@ -10,10 +12,12 @@ def update_state(build, progress, next, description):
 
 
 @task(name="firmware.build")
-def build(build_id, exclude=[], base_image=None):
+def build(build_id, *args, **kwargs):
     """ Builds a firmware image for build.node, excluding exclude files """
     # Avoid circular imports
     from firmware.models import Build, Config
+    
+    exclude = kwargs.get('exclude', [])
     
     # retrieve the existing build instance, used for user feedback
     update_state(build, 1, 4, 'Build started')
@@ -23,14 +27,7 @@ def build(build_id, exclude=[], base_image=None):
     
     config = Config.objects.get()
     node = build_obj.node
-    if base_image is None:
-        base_image = config.get_image(node) # backwards compatibility
-    else:
-        base_image = base_image.image
-    if base_image is None: # this should be avoided before running this task
-        raise ImproperlyConfigured("Error building the firmware. Does not \
-            exists a base image for %s arch (node %s)" % (node.arch, node.id))
-    image = Image(base_image.path)
+    image = Image(build_obj.base_image.path)
     
     try:
         # Build the image
@@ -41,7 +38,7 @@ def build(build_id, exclude=[], base_image=None):
         
         update_state(build, 15, 29, 'Preparing image file system')
         image.mount()
-
+        
         files = config.eval_files(node, exclude=exclude, image=image)
         total = len(files)
         for num, build_file in enumerate(files):
@@ -52,19 +49,38 @@ def build(build_id, exclude=[], base_image=None):
             build_file.build = build_obj
             build_file.save()
         
+        plugins = config.plugins.active()
+        total = len(plugins)
+        for num, plugin in enumerate(plugins):
+            plugin.instance.pre_umount(image, build_obj, *args, **kwargs)
+        
         update_state(build, 60, 74, 'Unmounting image file system')
         image.umount()
         
-        update_state(build, 75, 94, 'Compressing image')
+        # Post umount
+        for num, plugin in enumerate(plugins):
+            # FIXME this progress is not correct
+            current = 75 + num/total*25
+            next = min(75 + (num+1)/total*25, 80)
+            instance = plugin.instance
+            update_state(build, current, next, instance.post_umount.__doc__)
+            instance.post_umount(image, build_obj, *args, **kwargs)
+        
+        update_state(build, 80, 94, 'Compressing image')
         image.gzip()
         
         update_state(build, 95, 99, 'Cleaning up')
-        dest_path = config.get_dest_path(node, build=build_obj)
+        
+        # Image name
+        image_name = config.get_image_name(node, build_obj)
+        for plugin in config.plugins.active():
+            image_name = plugin.instance.update_image_name(image_name, **kwargs)
+        base_path = get_file_field_base_path(Build, 'image')
+        dest_path = os.path.join(base_path, image_name)
         image.move(dest_path)
     finally:
         image.clean()
     
     build_obj.image = dest_path
-    build_obj.base_image = base_image
     build_obj.save()
     return { 'progress': 99, 'description': 'Redirecting', 'result': dest_path }

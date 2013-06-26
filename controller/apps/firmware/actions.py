@@ -24,7 +24,7 @@ def get_firmware(modeladmin, request, queryset):
     
     using = router.db_for_write(modeladmin.model)
     node = queryset.get()
-    qs_base_image = BaseImage.objects.filter_by_arch(node.arch)
+    base_images = BaseImage.objects.filter_by_arch(node.arch)
     
     # Check if the user has permissions for download the image
     if not request.user.has_perm('nodes.getfirmware_node', node):
@@ -50,21 +50,21 @@ def get_firmware(modeladmin, request, queryset):
         form = BaseImageForm(data=request.POST, arch=node.arch)
         if form.is_valid():
             base_image = form.cleaned_data['base_image']
-            return redirect('admin:nodes_node_firmware_get', node.id, base_image.id)
+            return redirect('admin:nodes_node_firmware_get', node.pk, base_image.pk)
         else:
             # update context with current form for display errors 
             context['form'] = form
-
+    
     # No architecture support
-    if qs_base_image.count() == 0:
-        context["content_message"] = "Sorry but currently we do not support \
-                                      %s architectures :(" % node.arch
+    if base_images.count() == 0:
+        msg = "Sorry but currently we do not support %s architectures :(" % node.arch
+        context["content_message"] = msg
         template = 'admin/firmware/base_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
-
+    
     # Only one base image, redirect to next step
-    #elif qs_base_image.count() == 1:
-    #    base_image = qs_base_image[0]
+    #elif base_images.count() == 1:
+    #    base_image = base_images[0]
     #    return redirect('admin:nodes_node_firmware_get', node.id, base_image.id)
     
     # Show form for choosing the base image

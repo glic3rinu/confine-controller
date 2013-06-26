@@ -17,7 +17,7 @@ from singleton_models.models import SingletonModel
 
 from controller import settings as controller_settings
 from controller.models.fields import MultiSelectField
-from controller.models.utils import generate_chainer_manager, get_file_field_base_path
+from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
@@ -54,14 +54,16 @@ class Build(models.Model):
     DELETED = 'DELETED'
     FAILED = 'FAILED'
     
-    node = models.ForeignKey('nodes.Node')
+    node = models.OneToOneField('nodes.Node', primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
         upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH, max_length=256,
         condition=any_auth_method(lambda request, self:
                   request.user.has_perm('nodes.getfirmware_node', obj=self.node)))
-    base_image = models.CharField(max_length=256)
+    base_image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
+        upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
+        help_text='Image file compressed in gzip. The file name must end in .img.gz')
     task_id = models.CharField(max_length=36, unique=True, null=True,
         help_text="Celery task ID")
     
@@ -143,7 +145,7 @@ class Build(models.Model):
             return None
     
     @classmethod
-    def build(cls, node, base_image, async=False, exclude=[]):
+    def build(cls, node, base_image, async=False, exclude=[], **kwargs):
         """
         This method handles the building image,
         if async is True the building task will be executed with Celery
@@ -157,11 +159,12 @@ class Build(models.Model):
                 raise ConcurrencyError("One build at a time.")
             old_build.delete()
         config = Config.objects.get()
-        build_obj = Build.objects.create(node=node, version=config.version, base_image=base_image.image)
+        build_obj = Build.objects.create(node=node, version=config.version,
+            base_image=base_image.image)
         if async:
-            defer(build.delay, build_obj.pk, exclude=exclude, base_image=base_image)
+            defer(build.delay, build_obj.pk, exclude=exclude, **kwargs)
         else:
-            build_obj = build(build_obj.pk, exclude=exclude, base_image=base_image)
+            build_obj = build(build_obj.pk, exclude=exclude, **kwargs)
         return build_obj
     
     def add_file(self, path, content, config):
@@ -273,23 +276,19 @@ class Config(SingletonModel):
         context = {
             'node_name': node.name,
             'arch': node.arch,
-            'build_id': build.id if build else 0,
+            'build_id': build.pk if build else 0,
             'node_id': node.pk,
             'version': self.version }
         name = self.image_name % context
         return name.replace(' ', '_')
-    
-    def get_dest_path(self, node, build=None):
-        """ image destination path """
-        image_name = self.get_image_name(node, build)
-        base_path = get_file_field_base_path(Build, 'image')
-        return os.path.join(base_path, image_name)
+
 
 class BaseImageQuerySet(models.query.QuerySet):
     def filter_by_arch(self, arch):
         arch_regex = "(^|,)%s(,|$)" % arch
         return self.filter(architectures__regex=arch_regex)
-        
+
+
 class BaseImage(models.Model):
     """ Describes the image used for generating per node customized images """
     name = models.CharField(max_length=256, unique=True,
@@ -304,12 +303,12 @@ class BaseImage(models.Model):
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Invalid file extension (only accepted *.img.gz)', 'invalid')])
+    default = models.BooleanField(default=False)
     
     objects = generate_chainer_manager(BaseImageQuerySet)
-
+    
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.image)
-    
 
 
 class ConfigUCI(models.Model):
@@ -381,7 +380,10 @@ class ConfigFile(models.Model):
             paths = eval("self.path", safe_locals)
         
         # get contents
-        contents = eval(self.content, safe_locals)
+        try:
+            contents = eval(self.content, safe_locals)
+        except IndexError:
+            contents ='The content of this file depends on another file that is not present'
         
         # path and contents can be or not an iterator (multiple files)
         if not hasattr(paths, '__iter__'):
@@ -406,11 +408,35 @@ class ConfigFile(models.Model):
 
 class ConfigFileHelpText(models.Model):
     config = models.ForeignKey(Config)
-    file = models.OneToOneField(ConfigFile)
+    file = models.OneToOneField(ConfigFile, related_name='help_text')
     help_text = models.TextField()
     
     def __unicode__(self):
-        return str(self.file)
+        return str(self.help_text)
+
+
+class ConfigPluginQuerySet(models.query.QuerySet):
+    def active(self, **kwargs):
+        return self.filter(is_active=True, **kwargs)
+
+
+class ConfigPlugin(models.Model):
+    config = models.ForeignKey(Config, related_name='plugins')
+    is_active = models.BooleanField(default=False)
+    label = models.CharField(max_length=128, blank=True, unique=True)
+    module = models.CharField(max_length=256, blank=True)
+    objects = generate_chainer_manager(ConfigPluginQuerySet)
+    
+    def __unicode__(self):
+        return self.label
+    
+    @property
+    def instance(self):
+        if not hasattr(self, '_instance'):
+            module = __import__(self.module, fromlist=[self.label])
+            plugin_class = getattr(module, self.label)
+            self._instance = plugin_class()
+        return self._instance
 
 
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])

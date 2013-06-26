@@ -8,6 +8,7 @@ from controller.utils.system import run
 
 r = functools.partial(run, silent=False)
 
+# TODO rename self.image to self.file or something  path ? !
 
 class Image(object):
     """ 
@@ -57,9 +58,10 @@ class Image(object):
                        "sed -n %(part_nr)dp" % context)
             try:
                 self._sector = int(result.stdout)
-            except ValueError: #raise if sector != ^[0-9]+$
-                raise Exception("Failed getting image start sector (value '%s'). "\
-                        "Has selected base image a valid image file?" % result.stdout)
+            except ValueError:
+                # TODO custom exception
+                raise Exception("Failed getting image start sector (value '%s'). "
+                    "Has selected base image a valid image file?" % result.stdout)
         return self._sector
     
     @property
@@ -93,7 +95,7 @@ class Image(object):
         err_codes = [0, 1] if quiet else [0]
         r("fusermount -u %(mnt)s" % context, err_codes=err_codes)
         r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
-
+    
     def add_file(self, file):
         """
         add files to the image

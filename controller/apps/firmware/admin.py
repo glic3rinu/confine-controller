@@ -11,7 +11,7 @@ from nodes.models import Node
 
 from firmware.actions import get_firmware
 from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
-    ConfigFileHelpText, BuildFile)
+    ConfigFileHelpText, BuildFile, ConfigPlugin)
 from firmware.views import build_info_view, delete_build_view, get_firmware_view
 
 
@@ -75,12 +75,26 @@ class ConfigFileInline(admin.TabularInline):
 class ConfigFileHelpTextInline(admin.TabularInline):
     model = ConfigFileHelpText
     extra = 0
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make value input widget bigger """
+        if db_field.name == 'help_text':
+            kwargs['widget'] = forms.Textarea(attrs={'cols': 70, 'rows': 5})
+        return super(ConfigFileHelpTextInline, self).formfield_for_dbfield(db_field, **kwargs)
 
+
+class ConfigPluginInline(admin.TabularInline):
+    model = ConfigPlugin
+    extra = 0
+    readonly_fields = ('label', 'module', 'description')
+    
+    def description(self, plugin):
+        return plugin.instance.description
 
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['id', 'node', 'version', colored('state', STATE_COLORS), 
+    list_display = ['pk', 'node', 'version', colored('state', STATE_COLORS), 
                     'task_link', 'image_link', 'date']
-    list_display_links = ['id', 'node']
+    list_display_links = ['pk', 'node']
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
@@ -118,7 +132,8 @@ class BuildAdmin(admin.ModelAdmin):
 
 
 class ConfigAdmin(SingletonModelAdmin):
-    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline]
+    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline,
+        ConfigPluginInline]
     save_on_top = True
     
     def get_urls(self):

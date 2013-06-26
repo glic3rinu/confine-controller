@@ -65,6 +65,7 @@ class Command(BaseCommand):
             
             run("python manage.py syncdb")
             run("python manage.py migrate")
+            run("python manage.py syncfirmwareplugins")
             run("python manage.py restartservices")
         
         if not version:

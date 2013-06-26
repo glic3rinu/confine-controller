@@ -303,7 +303,7 @@ class BaseImage(models.Model):
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Invalid file extension (only accepted *.img.gz)', 'invalid')])
-    default = models.BooleanField(default=False)
+#    default = models.BooleanField(default=False)
     
     objects = generate_chainer_manager(BaseImageQuerySet)
     

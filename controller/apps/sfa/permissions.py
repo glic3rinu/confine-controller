@@ -5,33 +5,34 @@ from users.models import Group
 
 from .models import SfaObject
 
+
 class SfaObjectPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         """ Admins can add """
-        if self._is_class(caller):
+        if obj is None:
             return user.has_roles(('admin',))
-        elif type(caller.content_object) is Group:
-            return caller.content_object.has_role(user, 'admin')
-        return caller.content_object.group.has_role(user, 'admin')
+        elif isinstance(obj.content_object, Group):
+            return obj.content_object.has_role(user, 'admin')
+        return obj.content_object.group.has_role(user, 'admin')
     
-    def change(self, caller, user):
+    def change(self, obj, cls, user):
         """ Group admins can change """
-        if self._is_class(caller):
+        if obj is None:
             return user.has_roles(('admin',))
-        elif type(caller.content_object) is Group:
-            return caller.content_object.has_role(user, 'admin')
-        return caller.content_object.group.has_role(user, 'admin')
+        elif isinstance(obj.content_object, Group):
+            return obj.content_object.has_role(user, 'admin')
+        return obj.content_object.group.has_role(user, 'admin')
     
-    def delete(self, caller, user):
-        """ Group admins can delete """
-        if self._is_class(caller):
+    def delete(self, obj, cls, user):
+        """ Group adminsobjcan delete """
+        if obj is None:
             return user.has_roles(('admin',))
-        elif type(caller.content_object) is Group:
-            return caller.content_object.has_role(user, 'admin')
-        return caller.content_object.group.has_role(user, 'admin')
+        elif isinstance(obj.content_object, Group):
+            return obj.content_object.has_role(user, 'admin')
+        return obj.content_object.group.has_role(user, 'admin')
 
 
 SfaObject.has_permission = SfaObjectPermission()

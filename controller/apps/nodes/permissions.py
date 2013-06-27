@@ -6,29 +6,29 @@ from .models import Node, NodeProp, DirectIface, Server
 
 
 class NodePermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         """ Admins and techs can add """
-        if self._is_class(caller):
+        if obj is None:
             allow_nodes = user.groups.filter(allow_nodes=True).exists()
             return user.has_roles(('admin', 'technician')) and allow_nodes
-        if caller.group.allow_nodes:
-            return caller.group.has_roles(user, roles=['admin', 'technician'])
+        if obj.group.allow_nodes:
+            return obj.group.has_roles(user, roles=['admin', 'technician'])
     
-    def change(self, caller, user):
+    def change(self, obj, cls, user):
         """ group admins and techs can change """
-        if self._is_class(caller):
+        if obj is None:
             return user.has_roles(('admin', 'technician'))
         allow_nodes = user.groups.filter(allow_nodes=True).exists()
-        return caller.group.has_roles(user, roles=['admin', 'technician']) and allow_nodes
+        return obj.group.has_roles(user, roles=['admin', 'technician']) and allow_nodes
     
-    def delete(self, caller, user):
+    def delete(self, obj, cls, user):
         """ group admins and techs can delete """
-        if self._is_class(caller):
+        if obj is None:
             return user.has_roles(('admin', 'technician'))
-        return caller.group.has_roles(user, roles=['admin', 'technician'])
+        return obj.group.has_roles(user, roles=['admin', 'technician'])
 
 
 Node.has_permission = NodePermission()

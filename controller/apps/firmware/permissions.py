@@ -7,23 +7,22 @@ from .models import Build
 
 
 class FirmwarePermission(Permission):
-    def getfirmware(self, caller, user):
-        if not self._is_class(caller):
-            if caller.group.has_roles(user, roles=['admin', 'technician']):
-                return True
+    def getfirmware(self, obj, cls, user):
+        if obj is not None:
+            return obj.group.has_roles(user, roles=['admin', 'technician'])
         return False
 
 
 class BuildPermission(Permission):
     """ Allow delete nodes """
-    def delete(self, caller, user):
-        if not self._is_class(caller):
+    def delete(self, obj, cls, user):
+        if obj is not None:
             # TODO This will never be executed on admin because admin.delete checks
             # permissions like a bitch, without passing the object:
             # if not user.has_perm(p): perms_needed.add(opts.verbose_name)
             # Maybe we can open a ticket and fix this shit
             # https://github.com/django/django/blob/master/django/contrib/admin/util.py
-            return caller.node.group.has_roles(user, roles=['admin', 'technician'])
+            return obj.node.group.has_roles(user, roles=['admin', 'technician'])
         return True
 
 

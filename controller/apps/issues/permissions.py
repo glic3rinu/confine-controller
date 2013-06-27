@@ -8,39 +8,40 @@ from .models import Ticket, Message
 # FIXME this permissions are wrong, correct them
 
 class TicketPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         return True
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.created_by == user
+        return obj.created_by == user
     
-    def delete(self, caller, user):
-        return self.change(caller, user)
+    def delete(self, obj, cls, user):
+        return self.change(obj, cls, user)
 
 
 class MessagePermission(Permission):
-    def view(self, caller, user):
-        if self._is_class(caller):
+    def view(self, obj, cls, user):
+        if obj is None:
             return True
-        if caller.visibility == Message.PUBLIC:
+        if obj.visibility == Message.PUBLIC:
             return True
-        elif caller.visibility == Message.PRIVATE:
-            return caller.author == user
-        elif caller.visibility == Message.INERNAL:
-            return caller.ticket.group.is_member(user)
+        elif obj.visibility == Message.PRIVATE:
+            return obj.author == user
+        elif obj.visibility == Message.INERNAL:
+            return obj.ticket.group.is_member(user)
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         return True
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.author == user
+        return obj.author == user
+
 
 Ticket.has_permission = TicketPermission()
 Message.has_permission = MessagePermission()

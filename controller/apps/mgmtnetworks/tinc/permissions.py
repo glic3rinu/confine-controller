@@ -6,21 +6,22 @@ from .models import TincClient, TincServer, Host, Gateway, Island, TincAddress
 
 
 class HostPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         return True
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.owner == user
+        return obj.owner == user
     
-    def delete(self, caller, user):
-        if self._is_class(caller):
+    def delete(self, obj, cls, user):
+        if obj is None:
             return True
-        return self.change(caller, user)
+        return self.change(obj, cls, user)
+
 
 # Since it uses generic relations we must relay that permissions will be 
 # handled by the parent object

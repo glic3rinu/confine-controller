@@ -6,91 +6,91 @@ from .models import User, AuthToken, Group, Roles, JoinRequest
 
 
 class UserPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         return False
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller == user
+        return obj == user
     
-    def delete(self, caller, user):
-        return self.change(caller, user)
+    def delete(self, obj, cls, user):
+        return self.change(obj, cls, user)
 
 
 class RolesPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
-        if self._is_class(caller):
+    def add(self, obj, cls, user):
+        if obj is None:
             return user.has_role('admin')
-        return caller.group.has_role(user, 'admin')
+        return obj.group.has_role(user, 'admin')
     
-    def change(self, caller, user):
-        return self.add(caller, user)
+    def change(self, obj, cls, user):
+        return self.add(obj, cls, user)
     
-    def delete(self, caller, user):
-        return self.add(caller, user)
+    def delete(self, obj, cls, user):
+        return self.add(obj, cls, user)
 
 
 class GroupPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         return True
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.has_role(user, 'admin')
+        return obj.has_role(user, 'admin')
     
-    def delete(self, caller, user):
-        if self._is_class(caller):
+    def delete(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.has_role(user, 'admin')
+        return obj.has_role(user, 'admin')
 
 
 class JoinRequestPermission(Permission):
-    def view(self, caller, user):
-        if self._is_class(caller):
+    def view(self, obj, cls, user):
+        if obj is None:
             return user.has_role('admin')
-        return caller.group.has_role(user, 'admin')
+        return obj.group.has_role(user, 'admin')
     
-    def add(self, caller, user):
+    def add(self, obj, cls, user):
         return False
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.group.has_role(user, 'admin')
+        return obj.group.has_role(user, 'admin')
     
-    def delete(self, caller, user):
+    def delete(self, obj, cls, user):
         return False
 
 
 class AuthTokenPermission(Permission):
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
-        if self._is_class(caller):
+    def add(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.user == user
+        return obj.user == user
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.user == user
+        return obj.user == user
     
-    def delete(self, caller, user):
-        if self._is_class(caller):
+    def delete(self, obj, cls, user):
+        if obj is None:
             return True
-        return caller.user == user
+        return obj.user == user
 
 
 User.has_permission = UserPermission()

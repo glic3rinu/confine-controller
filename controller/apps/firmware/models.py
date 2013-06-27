@@ -374,8 +374,8 @@ class ConfigFile(models.Model):
         try:
             contents = eval(self.content, safe_locals)
         except IndexError:
-            contents ='Confine-controller firmware generation message: \n'
-                'The content of this file depends on another file that is not present'
+            contents = ('Confine-controller firmware generation message: \n'
+                'The content of this file depends on another file that is not present')
         
         # path and contents can be or not an iterator (multiple files)
         if not hasattr(paths, '__iter__'):

@@ -12,8 +12,8 @@ class Permission(object):
         
         # Define permissions
         class NodePermission(Permission):
-            def change(self, caller, user):
-                return caller.user == user
+            def change(self, obj, cls, user):
+                return obj.user == user
         
         # Provide permissions
         Node.has_permission = NodePermission()
@@ -29,49 +29,38 @@ class Permission(object):
         node.has_permission(user, 'change')
         node.has_permission.change(user)
     """
-    def __get__(self, instance, cls):
+    def __get__(self, obj, cls):
         """ Hacking object internals to provide means for the mentioned interface """
-        if instance is not None:
-            caller = instance
-        elif cls is not None:
-            caller = cls
-        else: 
-            raise TypeError('WTF are you doing dude?')
-        
         # call interface: has_permission(user, 'perm')
         def call(user, perm):
-            return getattr(self, perm)(caller, user)
+            return getattr(self, perm)(obj, cls, user)
         
         # has_permission.perm(user)
         for func in inspect.getmembers(type(self), predicate=inspect.ismethod):
             if func[1].im_class is not type(self):
                 # aggregated methods
-                setattr(call, func[0], functools.partial(func[1], caller))
+                setattr(call, func[0], functools.partial(func[1], obj, cls))
             else:
                 # self methods
-                setattr(call, func[0], functools.partial(func[1], self, caller))
+                setattr(call, func[0], functools.partial(func[1], self, obj, cls))
         return call
     
-    def _aggregate(self, caller, perm):
+    def _aggregate(self, obj, cls, perm):
         """ Aggregates cls methods to self class"""
         for method in inspect.getmembers(perm, predicate=inspect.ismethod):
             if not method[0].startswith('_'):
                 setattr(type(self), method[0], method[1])
-    
-    def _is_class(self, caller):
-        """ shortcut for inspect.isclass"""
-        return inspect.isclass(caller)
 
 
 class ReadOnlyPermission(Permission):
     """ Read only permissions """
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
 
 
 class AllowAllPermission(object):
     """ All methods return True """
-    def __get__(self, instance, cls):
+    def __get__(self, obj, cls):
         return self.AllowAllWrapper()
 
     class AllowAllWrapper(object):
@@ -93,23 +82,16 @@ class RelatedPermission(Permission):
     def __init__(self, relation):
         self.relation = relation
     
-    def __get__(self, instance, cls):
+    def __get__(self, obj, cls):
         """ Hacking object internals to provide means for the mentioned interface """
-        if instance is not None:
-            caller = instance
-        elif cls is not None:
-            caller = cls
-        else: 
-            raise TypeError('WTF are you doing dude?')
-        
         # Walk through FK relations
         relations = self.relation.split('.')
-        if inspect.isclass(caller):
-            parent = caller
+        if obj is None:
+            parent = cls
             for relation in relations:
                 parent = getattr(parent, relation).field.rel.to
         else:
-            parent = reduce(getattr, relations, caller)
+            parent = reduce(getattr, relations, obj)
         
         # call interface: has_permission(user, 'perm')
         def call(user, perm):

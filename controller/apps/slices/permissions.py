@@ -8,25 +8,25 @@ from .models import Slice, Sliver, SliceProp, SliverProp, Template, SliverIface
 class SlicePermission(Permission):
     admins = ('admin', 'researcher')
     
-    def view(self, caller, user):
+    def view(self, obj, cls, user):
         return True
     
-    def add(self, caller, user):
-        if self._is_class(caller):
+    def add(self, obj, cls, user):
+        if obj is None:
             allow_slices = user.groups.filter(allow_slices=True).exists()
             return user.has_roles(self.admins) and allow_slices
-        return caller.group.allow_slices and caller.group.has_roles(user, self.admins)
+        return obj.group.allow_slices and obj.group.has_roles(user, self.admins)
     
-    def change(self, caller, user):
-        if self._is_class(caller):
+    def change(self, obj, cls, user):
+        if obj is None:
             return user.has_roles(self.admins)
         allow_slices = user.groups.filter(allow_slices=True).exists()
-        return caller.group.has_roles(user, self.admins) and allow_slices
+        return obj.group.has_roles(user, self.admins) and allow_slices
     
-    def delete(self, caller, user):
-        if self._is_class(caller):
+    def delete(self, obj, cls, user):
+        if obj is None:
             return user.has_roles(self.admins)
-        return caller.group.has_roles(user, self.admins)
+        return obj.group.has_roles(user, self.admins)
 
 
 Slice.has_permission = SlicePermission()

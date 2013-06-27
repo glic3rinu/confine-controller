@@ -45,7 +45,11 @@ class BuildQuerySet(models.query.QuerySet):
 
 
 class Build(models.Model):
-    """ Represents a builded image for a research device """
+    """
+    Represents a builded image for a research device. All the build information
+    is copied, not referenced by related objects that can change over time.
+    Only the most recent build of each node is stored in order to keep the model simple
+    """
     REQUESTED = 'REQUESTED'
     QUEUED = 'QUEUED'
     BUILDING = 'BUILDING'
@@ -66,6 +70,7 @@ class Build(models.Model):
         help_text='Image file compressed in gzip. The file name must end in .img.gz')
     task_id = models.CharField(max_length=36, unique=True, null=True,
         help_text="Celery task ID")
+    kwargs = models.TextField()
     
     objects = generate_chainer_manager(BuildQuerySet)
     
@@ -160,7 +165,7 @@ class Build(models.Model):
             old_build.delete()
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version,
-            base_image=base_image.image)
+            base_image=base_image.image, kwargs=kwargs)
         if async:
             defer(build.delay, build_obj.pk, exclude=exclude, **kwargs)
         else:
@@ -252,25 +257,11 @@ class Config(SingletonModel):
         context = Context({'uci': self.eval_uci(node, sections=sections)})
         return uci.render(context)
     
-    def get_image(self, node, base_image=None):
-        """ Returns the correct base image file according to the node architecture """
-        images = self.get_images(node, base_image)
-        if len(images) == 0:
-            raise BaseImageNotAvailable('No base image for %s architecture' % node.arch)
-        if len(images) > 1: 
-            raise MultipleObjectsReturned('There are several images for %s architecture' % node.arch)
-        return images[0]
-
-    def get_images(self, node, base_image=None):
+    def get_images(self, node):
         """ 
         Returns a list of base image files according to the node architecture.
-        Optionally, can be filtered by base image.
         """
-        arch_regex = "(^|,)%s(,|$)" % node.arch
-        images = self.images.filter(architectures__regex=arch_regex)
-        if base_image:
-            images = images.filter(image=base_image.image)
-        return [image.image for image in images]
+        return BaseImage.objects.filter_by_arch(node.arch)
     
     def get_image_name(self, node, build=None):
         context = {
@@ -303,7 +294,7 @@ class BaseImage(models.Model):
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Invalid file extension (only accepted *.img.gz)', 'invalid')])
-#    default = models.BooleanField(default=False)
+#    default = models.BooleanField(default=False, help_text='Preselected image')
     
     objects = generate_chainer_manager(BaseImageQuerySet)
     
@@ -383,7 +374,8 @@ class ConfigFile(models.Model):
         try:
             contents = eval(self.content, safe_locals)
         except IndexError:
-            contents ='The content of this file depends on another file that is not present'
+            contents ='Confine-controller firmware generation message: \n'
+                'The content of this file depends on another file that is not present'
         
         # path and contents can be or not an iterator (multiple files)
         if not hasattr(paths, '__iter__'):

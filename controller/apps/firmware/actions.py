@@ -9,7 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
 from firmware.forms import BaseImageForm
-from firmware.models import BaseImage
+from firmware.models import Config
 
 
 @transaction.commit_on_success
@@ -24,7 +24,7 @@ def get_firmware(modeladmin, request, queryset):
     
     using = router.db_for_write(modeladmin.model)
     node = queryset.get()
-    base_images = BaseImage.objects.filter_by_arch(node.arch)
+    base_images = config.objects.get().get_images(node)
     
     # Check if the user has permissions for download the image
     if not request.user.has_perm('nodes.getfirmware_node', node):

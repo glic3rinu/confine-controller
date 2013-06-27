@@ -109,8 +109,6 @@ class Image(object):
         """ remove temporary files """
         try:
             self.umount(quiet=True) # silent error entry not found in /etc/mtab
-        except:
-            pass
         finally:
             shutil.rmtree(self.tmp)
     
@@ -139,19 +137,3 @@ class Image(object):
             dest_file.write(build_file.content)
         if build_file.config.mode:
             r("chmod %s '%s'" % (build_file.config.mode, dest_path))
-    
-    def build(self, path=None):
-        """ build the new image """
-        self.prepare()
-        self.gunzip()
-        self.mount()
-        
-        for f in self.files:
-            self.create_file(f)
-        
-        self.umount()
-        self.gzip()
-        
-        if path is not None:
-            # move the image to the destination path if required
-            self.move(path)

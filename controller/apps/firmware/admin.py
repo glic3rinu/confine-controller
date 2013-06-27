@@ -91,6 +91,7 @@ class ConfigPluginInline(admin.TabularInline):
     def description(self, plugin):
         return plugin.instance.description
 
+
 class BuildAdmin(admin.ModelAdmin):
     list_display = ['pk', 'node', 'version', colored('state', STATE_COLORS), 
                     'task_link', 'image_link', 'date']
@@ -99,8 +100,8 @@ class BuildAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_filter = ['version']
     fields = ['node_link', 'base_image', 'image_link', 'image_sha256', 'version',
-              'build_date', 'state', 'task_link', 'task_id']
-    readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256',
+              'build_date', 'state', 'task_link', 'task_id', 'kwargs']
+    readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 'kwargs',
                        'version', 'build_date', 'task_link', 'task_id', 'base_image']
     inlines = [BuildFileInline]
     

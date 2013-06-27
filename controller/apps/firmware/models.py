@@ -180,7 +180,8 @@ class Build(models.Model):
         """ Checks if a a given build is up-to-date or not """
         if self.version != config.version:
             return False
-        if not self.base_image or self.base_image not in config.get_images(self.node):
+        base_images = [ image.image for image in config.get_images(self.node) ]
+        if not self.base_image or self.base_image not in base_images:
             return False
         config = Config.objects.get()
         exclude = config.files.optional().values_list('pk', flat=True)

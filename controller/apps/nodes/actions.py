@@ -64,6 +64,7 @@ def reboot_selected(modeladmin, request, queryset):
 
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
 reboot_selected.url_name = 'reboot'
+reboot_selected.description = mark_safe('&#171;Reboot this node&#187;')
 
 
 @transaction.commit_on_success

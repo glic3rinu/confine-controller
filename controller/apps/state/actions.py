@@ -28,6 +28,7 @@ def refresh(modeladmin, request, queryset):
     else:
         msg = 'The state of %d %ss has been updated' % (queryset.count(), related_model_name)
         modeladmin.message_user(request, msg)
+refresh.description = "Retrieve the current state of the related object"
 
 
 @transaction.commit_on_success
@@ -58,3 +59,4 @@ def show_state(modeladmin, request, queryset):
     state, created = state_model.objects.get_or_create(**{model_name: obj})
     return redirect('admin:state_%sstate_change' % model_name, state.pk)
 show_state.url_name = 'state'
+show_state.description = "Show the current state of this object"

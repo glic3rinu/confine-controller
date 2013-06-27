@@ -1,5 +1,15 @@
 {% extends "admin/controller/change_form.html" %}
 
+
+{% block object-tools-items %}
+{% if has_change_permission %}
+    {% for item in object_tools_items %}
+        <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
 <a href="{% url 'admin:index' %}">Home</a>

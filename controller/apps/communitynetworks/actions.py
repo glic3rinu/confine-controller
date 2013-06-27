@@ -14,17 +14,16 @@ def cache_node_db(modeladmin, request, queryset):
     data with the received response.
     + List of updated fields: arch, sliver_pub_{ipv6,ipv4,ipv4_range}, gis
     NOTE: manually defined data will be overrided
-
     """
     opts = modeladmin.model._meta
     app_label = opts.app_label
-
+    
     for node in queryset:
         if not request.user.has_perm('node.change_node', node):
             messages.error(request, "Sorry, you don't have enought privileges \
                 for performing the requested action (cache node DB)")
             return None
-
+    
     if request.POST.get('post'):
         errors = success = 0
         if queryset:
@@ -41,7 +40,7 @@ def cache_node_db(modeladmin, request, queryset):
                 else:
                     success += 1
                     modeladmin.log_change(request, node, "Updated CNDB Cache")
-
+        
         if errors:
             messages.error(request, "CNDB Cache update has failed for %d node(s). \
                 See node history for details." % errors)
@@ -50,7 +49,7 @@ def cache_node_db(modeladmin, request, queryset):
         else:
             messages.warning(request, "No nodes have been updated.")
         return None
-
+    
     context = {
         "title": "Are you sure?",
         "content_message": "Are you sure you want to update CNDB cache of the selected nodes?",
@@ -69,3 +68,4 @@ def cache_node_db(modeladmin, request, queryset):
 
 cache_node_db.url_name = 'do-cache-cndb'
 cache_node_db.verbose_name = 'Cache CNDB'
+cache_node_db.description = 'Caches node information stored on CNDB'

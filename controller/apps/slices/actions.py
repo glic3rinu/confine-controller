@@ -23,10 +23,11 @@ def renew_selected_slices(modeladmin, request, queryset):
         obj.renew()
         msg = "Renewed for %s" % SLICES_SLICE_EXP_INTERVAL
         modeladmin.log_change(request, obj, msg)
-    msg = "%s selected slices have been renewed for %s on" % (queryset.count(), \
-        SLICES_SLICE_EXP_INTERVAL)
+    msg = ("%s selected slices have been renewed for %s on" % (queryset.count(),
+        SLICES_SLICE_EXP_INTERVAL))
     modeladmin.message_user(request, msg)
 renew_selected_slices.url_name = 'renew'
+renew_selected_slices.description = 'Renew the slice expiration date for %s on' % SLICES_SLICE_EXP_INTERVAL
 
 
 @transaction.commit_on_success
@@ -42,6 +43,8 @@ def reset_selected(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_plural)s")
 reset_selected.url_name = 'reset'
+reset_selected.description = ('Force the slivers step-by-step back to allocated state '
+    'and get it stopped, redeployed and restarted')
 
 
 @transaction.commit_on_success
@@ -57,6 +60,7 @@ def update_selected(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 update_selected.short_description = ugettext_lazy("Update selected %(verbose_name_plural)s")
 update_selected.url_name = 'update'
+update_selected.description = 'Force the application of changes to an already deployed sliver'
 
 
 @transaction.commit_on_success
@@ -114,3 +118,4 @@ def create_slivers(modeladmin, request, queryset):
     return TemplateResponse(request, "admin/slices/slice/create_slivers_confirmation.html",
                             context, current_app=modeladmin.admin_site.name)
 create_slivers.short_description = "Create slivers on selected nodes"
+create_slivers.description = create_slivers.short_description

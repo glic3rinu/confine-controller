@@ -7,7 +7,7 @@
 {% if user.is_superuser %}
     {% for item in object_tools_items %}
         {% if item.url_name in actions_filter %}
-        <li><a href="{{item.url_name}}/" class="{{item.css_class}}">{{item.verbose_name}}</a></li>
+        <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
         {% endif %}
     {% endfor %}
 {% endif %}

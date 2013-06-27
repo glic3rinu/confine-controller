@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import re
 
 from django.contrib import admin
+from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
@@ -12,10 +13,11 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (insert_list_display, get_admin_link, colored,
-    insert_list_filter, insert_action, get_modeladmin)
+    insert_list_filter, insert_action, get_modeladmin, wrap_admin_view)
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
-from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin
+from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
+from slices.helpers import wrap_action
 from slices.models import Sliver
 
 from .actions import refresh, refresh_state, show_state
@@ -174,6 +176,16 @@ node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action(show_state)
 sliver_modeladmin = get_modeladmin(Sliver)
 sliver_modeladmin.set_change_view_action(show_state)
-# TODO
-#actions = getattr(SliceSliversAdmin, 'change_view_actions', [])
-#SliceSliversAdmin.change_view_actions = actions + [state_action]
+
+actions = getattr(SliceSliversAdmin, 'change_view_actions', [])
+SliceSliversAdmin.change_view_actions = actions + [show_state]
+old_slice_get_urls = SliceAdmin.get_urls
+def get_urls(self):
+    urls = old_slice_get_urls(self)
+    extra_urls = patterns("",
+        url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/state",
+            wrap_admin_view(self, wrap_action(show_state,
+                SliceSliversAdmin(Sliver, self.admin_site))),)
+    )
+    return extra_urls + urls
+SliceAdmin.get_urls = get_urls

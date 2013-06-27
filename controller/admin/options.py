@@ -68,6 +68,8 @@ class ChangeViewActions(admin.options.ModelAdmin):
         view.url_name = getattr(action, 'url_name', action.__name__)
         view.verbose_name = getattr(action, 'verbose_name', view.url_name).capitalize()
         view.css_class = getattr(action, 'css_class', 'historylink')
+        view.description = getattr(action, 'description', '')
+        print view.description
         return view
     
     def get_change_view_actions_as_class(self):

@@ -58,7 +58,7 @@ class Build(models.Model):
     DELETED = 'DELETED'
     FAILED = 'FAILED'
     
-    node = models.OneToOneField('nodes.Node', primary_key=True)
+    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='firmware_build')
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,

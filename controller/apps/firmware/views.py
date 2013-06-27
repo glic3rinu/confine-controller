@@ -16,6 +16,8 @@ from firmware.forms import OptionalFilesForm
 from firmware.models import BaseImage, Build, Config
 
 
+# TODO no need for always passing bimg_id arround if build object is unique per node
+
 def build_info_view(request, node_id, bimg_id):
     """ Hook JSON representation of a Build to NodeModeladmin """
     base_image = get_object_or_404(BaseImage, pk=bimg_id)

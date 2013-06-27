@@ -51,6 +51,7 @@ class ReadOnlyRolesInline(PermissionTabularInline):
     extra = 0
     fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
     readonly_fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
+    verbose_name_plural = 'Roles'
     
     def group_link(self, instance):
         """ Link to related Group """
@@ -62,7 +63,10 @@ class ReadOnlyRolesInline(PermissionTabularInline):
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
-        if self.has_change_permission(request, obj, view=False):
+        if request.user.is_superuser:
+            self.verbose_name_plural = mark_safe(
+                'Roles <a href="../../group">(Manage groups)</a>')
+        elif self.has_change_permission(request, obj, view=False):
             self.verbose_name_plural = mark_safe(
                 'Roles <a href="../../group">(Request group membership)</a>')
         return super(ReadOnlyRolesInline, self).get_fieldsets(request, obj=obj)

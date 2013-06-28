@@ -30,6 +30,7 @@ from .utils import urlize_escaped_html, urlize
 
 STATES_COLORS = {
     'offline': 'red',
+    'crashed': 'red',
     'debug': 'darkorange',
     'safe': 'grey',
     'production': 'green',
@@ -126,6 +127,7 @@ class NodeStateAdmin(BaseStateAdmin):
         return display_timesince(instance.last_contact_on)
     last_contact.help_text = get_help_text(NodeState, 'last_contact_on')
 
+
 class SliverStateAdmin(BaseStateAdmin):
     readonly_fields = ['sliver_link'] + BaseStateAdmin.readonly_fields
     fieldsets = (
@@ -155,13 +157,13 @@ def state_link(*args):
     color = colored('current', STATES_COLORS, verbose=True)
     try:
         state = obj.state
-    except (NodeState.DoesNotExist, SliverState.DoesNotExist):
-        # TODO creatre state object by obj.state._meta introspection
-        return 'No data'
-    else:
-        model_name = obj._meta.verbose_name_raw
-        url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
-        return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
+    except NodeState.DoesNotExist:
+        state = NodeState.objects.create(node=obj)
+    except SliverState.DoesNotExist:
+        state = SliverState.objects.create(sliver=obj)
+    model_name = obj._meta.verbose_name_raw
+    url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
+    return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
 state_link.admin_order_field = 'state__last_seen_on'
 
 

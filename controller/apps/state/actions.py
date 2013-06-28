@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from controller.admin.utils import get_modeladmin
 from controller.core.exceptions import OperationLocked
 
-from .tasks import get_state
+from .tasks import get_state, get_state2
 
 
 @transaction.commit_on_success
@@ -15,10 +15,11 @@ def refresh(modeladmin, request, queryset):
     opts = queryset.model._meta
     state_module = '%s.%s' % (opts.app_label, opts.object_name)
     field_name = queryset.model.get_related_field_name()
-    ids = queryset.values_list('%s__id' % field_name , flat=True)
+    ids = queryset.values_list('%s__id' % field_name, flat=True)
     related_model_name = queryset.model.get_related_model()._meta.object_name
     # Execute get_state isolated on a process to avoid gevent polluting the stack
-    result = get_state.delay(state_module, ids=ids, lock=False)
+    # Don't know yet why I have to copy ids, otherwise celery doesn't work :(
+    result = get_state.delay(state_module, ids=list(ids), lock=False)
     try:
         # Block until finish
         result.get()

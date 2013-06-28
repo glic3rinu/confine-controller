@@ -7,6 +7,10 @@ from controller.utils import LockFile
 
 from .settings import STATE_LOCK_DIR, STATE_NODESTATE_SCHEDULE, STATE_SLIVERSTATE_SCHEDULE
 
+@task(name="state.get_state2")
+def get_state2(state_module, ids=[], lock=True):
+    return 'merda'
+
 
 @task(name="state.get_state")
 def get_state(state_module, ids=[], lock=True):

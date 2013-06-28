@@ -182,11 +182,11 @@ def display_timesince(date):
     if not date:
         return 'Never'
     date_rel = timesince(date) + ' ago'
-    date_abs = date.strftime("%Y-%m-%d %H:%M:%S")
+    date_abs = date.strftime("%Y-%m-%d %H:%M:%S %Z")
     return mark_safe("<span title='%s'>%s</span>" % (date_abs, date_rel))
 
 
 def display_timeuntil(date):
     date_rel = timeuntil(date) + ' left'
-    date_abs = date.strftime("%Y-%m-%d %H:%M:%S")
+    date_abs = date.strftime("%Y-%m-%d %H:%M:%S %Z")
     return mark_safe("<span title='%s'>%s</span>" % (date_abs, date_rel))

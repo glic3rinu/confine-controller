@@ -8,3 +8,11 @@ def urlize_escaped_html(text):
         url = '&quot;http%s&quot;' % url
         text = text.replace(url, link)
     return text
+
+
+def urlize(text):
+    for url in re.findall('http(.*)', text): # urlize
+        link = '<a href="http%s" rel="nofollow">http%s</a>' % (url, url)
+        url = 'http%s' % url
+        text = text.replace(url, link)
+    return text

@@ -69,7 +69,6 @@ class CnHost(models.Model):
             auth = requests.post(url_auth, data, verify=ca_bundle)
         except Exception as e:
             raise CnHost.CNDBFetchError(str(e))
-        print auth.json()
         return auth
 
     def fetch_cndb(self):
@@ -94,7 +93,6 @@ class CnHost(models.Model):
         if resp.status_code != requests.codes.ok:
             raise CnHost.CNDBFetchError("%i - %s" % (resp.status_code, resp.json().get('description')))
 
-        print resp.json()
         return resp.json()
 
     def cache_cndb(self, *fields):

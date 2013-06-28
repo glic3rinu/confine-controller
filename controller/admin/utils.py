@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -8,6 +10,7 @@ from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from controller.models.utils import get_field_value
+from controller.utils.time import timesince, timeuntil
 
 
 def get_modeladmin(model, import_module=True):
@@ -171,3 +174,19 @@ def set_default_filter(queryarg, request, value):
         request.META['QUERY_STRING'] = request.GET.urlencode()
 
 
+def display_timesince(date):
+    """ 
+    Format date for messages create_on: show a relative time
+    with contextual helper to show fulltime format.
+    """
+    if not date:
+        return 'Never'
+    date_rel = timesince(date) + ' ago'
+    date_abs = date.strftime("%Y-%m-%d %H:%M:%S")
+    return mark_safe("<span title='%s'>%s</span>" % (date_abs, date_rel))
+
+
+def display_timeuntil(date):
+    date_rel = timeuntil(date) + ' left'
+    date_abs = date.strftime("%Y-%m-%d %H:%M:%S")
+    return mark_safe("<span title='%s'>%s</span>" % (date_abs, date_rel))

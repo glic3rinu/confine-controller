@@ -13,7 +13,9 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (insert_list_display, get_admin_link, colored,
-    insert_list_filter, insert_action, get_modeladmin, wrap_admin_view)
+    insert_list_filter, insert_action, get_modeladmin, wrap_admin_view, display_timesince,
+    display_timeuntil)
+from controller.models.utils import get_help_text
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
@@ -21,9 +23,9 @@ from slices.helpers import wrap_action
 from slices.models import Sliver
 
 from .actions import refresh, refresh_state, show_state
-from .models import NodeState, SliverState
+from .models import NodeState, SliverState, BaseState
 from .settings import STATE_NODE_SOFT_VERSION_URL
-from .utils import urlize_escaped_html
+from .utils import urlize_escaped_html, urlize
 
 
 STATES_COLORS = {
@@ -43,16 +45,8 @@ STATES_COLORS = {
 
 
 class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
-    readonly_fields = ['node_link', 'last_seen_on', 'last_try_on', 'next_retry_on',
-        'current', 'display_metadata', 'display_data']
-    fieldsets = (
-        (None, {
-            'fields': ('node_link', 'last_seen_on', 'last_try_on', 'next_retry_on',
-                       'current',)
-        }),
-        ('Details', {
-            'fields': ('display_metadata', 'display_data')
-        }),)
+    readonly_fields = ['node_link', 'url_link', 'last_seen', 'last_try', 'next_retry', 'current',
+        'last_change', 'display_metadata', 'display_data']
     change_view_actions = [refresh]
     change_form_template = "admin/controller/change_form.html"
     
@@ -61,8 +55,29 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def node_link(self, instance):
         """ Link to related node used on change_view """
-        return mark_safe("<b>%s</b>" % get_admin_link(instance.get_node()))
+        return mark_safe(get_admin_link(instance.get_node()))
     node_link.short_description = 'Node'
+    
+    def url_link(self, instance):
+        url = type(instance).get_url(instance)
+        return mark_safe(urlize(url))
+    url_link.short_description = 'Monitored URL'
+    
+    def last_seen(self, instance):
+        return display_timesince(instance.last_seen_on)
+    last_seen.help_text = get_help_text(BaseState, 'last_seen_on')
+    
+    def last_try(self, instance):
+        return display_timesince(instance.last_try_on)
+    last_try.help_text = get_help_text(BaseState, 'last_try_on')
+    
+    def last_change(self, instance):
+        return display_timesince(instance.last_change_on)
+    last_change.help_text = get_help_text(BaseState, 'last_change_on')
+    
+    def next_retry(self, instance):
+        return display_timeuntil(instance.next_retry_on)
+    next_retry.help_text = 'Next time the state retrieval operation will be executed'
     
     def display_data(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
@@ -95,26 +110,28 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
             request, object_id, form_url=form_url, extra_context=context)
 
 
-
 class NodeStateAdmin(BaseStateAdmin):
-    readonly_fields = ['last_contact_on'] + BaseStateAdmin.readonly_fields
+    readonly_fields = ['last_contact'] + BaseStateAdmin.readonly_fields
     fieldsets = (
         (None, {
-            'fields': ('node_link', 'last_seen_on', 'last_contact_on',
-                       'last_try_on', 'next_retry_on', 'current',)
+            'fields': ('node_link', 'url_link', 'last_seen', 'last_contact',
+                       'last_try', 'next_retry', 'last_change', 'current')
         }),
         ('Details', {
             'fields': ('display_metadata', 'display_data')
         }),)
     change_form_template = 'admin/state/nodestate/change_form.html'
-
+    
+    def last_contact(self, instance):
+        return display_timesince(instance.last_contact_on)
+    last_contact.help_text = get_help_text(NodeState, 'last_contact_on')
 
 class SliverStateAdmin(BaseStateAdmin):
     readonly_fields = ['sliver_link'] + BaseStateAdmin.readonly_fields
     fieldsets = (
         (None, {
-            'fields': ('sliver_link', 'node_link', 'last_seen_on', 'last_try_on',
-                       'next_retry_on', 'current',)
+            'fields': ('sliver_link', 'node_link', 'url_link', 'last_seen', 'last_try',
+                       'next_retry', 'last_change', 'current')
         }),
         ('Details', {
             'fields': ('display_metadata', 'display_data')
@@ -123,7 +140,7 @@ class SliverStateAdmin(BaseStateAdmin):
     
     def sliver_link(self, instance):
         """ Link to related sliver used on change_view """
-        return mark_safe("<b>%s</b>" % get_admin_link(instance.sliver))
+        return mark_safe(get_admin_link(instance.sliver))
     sliver_link.short_description = 'Sliver'
 
 
@@ -139,6 +156,7 @@ def state_link(*args):
     try:
         state = obj.state
     except (NodeState.DoesNotExist, SliverState.DoesNotExist):
+        # TODO creatre state object by obj.state._meta introspection
         return 'No data'
     else:
         model_name = obj._meta.verbose_name_raw

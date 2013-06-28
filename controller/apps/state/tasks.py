@@ -18,15 +18,12 @@ def get_state(state_module, ids=[], lock=True):
         objects = state_model.get_related_model().objects.all()
         if ids:
             objects = objects.filter(id__in=ids)
-        URI = state_model.get_setting('URI')
-        node = lambda obj: getattr(obj, 'node', obj)
         
         # enable async execution
         monkey.patch_all(thread=False, select=False)
         
         # create greenlets
-        glets = [ gevent.spawn(requests.get, URI % {'mgmt_addr': node(obj).mgmt_net.addr,
-                                                    'object_id': obj.pk, }) for obj in objects ]
+        glets = [ gevent.spawn(requests.get, state_model.get_url(obj)) for obj in objects ]
         
         # wait for all greenlets to finish
         gevent.joinall(glets)

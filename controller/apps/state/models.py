@@ -17,6 +17,8 @@ class BaseState(models.Model):
         'retrieval was successfull')
     last_try_on = models.DateTimeField(null=True, help_text='Last '
         'time the state retrieval operation has been executed')
+    last_change_on = models.DateTimeField(null=True, help_text='Last time the state '
+        'has change')
     
     class Meta:
         abstract = True
@@ -36,8 +38,7 @@ class BaseState(models.Model):
     @property
     def next_retry_on(self):
         freq = type(self).get_setting('SCHEDULE')
-        time = self.last_try_on + timedelta(seconds=freq)
-        return time.strftime("%B %d, %Y, %I:%M %p.")
+        return self.last_try_on + timedelta(seconds=freq)
     
     @classmethod
     def get_setting(cls, setting):
@@ -49,15 +50,19 @@ class BaseState(models.Model):
         response = get_data(glet)
         field_name = cls.get_related_field_name()
         state, __ = cls.objects.get_or_create(**{field_name: obj})
-        state.last_try_on = now()
+        old_state = state.current
+        now = now()
+        state.last_try_on = now
         metadata = {'exception': str(glet._exception)}
         if response is not None:
-            state.last_seen_on = now()
+            state.last_seen_on = now
             state.data = response.content
             metadata.update({
                 'url': response.url,
                 'headers': response.headers})
         state.metadata = json.dumps(metadata, indent=4)
+        if old_state != state.current:
+            state.last_change_on = now
         state.save()
         state.post_store_glet(obj, glet)
         return state
@@ -93,6 +98,12 @@ class BaseState(models.Model):
             if name == current:
                 return verbose
         return current
+    
+    @classmethod
+    def get_url(cls, obj):
+        URI = cls().get_setting('URI')
+        node = obj.get_node()
+        return URI % {'mgmt_addr': node.mgmt_net.addr, 'object_id': obj.pk }
 
 
 class NodeState(BaseState):

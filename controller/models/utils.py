@@ -48,3 +48,7 @@ def get_file_field_base_path(model, field_name):
 
 def is_singleton(model):
     return SingletonModel in model.__mro__
+
+
+def get_help_text(cls, field):
+    return cls._meta.get_field_by_name(field)[0].help_text

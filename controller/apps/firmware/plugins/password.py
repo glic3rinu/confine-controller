@@ -38,7 +38,6 @@ class PasswordPlugin(FirmwarePlugin):
     
     def pre_umount(self, image, build, *args, **kwargs):
         """ Configuring image password """
-        
         password = kwargs.get('password')
         
         hash_type = 6 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
@@ -59,12 +58,11 @@ class PasswordPlugin(FirmwarePlugin):
             'min_days': 0,
             'max_days': 99999,
             'warn_days': 7 }
-        
         line = '%(user)s:%(pwd)s:%(last_changed)i:%(min_days)i:%(max_days)i:%(warn_days)i:::' % context
+        
         context = {
             'line': line.replace('/', '\/'),
             'shadow': os.path.join(image.mnt, 'etc/shadow'),
             'image': image.mnt }
-        
         run("sed -i 's/^root:.*/%(line)s/' %(shadow)s" % context)
         run('rm -f %(image)s/etc/uci-defaults/confine-passwd.sh' % context)

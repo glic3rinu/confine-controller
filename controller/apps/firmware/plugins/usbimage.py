@@ -27,9 +27,9 @@ class USBImagePlugin(FirmwarePlugin):
     def post_umount(self, image, build, *args, **kwargs):
         """ Creating confine-install USB image """
         if kwargs.get('usb_image', False):
+            context = { 'site_root': get_site_root() }
+            install = Image(FIRMWARE_PLUGINS_USB_IMAGE % context)
             try:
-                context = { 'site_root': get_site_root() }
-                install = Image(FIRMWARE_PLUGINS_USB_IMAGE % context)
                 install.prepare()
                 install.gunzip()
                 install.mount()

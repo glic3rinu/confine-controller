@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load staticfiles utils %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+{% endblock %}
+
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Home</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; Send Email
+</div>
+{% endblock %}
+
+
+
+{% block content %}
+    <div style="margin:20px;">
+    <fieldset class="module aligned">
+        <h2>Email form</h2>
+        {% for field in form %}
+        <div class="form-row ">
+            <div >
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+            <p class="help">{{ field.help_text|safe }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </fieldset>
+    <div>
+    {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+    {% endfor %}
+    <input type="hidden" name="action" value="request_cert" />
+    <input type="hidden" name="post" value="yes" />
+    <div style="float:left;">
+    <input type="submit" class="default" value="{% trans "Send" %}" />
+    </div>
+    </div>
+    </form>
+
+
+
+
+
+{% endblock %}
+
+

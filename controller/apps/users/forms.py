@@ -167,3 +167,8 @@ class JoinRequestForm(forms.ModelForm):
             self.instance.send_rejection_email(site=site)
         elif action == 'ignore':
             self.instance.delete()
+
+
+class SendMailForm(forms.Form):
+    subject = forms.CharField(widget=forms.TextInput(attrs={'size':'90'}))
+    content = forms.CharField(widget=forms.Textarea(attrs={'cols': 90, 'rows': 15}))

@@ -5,9 +5,13 @@ from django.db import router, transaction
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 
-from users.models import JoinRequest
 from controller.utils.options import send_email_template
+
+from users.forms import SendMailForm
+from users.models import JoinRequest
+
 
 @transaction.commit_on_success
 def join_request(modeladmin, request, queryset):
@@ -63,7 +67,6 @@ def join_request(modeladmin, request, queryset):
     # Display the confirmation page
     return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
         context, current_app=modeladmin.admin_site.name)
-
 join_request.short_description = "Request to join the selected groups"
 join_request.url_name = 'join-request'
 
@@ -86,5 +89,39 @@ def enable_account(modeladmin, request, queryset):
         site = RequestSite(request)
         send_email_template('registration/account_approved.email', {'site': site}, user.email)
         modeladmin.message_user(request, "The user has been enabled (%s)" % user)
-    
 enable_account.short_description = "Enable selected users"
+
+
+def send_email(modeladmin, request, queryset):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
+    form = SendMailForm()
+    
+    # User has provided a SCR
+    if request.POST.get('post'):
+        form = SendMailForm(request.POST)
+        if form.is_valid():
+            scr = form.cleaned_data['scr']
+            modeladmin.log_change(request, node, "Certificate requested")
+            return
+    
+    opts = modeladmin.model._meta
+    app_label = opts.app_label
+    
+    context = {
+        "title": "Send mail to users",
+        "content_title": '',
+        'queryset': queryset,
+        "opts": opts,
+        "app_label": app_label,
+        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+        "form": form,
+    }
+    
+    # Display the confirmation page
+    return TemplateResponse(request, 'admin/users/user/send_email.html', context, 
+        current_app=modeladmin.admin_site.name)
+
+send_email.url_name = 'send-email'
+send_email.verbose_name = 'Send Email'

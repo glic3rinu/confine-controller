@@ -49,7 +49,6 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     readonly_fields = ['node_link', 'url_link', 'last_seen', 'last_try', 'next_retry', 'current',
         'last_change', 'display_metadata', 'display_data']
     change_view_actions = [refresh]
-    change_form_template = "admin/controller/change_form.html"
     
     class Media:
         css = { "all": ("controller/css/github.css", "state/admin/css/details.css") }

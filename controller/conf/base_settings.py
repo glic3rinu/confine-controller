@@ -120,12 +120,13 @@ INSTALLED_APPS = (
     'nodes',
     'slices',
     'issues',
+    'state',
     'mgmtnetworks.tinc',
 #    'sfa',
     'communitynetworks',
     'firmware',
 #    'groupregistration',
-    'state',
+    'ping',
     'gis',
     'users',
     'pki',
@@ -286,6 +287,7 @@ BROKER_CONNECTION_TIMEOUT = None
 #CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERY_SEND_TASK_ERROR_EMAILS = True
 # Route state tasks to avoid gevent polluting other tasks
+# FIXME state.get_state ignores the queue!!!!
 CELERY_ROUTES = {
          'state.nodestate': {'queue': 'gevent'},
          'state.sliverstate': {'queue': 'gevent'},

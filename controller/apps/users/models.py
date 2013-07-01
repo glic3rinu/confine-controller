@@ -294,7 +294,7 @@ class JoinRequest(models.Model):
         The admin accepts the user's request to join.
         The user is added to the group and the request is deleted
         """
-        roles_kwargs = dict( ('is_%s' % role, True) for role in roles )
+        roles_kwargs = { 'is_%s' % role: True for role in roles }
         Roles.objects.create(user=self.user, group=self.group, **roles_kwargs)
         self.delete()
     

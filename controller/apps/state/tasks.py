@@ -20,7 +20,7 @@ def get_state(state_module, ids=[], lock=True):
             objects = objects.filter(id__in=ids)
         
         # enable async execution
-        monkey.patch_all(thread=False, select=False)
+#        monkey.patch_all(thread=False, select=False)
         
         # create greenlets
         glets = [ gevent.spawn(requests.get, state_model.get_url(obj)) for obj in objects ]

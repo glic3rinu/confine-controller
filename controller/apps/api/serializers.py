@@ -49,7 +49,7 @@ class PropertyField(WritableField):
     """
     def to_native(self, value):
         """ Dict-like representation of a Property Model"""
-        return dict([ (prop.name, prop.value) for prop in value.all() ])
+        return { prop.name: prop.value for prop in value.all() }
     
     def from_native(self, value):
         """ Convert a dict-like representation back to a Property Model """

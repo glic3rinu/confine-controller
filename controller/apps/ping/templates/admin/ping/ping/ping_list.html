@@ -1,0 +1,30 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls admin_static admin_list %}
+
+{% block content_title %}{% if title %}<h1>Pings on 
+<a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
+({{ ip_addr }})</h1>
+{% endif %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=obj_opts.app_label %}">{{ obj_opts.app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url obj_opts|admin_urlname:'changelist' %}">{{ obj_opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
+&rsaquo; Ping
+</div>
+{% endblock %}
+
+
+{% block object-tools %}
+    <ul class="object-tools">
+      {% block object-tools-items %}
+        <li>
+          <a href="{{ ping_url }}" class="historylink"> Ping machine </a>
+        </li>
+      {% endblock %}
+    </ul>
+{% endblock %}
+
+

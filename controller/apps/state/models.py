@@ -82,7 +82,7 @@ class BaseState(models.Model):
         kwagrs = {
             'freq': cls.get_setting('SCHEDULE'),
             'expire_window': cls.get_setting('EXPIRE_WINDOW')}
-        
+        # TODO: NODATA when no running :)
         if self.last_seen_on and time() < heartbeat_expires(self.last_seen_on, **kargs):
             # TODO: implement it first on the node
 #            if self.metadata:

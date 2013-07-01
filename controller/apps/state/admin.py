@@ -23,6 +23,7 @@ from slices.helpers import wrap_action
 from slices.models import Sliver
 
 from .actions import refresh, refresh_state, show_state
+from .filters import NodeStateListFilter, SliverStateListFilter
 from .models import NodeState, SliverState, BaseState
 from .settings import STATE_NODE_SOFT_VERSION_URL
 from .utils import urlize_escaped_html, urlize
@@ -187,6 +188,8 @@ insert_list_display(NodeListAdmin, state_link)
 insert_list_display(Sliver, state_link)
 insert_action(Node, refresh_state)
 insert_action(Sliver, refresh_state)
+insert_list_filter(Node, NodeStateListFilter)
+insert_list_filter(Sliver, SliverStateListFilter)
 insert_list_filter(Node, 'state__soft_version')
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')

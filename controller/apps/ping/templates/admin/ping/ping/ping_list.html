@@ -18,13 +18,13 @@
 
 
 {% block object-tools %}
+  {% if has_change_permission %}
     <ul class="object-tools">
-      {% block object-tools-items %}
         <li>
           <a href="{{ ping_url }}" class="historylink"> Ping machine </a>
         </li>
-      {% endblock %}
     </ul>
+  {% endif %}
 {% endblock %}
 
 

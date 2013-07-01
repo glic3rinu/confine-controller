@@ -25,13 +25,31 @@ STATES_COLORS = {
 class PingAdmin(PermissionModelAdmin):
     list_display = ('content_object', 'packet_loss', 'min', 'avg', 'max', 'mdev', 'date_since')
     fields = list_display
+    list_display_links = ('content_object',)
     readonly_fields = list_display
+    sudo_actions = ['delete_selected']
     
     def date_since(self, instance):
         return display_timesince(instance.date)
+    date_since.admin_order_field = 'date'
+    
+    def get_list_display(self, request):
+        list_display = super(PingAdmin, self).get_list_display(request)
+        if hasattr(request, 'ping_list_args'):
+            return list_display[1:]
+        return list_display
     
     def has_add_permission(self, *args, **kwargs):
         return False
+    
+    def get_actions(self, request):
+        """ Exclude manage tickets actions for NOT superusers """
+        actions = super(PingAdmin, self).get_actions(request)
+        if not request.user.is_superuser:
+            for action in self.sudo_actions:
+                if action in actions:
+                    del actions[action]
+        return actions
     
     def get_urls(self):
         urls = patterns("",
@@ -50,8 +68,8 @@ class PingAdmin(PermissionModelAdmin):
         class ObjectChangeList(ChangeList):
             def get_query_set(self, *args, **kwargs):
                 qs = super(ObjectChangeList, self).get_query_set(*args, **kwargs)
-                if hasattr(request, 'args'):
-                    content_type, object_id = request.args
+                if hasattr(request, 'ping_list_args'):
+                    content_type, object_id = request.ping_list_args
                     return qs.filter(content_type=content_type, object_id=object_id)
                 return qs
         return ObjectChangeList
@@ -62,15 +80,18 @@ class PingAdmin(PermissionModelAdmin):
         context.update({
             'title': 'Pings'})
         content_type_id = kwargs.get('content_type_id', False)
+        # TODO 404
         if content_type_id:
             object_id = kwargs.get('object_id')
             args = (content_type_id, object_id)
-            request.args = (content_type_id, object_id)
+            request.ping_list_args = (content_type_id, object_id)
             # For the breadcrumbs ...
             ct = ContentType.objects.get_for_id(content_type_id)
-            content_object = Ping.objects.filter(
+            # FIXME: when this does not exists what to do?
+            ping_object = Ping.objects.filter(
                 content_type=content_type_id,
-                object_id=object_id)[0].content_object
+                object_id=object_id)[0]
+            content_object = ping_object.content_object
             instance = Ping.get_instance_settings(ct.model_class())
             addr = instance.get('get_addr')(content_object)
             for __, __, __, field in instance.get('admin_classes'):
@@ -82,7 +103,8 @@ class PingAdmin(PermissionModelAdmin):
                 'ping_url': reverse('admin:ping_ping_ping', args=args),
                 'obj_opts': obj._meta,
                 'obj': obj,
-                'ip_addr': addr })
+                'ip_addr': addr,
+                'has_change_permission': self.has_change_permission(request, obj=ping_object, view=False),})
             self.change_list_template = 'admin/ping/ping/ping_list.html'
         else:
             self.change_list_template = None
@@ -108,7 +130,7 @@ def make_colored_address(old_method, field='', filters={}):
             if getattr(obj, k) != v:
                 return addr
         obj = getattr(obj, field, obj)
-        ct = ContentType.objects.get_for_model(self.model)
+        ct = ContentType.objects.get_for_model(type(obj))
         url = reverse('admin:ping_ping_list', args=(ct.pk, obj.pk))
         state = Ping.get_state(obj)
         color = STATES_COLORS.get(state, "black")

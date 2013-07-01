@@ -51,7 +51,8 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     change_view_actions = [refresh]
     
     class Media:
-        css = { "all": ("controller/css/github.css", "state/admin/css/details.css") }
+        css = { "all": ("controller/css/github.css",
+                        "state/admin/css/details.css") }
     
     def node_link(self, instance):
         """ Link to related node used on change_view """

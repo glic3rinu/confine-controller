@@ -117,18 +117,39 @@ function install_requirements () {
     check_root
     CONTROLLER_PATH=$(get_controller_dir)
     
-    DEVELOPMENT_APT="python-pip python-m2crypto python-psycopg2 postgresql rabbitmq-server \
+    DEVELOPMENT_APT="python-pip \
+                     python-m2crypto \
+                     python-psycopg2 \
+                     postgresql \
+                     rabbitmq-server \
                      python-dev gcc"
-    LOCAL_APT="libapache2-mod-wsgi fuseext2 tinc file libevent-dev"
+    LOCAL_APT="libapache2-mod-wsgi \
+               fuseext2 file \
+               tinc \
+               libevent-dev"
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev"
     
-    DEVELOPMENT_PIP="django django-celery-email django-fluent-dashboard south django-private-files IPy \
-                     django-singletons django-extensions django_transaction_signals django-celery \
-                     markdown django-filter django-admin-tools djangorestframework==2.3.5 "
-    LOCAL_PIP="paramiko pygments requests==1.2.0 gevent"
+    DEVELOPMENT_PIP="django \
+                     django-celery-email \
+                     django-fluent-dashboard \
+                     south \
+                     django-private-files \
+                     IPy \
+                     django-singletons \
+                     django-extensions \
+                     django_transaction_signals \
+                     django-celery \
+                     markdown \
+                     django-filter \
+                     django-admin-tools \
+                     djangorestframework==2.3.5"
+    LOCAL_PIP="paramiko \
+               pygments \
+               requests==1.2.0 \
+               gevent"
     PRODUCTION_PIP="django-simple-captcha \
-                    https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz \
-                    https://github.com/madisona/django-google-maps/archive/master.zip"
+                    django-registration \
+                    django-google-maps"
     
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then

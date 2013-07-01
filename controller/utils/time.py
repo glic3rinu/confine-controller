@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+
 import datetime
+from time import mktime
 
 from django.utils.timesince import timesince as django_timesince
 from django.utils.timezone import is_aware, utc
@@ -30,3 +33,7 @@ def timeuntil(d, now=None):
     """
     return timesince(d, now, reversed=True)
 
+
+def heartbeat_expires(date, freq, expire_window):
+    timestamp = mktime(date.timetuple())
+    return timestamp + freq * (expire_window / 1e2)

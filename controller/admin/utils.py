@@ -127,7 +127,7 @@ def colored(field_name, colours, description='', verbose=False):
         if verbose:
             # Get the human-readable value of a choice field
             value = getattr(obj, 'get_%s_display' % field)()
-        return """<b><span style="color: %s;">%s</span></b>""" % (color, value)
+        return '<b><span style="color: %s;">%s</span></b>' % (color, value)
     if not description:
         description = field_name.split('__').pop().replace('_', ' ').capitalize()
     colored_field.short_description = description

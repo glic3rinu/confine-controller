@@ -1,11 +1,13 @@
 import json
 from datetime import timedelta
-from time import time, mktime
+from time import time
 
 import django.dispatch
 from django.db import models
 from django.dispatch import Signal
 from django.utils import timezone
+
+from controller.utils.time import heartbeat_expires
 
 from . import settings
 
@@ -60,6 +62,8 @@ class BaseState(models.Model):
             metadata.update({
                 'url': response.url,
                 'headers': response.headers})
+        else:
+            state.data = ''
         state.metadata = json.dumps(metadata, indent=4)
         if old_state != state.current:
             state.last_change_on = now
@@ -75,13 +79,11 @@ class BaseState(models.Model):
         if not self.last_try_on:
             return 'nodata'
         cls = type(self)
-        freq = cls.get_setting('SCHEDULE')
-        expire_window = cls.get_setting('EXPIRE_WINDOW')
+        kwagrs = {
+            'freq': cls.get_setting('SCHEDULE'),
+            'expire_window': cls.get_setting('EXPIRE_WINDOW')}
         
-        def heartbeat_expires(timestamp, freq=freq, expire_window=expire_window):
-            return timestamp + freq * (expire_window / 1e2)
-        
-        if self.last_seen_on and time() < heartbeat_expires(self.last_seen_timestamp):
+        if self.last_seen_on and time() < heartbeat_expires(self.last_seen_on, **kargs):
             # TODO: implement it first on the node
 #            if self.metadata:
 #                from datetime import datetime, timedelta
@@ -100,10 +102,6 @@ class BaseState(models.Model):
                     pass
             return 'unknown'
         return 'offline'
-    
-    @property
-    def last_seen_timestamp(self):
-        return mktime(self.last_seen_on.timetuple())
     
     def get_current_display(self):
         current = self.current

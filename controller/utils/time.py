@@ -15,14 +15,15 @@ def timesince(d, now=None, reversed=False):
     delta = (d - now) if reversed else (now - d)
     s = django_timesince(d, now=now, reversed=reversed)
     
-    count, name = s.split(' ')
-    if name in ['minutes', 'minute']:
-        seconds = delta.seconds % 60
-        extension = '%(number)d %(type)s' % {'number': seconds, 'type': 'seconds'}
-        if int(count) is 0:
-            return extension
-        elif int(count) < 2:
-            s += ', %s' % extension
+    if len(s.split(' ')) is 2:
+        count, name = s.split(' ')
+        if name in ['minutes', 'minute']:
+            seconds = delta.seconds % 60
+            extension = '%(number)d %(type)s' % {'number': seconds, 'type': 'seconds'}
+            if int(count) is 0:
+                return extension
+            elif int(count) < 2:
+                s += ', %s' % extension
     return s
 
 

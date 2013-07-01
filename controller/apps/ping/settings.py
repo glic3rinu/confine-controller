@@ -11,8 +11,8 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES',(
     {
         'model': 'tinc.TincClient',
         'admin_classes': (
-            ('TincClientInline', 'tinc_compatible_address', ''),
-            ('HostAdmin', 'address', 'tinc'),),
+            ('TincClientInline', 'tinc_compatible_address', '', 'content_object'),
+            ('HostAdmin', 'address', 'tinc', ''),),
         'app': 'mgmtnetworks.tinc',
         'schedule': 200,
         'expire_window': 150,
@@ -20,7 +20,7 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES',(
     {
         'model': 'slices.SliverIface',
         'admin_classes': (
-            ('SliverIfaceInline', 'ipv6_addr', ''),),
+            ('SliverIfaceInline', 'ipv6_addr', '', 'sliver'),),
         'app': 'slices',
         'schedule': 200,
         'expire_window': 150,

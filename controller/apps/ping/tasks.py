@@ -54,6 +54,8 @@ def ping(model, ids=[], lock=True):
         filter = settings.get('filter', False)
         if filter:
             objects = objects.filter(**filter)
+        if ids:
+            objects = objects.filter(id__in=ids)
         
         # Create pool and spawn process
         pool = []

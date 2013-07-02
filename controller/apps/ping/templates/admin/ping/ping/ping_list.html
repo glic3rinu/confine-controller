@@ -12,18 +12,18 @@
 
 
 {% block content_title %}{% if title %}<h1>Pings on 
-<a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
-({{ ip_addr }})</h1>
+    <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
+    ({{ ip_addr }})</h1>
 {% endif %}{% endblock %}
 
 {% block breadcrumbs %}
-<div class="breadcrumbs">
-<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-&rsaquo; <a href="{% url 'admin:app_list' app_label=obj_opts.app_label %}">{{ obj_opts.app_label|capfirst|escape }}</a>
-&rsaquo; <a href="{% url obj_opts|admin_urlname:'changelist' %}">{{ obj_opts.verbose_name_plural|capfirst }}</a>
-&rsaquo; <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
-&rsaquo; Ping
-</div>
+    <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=obj_opts.app_label %}">{{ obj_opts.app_label|capfirst|escape }}</a>
+    &rsaquo; <a href="{% url obj_opts|admin_urlname:'changelist' %}">{{ obj_opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
+    &rsaquo; Ping
+    </div>
 {% endblock %}
 
 
@@ -39,9 +39,9 @@
 
 
 
-      {% block result_list %}
+{% block result_list %}
     <div id='pingchart'></div>
-        {{ block.super }}
-      {% endblock %}
+    {{ block.super }}
+{% endblock %}
 
 

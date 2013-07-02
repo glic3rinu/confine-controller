@@ -146,7 +146,9 @@ function install_requirements () {
     LOCAL_PIP="paramiko \
                pygments \
                requests==1.2.0 \
-               gevent"
+               gevent \
+               simplejson \
+               http://github.com/bastir85/django-chartit/archive/master.zip"
     PRODUCTION_PIP="django-simple-captcha \
                     django-registration \
                     django-google-maps"

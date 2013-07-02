@@ -1,6 +1,16 @@
 {% extends "admin/change_list.html" %}
 {% load i18n admin_urls admin_static admin_list %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="{% static "js/highcharts/highcharts.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highcharts/themes/default.js" %}"></script>
+    {% load chartit %}
+    {{ pingchart|load_charts:"pingchart" }}
+{% endblock %}
+
+
 {% block content_title %}{% if title %}<h1>Pings on 
 <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
 ({{ ip_addr }})</h1>
@@ -21,10 +31,17 @@
   {% if has_change_permission %}
     <ul class="object-tools">
         <li>
-          <a href="{{ ping_url }}" class="historylink"> Ping machine </a>
+          <a href="{{ ping_url }}" class="historylink"> Ping machine ! </a>
         </li>
     </ul>
   {% endif %}
 {% endblock %}
+
+
+
+      {% block result_list %}
+    <div id='pingchart'></div>
+        {{ block.super }}
+      {% endblock %}
 
 

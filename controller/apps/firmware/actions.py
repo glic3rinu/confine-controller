@@ -44,7 +44,7 @@ def get_firmware(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
-        'form': BaseImageForm(arch=node.arch),
+        'img_form': BaseImageForm(arch=node.arch),
         'opt_form': OptionalFilesForm(prefix='opt'),
         'plugins': config.plugins.active(),
     }
@@ -69,19 +69,17 @@ def get_firmware(modeladmin, request, queryset):
             else:
                 all_valid = False
         # base image and optional files forms
-        form = BaseImageForm(data=request.POST, arch=node.arch)
+        img_form = BaseImageForm(data=request.POST, arch=node.arch)
         opt_form = OptionalFilesForm(request.POST, prefix='opt')
-        form_valid = form.is_valid()
-        opt_form_valid = opt_form.is_valid()
-        if all_valid and form_valid and opt_form_valid:
-            base_image = form.cleaned_data['base_image']
+        if all_valid and img_form.is_valid() and opt_form.is_valid():
+            base_image = img_form.cleaned_data['base_image']
             optional_fields = opt_form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
             build = Build.build(node, base_image, async=True, exclude=exclude, **kwargs)
             modeladmin.log_change(request, node, "Build firmware")
         else:
             # Display form validation errors
-            context['form'] = form
+            context['img_form'] = img_form
             context['opt_form'] = opt_form
             template = 'admin/firmware/generate_build.html'
             return TemplateResponse(request, template, context, current_app=site_name)

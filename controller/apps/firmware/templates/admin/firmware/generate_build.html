@@ -10,18 +10,13 @@
 {{ block.super }}
 <form action="" method="post">{% csrf_token %}
   <div>
-  <ul>
-    <li><b>Node:</b> {{ node }}</li>
-    <li><b>Architecture:</b> {{ node.arch }}</li>
-  </ul>
     <div style="margin:20px;">
     <fieldset class="module">
         <h2>Base Image</h2>
-        {% for field in form %}
+        {% for field in img_form %}
         <div class="form-row">
             {{ field.errors }}
             {{ field }}
-            <p class="help">{{ field.help_text }}</p>
         </div>
         {% endfor %}
     </fieldset>

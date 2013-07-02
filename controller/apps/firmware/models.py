@@ -258,7 +258,7 @@ class Config(SingletonModel):
         """ 
         Returns a list of base image files according to the node architecture.
         """
-        return BaseImage.objects.filter_by_arch(node.arch)
+        return self.images.filter_by_arch(node.arch)
     
     def get_image_name(self, node, build=None):
         context = {
@@ -296,7 +296,11 @@ class BaseImage(models.Model):
     objects = generate_chainer_manager(BaseImageQuerySet)
     
     def __unicode__(self):
-        return "%s (%s)" % (self.name, self.image)
+        return "%s (%s)" % (self.name, self.filename)
+    
+    @property
+    def filename(self):
+        return os.path.basename(self.image.name)
 
 
 class ConfigUCI(models.Model):

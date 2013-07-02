@@ -35,12 +35,12 @@ class ReadPermModelAdminMixin(object):
         return self.readonly_fields
     
     def get_actions(self, request):
-        """ display sudo_actions only to superusers """
+        """ Exclude sudo actions for unprivileged users """
         actions = super(ReadPermModelAdminMixin, self).get_actions(request)
         if not request.user.is_superuser:
             for action in self.sudo_actions:
-                if action in actions:
-                    del actions[action]
+                name = action.func_name if callable(action) else action
+                del actions[name]
         return actions
     
     def get_view_permission(self, opts):

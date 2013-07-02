@@ -6,7 +6,6 @@ from celery import states as celery_states
 from django import template
 from django.conf import settings as project_settings
 from django.core import validators
-from django.core.exceptions import MultipleObjectsReturned
 from django.db import models
 from django.dispatch import Signal, receiver
 from django.template import Context
@@ -24,17 +23,14 @@ from nodes.settings import NODES_NODE_ARCHS
 
 from firmware import settings
 from firmware.context import context
-from firmware.exceptions import ConcurrencyError, BaseImageNotAvailable
+from firmware.exceptions import ConcurrencyError
 from firmware.tasks import build
 
 
 class BuildQuerySet(models.query.QuerySet):
-    def get_current(self, node, base_image=None):
+    def get_current(self, node):
         """ Given an node returns an up-to-date builded image, if exists """
-        if base_image is None:
-            build = Build.objects.get(node=node)
-        else:
-            build = Build.objects.get(node=node, base_image=base_image.image)
+        build = Build.objects.get(node=node)
         config = Config.objects.get()
         if build.state != Build.AVAILABLE: 
             return build
@@ -156,7 +152,7 @@ class Build(models.Model):
         if async is True the building task will be executed with Celery
         """
         try:
-            old_build = cls.objects.get(node=node, base_image=base_image.image)
+            old_build = cls.objects.get(node=node)
         except cls.DoesNotExist:
             pass
         else: 

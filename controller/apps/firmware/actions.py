@@ -8,8 +8,8 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from firmware.forms import BaseImageForm
-from firmware.models import Config
+from firmware.forms import BaseImageForm, OptionalFilesForm
+from firmware.models import Build, Config
 
 
 @transaction.commit_on_success
@@ -29,7 +29,8 @@ def get_firmware(modeladmin, request, queryset):
     # Check if the user has permissions for download the image
     if not request.user.has_perm('nodes.getfirmware_node', node):
         raise PermissionDenied
-    
+
+    config = Config.objects.get()
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     
@@ -44,31 +45,81 @@ def get_firmware(modeladmin, request, queryset):
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
         'form': BaseImageForm(arch=node.arch),
+        'opt_form': OptionalFilesForm(prefix='opt'),
+        'plugins': config.plugins.active(),
     }
-    
-    if request.method == 'POST':
-        form = BaseImageForm(data=request.POST, arch=node.arch)
-        if form.is_valid():
-            base_image = form.cleaned_data['base_image']
-            return redirect('admin:nodes_node_firmware_get', node.pk, base_image.pk)
-        else:
-            # update context with current form for display errors 
-            context['form'] = form
-    
+
     # No architecture support
-    if base_images.count() == 0:
+    if not base_images.exists():
         msg = "Sorry but currently we do not support %s architectures :(" % node.arch
         context["content_message"] = msg
         template = 'admin/firmware/base_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
     
-    # Only one base image, redirect to next step
-    elif base_images.count() == 1:
-        base_image = base_images.get()
-        return redirect('admin:nodes_node_firmware_get', node.pk, base_image.pk)
+    # process the form
+    if request.method == 'POST':
+        # plugins
+        kwargs = {}
+        all_valid = True
+        for plugin in context['plugins']:
+            form = plugin.instance.form(request.POST)
+            plugin.instance.form = form
+            if form.is_valid():
+                kwargs.update(plugin.instance.process_form_post(form))
+            else:
+                all_valid = False
+        # base image and optional files forms
+        form = BaseImageForm(data=request.POST, arch=node.arch)
+        opt_form = OptionalFilesForm(request.POST, prefix='opt')
+        form_valid = form.is_valid()
+        opt_form_valid = opt_form.is_valid()
+        if all_valid and form_valid and opt_form_valid:
+            base_image = form.cleaned_data['base_image']
+            optional_fields = opt_form.cleaned_data
+            exclude = [ field for field, value in optional_fields.iteritems() if not value ]
+            build = Build.build(node, base_image, async=True, exclude=exclude, **kwargs)
+            modeladmin.log_change(request, node, "Build firmware")
+        else:
+            # Display form validation errors
+            context['form'] = form
+            context['opt_form'] = opt_form
+            template = 'admin/firmware/generate_build.html'
+            return TemplateResponse(request, template, context, current_app=site_name)
     
-    # Show form for choosing the base image
-    template = 'admin/firmware/select_base_image.html'
+    try:
+        build = Build.objects.get_current(node=node)
+    except Build.DoesNotExist:
+        state = False
+    else:
+        state = build.state
+
+    # Build a new firmware
+    if not state or state in [Build.DELETED, Build.OUTDATED, Build.FAILED]:
+        if state == Build.FAILED:
+            msg = ("<b>The last build for this research device has failed</b>. "
+                   "This problem has been reported to the operators, but you can "
+                   "try to build again the image")
+        else:
+            msg = ("There is no pre-build up-to-date firmware for this research "
+                   "device, but you can instruct the system to build a fresh one "
+                   "for you, it will take only a few seconds.")
+        context["content_message"] = mark_safe(msg)
+        template = 'admin/firmware/generate_build.html'
+        return TemplateResponse(request, template, context, current_app=site_name)
+
+    context.update({
+        "content_message": build.state_description,
+        "build": build,
+    })
+
+    # Available for download
+    if state in [Build.AVAILABLE]:
+        context['base_image'] = base_images.get(image=build.base_image)
+        template = 'admin/firmware/download_build.html'
+        return TemplateResponse(request, template, context, current_app=site_name)
+
+    # Processing
+    template = 'admin/firmware/processing_build.html'
     return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
 
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")

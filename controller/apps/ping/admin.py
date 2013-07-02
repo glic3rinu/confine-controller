@@ -43,7 +43,7 @@ class PingAdmin(PermissionModelAdmin):
         return False
     
     def get_actions(self, request):
-        """ Exclude manage tickets actions for NOT superusers """
+        """ Exclude actions for normal users """
         actions = super(PingAdmin, self).get_actions(request)
         if not request.user.is_superuser:
             for action in self.sudo_actions:
@@ -80,31 +80,26 @@ class PingAdmin(PermissionModelAdmin):
         context.update({
             'title': 'Pings'})
         content_type_id = kwargs.get('content_type_id', False)
-        # TODO 404
         if content_type_id:
             object_id = kwargs.get('object_id')
             args = (content_type_id, object_id)
             request.ping_list_args = (content_type_id, object_id)
-            # For the breadcrumbs ...
             ct = ContentType.objects.get_for_id(content_type_id)
-            # FIXME: when this does not exists what to do?
-            ping_object = Ping.objects.filter(
-                content_type=content_type_id,
-                object_id=object_id)[0]
-            content_object = ping_object.content_object
-            instance = Ping.get_instance_settings(ct.model_class())
-            addr = instance.get('get_addr')(content_object)
+            related_model = ct.model_class()
+            related_object = related_model.objects.get(pk=object_id)
+            instance = Ping.get_instance_settings(related_model)
+            addr = instance.get('get_addr')(related_object)
             for __, __, __, field in instance.get('admin_classes'):
-                obj = getattr(content_object, field, False)
+                obj = getattr(related_object, field, False)
                 if obj:
                     break
-            obj = obj or content_object
+            obj = obj or related_object
             context.update({
                 'ping_url': reverse('admin:ping_ping_ping', args=args),
                 'obj_opts': obj._meta,
                 'obj': obj,
                 'ip_addr': addr,
-                'has_change_permission': self.has_change_permission(request, obj=ping_object, view=False),})
+                'has_change_permission': self.has_change_permission(request, obj=obj, view=False),})
             self.change_list_template = 'admin/ping/ping/ping_list.html'
         else:
             self.change_list_template = None
@@ -124,6 +119,11 @@ admin.site.register(Ping, PingAdmin)
 # Monkey-patch section
 
 def make_colored_address(old_method, field='', filters={}):
+    """
+    factory function that integrates ping into related object addresses
+    displaying the address in representative colors and providing a link to
+    its related time series data
+    """
     def colored_address(self, obj, old_method=old_method, field=field, filters=filters):
         addr = old_method(self, obj)
         for k,v in filters.items():

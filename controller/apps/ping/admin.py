@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+import time, datetime
+
+from chartit import DataPool, Chart
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.conf.urls import patterns, url
@@ -41,15 +44,6 @@ class PingAdmin(PermissionModelAdmin):
     
     def has_add_permission(self, *args, **kwargs):
         return False
-    
-    def get_actions(self, request):
-        """ Exclude actions for normal users """
-        actions = super(PingAdmin, self).get_actions(request)
-        if not request.user.is_superuser:
-            for action in self.sudo_actions:
-                if action in actions:
-                    del actions[action]
-        return actions
     
     def get_urls(self):
         urls = patterns("",
@@ -101,6 +95,23 @@ class PingAdmin(PermissionModelAdmin):
                 'ip_addr': addr,
                 'has_change_permission': self.has_change_permission(request, obj=obj, view=False),})
             self.change_list_template = 'admin/ping/ping/ping_list.html'
+            pingdataset = DataPool(series=[{
+                'options': {
+                    'source': Ping.objects.filter(content_type=content_type_id, object_id=object_id)[:25]},
+                    'terms': [
+                        ('date', lambda d: time.mktime(d.timetuple())),
+                        'packet_loss',
+                        'avg']}
+                 ])
+            pingchart = Chart(datasource = pingdataset,
+                series_options = [{
+                    'options':{ 'type': 'line', 'stacking': False },
+                    'terms':{ 'date': ['packet_loss', 'avg'] }}],
+                chart_options = {
+                    'title': { 'text': 'Pings'},
+                    'xAxis': { 'title': { 'text': 'Last 25 mesurements'}}},
+                x_sortf_mapf_mts=(None, lambda i: datetime.datetime.fromtimestamp(i).strftime("%H:%M"), False))
+            context.update({'pingchart': pingchart})
         else:
             self.change_list_template = None
         return super(PingAdmin, self).changelist_view(request, extra_context=context)

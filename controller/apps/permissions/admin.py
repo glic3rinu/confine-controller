@@ -18,6 +18,7 @@ class ReadPermModelAdminMixin(object):
     """ Mixing class that adds view permission support to ModelAdmin """
     change_form_template = 'admin/permissions_change_form.html'
     save_and_continue = False
+    sudo_actions = []
     
     def get_readonly_fields(self, request, obj=None):
         """ Makes all fields read only if user doesn't have change permissions """
@@ -32,6 +33,15 @@ class ReadPermModelAdminMixin(object):
                         fields.append(field)
                 return fields
         return self.readonly_fields
+    
+    def get_actions(self, request):
+        """ display sudo_actions only to superusers """
+        actions = super(ReadPermModelAdminMixin, self).get_actions(request)
+        if not request.user.is_superuser:
+            for action in self.sudo_actions:
+                if action in actions:
+                    del actions[action]
+        return actions
     
     def get_view_permission(self, opts):
         return 'view_%s' % opts.object_name.lower()

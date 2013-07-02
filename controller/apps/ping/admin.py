@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 
-from controller.admin.utils import display_timesince
+from controller.admin.utils import display_timesince, wrap_admin_view
 from controller.utils import is_installed
 from permissions.admin import PermissionModelAdmin
 
@@ -48,10 +48,10 @@ class PingAdmin(PermissionModelAdmin):
     def get_urls(self):
         urls = patterns("",
             url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/",
-                self.changelist_view,
+                wrap_admin_view(self, self.changelist_view),
                 name='ping_ping_list'),
             url("^ping/(?P<content_type_id>\d+)/(?P<object_id>\d+)/",
-                self.ping_view,
+                wrap_admin_view(self, self.ping_view),
                 name='ping_ping_ping')
         )
         return urls + super(PingAdmin, self).get_urls()

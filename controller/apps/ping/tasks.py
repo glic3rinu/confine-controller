@@ -11,6 +11,11 @@ from .settings import PING_LOCK_DIR, PING_COUNT, PING_INSTANCES
 
 
 def pinger(ip):
+    """
+    Two-phase ping coroutine
+    phase one: spawn a ping process and yield
+    phase two: wait until ping finishes, then process stdout and yield the result
+    """
     context = {
         'ip': ip,
         'count': PING_COUNT,
@@ -36,7 +41,7 @@ def pinger(ip):
 @task(name="ping.ping")
 def ping(model, ids=[], lock=True):
     """
-    Ping task based on coroutine concurrency model
+    Ping task based on cooperative multitasking model
     ICMP sockets can only be used by privileged users, so we have decided to use
     the OS ping command (has suid) in order to avoid running this task as root.
     This coroutine solution outperforms thread pool concurrency pattern :)

@@ -1,7 +1,6 @@
 import requests, gevent, os
 from celery.task import periodic_task, task
 from django.db.models import get_model
-from gevent import monkey
 
 from controller.utils import LockFile
 
@@ -9,7 +8,7 @@ from .settings import STATE_LOCK_DIR, STATE_NODESTATE_SCHEDULE, STATE_SLIVERSTAT
 
 
 @task(name="state.get_state")
-def get_state(state_module, ids=[], lock=True):
+def get_state(state_module, ids=[], lock=True, patch=False):
     state_model = get_model(*state_module.split('.'))
     lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
     freq = state_model.get_setting('SCHEDULE')
@@ -19,8 +18,9 @@ def get_state(state_module, ids=[], lock=True):
         if ids:
             objects = objects.filter(id__in=ids)
         
-        # enable async execution
-#        monkey.patch_all(thread=False, select=False)
+        # enable async execution (not needed since this is being executed in a gevent worker)
+        if patch:
+            gevent.monkey.patch_all(thread=False, select=False)
         
         # create greenlets
         glets = [ gevent.spawn(requests.get, state_model.get_url(obj)) for obj in objects ]

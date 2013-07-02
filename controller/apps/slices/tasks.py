@@ -2,9 +2,6 @@ from datetime import timedelta
 
 from celery.task import task, periodic_task
 from celery.task.schedules import crontab
-from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
-from django.conf import settings as project_settings
 from django.db import transaction
 from django.utils import timezone
 
@@ -15,9 +12,7 @@ from .settings import SLICES_SLICE_EXP_WARN_DAYS
 
 @periodic_task(name="slices.clean_expired_slices", run_every=crontab(minute=0, hour=0))
 def clean_expired_slices():
-    """ 
-    Delete expired slices and warn admins about slices that are about to expire
-    """
+    """ Delete expired slices """
     from slices.models import Slice
     now = timezone.now()
     

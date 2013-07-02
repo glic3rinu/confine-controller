@@ -12,7 +12,7 @@ from nodes.models import Node
 from firmware.actions import get_firmware
 from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
     ConfigFileHelpText, BuildFile, ConfigPlugin)
-from firmware.views import build_info_view, delete_build_view, get_firmware_view
+from firmware.views import build_info_view, delete_build_view
 
 
 STATE_COLORS = {
@@ -189,13 +189,10 @@ old_get_urls = node_modeladmin.get_urls
 
 def get_urls(self):
     extra_urls = patterns("", 
-        url("^(?P<node_id>\d+)/firmware/(?P<bimg_id>\d+)/info/$",
+        url("^(?P<node_id>\d+)/firmware/info/$",
             wrap_admin_view(self, build_info_view),
             name='nodes_node_firmware_build_info'),
-        url("^(?P<node_id>\d+)/firmware/(?P<bimg_id>\d+)/$",
-            wrap_admin_view(self, get_firmware_view),
-            name='nodes_node_firmware_get'),
-        url("^(?P<node_id>\d+)/firmware/(?P<bimg_id>\d+)/delete/$",
+        url("^(?P<node_id>\d+)/firmware/delete/$",
             wrap_admin_view(self, delete_build_view),
             name='nodes_node_firmware_delete'),
     )

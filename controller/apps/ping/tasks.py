@@ -10,18 +10,12 @@ from .models import Ping
 from .settings import PING_LOCK_DIR, PING_COUNT, PING_INSTANCES
 
 
-# Coroutine concurrency model
-# ICMP sockets can only be used by privileged users, we have decided to use the
-# OS ping command (has suid) in order to avoid running this code as a root user.
-# In our tests this coroutine solution outperformed thread pool concurrency pattern
-
-
 def pinger(ip):
     context = {
         'ip': ip,
         'count': PING_COUNT,
         'version': 6 if ip.version() == 6 else '' }
-    
+    # Async execution of the ping command
     ping = subprocess.Popen("ping%(version)s -c %(count)s %(ip)s" % context,
             shell=True,
             stdout=subprocess.PIPE,
@@ -41,6 +35,12 @@ def pinger(ip):
 
 @task(name="ping.ping")
 def ping(model, ids=[], lock=True):
+    """
+    Ping task based on coroutine concurrency model
+    ICMP sockets can only be used by privileged users, so we have decided to use
+    the OS ping command (has suid) in order to avoid running this task as root.
+    This coroutine solution outperforms thread pool concurrency pattern :)
+    """
     model = get_model(*model.split('.'))
     lock_file = os.path.join(PING_LOCK_DIR, '.%s.lock' % model.__name__)
     
@@ -57,7 +57,7 @@ def ping(model, ids=[], lock=True):
         if ids:
             objects = objects.filter(id__in=ids)
         
-        # Create pool and spawn process
+        # Create pool and spawn some process
         pool = []
         for obj in objects:
             coroutine = pinger(get_addr(obj))
@@ -73,6 +73,7 @@ def ping(model, ids=[], lock=True):
 
 
 for instance in PING_INSTANCES:
+    # Create periodic tasks
     if is_installed(instance.get('app')):
         name = "ping.%s_ping" % instance.get('app')
         run_every = instance.get('schedule')
@@ -80,4 +81,3 @@ for instance in PING_INSTANCES:
         @periodic_task(name=name, run_every=run_every, expires=run_every)
         def ping_instance(model=instance.get('model')):
             return ping(model)
-

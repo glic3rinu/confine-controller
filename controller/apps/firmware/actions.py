@@ -48,7 +48,7 @@ def get_firmware(modeladmin, request, queryset):
         'opt_form': OptionalFilesForm(prefix='opt'),
         'plugins': config.plugins.active(),
     }
-
+    
     # No architecture support
     if not base_images.exists():
         msg = "Sorry but currently we do not support %s architectures :(" % node.arch
@@ -104,18 +104,18 @@ def get_firmware(modeladmin, request, queryset):
         context["content_message"] = mark_safe(msg)
         template = 'admin/firmware/generate_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
-
+    
     context.update({
         "content_message": build.state_description,
         "build": build,
     })
-
+    
     # Available for download
     if state in [Build.AVAILABLE]:
         context['base_image'] = base_images.get(image=build.base_image)
         template = 'admin/firmware/download_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
-
+    
     # Processing
     template = 'admin/firmware/processing_build.html'
     return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)

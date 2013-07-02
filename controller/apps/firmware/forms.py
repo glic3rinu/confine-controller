@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.safestring import mark_safe
 
 from firmware.models import BaseImage, Config
 
@@ -12,16 +13,21 @@ class OptionalFilesForm(forms.Form):
                 help_text=f.help_text)
 
 
+class HackedRadioSelect(forms.RadioSelect.renderer):
+    """ here be dragons """
+    def render(self):
+        options = u'<br>'.join([u'%s' % w for w in self])
+        return mark_safe('<ul style="margin: 2px; padding: 2px;">%s</ul>' % options)
+
+
 class BaseImageForm(forms.Form):
     """ Select a node base image (filtered by arch) """
     base_image = forms.ModelChoiceField(queryset=BaseImage.objects.all(),
-                    empty_label=None, widget=forms.RadioSelect,
-                    help_text="Select the base image for building the firmware")
+                    empty_label=None, widget=forms.RadioSelect(renderer=HackedRadioSelect),
+                    help_text="Choose one base image for building the firmware")
     
     def __init__(self, arch, *args, **kwargs):
         super(BaseImageForm, self).__init__(*args, **kwargs)
-        qs = BaseImage.objects.filter_by_arch(arch)
-#        default = qs.filter(default=True)
-        default = qs
+        qs = BaseImage.objects.filter_by_arch(arch).order_by('-default')
         self.fields['base_image'].queryset = qs
-        self.fields['base_image'].initial = default[0] if default else qs[0]
+        self.fields['base_image'].initial = qs[0]

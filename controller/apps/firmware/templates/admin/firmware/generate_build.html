@@ -11,20 +11,25 @@
 <form action="" method="post">{% csrf_token %}
   <div>
     <div style="margin:20px;">
-    <fieldset class="module">
+    
+    <fieldset class="module aligned">
         <h2>Base Image</h2>
         {% for field in img_form %}
         <div class="form-row">
+            <div>
             {{ field.errors }}
             {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+            </div>
         </div>
         {% endfor %}
     </fieldset>
+    
     <fieldset class="module aligned">
         <h2>Optional files</h2>
         {% for field in opt_form %}
         <div class="form-row ">
-            <div >
+            <div>
             {{ field.errors }}
             {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
             <p class="help">{{ field.help_text|safe }}</p>

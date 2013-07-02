@@ -291,7 +291,8 @@ class BaseImage(models.Model):
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
         validators=[validators.RegexValidator('.*\.img\.gz$',
                     'Invalid file extension (only accepted *.img.gz)', 'invalid')])
-#    default = models.BooleanField(default=False, help_text='Preselected image')
+    default = models.BooleanField(default=False, help_text='If true this base image '
+        'will be preselected on the firmware generation form')
     
     objects = generate_chainer_manager(BaseImageQuerySet)
     

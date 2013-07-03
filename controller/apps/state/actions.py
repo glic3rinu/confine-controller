@@ -18,7 +18,8 @@ def refresh(modeladmin, request, queryset):
     ids = queryset.values_list('%s__id' % field_name, flat=True)
     related_model_name = queryset.model.get_related_model()._meta.object_name
     # Execute get_state isolated on a process to avoid gevent polluting the stack
-    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored :(
+    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored
+    # Maybe because somehow ids can not be properly serialized
     result = get_state.delay(state_module, ids=list(ids), lock=False)
     try:
         # Block until finish

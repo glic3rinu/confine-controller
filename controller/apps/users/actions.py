@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.sites.models import RequestSite
-from django.db import router, transaction
+from django.core.mail import send_mass_mail
+from django.db import transaction
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
@@ -9,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 from controller.utils.options import send_email_template
 
-from users.forms import SendMailForm
+from users.forms import SendMailForm, ConfirmSendMailForm
 from users.models import JoinRequest
 
 
@@ -23,7 +24,6 @@ def join_request(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    using = router.db_for_write(modeladmin.model)
     user = request.user
     
     # check if user is alreday in the group
@@ -92,20 +92,65 @@ def enable_account(modeladmin, request, queryset):
 enable_account.short_description = "Enable selected users"
 
 
+def confirm_send_email_view(modeladmin, request, queryset, subject, message):
+    opts = modeladmin.model._meta
+    app_label = opts.app_label
+    
+    # The user has already confirmed the reboot.
+    if request.POST.get('post') == 'send_email_confirmation':
+        form = ConfirmSendMailForm(request.POST)
+        n = queryset.count()
+        if n and form.is_valid():
+            email_from = None
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            datatuple = []
+            for user in queryset:
+                datatuple.append((subject, message, email_from, [user.email]))
+            send_mass_mail(datatuple)
+            msg = "Message has been sent to %i users" % queryset.count()
+            modeladmin.message_user(request, msg)
+        # Return None to display the change list page again.
+        return None
+    
+    if len(queryset) == 1:
+        objects_name = force_text(opts.verbose_name)
+    else:
+        objects_name = force_text(opts.verbose_name_plural)
+    
+    form = ConfirmSendMailForm(initial={'subject': subject, 'message': message})
+    context = {
+        "title": "Are you sure?",
+        "content_message": "Are you sure you want to send the following message to the selected users?",
+        "action_name": 'send_email',
+        "action_value": 'send_email',
+        "deletable_objects": queryset,
+        'queryset': queryset,
+        "opts": opts,
+        "app_label": app_label,
+        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+        'form': form,
+        'subject': subject,
+        'message': message,
+    }
+    
+    # Display the confirmation page
+    return TemplateResponse(request, 'admin/users/user/send_email_confirmation.html',
+        context, current_app=modeladmin.admin_site.name)
+
+
 def send_email(modeladmin, request, queryset):
     if not request.user.is_superuser:
         raise PermissionDenied
     
     form = SendMailForm()
-    
-    # User has provided a SCR
     if request.POST.get('post'):
         form = SendMailForm(request.POST)
         if form.is_valid():
-            scr = form.cleaned_data['scr']
-            modeladmin.log_change(request, node, "Certificate requested")
-            return
-    
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            return confirm_send_email_view(modeladmin, request, queryset, subject, message)
+        
     opts = modeladmin.model._meta
     app_label = opts.app_label
     

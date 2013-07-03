@@ -34,16 +34,21 @@ class PasswordPlugin(FirmwarePlugin):
         return PasswordForm
     
     def process_form_post(self, form):
-        return {'password': form.cleaned_data['password2'] or FIRMWARE_PLUGINS_PASSWORD_DEFAULT}
-    
-    def pre_umount(self, image, build, *args, **kwargs):
-        """ Configuring image password """
-        password = kwargs.get('password')
-        
+        """ hash password for avoid store it as plain text """
+        password = form.cleaned_data['password2'] or FIRMWARE_PLUGINS_PASSWORD_DEFAULT
+
         hash_type = 6 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
         salt_chars = string.ascii_letters + string.digits
         salt_length = random.randint(1, 16)
         salt = ''.join(random.choice(salt_chars) for x in range(salt_length))
+
+        crypted_password = crypt.crypt(password, "$%i$%s$" % (hash_type, salt))
+
+        return {'password': crypted_password}
+    
+    def pre_umount(self, image, build, *args, **kwargs):
+        """ Configuring image password """
+        password = kwargs.get('password')
         
         # days since Jan 1, 1970 from now
         epoch = datetime.utcfromtimestamp(0)
@@ -52,7 +57,7 @@ class PasswordPlugin(FirmwarePlugin):
         
         # generate root line for shadow file
         context = {
-            'pwd': crypt.crypt(password, "$%i$%s$" % (hash_type, salt)),
+            'pwd': password,
             'user': 'root',
             'last_changed': d.days,
             'min_days': 0,

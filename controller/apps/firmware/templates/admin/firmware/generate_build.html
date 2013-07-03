@@ -11,7 +11,6 @@
 <form action="" method="post">{% csrf_token %}
   <div>
     <div style="margin:20px;">
-    
     <fieldset class="module aligned">
         <h2>Base Image</h2>
         {% for field in img_form %}
@@ -24,7 +23,6 @@
         </div>
         {% endfor %}
     </fieldset>
-    
     <fieldset class="module aligned">
         <h2>Optional files</h2>
         {% for field in opt_form %}

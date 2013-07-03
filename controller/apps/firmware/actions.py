@@ -48,7 +48,7 @@ def get_firmware(modeladmin, request, queryset):
         'opt_form': OptionalFilesForm(prefix='opt'),
         'plugins': config.plugins.active(),
     }
-    
+
     # No architecture support
     if not base_images.exists():
         msg = "Sorry but currently we do not support %s architectures :(" % node.arch
@@ -71,7 +71,10 @@ def get_firmware(modeladmin, request, queryset):
         # base image and optional files forms
         img_form = BaseImageForm(data=request.POST, arch=node.arch)
         opt_form = OptionalFilesForm(request.POST, prefix='opt')
-        if all_valid and img_form.is_valid() and opt_form.is_valid():
+        # validate the two forms to get possible errors
+        img_form_valid = img_form.is_valid() 
+        opt_form_valid = opt_form.is_valid()
+        if all_valid and img_form_valid and opt_form_valid:
             base_image = img_form.cleaned_data['base_image']
             optional_fields = opt_form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
@@ -104,7 +107,7 @@ def get_firmware(modeladmin, request, queryset):
         context["content_message"] = mark_safe(msg)
         template = 'admin/firmware/generate_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
-    
+
     context.update({
         "content_message": build.state_description,
         "build": build,

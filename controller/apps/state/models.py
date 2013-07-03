@@ -76,13 +76,14 @@ class BaseState(models.Model):
     
     @property
     def current(self):
-        if not self.last_try_on:
-            return 'nodata'
         cls = type(self)
         kwargs = {
             'freq': cls.get_setting('SCHEDULE'),
-            'expire_window': cls.get_setting('EXPIRE_WINDOW')}
-        # TODO: NODATA when no running :)
+            'expire_window': cls.get_setting('EXPIRE_WINDOW') }
+        
+        if not self.last_try_on or time() > heartbeat_expires(self.last_try_on, **kwargs):
+            return 'nodata'
+        
         if self.last_seen_on and time() < heartbeat_expires(self.last_seen_on, **kwargs):
             # TODO: implement it first on the node
 #            if self.metadata:

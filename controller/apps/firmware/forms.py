@@ -24,7 +24,7 @@ class BaseImageForm(forms.Form):
     """ Select a node base image (filtered by arch) """
     base_image = forms.ModelChoiceField(queryset=BaseImage.objects.all(),
                     empty_label=None, widget=forms.RadioSelect(renderer=HackedRadioSelect),
-                    help_text="Choose one base image for building the firmware")
+                    help_text="Choose a base image for building the firmware")
     
     def __init__(self, arch, *args, **kwargs):
         super(BaseImageForm, self).__init__(*args, **kwargs)

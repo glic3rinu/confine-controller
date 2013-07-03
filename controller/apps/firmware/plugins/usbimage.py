@@ -10,9 +10,14 @@ from firmware.plugins import FirmwarePlugin
 from firmware.settings import FIRMWARE_PLUGINS_USB_IMAGE
 
 
+usb_image = FIRMWARE_PLUGINS_USB_IMAGE % {'site_root': get_site_root()}
+
+
 class USBImagePlugin(FirmwarePlugin):
     verbose_name = 'USB image'
-    description = 'Optionally puts the firmware image into confine-install USB image'
+    description = ('Optionally puts the firmware image into confine-install USB image.\n'
+        'The base image can be downloaded from http://media.confine-project.eu/'
+        'confine-install/confine-install.img.gz and stored in %s.' % usb_image)
     
     def get_form(self):
         class USBImageForm(forms.Form):
@@ -27,8 +32,7 @@ class USBImagePlugin(FirmwarePlugin):
     def post_umount(self, image, build, *args, **kwargs):
         """ Creating confine-install USB image """
         if kwargs.get('usb_image', False):
-            context = { 'site_root': get_site_root() }
-            install = Image(FIRMWARE_PLUGINS_USB_IMAGE % context)
+            install = Image(usb_image)
             try:
                 install.prepare()
                 install.gunzip()

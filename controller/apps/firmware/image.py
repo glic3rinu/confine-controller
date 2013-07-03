@@ -95,7 +95,6 @@ class Image(object):
         # raise an exception if there is nothing mounted in our target
         r("fusermount -u %(mnt)s" % context)
         r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
-
     
     def add_file(self, file):
         """

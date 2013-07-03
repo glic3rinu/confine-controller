@@ -116,12 +116,12 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     # confine-controller apps
     'controller',
-    'ping',
     'api',
     'nodes',
     'slices',
     'issues',
     'state',
+    'ping',
     'mgmtnetworks.tinc',
 #    'sfa',
     'communitynetworks',

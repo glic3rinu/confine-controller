@@ -11,7 +11,7 @@ email_days = 10
 
 class NodeNotAvailable(Notification):
     model = NodeState
-    description = 'Notificate %s days before the slice expires' % email_days
+    description = 'Notificate %s days after the node goes offline' % email_days
     verbose_name = 'Node not available notification'
     
     def check_condition(self, obj):

@@ -79,7 +79,7 @@ class BaseState(models.Model):
         if not self.last_try_on:
             return 'nodata'
         cls = type(self)
-        kwagrs = {
+        kwargs = {
             'freq': cls.get_setting('SCHEDULE'),
             'expire_window': cls.get_setting('EXPIRE_WINDOW')}
         # TODO: NODATA when no running :)

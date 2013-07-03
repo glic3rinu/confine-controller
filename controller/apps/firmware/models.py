@@ -18,6 +18,7 @@ from controller import settings as controller_settings
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
+from controller.utils.plugins import PluginModel
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 
@@ -409,28 +410,8 @@ class ConfigFileHelpText(models.Model):
         return str(self.help_text)
 
 
-class ConfigPluginQuerySet(models.query.QuerySet):
-    def active(self, **kwargs):
-        return self.filter(is_active=True, **kwargs)
-
-
-class ConfigPlugin(models.Model):
+class ConfigPlugin(PluginModel):
     config = models.ForeignKey(Config, related_name='plugins')
-    is_active = models.BooleanField(default=False)
-    label = models.CharField(max_length=128, blank=True, unique=True)
-    module = models.CharField(max_length=256, blank=True)
-    objects = generate_chainer_manager(ConfigPluginQuerySet)
-    
-    def __unicode__(self):
-        return self.label
-    
-    @property
-    def instance(self):
-        if not hasattr(self, '_instance'):
-            module = __import__(self.module, fromlist=[self.label])
-            plugin_class = getattr(module, self.label)
-            self._instance = plugin_class()
-        return self._instance
 
 
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])

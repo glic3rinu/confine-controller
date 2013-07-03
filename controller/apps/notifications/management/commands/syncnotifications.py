@@ -19,7 +19,11 @@ class Command(BaseCommand):
         for notification in Notification.plugins:
             label = notification.__name__
             module = notification.__module__
-            obj, __ = NotificationModel.objects.get_or_create(label=label, module=module)
+            obj, created = NotificationModel.objects.get_or_create(label=label, module=module)
+            if created:
+                obj.subject=notification.default_subject
+                obj.message=notification.default_message
+                obj.save()
             existing_pks.append(obj.pk)
             self.stdout.write('Found %s (%s)' % (label, module))
         # Delete unused notifications

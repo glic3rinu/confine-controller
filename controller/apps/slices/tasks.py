@@ -1,13 +1,7 @@
-from datetime import timedelta
-
 from celery.task import task, periodic_task
 from celery.task.schedules import crontab
 from django.db import transaction
 from django.utils import timezone
-
-from controller.utils import send_email_template
-
-from .settings import SLICES_SLICE_EXP_WARN_DAYS
 
 
 @periodic_task(name="slices.clean_expired_slices", run_every=crontab(minute=0, hour=0))
@@ -21,17 +15,6 @@ def clean_expired_slices():
     for slice in deletable_slices:
         with transaction.commit_on_success():
             slice.delete()
-    
-    # warn about slices that are about to expire
-    email_days = timedelta(SLICES_SLICE_EXP_WARN_DAYS)
-    warning_slices = Slice.objects.filter(expires_on__gte=now+email_days,
-                                          expires_on__lte=now+email_days+timedelta(1))
-    for slice in warning_slices:
-        context = {'slice': slice,
-                   'days': SLICES_SLICE_EXP_WARN_DAYS,}
-        template = 'slices/slice_expiration_warning.email'
-        to = slice.group.get_admin_emails()
-        send_email_template(context=context, template=template, to=to)
     
     # Just for the record
     format = lambda slice: '<%s "%s">' % (slice.id, slice.name)

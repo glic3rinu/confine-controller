@@ -27,8 +27,6 @@ def reboot_selected(modeladmin, request, queryset):
         if not request.user.has_perm('nodes.change_node', node):
             raise PermissionDenied
     
-    using = router.db_for_write(modeladmin.model)
-    
     # The user has already confirmed the reboot.
     if request.POST.get('post'):
         n = queryset.count()

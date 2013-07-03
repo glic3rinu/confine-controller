@@ -18,7 +18,9 @@ def refresh(modeladmin, request, queryset):
     ids = queryset.values_list('%s__id' % field_name, flat=True)
     related_model_name = queryset.model.get_related_model()._meta.object_name
     # Execute get_state isolated on a process to avoid gevent polluting the stack
-    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored :(
+    # and preventing this silly complain "gevent is only usable from a single thread"
+    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored
+    # Maybe because somehow ids can not be properly serialized ?? WTF
     result = get_state.delay(state_module, ids=list(ids), lock=False)
     try:
         # Block until finish
@@ -40,6 +42,9 @@ def refresh_state(modeladmin, request, queryset):
     state_model = get_model(*state_module.split('.'))
     ids = queryset.values_list('state__id', flat=True)
     # Execute get_state isolated on a process to avoid gevent polluting the stack
+    # and preventing this silly complain "gevent is only usable from a single thread"
+    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored
+    # Maybe because somehow ids can not be properly serialized ?? WTF
     try:
         result = get_state.delay(state_module, ids=list(ids))
         result.get()

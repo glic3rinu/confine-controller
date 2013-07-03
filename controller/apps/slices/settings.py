@@ -36,9 +36,9 @@ SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME',
 
 
 # 30 days expiration interval
-SLICES_SLICE_EXP_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_INTERVAL', timedelta(30))
+SLICES_SLICE_EXP_INTERVAL = getattr(settings, 'SLICES_SLICE_EXP_INTERVAL', timedelta(days=30))
 # Send warning email 4 days before expiration
-SLICES_SLICE_EXP_WARN_DAYS = getattr(settings, 'SLICES_SLICE_EXP_WARN_DAYS', 4)
+SLICES_SLICE_EXP_WARN = getattr(settings, 'SLICES_SLICE_EXP_WARN', timedelta(days=4))
 
 # List of disabled sliver ifaces. i.e. ['management', 'public4']
 SLICES_DISABLED_SLIVER_IFACES = getattr(settings, 'SLICES_DISABLED_SLIVER_IFACES', [])

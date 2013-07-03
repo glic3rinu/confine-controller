@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import os, time
 from distutils.sysconfig import get_python_lib
+from urlparse import urlparse
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -53,6 +54,16 @@ def remove_app(INSTALLED_APPS, app):
     return INSTALLED_APPS
 
 
+def get_controller_site():
+    """ 
+    Returns a site-like object based on SITE_URL setting than can be used on templates
+    """
+    # Avoid import problems ...
+    from controller import settings as controller_settings
+    url = urlparse(controller_settings.SITE_URL)
+    return { 'domain': url.netloc, 'name': controller_settings.SITE_NAME }
+
+
 def send_email_template(template, context, to, email_from=None):
     """
     Renders an email template with this format:
@@ -64,16 +75,11 @@ def send_email_template(template, context, to, email_from=None):
     if type(context) is dict:
         context = Context(context)
     if type(to) is str or type(to) is unicode:
-        to = [to] #send_mail 'to' argument must be a list or a tuple
+        to = [to] # send_mail 'to' argument must be a list or a tuple
     
     if not 'site' in context: # fallback site value
-        from controller import settings as controller_settings
-        from urlparse import urlparse
-        url = urlparse(controller_settings.SITE_URL)
-        site = { 'domain': url.netloc, 'name': controller_settings.SITE_NAME }
-        email_context = {'site': site}
-        context.update(email_context)
-
+        context.update({'site': get_controller_site()})
+    
     #subject cannot have new lines
     subject = render_to_string(template, {'subject': True}, context).strip()
     message = render_to_string(template, {'message': True}, context)

@@ -9,7 +9,6 @@
 <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
 {% endblock %}
 
-
 {% block breadcrumbs %}
 <div class="breadcrumbs">
 <a href="{% url 'admin:index' %}">Home</a>
@@ -19,12 +18,11 @@
 </div>
 {% endblock %}
 
-
-
 {% block content %}
     <div style="margin:20px;">
     <fieldset class="module aligned">
         <h2>Email form</h2>
+        <form action="" method="post">{% csrf_token %}
         {% for field in form %}
         <div class="form-row ">
             <div >
@@ -39,18 +37,13 @@
     {% for obj in queryset %}
     <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
     {% endfor %}
-    <input type="hidden" name="action" value="request_cert" />
-    <input type="hidden" name="post" value="yes" />
+    <input type="hidden" name="action" value="send_email" />
+    <input type="hidden" name="post" value="send_email" />
     <div style="float:left;">
-    <input type="submit" class="default" value="{% trans "Send" %}" />
+    <input type="submit" class="default" value="{% trans "Send" %}" /> 
     </div>
     </div>
     </form>
-
-
-
-
-
 {% endblock %}
 
 

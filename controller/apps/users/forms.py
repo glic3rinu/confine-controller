@@ -170,5 +170,10 @@ class JoinRequestForm(forms.ModelForm):
 
 
 class SendMailForm(forms.Form):
-    subject = forms.CharField(widget=forms.TextInput(attrs={'size':'90'}))
-    content = forms.CharField(widget=forms.Textarea(attrs={'cols': 90, 'rows': 15}))
+    subject = forms.CharField(widget=forms.TextInput(attrs={'size':'118'}))
+    message = forms.CharField(widget=forms.Textarea(attrs={'cols': 118, 'rows': 15}))
+
+
+class ConfirmSendMailForm(forms.Form):
+    subject = forms.CharField(widget=forms.HiddenInput()) 
+    message = forms.CharField(widget=forms.HiddenInput())

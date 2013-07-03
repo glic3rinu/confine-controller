@@ -16,7 +16,7 @@ class PluginMount(type):
             cls.plugins.append(cls)
 
 
-class PluginModelQuerySet(models.query.QuerySet):
+class PluginModelQuerySet(models.Manager):
     def active(self, **kwargs):
         return self.filter(is_active=True, **kwargs)
 
@@ -26,7 +26,7 @@ class PluginModel(models.Model):
     label = models.CharField(max_length=128, blank=True, unique=True)
     module = models.CharField(max_length=256, blank=True)
     
-    objects = PluginModelQuerySet
+    objects = PluginModelQuerySet()
     
     class Meta:
         abstract = True

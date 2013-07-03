@@ -1,11 +1,15 @@
 from django.db import models
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import send_mail
+from django.template import Context, Template
 
+from controller.utils import send_email_template
 from controller.utils.plugins import PluginModel
 
 
 class Notification(PluginModel):
+    subject = models.CharField(max_length=256)
     message = models.TextField()
     
     def process(self):
@@ -19,8 +23,12 @@ class Notification(PluginModel):
                 valid_delivereds.update(is_valid=False)
     
     def deliver(self, obj):
-        recipients = self.instance.get_recipients(obj)
-        send_email_template(self.message, recipients)
+        email_from = None
+        email_to = self.instance.get_recipients(obj)
+        context = Context(self.instance.get_context(obj))
+        subject = Template(self.instance.default_subject).render(context)
+        message = Template(self.instance.default_message).render(context)
+        send_mail(subject, message, email_from, email_to)
         self.delivered.create(content_object=obj)
 
 

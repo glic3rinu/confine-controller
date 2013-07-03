@@ -14,18 +14,26 @@
 
 {% block content %}
     <p>{{ content_message }}</p>
+    <il>
+    <h3> Subject </h3>
+        <ul>{{ subject }}</ul>
+    <h3> Message </h3>
+        <ul>{{ message|linebreaks }}</ul>
+    </il>
+    <h3> Users </h3>
     <ul>
     {% for deletable_object in deletable_objects %}
         <li> <a href="{% url 'admin:nodes_node_change' deletable_object.id %}">{{ deletable_object }} </a></li>
     {% endfor %}
     </ul>
     <form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
     <div>
     {% for obj in queryset %}
     <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
     {% endfor %}
     <input type="hidden" name="action" value="{{ action_value }}" />
-    <input type="hidden" name="post" value="generic_confirmation" />
+    <input type="hidden" name="post" value="send_email_confirmation" />
     <input type="submit" value="{% trans "Yes, I'm sure" %}" />
     </div>
     </form>

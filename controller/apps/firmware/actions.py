@@ -93,7 +93,7 @@ def get_firmware(modeladmin, request, queryset):
         state = False
     else:
         state = build.state
-
+    
     # Build a new firmware
     if not state or state in [Build.DELETED, Build.OUTDATED, Build.FAILED]:
         if state == Build.FAILED:
@@ -107,11 +107,10 @@ def get_firmware(modeladmin, request, queryset):
         context["content_message"] = mark_safe(msg)
         template = 'admin/firmware/generate_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
-
+    
     context.update({
         "content_message": build.state_description,
-        "build": build,
-    })
+        "build": build, })
     
     # Available for download
     if state in [Build.AVAILABLE]:

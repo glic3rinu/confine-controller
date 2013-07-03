@@ -7,7 +7,7 @@ PING_LOCK_DIR = getattr(settings, 'PING_LOCK_DIR', '/dev/shm/')
 
 PING_COUNT = getattr(settings, 'PING_COUNT', 4)
 
-PING_INSTANCES = getattr(settings, 'PING_INSTANCES',(
+PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
     {
         'model': 'tinc.TincClient',
         'admin_classes': (

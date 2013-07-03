@@ -38,7 +38,7 @@ def pinger(ip):
     yield {'packet_loss': 100}
 
 
-@task(name="ping.ping")
+@task(name="pings.ping")
 def ping(model, ids=[], lock=True):
     """
     Ping task based on cooperative multitasking model
@@ -80,7 +80,7 @@ def ping(model, ids=[], lock=True):
 for instance in PING_INSTANCES:
     # Create periodic tasks
     if is_installed(instance.get('app')):
-        name = "ping.%s_ping" % instance.get('app')
+        name = "pings.%s_ping" % instance.get('app')
         run_every = instance.get('schedule')
         
         @periodic_task(name=name, run_every=run_every, expires=run_every)

@@ -21,7 +21,7 @@ for instance in PING_INSTANCES:
             'app': instance.get('app'),
             'model': instance.get('model').split('.')[1] }
         exec('from %(app)s.models import %(model)s as model' % context)
-        model.add_to_class('pings', generic.GenericRelation('ping.Ping'))
+        model.add_to_class('pings', generic.GenericRelation('pings.Ping'))
 
 
 class Ping(models.Model):

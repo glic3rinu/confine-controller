@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'Ping'
-        db.create_table(u'ping_ping', (
+        db.create_table(u'pings_ping', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
             ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
@@ -20,12 +20,12 @@ class Migration(SchemaMigration):
             ('mdev', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=9, decimal_places=3)),
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
         ))
-        db.send_create_signal(u'ping', ['Ping'])
+        db.send_create_signal(u'pings', ['Ping'])
 
 
     def backwards(self, orm):
         # Deleting model 'Ping'
-        db.delete_table(u'ping_ping')
+        db.delete_table(u'pings_ping')
 
 
     models = {
@@ -36,7 +36,7 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'ping.ping': {
+        u'pings.ping': {
             'Meta': {'object_name': 'Ping'},
             'avg': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '9', 'decimal_places': '3'}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
@@ -50,4 +50,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['ping']
+    complete_apps = ['pings']

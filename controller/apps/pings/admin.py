@@ -49,10 +49,10 @@ class PingAdmin(PermissionModelAdmin):
         urls = patterns("",
             url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/",
                 wrap_admin_view(self, self.changelist_view),
-                name='ping_ping_list'),
+                name='pings_ping_list'),
             url("^ping/(?P<content_type_id>\d+)/(?P<object_id>\d+)/",
                 wrap_admin_view(self, self.ping_view),
-                name='ping_ping_ping')
+                name='pings_ping_ping')
         )
         return urls + super(PingAdmin, self).get_urls()
     
@@ -89,12 +89,12 @@ class PingAdmin(PermissionModelAdmin):
                     break
             obj = obj or related_object
             context.update({
-                'ping_url': reverse('admin:ping_ping_ping', args=args),
+                'ping_url': reverse('admin:pings_ping_ping', args=args),
                 'obj_opts': obj._meta,
                 'obj': obj,
                 'ip_addr': addr,
                 'has_change_permission': self.has_change_permission(request, obj=obj, view=False),})
-            self.change_list_template = 'admin/ping/ping/ping_list.html'
+            self.change_list_template = 'admin/pings/ping/ping_list.html'
             pingdataset = DataPool(series=[{
                 'options': {
                     'source': Ping.objects.filter(content_type=content_type_id, object_id=object_id)[:25]},
@@ -121,7 +121,7 @@ class PingAdmin(PermissionModelAdmin):
         model = "%s.%s" % (ct.app_label, ct.model)
         ping(model, ids=[object_id], lock=False)
         args = (content_type_id, object_id)
-        return redirect(reverse('admin:ping_ping_list', args=args))
+        return redirect(reverse('admin:pings_ping_list', args=args))
 
 
 admin.site.register(Ping, PingAdmin)
@@ -142,7 +142,7 @@ def make_colored_address(old_method, field='', filters={}):
                 return addr
         obj = getattr(obj, field, obj)
         ct = ContentType.objects.get_for_model(type(obj))
-        url = reverse('admin:ping_ping_list', args=(ct.pk, obj.pk))
+        url = reverse('admin:pings_ping_list', args=(ct.pk, obj.pk))
         state = Ping.get_state(obj)
         color = STATES_COLORS.get(state, "black")
         context = {

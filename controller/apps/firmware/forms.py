@@ -30,4 +30,4 @@ class BaseImageForm(forms.Form):
         super(BaseImageForm, self).__init__(*args, **kwargs)
         qs = BaseImage.objects.filter_by_arch(arch).order_by('-default')
         self.fields['base_image'].queryset = qs
-        self.fields['base_image'].initial = qs[0]
+        self.fields['base_image'].initial = qs[0] if qs.exists() else None

@@ -89,12 +89,13 @@ class Image(object):
         # raising an exception if fuseext2 didn't succeed
         r("mountpoint -q %(mnt)s" % context)
     
-    def umount(self, quiet=False):
+    def umount(self):
         """ umount image partition """
         context = self.mount_context
-        err_codes = [0, 1] if quiet else [0]
-        r("fusermount -u %(mnt)s" % context, err_codes=err_codes)
+        # raise an exception if there is nothing mounted in our target
+        r("fusermount -u %(mnt)s" % context)
         r("dd if=%(partition)s of=%(image)s seek=%(sector)d" % context)
+
     
     def add_file(self, file):
         """
@@ -108,7 +109,10 @@ class Image(object):
     def clean(self):
         """ remove temporary files """
         try:
-            self.umount(quiet=True) # silent error entry not found in /etc/mtab
+            self.umount()
+        except:
+            # umount may fail because the image is already umounted
+            pass
         finally:
             shutil.rmtree(self.tmp)
     

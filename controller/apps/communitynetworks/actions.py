@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.db import transaction
+from django.utils.safestring import mark_safe
 from django.template.response import TemplateResponse
 
 from communitynetworks.models import CnHost
@@ -61,11 +62,9 @@ def cache_node_db(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
     }
-
     # Display the confirmation page
     return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
         context, current_app=modeladmin.admin_site.name)
-
 cache_node_db.url_name = 'do-cache-cndb'
 cache_node_db.verbose_name = 'Cache CNDB'
-cache_node_db.description = 'Caches node information stored on CNDB'
+cache_node_db.description = mark_safe('&#171;Caches node information stored on CNDB&#187;')

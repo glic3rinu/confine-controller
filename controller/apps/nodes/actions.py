@@ -103,10 +103,10 @@ def request_cert(modeladmin, request, queryset):
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         "form": form,
     }
-    
     # Display the confirmation page
     return TemplateResponse(request, 'admin/nodes/node/request_certificate.html', context, 
         current_app=modeladmin.admin_site.name)
-
 request_cert.url_name = 'request-cert'
 request_cert.verbose_name = 'Request Certificate'
+request_cert.description = mark_safe('&#171;Upload a node CSR to be signed by the '
+                                     'testbed certificate authority (CA)&#187;')

@@ -2,11 +2,11 @@
 {% load i18n %}
 
 {% block object-tools-items %}
-{% if has_change_permission %}
-    {% for item in object_tools_items %}
-        <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
-    {% endfor %}
-{% endif %}
+{% for item in object_tools_items %}
+    {% if item.always_display or has_change_permission %}
+    <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
+    {% endif %}
+{% endfor %}
 <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
 <li><a href="help/" class="historylink">{% trans "Help" %}</a></li>
 {% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}

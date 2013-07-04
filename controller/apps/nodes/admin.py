@@ -51,12 +51,12 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     inlines = [DirectIfaceInline, NodePropInline]
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'group', 'arch', 'local_iface',
-                       'sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'set_state'),
+            'fields': ('name', 'description', 'group', 'arch', 'set_state'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('display_cert', 'priv_ipv4_prefix', 'sliver_mac_prefix',
+            'fields': ('sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'local_iface',
+                       'display_cert', 'priv_ipv4_prefix', 'sliver_mac_prefix',
                        'sliver_pub_ipv6', 'boot_sn')
         }), 
         )

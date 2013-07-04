@@ -5,6 +5,7 @@ import re
 from django.contrib import admin
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from pygments import highlight
@@ -161,8 +162,11 @@ def state_link(*args):
     except NodeState.DoesNotExist:
         state = NodeState.objects.create(node=obj)
     except SliverState.DoesNotExist:
-        return # otherwise I get an IntegrityError WTF^2!
-#        state = SliverState.objects.create(sliver=obj)
+        try:
+            # Sometimes I get an IntegrityError WTF^2!
+            state = SliverState.objects.create(sliver=obj)
+        except IntegrityError:
+            return
     model_name = obj._meta.verbose_name_raw
     url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))

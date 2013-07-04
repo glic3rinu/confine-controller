@@ -156,5 +156,5 @@ if is_installed('firmware'):
     from firmware.models import construct_safe_locals
     @receiver(construct_safe_locals, dispatch_uid="maintenance.update_safe_locals")
     def update_safe_locals(sender, safe_locals, **kwargs):
-        safe_locals.update({ setting: getattr(settings, setting)
-            for setting in dir(settings) if setting.isupper() })
+        safe_locals.update(dict((setting, getattr(settings, setting))
+            for setting in dir(settings) if setting.isupper() ))

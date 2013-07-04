@@ -1,10 +1,10 @@
-{% load i18n %}
+{% load i18n utils %}
 
 <p>You can find the initial steps at <a href="https://wiki.confine-project.eu/usage:start">Using Community-lab.net testbed</a>
 <br>For reporting problems you can use:
 <ol>
 <li>Users mailing list <a href="http://lists.community-lab.net/mailman/listinfo/users-community-lab">users@lists.community-lab.net</a> (Preferent)</li>
-<li>Community-lab <a href="{% url 'admin:issues_ticket_changelist'%}">issue tracking</a> (Testbed operation related)</li>
+{% if 'issues'|isinstalled %}<li>Community-lab <a href="{% url 'admin:issues_ticket_changelist'%}">issue tracking</a> (Testbed operation related)</li>{% endif %}
 <li>Confine projecte <a href="http://redmine.confine-project.eu/projects/confine/issues">redmine</a> (Software related)</li>
 </p>
 </ol>

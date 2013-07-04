@@ -161,7 +161,8 @@ def state_link(*args):
     except NodeState.DoesNotExist:
         state = NodeState.objects.create(node=obj)
     except SliverState.DoesNotExist:
-        state = SliverState.objects.create(sliver=obj)
+        return # otherwise I get an IntegrityError WTF^2!
+#        state = SliverState.objects.create(sliver=obj)
     model_name = obj._meta.verbose_name_raw
     url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))

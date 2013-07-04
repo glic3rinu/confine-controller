@@ -286,6 +286,10 @@ class SliceSliversAdmin(SliverAdmin):
         if response._headers.get('location')[1] == request.path:
             return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver',
                 args=(obj.slice.pk,)))
+        # "save" correction
+        if response._headers.get('location')[1] == reverse('admin:slices_sliver_changelist'):
+            return HttpResponseRedirect(reverse('admin:slices_slice_change',
+                args=(obj.slice.pk,)))
         return response
     
     def response_change(self, request, obj):
@@ -294,6 +298,10 @@ class SliceSliversAdmin(SliverAdmin):
         # "save and add another" correction
         if response._headers.get('location')[1] == reverse('admin:slices_sliver_add'):
             return HttpResponseRedirect(reverse('admin:slices_slice_add_sliver',
+                args=(obj.slice.pk,)))
+        # "save" correction
+        if response._headers.get('location')[1] == reverse('admin:slices_sliver_changelist'):
+            return HttpResponseRedirect(reverse('admin:slices_slice_change',
                 args=(obj.slice.pk,)))
         return response
     

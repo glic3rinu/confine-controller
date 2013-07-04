@@ -45,7 +45,8 @@ class Command(BaseCommand):
                 if desired_version:
                     run('pip install confine-controller==%s' % desired_version, silent=False)
                 else:
-                    run('pip install confine-controller --upgrade', silent=False)
+                    # Fucking pip, it does return exit code 0 even when fail because Requirement already up-to-date
+                    run('pip install confine-controller --upgrade --force', silent=False)
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)

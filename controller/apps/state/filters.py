@@ -12,7 +12,7 @@ class NodeStateListFilter(SimpleListFilter):
     
     def queryset(self, request, queryset):
         if self.value():
-            pks = [state.pk for state in queryset.all() if state.current == self.value()]
+            pks = [node.pk for node in queryset.all() if node.state.current == self.value()]
             return queryset.filter(pk__in=pks)
 
 
@@ -25,5 +25,5 @@ class SliverStateListFilter(SimpleListFilter):
     
     def queryset(self, request, queryset):
         if self.value():
-            pks = [state.pk for state in queryset.all() if state.current == self.value()]
+            pks = [sliver.pk for sliver in queryset.all() if sliver.state.current == self.value()]
             return queryset.filter(pk__in=pks)

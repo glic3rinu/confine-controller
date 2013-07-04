@@ -26,6 +26,7 @@ class BaseState(models.Model):
         'time the state retrieval operation has been executed')
     last_change_on = models.DateTimeField(null=True, help_text='Last time the state '
         'has change')
+    add_date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         abstract = True
@@ -156,8 +157,9 @@ class NodeState(BaseState):
         if state not in ['offline', 'nodata']:
             # offline and nodata are worst than crashed :)
             timeout_expire = timezone.now()-settings.STATE_NODE_PULL_TIMEOUT
-            if not self.last_contact_on or self.last_contact_on < timeout_expire:
-                return 'crashed'
+            if self.add_date < timeout_expire:
+                if not self.last_contact_on or self.last_contact_on < timeout_expire:
+                    return 'crashed'
         return state
 
 

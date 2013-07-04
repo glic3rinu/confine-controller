@@ -114,6 +114,7 @@ def get_firmware(modeladmin, request, queryset):
     
     # Available for download
     if state in [Build.AVAILABLE]:
+        print request
         context['base_image'] = base_images.get(image=build.base_image)
         template = 'admin/firmware/download_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)

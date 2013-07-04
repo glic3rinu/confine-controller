@@ -151,6 +151,7 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Sliver
     serializer_class = SliverSerializer
     filter_fields = ['slice__name', 'slice__set_state', 'node', 'node__id']
+    filter_fields = ('node', 'slice')
 
 
 class SliverDetail(generics.RetrieveUpdateDestroyAPIView):

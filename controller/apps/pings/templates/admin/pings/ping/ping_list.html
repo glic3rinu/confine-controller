@@ -10,7 +10,6 @@
     {{ pingchart|load_charts:"pingchart" }}
 {% endblock %}
 
-
 {% block content_title %}{% if title %}<h1>Pings on 
     <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
     ({{ ip_addr }})</h1>
@@ -26,18 +25,13 @@
     </div>
 {% endblock %}
 
-
 {% block object-tools %}
-  {% if has_change_permission %}
-    <ul class="object-tools">
-        <li>
-          <a href="{{ ping_url }}" class="historylink"> Ping machine ! </a>
-        </li>
-    </ul>
-  {% endif %}
+<ul class="object-tools">
+    <li>
+      <a href="{{ ping_url }}" class="historylink"> Ping machine ! </a>
+    </li>
+</ul>
 {% endblock %}
-
-
 
 {% block result_list %}
     <div id='pingchart'></div>

@@ -13,6 +13,11 @@ from . import settings
 
 
 class BaseState(models.Model):
+    STATES = (
+        ('unknown', 'UNKNOWN'),
+        ('offline', 'OFFLINE'),
+        ('nodata', 'NO DATA'),)
+    
     data = models.TextField()
     metadata = models.TextField()
     last_seen_on = models.DateTimeField(null=True, help_text='Last time the state '
@@ -85,20 +90,9 @@ class BaseState(models.Model):
             return 'nodata'
         
         if self.last_seen_on and time() < heartbeat_expires(self.last_seen_on, **kwargs):
-            # TODO: implement it first on the node
-#            if self.metadata:
-#                from datetime import datetime, timedelta
-#                headers = json.loads(self.metadata).get('headers', False)
-#                if headers:
-#                    last_modified = headers.get('last-modified')
-#                    last_modified = datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S %Z")
-#                    date = headers.get('date')
-#                    date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %Z")
-#                    if date - last_modified > timedelta(hours=1):
-#                        return 'crashed'
             if self.data:
                 try:
-                    state = json.loads(self.data).get('state', 'unknown')
+                    return json.loads(self.data).get('state', 'unknown')
                 except ValueError:
                     pass
             return 'unknown'
@@ -120,14 +114,12 @@ class BaseState(models.Model):
 
 class NodeState(BaseState):
     STATES = (
-        ('offline', 'OFFLINE'),
-        ('debug', 'DEBUG'),
-        ('safe', 'SAFE'),
         ('production', 'PRODUCTION'),
+        ('safe', 'SAFE'),
+        ('debug', 'DEBUG'),
         ('failure', 'FAILURE'),
-        ('unknown', 'UNKNOWN'),
-        ('nodata', 'NO DATA'),
-        ('crashed', 'CRASHED'),)
+        ('crashed', 'CRASHED'),
+        ) + BaseState.STATES
     
     node = models.OneToOneField('nodes.Node', related_name='state', primary_key=True)
     last_contact_on = models.DateTimeField(null=True, help_text='Last API pull '
@@ -156,20 +148,28 @@ class NodeState(BaseState):
             pass
         else:
             self.save()
+    
+    @property
+    def current(self):
+        """ node is crashed if we do not receive node heartbeats beyond a timeout """
+        state = super(NodeState, self).current
+        if state not in ['offline', 'nodata']:
+            # offline and nodata are worst than crashed :)
+            timeout_expire = timezone.now()-settings.STATE_NODE_PULL_TIMEOUT
+            if not self.last_contact_on or self.last_contact_on < timeout_expire:
+                return 'crashed'
+        return state
 
 
 class SliverState(BaseState):
     STATES = (
-        ('offline', 'OFFLINE'),
-        ('unknown', 'UNKNOWN'),
-        ('nodata', 'NO DATA'),
-        ('crashed', 'CRASHED'),
-        ('registered', 'REGISTERED'),
-        ('deployed', 'DEPLOYED'),
         ('started', 'STARTED'),
-        ('fail_alloc', 'FAIL_ALLOC'),
+        ('deployed', 'DEPLOYED'),
+        ('registered', 'REGISTERED'),
+        ('fail_start', 'FAIL_START'),
         ('fail_deploy', 'FAIL_DEPLOY'),
-        ('fail_start', 'FAIL_START'),)
+        ('fail_alloc', 'FAIL_ALLOC'),
+        ) + BaseState.STATES
     
     sliver = models.OneToOneField('slices.Sliver', related_name='state', primary_key=True)
     

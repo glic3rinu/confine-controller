@@ -40,12 +40,12 @@ class USBImagePlugin(FirmwarePlugin):
                 path = os.path.join(install.mnt, 'confine/*img.gz')
                 dst = run('ls %s' % path).stdout
                 image.gzip()
-                run('mv %s %s' % (image.image, dst))
+                run('mv %s %s' % (image.file, dst))
                 install.umount()
             except:
                 install.clean()
             image.clean()
-            image.image = install.image
+            image.file = install.file
             image.tmp = install.tmp
     
     def update_image_name(self, image_name, **kwargs):

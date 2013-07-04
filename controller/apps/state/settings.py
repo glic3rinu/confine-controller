@@ -1,8 +1,11 @@
-#from celery.task.schedules import crontab
+from datetime import timedelta
+
 from django.conf import settings
 
 
 STATE_LOCK_DIR = getattr(settings, 'STATE_LOCK_DIR', '/dev/shm/')
+
+STATE_NODE_PULL_TIMEOUT = getattr(settings, 'STATE_NODE_PULL_TIMEOUT', timedelta(hours=2))
 
 
 STATE_NODESTATE_URI = getattr(settings, 'STATE_NODESTATE_URI',

@@ -1,14 +1,12 @@
-import functools
-import os
-import shutil
-import tempfile
+import functools, os, shutil, tempfile
+
+from django.core.management.base import CommandError
 
 from controller.utils.system import run
 
 
 r = functools.partial(run, silent=False)
 
-# TODO rename self.image to self.file or something  path ? !
 
 class Image(object):
     """ 
@@ -51,7 +49,7 @@ class Image(object):
     def sector(self):
         """ sector number of image part_nr """
         if not hasattr(self, '_sector'):
-            context = { 'image': self.image, 'part_nr': self.part_nr }
+            context = { 'image': self.file, 'part_nr': self.part_nr }
             #BUGFIX: file -k option for keep looking and getting all file image info
             # different output at UNIX `file` between version 5.11 and 5.14
             result = r("file -k %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
@@ -68,7 +66,7 @@ class Image(object):
     def mount_context(self):
         """ context used in mount and umount methods """
         return { 'mnt': self.mnt,
-                 'image': self.image,
+                 'image': self.file,
                  'partition': self.partition,
                  'sector': self.sector }
     
@@ -76,7 +74,7 @@ class Image(object):
         """ create temporary directories needed for building the image """
         self.tmp = tempfile.mkdtemp()
         os.mkdir(self.mnt)
-        self.image = os.path.join(self.tmp, "image.bin")
+        self.file = os.path.join(self.tmp, "image.bin")
     
     def mount(self):
         """ mount image partition with user-space tools """
@@ -109,25 +107,25 @@ class Image(object):
         """ remove temporary files """
         try:
             self.umount()
-        except:
+        except CommandError:
             # umount may fail because the image is already umounted
             pass
         finally:
             shutil.rmtree(self.tmp)
     
     def move(self, dst):
-        """ move self.image to destination path """
-        shutil.move(self.image, dst)
-        self.image = dst
+        """ move self.file to destination path """
+        shutil.move(self.file, dst)
+        self.file = dst
     
     def gunzip(self):
         """ extract the image """
-        r("cat '%s' | gunzip -c > '%s'" % (self.base_image, self.image))
+        r("cat '%s' | gunzip -c > '%s'" % (self.base_image, self.file))
     
     def gzip(self):
-        """ compress the image """
-        r("gzip " + self.image)
-        self.image += '.gz'
+        """ compress the image file """
+        r("gzip " + self.file)
+        self.file += '.gz'
     
     def create_file(self, build_file):
         dest_path = self.mnt + build_file.name

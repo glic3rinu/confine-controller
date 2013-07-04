@@ -1,5 +1,13 @@
 {% load i18n %}
-<p class=warning>The testbed is in testing phase. <br>You are very welcome to report any problem using <a href="http://redmine.confine-project.eu/projects/confine/issues">redmine</a> issue tracker.</p>
+
+<p>You can find the initial steps at <a href="https://wiki.confine-project.eu/usage:start">Using Community-lab.net testbed</a>
+<br>And or reporting problems you can use:
+<ol>
+<li>The users mailing list <a href="http://lists.community-lab.net/mailman/listinfo/users-community-lab">users@lists.community-lab.net</a> (Preferent)</li>
+<li>The community-lab  <a href="{% url 'admin:issues_ticket_changelist'%}">issue tracking</a> (Testbed operation related)</li>
+<li>The confine-projecte <a href="http://redmine.confine-project.eu/projects/confine/issues">redmine</a> (Software related)</li>
+</p>
+</ol>
 {% if user.join_requests.exists %}
 <p> You have a pending membership request for 
 {% for req in user.join_requests.all %}

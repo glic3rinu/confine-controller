@@ -5,4 +5,12 @@ from permissions import ReadOnlyPermission
 from .models import Ping
 
 
-Ping.has_permission = ReadOnlyPermission()
+class PingPermission(ReadOnlyPermission):
+    """ Allow delete because this is a related object """
+    def delete(self, obj, cls, user):
+        if obj is None:
+            return True
+        return obj.content_object.has_permission.delete(user)
+
+
+Ping.has_permission = PingPermission()

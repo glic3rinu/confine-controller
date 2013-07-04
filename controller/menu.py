@@ -101,12 +101,6 @@ class CustomMenu(Menu):
                     items.MenuItem('User Registration',
                         reverse('admin:registration_registrationprofile_changelist')))
             
-            if is_installed('groupregistration'):
-                user_items.append(
-                    items.MenuItem('Group registration',
-                        reverse('admin:groupregistration_groupregistration_changelist'))
-                )
-            
             admin_item.children.append(
                 items.MenuItem('Users',
                     reverse('admin:app_list', args=['users']),

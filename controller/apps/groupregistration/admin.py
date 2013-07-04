@@ -1,6 +1,10 @@
 from django.contrib import admin
 
 from controller.admin import ChangeViewActions
+from controller.admin.utils import (insert_list_display, insert_action)
+
+from users.admin import GroupAdmin
+from users.models import Group
 
 from groupregistration.actions import approve_group, reject_group
 from groupregistration.models import GroupRegistration
@@ -55,4 +59,16 @@ class GroupRegistrationAdmin(ChangeViewActions):
         super(GroupRegistrationAdmin, self).__init__(*args, **kwargs)
         self.list_display_links = (None, )
 
-admin.site.register(GroupRegistration, GroupRegistrationAdmin)
+#admin.site.register(GroupRegistration, GroupRegistrationAdmin)
+
+
+# Monkey Patch section
+
+def is_approved(group):
+    return GroupRegistration.is_group_approved(group.pk)
+is_approved.boolean = True
+
+
+insert_list_display(GroupAdmin, is_approved)
+insert_action(Group, approve_group)
+insert_action(Group, reject_group)

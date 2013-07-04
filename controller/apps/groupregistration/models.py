@@ -44,6 +44,11 @@ class GroupRegistration(models.Model):
     user = models.ForeignKey(User, verbose_name=_('user'))
     group = models.ForeignKey(Group, verbose_name=_('group'))
     date = models.DateTimeField('requested date', auto_now=True)
+    # NOT necessary: if exists --> not approved, otherwise approved
+    #is_approved = models.BooleanField(default=False,
+    #    help_text='Designates if a group has been approved by the operations '
+    #              'team. When someone sends a request, a group pending of '
+    #              'be approved is created.')
 
     objects = GroupRegistrationManager()
 
@@ -53,6 +58,14 @@ class GroupRegistration(models.Model):
 
     def __unicode__(self):
         return "%s by %s at %s" % (self.group, self.user, self.date)
+
+    @classmethod
+    def is_group_approved(cls, group):
+        """ 
+        Returns if a group has been approved by operators team. When someone
+        sends a request, a group pending of be approved is created.
+        """
+        return not cls.objects.filter(group=group).exists()
 
     def approve(self):
         """
@@ -65,10 +78,6 @@ class GroupRegistration(models.Model):
          # create admin role
         Roles.objects.create(user=self.user, group=self.group, is_admin=True)
         
-        # mark the group as approved
-        self.group.is_approved = True
-        self.group.save()
-
         # enable the user
         self.user.is_active = True
         self.user.save()
@@ -76,6 +85,7 @@ class GroupRegistration(models.Model):
         # notify the group admin
         self.notify_user(template='registration_group_approved.txt')
         
+        # mark the group as approved
         self.delete()
 
     def reject(self):

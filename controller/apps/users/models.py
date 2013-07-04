@@ -18,12 +18,6 @@ class Group(models.Model):
         validators=[validators.RegexValidator('^[\w.@+-]+$', 
                    'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True)
-    # used when someone send a request to create a group
-    # TODO move to groupregistration
-#    is_approved = models.BooleanField(default=False,
-#        help_text='Designates if a group has been approved by the operations '
-#                  'team. When someone sends a request, a group pending of '
-#                  'be approved is created.')
     allow_nodes = models.BooleanField(default=False,
         help_text='Whether nodes belonging to this group can be created or set '
                   'into production (false by default). Its value can only be '

@@ -2,64 +2,36 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db import router, transaction
+from django.db import transaction
 from django.template.response import TemplateResponse
-from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy, ugettext as _
+
+from controller.admin.decorators import action_with_confirmation
 
 from .forms import RequestCertificateForm
 
 
-#TODO make this a generic pattern for reusing accros all actions that needs
-#     confirmation step
-
-
+@action_with_confirmation('reboot')
 @transaction.commit_on_success
 def reboot_selected(modeladmin, request, queryset):
-    opts = modeladmin.model._meta
-    app_label = opts.app_label
-    
     # Check that the user has change permission for the actual model
-    # TODO performance improvenet: if superuser skip
-    # TODO Say more gently that permission is needed
-    for node in queryset:
-        if not request.user.has_perm('nodes.change_node', node):
-            raise PermissionDenied
+    # performance improvement: if superuser skip
+    if not request.user.is_superuser:
+        for node in queryset:
+            if not request.user.has_perm('nodes.change_node', node):
+                msg = "You have not enought rights for rebooting the node '%s'!" % node
+                modeladmin.message_user(request, msg, messages.ERROR)
+                return None
     
-    # The user has already confirmed the reboot.
-    if request.POST.get('post'):
-        n = queryset.count()
-        if n:
-            for obj in queryset:
-                obj.reboot()
-                modeladmin.log_change(request, obj, "Instructed to reboot")
-            msg = "%s selected nodes have been instructed to reboot." % queryset.count()
-            modeladmin.message_user(request, msg)
-        # Return None to display the change list page again.
-        return None
+    n = queryset.count()
+    if n:
+        for obj in queryset:
+            obj.reboot()
+            modeladmin.log_change(request, obj, "Instructed to reboot")
+        msg = "%s selected nodes have been instructed to reboot." % n
+        modeladmin.message_user(request, msg)
     
-    if len(queryset) == 1:
-        objects_name = force_text(opts.verbose_name)
-    else:
-        objects_name = force_text(opts.verbose_name_plural)
-    
-    context = {
-        "title": "Are you sure?",
-        "content_message": "Are you sure you want to reboot the selected nodes?",
-        "action_name": 'Reboot',
-        "action_value": 'reboot_selected',
-        "deletable_objects": queryset,
-        'queryset': queryset,
-        "opts": opts,
-        "app_label": app_label,
-        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-    }
-    
-    # Display the confirmation page
-    return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
-        context, current_app=modeladmin.admin_site.name)
-
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
 reboot_selected.url_name = 'reboot'
 reboot_selected.description = mark_safe('&#171;Reboot this node&#187;')

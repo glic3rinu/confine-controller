@@ -27,7 +27,7 @@
     <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
     {% endfor %}
     <input type="hidden" name="action" value="{{ action_value }}" />
-    <input type="hidden" name="post" value="yes" />
+    <input type="hidden" name="post" value="generic_confirmation" />
     <input type="submit" value="{% trans "Yes, reject the ticket" %}" />
     </div>
     </form>

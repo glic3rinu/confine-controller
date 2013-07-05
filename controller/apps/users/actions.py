@@ -3,17 +3,17 @@ from django.contrib.admin import helpers
 from django.contrib.sites.models import RequestSite
 from django.core.mail import send_mass_mail
 from django.db import transaction
-from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
-from django.utils.safestring import mark_safe
 
+from controller.admin.decorators import action_with_confirmation
 from controller.utils.options import send_email_template
 
 from users.forms import SendMailForm, ConfirmSendMailForm
 from users.models import JoinRequest
 
 
+@action_with_confirmation('send a join request to')
 @transaction.commit_on_success
 def join_request(modeladmin, request, queryset):
     """
@@ -21,52 +21,24 @@ def join_request(modeladmin, request, queryset):
     If there are any error when creating a request, the process continues
     for the other groups.
     """
-    opts = modeladmin.model._meta
-    app_label = opts.app_label
-    
     user = request.user
     
     # check if user is alreday in the group
     for group in queryset:
         if group.users.filter(pk=user.id).exists():
             messages.error(request, "You already are member of group (%s)" % group)
-            return
+            return None
         if JoinRequest.objects.filter(user=user, group=group).exists():
             messages.error(request, "You alreday have sent a request to this group (%s)" % group)
-            return
-    
-    # The user has already confirmed the join requests
-    if request.POST.get('post'):
-        n = queryset.count()
-        if n:
-            for group in queryset:
-                jrequest, created = JoinRequest.objects.get_or_create(user=user, group=group)
-                if created:
-                    site = RequestSite(request)
-                    jrequest.send_creation_email(site)
-                    modeladmin.message_user(request, "Your join request has been sent (%s)" % group)
             return None
     
-    if len(queryset) == 1:
-        objects_name = force_text(opts.verbose_name)
-    else:
-        objects_name = force_text(opts.verbose_name_plural)
+    for group in queryset:
+        jrequest, created = JoinRequest.objects.get_or_create(user=user, group=group)
+        if created:
+            site = RequestSite(request)
+            jrequest.send_creation_email(site)
+            modeladmin.message_user(request, "Your join request has been sent (%s)" % group)
     
-    context = {
-        "title": "Are you sure?",
-        "content_message": "Are you sure you want to send a join request to the following groups?",
-        "action_name": 'Join Request',
-        "action_value": 'join_request',
-        "deletable_objects": queryset,
-        'queryset': queryset,
-        "opts": opts,
-        "app_label": app_label,
-        'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-    }
-    
-    # Display the confirmation page
-    return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
-        context, current_app=modeladmin.admin_site.name)
 join_request.short_description = "Request to join the selected groups"
 join_request.url_name = 'join-request'
 
@@ -76,7 +48,6 @@ def enable_account(modeladmin, request, queryset):
     """
     The testbed operators can enable the users
     """
-    opts = modeladmin.model._meta
     
     # check if the selected user is alreday enabled
     for user in queryset:
@@ -96,7 +67,7 @@ def confirm_send_email_view(modeladmin, request, queryset, subject, message):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    # The user has already confirmed the reboot.
+    # The user has already confirmed
     if request.POST.get('post') == 'send_email_confirmation':
         form = ConfirmSendMailForm(request.POST)
         n = queryset.count()
@@ -121,7 +92,8 @@ def confirm_send_email_view(modeladmin, request, queryset, subject, message):
     form = ConfirmSendMailForm(initial={'subject': subject, 'message': message})
     context = {
         "title": "Are you sure?",
-        "content_message": "Are you sure you want to send the following message to the selected users?",
+        "content_message": "Are you sure you want to send the following message \
+                            to the selected %s?" % objects_name,
         "action_name": 'send_email',
         "action_value": 'send_email',
         "deletable_objects": queryset,

@@ -5,24 +5,27 @@ from django.utils import timezone
 from notifications import Notification
 
 from .models import NodeState
+from .settings import STATE_NODE_OFFLINE_WARNING
 
-
-email_days = 10
 
 class NodeNotAvailable(Notification):
     model = NodeState
-    description = 'Notificate %s days after the node goes offline' % email_days
+    description = 'Notificate %s days after the node goes offline' % STATE_NODE_OFFLINE_WARNING.days
     verbose_name = 'Node not available notification'
-    default_subject = ''
-    default_message = ''
+    default_subject = 'Node {{ node.name }} appear OFFLINE for more than {{ exp_warn.days }} days'
+    default_message = (
+        'Dear node operator\n'
+        'Your node appear as offline')
     
     def check_condition(self, obj):
-        return (obj.current == obj.OFFLINE and obj.last_change_on < timezone.now()-email_days)
+        return (obj.current == NodeState.OFFLINE and obj.last_change_on < timezone.now()-STATE_NODE_OFFLINE_WARNING)
     
-    def get_recipients(self, ob):
-        return obj.node.group.admins.list_values('email')
+    def get_recipients(self, obj):
+        return obj.node.group.get_admin_emails()
     
     def get_context(self, obj):
-         return {
-            'obj': obj,
-            'notification_time': SLICES_SLICE_EXP_WARN,}
+        context = super(NodeNotAvailable, self).get_context(obj)
+        context.update({
+            'slice': obj,
+            'exp_warn': STATE_NODE_OFFLINE_WARNING })
+        return context

@@ -13,6 +13,9 @@ from . import settings
 
 
 class BaseState(models.Model):
+    UNKNOWN = 'unknown'
+    OFFLINE = 'offline'
+    NODATA = 'nodata'
     STATES = (
         ('unknown', 'UNKNOWN'),
         ('offline', 'OFFLINE'),
@@ -114,6 +117,11 @@ class BaseState(models.Model):
 
 
 class NodeState(BaseState):
+    PRODUCTION = 'production'
+    SAFE = 'safe'
+    DEBUG = 'debug'
+    FAILURE = 'failure'
+    CRASHED = 'crashed'
     STATES = (
         ('production', 'PRODUCTION'),
         ('safe', 'SAFE'),

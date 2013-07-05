@@ -2,9 +2,15 @@ from celery.task import periodic_task
 from celery.task.schedules import crontab
 from django.db import transaction
 
+from notifications.models import Notification
+
 
 @periodic_task(name="notifications.notify", run_every=crontab(minute=0, hour=0))
-def notify():
-    for notification in Notification.objects.active():
+def notify(ids=[]):
+    if ids:
+        notifications = Notification.objects.filter(pk__in=ids)
+    else:
+        notifications = Notification.objects.active()
+    for notification in notifications:
         with transaction.commit_on_success():
             notification.process()

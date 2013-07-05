@@ -239,6 +239,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'djcelery.models.TaskState',
             'firmware.models.Config',
             'maintenance.models.Operation',
+            'notifications.models.Notification',
         ),
         'collapsible': True,
     }),
@@ -268,6 +269,7 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'djcelery/taskstate': "taskstate.png",
     'firmware/config': "Firmware.png",
     'maintenance/operation': "gnome-terminal.png",
+    'notifications/notification': "notifications.png",
 }
 
 

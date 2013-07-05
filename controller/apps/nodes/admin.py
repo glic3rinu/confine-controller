@@ -11,9 +11,8 @@ from singleton_models.admin import SingletonModelAdmin
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
     docstring_as_help_tip)
-from controller.forms.widgets import ReadOnlyWidget
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
-from users.models import Group
+from users.helpers import filter_group_queryset
 
 from nodes.actions import request_cert, reboot_selected
 from nodes.filters import MyNodesListFilter
@@ -41,7 +40,7 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True),
+    list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True, bold=False),
                     admin_link('group'), 'num_ifaces']
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
@@ -88,25 +87,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             user = request.user
             query = Q( Q(users__roles__is_admin=True) | Q(users__roles__is_technician=True) )
             query = Q( query & Q(allow_nodes=True) )
-            if obj and obj.pk:
-                # Add actual group
-                query = Q( query | Q(pk=obj.group.pk) )
-            if user.is_superuser:
-                # TODO filter only user related groups + current node group?
-                groups = Group.objects.filter(query).distinct()
-            else:
-                groups = user.groups.filter(query).distinct()
-            num_groups = len(groups)
-            if num_groups >= 1:
-                # User has can add nodes in more than one group
-                form.base_fields['group'].queryset = groups
-            if num_groups == 1:
-                # User can add nodes in only one group (set that group by default)
-                ro_widget = ReadOnlyWidget(groups[0].id, groups[0].name)
-                form.base_fields['group'].widget = ro_widget
-                form.base_fields['group'].required = False
-            if num_groups == 0 and not user.is_superuser:
-                raise Exception('Oops this is unfortunate but you can not proceed.')
+            form = filter_group_queryset(form, obj, request.user, query)
         return form
     
     def queryset(self, request):

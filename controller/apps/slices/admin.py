@@ -13,13 +13,13 @@ from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, link, get_admin_link,
     insert_list_display, action_to_view, get_modeladmin, wrap_admin_view,
     docstring_as_help_tip)
-from controller.forms.widgets import ReadOnlyWidget
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
-from .filters import MySlicesListFilter, MySliversListFilter
+from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
 from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet
 from .helpers import wrap_action, remove_slice_id
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
@@ -69,8 +69,9 @@ class SliverIfaceInline(PermissionTabularInline):
 
 
 class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['__unicode__', admin_link('node'), admin_link('slice')]
-    list_filter = [MySliversListFilter, 'slice__name']
+    list_display = ['__unicode__', admin_link('node'), admin_link('slice'),
+                    'computed_set_state']
+    list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice__name']
     fieldsets = (
         (None, {
             'fields': ('description', 'slice_link', 'node_link', ('template',
@@ -129,6 +130,12 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             return instance.instance_sn
         return instance.slice.new_sliver_instance_sn
     new_instance_sn.short_description ='Instance sequence number'
+    
+    def computed_set_state(self, sliver):
+        state = sliver.set_state if sliver.set_state else sliver.slice.set_state
+        color = STATE_COLORS.get(state, "black")
+        return mark_safe('<span style="color:%s;">%s</spam>' % (color, state))
+    computed_set_state.short_description = 'Set state'
     
     def has_add_permission(self, *args, **kwargs):
         """ 
@@ -448,23 +455,17 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         )
         return extra_urls + urls
     
-    def get_form(self, request, *args, **kwargs):
+    def get_form(self, request, obj=None, *args, **kwargs):
         """ 
         Request.user as default node admin and Warn the user that the testbed is
         not ready for allocating shit
         """
-        form = super(SliceAdmin, self).get_form(request, *args, **kwargs)
+        form = super(SliceAdmin, self).get_form(request, obj=obj, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
-            user = request.user
-            groups = user.groups.filter(Q(roles__is_admin=True) | Q(roles__is_researcher=True))
-            groups = groups.filter(allow_slices=True)
-            num_groups = groups.count()
-            if num_groups >= 1:
-                form.base_fields['group'].queryset = groups
-            if num_groups == 1:
-                form.base_fields['group'].widget = ReadOnlyWidget(groups[0].id, groups[0].name)
-                form.base_fields['group'].required = False
+            query = Q( Q(users__roles__is_admin=True) | Q(users__roles__is_researcher=True) )
+            query = Q( query & Q(allow_slices=True) )
+            form = filter_group_queryset(form, obj, request.user, query)
         return form
     
     def get_readonly_fields(self, request, obj=None):

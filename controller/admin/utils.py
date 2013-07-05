@@ -119,7 +119,7 @@ def get_admin_link(obj, href_name=''):
     return admin_link('', href_name=href_name)(obj)
 
 
-def colored(field_name, colours, description='', verbose=False):
+def colored(field_name, colours, description='', verbose=False, bold=True):
     """ returns a method that will render obj with colored html """
     def colored_field(obj, field=field_name, colors=colours, verbose=verbose):
         value = escape(get_field_value(obj, field))
@@ -127,7 +127,10 @@ def colored(field_name, colours, description='', verbose=False):
         if verbose:
             # Get the human-readable value of a choice field
             value = getattr(obj, 'get_%s_display' % field)()
-        return '<b><span style="color: %s;">%s</span></b>' % (color, value)
+        colored_value = '<span style="color: %s;">%s</span>' % (color, value)
+        if bold:
+            colored_value = '<b>%s</b>' % colored_value
+        return colored_value
     if not description:
         description = field_name.split('__').pop().replace('_', ' ').capitalize()
     colored_field.short_description = description

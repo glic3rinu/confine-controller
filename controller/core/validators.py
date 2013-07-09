@@ -34,7 +34,7 @@ def validate_rsa_pubkey(value):
 
 def validate_ssh_pubkey(value):
     try:
-        type, key_string, comment = value.split(' ', 2) # maxsplit=2 allows comment containing spaces
+        type, key_string, comment = value.split(None, 2) # maxsplit=2 allows comment containing spaces
         data = base64.decodestring(key_string)
         int_len = 4
         str_len = struct.unpack('>I', data[:int_len])[0] # this should return 7

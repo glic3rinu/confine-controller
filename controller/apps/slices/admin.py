@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
@@ -264,9 +265,9 @@ class SliceSliversAdmin(SliverAdmin):
     
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
-        slice = Slice.objects.get(pk=slice_id)
+        slice = get_object_or_404(Slice, pk=slice_id)
+        sliver = get_object_or_404(Sliver, pk=object_id)
         self.slice_id = slice_id
-        sliver = self.get_object(request, object_id)
         self.node_id = sliver.node_id
         context = { 'slice': slice }
         context.update(extra_context or {})

@@ -67,4 +67,4 @@ def cache_node_db(modeladmin, request, queryset):
         context, current_app=modeladmin.admin_site.name)
 cache_node_db.url_name = 'do-cache-cndb'
 cache_node_db.verbose_name = 'Cache CNDB'
-cache_node_db.description = mark_safe('&#171;Caches node information stored on CNDB&#187;')
+cache_node_db.description = mark_safe('Caches node information stored on CNDB&#8230;')

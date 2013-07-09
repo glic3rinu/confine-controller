@@ -34,7 +34,7 @@ def reboot_selected(modeladmin, request, queryset):
     
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
 reboot_selected.url_name = 'reboot'
-reboot_selected.description = mark_safe('&#171;Reboot this node&#187;')
+reboot_selected.description = mark_safe('Restart this node to apply configuration changes&#8230;')
 
 
 @transaction.commit_on_success
@@ -80,5 +80,5 @@ def request_cert(modeladmin, request, queryset):
         current_app=modeladmin.admin_site.name)
 request_cert.url_name = 'request-cert'
 request_cert.verbose_name = 'Request Certificate'
-request_cert.description = mark_safe('&#171;Upload a node CSR to be signed by the '
-                                     'testbed certificate authority (CA)&#187;')
+request_cert.description = mark_safe('Upload a node CSR to be signed by the '
+                                     'testbed certificate authority (CA)&#8230;')

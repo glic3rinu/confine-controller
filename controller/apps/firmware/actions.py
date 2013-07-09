@@ -125,4 +125,4 @@ get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verb
 get_firmware.url_name = 'firmware'
 get_firmware.verbose_name = 'Download Firmware'
 get_firmware.css_class = 'viewsitelink'
-get_firmware.description = mark_safe('&#171;Build and download a customized firmware for this node&#187;')
+get_firmware.description = mark_safe('Build and download a customized firmware for this node&#8230;')

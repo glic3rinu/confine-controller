@@ -27,7 +27,7 @@ def renew_selected_slices(modeladmin, request, queryset):
         SLICES_SLICE_EXP_INTERVAL))
     modeladmin.message_user(request, msg)
 renew_selected_slices.url_name = 'renew'
-renew_selected_slices.description = 'Renew the slice expiration date for %s on' % SLICES_SLICE_EXP_INTERVAL
+renew_selected_slices.description = 'Delay the slice expiration date for %s days' % SLICES_SLICE_EXP_INTERVAL.days
 
 
 @transaction.commit_on_success
@@ -43,8 +43,8 @@ def reset_selected(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 reset_selected.short_description = ugettext_lazy("Reset selected %(verbose_name_plural)s")
 reset_selected.url_name = 'reset'
-reset_selected.description = ('Force the slivers step-by-step back to allocated state '
-    'and get it stopped, redeployed and restarted')
+reset_selected.description = ('Stop, redeploy and restart all the slivers in this '
+    'slice without changing their configuration')
 
 
 @transaction.commit_on_success
@@ -60,7 +60,8 @@ def update_selected(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 update_selected.short_description = ugettext_lazy("Update selected %(verbose_name_plural)s")
 update_selected.url_name = 'update'
-update_selected.description = 'Force the application of changes to an already deployed sliver'
+update_selected.description = ('Stop and undeploy this sliver, then try to deploy '
+    'it again with its latest configuration')
 
 
 @transaction.commit_on_success

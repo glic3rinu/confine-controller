@@ -22,8 +22,8 @@ class USBImagePlugin(FirmwarePlugin):
     def get_form(self):
         class USBImageForm(forms.Form):
             usb_image = forms.BooleanField(label='USB Image', required=False,
-                help_text='Select this option if you want to flash the image into '
-                    'a USB rather than flashing the image directly on the node.')
+                help_text='Select this option if you want to install the node image '
+                    'from a USB stick. This option requires a node internal hard drive.')
         return USBImageForm
     
     def process_form_post(self, form):

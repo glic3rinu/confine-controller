@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url, include
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from pygments import highlight
 from pygments.lexers import BashLexer
@@ -93,8 +94,8 @@ class NodeListAdmin(NodeAdmin):
     
     def changelist_view(self, request, operation_id, extra_context=None):
         """ Just fixing title and breadcrumbs """
+        operation = get_object_or_404(Operation, pk=operation_id)
         self.operation_id = operation_id
-        operation = Operation.objects.get(pk=operation_id)
         title = 'Select one or more nodes for executing %s operation' % get_admin_link(operation)
         context = {'title': mark_safe(title),
                    'operation': operation, }

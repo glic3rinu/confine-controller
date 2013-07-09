@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied
 from django.db import router, transaction
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy
@@ -69,7 +69,7 @@ def create_slivers(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    slice = Slice.objects.get(pk=modeladmin.slice_id)
+    slice = get_object_or_404(Slice, pk=modeladmin.slice_id)
     
     if not modeladmin.has_change_permission(request, obj=slice):
         raise PermissionDenied

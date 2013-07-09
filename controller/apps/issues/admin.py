@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 
@@ -207,7 +208,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
                 self.inline_instances.append(inline_instance)
 
         act = self.change_view_actions
-        instance = Ticket.objects.get(pk=object_id)
+        instance = get_object_or_404(Ticket, pk=object_id)
         if instance.state in [Ticket.NEW, Ticket.OPEN]:
             actions_filter = [a.url_name for a in act if a.url_name != 'open']
         else:

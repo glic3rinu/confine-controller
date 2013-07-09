@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 
@@ -30,7 +30,7 @@ def execute_operation(modeladmin, request, queryset):
     opts = modeladmin.model._meta
     app_label = opts.app_label
     
-    operation = Operation.objects.get(pk=modeladmin.operation_id)
+    operation = get_object_or_404(Operation, pk=modeladmin.operation_id)
     
     if request.POST.get('post'):
         form = ExecutionForm(request.POST)

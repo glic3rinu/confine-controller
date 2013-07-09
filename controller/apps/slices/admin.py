@@ -207,8 +207,8 @@ class NodeListAdmin(NodeAdmin):
     
     def changelist_view(self, request, slice_id, extra_context=None):
         """ Just fixing title and breadcrumbs """
+        slice = get_object_or_404(Slice, pk=slice_id)
         self.slice_id = slice_id
-        slice = Slice.objects.get(pk=slice_id)
         title = 'Select one or more nodes for creating %s slivers' % get_admin_link(slice)
         context = {'title': mark_safe(title),
                    'slice': slice, }
@@ -252,10 +252,10 @@ class SliceSliversAdmin(SliverAdmin):
     def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
         # hook for future use on self.save_model()
+        slice = get_object_or_404(Slice, pk=slice_id)
+        node = get_object_or_404(Node, pk=node_id)
         self.slice_id = slice_id
         self.node_id = node_id
-        slice = Slice.objects.get(pk=slice_id)
-        node = Node.objects.get(pk=node_id)
         title = 'Add sliver %s@%s' % (get_admin_link(slice), get_admin_link(node))
         context = {'title': mark_safe(title),
                    'slice': slice,}
@@ -276,8 +276,8 @@ class SliceSliversAdmin(SliverAdmin):
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Provde node and slice attributes to obj sliver """
-        obj.node = Node.objects.get(pk=self.node_id)
-        slice = Slice.objects.get(pk=self.slice_id)
+        obj.node = get_object_or_404(Node, pk=self.node_id)
+        slice = get_object_or_404(Slice, pk=self.slice_id)
         obj.slice = slice
         super(SliceSliversAdmin, self).save_model(request, obj, *args, **kwargs)
         slice_modeladmin = SliceAdmin(slice, self.admin_site)
@@ -323,9 +323,9 @@ class SliceSliversAdmin(SliverAdmin):
             request._node_ = obj.node
             request._slice_ = obj.slice
         else:
-            node = Node.objects.get(pk=self.node_id)
+            node = get_object_or_404(Node, pk=self.node_id)
             request._node_ = node
-            slice = Slice.objects.get(pk=self.slice_id)
+            slice = get_object_or_404(Slice, pk=self.slice_id)
             request._slice_ = slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
 

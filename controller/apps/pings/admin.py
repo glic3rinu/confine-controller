@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.safestring import mark_safe
 
 from controller.admin.utils import display_timesince, wrap_admin_view
@@ -78,9 +78,9 @@ class PingAdmin(PermissionModelAdmin):
             object_id = kwargs.get('object_id')
             args = (content_type_id, object_id)
             request.ping_list_args = (content_type_id, object_id)
-            ct = ContentType.objects.get_for_id(content_type_id)
+            ct = get_object_or_404(ContentType, pk=content_type_id)
             related_model = ct.model_class()
-            related_object = related_model.objects.get(pk=object_id)
+            related_object = get_object_or_404(related_model, pk=object_id)
             instance = Ping.get_instance_settings(related_model)
             addr = instance.get('get_addr')(related_object)
             for __, __, __, field in instance.get('admin_classes'):
@@ -117,7 +117,7 @@ class PingAdmin(PermissionModelAdmin):
         return super(PingAdmin, self).changelist_view(request, extra_context=context)
     
     def ping_view(self, request, content_type_id, object_id):
-        ct = ContentType.objects.get_for_id(content_type_id)
+        ct = get_object_or_404(ContentType, pk=content_type_id)
         model = "%s.%s" % (ct.app_label, ct.model)
         ping(model, ids=[object_id], lock=False)
         args = (content_type_id, object_id)

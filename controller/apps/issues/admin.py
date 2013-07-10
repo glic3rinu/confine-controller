@@ -18,7 +18,7 @@ from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
     open_tickets, mark_as_unread, set_default_queue)
 from issues.filters import MyTicketsListFilter
 from issues.forms import MessageInlineForm, TicketInlineForm, TicketForm
-from issues.models import Ticket, Queue, Message
+from issues.models import Ticket, Queue, Message, ticket_save
 
 
 PRIORITY_COLORS = { 
@@ -255,9 +255,9 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         if obj.pk is None:
             obj.created_by = request.user
 
-        from issues.models import ticket_save
-        ticket_save.send(sender=Ticket, instance=obj, created=(obj.pk is None), user=request.user)
         super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
+        # trigger ticket_save signal after call super for having obj.pk!
+        ticket_save.send(sender=Ticket, instance=obj, created=(obj.pk is None), user=request.user)
     
     ## markdown preview staff ##
     def get_urls(self):

@@ -41,7 +41,7 @@ def refresh_state(modeladmin, request, queryset):
     opts = queryset.model._meta
     state_module = 'state.%sState' % opts.object_name
     state_model = get_model(*state_module.split('.'))
-    ids = queryset.values_list('state__id', flat=True)
+    ids = queryset.values_list('state__pk', flat=True)
     # Execute get_state isolated on a process to avoid gevent polluting the stack
     # and preventing this silly complain "gevent is only usable from a single thread"
     # Don't know yet why ids has to be copied, otherwise task doesn't get monitored

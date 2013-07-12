@@ -30,11 +30,15 @@ class AuthKeysPlugin(FirmwarePlugin):
         return {'auth_keys': form.cleaned_data['auth_keys']}
     
     def pre_umount(self, image, build, *args, **kwargs):
-        """ Creating ssh/authorized_keys keys file """
-        auth_keys = kwargs.get('auth_keys', False)
-        if auth_keys:
-            context = {
-                'auth_keys': auth_keys,
-                'image': image.mnt }
-            run('echo "%(auth_keys)s" >> %(image)s/etc/dropbear/authorized_keys' % context)
-            run('chmod 0600 %(image)s/etc/dropbear/authorized_keys' % context)
+        """ 
+        Creating ssh/authorized_keys keys file.
+        WARNING: this action overrides the old keys.
+        """
+        auth_keys = kwargs.get('auth_keys', '')
+        print "AUTH_KEYS: %s" % auth_keys
+        context = {
+            'auth_keys': auth_keys,
+            'image': image.mnt }
+        run('echo "%(auth_keys)s" > %(image)s/etc/dropbear/authorized_keys' % context)
+        run('chmod 0600 %(image)s/etc/dropbear/authorized_keys' % context)
+

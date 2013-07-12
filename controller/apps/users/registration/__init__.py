@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.contrib.sites.models import RequestSite
 from django.core.exceptions import ImproperlyConfigured

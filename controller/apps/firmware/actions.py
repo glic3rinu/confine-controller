@@ -3,7 +3,7 @@ from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import router, transaction
-from django.shortcuts import redirect,get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
@@ -30,6 +30,10 @@ def get_firmware(modeladmin, request, queryset):
     # Check if the user has permissions for download the image
     if not request.user.has_perm('nodes.getfirmware_node', node):
         raise PermissionDenied
+
+    # Hack for allow call action from nodes changelist
+    if request.path == reverse('admin:nodes_node_changelist'):
+        return redirect('admin:nodes_node_firmware', node.pk)
 
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)

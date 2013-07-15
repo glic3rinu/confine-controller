@@ -149,7 +149,7 @@ function install_requirements () {
                simplejson \
                http://github.com/bastir85/django-chartit/archive/master.zip"
     PRODUCTION_PIP="django-simple-captcha \
-                    django-registration \
+                    django-registration==1.0 \
                     django-google-maps"
     
     # Make sure locales are in place before installing postgres

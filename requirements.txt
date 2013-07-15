@@ -14,7 +14,7 @@ django_transaction_signals
 markdown
 django-filter
 django-admin-tools
-https://bitbucket.org/glic3rinu/django-registration/get/tip.tar.gz
+django-registration==1.0
 pygments
 requests
 https://github.com/madisona/django-google-maps/archive/master.zip

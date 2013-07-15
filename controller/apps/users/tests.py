@@ -228,8 +228,8 @@ class GroupJoinTestCase(BaseTestCase):
         url = reverse('admin:users_group_join-request', args=[gid])
         post = {
             'action': 'join_request',
-            'post': 'yes',
-            '_selected_action': 2,
+            'post': 'generic_confirmation',
+            '_selected_action': 1,
         }
         resp = self.client.post(url, post)
         url_complete = test_reverse('admin:users_group_change', args=[gid])

@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
 from django.conf import settings
-from django.contrib.sites.models import RequestSite
 from django.core.exceptions import ImproperlyConfigured
-from registration.backends.default import DefaultBackend
 
 from controller.utils import send_email_template
+from registration.backends.default.views import ActivationView, RegistrationView
 
+from .utils import get_backend
+from .views import ActivationRestrictedView, RegistrationClosedView
 
 class BackendFactory(object):
     """
@@ -19,51 +20,38 @@ class BackendFactory(object):
             'RESTRICTED': 'users.registration.RestrictedBackend',
             'CLOSED': 'users.registration.ClosedBackend' }
         try:
-            return modes.get(settings.USERS_REGISTRATION_MODE)
+            backend = modes.get(settings.USERS_REGISTRATION_MODE)
+            return get_backend(backend)
         except KeyError:
             raise ImproperlyConfigured('"%s" is not a valid mode for USERS_REGISTRATION_MODE'
                 ' Available modes are %s' % (mode, ','.join(modes.keys())))
 
     
-class OpenBackend(DefaultBackend):
+class OpenBackend(object):
     """
     Wrapper of the django-registration default backend
     1. User submits registration info.
     2. System sends an email to the users with validation link
     3. Once the user has visited the link its account is enabled
     """
-    pass
+    def get_activation_view(self):
+        return ActivationView 
 
+    def get_registration_view(self):
+        return RegistrationView
 
-class RestrictedBackend(DefaultBackend):
+class RestrictedBackend(OpenBackend):
     """
     The user registration needs be approved by the administrators
     after the account confirmation
     """
-    def activate(self, request, activation_key):
-        """
-        Mark the account as email confirmed and send an email to
-        the administrators asking their approval.
-        """
-        activated = super(RestrictedBackend, self).activate(request, activation_key)
-        if activated:
-            # email confirmed but user still remains disabled
-            activated.is_active = False
-            activated.save()
+    def get_activation_view(self):
+        return ActivationRestrictedView 
 
-            # send mail admin requesting enable the account
-            site = RequestSite(request)
-            context = { 'request': request, 'site': site, 'user': activated }
-            template = 'registration/account_approve_request.email'
-            to = settings.EMAIL_REGISTRATION_APPROVE
-            send_email_template(template=template, context=context, to=to)
-
-        return activated
-
-
-class ClosedBackend(DefaultBackend):
+class ClosedBackend(OpenBackend):
     """
     Registration disabled. Only the admins can create new users.
     """
-    def registration_allowed(self, request):
-        return False
+    def get_registration_view(self):
+        return RegistrationClosedView
+

@@ -156,17 +156,16 @@ admin.site.register(SliverState, SliverStateAdmin)
 
 def state_link(*args):
     obj = args[-1]
+    if not obj.pk:
+        # Don't know why state_link is called without a real object :(
+        return
     color = colored('current', STATES_COLORS, verbose=True)
     try:
         state = obj.state
     except NodeState.DoesNotExist:
         state = NodeState.objects.create(node=obj)
     except SliverState.DoesNotExist:
-        try:
-            # Sometimes I get an IntegrityError WTF^2!
-            state = SliverState.objects.create(sliver=obj)
-        except IntegrityError:
-            return
+        state = SliverState.objects.create(sliver=obj)
     model_name = obj._meta.verbose_name_raw
     url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))

@@ -112,7 +112,7 @@ class BaseState(models.Model):
     @classmethod
     def get_url(cls, obj):
         URI = cls().get_setting('URI')
-        node = getattr(obj, 'node', obj)
+        node = obj.get_node()
         return URI % {'mgmt_addr': node.mgmt_net.addr, 'object_id': obj.pk }
 
 

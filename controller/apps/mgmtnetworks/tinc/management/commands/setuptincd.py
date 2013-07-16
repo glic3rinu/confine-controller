@@ -34,11 +34,13 @@ class Command(BaseCommand):
             make_option('--mgmt_prefix', dest='mgmt_prefix',
                 default=settings.MGMT_IPV6_PREFIX,
                 help='Mgmt prefix, the settings file will be updated.'),
-            make_option('--tinc_port_dflt', dest='tinc_port_dflt',
+            make_option('--default_port', dest='default_port',
                 default=TINC_PORT_DFLT,
                 help='Tinc port default, the settings file will be updated.'),
-            make_option('--tinc_address', dest='tinc_address', default='0.0.0.0',
+            make_option('--address', dest='address', default='0.0.0.0',
                 help='Tinc BindToAddress'),
+            make_option('--net_name', dest='net_name', default=TINC_NET_NAME,
+                help='Tinc net name'),
             make_option('--noinput', action='store_false', dest='interactive',
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -94,20 +96,24 @@ class Command(BaseCommand):
         tinc_server, __ = TincServer.objects.get_or_create(object_id=1,
             content_type=server_ct)
         
-        tinc_port = options.get('tinc_port_dflt')
-        tinc_address = options.get('tinc_address')
+        tinc_port = options.get('default_port')
+        tinc_address = options.get('address')
+        tinc_net_name = options.get('net_name')
         mgmt_prefix = options.get('mgmt_prefix')
+        
         if mgmt_prefix != settings.MGMT_IPV6_PREFIX:
             update_settings(MGMT_IPV6_PREFIX=mgmt_prefix,
                             monkey_patch='controller.settings')
         if tinc_port != TINC_PORT_DFLT:
             update_settings(TINC_PORT_DFLT=tinc_port)
+        if tinc_net_name != TINC_NET_NAME:
+            update_settings(TINC_NET_NAME=tinc_net_name)
         
         context = {
             'tincd_root': TINC_TINCD_ROOT,
             'tincd_bin': TINC_TINCD_BIN,
-            'net_name': TINC_NET_NAME,
-            'net_root': os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME),
+            'net_name': tinc_net_name,
+            'net_root': os.path.join(TINC_TINCD_ROOT, tinc_net_name),
             'tinc_conf': ( "BindToAddress = %s\n"
                            "Port = %s\n"
                            "Name = server\n"
@@ -134,7 +140,7 @@ class Command(BaseCommand):
             TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address,
                 port=tinc_port)
         
-        priv_key = os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME, 'rsa_key.priv')
+        priv_key = os.path.join(TINC_TINCD_ROOT, tinc_net_name, 'rsa_key.priv')
         try:
             priv_key = RSA.load_key(priv_key)
         except:

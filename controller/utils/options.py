@@ -12,6 +12,7 @@ from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
 from controller.core.exceptions import OperationLocked
+from controller.utils.paths import get_project_root
 from controller.utils.system import run, touch
 
 

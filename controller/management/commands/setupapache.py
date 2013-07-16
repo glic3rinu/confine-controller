@@ -93,18 +93,18 @@ class Command(BaseCommand):
             '    SSLVerifyClient None\n'
             '</VirtualHost>' % context)
         
-        context.update({'apache_conf': apache_conf})
+        context.update({
+            'apache_conf': apache_conf,
+            'apache_conf_file': '/etc/apache2/conf.d/%(project_name)s.conf' % context})
         
-        diff = run("echo '%(apache_conf)s'|"
-                   "diff - /etc/apache2/conf.d/%(project_name)s.conf" % context,
-                   err_codes=[0,1,2])
+        diff = run("echo '%(apache_conf)s'|diff - %(apache_conf_file)s" % context, err_codes=[0,1,2])
         if diff.return_code == 2:
             # File does not exist
-            run("echo '%(apache_conf)s' > /etc/apache2/conf.d/%(project_name)s.conf" % context)
+            run("echo '%(apache_conf)s' > %(apache_conf_file)s" % context)
         elif diff.return_code == 1:
             # File is different, save the old one
             if interactive:
-                msg = ("\n\nFile /etc/apache2/conf.d/%(project_name)s.conf should "
+                msg = ("\n\nFile %(apache_conf_file)s should "
                        "be updated, do you like to overide it? (yes/no): " % context)
                 confirm = input(msg)
                 while 1:
@@ -114,12 +114,11 @@ class Command(BaseCommand):
                     if confirm == 'no':
                         return
                     break
-            run("cp /etc/apache2/conf.d/%(project_name)s.conf "
-                "/etc/apache2/conf.d/%(project_name)s.conf.save" % context)
-            run("echo '%(apache_conf)s' > /etc/apache2/conf.d/%(project_name)s.conf" % context)
-            self.stdout.write("\033[1;31mA new version of /etc/apache2/conf.d/%(project_name)s.conf "
-                              "has been installed.\n The old version has been placed at "
-                              "/etc/apache2/conf.d/%(project_name)s.conf.save\033[m" % context)
+            run("cp %(apache_conf_file)s %(apache_conf_file)s.save" % context)
+            run("echo '%(apache_conf)s' > %(apache_conf_file)s" % context)
+            self.stdout.write("\033[1;31mA new version of %(apache_conf_file)s "
+                "has been installed.\n The old version has been placed at "
+                "%(apache_conf_file)s.save\033[m" % context)
         
 #        include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
 #        if include_httpd.return_code == 1:

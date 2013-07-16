@@ -62,7 +62,7 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     node_link.short_description = 'Node'
     
     def url_link(self, instance):
-        url = type(instance).get_url(instance)
+        url = type(instance).get_url(instance.related_object)
         return mark_safe(urlize(url))
     url_link.short_description = 'Monitored URL'
     

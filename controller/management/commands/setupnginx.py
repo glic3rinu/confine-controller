@@ -12,6 +12,8 @@ from controller.utils.system import run, check_root, get_default_celeryd_usernam
 from pki import ca
 
 
+# TODO dependencies on controller-admin.sh: nginx uwsgi uwsgi-plugin-python
+
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -107,10 +109,6 @@ class Command(BaseCommand):
         uwsgi = {
             'file': '/etc/uwsgi/apps-enabled/%(project_name)s.ini' % context,
             'conf': uwsgi_conf }
-        
-        run('apt-get update')
-        extra = '-y' if interactive else ''
-        run('apt-get install nginx uwsgi uwsgi-plugin-python ' + extra)
         
         for extra_context in (nginx, uwsgi):
             context.update(extra_context)

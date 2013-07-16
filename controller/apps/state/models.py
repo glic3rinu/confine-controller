@@ -112,8 +112,13 @@ class BaseState(models.Model):
     @classmethod
     def get_url(cls, obj):
         URI = cls().get_setting('URI')
-        node = obj.get_node()
+        node = getattr(obj, 'node', obj)
         return URI % {'mgmt_addr': node.mgmt_net.addr, 'object_id': obj.pk }
+    
+    @property
+    def related_object(self):
+        field = self.get_related_field_name()
+        return getattr(self, field)
 
 
 class NodeState(BaseState):

@@ -123,8 +123,7 @@ function install_requirements () {
                      postgresql \
                      rabbitmq-server \
                      python-dev gcc"
-    LOCAL_APT="libapache2-mod-wsgi \
-               fuseext2 file \
+    LOCAL_APT="fuseext2 file \
                tinc \
                libevent-dev"
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev"

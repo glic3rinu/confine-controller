@@ -12,8 +12,6 @@ from controller.utils.system import run, check_root, get_default_celeryd_usernam
 from pki import ca
 
 
-# TODO dependencies on controller-admin.sh: nginx uwsgi uwsgi-plugin-python
-
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -136,3 +134,24 @@ class Command(BaseCommand):
         
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)
+        
+        # nginx should start after tincd
+        current = "\$local_fs \$remote_fs \$network \$syslog"
+        run('sed -i "s/  %s$/  %s \$named/g" /etc/init.d/nginx' % (current, current))
+        
+        rotate = (
+            '/var/log/nginx/*.log {\n'
+            '    daily\n'
+            '    missingok\n'
+            '    rotate 30\n'
+            '    compress\n'
+            '    delaycompress\n'
+            '    notifempty\n'
+            '    create 640 root adm\n'
+            '    sharedscripts\n'
+            '    postrotate\n'
+            '        [ ! -f /var/run/nginx.pid ] || kill -USR1 `cat /var/run/nginx.pid`\n'
+            '    endscript\n'
+            '}\n')
+        run("echo '%s' > /etc/logrotate.d/nginx" % rotate)
+        

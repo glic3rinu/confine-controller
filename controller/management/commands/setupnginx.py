@@ -155,3 +155,5 @@ class Command(BaseCommand):
             '}\n')
         run("echo '%s' > /etc/logrotate.d/nginx" % rotate)
         
+        # Allow nginx to write to uwsgi socket
+        run('adduser www-data %(group)s' % context)

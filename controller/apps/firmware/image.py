@@ -131,10 +131,12 @@ class Image(object):
         dest_path = self.mnt + build_file.name
         dest_dir = os.path.dirname(dest_path)
         if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir)
+            os.makedirs(dest_dir, 0755)
         if os.path.exists(dest_path):
             os.remove(dest_path)
         with open(dest_path, 'w+') as dest_file:
             dest_file.write(build_file.content)
         if build_file.config.mode:
             r("chmod %s '%s'" % (build_file.config.mode, dest_path))
+        else:
+            r("chmod 644 '%s'" % dest_path)

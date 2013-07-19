@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from controller.utils import send_email_template
 from registration.backends.default.views import ActivationView, RegistrationView
 
 from .utils import get_backend

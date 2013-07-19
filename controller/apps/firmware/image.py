@@ -139,4 +139,4 @@ class Image(object):
         if build_file.config.mode:
             r("chmod %s '%s'" % (build_file.config.mode, dest_path))
         else:
-            r("chmod 644 '%s'" % dest_path)
+            r("chmod 0644 '%s'" % dest_path)

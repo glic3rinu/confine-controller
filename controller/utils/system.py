@@ -106,3 +106,16 @@ def touch(fname, times=None):
     with file(fname, 'a'):
         os.utime(fname, times)
 
+
+def makedirs(path, mode=0755, uid=0, gid=0):
+    """ os.makedirs replacement enabling setting mode, uid and gid for created files """
+    abspath = ''
+    for dirname in path.split(os.path.sep):
+        if not dirname:
+            abspath += '/'
+            continue
+        abspath = os.path.join(abspath, dirname)
+        if not os.path.exists(abspath):
+            os.mkdir(abspath)
+            os.chmod(abspath, mode)  # ignore umask
+            os.chown(abspath, uid, gid)

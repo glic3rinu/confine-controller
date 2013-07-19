@@ -2,7 +2,7 @@ import functools, os, shutil, tempfile
 
 from django.core.management.base import CommandError
 
-from controller.utils.system import run
+from controller.utils.system import run, makedirs
 
 
 r = functools.partial(run, silent=False)
@@ -131,7 +131,7 @@ class Image(object):
         dest_path = self.mnt + build_file.name
         dest_dir = os.path.dirname(dest_path)
         if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir, 0755)
+            makedirs(dest_dir, mode=0755, uid=0, gid=0)
         if os.path.exists(dest_path):
             os.remove(dest_path)
         with open(dest_path, 'w+') as dest_file:

@@ -34,7 +34,7 @@ def run_instance(instance_id):
             instance.save()
             return 'socket error'
         channel = ssh.get_transport().open_session()
-        channel.exec_command(instance.script)
+        channel.exec_command(instance.script.replace('\r', ''))
         #stderr = channel.recv_stderr(1024)
         instance.stdout = channel.makefile('rb', -1).read()
         instance.stderr = channel.makefile_stderr('rb', -1).read()

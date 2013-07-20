@@ -273,6 +273,8 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         from markdown import markdown
         data = request.POST.get("data")
         markdown = markdown(strip_tags(data))
+        # bugfix preview break lines differs from final result
+        markdown = '<br />'.join(markdown.split('\n'))
         return HttpResponse(markdown)
 
 

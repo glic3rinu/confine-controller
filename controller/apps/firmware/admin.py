@@ -5,11 +5,12 @@ from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from singleton_models.admin import SingletonModelAdmin
 
+from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_modeladmin, get_admin_link, insert_action,
     colored, wrap_admin_view)
 from nodes.models import Node
 
-from firmware.actions import get_firmware
+from firmware.actions import get_firmware, sync_plugins
 from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
     ConfigFileHelpText, BuildFile, ConfigPlugin)
 from firmware.views import build_info_view, delete_build_view
@@ -132,15 +133,20 @@ class BuildAdmin(admin.ModelAdmin):
         return False
 
 
-class ConfigAdmin(SingletonModelAdmin):
+class ConfigAdmin(SingletonModelAdmin, ChangeViewActions):
     inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline,
         ConfigPluginInline]
+    change_view_actions = [sync_plugins]
+    change_form_template = "admin/controller/change_form.html"
     save_on_top = True
     
     def get_urls(self):
         """ Make URLs singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
+            url(r'^sync-plugins/$', #FIXME is this hack required for adding action
+                sync_plugins,
+                name='%s_%s_sync_plugins' % info),
             url(r'^(?P<object_id>\d+)/history/$',
                 self.history_view,
                 name='%s_%s_history' % info),

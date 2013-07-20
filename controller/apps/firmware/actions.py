@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
+from django.core import management
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import router, transaction
@@ -130,3 +131,13 @@ get_firmware.url_name = 'firmware'
 get_firmware.verbose_name = 'Download Firmware'
 get_firmware.css_class = 'viewsitelink'
 get_firmware.description = mark_safe('Build and download a customized firmware for this node&#8230;')
+
+def sync_plugins(request):
+    """ Synchronize firmware plugins running a management command """
+    management.call_command('syncfirmwareplugins')
+    messages.info(request, "Firmware plugins synchronized successfully!")
+    return redirect('admin:firmware_config_change') 
+
+sync_plugins.short_description = "Synchronize plugins"
+sync_plugins.url_name = "sync-plugins"
+

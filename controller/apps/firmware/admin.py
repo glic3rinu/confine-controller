@@ -133,7 +133,7 @@ class BuildAdmin(admin.ModelAdmin):
         return False
 
 
-class ConfigAdmin(SingletonModelAdmin, ChangeViewActions):
+class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
     inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline,
         ConfigPluginInline]
     change_view_actions = [sync_plugins]
@@ -144,9 +144,6 @@ class ConfigAdmin(SingletonModelAdmin, ChangeViewActions):
         """ Make URLs singleton aware """
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
-            url(r'^sync-plugins/$', #FIXME is this hack required for adding action
-                sync_plugins,
-                name='%s_%s_sync_plugins' % info),
             url(r'^(?P<object_id>\d+)/history/$',
                 self.history_view,
                 name='%s_%s_history' % info),

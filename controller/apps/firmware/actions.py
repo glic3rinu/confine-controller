@@ -9,6 +9,8 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
+from controller.utils.plugins import sync_plugins_action
+
 from firmware.forms import BaseImageForm, OptionalFilesForm
 from firmware.models import Build, Config
 
@@ -132,12 +134,5 @@ get_firmware.verbose_name = 'Download Firmware'
 get_firmware.css_class = 'viewsitelink'
 get_firmware.description = mark_safe('Build and download a customized firmware for this node&#8230;')
 
-def sync_plugins(request):
-    """ Synchronize firmware plugins running a management command """
-    management.call_command('syncfirmwareplugins')
-    messages.info(request, "Firmware plugins synchronized successfully!")
-    return redirect('admin:firmware_config_change') 
 
-sync_plugins.short_description = "Synchronize plugins"
-sync_plugins.url_name = "sync-plugins"
-
+sync_plugins = sync_plugins_action('firmwareplugins')

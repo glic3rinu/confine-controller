@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.conf.urls import patterns, url
+from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin.utils import action_to_view, set_default_filter
 
@@ -55,8 +56,10 @@ class ChangeViewActions(admin.options.ModelAdmin):
         opts = self.model._meta
         new_urls = patterns("")
         for action in self.change_view_actions:
+            singleton = SingletonModelAdmin in type(self).__mro__
+            pattern = '^%s/$' if singleton else '^(.+)/%s/$'
             new_urls += patterns("",
-                url("^(.+)/%s/$" % action.url_name,
+                url(pattern % action.url_name,
                     admin_site.admin_view(action),
                     name='%s_%s_%s' % (opts.app_label, opts.module_name, action.url_name)))
         return new_urls + urls

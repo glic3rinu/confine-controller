@@ -50,4 +50,5 @@ class USBImagePlugin(FirmwarePlugin):
     
     def update_image_name(self, image_name, **kwargs):
         """ Updating confine-install USB image name """
-        return 'USB-'+image_name if kwargs.get('usb_image', False) else image_name
+        is_usb = kwargs.get('usb_image', False)
+        return 'USB-'+image_name if is_usb else image_name

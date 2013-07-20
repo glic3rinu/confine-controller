@@ -1,4 +1,7 @@
-from django.db import models
+from StringIO import StringIO
+
+from django.core.management import call_command
+from django.db import models, transaction
 
 
 class PluginMount(type):
@@ -45,3 +48,18 @@ class PluginModel(models.Model):
     @property
     def description(self):
         return self.instance.description
+
+
+def sync_plugins_action(name):
+    @transaction.commit_on_success
+    def sync_plugins(modeladmin, request, queryset):
+        content = StringIO()
+        call_command('sync%s' % name, stdout=content)
+        content.seek(0)
+        found = [ line.split(' ')[1] for line in content.read().splitlines() ]
+        msg = '%i %s had been found (%s)' % (len(found), name, ', '.join(found))
+        modeladmin.message_user(request, msg)
+    sync_plugins.description = "Syncronize existing %s with the database" % name
+    sync_plugins.url_name = 'sync-plugins'
+    sync_plugins.verbose_name = 'sync plugins'
+    return sync_plugins

@@ -26,7 +26,8 @@ def get_modeladmin(model, import_module=True):
 
 def insert_inline(model, inline, head=False):
     """ Inserts model inline into an existing modeladmin """
-    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
+    is_model = models.Model in model.__mro__
+    modeladmin = get_modeladmin(model) if is_model else model
     if hasattr(inline, 'inline_identify'):
         delete_inline(model, inline.inline_identify)
     # Avoid inlines defined on parent class be shared between subclasses
@@ -42,7 +43,8 @@ def insert_inline(model, inline, head=False):
 
 def insert_list_filter(model, filter):
     """ inserts filter to modeladmin.list_filters """
-    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
+    is_model = models.Model in model.__mro__
+    modeladmin = get_modeladmin(model) if is_model else model
     if not modeladmin.list_filter:
         type(modeladmin).list_filter = []
     modeladmin.list_filter += (filter,)
@@ -50,7 +52,8 @@ def insert_list_filter(model, filter):
 
 def insert_list_display(model, field):
     """ inserts field to modeladmin.list_display """
-    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
+    is_model = models.Model in model.__mro__
+    modeladmin = get_modeladmin(model) if is_model else model
     if not modeladmin.list_display:
         type(modeladmin).list_display = []
     modeladmin.list_display += (field,)
@@ -58,7 +61,8 @@ def insert_list_display(model, field):
 
 def insert_action(model, action):
     """ inserts action to modeladmin.actions """
-    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
+    is_model = models.Model in model.__mro__
+    modeladmin = get_modeladmin(model) if is_model else model
     if not modeladmin.actions:
         type(modeladmin).actions = [action]
     else:
@@ -67,7 +71,8 @@ def insert_action(model, action):
 
 def insert_change_view_action(model, action):
     """ inserts action to modeladmin.change_view_actions """
-    modeladmin = get_modeladmin(model) if models.Model in model.__mro__ else model
+    is_model = models.Model in model.__mro__
+    modeladmin = get_modeladmin(model) if is_model else model
     modeladmin.set_change_view_action(action)
 
 
@@ -141,12 +146,13 @@ def colored(field_name, colours, description='', verbose=False, bold=True):
 
 def action_to_view(action, modeladmin):
     """ Converts modeladmin action to view function """
-    def action_view(request, object_id, modeladmin=modeladmin, action=action):
+    def action_view(request, object_id=1, modeladmin=modeladmin, action=action):
         queryset = modeladmin.model.objects.filter(pk=object_id)
         response = action(modeladmin, request, queryset)
         if not response:
             opts = modeladmin.model._meta
-            return redirect('admin:%s_%s_change' % (opts.app_label, opts.module_name), object_id)
+            url = 'admin:%s_%s_change' % (opts.app_label, opts.module_name)
+            return redirect(url, object_id)
         return response
     return action_view
 

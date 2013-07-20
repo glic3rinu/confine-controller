@@ -1,7 +1,6 @@
-from StringIO import StringIO 
-
 from django.db import transaction
-from django.core.management import call_command
+
+from controller.utils.plugins import sync_plugins_action
 
 from .tasks import notify
 
@@ -25,15 +24,7 @@ upgrade_notifications.description = ('Override current subject and message for '
 upgrade_notifications.short_description = 'Upgrade subject and message'
 
 
-@transaction.commit_on_success
-def sync_notifications(modeladmin, request, queryset):
-    content = StringIO()
-    call_command('syncnotifications', stdout=content)
-    content.seek(0)
-    found = [line.split(' ')[1] for line in content.read().splitlines()]
-    msg = '%i notifications had been found (%s)' % (len(found), ', '.join(found))
-    modeladmin.message_user(request, msg)
-sync_notifications.description = "Syncronize existing notifications with the database"
+sync_notifications = sync_plugins_action('notifications')
 
 
 @transaction.commit_on_success
@@ -52,4 +43,3 @@ def disable_selected(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 disable_selected.description = "Disable selected notifications"
 disable_selected.short_description = "Disable selected notifications"
-

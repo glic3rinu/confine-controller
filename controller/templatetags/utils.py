@@ -1,6 +1,9 @@
+import re
+
 from django import template
 from django.core.urlresolvers import reverse
 from django.forms import CheckboxInput
+from django.utils.safestring import mark_safe
 
 from controller import get_version
 from controller.utils import is_installed
@@ -40,3 +43,10 @@ def rest_to_admin_url(context):
 @register.filter(name='is_checkbox')
 def is_checkbox(field):
     return isinstance(field.field.widget, CheckboxInput)
+
+
+@register.filter(name="compact")
+def compact(text):
+    compacted = text.replace('\n', '').replace('<p>', '<br>').replace('</p>', '</br>')
+    compacted = re.sub('^<br>', '', compacted) 
+    return mark_safe(compacted)

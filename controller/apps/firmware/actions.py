@@ -43,7 +43,7 @@ def get_firmware(modeladmin, request, queryset):
     
     context = {
         "title": "Download firmware for your research device %s" % node,
-        "content_title":  mark_safe("Download firmware for your research device %s" % node_link),
+        "content_title":  mark_safe("Download firmware for research device %s" % node_link),
         "content_message": "Please, choose the base image which you want to get the firmware.",
         "action_name": 'Firmware',
         'queryset': queryset,
@@ -103,6 +103,7 @@ def get_firmware(modeladmin, request, queryset):
     
     # Build a new firmware
     if not state or state in [Build.DELETED, Build.OUTDATED, Build.FAILED]:
+        title = "Generate firmware for research device %s" % node_link
         if state == Build.FAILED:
             msg = ("<b>The last build for this research device has failed</b>. "
                    "This problem has been reported to the operators, but you can "
@@ -112,6 +113,7 @@ def get_firmware(modeladmin, request, queryset):
                    "device, but you can instruct the system to build a fresh one "
                    "for you, it will take only a few seconds.")
         context["content_message"] = mark_safe(msg)
+        context["content_title"] = mark_safe(title)
         template = 'admin/firmware/generate_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
     
@@ -126,6 +128,8 @@ def get_firmware(modeladmin, request, queryset):
         return TemplateResponse(request, template, context, current_app=site_name)
     
     # Processing
+    title = "Generating firmware for research device %s ..." % node_link
+    context["content_title"] = mark_safe(title)
     template = 'admin/firmware/processing_build.html'
     return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")

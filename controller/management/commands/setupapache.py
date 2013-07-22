@@ -125,6 +125,7 @@ class Command(BaseCommand):
 #            run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
         
         # run('a2ensite %s' % project_name)
+        run('a2enmod wsgi')
         run('a2enmod expires')
         run('a2enmod deflate')
         run('a2enmod ssl')

@@ -1,4 +1,5 @@
 from optparse import make_option
+from os.path import expanduser
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -49,6 +50,7 @@ class Command(BaseCommand):
             'mgmt_addr': str(server.mgmt_net.addr),
             'user': options.get('user'),
             'group': options.get('group') or options.get('user'),
+            'home': expanduser("~%s" % options.get('user')),
             'processes': int(options.get('processes')),}
         
         nginx_conf = (
@@ -99,13 +101,14 @@ class Command(BaseCommand):
             'chmod-socket = 664\n'
             'vacuum       = true\n'
             'uid          = %(user)s\n'
-            'gid          = %(group)s\n') % context
+            'gid          = %(group)s\n'
+            'home         = HOME=%(home)s\n') % context
         
         nginx = {
             'file': '/etc/nginx/conf.d/%(project_name)s.conf' % context,
             'conf': nginx_conf }
         uwsgi = {
-            'file': '/etc/uwsgi/apps-enabled/%(project_name)s.ini' % context,
+            'file': '/etc/uwsgi/apps-available/%(project_name)s.ini' % context,
             'conf': uwsgi_conf }
         
         for extra_context in (nginx, uwsgi):
@@ -131,6 +134,8 @@ class Command(BaseCommand):
                 run("echo '%(conf)s' > %(file)s" % context)
                 self.stdout.write("\033[1;31mA new version of %(file)s has been installed.\n "
                     "The old version has been placed at %(file)s.save\033[m" % context)
+        
+        run('ln -s /etc/uwsgi/apps-available/%(project_name)s.ini /etc/uwsgi/apps-enabled/' % context)
         
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)

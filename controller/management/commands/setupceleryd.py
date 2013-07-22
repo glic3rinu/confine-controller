@@ -16,6 +16,10 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default='confine',
                 help='Specifies the system user that would generate the firmwares.'),
+            make_option('--processes', dest='processes', default=5,
+                help='Number of celeryd processes.'),
+            make_option('--greenlets', dest='greenlets', default=1000,
+                help='Number of celeryd greenlets (gevent-based tasks).'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -29,7 +33,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         context = {'site_root': get_site_root(),
                    'username': options.get('username'),
-                   'bin_path': path.join(get_controller_root(), 'bin') }
+                   'bin_path': path.join(get_controller_root(), 'bin'),
+                   'processes': options.get('processes'),
+                   'greenlets': options.get('greenlets') }
         
         celery_config = (
             '# Name of nodes to start, here we have a single node\n'
@@ -42,8 +48,8 @@ class Command(BaseCommand):
             'CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"\n'
             '\n'
             '# Extra arguments to celeryd\n'
-            'CELERYD_OPTS="-P:w1 processes -c:w1 5 -Q:w1 celery \\\n'
-            '              -P:w2 gevent -c:w2 1000 -Q:w2 gevent --time-limit=300"\n'
+            'CELERYD_OPTS="-P:w1 processes -c:w1 %(processes)s -Q:w1 celery \\\n'
+            '              -P:w2 gevent -c:w2 %(greenlets)s -Q:w2 gevent --time-limit=300"\n'
             '\n'
             '# Name of the celery config module.\n'
             'CELERY_CONFIG_MODULE="celeryconfig"\n'

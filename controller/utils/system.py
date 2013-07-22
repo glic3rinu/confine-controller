@@ -1,4 +1,11 @@
-import subprocess, getpass, re, sys, fcntl, select, os, errno
+import errno
+import fcntl
+import getpass
+import os
+import re
+import select
+import subprocess
+import sys
 
 from django.core.management.base import CommandError
 

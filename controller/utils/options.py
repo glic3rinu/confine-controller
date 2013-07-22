@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 
-import os, time
+import os
+import time
 from distutils.sysconfig import get_python_lib
 from urlparse import urlparse
 
-from django.conf import settings
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.template import Context
 from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
@@ -16,8 +14,12 @@ from controller.utils.paths import get_project_root
 from controller.utils.system import run, touch
 
 
+# TODO split this shit inot different modules in order to avoid import issues
+#      when imported from settings.py
+
 def autodiscover(module):
     """ Auto-discover INSTALLED_APPS module.py """
+    from django.conf import settings
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)
         try: 
@@ -33,6 +35,7 @@ def autodiscover(module):
 
 def is_installed(app):
     """ returns True if app is installed """
+    from django.conf import settings
     return app in settings.INSTALLED_APPS
 
 
@@ -73,6 +76,8 @@ def send_email_template(template, context, to, email_from=None):
     
     context can be a dictionary or a template.Context instance
     """
+    from django.template.loader import render_to_string
+    from django.template import Context
     if type(context) is dict:
         context = Context(context)
     if type(to) is str or type(to) is unicode:
@@ -99,6 +104,7 @@ def get_existing_pip_installation():
 
 def update_settings(monkey_patch=None, **options):
     """ Warning this only works with a very simple setting format: NAME = 'value' """
+    from django.conf import settings
     for name, value in options.iteritems():
         if getattr(settings, name, None) != value:
             settings_file = os.path.join(get_project_root(), 'settings.py')

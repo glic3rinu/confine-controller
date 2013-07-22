@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import re
 
 from django.contrib import admin
+from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -48,18 +49,13 @@ STATES_COLORS = {
 
 
 class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
-    readonly_fields = ['node_link', 'url_link', 'last_seen', 'last_try', 'next_retry', 'current',
+    readonly_fields = ['url_link', 'last_seen', 'last_try', 'next_retry', 'current',
         'last_change', 'display_metadata', 'display_data']
     change_view_actions = [refresh]
     
     class Media:
         css = { "all": ("controller/css/github.css",
                         "state/admin/css/details.css") }
-    
-    def node_link(self, instance):
-        """ Link to related node used on change_view """
-        return mark_safe(get_admin_link(instance.get_node()))
-    node_link.short_description = 'Node'
     
     def url_link(self, instance):
         url = type(instance).get_url(instance.related_object)
@@ -107,7 +103,11 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         return False
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        context = { 'title': force_text(self.opts.verbose_name).capitalize() }
+        state = self.get_object(request, unquote(object_id))
+        related_obj = state.get_related_model().objects.get(pk=object_id)
+        title = force_text(self.opts.verbose_name).capitalize()
+        title += ' (%s)' % get_admin_link(related_obj)
+        context = { 'title': mark_safe(title) }
         context.update(extra_context or {})
         return super(BaseStateAdmin, self).change_view(
             request, object_id, form_url=form_url, extra_context=context)
@@ -117,7 +117,7 @@ class NodeStateAdmin(BaseStateAdmin):
     readonly_fields = ['last_contact'] + BaseStateAdmin.readonly_fields
     fieldsets = (
         (None, {
-            'fields': ('node_link', 'url_link', 'last_seen', 'last_contact',
+            'fields': ('url_link', 'last_seen', 'last_contact',
                        'last_try', 'next_retry', 'last_change', 'current')
         }),
         ('Details', {
@@ -131,10 +131,9 @@ class NodeStateAdmin(BaseStateAdmin):
 
 
 class SliverStateAdmin(BaseStateAdmin):
-    readonly_fields = ['sliver_link'] + BaseStateAdmin.readonly_fields
     fieldsets = (
         (None, {
-            'fields': ('sliver_link', 'node_link', 'url_link', 'last_seen', 'last_try',
+            'fields': ('url_link', 'last_seen', 'last_try',
                        'next_retry', 'last_change', 'current')
         }),
         ('Details', {

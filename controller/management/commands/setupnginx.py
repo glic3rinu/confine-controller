@@ -102,7 +102,7 @@ class Command(BaseCommand):
             'vacuum       = true\n'
             'uid          = %(user)s\n'
             'gid          = %(group)s\n'
-            'home         = HOME=%(home)s\n') % context
+            'env          = HOME=%(home)s\n') % context
         
         nginx = {
             'file': '/etc/nginx/conf.d/%(project_name)s.conf' % context,
@@ -135,7 +135,7 @@ class Command(BaseCommand):
                 self.stdout.write("\033[1;31mA new version of %(file)s has been installed.\n "
                     "The old version has been placed at %(file)s.save\033[m" % context)
         
-        run('ln -s /etc/uwsgi/apps-available/%(project_name)s.ini /etc/uwsgi/apps-enabled/' % context)
+        run('ln -s /etc/uwsgi/apps-available/%(project_name)s.ini /etc/uwsgi/apps-enabled/' % context, err_codes=[0,1])
         
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)

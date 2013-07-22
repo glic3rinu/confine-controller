@@ -105,9 +105,11 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         state = self.get_object(request, unquote(object_id))
         related_obj = state.get_related_model().objects.get(pk=object_id)
+        related_obj_link = get_admin_link(related_obj)
         title = force_text(self.opts.verbose_name).capitalize()
-        title += ' (%s)' % get_admin_link(related_obj)
-        context = { 'title': mark_safe(title) }
+        context = {
+            'title': mark_safe('%s (%s)' % (title, related_obj_link)),
+            'header_title': title}
         context.update(extra_context or {})
         return super(BaseStateAdmin, self).change_view(
             request, object_id, form_url=form_url, extra_context=context)

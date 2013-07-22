@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% load admin_tools_menu_tags utils %}
 
-{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME }} {% endblock %}
+{% block title %}{% if header_title %}{{ header_title }}{% else %}{{ title }}{% endif %} | {{ SITE_VERBOSE_NAME }} {% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}

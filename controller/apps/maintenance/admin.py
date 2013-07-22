@@ -98,6 +98,7 @@ class NodeListAdmin(NodeAdmin):
         self.operation_id = operation_id
         title = 'Select one or more nodes for executing %s operation' % get_admin_link(operation)
         context = {'title': mark_safe(title),
+                   'header_title': 'Executing %s operation' % operation,
                    'operation': operation, }
         context.update(extra_context or {})
         # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter

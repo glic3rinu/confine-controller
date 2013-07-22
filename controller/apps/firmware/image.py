@@ -137,7 +137,6 @@ class Image(object):
         with open(dest_path, 'w+') as dest_file:
             dest_file.write(build_file.content)
         os.chown(dest_path, 0, 0)
+        os.chmod(dest_path, 0644)
         if build_file.config.mode:
             r("chmod %s '%s'" % (build_file.config.mode, dest_path))
-        else:
-            os.chmod(dest_path, 0644)

@@ -119,7 +119,7 @@ def makedirs(path, mode=0755, uid=0, gid=0):
     abspath = ''
     for dirname in path.split(os.path.sep):
         if not dirname:
-            abspath += '/'
+            abspath += os.path.sep
             continue
         abspath = os.path.join(abspath, dirname)
         if not os.path.exists(abspath):

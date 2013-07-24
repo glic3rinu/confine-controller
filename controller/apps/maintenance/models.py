@@ -1,3 +1,6 @@
+from celery import current_app
+from celery.task.control import revoke
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
@@ -57,6 +60,10 @@ class Execution(models.Model):
         for instance in self.instances:
             instance.revoke()
     
+    def kill(self):
+        for instance in self.instances:
+            instance.kill()
+    
     @property
     def state(self):
         progress = [Instance.RECEIVED, Instance.STARTED, Instance.TIMEOUT]
@@ -114,6 +121,8 @@ class Instance(models.Model):
     stderr = models.TextField()
     traceback = models.TextField()
     exit_code = models.IntegerField(null=True)
+#    task_id = models.CharField(max_length=36, unique=True, null=True,
+#        help_text="Celery task ID")
     
     def __unicode__(self):
         return "%s@%s" % (self.execution.operation.identifier, self.node)
@@ -134,9 +143,21 @@ class Instance(models.Model):
         else:
             run_instance(self.pk)
     
+    @property
+    def db_task(self):
+        return TaskState.objects.get(task_id=self.task_id)
+    
+    @property
+    def task(self):
+        return run_instance.AsyncResult(self.task_id)
+    
     def revoke(self):
         self.state = self.REVOKED
         self.save()
+    
+    def kill(self):
+        with current_app.default_connection() as connection:
+            revoke(self.task_id, connection=connection, terminate=True, signal='KILL')
     
     @property
     def script(self):

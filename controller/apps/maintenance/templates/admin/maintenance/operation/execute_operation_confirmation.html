@@ -1,6 +1,15 @@
 {% extends "admin/base_site.html" %}
 {% load i18n l10n %}
 {% load admin_urls %}
+{% load code staticfiles %}
+
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "controller/css/default.css" %}"/>
+{% endblock %}
+
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -15,28 +24,43 @@
 
 {% block content %}
     <p>Are you sure you want to execute <a href="{% url 'admin:maintenance_operation_change' operation.pk %}">{{ operation }}</a> operation on the following selected nodes?</p>
-    {% for deletable_object in deletable_objects %}
-        <ul>{{ deletable_object|unordered_list }}</ul>
-    {% endfor %}
-    <form action="" method="post">{% csrf_token %}
-    <div>
-    
-    <div style="margin-left:20px; margin-bottom:20px; margin-top:20px;">
-            {% for field in form %}
-                <div class="fieldWrapper">
-                    {{ field.errors }}
-                    {{ field }}<b>{{ field.label_tag }}</b>{{ field.help_text|linebreaks }}
-                </div>
-            {% endfor %}
-        </div>
-    
-    {% for obj in queryset %}
-    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
-    {% endfor %}
-    <input type="hidden" name="action" value="execute_operation" />
-    <input type="hidden" name="post" value="yes" />
-    <input type="submit" value="{% trans "Yes, create slivers" %}" />
+<form action="" method="post">{% csrf_token %}
+    <div style="margin:20px;">
+        <fieldset class="module aligned">
+            <h2>Script</h2>
+            <div>{% code 'bash' %}{{ operation.script }}{% endcode %}</div>
+        </fieldsets>
     </div>
+    <div style="margin:20px;">
+        <fieldset class="module aligned">
+            <h2>Options</h2>
+            {% for field in form %}
+            <div class="form-row ">
+                <div>
+                {{ field.errors }}
+                {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
+                <p class="help">{{ field.help_text|safe }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </fieldset>
+    </div>
+    <div style="margin:20px;">
+        <h3>Nodes list</h3>
+            <p></p>
+            {% for deletable_object in deletable_objects %}
+                <ul>{{ deletable_object|unordered_list }}</ul>
+            {% endfor %}
+    </div>
+
+        <div>
+        {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+        {% endfor %}
+        <input type="hidden" name="action" value="execute_operation" />
+        <input type="hidden" name="post" value="yes" />
+        <input type="submit" value="{% trans "Yes, execute!" %}" />
+        </div>
     </form>
 {% endblock %}
 

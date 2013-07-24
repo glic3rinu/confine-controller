@@ -8,13 +8,13 @@ from pygments.lexers import BashLexer
 from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import get_admin_link, colored, admin_link, wrap_admin_view
+from controller.admin.utils import get_admin_link, colored, admin_link, wrap_admin_view, action_to_view
 from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 
 from .actions import ( execute_operation, execute_operation_changelist, run_instance,
-    revoke_instance )
+    kill_instance, revoke_instance )
 from .forms import ExecutionInlineForm
 from .models import Operation, Execution, Instance
 
@@ -65,6 +65,7 @@ class ExecutionInline(admin.TabularInline):
 class InstanceInline(admin.TabularInline):
     model = Instance
     extra = 0
+    max_num = 0
     fields = ['node_link', 'state_link', 'last_try', 'exit_code']
     readonly_fields = ['node_link', 'state_link', 'last_try', 'exit_code']
     
@@ -85,9 +86,17 @@ class NodeListAdmin(NodeAdmin):
     slivers hooked on Operation
     """
     # Template that fixes breadcrumbs for the new namespace
+    list_display = ['execute_node'] + NodeAdmin.list_display[1:]
+    list_display_links = ['execute_node', 'id']
     change_list_template = 'admin/maintenance/operation/list_nodes.html'
     actions = [execute_operation]
+    change_list_actions = [execute_operation]
     actions_on_bottom = True
+    
+    def execute_node(self, instance):
+        url = reverse('admin:maintenance_operation_execute_node', args=[self.operation_id, instance.pk])
+        return mark_safe('<a href="%s">%s</a>' % (url, instance))
+    execute_node.short_description = 'Node'
     
     def get_actions(self, request):
         """ Avoid inherit NodeAdmin actions """
@@ -106,6 +115,11 @@ class NodeListAdmin(NodeAdmin):
         # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter
         return admin.ModelAdmin.changelist_view(self, request, extra_context=context)
     
+    def execute_operation_view(self, request, operation_id, node_id):
+        self.operation_id = operation_id
+        _execute_operation_view = action_to_view(execute_operation, self)
+        return _execute_operation_view(request, node_id)
+    
     def has_add_permission(self, *args, **kwargs):
         """ Prevent node addition on this ModelAdmin """
         return False
@@ -117,7 +131,6 @@ class OperationAdmin(PermissionModelAdmin):
     list_display_links = ['name', 'identifier']
     list_filter = ['executions__is_active']
     inlines = [ExecutionInline]
-    actions = [execute_operation_changelist]
     save_and_continue = True
     # TODO fix this annoying mandatory declaration once and for all
     change_form_template = "admin/maintenance/operation/change_form.html"
@@ -158,6 +171,9 @@ class OperationAdmin(PermissionModelAdmin):
             url("^(?P<operation_id>\d+)/execute/$",
                 wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view),
                 name='maintenance_operation_execute'),
+            url("^(?P<operation_id>\d+)/execute/(?P<node_id>\d+)/$",
+                wrap_admin_view(self, NodeListAdmin(Node, admin_site).execute_operation_view),
+                name='maintenance_operation_execute_node'),
         )
         return extra_urls + urls
 
@@ -190,8 +206,8 @@ class InstanceAdmin(ChangeViewActions):
     list_filter = ['state', 'execution__operation__identifier', 'execution__is_active']
     readonly_fields = ['execution', 'node', 'last_try', 'stdout', 'stderr',
                        'exit_code', 'traceback', 'state']
-    actions = [revoke_instance, run_instance]
-    change_view_actions = [revoke_instance, run_instance]
+    actions = [kill_instance, revoke_instance, run_instance]
+    change_view_actions = [kill_instance, revoke_instance, run_instance]
     change_form_template = 'admin/maintenance/instance/change_form.html'
     
     def lookup_allowed(self, key, value):

@@ -73,6 +73,14 @@ revoke_instance.verbose_name = 'revoke'
 
 
 @transaction.commit_on_success
+def kill_instance(modeladmin, request, queryset):
+    for instance in queryset:
+        instance.kill()
+kill_instance.url_name = 'kill'
+kill_instance.verbose_name = 'kill'
+
+
+@transaction.commit_on_success
 def run_instance(modeladmin, request, queryset):
     for instance in queryset:
         instance.run()

@@ -10,8 +10,6 @@ FIRMWARE_BASE_IMAGE_STORAGE = getattr(settings, 'FIRMWARE_BASE_IMAGE_STORAGE', N
 
 FIRMWARE_BASE_IMAGE_PATH = getattr(settings, 'FIRMWARE_BASE_IMAGE_PATH', 'firmwares')
 
-FIRMWARE_BASE_IMAGE_EXT = getattr(settings, 'FIRMWARE_BASE_IMAGE_EXT', '.img.gz')
-
 FIRMWARE_BUILD_IMAGE_STORAGE = getattr(settings, 'FIRMWARE_BUILD_IMAGE_STORAGE',
     FileSystemStorage(location=settings.PRIVATE_MEDIA_ROOT))
 

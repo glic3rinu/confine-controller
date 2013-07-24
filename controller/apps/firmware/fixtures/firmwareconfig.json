@@ -99,16 +99,6 @@
     }
 },
 {
-    "pk": 11, 
-    "model": "firmware.configuci", 
-    "fields": {
-        "section": "server server", 
-        "config": 1, 
-        "option": "mgmt_pubkey", 
-        "value": "open(MAINTENANCE_PUB_KEY_PATH, 'r').readline().strip()"
-    }
-},
-{
     "pk": 13, 
     "model": "firmware.configuci", 
     "fields": {

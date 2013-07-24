@@ -28,7 +28,8 @@ class AuthKeysPlugin(FirmwarePlugin):
             def clean_auth_keys(self):
                 auth_keys = self.cleaned_data.get("auth_keys").strip()
                 for ssh_pubkey in auth_keys.splitlines():
-                    validate_ssh_pubkey(ssh_pubkey)
+                    if not ssh_pubkey.lstrip().startswith('#'): # ignore comments
+                        validate_ssh_pubkey(ssh_pubkey)
                 return auth_keys
         
         return AuthKeysForm

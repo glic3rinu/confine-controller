@@ -1,4 +1,6 @@
-import socket, sys
+import socket
+import sys
+import select
 
 import paramiko
 from celery.datastructures import ExceptionInfo
@@ -35,9 +37,16 @@ def run_instance(instance_id):
             return 'socket error'
         channel = ssh.get_transport().open_session()
         channel.exec_command(instance.script.replace('\r', ''))
-        #stderr = channel.recv_stderr(1024)
-        instance.stdout = channel.makefile('rb', -1).read()
-        instance.stderr = channel.makefile_stderr('rb', -1).read()
+        while True:
+            # Non-blocking is the secret ingridient in the async sauce
+            select.select([channel], [], [])
+            if channel.recv_ready():
+                instance.stdout += channel.recv(1024)
+            if channel.recv_stderr_ready():
+                instance.stderr += channel.recv_stderr(1024)
+            instance.save()
+            if channel.exit_status_ready():
+                break
         instance.exit_code = exit_code = channel.recv_exit_status()
         instance.state = Instance.SUCCESS if exit_code == 0 else Instance.FAILURE
         channel.close()

@@ -4,10 +4,11 @@ from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.template.response import TemplateResponse
+from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeListDefaultFilter
 from controller.admin.utils import (insert_inline, admin_link, insert_action,
-    get_modeladmin, link, wrap_admin_view)
+    get_modeladmin, link, wrap_admin_view, monospace_format)
 from controller.forms.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
@@ -22,7 +23,8 @@ from . import settings
 class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
-    readonly_fields = ['tinc_compatible_address']
+    fields = ['island', 'pubkey', 'tinc_compatible_address']
+    readonly_fields = ['tinc_compatible_address', 'formatted_pubkey']
     verbose_name_plural = 'tinc client'
     
     def tinc_compatible_address(self, instance):
@@ -30,18 +32,20 @@ class TincClientInline(PermissionGenericTabularInline):
         return instance.address.strNormal()
     tinc_compatible_address.short_description = 'Address'
     
-    def get_readonly_fields(self, request, obj=None):
-        """ pubkey as readonly if exists """
-        readonly_fields = super(TincClientInline, self).get_readonly_fields(request, obj=obj)
-        if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
-            return ['pubkey'] + readonly_fields
-        return readonly_fields
+    def formatted_pubkey(self, instance):
+        return monospace_format(instance.pubkey)
+    formatted_pubkey.short_description = 'Public Key'
     
     def get_fieldsets(self, request, obj=None):
         """ Warning user if the tinc client is not fully configured """
         if obj and not obj.tinc.pubkey:
             messages.warning(request, 'This %s misses a tinc public key.' % obj._meta.verbose_name)
-        return super(TincClientInline, self).get_fieldsets(request, obj=obj)
+        fieldsets = super(TincClientInline, self).get_fieldsets(request, obj=obj)
+        # pubkey as readonly if exists
+        if obj and obj.tinc.pubkey:
+            fields = fieldsets[0][1]['fields']
+            fieldsets[0][1]['fields'] = [ f.replace('pubkey', 'formatted_pubkey') for f in fields ]
+        return fieldsets
 
 
 class TincServerInline(PermissionGenericTabularInline):

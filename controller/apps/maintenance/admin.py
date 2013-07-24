@@ -8,7 +8,8 @@ from pygments.lexers import BashLexer
 from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import get_admin_link, colored, admin_link, wrap_admin_view, action_to_view
+from controller.admin.utils import (get_admin_link, colored, admin_link, wrap_admin_view, 
+    action_to_view, monospace_format)
 from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
@@ -204,7 +205,9 @@ class InstanceAdmin(ChangeViewActions):
     list_display = ['__unicode__', admin_link('execution__operation'), admin_link('execution'),
                     admin_link('node'), colored('state', STATE_COLORS), 'last_try']
     list_filter = ['state', 'execution__operation__identifier', 'execution__is_active']
-    readonly_fields = ['execution', 'node', 'last_try', 'stdout', 'stderr',
+    fields = ['execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
+              'traceback', 'state']
+    readonly_fields = ['execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr',
                        'exit_code', 'traceback', 'state']
     actions = [kill_instance, revoke_instance, run_instance]
     change_view_actions = [kill_instance, revoke_instance, run_instance]
@@ -214,6 +217,14 @@ class InstanceAdmin(ChangeViewActions):
         if key == 'execution__operation':
             return True
         return super(InstanceAdmin, self).lookup_allowed(key, value)
+    
+    def mono_stdout(self, instance):
+        return monospace_format(instance.stdout)
+    mono_stdout.short_description = 'stdout'
+    
+    def mono_stderr(self, instance):
+        return monospace_format(instance.stderr)
+    mono_stderr.short_description = 'stderr'
 
 
 admin.site.register(Operation, OperationAdmin)

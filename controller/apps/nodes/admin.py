@@ -10,7 +10,7 @@ from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
-    docstring_as_help_tip)
+    docstring_as_help_tip, monospace_format)
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
@@ -70,7 +70,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if not node.cert:
             req_url = reverse('admin:nodes_node_request-cert', args=[node.pk])
             return mark_safe("<a href='%s'>Request certificate</a>" % req_url)
-        return node.cert
+        return monospace_format(node.cert)
     display_cert.short_description = 'Certificate'
     
     def num_ifaces(self, node):

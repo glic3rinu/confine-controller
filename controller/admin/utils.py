@@ -199,3 +199,10 @@ def display_timeuntil(date):
     date_rel = timeuntil(date) + ' left'
     date_abs = date.strftime("%Y-%m-%d %H:%M:%S %Z")
     return mark_safe("<span title='%s'>%s</span>" % (date_abs, date_rel))
+
+
+def monospace_format(text):
+    MONOSPACE_FONTS = ('Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,'
+                       'Bitstream Vera Sans Mono,Courier New,monospace')
+    style="font-family:%s;" % MONOSPACE_FONTS
+    return mark_safe('<span style="%s">%s</span>' % (style, text))

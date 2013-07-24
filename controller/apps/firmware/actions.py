@@ -33,11 +33,11 @@ def get_firmware(modeladmin, request, queryset):
     # Check if the user has permissions for download the image
     if not request.user.has_perm('nodes.getfirmware_node', node):
         raise PermissionDenied
-
-    # Hack for allow call action from nodes changelist
+    
+    # Hack for allowing calling this action from node changelist
     if request.path == reverse('admin:nodes_node_changelist'):
         return redirect('admin:nodes_node_firmware', node.pk)
-
+    
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     

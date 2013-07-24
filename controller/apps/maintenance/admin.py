@@ -49,32 +49,34 @@ colored_state.short_description = 'State'
 
 class ExecutionInline(admin.TabularInline):
     model = Execution
-    fields = [num_instances, 'is_active', 'include_new_nodes', 'created_on', 
-              'details', colored_state]
-    readonly_fields = ['created_on', num_instances, colored_state, 'details']
+    fields = [num_instances, 'is_active', 'include_new_nodes', 'created_on', 'state']
+    readonly_fields = ['created_on', num_instances, 'state']
     extra = 0
     form = ExecutionInlineForm
     
     def has_add_permission(self, *args, **kwargs):
         return False
     
-    def details(self, instance):
-        return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name='details'))
+    def state(self, instance):
+        state = colored_state(instance)
+        return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name=state)) 
 
 
 class InstanceInline(admin.TabularInline):
     model = Instance
     extra = 0
-    fields = ['node_link', colored_state, 'last_try', 'details', 'exit_code']
-    readonly_fields = ['node_link', colored_state, 'last_try', 'details', 'exit_code']
+    fields = ['node_link', 'state_link', 'last_try', 'exit_code']
+    readonly_fields = ['node_link', 'state_link', 'last_try', 'exit_code']
     
     def node_link(self, instance):
         """ Link to related node used on change_view """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.node))
     node_link.short_description = 'Node'
     
-    def details(self, instance):
-        return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name='details'))
+    def state_link(self, instance):
+        state = colored_state(instance)
+        return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name=state))
+    state_link.short_description = 'State'
 
 
 class NodeListAdmin(NodeAdmin):
@@ -190,6 +192,7 @@ class InstanceAdmin(ChangeViewActions):
                        'exit_code', 'traceback', 'state']
     actions = [revoke_instance, run_instance]
     change_view_actions = [revoke_instance, run_instance]
+    change_form_template = 'admin/maintenance/instance/change_form.html'
     
     def lookup_allowed(self, key, value):
         if key == 'execution__operation':

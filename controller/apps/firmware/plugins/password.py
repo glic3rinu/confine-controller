@@ -11,7 +11,8 @@ from firmware.settings import FIRMWARE_PLUGINS_PASSWORD_DEFAULT
 
 class PasswordPlugin(FirmwarePlugin):
     verbose_name = 'Root password'
-    description = 'Enables password setting before building the image'
+    description = ('Enables password setting before building the image\n'
+                   'Default password: %s' % FIRMWARE_PLUGINS_PASSWORD_DEFAULT)
     
     def get_form(self):
         class PasswordForm(forms.Form):

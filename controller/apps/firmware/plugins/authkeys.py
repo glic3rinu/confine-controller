@@ -4,11 +4,13 @@ from controller.core.validators import validate_ssh_pubkey
 from controller.utils.system import run
 
 from firmware.plugins import FirmwarePlugin
+from firmware.settings import FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH
 
 
 class AuthKeysPlugin(FirmwarePlugin):
     verbose_name = 'SSH authorized keys'
-    description = 'Enables the inclusion of user SSH Authorized Keys'
+    description = ('Enables the inclusion of user SSH Authorized Keys\n'
+                   'Current authorized keys file: %s' % FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH)
     
     def get_form(self):
         class AuthKeysForm(forms.Form):
@@ -16,8 +18,13 @@ class AuthKeysPlugin(FirmwarePlugin):
                 'keys allowed to log in as root (in "authorized_keys" format). '
                 'You may leave the default keys to allow centralized management '
                 'of your node.',
-            widget=forms.Textarea(attrs={'cols': 70, 'rows': 5}))
-        
+            widget=forms.Textarea(attrs={'cols': 125, 'rows': 10}))
+            
+            def __init__(self, *args, **kwargs):
+                super(AuthKeysForm, self).__init__(*args, **kwargs)
+                if FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH:
+                    self.fields['auth_keys'].initial = open(FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH).read()
+            
             def clean_auth_keys(self):
                 auth_keys = self.cleaned_data.get("auth_keys").strip()
                 for ssh_pubkey in auth_keys.splitlines():

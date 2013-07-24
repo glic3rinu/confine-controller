@@ -3,6 +3,8 @@ import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
+from controller.utils import is_installed
+
 
 FIRMWARE_BASE_IMAGE_STORAGE = getattr(settings, 'FIRMWARE_BASE_IMAGE_STORAGE', None)
 
@@ -20,3 +22,13 @@ FIRMWARE_PLUGINS_USB_IMAGE = getattr(settings, 'FIRMWARE_PLUGINS_USB_IMAGE',
 
 FIRMWARE_PLUGINS_PASSWORD_DEFAULT = getattr(settings, 'FIRMWARE_PLUGINS_PASSWORD_DEFAULT',
     'confine')
+
+
+auth_keys_path = ''
+if is_installed('maintenance'):
+    from maintenance.settings import MAINTENANCE_PUB_KEY_PATH
+    auth_keys_path = MAINTENANCE_PUB_KEY_PATH
+
+FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH = getattr(settings,
+    'FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH', auth_keys_path)
+del auth_keys_path

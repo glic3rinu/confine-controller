@@ -19,8 +19,8 @@ class Operation(models.Model):
     identifier = models.CharField(max_length=16, help_text='Identifier used on the '
         'command line')
     script = models.TextField(help_text='Script to be executed on the nodes. Write '
-        'it with atomicity in mind, because there is no waranty that the script '
-        'ends executed multiple times.')
+        'it with atomicity in mind, there is no waranty that the script ends '
+        'executed multiple times.')
     
     def __unicode__(self):
         return self.identifier

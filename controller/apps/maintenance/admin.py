@@ -196,7 +196,7 @@ class ExecutionAdmin(admin.ModelAdmin):
                     'include_new_nodes', 'retry_if_offline', num_instances]
     inlines = [InstanceInline]
     readonly_fields = ['operation_link', 'display_script']
-    list_filter = ['is_active', 'include_new_nodes', 'retry_if_offline']
+    list_filter = ['is_active', 'include_new_nodes', 'retry_if_offline', 'operation']
     fields = ['operation_link', 'display_script', 'is_active', 'include_new_nodes',
               'retry_if_offline']
     

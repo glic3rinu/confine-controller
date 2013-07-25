@@ -17,7 +17,7 @@
    sodipodi:docname="notifications.svg"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   inkscape:export-filename="/home/glic3rinu/confine-controller/controller/static/controller/icons/notifications.png"
+   inkscape:export-filename="/home/glic3rinu/vct/confine-controller/controller/static/controller/icons/notifications.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -191,9 +191,9 @@
      pagecolor="#ffffff"
      showgrid="false"
      borderopacity="1.0"
-     inkscape:zoom="1.2291667"
-     inkscape:cx="-184.68032"
-     inkscape:cy="-1.9023855"
+     inkscape:zoom="9.8333336"
+     inkscape:cx="-3.5397769"
+     inkscape:cy="13.157447"
      inkscape:window-width="1920"
      inkscape:window-height="1024"
      inkscape:window-x="0"
@@ -248,7 +248,7 @@
   </metadata>
   <g
      id="layer1"
-     transform="matrix(1.0807812,0,0,1.0807812,-3.3802874,-2.0785149)">
+     transform="translate(-0.82801372,-0.73767948)">
     <path
        id="path10699"
        sodipodi:rx="13.75"
@@ -340,7 +340,7 @@
   </g>
   <g
      id="layer1-2"
-     transform="matrix(0.63020493,0,0,0.63020493,19.160303,19.939473)">
+     transform="matrix(0.58310133,0,0,0.58310133,20.027818,19.634611)">
     <path
        transform="matrix(2.1829,0,0,2.1829,-13.504,-14.35)"
        d="m 27,25.531 a 9.6875,3.4062 0 1 1 -19.375,0 9.6875,3.4062 0 1 1 19.375,0 z"

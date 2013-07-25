@@ -36,7 +36,9 @@ def execute_operation(modeladmin, request, queryset):
         form = ExecutionForm(request.POST)
         if form.is_valid():
             include_new_nodes = form.cleaned_data['include_new_nodes']
-        instances = operation.execute(queryset, include_new_nodes=include_new_nodes)
+            retry_if_offline = form.cleaned_data['retry_if_offline']
+        instances = operation.execute(queryset, include_new_nodes=include_new_nodes,
+            retry_if_offline=retry_if_offline)
         for instance in instances:
             msg = 'Executed operation "%s"' % force_text(operation)
             modeladmin.log_change(request, operation, msg)

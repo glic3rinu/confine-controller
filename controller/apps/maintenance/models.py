@@ -28,8 +28,8 @@ class Operation(models.Model):
     def __unicode__(self):
         return self.identifier
     
-    def execute(self, nodes, include_new_nodes=False):
-        instances = Execution.create(self, nodes, include_new_nodes)
+    def execute(self, nodes, include_new_nodes=False, retry_if_offline=True):
+        instances = Execution.create(self, nodes, include_new_nodes, retry_if_offline)
         return instances
 
 
@@ -48,7 +48,10 @@ class Execution(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     script = models.TextField()
     is_active = models.BooleanField(default=True)
-    include_new_nodes = models.BooleanField()
+    retry_if_offline = models.BooleanField(default=True, help_text='The operation '
+        'will be retried if the node is currently offline.')
+    include_new_nodes = models.BooleanField(help_text='If selected the operation '
+        'will be executed on newly created nodes')
     
     class Meta:
         ordering = ['-created_on']
@@ -66,17 +69,19 @@ class Execution(models.Model):
     
     @property
     def state(self):
-        progress = [Instance.RECEIVED, Instance.STARTED, Instance.TIMEOUT]
+        progress = [Instance.RECEIVED, Instance.STARTED]
+        if self.retry_if_offline:
+            progress.append(Instance.TIMEOUT)
         if self.instances.filter(state__in=progress).exists():
             return self.PROGRESS
         return self.COMPLETE
     
     @classmethod
-    def create(cls, operation, nodes, include_new_nodes):
+    def create(cls, operation, nodes, include_new_nodes=False, retry_if_offline=True):
         cls.objects.filter(operation=operation,
             include_new_nodes=include_new_nodes).update(include_new_nodes=False)
         execution = cls.objects.create(operation=operation, script=operation.script,
-            include_new_nodes=include_new_nodes)
+            include_new_nodes=include_new_nodes, retry_if_offline=retry_if_offline)
         instances = []
         for node in nodes:
             instance = Instance.create(execution=execution, node=node)
@@ -168,7 +173,7 @@ class Instance(models.Model):
 def retry_pending_operations(sender, node, **kwargs):
     """ runs timeout instances when a node heart beat is received """
     instances = Instance.objects.filter(node=node, state=Instance.TIMEOUT,
-        execution__is_active=True)
+        execution__is_active=True, execution__retry_if_offline=True)
     for instance in instances:
         instance.run()
 

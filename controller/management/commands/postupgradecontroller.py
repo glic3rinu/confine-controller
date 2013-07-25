@@ -51,6 +51,10 @@ class Command(BaseCommand):
                 if is_installed('firmware'):
                     from firmware.models import Build
                     Build.objects.filter(base_image=None).update(base_image='')
+            if version <= 902:
+                if is_installed('maintenance'):
+                    # Apply losed migrations
+                    run('python manage.py migrate maintenance 0001 --fake')
         
         if not options.get('specifics_only'):
             # Common stuff

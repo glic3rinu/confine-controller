@@ -121,8 +121,8 @@ class Instance(models.Model):
     stderr = models.TextField()
     traceback = models.TextField()
     exit_code = models.IntegerField(null=True)
-#    task_id = models.CharField(max_length=36, unique=True, null=True,
-#        help_text="Celery task ID")
+    task_id = models.CharField(max_length=36, unique=True, null=True,
+        help_text="Celery task ID")
     
     def __unicode__(self):
         return "%s@%s" % (self.execution.operation.identifier, self.node)

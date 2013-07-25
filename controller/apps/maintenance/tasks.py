@@ -17,6 +17,7 @@ def run_instance(instance_id):
     if not instance.execution.is_active:
         return 'no active'
     instance.state = Instance.STARTED
+    instance.task_id = run_instance.request.id
     instance.last_try = now()
     # Make sure to have cleaned feedback fields (re-executing an instance)
     instance.exit_code = None

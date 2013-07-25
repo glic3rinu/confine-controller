@@ -221,9 +221,9 @@ class InstanceAdmin(ChangeViewActions):
     list_filter = ['state', 'execution__operation__identifier', 'execution__is_active',
                    'execution__retry_if_offline']
     fields = ['execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
-              'traceback', 'state']
+              'traceback', 'state', 'task_link']
     readonly_fields = ['execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr',
-                       'exit_code', 'traceback', 'state']
+                       'exit_code', 'traceback', 'state', 'task_link']
     actions = [kill_instance, revoke_instance, run_instance]
     change_view_actions = [kill_instance, revoke_instance, run_instance]
     change_form_template = 'admin/maintenance/instance/change_form.html'
@@ -232,6 +232,13 @@ class InstanceAdmin(ChangeViewActions):
         return instance.execution.retry_if_offline
     execution__retry_if_offline.short_description = 'retry if offline'
     execution__retry_if_offline.boolean = True
+    
+    def task_link(self, build):
+        """ Display Celery task change view if exists """
+        if build.db_task:
+            return get_admin_link(build.db_task, href_name=build.db_task.task_id)
+    task_link.allow_tags = True
+    task_link.short_description = "Task"
     
     def lookup_allowed(self, key, value):
         if key == 'execution__operation':

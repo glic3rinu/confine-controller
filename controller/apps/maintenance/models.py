@@ -1,11 +1,11 @@
 from celery import current_app
 from celery.task.control import revoke
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_transaction_signals import defer
+from djcelery.models import TaskState
 
 from controller.utils import is_installed
 from nodes.models import Node

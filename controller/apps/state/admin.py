@@ -17,6 +17,7 @@ from controller.admin import ChangeViewActions
 from controller.admin.utils import (insertattr, get_admin_link, colored, get_modeladmin,
     wrap_admin_view, display_timesince, display_timeuntil)
 from controller.models.utils import get_help_text
+from controller.utils.html import urlize
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
@@ -27,7 +28,6 @@ from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
 from .models import NodeState, SliverState, BaseState
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
-from .utils import urlize_escaped_html, urlize
 
 
 STATES_COLORS = {
@@ -77,19 +77,20 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         return display_timeuntil(instance.next_retry_on)
     next_retry.help_text = 'Next time the state retrieval operation will be executed'
     
+    def display_metadata(self, instance):
+        style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
+        metadata = highlight(instance.metadata, JsonLexer(), HtmlFormatter())
+        print metadata
+        return mark_safe(style + urlize(metadata))
+    display_metadata.short_description = 'metadata'
+    
     def display_data(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
         # TODO render data according to header content-type
         #      (when it becomes available in the node)
         data = highlight(instance.data, JsonLexer(), HtmlFormatter())
-        return mark_safe(style + urlize_escaped_html(data))
+        return mark_safe(style + urlize(data))
     display_data.short_description = 'data'
-    
-    def display_metadata(self, instance):
-        style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
-        metadata = highlight(instance.metadata, JsonLexer(), HtmlFormatter())
-        return mark_safe(style + urlize_escaped_html(metadata))
-    display_metadata.short_description = 'metadata'
     
     def current(self, instance):
         return mark_safe(colored('current', STATES_COLORS, verbose=True)(instance))

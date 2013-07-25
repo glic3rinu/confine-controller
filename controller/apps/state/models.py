@@ -74,7 +74,7 @@ class BaseState(models.Model):
         else:
             state.data = ''
         state.metadata = json.dumps(metadata, indent=4)
-        if old_state != state.current:
+        if old_state != state.current and old_state != BaseState.NODATA:
             state.last_change_on = now
         state.save()
         state.post_store_glet(obj, glet)

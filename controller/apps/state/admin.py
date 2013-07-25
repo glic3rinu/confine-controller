@@ -169,6 +169,7 @@ def state_link(*args):
     model_name = obj._meta.verbose_name_raw
     url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
+state_link.short_description = 'Current state'
 state_link.admin_order_field = 'state__last_seen_on'
 
 

@@ -32,7 +32,7 @@ class SliceExpiration(Notification):
         context = super(SliceExpiration, self).get_context(obj)
         context.update({
             'slice': obj,
-            'expiration_days': (slice.expires_on-timezone.now().date()).days })
+            'expiration_days': (obj.expires_on-timezone.now().date()).days })
         return context
 
 

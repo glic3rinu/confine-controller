@@ -120,6 +120,12 @@ class CustomMenu(Menu):
                         children=maintenance_items)
                     )
             
+            if is_installed('notifications'):
+                admin_item.children.append(
+                    items.MenuItem('Notifications',
+                        reverse('admin:notifications_notification_changelist')),
+                )
+        
         else:
             admin_items = [
                 items.MenuItem('Users',

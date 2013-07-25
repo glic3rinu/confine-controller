@@ -178,6 +178,7 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
         """ It doesn't make sense to delete a singleton configuration """
         return False
 
+
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Build, BuildAdmin)
 

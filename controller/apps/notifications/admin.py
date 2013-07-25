@@ -22,6 +22,7 @@ class DeliveredInline(admin.TabularInline):
 
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('label', 'module', 'is_active', 'description')
+    list_editable = ('is_active',)
     fields = ('description', 'label', 'module', 'subject', 'message', 'is_active')
     readonly_fields = ('label', 'module', 'description')
     list_filter = ('is_active',)

@@ -4,7 +4,7 @@ from .models import NodeState, SliverState
 
 
 class NodeStateListFilter(SimpleListFilter):
-    title = 'State'
+    title = 'Current state'
     parameter_name = 'state'
     
     def lookups(self, request, model_admin):
@@ -17,7 +17,7 @@ class NodeStateListFilter(SimpleListFilter):
 
 
 class SliverStateListFilter(SimpleListFilter):
-    title = 'State'
+    title = 'Current state'
     parameter_name = 'state'
     
     def lookups(self, request, model_admin):

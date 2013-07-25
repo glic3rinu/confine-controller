@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django import forms
 from django.conf.urls import patterns, url, include
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
@@ -12,8 +13,7 @@ from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, link, get_admin_link,
-    insert_list_display, action_to_view, get_modeladmin, wrap_admin_view,
-    docstring_as_help_tip)
+    insertattr, action_to_view, get_modeladmin, wrap_admin_view, docstring_as_help_tip)
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -164,6 +164,12 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                     SliverIface.objects.create(sliver=object, type=iface_type,
                         name=iface_object.DEFAULT_NAME)
         super(SliverAdmin, self).log_addition(request, object)
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make description input widget smaller """
+        if db_field.name == 'description':
+            kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
+        return super(SliverAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class NodeListAdmin(NodeAdmin):
@@ -475,11 +481,16 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         if 'set_state' not in readonly_fields and obj is None:
             return readonly_fields + ['set_state']
         return readonly_fields
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make description input widget smaller """
+        if db_field.name == 'description':
+            kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
+        return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class TemplateAdmin(PermissionModelAdmin):
-    list_display = ['name', 'description', 'type', 'node_archs_str', 'image',
-                    'is_active']
+    list_display = ['name', 'description', 'type', 'node_archs_str', 'image', 'is_active']
     list_filter = ['is_active', 'type', 'node_archs']
     #FIXME node_archs: contains rather than exact
     search_fields = ['name', 'description', 'type', 'node_archs']
@@ -515,4 +526,4 @@ def queryset(request):
 
 node_modeladmin.queryset = queryset
 
-insert_list_display(Node, num_slivers)
+insertattr(Node, 'list_display', num_slivers)

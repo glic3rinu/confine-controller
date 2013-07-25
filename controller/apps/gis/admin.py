@@ -1,19 +1,16 @@
-from gis import widgets as map_widgets
+from django.contrib import admin
+from django.forms.widgets import TextInput
 from django_google_maps import fields as map_fields
 
-from django.forms.widgets import TextInput
-
-from controller.admin.utils import insert_inline
-from gis.models import Geolocation, NodeGeolocation
+from controller.admin.utils import insertattr
 from nodes.models import Node
-#from permissions.admin import PermissionGenericTabularInline
-from django.contrib import admin
+
+from gis import widgets as map_widgets
+from gis.models import Geolocation, NodeGeolocation
+
 
 class GisInline(admin.TabularInline):
     """ Base class for create an inline that provides geolocation info. """
-    class Meta:
-        abstract = True
-
     model = Geolocation
     max_num = 1
     fields = ['address', 'geolocation']
@@ -24,9 +21,11 @@ class GisInline(admin.TabularInline):
     verbose_name_plural = 'Geolocation'
     can_delete = False
 
+
 class NodeGisInline(GisInline):
     """ Inline instantiation for node geolocation. """
     model = NodeGeolocation
 
+
 # Monkey-Patching Section
-insert_inline(Node, NodeGisInline)
+insertattr(Node, 'inlines', NodeGisInline)

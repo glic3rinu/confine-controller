@@ -3,8 +3,7 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
-from controller.admin.utils import (insert_action, insert_change_view_action,
-    insert_inline, insert_list_display, link)
+from controller.admin.utils import insertattr, insert_change_view_action, link
 from controller.utils import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
@@ -33,13 +32,13 @@ class CnHostInline(PermissionGenericTabularInline):
 
 app_url_link = link('related_cnhost__app_url', description='CN URL')
 
-insert_action(Node, cache_node_db)
+insertattr(Node, 'actions', cache_node_db)
 insert_change_view_action(Node, cache_node_db)
 
-insert_inline(Node, CnHostInline)
-insert_inline(Server, CnHostInline)
+insertattr(Node, 'inlines', CnHostInline)
+insertattr(Server, 'inlines', CnHostInline)
 
 if is_installed('mgmtnetworks.tinc'):
     from mgmtnetworks.tinc.models import Gateway
-    insert_inline(Gateway, CnHostInline)
-    insert_list_display(Gateway, app_url_link)
+    insertattr(Gateway, 'inlines', CnHostInline)
+    insertattr(Gateway, 'list_display', app_url_link)

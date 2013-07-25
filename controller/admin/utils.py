@@ -24,49 +24,18 @@ def get_modeladmin(model, import_module=True):
             return v
 
 
-def insert_inline(model, inline, head=False):
-    """ Inserts model inline into an existing modeladmin """
+def insertattr(model, name, value, prepend=False):
     is_model = models.Model in model.__mro__
     modeladmin = get_modeladmin(model) if is_model else model
-    if hasattr(inline, 'inline_identify'):
-        delete_inline(model, inline.inline_identify)
     # Avoid inlines defined on parent class be shared between subclasses
     # Seems that if we use tuples they are lost in some conditions like changing
     # the tuple in modeladmin.__init__
-    if not modeladmin.inlines:
-        type(modeladmin).inlines = []
-    if head:
-        modeladmin.inlines = [inline] + modeladmin.inlines
+    if not getattr(modeladmin, name, False):
+        setattr(type(modeladmin), name, [])
+    if prepend:
+        setattr(modeladmin, name, [value] + modeladmin.inlines)
     else:
-        modeladmin.inlines.append(inline)
-
-
-def insert_list_filter(model, filter):
-    """ inserts filter to modeladmin.list_filters """
-    is_model = models.Model in model.__mro__
-    modeladmin = get_modeladmin(model) if is_model else model
-    if not modeladmin.list_filter:
-        type(modeladmin).list_filter = []
-    modeladmin.list_filter += (filter,)
-
-
-def insert_list_display(model, field):
-    """ inserts field to modeladmin.list_display """
-    is_model = models.Model in model.__mro__
-    modeladmin = get_modeladmin(model) if is_model else model
-    if not modeladmin.list_display:
-        type(modeladmin).list_display = []
-    modeladmin.list_display += (field,)
-
-
-def insert_action(model, action):
-    """ inserts action to modeladmin.actions """
-    is_model = models.Model in model.__mro__
-    modeladmin = get_modeladmin(model) if is_model else model
-    if not modeladmin.actions:
-        type(modeladmin).actions = [action]
-    else:
-        modeladmin.actions.append(action)
+        getattr(modeladmin, name).append(value)
 
 
 def insert_change_view_action(model, action):

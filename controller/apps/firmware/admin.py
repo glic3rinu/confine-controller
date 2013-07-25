@@ -6,7 +6,7 @@ from django.contrib import admin, messages
 from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import (get_modeladmin, get_admin_link, insert_action,
+from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
     colored, wrap_admin_view)
 from nodes.models import Node
 
@@ -145,16 +145,16 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
         info = self.model._meta.app_label, self.model._meta.module_name
         urlpatterns = patterns('',
             url(r'^(?P<object_id>\d+)/history/$',
-                self.history_view,
+                wrap_admin_view(self, self.history_view),
                 name='%s_%s_history' % info),
             url(r'^(?P<object_id>\d+)/delete/$',
-                self.delete_view, 
+                wrap_admin_view(self, self.delete_view),
                 name='%s_%s_delete' % info),
             url(r'^(?P<object_id>\d+)$',
-                self.change_view, 
+                wrap_admin_view(self, self.change_view),
                 name='%s_%s_change' % info),
             url(r'^$',
-                self.change_view, {'object_id': '1'},
+                wrap_admin_view(self,  self.change_view), {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
         urls = super(ConfigAdmin, self).get_urls()
@@ -184,7 +184,7 @@ admin.site.register(Build, BuildAdmin)
 
 # Monkey-Patching Section
 
-insert_action(Node, get_firmware)
+insertattr(Node, 'action', get_firmware)
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action(get_firmware)
 

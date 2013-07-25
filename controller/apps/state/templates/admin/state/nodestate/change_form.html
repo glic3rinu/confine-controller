@@ -1,8 +1,10 @@
 {% extends "admin/controller/change_form.html" %}
+{% load utils admin_urls %}
 
 {% block object-tools-items %}
 {% for item in object_tools_items %}
     {% if item.always_display or has_change_permission %}
+    {% if 'pings'|isinstalled %}<li><a href="{% url 'admin:pings_ping_ping' 31 original.pk %}"> Pings </a></li>{% endif %}
     <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
     {% endif %}
 {% endfor %}

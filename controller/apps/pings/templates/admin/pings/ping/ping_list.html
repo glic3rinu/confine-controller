@@ -1,5 +1,5 @@
 {% extends "admin/change_list.html" %}
-{% load i18n admin_urls admin_static admin_list %}
+{% load i18n admin_urls admin_static admin_list utils %}
 
 {% block extrahead %}
     {{ block.super }}
@@ -27,6 +27,9 @@
 
 {% block object-tools %}
 <ul class="object-tools">
+    {% if 'state'|isinstalled and obj_opts.verbose_name_plural == 'nodes' %}
+        <li><a href="{% url 'admin:state_nodestate_change' obj.pk %}"> State </a></li>
+    {% endif %}
     <li>
       <a href="{{ ping_url }}" class="historylink" title="Perform a ping operation on this address"> Ping machine ! </a>
     </li>

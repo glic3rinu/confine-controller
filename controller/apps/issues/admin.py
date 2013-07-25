@@ -11,7 +11,7 @@ from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import admin_link, colored
+from controller.admin.utils import admin_link, colored, wrap_admin_view
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
@@ -264,7 +264,7 @@ class TicketAdmin(ChangeViewActions, PermissionModelAdmin):
         """ add markdown preview url """
         urls = super(TicketAdmin, self).get_urls()
         my_urls = patterns('',
-            (r'^preview/$', self.preview)
+            (r'^preview/$', wrap_admin_view(self, self.preview))
         )
         return my_urls + urls
 

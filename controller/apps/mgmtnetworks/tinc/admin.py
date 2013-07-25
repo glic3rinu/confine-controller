@@ -7,8 +7,8 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeListDefaultFilter
-from controller.admin.utils import (insert_inline, admin_link, insert_action,
-    get_modeladmin, link, wrap_admin_view, monospace_format)
+from controller.admin.utils import (insertattr, admin_link, get_modeladmin, link,
+    wrap_admin_view, monospace_format)
 from controller.forms.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
@@ -120,7 +120,7 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
                    'net_name': settings.TINC_NET_NAME,
                    'opts': opts,
                    'app_label': opts.app_label}
-        return TemplateResponse(request, 'admin/tinc/host/help.html', context, 
+        return TemplateResponse(request, 'admin/tinc/host/help.html', context,
             current_app=self.admin_site.name)
     
     def get_form(self, request, *args, **kwargs):
@@ -146,7 +146,7 @@ admin.site.register(Gateway, GatewayAdmin)
 
 # Monkey-Patching Section
 
-insert_inline(Node, TincClientInline)
-insert_inline(Server, TincServerInline)
+insertattr(Node, 'inline', TincClientInline)
+insertattr(Server, 'inline', TincServerInline)
 
 node_modeladmin = get_modeladmin(Node)

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
@@ -106,6 +107,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Remove DEBUG from set_state choices, DEBUG is an automatic state """
+        if db_field.name == 'description':
+            kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
         field = super(NodeAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == 'set_state':
             # Removing Debug from choices

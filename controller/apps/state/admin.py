@@ -14,9 +14,8 @@ from pygments.lexers import JsonLexer
 from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import (insert_list_display, get_admin_link, colored,
-    insert_list_filter, insert_action, get_modeladmin, wrap_admin_view, display_timesince,
-    display_timeuntil)
+from controller.admin.utils import (insertattr, get_admin_link, colored, get_modeladmin,
+    wrap_admin_view, display_timesince, display_timeuntil)
 from controller.models.utils import get_help_text
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
@@ -186,16 +185,17 @@ def soft_version(node):
 soft_version.admin_order_field = 'state__soft_version'
 
 
-insert_list_display(Node, soft_version)
-insert_list_display(NodeListAdmin, soft_version)
-insert_list_display(Node, state_link)
-insert_list_display(NodeListAdmin, state_link)
-insert_list_display(Sliver, state_link)
-insert_action(Node, refresh_state)
-insert_action(Sliver, refresh_state)
-insert_list_filter(Node, NodeStateListFilter)
-insert_list_filter(Sliver, SliverStateListFilter)
-insert_list_filter(Node, 'state__soft_version')
+insertattr(Node, 'list_display', soft_version)
+insertattr(NodeListAdmin, 'list_display', soft_version)
+insertattr(Node, 'list_display', state_link)
+insertattr(NodeListAdmin, 'list_display', state_link)
+insertattr(Sliver, 'list_display', state_link)
+
+insertattr(Node, 'action', refresh_state)
+insertattr(Sliver, 'action', refresh_state)
+insertattr(Node, 'list_filter', NodeStateListFilter)
+insertattr(Sliver, 'list_filter', SliverStateListFilter)
+insertattr(Node, 'list_filter', 'state__soft_version')
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')

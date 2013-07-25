@@ -33,7 +33,7 @@ class NotificationAdmin(admin.ModelAdmin):
         admin_site = self.admin_site
         opts = self.model._meta
         extra_urls = patterns("",
-            url("^/sync-plugins$",
+            url("^sync-plugins/$",
                 wrap_admin_view(self, NotificationAdmin(Notification, admin_site).sync_plugins_view),
                 name='notifications_notification_sync_plugins'),
         )

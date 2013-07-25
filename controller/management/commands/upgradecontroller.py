@@ -31,7 +31,7 @@ class Command(BaseCommand):
         pypi_url = 'https://pypi.python.org/pypi/confine-controller'
         grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
         extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'
-        pypi_version = run('wget -q %s -O - | grep %s %s' % (pypi_url, grep, extract)).stdout
+        pypi_version = run("wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)).stdout
         
         if current_version == pypi_version:
             raise CommandError("Not upgrading, you already have version %s installed" % current_version)

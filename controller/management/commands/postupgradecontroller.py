@@ -3,6 +3,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
+from controller.utils import is_installed
 from controller.utils.system import run, check_root
 
 
@@ -47,7 +48,6 @@ class Command(BaseCommand):
             # Pre version specific upgrade operations
             if version < 835:
                 # prevent schema migrations from failing
-                from controller.utils import is_installed
                 if is_installed('firmware'):
                     from firmware.models import Build
                     Build.objects.filter(base_image=None).update(base_image='')
@@ -65,7 +65,10 @@ class Command(BaseCommand):
             
             run("python manage.py syncdb")
             run("python manage.py migrate")
-            run("python manage.py syncfirmwareplugins")
+            if is_installed('firmware'):
+                run("python manage.py syncfirmwareplugins")
+            if is_installed('notifications'):
+                run("python manage.py syncnotifications")
             run("python manage.py restartservices")
         
         if not version:

@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
+from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.safestring import mark_safe
 
@@ -119,7 +120,10 @@ class PingAdmin(PermissionModelAdmin):
     def ping_view(self, request, content_type_id, object_id):
         ct = get_object_or_404(ContentType, pk=content_type_id)
         model = "%s.%s" % (ct.app_label, ct.model)
-        ping(model, ids=[object_id], lock=False)
+        try:
+            ping(model, ids=[object_id], lock=False)
+        except AttributeError:
+            raise Http404
         args = (content_type_id, object_id)
         return redirect(reverse('admin:pings_ping_list', args=args))
 

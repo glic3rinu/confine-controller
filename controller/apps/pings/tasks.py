@@ -50,6 +50,8 @@ def ping(model, ids=[], lock=True):
     lock_file = os.path.join(PING_LOCK_DIR, '.%s.lock' % model.__name__)
     
     settings = Ping.get_instance_settings(model)
+    if settings is None:
+        raise AttributeError('Unknown model %s' % str(model))
     freq = settings.get('schedule')
     get_addr = settings.get('get_addr')
     

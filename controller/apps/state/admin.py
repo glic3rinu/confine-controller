@@ -26,7 +26,7 @@ from slices.models import Sliver
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
 from .models import NodeState, SliverState, BaseState
-from .settings import STATE_NODE_SOFT_VERSION_URL
+from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 from .utils import urlize_escaped_html, urlize
 
 
@@ -182,7 +182,8 @@ def soft_version(node):
         if not version:
             return 'No data'
         url = STATE_NODE_SOFT_VERSION_URL(version)
-        return mark_safe('<a href="%s">%s</a>' % (url, version))
+        name = STATE_NODE_SOFT_VERSION_NAME(version)
+        return mark_safe('<a href="%s">%s</a>' % (url, name))
 soft_version.admin_order_field = 'state__soft_version'
 
 

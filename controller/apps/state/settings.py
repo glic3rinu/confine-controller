@@ -28,7 +28,11 @@ STATE_SLIVERSTATE_EXPIRE_WINDOW = getattr(settings, 'STATE_SLIVERSTATE_EXPIRE_WI
 
 STATE_NODE_SOFT_VERSION_URL = getattr(settings, 'STATE_NODE_SOFT_VERSION_URL',
     lambda version: ('http://redmine.confine-project.eu/projects/confine/repository/'
-                     'show?branch=%s&rev=%s' % tuple(version.split('.'))))
+                     'show?branch=%s&rev=%s' % tuple(version.split('-')[0].split('.'))))
+
+
+STATE_NODE_SOFT_VERSION_NAME = getattr(settings, 'STATE_NODE_SOFT_VERSION_NAME',
+    lambda version: version.split('-')[1] if len(version.split('-')) > 1 else version)
 
 
 STATE_NODE_OFFLINE_WARNING = getattr(settings, 'STATE_NODE_OFFLINE_WARNING', timedelta(days=1))

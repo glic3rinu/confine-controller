@@ -146,7 +146,7 @@ admin.site.register(Gateway, GatewayAdmin)
 
 # Monkey-Patching Section
 
-insertattr(Node, 'inline', TincClientInline)
-insertattr(Server, 'inline', TincServerInline)
+insertattr(Node, 'inlines', TincClientInline)
+insertattr(Server, 'inlines', TincServerInline)
 
 node_modeladmin = get_modeladmin(Node)

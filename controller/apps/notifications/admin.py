@@ -3,6 +3,7 @@ from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.shortcuts import redirect
 
+from controller.admin import ChangeViewActions
 from controller.admin.utils import action_to_view, wrap_admin_view
 from controller.utils.plugins import sync_plugins_action
 
@@ -20,7 +21,7 @@ class DeliveredInline(admin.TabularInline):
         return False
 
 
-class NotificationAdmin(admin.ModelAdmin):
+class NotificationAdmin(ChangeViewActions):
     list_display = ('label', 'module', 'is_active', 'description')
     list_editable = ('is_active',)
     fields = ('description', 'label', 'module', 'subject', 'message', 'is_active')
@@ -28,6 +29,7 @@ class NotificationAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     inlines = [DeliveredInline]
     actions = [enable_selected, disable_selected, run_notifications, upgrade_notifications]
+    change_view_actions = [run_notifications, upgrade_notifications]
     
     def get_urls(self):
         urls = super(NotificationAdmin, self).get_urls()

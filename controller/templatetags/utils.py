@@ -1,6 +1,7 @@
 import re
 
 from django import template
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.forms import CheckboxInput
 from django.utils.safestring import mark_safe
@@ -50,3 +51,8 @@ def compact(text):
     compacted = text.replace('\n', '').replace('<p>', '<br>').replace('</p>', '</br>')
     compacted = re.sub('^<br>', '', compacted) 
     return mark_safe(compacted)
+
+
+@register.filter(name='content_type')
+def content_type(obj):
+    return ContentType.objects.get_for_model(type(obj)).pk

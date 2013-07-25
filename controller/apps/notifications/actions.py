@@ -10,6 +10,9 @@ def run_notifications(modeladmin, request, queryset):
     notify(ids=ids)
     msg = '%i notifications had been executed' % len(ids)
     modeladmin.message_user(request, msg)
+run_notifications.url_nam = 'run'
+run_notifications.verbose_name = 'Run'
+run_notifications.description = 'Execute this notifications and send alerts if needed'
 
 
 def upgrade_notifications(modeladmin, request, queryset):
@@ -19,9 +22,11 @@ def upgrade_notifications(modeladmin, request, queryset):
         notification.save()
     msg = '%i notifications had been upgraded' % (num+1)
     modeladmin.message_user(request, msg)
+upgrade_notifications.short_description = 'Upgrade subject and message'
+upgrade_notifications.url_name = 'upgrade'
+upgrade_notifications.verbose_name = 'Upgrade message'
 upgrade_notifications.description = ('Override current subject and message for '
     'the one provided by default')
-upgrade_notifications.short_description = 'Upgrade subject and message'
 
 
 sync_notifications = sync_plugins_action('notifications')

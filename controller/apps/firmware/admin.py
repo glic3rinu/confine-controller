@@ -185,7 +185,7 @@ admin.site.register(Build, BuildAdmin)
 
 # Monkey-Patching Section
 
-insertattr(Node, 'action', get_firmware)
+insertattr(Node, 'actions', get_firmware)
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action(get_firmware)
 

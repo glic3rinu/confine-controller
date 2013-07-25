@@ -30,7 +30,7 @@ def insertattr(model, name, value, prepend=False):
     # Avoid inlines defined on parent class be shared between subclasses
     # Seems that if we use tuples they are lost in some conditions like changing
     # the tuple in modeladmin.__init__
-    if not getattr(modeladmin, name, False):
+    if not getattr(modeladmin, name):
         setattr(type(modeladmin), name, [])
     if prepend:
         setattr(modeladmin, name, [value] + modeladmin.inlines)

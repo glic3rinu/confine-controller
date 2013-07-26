@@ -26,6 +26,7 @@ from slices.models import Sliver
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
+from .helpers import break_headers, break_long_lines
 from .models import NodeState, SliverState, BaseState
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
@@ -58,7 +59,7 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def url_link(self, instance):
         url = type(instance).get_url(instance.related_object)
-        return mark_safe(urlize(url))
+        return mark_safe('<a href="%s">%s</a>' % (url, url))
     url_link.short_description = 'Monitored URL'
     
     def last_seen(self, instance):
@@ -79,7 +80,9 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def display_metadata(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
-        metadata = highlight(instance.metadata, JsonLexer(), HtmlFormatter())
+        metadata = break_headers(instance.metadata)
+        print metadata
+        metadata = highlight(metadata, JsonLexer(), HtmlFormatter())
         return mark_safe(style + urlize(metadata))
     display_metadata.short_description = 'metadata'
     
@@ -87,7 +90,8 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
         # TODO render data according to header content-type
         #      (when it becomes available in the node)
-        data = highlight(instance.data, JsonLexer(), HtmlFormatter())
+        data = break_long_lines(instance.data)
+        data = highlight(data, JsonLexer(), HtmlFormatter())
         return mark_safe(style + urlize(data))
     display_data.short_description = 'data'
     

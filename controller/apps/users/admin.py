@@ -32,7 +32,7 @@ class AuthTokenInline(PermissionTabularInline):
         """ Use monospace font style in script textarea """
         if db_field.name == 'data':
             kwargs['widget'] = forms.Textarea(
-                attrs={'cols': 120, 'rows': '10'})
+                attrs={'cols': 130, 'rows': '6'})
         return super(AuthTokenInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
@@ -145,6 +145,12 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         if not request.user.is_superuser:
             fields += ('last_login', 'date_joined', 'is_active', 'is_superuser')
         return fields
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make description input widget smaller """
+        if db_field.name == 'description':
+            kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
+        return super(UserAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class GroupAdmin(ChangeViewActions, PermissionModelAdmin):

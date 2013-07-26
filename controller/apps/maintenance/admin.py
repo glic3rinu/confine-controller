@@ -11,7 +11,8 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_admin_link, colored, admin_link, wrap_admin_view, 
-    action_to_view, monospace_format, MONOSPACE_FONTS)
+    action_to_view)
+from controller.utils.html import monospace_format, MONOSPACE_FONTS
 from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin

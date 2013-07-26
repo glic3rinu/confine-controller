@@ -1,6 +1,7 @@
 from django import forms
 
 from controller.core.validators import validate_ssh_pubkey
+from controller.utils.html import MONOSPACE_FONTS
 from controller.utils.system import run
 
 from firmware.plugins import FirmwarePlugin
@@ -18,7 +19,8 @@ class AuthKeysPlugin(FirmwarePlugin):
                 'keys allowed to log in as root (in "authorized_keys" format). '
                 'You may leave the default keys to allow centralized management '
                 'of your node.',
-            widget=forms.Textarea(attrs={'cols': 125, 'rows': 10}))
+            widget=forms.Textarea(
+                attrs={'cols': 125, 'rows': 10, 'style': 'font-family:%s' % MONOSPACE_FONTS}))
             
             def __init__(self, *args, **kwargs):
                 super(AuthKeysForm, self).__init__(*args, **kwargs)

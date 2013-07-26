@@ -11,7 +11,8 @@ from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
-    docstring_as_help_tip, monospace_format)
+    docstring_as_help_tip)
+from controller.utils.html import monospace_format
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 

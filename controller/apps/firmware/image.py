@@ -4,6 +4,7 @@ from django.core.management.base import CommandError
 
 from controller.utils.system import run, makedirs
 
+from .exceptions import UnexpectedFileType
 
 r = functools.partial(run, silent=False)
 
@@ -57,8 +58,7 @@ class Image(object):
             try:
                 self._sector = int(result.stdout)
             except ValueError:
-                # TODO custom exception
-                raise Exception("Failed getting image start sector (value '%s'). "
+                raise UnexpectedFileType("Failed getting image start sector (value '%s'). "
                     "Has selected base image a valid image file?" % result.stdout)
         return self._sector
     

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin
@@ -21,6 +22,18 @@ from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
 class AuthTokenInline(PermissionTabularInline):
     model = AuthToken
     extra = 0
+    
+    class Media:
+        css = {
+             'all': ('users/monospace-authtoken.css',)
+        }
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Use monospace font style in script textarea """
+        if db_field.name == 'data':
+            kwargs['widget'] = forms.Textarea(
+                attrs={'cols': 120, 'rows': '10'})
+        return super(AuthTokenInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class RolesInline(PermissionTabularInline):

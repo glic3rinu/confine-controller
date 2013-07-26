@@ -80,7 +80,6 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     def display_metadata(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
         metadata = highlight(instance.metadata, JsonLexer(), HtmlFormatter())
-        print metadata
         return mark_safe(style + urlize(metadata))
     display_metadata.short_description = 'metadata'
     

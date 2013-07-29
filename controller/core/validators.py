@@ -71,7 +71,17 @@ def validate_sha256(value):
     """ SHA256 hex digest """
     if len(value) != 64 or not all(c in string.hexdigits for c in value):
         raise ValidationError('This is not an SHA256 HEX digest.')
-    
+
+
+def validate_file_extensions(extensions):
+    def _validate_extensions(value, extensions=extensions):
+        for extension in extensions:
+            if value.name.endswith(extension):
+                return
+        msg = '"%s" does not have a valid extension %s' % (value, extensions)
+        raise ValidationError(msg)
+    return _validate_extensions
+
 
 class OrValidator(object):
     """
@@ -92,4 +102,5 @@ class OrValidator(object):
             else:
                 return
         raise type(e)(' OR '.join(msg))
-        
+
+

@@ -15,6 +15,7 @@ from private_files import PrivateFileField
 from singleton_models.models import SingletonModel
 
 from controller import settings as controller_settings
+from controller.core.validators import validate_file_extensions
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
@@ -25,6 +26,7 @@ from nodes.settings import NODES_NODE_ARCHS
 from firmware import settings
 from firmware.context import context
 from firmware.exceptions import ConcurrencyError
+from firmware.settings import FIRMWARE_BASE_IMAGE_EXTENSIONS
 from firmware.tasks import build
 
 
@@ -290,8 +292,7 @@ class BaseImage(models.Model):
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
         upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
         help_text='Image file compressed in gzip. The file name must end in .img.gz',
-        validators=[validators.RegexValidator('.*\.img\.gz$',
-                    'Invalid file extension (only accepted *.img.gz)', 'invalid')])
+        validators=[validate_file_extensions(FIRMWARE_BASE_IMAGE_EXTENSIONS)])
     default = models.BooleanField(default=False, help_text='If true this base image '
         'will be preselected on the firmware generation form')
     

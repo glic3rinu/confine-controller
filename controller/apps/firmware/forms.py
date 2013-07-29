@@ -10,7 +10,7 @@ class OptionalFilesForm(forms.Form):
         config = Config.objects.get()
         for f in config.files.active().optional():
             self.fields["%s" % f.pk] = forms.BooleanField(label=f.path, required=False,
-                help_text=f.help_text)
+                help_text=f.help_text, initial=True)
 
 
 class HackedRadioSelect(forms.RadioSelect.renderer):

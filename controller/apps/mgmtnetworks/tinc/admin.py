@@ -16,7 +16,7 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import HostInlineAdminForm
+from .forms import TincClientInlineForm, HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 from . import settings
 
@@ -24,9 +24,12 @@ from . import settings
 class TincClientInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
-    fields = ['island', 'pubkey', 'tinc_compatible_address']
+    fields = ['island', 'pubkey', 'clear_pubkey', 'tinc_compatible_address']
     readonly_fields = ['tinc_compatible_address']
     verbose_name_plural = 'tinc client'
+    can_delete = False
+    form = TincClientInlineForm
+    
     class Media:
         css = {
              'all': ('tinc/monospace-pubkey.css',)

@@ -28,7 +28,7 @@ class ApiRoot(APIView):
     -H "Accept: application/json; indent=4"`
     """
     def get(base_view, request, format=None):
-        relations = []
+        relations = ['base']
         for model in api._registry:
             name = force_unicode(model._meta.verbose_name)
             relations.append(name if is_singleton(model) else '%s-list' % name)

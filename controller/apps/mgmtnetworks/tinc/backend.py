@@ -19,6 +19,9 @@ class TincBackend(object):
     def tinc_server(self):
         return self.obj.tinc if self.name == 'tinc_server' else None
     
+    def is_configured(self):
+        return bool(self.obj.tinc.pubkey)
+    
     @property
     def native(self):
         return None

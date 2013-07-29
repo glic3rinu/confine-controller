@@ -64,7 +64,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     actions = [request_cert, reboot_selected]
     change_view_actions = [reboot_selected, request_cert]
     change_form_template = "admin/controller/change_form.html"
-    save_on_top = True
     
     def display_cert(self, node):
         """ Display certificate with some contextual help if cert is not present """

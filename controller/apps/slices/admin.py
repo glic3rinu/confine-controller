@@ -26,10 +26,13 @@ from .helpers import wrap_action, remove_slice_id
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
-STATE_COLORS = { 
+STATE_COLORS = {
     Slice.REGISTER: 'grey',
     Slice.DEPLOY: 'darkorange',
     Slice.START: 'green' }
+
+
+colored_set_state = colored('set_state', STATE_COLORS, verbose=True, bold=False)
 
 
 def num_slivers(instance):
@@ -135,6 +138,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def computed_set_state(self, sliver):
         state = sliver.set_state if sliver.set_state else sliver.slice.set_state
         color = STATE_COLORS.get(state, "black")
+        state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
         return mark_safe('<span style="color:%s;">%s</spam>' % (color, state))
     computed_set_state.short_description = 'Set state'
     
@@ -178,9 +182,8 @@ class NodeListAdmin(NodeAdmin):
     slivers hooked on Slice
     """
     list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'),
-                    'arch', colored('set_state', STATES_COLORS, verbose=True),
-                    admin_link('group'), 'num_ifaces', num_slivers,
-                    'display_sliver_pub_ipv4_range']
+        'arch', colored_set_state, admin_link('group'), 'num_ifaces', num_slivers,
+        'display_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace
     change_list_template = 'admin/slices/slice/list_nodes.html'
@@ -402,8 +405,8 @@ class SlicePropInline(PermissionTabularInline):
 
 
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['name', 'id', 'vlan_nr', colored('set_state', STATE_COLORS, verbose=True),
-                    num_slivers, admin_link('template'), 'expires_on', admin_link('group')]
+    list_display = ['name', 'id', 'vlan_nr', colored_set_state, num_slivers,
+                    admin_link('template'), 'expires_on', admin_link('group')]
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on',

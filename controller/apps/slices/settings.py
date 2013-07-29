@@ -27,12 +27,12 @@ SLICES_TEMPLATE_IMAGE_NAME = getattr(settings, 'SLICES_TEMPLATE_IMAGE_NAME', '')
 SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data')
 
 SLICES_SLICE_EXP_DATA_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
-    'slice-%(pk)d-exp-data.%(suffix)s')
+    'slice-%(pk)d-%(original)s')
 
 SLICES_SLIVER_EXP_DATA_DIR = getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data')
 
 SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME',
-    'sliver-%(pk)d-exp-data.%(suffix)s')
+    'sliver-%(pk)d-%(original)s')
 
 
 # 30 days expiration interval

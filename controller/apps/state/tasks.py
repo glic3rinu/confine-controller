@@ -1,4 +1,4 @@
-import requests, gevent, os
+import requests, gevent, os, json
 from celery.task import periodic_task, task
 from django.db.models import get_model
 
@@ -14,16 +14,23 @@ def get_state(state_module, ids=[], lock=True, patch=False):
     freq = state_model.get_setting('SCHEDULE')
     # Prevent concurrent executions
     with LockFile(lock_file, expire=freq-(freq*0.2), unlocked=not lock):
-        objects = state_model.get_related_model().objects.all()
+        objects = state_model.objects.all()
         if ids:
-            objects = objects.filter(id__in=ids)
+            objects = objects.filter(pk__in=ids)
         
         # enable async execution (not needed since this is being executed in a gevent worker)
         if patch:
             gevent.monkey.patch_all(thread=False, select=False)
         
-        # create greenlets
-        glets = [ gevent.spawn(requests.get, state_model.get_url(obj)) for obj in objects ]
+        glets = []
+        for obj in objects:
+            try:
+                etag = json.loads(obj.metadata)['headers']['etag']
+            except (ValueError, KeyError):
+                headers = {}
+            else:
+                headers = {'If-None-Match': etag}
+            glets.append(gevent.spawn(requests.get, obj.get_url(), headers=headers))
         
         # wait for all greenlets to finish
         gevent.joinall(glets)

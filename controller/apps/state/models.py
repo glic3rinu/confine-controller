@@ -64,13 +64,15 @@ class BaseState(models.Model):
         old_state = state.current
         now = timezone.now()
         state.last_try_on = now
-        metadata = {'exception': str(glet._exception)}
+        metadata = {'exception': str(glet._exception) if glet._exception else None}
         if response is not None:
             state.last_seen_on = now
-            state.data = response.content
+            if response.status_code != 304:
+                state.data = response.content
             metadata.update({
                 'url': response.url,
-                'headers': response.headers})
+                'headers': response.headers,
+                'status_code': response.status_code})
         else:
             state.data = ''
         state.metadata = json.dumps(metadata, indent=4)
@@ -109,11 +111,10 @@ class BaseState(models.Model):
                 return verbose
         return current
     
-    @classmethod
-    def get_url(cls, obj):
-        URI = cls().get_setting('URI')
-        node = getattr(obj, 'node', obj)
-        return URI % {'mgmt_addr': node.mgmt_net.addr, 'object_id': obj.pk }
+    def get_url(self):
+        URI = type(self).get_setting('URI')
+        node = self.get_node()
+        return URI % {'mgmt_addr': node.mgmt_net.addr, 'object_id': self.pk }
     
     @property
     def related_object(self):

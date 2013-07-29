@@ -7,6 +7,7 @@ from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from pygments import highlight
@@ -26,7 +27,7 @@ from slices.models import Sliver
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
-from .helpers import break_headers, break_long_lines
+from .helpers import break_headers, break_lines
 from .models import NodeState, SliverState, BaseState
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
@@ -54,11 +55,10 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     change_view_actions = [refresh]
     
     class Media:
-        css = { "all": ("controller/css/github.css",
-                        "state/admin/css/details.css") }
+        css = { "all": ("controller/css/github.css",)}
     
     def url_link(self, instance):
-        url = type(instance).get_url(instance.related_object)
+        url = instance.get_url()
         return mark_safe('<a href="%s">%s</a>' % (url, url))
     url_link.short_description = 'Monitored URL'
     
@@ -81,7 +81,6 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     def display_metadata(self, instance):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
         metadata = break_headers(instance.metadata)
-        print metadata
         metadata = highlight(metadata, JsonLexer(), HtmlFormatter())
         return mark_safe(style + urlize(metadata))
     display_metadata.short_description = 'metadata'
@@ -90,7 +89,7 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
         # TODO render data according to header content-type
         #      (when it becomes available in the node)
-        data = break_long_lines(instance.data)
+        data = break_lines(instance.data)
         data = highlight(data, JsonLexer(), HtmlFormatter())
         return mark_safe(style + urlize(data))
     display_data.short_description = 'data'
@@ -106,7 +105,7 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
         return False
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        state = self.get_object(request, unquote(object_id))
+        state = get_object_or_404(self.model, pk=object_id)
         related_obj = state.get_related_model().objects.get(pk=object_id)
         related_obj_link = get_admin_link(related_obj)
         title = force_text(self.opts.verbose_name).capitalize()

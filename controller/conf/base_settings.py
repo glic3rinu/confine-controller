@@ -319,9 +319,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    )
+    ),
+#    'PAGINATE_BY': 10,
+#    'PAGINATE_BY_PARAM': 'page_size',
 }
 
+USE_ETAGS = True
 
 ###################################
 ## CONTROLLER APPS CONFIGURATION ##

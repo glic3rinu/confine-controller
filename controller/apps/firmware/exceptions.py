@@ -11,7 +11,8 @@ class BaseImageNotAvailable(Exception):
     """
     pass
 
-class UnexpectedFileType(Exception):
+
+class UnexpectedImageFormat(Exception):
     """
     Raised when the image file has not the expected type or format
     """

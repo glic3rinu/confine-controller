@@ -4,7 +4,7 @@ from django.core.management.base import CommandError
 
 from controller.utils.system import run, makedirs
 
-from .exceptions import UnexpectedFileType
+from .exceptions import UnexpectedImageFormat
 
 r = functools.partial(run, silent=False)
 
@@ -51,15 +51,15 @@ class Image(object):
         """ sector number of image part_nr """
         if not hasattr(self, '_sector'):
             context = { 'image': self.file, 'part_nr': self.part_nr }
-            #BUGFIX: file -k option for keep looking and getting all file image info
-            # different output at UNIX `file` between version 5.11 and 5.14
+            # File -k option for keep looking and getting part_nr sector number
+            # different behaviour between version 5.11 and 5.14
             result = r("file -k %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
                        "sed -n %(part_nr)dp" % context)
             try:
                 self._sector = int(result.stdout)
             except ValueError:
-                raise UnexpectedFileType("Failed getting image start sector (value '%s'). "
-                    "Has selected base image a valid image file?" % result.stdout)
+                msg = '"%s" is not a valid sector number' % result.stdout
+                raise UnexpectedImageFormat(msg)
         return self._sector
     
     @property

@@ -28,7 +28,7 @@ wget --user {{ user }} --ask-password --auth-no-challenge --no-check-certificate
     http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }}
 {% endcode %}
         <p>The following command can be used for flashing this image (remember to change the destination device):</p>
-        {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}
+        {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sda bs=1M; sync{% endcode %}
     </fieldset>
     </div>
     </ul>

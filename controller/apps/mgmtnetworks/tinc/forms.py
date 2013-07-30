@@ -4,18 +4,26 @@ from django.utils.safestring import mark_safe
 
 from controller.forms.widgets import ShowText
 
-from .models import TincClient
+from .models import TincClient, TincServer
 
-class TincClientInlineForm(forms.ModelForm):
+
+class TincHostInlineForm(forms.ModelForm):
     clear_pubkey = forms.BooleanField(label='Clear pubkey', required=False)
-    
-    class Meta:
-        model = TincClient
     
     def save(self, commit=True):
         if self.cleaned_data['clear_pubkey']:
             self.instance.pubkey = None
-        super(TincClientInlineForm, self).save(commit=commit)
+        super(TincHostInlineForm, self).save(commit=commit)
+    
+
+class TincClientInlineForm(TincHostInlineForm):
+    class Meta:
+        model = TincClient
+
+
+class TincServerInlineForm(TincHostInlineForm):
+    class Meta:
+        model = TincServer
 
 
 class HostInlineAdminForm(forms.ModelForm):

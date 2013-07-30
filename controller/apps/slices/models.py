@@ -32,7 +32,6 @@ def make_upload_to(field_name, base_path, file_name):
     """ dynamically generate file names with randomnes for upload_to args """
     def upload_path(instance, filename, base_path=base_path, file_name=file_name,
                     field_name=field_name):
-        print file_name, instance
         if not file_name or instance is None:
             return os.path.join(base_path, filename)
         field = type(instance)._meta.get_field_by_name(field_name)[0]
@@ -52,8 +51,6 @@ def make_upload_to(field_name, base_path, file_name):
         else:
             name = file_name % context
         name = name.replace(' ', '_')
-        print name
-        print 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         return os.path.join(base_path, name)
     return upload_path
 
@@ -147,7 +144,7 @@ class Slice(models.Model):
                   'they do not explicitly indicate one). Its format and contents '
                   'depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-        help_text='The SHA256 hash of the previous file, used to check its integrity. '
+        help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
@@ -286,7 +283,7 @@ class Sliver(models.Model):
                   'this sliver, instead of the one specified by the slice. Its '
                   'format and contents depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-        help_text='The SHA256 hash of the previous file, used to check its integrity. '
+        help_text='The SHA256 hash of the exp data file, used to check its integrity. '
                   'Compulsory when a file has been specified.',
         validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,

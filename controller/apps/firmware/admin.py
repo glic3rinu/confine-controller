@@ -8,6 +8,7 @@ from singleton_models.admin import SingletonModelAdmin
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
     colored, wrap_admin_view)
+from controller.utils.html import monospace_format
 from nodes.models import Node
 
 from firmware.actions import get_firmware, sync_plugins
@@ -46,14 +47,18 @@ class BuildFileInline(admin.TabularInline):
     """ Readonly inline for displaying build files """
     model = BuildFile
     extra = 0
-    fields = ['path', 'content']
-    readonly_fields = ['path', 'content']
+    fields = ['path', 'monospace_content']
+    readonly_fields = ['path', 'monospace_content']
     verbose_name_plural = 'Files'
     can_delete = False
     
     def has_add_permission(self, *args, **kwargs):
         """ Don't show add another link on the inline """
         return False
+    
+    def monospace_content(self, instance):
+        return monospace_format(instance.content)
+    monospace_content.short_description = 'Content'
 
 
 class ConfigFileInline(admin.TabularInline):

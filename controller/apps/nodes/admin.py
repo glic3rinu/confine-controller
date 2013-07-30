@@ -12,6 +12,7 @@ from singleton_models.admin import SingletonModelAdmin
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
     docstring_as_help_tip)
+from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
@@ -74,6 +75,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             return mark_safe("<a href='%s'>Request certificate</a>" % req_url)
         return monospace_format(node.cert)
     display_cert.short_description = 'Certificate'
+    display_cert.help_text = get_help_text(Node, 'cert')
     
     def num_ifaces(self, node):
         """ Diplay number of direct ifaces, used on changelist """

@@ -16,52 +16,56 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincClientInlineForm, HostInlineAdminForm
+from .forms import TincClientInlineForm, TincServerInlineForm, HostInlineAdminForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 from . import settings
 
 
-class TincClientInline(PermissionGenericTabularInline):
+class TincHostInline(PermissionGenericTabularInline):
     model = TincClient
     max_num = 1
     fields = ['island', 'pubkey', 'clear_pubkey', 'tinc_compatible_address']
     readonly_fields = ['tinc_compatible_address']
-    verbose_name_plural = 'tinc client'
     can_delete = False
-    form = TincClientInlineForm
-    
+
     class Media:
         css = {
              'all': ('tinc/monospace-pubkey.css',)
         }
-    
+
     def tinc_compatible_address(self, instance):
         """ return instance.address in a format compatible with tinc daemon """
         return instance.address.strNormal()
     tinc_compatible_address.short_description = 'Address'
-    
+
     def get_readonly_fields(self, request, obj=None):
         """ pubkey as readonly if exists """
-        readonly_fields = super(TincClientInline, self).get_readonly_fields(request, obj=obj)
+        readonly_fields = super(TincHostInline, self).get_readonly_fields(request, obj=obj)
         if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
             return ['pubkey'] + readonly_fields
         return readonly_fields
-    
+
     def get_fieldsets(self, request, obj=None):
-        """ Warning user if the tinc client is not fully configured """
+        """ Warning user if the tinc host is not fully configured """
         if obj and not obj.tinc.pubkey:
             messages.warning(request, 'This %s misses a tinc public key.' % obj._meta.verbose_name)
-        return super(TincClientInline, self).get_fieldsets(request, obj=obj)
+        return super(TincHostInline, self).get_fieldsets(request, obj=obj)
 
 
-class TincServerInline(PermissionGenericTabularInline):
+class TincClientInline(TincHostInline):
+    model = TincClient
+    verbose_name_plural = 'tinc client'
+    form = TincClientInlineForm
+    
+
+class TincServerInline(TincHostInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     # TODO warn user when it tries to modify a tincserver with depends on more than 
     #      one client without alternative path
     model = TincServer
-    max_num = 1
     verbose_name_plural = 'tinc server'
-    readonly_fields = ['address']
+    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address', 'is_active']
+    form = TincServerInlineForm
 
 
 class TincAddressInline(PermissionTabularInline):

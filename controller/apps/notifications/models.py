@@ -42,3 +42,6 @@ class Delivered(models.Model):
         'when the condition is still valid')
     
     content_object = generic.GenericForeignKey()
+    
+    def __unicode__(self):
+        return str(self.content_object)

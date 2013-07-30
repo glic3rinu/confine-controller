@@ -27,11 +27,17 @@ STATES_COLORS = {
 
 
 class PingAdmin(PermissionModelAdmin):
-    list_display = ('content_object', 'packet_loss', 'min', 'avg', 'max', 'mdev', 'date_since')
+    list_display = ('content_object', 'packet_loss_percentage', 'min', 'avg',
+                    'max', 'mdev', 'date_since')
     fields = list_display
     list_display_links = ('content_object',)
     readonly_fields = list_display
     sudo_actions = ['delete_selected']
+    
+    def packet_loss_percentage(self, instance):
+        return str(instance.packet_loss) + '%'
+    packet_loss_percentage.short_description = 'Packet loss'
+    packet_loss_percentage.order_field = 'packet_loss'
     
     def date_since(self, instance):
         return display_timesince(instance.date)

@@ -1,7 +1,9 @@
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
+from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import action_to_view, wrap_admin_view
@@ -13,12 +15,20 @@ from notifications.models import Notification, Delivered
 
 
 class DeliveredInline(admin.TabularInline):
-    fields = ('content_object', 'date', 'is_valid')
-    readonly_fields = ('content_object', 'date', 'is_valid')
+    fields = ('content_object_link', 'date', 'is_valid')
+    readonly_fields = ('content_object_link', 'date', 'is_valid')
     model = Delivered
     
     def has_add_permission(self, *args, **kwargs):
         return False
+    
+    def content_object_link(self, instance):
+        opts = instance.content_object._meta
+        info = (opts.app_label, opts.object_name.lower())
+        link = reverse('admin:%s_%s_change' % info, args=[instance.object_id])
+        link = '<a href="%s">%s</a>' % (link, instance.content_object)
+        return mark_safe(link)
+    content_object_link.short_description = 'Content object'
 
 
 class NotificationAdmin(ChangeViewActions):

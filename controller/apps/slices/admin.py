@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, link, get_admin_link,
     insertattr, action_to_view, get_modeladmin, wrap_admin_view, docstring_as_help_tip)
+from controller.admin.widgets import LinkedRelatedFieldWidgetWrapper
 from nodes.admin import NodeAdmin, STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -45,11 +46,6 @@ num_slivers.short_description = 'Slivers'
 num_slivers.admin_order_field = 'sliver__count'
 
 
-def template_link(instance):
-    """ Display template change view link """
-    return get_admin_link(instance.template)
-
-
 class SliverPropInline(PermissionTabularInline):
     model = SliverProp
     extra = 0
@@ -78,15 +74,13 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice__name']
     fieldsets = (
         (None, {
-            'fields': ('description', 'slice_link', 'node_link', ('template',
-                       template_link), 'exp_data', 'exp_data_sha256', 'set_state')
+            'fields': ('description', 'template', 'exp_data', 'set_state')
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('new_instance_sn',)
+            'fields': ('new_instance_sn', 'exp_data_sha256',)
         }),)
-    readonly_fields = ['new_instance_sn', 'slice_link', 'node_link', template_link,
-                       'exp_data_sha256']
+    readonly_fields = ['new_instance_sn', 'exp_data_sha256']
     search_fields = ['description', 'node__description', 'slice__name']
     inlines = [SliverIfaceInline]
     actions = [update_selected]
@@ -99,6 +93,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         For each sliver iface type show number of requested ifaces on sliver changelist
         """
         for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+            """ Hook registered ifaces """
             if not iface_type in self.list_display and not iface_object.AUTO_CREATE:
                 def display_ifaces(instance, iface_type=iface_type):
                     return instance.interfaces.filter(type=iface_type).count()
@@ -113,21 +108,6 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return instance.interfaces.count()
     total_num_ifaces.short_description = 'Total ifaces'
     total_num_ifaces.admin_order_field = 'interfaces__count'
-    
-    def slice_link(self, instance):
-        """ Link to related slice used on change_view """
-        return mark_safe("<b>%s</b>" % get_admin_link(instance.slice))
-    slice_link.short_description = 'Slice'
-    
-    def node_link(self, instance):
-        """ Link to related node used on change_view """
-        return mark_safe("<b>%s</b>" % get_admin_link(instance.node))
-    node_link.short_description = 'Node'
-    
-    def exp_data_sha256(self, instance):
-        """ Experiment data SHA256 used on change_view """
-        return instance.exp_data_sha256
-    exp_data_sha256.short_description = 'Experiment data SHA256'
     
     def new_instance_sn(self, instance):
         if instance.pk:
@@ -173,7 +153,23 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         """ Make description input widget smaller """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
+        if db_field.name == 'template':
+            formfield = self.formfield_for_foreignkey(db_field, **kwargs)
+            kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
+                db_field.rel, self.admin_site)
         return super(SliverAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Linked title """
+        sliver = get_object_or_404(Sliver, pk=object_id)
+        slice_link = get_admin_link(sliver.slice)
+        node_link = get_admin_link(sliver.node)
+        context = {
+            'title': mark_safe('Change sliver %s@%s' % (slice_link, node_link)),
+            'header_title': 'Change sliver'}
+        context.update(extra_context or {})
+        return super(SliverAdmin, self).change_view(request, object_id,
+            form_url=form_url, extra_context=context)
 
 
 class NodeListAdmin(NodeAdmin):
@@ -410,7 +406,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
     readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on',
-                       'exp_data_sha256', template_link]
+                       'exp_data_sha256']
     date_hierarchy = 'expires_on'
     search_fields = ['name']
     inlines = [SliverInline]
@@ -418,22 +414,17 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', ('template', template_link),
-                       ('exp_data',), 'exp_data_sha256', 'set_state',
-                        'vlan_nr', 'expires_on', 'group'),
+            'fields': ('name', 'description', 'template', 'exp_data', 'set_state',
+                       'vlan_nr', 'expires_on', 'group'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('instance_sn', 'new_sliver_instance_sn')
+            'fields': ('instance_sn', 'new_sliver_instance_sn', 'exp_data_sha256')
         }),)
     change_form_template = "admin/slices/slice/change_form.html"
     save_and_continue = True
     change_view_actions = [renew_selected_slices, reset_selected]
     default_changelist_filters = (('my_slices', 'True'),)
-    
-    def exp_data_sha256(self, instance):
-        return instance.exp_data_sha256
-    exp_data_sha256.short_description = 'Experiment Data SHA256'
     
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
@@ -489,6 +480,10 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         """ Make description input widget smaller """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
+        if db_field.name == 'template':
+            formfield = self.formfield_for_foreignkey(db_field, **kwargs)
+            kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
+                db_field.rel, self.admin_site)
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
@@ -501,14 +496,16 @@ class TemplateAdmin(PermissionModelAdmin):
               'is_active']
     readonly_fields = ['image_sha256']
     
-    def image_sha256(self, instance):
-        return instance.image_sha256
-    image_sha256.short_description = 'Image SHA256'
-    
     def node_archs_str(self, instance):
         return ', '.join(instance.node_archs)
     node_archs_str.short_description = 'Node archs'
     node_archs_str.admin_order_field = 'node_archs'
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make description input widget smaller """
+        if db_field.name == 'description':
+            kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
+        return super(TemplateAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 admin.site.register(Sliver, SliverAdmin)

@@ -15,6 +15,8 @@ class Command(BaseCommand):
                 help='Only install development requirements'),
             make_option('--local', action='store_true', dest='local', default=False,
                 help='Only install local requirements'),
+            make_option('--no-restart', action='store_false', dest='restart', default=True,
+                help='Only install local requirements'),
             make_option('--specifics', action='store_true', dest='specifics_only',
                 default=False, help='Only run version specific operations'),
             make_option('--no-upgrade-notes', action='store_false', default=True,
@@ -73,7 +75,8 @@ class Command(BaseCommand):
                 run("python manage.py syncfirmwareplugins")
             if is_installed('notifications'):
                 run("python manage.py syncnotifications")
-            run("python manage.py restartservices")
+            if options.get('restart'):
+                run("python manage.py restartservices")
         
         if not version:
             self.stderr.write('\nNext time you migth want to provide a --from argument '

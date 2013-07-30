@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = 'Sync existing plugins with the database'
     
     def handle(self, *args, **options):
-        config = Config.objects.get()
+        config, __ = Config.objects.get_or_create(pk=1)
         existing_pks = []
         for plugin in FirmwarePlugin.plugins:
             label = plugin.__name__

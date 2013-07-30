@@ -10,7 +10,6 @@ from nodes.models import Node
 from firmware.models import Build
 
 
-
 def build_info_view(request, node_id):
     """ Hook JSON representation of a Build to NodeModeladmin """
     try:

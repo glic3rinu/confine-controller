@@ -3,7 +3,7 @@
 
 {% block extrahead %}
     {{ block.super }}
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 
     <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
@@ -12,7 +12,7 @@
 
 <script type="text/javascript">
 $(function() {
-    $.getJSON('http://bestia.confine-project.eu:8888/admin/pings/ping/31/104/timeseries/', function(data) {
+    $.getJSON('/admin/pings/ping/31/104/timeseries/', function(data) {
         // split the data set into ohlc and volume
         var loss = [],
             rtt = [],
@@ -42,11 +42,10 @@ $(function() {
             [1, 2, 3, 4, 6]
         ]];
         // create the chart
-        $('#container').highcharts('StockChart', {
+        $('#pingchart').highcharts('StockChart', {
             rangeSelector: {
                 selected: 1
             },
-            renderTo: "pingchart",
         yAxis: [{ // Primary yAxis
             labels: {
                 formatter: function() {
@@ -139,9 +138,12 @@ $(function() {
 {% endblock %}
 
 {% block result_list %}
-<div id="pingchart" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
-
+<div id="pingchart"></div>
     {{ block.super }}
+
+<!--style="min-width: 400px; height: 400px; margin: 0 auto"></div>-->
+
+
 {% endblock %}
 
 

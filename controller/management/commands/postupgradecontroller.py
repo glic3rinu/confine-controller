@@ -56,7 +56,10 @@ class Command(BaseCommand):
             if version <= 902:
                 if is_installed('maintenance'):
                     # Apply losed migrations
-                    run('python manage.py migrate maintenance 0001 --fake')
+                    from south.models import MigrationHistory
+                    migrated = MigrationHistory.objects.filter(app_name='maintenance').exists()
+                    if not migrated:
+                        run('python manage.py migrate maintenance 0001 --fake')
         
         if not options.get('specifics_only'):
             # Common stuff

@@ -2,13 +2,13 @@ from __future__ import absolute_import
 
 import time, datetime
 
-from chartit import DataPool, Chart
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
+from django.utils import simplejson
 from django.utils.safestring import mark_safe
 
 from controller.admin.utils import display_timesince, wrap_admin_view
@@ -54,12 +54,15 @@ class PingAdmin(PermissionModelAdmin):
     
     def get_urls(self):
         urls = patterns("",
-            url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/",
+            url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/$",
                 wrap_admin_view(self, self.changelist_view),
                 name='pings_ping_list'),
-            url("^ping/(?P<content_type_id>\d+)/(?P<object_id>\d+)/",
+            url("^ping/(?P<content_type_id>\d+)/(?P<object_id>\d+)/$",
                 wrap_admin_view(self, self.ping_view),
-                name='pings_ping_ping')
+                name='pings_ping_ping'),
+            url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/timeseries/$",
+                wrap_admin_view(self, self.timeseries_view),
+                name='pings_ping_timeseries'),
         )
         return urls + super(PingAdmin, self).get_urls()
     
@@ -102,23 +105,6 @@ class PingAdmin(PermissionModelAdmin):
                 'ip_addr': addr,
                 'has_change_permission': self.has_change_permission(request, obj=obj, view=False),})
             self.change_list_template = 'admin/pings/ping/ping_list.html'
-            pingdataset = DataPool(series=[{
-                'options': {
-                    'source': Ping.objects.filter(content_type=content_type_id, object_id=object_id)[:25]},
-                    'terms': [
-                        ('date', lambda d: time.mktime(d.timetuple())),
-                        'packet_loss',
-                        'avg']}
-                 ])
-            pingchart = Chart(datasource = pingdataset,
-                series_options = [{
-                    'options':{ 'type': 'line', 'stacking': False },
-                    'terms':{ 'date': ['packet_loss', 'avg'] }}],
-                chart_options = {
-                    'title': { 'text': 'Pings'},
-                    'xAxis': { 'title': { 'text': 'Last 25 mesurements'}}},
-                x_sortf_mapf_mts=(None, lambda i: datetime.datetime.fromtimestamp(i).strftime("%H:%M"), False))
-            context.update({'pingchart': pingchart})
         else:
             self.change_list_template = None
         return super(PingAdmin, self).changelist_view(request, extra_context=context)
@@ -132,6 +118,15 @@ class PingAdmin(PermissionModelAdmin):
             raise Http404
         args = (content_type_id, object_id)
         return redirect(reverse('admin:pings_ping_list', args=args))
+    
+    def timeseries_view(self, request, content_type_id, object_id):
+        pings = Ping.objects.filter(content_type=content_type_id, object_id=object_id)
+        pings = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
+        series = []
+        for date, loss, avg, min, max in pings.order_by('date'):
+            date = int(str(time.mktime(date.timetuple())).split('.')[0] + '000')
+            series.append([date, loss, avg, min, max])
+        return HttpResponse(simplejson.dumps(series), mimetype="application/json")
 
 
 admin.site.register(Ping, PingAdmin)

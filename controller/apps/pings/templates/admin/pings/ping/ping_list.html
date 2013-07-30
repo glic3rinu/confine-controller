@@ -3,11 +3,113 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="{% static "js/highcharts/highcharts.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/highcharts/themes/default.js" %}"></script>
-    {% load chartit %}
-    {{ pingchart|load_charts:"pingchart" }}
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+    <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
+    
+
+<script type="text/javascript">
+$(function() {
+    $.getJSON('http://bestia.confine-project.eu:8888/admin/pings/ping/31/104/timeseries/', function(data) {
+        // split the data set into ohlc and volume
+        var loss = [],
+            rtt = [],
+            rtt_avg = [],
+            dataLength = data.length;
+        for (i = 0; i < dataLength; i++) {
+            rtt.push([
+                data[i][0], // the date
+                data[i][3], // high
+                data[i][4] // low
+            ]);
+            rtt_avg.push([
+                data[i][0], // high
+                data[i][2] // low
+            ])
+            loss.push([
+                data[i][0], // the date
+                data[i][1] // the rtt
+            ])
+        }
+        // set the allowed units for data grouping
+        var groupingUnits = [[
+            'week',                         // unit name
+            [1]                             // allowed multiples
+        ], [
+            'month',
+            [1, 2, 3, 4, 6]
+        ]];
+        // create the chart
+        $('#container').highcharts('StockChart', {
+            rangeSelector: {
+                selected: 1
+            },
+            renderTo: "pingchart",
+        yAxis: [{ // Primary yAxis
+            labels: {
+                formatter: function() {
+                    return this.value + 'ms';
+                },
+                style: {
+                    color: '#89A54E'
+                }
+            },
+            title: {
+                text: 'RTT',
+                style: {
+                    color: '#89A54E'
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: 'Packet Loss',
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            labels: {
+                formatter: function() {
+                    return this.value + '%';
+                },
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+        series: [{
+                type: 'line',
+                name: 'loss',
+                data: loss,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            }, {
+                type: 'arearange',
+                name: 'rtt range',
+                data: rtt,
+                yAxis: 1,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+        }, {
+                type: 'line',
+                name: 'rtt',
+                data: rtt_avg,
+                yAxis: 1,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+        }]
+        });
+    });
+});
+</script>
 {% endblock %}
 
 {% block content_title %}{% if title %}<h1>Pings on 
@@ -37,7 +139,8 @@
 {% endblock %}
 
 {% block result_list %}
-    <div id='pingchart'></div>
+<div id="pingchart" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+
     {{ block.super }}
 {% endblock %}
 

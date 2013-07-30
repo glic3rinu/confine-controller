@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v3.0.2 (2013-06-05)
+ * @license Highstock JS v1.3.2 (2013-06-05)
  * Prototype adapter
  *
  * @author Michael Nelson, Torstein Hønsi.

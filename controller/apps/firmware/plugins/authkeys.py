@@ -5,13 +5,13 @@ from controller.utils.html import MONOSPACE_FONTS
 from controller.utils.system import run
 
 from firmware.plugins import FirmwarePlugin
-from firmware.settings import FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH
+from firmware.settings import FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH as keys_path
 
 
 class AuthKeysPlugin(FirmwarePlugin):
     verbose_name = 'SSH authorized keys'
     description = ('Enables the inclusion of user SSH Authorized Keys\n'
-                   'Current authorized keys file: %s' % FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH)
+                   'Current authorized keys file: %s' % keys_path)
     
     def get_form(self):
         class AuthKeysForm(forms.Form):
@@ -24,8 +24,8 @@ class AuthKeysPlugin(FirmwarePlugin):
             
             def __init__(self, *args, **kwargs):
                 super(AuthKeysForm, self).__init__(*args, **kwargs)
-                if FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH:
-                    self.fields['auth_keys'].initial = open(FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH).read()
+                if keys_path:
+                    self.fields['auth_keys'].initial = open(keys_path).read()
             
             def clean_auth_keys(self):
                 auth_keys = self.cleaned_data.get("auth_keys").strip()
@@ -40,12 +40,8 @@ class AuthKeysPlugin(FirmwarePlugin):
         return {'auth_keys': form.cleaned_data['auth_keys']}
     
     def pre_umount(self, image, build, *args, **kwargs):
-        """ 
-        Creating ssh/authorized_keys keys file.
-        WARNING: this action overrides the old keys.
-        """
+        """ Creating ssh authorized keys file """
         auth_keys = kwargs.get('auth_keys', '')
-        print "AUTH_KEYS: %s" % auth_keys
         context = {
             'auth_keys': auth_keys,
             'image': image.mnt }

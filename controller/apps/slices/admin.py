@@ -178,7 +178,8 @@ class NodeListAdmin(NodeAdmin):
     slivers hooked on Slice
     """
     list_display = ['add_sliver_link', 'id', link('cn_url', description='CN URL'),
-        'arch', colored_set_state, admin_link('group'), 'num_ifaces', num_slivers,
+        'arch', colored('set_state', STATES_COLORS, verbose=True, bold=False),
+        admin_link('group'), 'num_ifaces', num_slivers,
         'display_sliver_pub_ipv4_range']
     list_display_links = ['add_sliver_link', 'id']
     # Template that fixes breadcrumbs for the new namespace

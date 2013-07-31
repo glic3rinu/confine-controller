@@ -30,6 +30,7 @@ class PingAdmin(PermissionModelAdmin):
     list_display = ('content_object', 'packet_loss_percentage', 'min', 'avg',
                     'max', 'mdev', 'date_since')
     fields = list_display
+    date_hierarchy = 'date'
     list_display_links = ('content_object',)
     readonly_fields = list_display
     sudo_actions = ['delete_selected']
@@ -37,7 +38,7 @@ class PingAdmin(PermissionModelAdmin):
     def packet_loss_percentage(self, instance):
         return str(instance.packet_loss) + '%'
     packet_loss_percentage.short_description = 'Packet loss'
-    packet_loss_percentage.order_field = 'packet_loss'
+    packet_loss_percentage.admin_order_field = 'packet_loss'
     
     def date_since(self, instance):
         return display_timesince(instance.date)
@@ -103,6 +104,7 @@ class PingAdmin(PermissionModelAdmin):
                 'obj_opts': obj._meta,
                 'obj': obj,
                 'ip_addr': addr,
+                'metrics_url': reverse('admin:pings_ping_timeseries', args=args), 
                 'has_change_permission': self.has_change_permission(request, obj=obj, view=False),})
             self.change_list_template = 'admin/pings/ping/ping_list.html'
         else:
@@ -123,7 +125,7 @@ class PingAdmin(PermissionModelAdmin):
         pings = Ping.objects.filter(content_type=content_type_id, object_id=object_id)
         pings = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
         series = []
-        for date, loss, avg, min, max in pings.order_by('date'):
+        for date, loss, avg, min, max in pings.order_by('date')[500:]:
             date = int(str(time.mktime(date.timetuple())).split('.')[0] + '000')
             series.append([date, loss, avg, min, max])
         return HttpResponse(simplejson.dumps(series), mimetype="application/json")

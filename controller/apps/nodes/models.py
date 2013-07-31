@@ -147,7 +147,7 @@ class Node(models.Model):
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
-        if not self.cert or self.mgmt_net.is_configured():
+        if not self.cert or not self.mgmt_net.is_configured():
             # bad_conf
             self.set_state = Node.DEBUG
         else:

@@ -126,7 +126,8 @@ function install_requirements () {
     LOCAL_APT="fuseext2 file \
                tinc \
                libevent-dev"
-    PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev"
+    
+    PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
     
     DEVELOPMENT_PIP="django \
                      django-celery-email \
@@ -146,8 +147,7 @@ function install_requirements () {
                pygments \
                requests==1.2.0 \
                gevent \
-               simplejson \
-               http://github.com/bastir85/django-chartit/archive/master.zip"
+               simplejson"
     PRODUCTION_PIP="django-simple-captcha \
                     django-registration==1.0 \
                     django-google-maps"

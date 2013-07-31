@@ -149,7 +149,6 @@ INSTALLED_APPS = (
     'admin_tools.theming',
     'admin_tools.menu',
     'admin_tools.dashboard',
-    'chartit',
     
     # Django.contrib
     'django.contrib.auth',

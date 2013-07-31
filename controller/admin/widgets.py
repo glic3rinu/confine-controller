@@ -9,8 +9,8 @@ class LinkedRelatedFieldWidgetWrapper(RelatedFieldWidgetWrapper):
         info = (opts.app_label, opts.object_name.lower())
         self.widget.choices = self.choices
         output = [self.widget.render(name, value, *args, **kwargs)]
-        if self.can_add_related:
-            related_url = reverse('admin:%s_%s_add' % info, current_app=self.admin_site.name)
-        link = reverse("admin:%s_%s_change" % info, current_app=self.admin_site.name, args=[value])
-        link = '<p class="file-upload">Link: <a href="%s">%s</a><br>' % (link, link)
+        link = ''
+        if value is not None:
+            link = reverse("admin:%s_%s_change" % info, current_app=self.admin_site.name, args=[value])
+            link = '<p class="file-upload">Link: <a href="%s">%s</a><br>' % (link, link)
         return mark_safe(link + ''.join(output))

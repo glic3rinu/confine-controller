@@ -60,7 +60,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             'fields': ('sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'local_iface',
                        'display_cert', 'priv_ipv4_prefix', 'sliver_mac_prefix',
                        'sliver_pub_ipv6', 'boot_sn')
-        }), 
+        }),
         )
     actions = [request_cert, reboot_selected]
     change_view_actions = [reboot_selected, request_cert]
@@ -92,6 +92,10 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             query = Q( Q(users__roles__is_admin=True) | Q(users__roles__is_technician=True) )
             query = Q( query & Q(allow_nodes=True) )
             form = filter_group_queryset(form, obj, request.user, query)
+        if obj is not None and obj.set_state == obj.FAILURE:
+            # removing production choice if in failure state
+            assert ( form.base_fields['set_state'].choices.pop(1) == Node.PRODUCTION,
+                "Problem removing PRODUCTION from set_state" )
         return form
     
     def queryset(self, request):

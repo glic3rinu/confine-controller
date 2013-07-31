@@ -6,19 +6,19 @@ from django import forms
 from controller.utils.system import run
 
 from firmware.plugins import FirmwarePlugin
-from firmware.settings import FIRMWARE_PLUGINS_PASSWORD_DEFAULT
+from firmware.settings import FIRMWARE_PLUGINS_PASSWORD_DEFAULT as default_password
 
 
 class PasswordPlugin(FirmwarePlugin):
     verbose_name = 'Root password'
     description = ('Enables password setting before building the image\n'
-                   'Default password: %s' % FIRMWARE_PLUGINS_PASSWORD_DEFAULT)
+                   'Default password: %s' % default_password)
     
     def get_form(self):
         class PasswordForm(forms.Form):
             password1 = forms.CharField(label='Password', required=False,
                 help_text='Enter a password to be set for the root user. The '
-                    'default password is %s.' % FIRMWARE_PLUGINS_PASSWORD_DEFAULT,
+                    'default password is %s.' % default_password,
                 widget=forms.PasswordInput)
             password2 = forms.CharField(label='Password confirmation', required=False,
                 widget=forms.PasswordInput)
@@ -35,16 +35,13 @@ class PasswordPlugin(FirmwarePlugin):
         return PasswordForm
     
     def process_form_post(self, form):
-        """ hash password for avoid store it as plain text """
-        password = form.cleaned_data['password2'] or FIRMWARE_PLUGINS_PASSWORD_DEFAULT
-
+        """ Calculating password hash """
+        password = form.cleaned_data['password2'] or default_password
         hash_type = 6 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
         salt_chars = string.ascii_letters + string.digits
         salt_length = random.randint(1, 16)
         salt = ''.join(random.choice(salt_chars) for x in range(salt_length))
-
         crypted_password = crypt.crypt(password, "$%i$%s$" % (hash_type, salt))
-
         return {'password': crypted_password}
     
     def pre_umount(self, image, build, *args, **kwargs):

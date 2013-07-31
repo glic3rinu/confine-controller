@@ -8,7 +8,9 @@ from .models import TincClient, TincServer
 
 
 class TincHostInlineForm(forms.ModelForm):
-    clear_pubkey = forms.BooleanField(label='Clear pubkey', required=False)
+    clear_pubkey = forms.BooleanField(label='Clear pubkey', required=False,
+        help_text="Select if you want to delete the current public key for adding "
+                  "a new one")
     
     def save(self, commit=True):
         if self.cleaned_data['clear_pubkey']:

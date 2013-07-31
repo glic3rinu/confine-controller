@@ -3,112 +3,140 @@
 
 {% block extrahead %}
     {{ block.super }}
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
-    
 
-<script type="text/javascript">
-$(function() {
-    $.getJSON('/admin/pings/ping/31/104/timeseries/', function(data) {
-        // split the data set into ohlc and volume
-        var loss = [],
-            rtt = [],
-            rtt_avg = [],
-            dataLength = data.length;
-        for (i = 0; i < dataLength; i++) {
-            rtt.push([
-                data[i][0], // the date
-                data[i][3], // high
-                data[i][4] // low
-            ]);
-            rtt_avg.push([
-                data[i][0], // high
-                data[i][2] // low
-            ])
-            loss.push([
-                data[i][0], // the date
-                data[i][1] // the rtt
-            ])
-        }
-        // set the allowed units for data grouping
-        var groupingUnits = [[
-            'week',                         // unit name
-            [1]                             // allowed multiples
-        ], [
-            'month',
-            [1, 2, 3, 4, 6]
-        ]];
-        // create the chart
-        $('#pingchart').highcharts('StockChart', {
-            rangeSelector: {
-                selected: 1
-            },
-        yAxis: [{ // Primary yAxis
-            labels: {
-                formatter: function() {
-                    return this.value + 'ms';
-                },
-                style: {
-                    color: '#89A54E'
-                }
-            },
-            title: {
-                text: 'RTT',
-                style: {
-                    color: '#89A54E'
-                }
+    <script type="text/javascript">
+    $(function() {
+        $.getJSON('{{ metrics_url }}', function(data) {
+            // Create a timer
+            var start = + new Date();
+            // split the data set intopacket loss and rtt
+            var loss = [],
+                rtt = [],
+                rtt_avg = [],
+                dataLength = data.length;
+            for (i = 0; i < dataLength; i++) {
+                rtt.push([
+                    data[i][0], // the date
+                    data[i][3], // high
+                    data[i][4] // low
+                ]);
+                rtt_avg.push([
+                    data[i][0], // high
+                    data[i][2] // low
+                ])
+                loss.push([
+                    data[i][0], // the date
+                    data[i][1] // the rtt
+                ])
             }
-        }, { // Secondary yAxis
-            title: {
-                text: 'Packet Loss',
-                style: {
-                    color: '#4572A7'
-                }
-            },
-            labels: {
-                formatter: function() {
-                    return this.value + '%';
+            // create the chart
+            $('#pingchart').highcharts('StockChart', {
+                chart: {
+                    events: {
+                        load: function(chart) {
+                            this.setTitle(null, {
+                                text: 'Built chart at '+ (new Date() - start) +'ms'
+                            });
+                        }
+                    },
+                    zoomType: 'x'
                 },
-                style: {
-                    color: '#4572A7'
+                rangeSelector: {
+                    buttons: [{
+                        type: 'day',
+                        count: 1,
+                        text: '1d'
+                    }, {
+                        type: 'day',
+                        count: 3,
+                        text: '3d'
+                    }, {
+                        type: 'week',
+                        count: 1,
+                        text: '1w'
+                    }, {
+                        type: 'month',
+                        count: 1,
+                        text: '1m'
+                    }, {
+                        type: 'month',
+                        count: 6,
+                        text: '6m'
+                    }, {
+                        type: 'year',
+                        count: 1,
+                        text: '1y'
+                    }, {
+                        type: 'all',
+                        text: 'All'
+                    }],
+                    selected: 3
+                },
+            yAxis: [{ // Primary yAxis
+                title: {
+                    text: 'Packet Loss',
+                    style: {
+                        color: '#ef2929'
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value + '%';
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                opposite: true
+            }, { // Secondary yAxis
+                labels: {
+                    formatter: function() {
+                        return this.value + 'ms';
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                title: {
+                    text: 'RTT',
+                    style: {
+                        color: '#4e9a06'
+                    }
                 }
+            }],
+            tooltip: {
+                color: 'blue',
+                shared: true
             },
-            opposite: true
-        }],
-        tooltip: {
-            shared: true
-        },
-        series: [{
-                type: 'line',
-                name: 'loss',
-                data: loss,
-                dataGrouping: {
-                    units: groupingUnits
-                }
+            scrollbar : {
+                enabled : false
+            },
+            series: [{
+                    type: 'line',
+                    color: '#ef2929',
+                    name: 'loss',
+                    data: loss
+           }, {
+                    type: 'areasplinerange',
+                    color: '#8ae234',
+                    name: 'rtt range',
+                    data: rtt,
+                    yAxis: 1
             }, {
-                type: 'arearange',
-                name: 'rtt range',
-                data: rtt,
-                yAxis: 1,
-                dataGrouping: {
-                    units: groupingUnits
-                }
-        }, {
-                type: 'line',
-                name: 'rtt',
-                data: rtt_avg,
-                yAxis: 1,
-                dataGrouping: {
-                    units: groupingUnits
-                }
-        }]
+                    type: 'line',
+                    color: '#4e9a06',
+                    name: 'rtt',
+                    data: rtt_avg,
+                    yAxis: 1
+            }]
+            });
         });
     });
-});
-</script>
+    </script>
 {% endblock %}
 
 {% block content_title %}{% if title %}<h1>Pings on 
@@ -137,13 +165,10 @@ $(function() {
 </ul>
 {% endblock %}
 
-{% block result_list %}
-<div id="pingchart"></div>
+
+{% block date_hierarchy %}
+    <div id="pingchart" style="margin: 2;"></div>
     {{ block.super }}
-
-<!--style="min-width: 400px; height: 400px; margin: 0 auto"></div>-->
-
-
 {% endblock %}
 
 

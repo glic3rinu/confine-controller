@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from controller.management.commands.startservices import ManageServiceCommand
-from controller.settings import STOPSERVICES
+from controller.settings import STOP_SERVICES
 
 
 class Command(ManageServiceCommand):

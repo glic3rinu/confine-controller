@@ -10,7 +10,7 @@ class LinkedRelatedFieldWidgetWrapper(RelatedFieldWidgetWrapper):
         self.widget.choices = self.choices
         output = [self.widget.render(name, value, *args, **kwargs)]
         link = ''
-        if value is not None:
+        if value:
             link = reverse("admin:%s_%s_change" % info, current_app=self.admin_site.name, args=[value])
-            link = '<p class="file-upload">Link: <a href="%s">%s</a><br>' % (link, link)
+            link = '<p class="file-upload">Current: <a href="%s">%s</a><br>' % (link, link)
         return mark_safe(link + ''.join(output))

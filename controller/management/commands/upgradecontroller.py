@@ -54,8 +54,12 @@ class Command(BaseCommand):
                 if desired_version:
                     run('pip install confine-controller==%s' % desired_version, silent=False)
                 else:
-                    # Fucking pip, it does return exit code 0 even when fail because Requirement already up-to-date
-                    run('pip install confine-controller --upgrade --force', silent=False)
+                    # Did I mentioned how I hate PIP?
+                    if run('pip --version|cut -d" " -f2').stdout == '1.0':
+                        run('pip install confine-controller --upgrade', silent=False)
+                    else:
+                        # (Fucking pip)^2, it returns exit code 0 even when fails because requirement already up-to-date
+                        run('pip install confine-controller --upgrade --force', silent=False)
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)
@@ -65,7 +69,7 @@ class Command(BaseCommand):
                 # Some old versions of pip do not performe this cleaning ...
                 # Remove all backups
                 run('rm -fr %s' % os.path.join(base_path, 'controller\.*'))
-                # Clean old egg files
+                # Clean old egg files, yeah, cleaning PIP shit :P
                 version = run('python -c "from controller import get_version; print get_version();"').stdout
                 for egg in eggs:
                     # Do not remove the actual egg file when upgrading twice the same version

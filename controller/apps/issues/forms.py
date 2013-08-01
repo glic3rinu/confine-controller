@@ -35,6 +35,7 @@ class MessageInlineForm(forms.ModelForm):
 
     def clean_content(self):
         """  clean HTML tags """
+        print 'hola'
         return strip_tags(self.cleaned_data['content'])
     
     def save(self, *args, **kwargs):

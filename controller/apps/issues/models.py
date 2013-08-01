@@ -114,7 +114,9 @@ class Ticket(models.Model):
         
         emails = set(emails + self.cc_emails) # avoid duplicates
         template = 'issues/ticket_notification.mail'
-        context = {'ticket': self, 'ticket_message': message}
+        context = {
+            'ticket': self,
+            'ticket_message': message}
         send_email_template(template, context, emails)
     
     def save(self, *args, **kwargs):
@@ -154,7 +156,7 @@ class Message(models.Model):
         """ notify stakeholders of ticket update """
         if not self.pk:
             self.ticket.mark_as_unread()
-            self.ticket.notify(self)
+            self.ticket.notify(message=self)
         super(Message, self).save(*args, **kwargs)
 
 

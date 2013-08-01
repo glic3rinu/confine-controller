@@ -12,6 +12,9 @@ A new ticket #{{ ticket.id }} has been reported at {{ ticket.created_on }}:
 * Queue: {{ ticket.queue }}
 * Priority: {{ ticket.priority }}
 
+
+{{ ticket_message.content }}
+
 You can get more details at testbed site.
 http://{{ site.domain }}{% url 'admin:issues_ticket_change' ticket.id %}
 

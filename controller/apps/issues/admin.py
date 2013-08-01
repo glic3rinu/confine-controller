@@ -149,7 +149,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                     take_tickets]
     change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
     change_form_template = "admin/issues/ticket/change_form.html"
-    readonly_fields = ('abstract', 'colored_state', 'created_by')
+    readonly_fields = ('abstract', 'colored_state', 'created_by', 'state', 'group')
     fieldsets = (
         (None, {
             'classes': ('relative',),

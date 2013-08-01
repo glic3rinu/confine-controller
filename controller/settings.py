@@ -30,3 +30,15 @@ SITE_VERBOSE_NAME = getattr(settings, 'SITE_VERBOSE_NAME',
 # Storage settings
 # Extensions supported for renaming when uploading existing filenames
 DOUBLE_EXTENSIONS = ('tar.gz', 'img.gz')
+
+
+# Service managemente
+START_SERVICES = getattr(settings, 'START_SERVICES',
+    ['postgresql', 'tinc', 'celeryevcam', 'celeryd', 'celerybeat', [('uwsgi', 'nginx'), 'apache2',]])
+
+RESTART_SERVICES = getattr(settings, 'RESTART_SERVICES',
+    ['celeryd', 'celerybeat', ['apache2', 'uwsgi']])
+
+STOP_SERVICES = getattr(settings, 'STOP_SERVICES',
+    [['apache2', ('uwsgi', 'nginx')], 'celerybeat', 'celeryd', 'celeryevcam', 'tinc', 'postgresql'])
+

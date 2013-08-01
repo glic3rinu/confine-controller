@@ -1,5 +1,7 @@
 from controller.admin.filters import MySimpleListFilter
 
+from .models import Ticket
+
 
 class MyTicketsListFilter(MySimpleListFilter):
     """ Filter tickets by created_by according to request.user """
@@ -17,3 +19,27 @@ class MyTicketsListFilter(MySimpleListFilter):
             if request.user.is_superuser:
                 return queryset.filter(owner=request.user)
             return queryset.filter(created_by=request.user)
+
+
+class TicketStateListFilter(MySimpleListFilter):
+    title = 'State'
+    parameter_name = 'state'
+    
+    def lookups(self, request, model_admin):
+        return (
+            ('OPEN', "Open"),
+            (Ticket.NEW, "New"),
+            (Ticket.IN_PROGRESS, "In Progress"),
+            (Ticket.RESOLVED, "Resolved"),
+            (Ticket.FEEDBACK, "Resolved"),
+            (Ticket.REJECTED, "Rejected"),
+            (Ticket.CLOSED, "Closed"),
+            ('False', 'All'),
+        )
+    
+    def queryset(self, request, queryset):
+        if self.value() == 'OPEN':
+            return queryset.exclude(state=Ticket.CLOSED)
+        elif self.value() == 'False':
+            return queryset
+        return queryset.filter(state=self.value())

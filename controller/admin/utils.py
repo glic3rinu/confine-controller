@@ -104,7 +104,7 @@ def colored(field_name, colours, description='', verbose=False, bold=True):
         colored_value = '<span style="color: %s;">%s</span>' % (color, value)
         if bold:
             colored_value = '<b>%s</b>' % colored_value
-        return colored_value
+        return mark_safe(colored_value)
     if not description:
         description = field_name.split('__').pop().replace('_', ' ').capitalize()
     colored_field.short_description = description

@@ -1,6 +1,8 @@
 from django.contrib import messages
+from django.contrib.admin import helpers
 from django.contrib.sites.models import RequestSite
 from django.db import transaction
+from django.template.response import TemplateResponse
 
 from controller.admin.decorators import action_with_confirmation
 
@@ -13,9 +15,9 @@ from issues.models import Queue
 def resolve_tickets(modeladmin, request, queryset):
     site = RequestSite(request)
     queryset.resolve(site)
-    for obj in queryset:
-        modeladmin.log_change(request, obj, "Marked as Resolved")
-        log_as_message(modeladmin, obj, request.user)
+    for ticket in queryset:
+        modeladmin.log_change(request, ticket, "Marked as Resolved")
+        log_as_message(modeladmin, ticket, request.user)
     msg = "%s selected tickets are now resolved" % queryset.count()
     modeladmin.message_user(request, msg)
 resolve_tickets.url_name = 'resolve'
@@ -41,34 +43,47 @@ def reject_tickets(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 reject_tickets.url_name = 'reject'
 
+
 @user_has_perm
 def open_tickets(modeladmin, request, queryset):
     site = RequestSite(request)
     queryset.open(site)
-    for obj in queryset:
-        modeladmin.log_change(request, obj, "Marked as Open")
-        log_as_message(modeladmin, obj, request.user)
+    for ticket in queryset:
+        modeladmin.log_change(request, ticket, "Marked as Open")
+        log_as_message(modeladmin, ticket, request.user)
     msg = "%s selected tickets are now open" % queryset.count()
     modeladmin.message_user(request, msg)
 open_tickets.url_name = 'open'
+
 
 @user_has_perm
 @transaction.commit_on_success
 def take_tickets(modeladmin, request, queryset):
     queryset.take(owner=request.user)
-    for obj in queryset:
-        modeladmin.log_change(request, obj, "Taken")
+    for ticket in queryset:
+        modeladmin.log_change(request, ticket, "Taken")
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 take_tickets.url_name = 'take'
 
+
 @transaction.commit_on_success
 def mark_as_unread(modeladmin, request, queryset):
-    """ Mark a ticket as unread """
-    for obj in queryset:
-        obj.mark_as_read(request.user, is_read=False)
+    """ Mark a tickets as unread """
+    for ticket in queryset:
+        ticket.mark_as_unread_by(request.user)
     msg = "%s selected tickets has been marked as unread" % queryset.count()
     modeladmin.message_user(request, msg)
+
+
+@transaction.commit_on_success
+def mark_as_read(modeladmin, request, queryset):
+    """ Mark a tickets as unread """
+    for ticket in queryset:
+        ticket.mark_as_read_by(request.user)
+    msg = "%s selected tickets has been marked as read" % queryset.count()
+    modeladmin.message_user(request, msg)
+
 
 ## Queue actions
 @user_has_perm

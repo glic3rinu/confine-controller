@@ -141,7 +141,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                reject_tickets, resolve_tickets, take_tickets]
     sudo_actions = ['delete_selected', open_tickets, reject_tickets, resolve_tickets,
                     take_tickets]
-    change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
+#    change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
     readonly_fields = ('display_summary', 'display_description', 'display_queue',
                        'display_group', 'display_owner', 'display_state',
                        'display_priority', 'display_visibility')

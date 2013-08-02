@@ -5,7 +5,7 @@ import time
 from distutils.sysconfig import get_python_lib
 from urlparse import urlparse
 
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
@@ -65,10 +65,13 @@ def get_controller_site():
     # Avoid import problems ...
     from controller import settings as controller_settings
     url = urlparse(controller_settings.SITE_URL)
-    return { 'domain': url.netloc, 'name': controller_settings.SITE_NAME }
+    return {
+        'domain': url.netloc,
+        'name': controller_settings.SITE_NAME,
+        'scheme': url.scheme}
 
 
-def send_email_template(template, context, to, email_from=None):
+def send_email_template(template, context, to, email_from=None, html=None):
     """
     Renders an email template with this format:
         {% if subject %}Subject{% endif %}
@@ -81,7 +84,7 @@ def send_email_template(template, context, to, email_from=None):
     if type(context) is dict:
         context = Context(context)
     if type(to) is str or type(to) is unicode:
-        to = [to] # send_mail 'to' argument must be a list or a tuple
+        to = [to]
     
     if not 'site' in context: # fallback site value
         context.update({'site': get_controller_site()})
@@ -89,7 +92,11 @@ def send_email_template(template, context, to, email_from=None):
     #subject cannot have new lines
     subject = render_to_string(template, {'subject': True}, context).strip()
     message = render_to_string(template, {'message': True}, context)
-    send_mail(subject, message, email_from, to)
+    msg = EmailMultiAlternatives(subject, message, email_from, to)
+    if html:
+        html_message = render_to_string(html, {'message': True}, context)
+        msg.attach_alternative(html_message, "text/html")
+    msg.send()
 
 
 def get_existing_pip_installation():

@@ -102,7 +102,7 @@ class Ticket(models.Model):
     
     def notify(self, message=None, content=None):
         """ Send an email to ticket stakeholders notifying an state update """
-        emails = settings.ISSUES_SUPPORT_EMAIL
+        emails = settings.ISSUES_SUPPORT_EMAILS
         emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)
@@ -113,10 +113,11 @@ class Ticket(models.Model):
         
         emails = set(emails + self.cc_emails)
         template = 'issues/ticket_notification.mail'
+        html_template = 'issues/ticket_notification_html.mail'
         context = {
             'ticket': self,
             'ticket_message': message }
-        send_email_template(template, context, emails)
+        send_email_template(template, context, emails, html=html_template)
     
     def save(self, *args, **kwargs):
         """ notify stakeholders of new ticket """

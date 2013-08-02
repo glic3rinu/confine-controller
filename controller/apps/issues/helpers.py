@@ -2,21 +2,9 @@ from functools import wraps
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
 from django.utils.decorators import available_attrs
 
 from controller.admin.utils import admin_link
-from issues.models import Message
-
-
-def log_as_message(modeladmin, ticket, author, info=''):
-    """ Generate a message for register the change """
-    info = "(%s)" % info if info else ''
-    author_link = admin_link('')(author)
-    state = modeladmin.colored_state(ticket)
-    content = "%s has changed state to %s %s" % (author_link, state, info)
-    message = Message(ticket=ticket, author=author, content=content)
-    message.save()
 
 
 #TODO implement using permissions??

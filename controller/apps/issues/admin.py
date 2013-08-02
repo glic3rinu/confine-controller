@@ -25,10 +25,6 @@ from issues.helpers import get_ticket_changes, markdown_formated_changes
 from issues.models import Ticket, Queue, Message
 
 
-# TODO remove add another messages
-# TODO refactor remaining files
-
-
 PRIORITY_COLORS = { 
     Ticket.HIGH: 'red',
     Ticket.MEDIUM: 'darkorange',

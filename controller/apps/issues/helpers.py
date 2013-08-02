@@ -8,24 +8,6 @@ from django.utils.decorators import available_attrs
 from controller.admin.utils import admin_link
 from issues.models import Message
 
-# TODO move to controller.utils
-
-def timesince(d, now=None):
-    """ Parse django timeago to get only one unit time """
-    # Avoid circular imports
-    from django.utils.timesince import timesince
-    return timesince(d).split(',')[0]
-
-
-def format_date(d):
-    """ 
-    Format date for messages create_on: show a relative time
-    with contextual helper to show fulltime format.
-    """
-    date_rel = timesince(d) + ' ago'
-    date_abs = d.strftime("%Y-%m-%d %H:%M:%S")
-    return "%s <span class='timesince' title='%s'></span>" % (date_rel, date_abs) 
-
 
 def log_as_message(modeladmin, ticket, author, info=''):
     """ Generate a message for register the change """
@@ -55,12 +37,12 @@ def user_has_perm(func):
     return decorator
 
 
-def html_formated_changes(changes):
-    html = ''
+def markdown_formated_changes(changes):
+    markdown = ''
     for name, values in changes.items():
         context = (name.capitalize(), values[0], values[1])
-        html += '<li><b>%s</b> changed from %s to %s</li>' % context
-    return '<ul>%s</ul>' % html if html else ''
+        markdown += '* **%s** changed from _%s_ to _%s_\n' % context
+    return markdown
 
 
 def get_ticket_changes(modeladmin, request, ticket):
@@ -68,8 +50,7 @@ def get_ticket_changes(modeladmin, request, ticket):
     form = ModelForm(request.POST, request.FILES)
     changes = {}
     if form.is_valid():
-        # TODO state
-        for attr in ['owner', 'visibility', 'priority', 'cc', 'queue']:
+        for attr in ['state', 'visibility', 'priority', 'group', 'owner', 'queue']:
             old_value = getattr(ticket, attr)
             new_value = form.cleaned_data[attr]
             if old_value != new_value:

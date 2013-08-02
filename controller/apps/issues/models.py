@@ -68,7 +68,7 @@ class Ticket(models.Model):
     STATES = ((NEW, "New"),
               (IN_PROGRESS, "In Progress"),
               (RESOLVED, "Resolved"),
-              (FEEDBACK, "Resolved"),
+              (FEEDBACK, "Feedback"),
               (REJECTED, "Rejected"),
               (CLOSED, "Closed"),)
     INTERNAL = 'INTERNAL'
@@ -85,10 +85,7 @@ class Ticket(models.Model):
     queue = models.ForeignKey(Queue, related_name='tickets')
     subject = models.CharField(max_length=256)
     description = models.TextField()
-    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES,
-        default=PUBLIC, help_text="Internal: for the testbed operation staff<br/>"
-                                  "Public: for all RG researchers<br/>"
-                                  "Private: between user and staff")
+    visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default=PUBLIC)
     priority = models.CharField(max_length=32, choices=PRIORITIES, default=MEDIUM)
     state = models.CharField(max_length=32, choices=STATES, default=NEW)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -150,7 +147,8 @@ class Message(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     
     def __unicode__(self):
-        return str(self.id)
+        messages = self.ticket.messages.order_by('created_on').values_list('id', flat=True)
+        return "#%s" % str(list(messages).index(self.id)+1)
     
     def save(self, *args, **kwargs):
         """ notify stakeholders of ticket update """

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django import forms
 from django.conf.urls import patterns
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -12,25 +13,27 @@ from django.utils.safestring import mark_safe
 from markdown import markdown
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
-from controller.admin.utils import admin_link, get_admin_link, colored, wrap_admin_view
+from controller.admin.utils import (admin_link, get_admin_link, colored, wrap_admin_view,
+    display_timesince)
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
     open_tickets, mark_as_unread, mark_as_read, set_default_queue)
 from issues.filters import MyTicketsListFilter, TicketStateListFilter
 from issues.forms import MessageInlineForm, TicketForm
-from issues.helpers import format_date, get_ticket_changes, html_formated_changes
+from issues.helpers import get_ticket_changes, markdown_formated_changes
 from issues.models import Ticket, Queue, Message
 
 
 # TODO remove add another messages
-# TODO format_date on controller.utils 
 # TODO refactor remaining files
+
 
 PRIORITY_COLORS = { 
     Ticket.HIGH: 'red',
     Ticket.MEDIUM: 'darkorange',
     Ticket.LOW: 'green',}
+
 
 STATE_COLORS = { 
     Ticket.NEW: 'grey',
@@ -38,29 +41,25 @@ STATE_COLORS = {
     Ticket.FEEDBACK: 'purple',
     Ticket.RESOLVED: 'green',
     Ticket.REJECTED: 'firebrick',
-    Ticket.CLOSED: 'black',}
+    Ticket.CLOSED: 'grey',}
 
 
 class MessageReadOnlyInline(admin.TabularInline):
     model = Message
     extra = 0
     can_delete = False
-    fields = ['content_html', 'author_link', 'created_on_html']
-    readonly_fields = ('content_html', 'author_link', 'created_on_html')
-    
-    def author_link(self, obj):
-        return admin_link('author')(obj)
-    author_link.short_description = "Author"
+    fields = ['content_html']
+    readonly_fields = ['content_html']
     
     def content_html(self, obj):
-        return markdown(obj.content)
+        time = display_timesince(obj.created_on)
+        author_link = get_admin_link(obj.author)
+        header = '<strong style="color:#666;">Updated by %s about %s</strong><hr />' % (author_link, time)
+        content = markdown(obj.content)
+        content = content.replace('>\n', '>')
+        return header + content
     content_html.allow_tags = True
     content_html.short_description = "Content"
-    
-    def created_on_html(self, obj):
-        return format_date(obj.created_on)
-    created_on_html.allow_tags = True
-    created_on_html.short_description = "Created on"
     
     def has_add_permission(self, request):
         return False
@@ -92,12 +91,14 @@ class TicketInline(PermissionTabularInline):
     model = Ticket
     extra = 0
     max_num = 0
-    fields = ['ticket_id', 'subject', 'created_by_link', 'owner_link', 'colored_state', 'colored_priority', 'created', 'last_modified']
-    readonly_fields =  ['ticket_id', 'subject', 'created_by_link', 'owner_link', 'colored_state', 'colored_priority', 'created', 'last_modified']
+    fields = ['ticket_id', 'subject', 'created_by_link', 'owner_link', 'colored_state',
+              'colored_priority', 'created', 'last_modified']
+    readonly_fields =  ['ticket_id', 'subject', 'created_by_link', 'owner_link',
+                        'colored_state', 'colored_priority', 'created', 'last_modified']
 
     def ticket_id(self, instance):
         return mark_safe('<b>%s</b>' % get_admin_link(instance))
-    ticket_id.short_description = 'ID'
+    ticket_id.short_description = '#'
     
     def created_by_link(self, instance):
         return get_admin_link(instance.created_by)
@@ -125,15 +126,10 @@ class TicketInline(PermissionTabularInline):
 
 
 class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    class Media:
-        js = ('issues/js/admin-ticket.js',)
-        css = {
-             'all': ('issues/css/admin-ticket.css',)
-        }
     form = TicketForm
     list_display = ['unbold_id', 'bold_subject', admin_link('created_by'),
-        admin_link('owner'), admin_link('queue'), colored('priority', PRIORITY_COLORS),
-        colored('state', STATE_COLORS), 'last_modified_on']
+        admin_link('owner'), admin_link('queue'), colored('priority', PRIORITY_COLORS, bold=False),
+        colored('state', STATE_COLORS, bold=False), 'last_modified']
     list_display_links = ('unbold_id', 'bold_subject')
     list_filter = [MyTicketsListFilter, 'queue__name', 'priority', TicketStateListFilter,
        'visibility']
@@ -148,49 +144,84 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     sudo_actions = ['delete_selected', open_tickets, reject_tickets, resolve_tickets,
                     take_tickets]
     change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
-    change_form_template = "admin/issues/ticket/change_form.html"
-    readonly_fields = ('abstract', 'colored_state', 'created_by', 'state', 'group')
+    readonly_fields = ('display_summary', 'display_description', 'display_queue',
+                       'display_group', 'display_owner', 'display_state',
+                       'display_priority', 'display_visibility')
     fieldsets = (
         (None, {
-            'classes': ('relative',),
-            'fields': (('abstract', 'subject'), 
-                      ('queue', 'state', 'priority', 'visibility', 'group', 'owner'), 'description')
+            'fields': ('display_summary', 
+                      ('display_queue',  'display_state', 'display_group',
+                       'display_visibility', 'display_priority', 'display_owner', ),
+                      'display_description')
         }),
-        ('CC', {
+        ('Update', {
             'classes': ('collapse',),
-            'fields': ('cc',)
+            'fields': ('subject','description',
+                       ('queue', 'state', 'group', 'visibility', 'priority', 'owner'))
+        }),)
+    readonly_fieldsets = (
+        (None, {
+            'fields': ('display_summary', 
+                      ('display_queue',  'display_state', 'display_group',
+                       'display_visibility', 'display_priority', 'display_owner', ),
+                      'display_description')
         }),)
     add_fieldsets = (
         (None, {
-            'classes': ('relative',),
-            'fields': (('subject', 'colored_state'),
-                      ('queue', 'priority', 'visibility','owner'), 'description')
-        }),
-        ('CC', {
-            'classes': ('collapse',),
-            'fields': ('cc',)
+            'fields': ('subject',
+                      ('queue', 'state', 'priority', 'visibility', 'group', 'owner'),
+                      'description')
         }),)
     
-    def abstract(self, ticket):
-        """ Provide a ticket abstract: subject, creator and state """
-        created_by_url = admin_link('created_by')(ticket)
-        created_on = ticket.created_on.strftime("%Y-%m-%d")
-        state = self.colored_state(ticket)
-        subject = "%s<a id='subject-edit' href='#' title='edit'></a>" % ticket.subject
-        return ("<div class='field-box'>"
-                "    <span class='h3'>Issue #%s - %s</span><br/>"
-                "    <span class='created_by'>created by %s at %s</span>"
-                "</div>"
-                "<div class='field-box field-state'>%s</div>" %
-                    (ticket.id, subject, created_by_url, created_on, state))
-    abstract.short_description = ""
-    abstract.allow_tags = True
+    class Media:
+        css = { 'all': ('issues/css/admin-ticket.css',) }
+        js = ('issues/js/admin-ticket.js',)
+
     
-    def colored_state(self, ticket):
+    def display_summary(self, ticket):
+        author_url = get_admin_link(ticket.created_by)
+        created = display_timesince(ticket.created_on)
+        messages = ticket.messages.order_by('-created_on')
+        updated = ''
+        if messages:
+            updated_on = display_timesince(messages[0].created_on)
+            updated_by = get_admin_link(messages[0].author)
+            updated = '. Updated by %s about %s' % (updated_by, updated_on)
+        msg = '<h4>Added by %s about %s%s</h4>' % (author_url, created, updated)
+        return mark_safe(msg)
+    display_summary.short_description = 'Summary'
+    
+    def display_description(self, ticket):
+        description = markdown(ticket.description)
+        return mark_safe(description.replace('>\n', '>'))
+    display_description.short_description = 'description'
+    
+    def display_queue(self, ticket):
+        return get_admin_link(ticket.queue)
+    display_queue.short_description = 'queue'
+    
+    def display_priority(self, ticket):
         """ State colored for change_form """
-        return  mark_safe(colored(ticket.state, STATE_COLORS)(ticket))
-    colored_state.short_description = "State"
-    colored_state.allow_tags = True
+        return mark_safe(colored(ticket.priority, PRIORITY_COLORS, bold=False)(ticket))
+    display_priority.short_description = "priority"
+    display_priority.allow_tags = True
+    
+    def display_state(self, ticket):
+        """ State colored for change_form """
+        return  mark_safe(colored(ticket.state, STATE_COLORS, bold=False)(ticket))
+    display_state.short_description = "State"
+    
+    def display_visibility(self, ticket):
+        return ticket.visibility
+    display_visibility.short_description = 'Visibility'
+    
+    def display_group(self, ticket):
+        return get_admin_link(ticket.group) or '-'
+    display_group.short_description = 'Group'
+    
+    def display_owner(self, ticket):
+        return get_admin_link(ticket.owner) or '-'
+    display_owner.short_description = 'Assigned to'
     
     def unbold_id(self, ticket):
         """ Unbold id if thicket is readed """
@@ -198,7 +229,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             return '<span style="font-weight:normal;">%s</span>' % ticket.pk
         return ticket.pk
     unbold_id.allow_tags = True
-    unbold_id.short_description = "ID"
+    unbold_id.short_description = "#"
     
     def bold_subject(self, ticket):
         """ Bold subject when tickets are unread for request.user """
@@ -207,6 +238,10 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return "<strong class='unread'>%s</strong>" % ticket.subject
     bold_subject.allow_tags = True
     bold_subject.short_description = "Subject"
+    
+    def last_modified(self, instance):
+        return display_timesince(instance.last_modified_on)
+    last_modified.admin_order_field = 'last_modified_on'
     
     def queryset(self, request):
         """ Filter tickets according to their visibility preference """
@@ -221,6 +256,8 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.add_fieldsets
+        elif not self.has_change_permission(request, obj=obj, view=False):
+            return self.readonly_fieldsets
         return super(TicketAdmin, self).get_fieldsets(request, obj)
     
     def get_readonly_fields(self, request, obj=None):
@@ -252,23 +289,31 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         
         # only include messages inline for change view
         self.inlines = [ MessageReadOnlyInline, MessageInline ]
-        
         if request.method == 'POST':
             # Hack: Include the ticket changes on the request.POST
             #       other approaches get really messy
             changes = get_ticket_changes(self, request, ticket)
             if changes:
-                content = html_formated_changes(changes)
+                content = markdown_formated_changes(changes)
                 content += request.POST[u'messages-2-0-content']
                 request.POST[u'messages-2-0-content'] = content
         ticket.mark_as_read_by(request.user)
+        
+        context = {'title': "Issue #%i - %s" % (ticket.id, ticket.subject)}
+        context.update(extra_context or {})
         return super(TicketAdmin, self).change_view(
-            request, object_id, form_url, extra_context=extra_context)
+            request, object_id, form_url, extra_context=context)
     
     def changelist_view(self, request, extra_context=None):
         # Hook user for bold_subject
         self.user = request.user
         return super(TicketAdmin,self).changelist_view(request, extra_context=extra_context)
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make value input widget bigger """
+        if db_field.name == 'subject':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
+        return super(TicketAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         """ Remove INTERNAL visibility choice for unprivileged users """
@@ -302,7 +347,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         """ markdown preview render via ajax """
         from markdown import markdown
         data = request.POST.get("data")
-        markdown = markdown(strip_tags(data))
+        markdown = markdown(strip_tags(strip_tags(data)))
         # bugfix preview break lines differs from final result
         markdown = '<br />'.join(markdown.split('\n'))
         return HttpResponse(markdown)
@@ -310,7 +355,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
 
 class QueueAdmin(PermissionModelAdmin):
     class Media:
-        css = { 'all': ('issues/css/admin-queue.css',) }
+        css = { 'all': ('controller/css/hide-inline-id.css',) }
     
     actions = [set_default_queue]
     list_display = ['name', 'default', 'num_tickets']

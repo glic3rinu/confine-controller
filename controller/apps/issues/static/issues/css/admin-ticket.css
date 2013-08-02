@@ -1,85 +1,15 @@
-/** ticket abstract styling **/
-#ticket_form .field-abstract div {
-    text-align: right;
-}
-
-#ticket_form .field-abstract .h3 {
-    color: #666;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-#ticket_form .field-abstract .created_by {
-    padding-right: 24px;
-}
-
-#ticket_form .field-abstract p {
-    margin-left: 0;
-    padding-left: 0;
-}
-
-#ticket_form .field-box.field-abstract label {
-    display: none;
-}
-
-.form-row.field-abstract .field-box.field-subject {
-    display: none;
-    line-height: 2.5em;
-}
-
-#subject-edit {
-    background: url('../images/btn_edit.gif') no-repeat;
-    display: inline-block;
-    margin-left: 8px;
-    width: 17px;
-    height: 16px;
-}
-
-body.readonly #subject-edit {
-    display: none;
-}
-
-
-/** two columns layout **/
-.form-row.field-description {
-    /*float: left; */
-}
-
-.form-row.field-priority {
-    border-bottom: 0;
-    float: right;
+fieldset .field-box {
+    float: left;
+    margin-right: 20px;
     width: 300px;
 }
 
-.form-row.field-priority label {
-    text-align: right; 
+hr {
+    background-color: #B6B6B6;
 }
 
-/** field-visibility help styling **/
-fieldset.relative {
-    position: relative;
-}
-
-#ticket_form .form-row.field-visibility {
-    padding: 20px 12px;
-}
-
-#ticket_form .field-box.field-visibility .help {
-    background-color: rgba(100, 100, 100, 0.8);
-    color: #f5f5f5;
-    
-    display: none;
-    padding: 5px;
-    width: 200px;    
-    
-    position: absolute;
-    bottom: 2.5em;
-    right: -50px;
-    z-index: 1000;
-}
-
-.form-row.field-description {
-    border-bottom: 0;
+h4 {
+    color: #666;
 }
 
 /*** messages format ***/
@@ -94,33 +24,30 @@ fieldset.relative {
 #messages-group td.field-author {
     min-width: 80px;
 }
+
 #messages-group td.field-created_on {
     min-width: 126px;
 }
 
-/** hidde message id http://stackoverflow.com/a/5556813/1538221 **/
-#messages-group td.original p {
-  visibility: hidden
+#messages-group {
+    margin-bottom: 0;
 }
 
-.inline-group .tabular tr.has_original td {
-    padding-top: 0.8em;
+#messages-2-group {
+    margin-top: 0;
 }
 
-#messages-group { margin-bottom: 0; }
-#messages-2-group { margin-top: 0; }
-#messages-2-group h2,
-#messages-2-group thead {
+#messages-2-group h2, #messages-2-group thead {
     display: none;
 }
+
 #id_messages-2-0-content {
-    width: 100%;
+    width: 99%;
 }
+
 #content-preview {
     border: 1px solid #ccc;
     padding: 2px 5px;
-    /*width: 300px;
-    height: 80px;*/
 }
 
 /** unread messages admin changelist **/

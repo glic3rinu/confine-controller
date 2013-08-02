@@ -142,6 +142,9 @@ class OperationAdmin(PermissionModelAdmin):
     # TODO fix this annoying mandatory declaration once and for all
     change_form_template = "admin/maintenance/operation/change_form.html"
     
+    class Media:
+        css = { 'all': ('controller/css/hide-inline-id.css',) }
+    
     def num_executions(self, instance):
         num = instance.executions.count()
         url = reverse('admin:maintenance_execution_changelist')
@@ -202,8 +205,11 @@ class ExecutionAdmin(admin.ModelAdmin):
               'retry_if_offline']
     
     class Media:
-        css = { "all": ("controller/css/github.css", "state/admin/css/details.css") }
-    
+        css = {
+            "all": (
+                "controller/css/github.css",
+                "state/admin/css/details.css",
+                'controller/css/hide-inline-id.css') }
     def display_script(self, instance):
         style = ('<style>code,pre {font-size:1.13em;}</style>'
                  '<div style="padding-left:100px;">')

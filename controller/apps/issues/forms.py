@@ -6,7 +6,6 @@ from controller.forms.utils import admin_link
 from controller.forms.widgets import ShowText
 
 from issues.models import Queue, Ticket
-from issues.helpers import format_date
 
 
 class MarkDownWidget(forms.Textarea):

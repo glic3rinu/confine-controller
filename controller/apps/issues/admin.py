@@ -117,12 +117,10 @@ class TicketInline(PermissionTabularInline):
     colored_priority.short_description = 'Priority'
     
     def created(self, instance):
-        return instance.created_on.strftime("%Y-%m-%d %H:%M:%S")
-    created.short_description = 'Created'
+        return display_timesince(instance.created_on)
     
     def last_modified(self, instance):
-        return instance.last_modified_on.strftime("%Y-%m-%d %H:%M:%S")
-    last_modified.short_description = 'Last modified'
+        return display_timesince(instance.last_modified_on)
 
 
 class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
@@ -260,12 +258,12 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             return self.readonly_fieldsets
         return super(TicketAdmin, self).get_fieldsets(request, obj)
     
-    def get_readonly_fields(self, request, obj=None):
-        """ Only superusers can change owner field """
-        readonly_fields = super(TicketAdmin, self).get_readonly_fields(request, obj=obj)
-        if not request.user.is_superuser:
-            readonly_fields += ('owner',)
-        return readonly_fields
+#    def get_readonly_fields(self, request, obj=None):
+#        """ Only superusers can change owner field """
+#        readonly_fields = super(TicketAdmin, self).get_readonly_fields(request, obj=obj)
+#        if not request.user.is_superuser:
+#            readonly_fields += ('owner',)
+#        return readonly_fields
     
     def add_view(self, request, form_url='', extra_context=None):
         """ Do not sow message inlines """
@@ -279,13 +277,13 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         last_message = messages[0] if messages else False
         
         # Change view actions based on ticket state
-        if not hasattr(self, 'change_view_actions_backup'):
-            self.change_view_actions_backup = list(self.change_view_actions)
-        actions = self.change_view_actions_backup
-        if ticket.state in [Ticket.NEW]:
-            self.change_view_actions = [a for a in actions if a.url_name != 'open']
-        else:
-            self.change_view_actions = [a for a in actions if a.url_name == 'open']
+#        if not hasattr(self, 'change_view_actions_backup'):
+#            self.change_view_actions_backup = list(self.change_view_actions)
+#        actions = self.change_view_actions_backup
+#        if ticket.state in [Ticket.NEW]:
+#            self.change_view_actions = [a for a in actions if a.url_name != 'open']
+#        else:
+#            self.change_view_actions = [a for a in actions if a.url_name == 'open']
         
         # only include messages inline for change view
         self.inlines = [ MessageReadOnlyInline, MessageInline ]
@@ -315,18 +313,18 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
         return super(TicketAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
-        """ Remove INTERNAL visibility choice for unprivileged users """
-        if db_field.name == "visibility" and not request.user.is_superuser:
-            kwargs['choices'] = [ c for c in db_field.choices if c[0] != Ticket.INTERNAL ]
-        return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
+#    def formfield_for_choice_field(self, db_field, request, **kwargs):
+#        """ Remove INTERNAL visibility choice for unprivileged users """
+#        if db_field.name == "visibility" and not request.user.is_superuser:
+#            kwargs['choices'] = [ c for c in db_field.choices if c[0] != Ticket.INTERNAL ]
+#        return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """ Filter owner choices to be only superusers """
-        if db_field.name == 'owner':
-            User = get_user_model()
-            kwargs['queryset'] = User.objects.exclude(is_superuser=False)
-        return super(TicketAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+#    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+#        """ Filter owner choices to be only superusers """
+#        if db_field.name == 'owner':
+#            User = get_user_model()
+#            kwargs['queryset'] = User.objects.exclude(is_superuser=False)
+#        return super(TicketAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Define creator for new tickets """

@@ -102,26 +102,27 @@ class Ticket(models.Model):
     
     def notify(self, message=None, content=None):
         """ Send an email to ticket stakeholders notifying an state update """
-        # TODO notify admin
-        emails = [self.created_by.email]
+        emails = settings.ISSUES_SUPPORT_EMAIL
+        emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)
+        if self.group:
+            emails += self.group.get_admin_emails()
         for val in self.messages.distinct('author').values('author__email'):
             emails.append(val.get('author__email'))
         
-        emails = set(emails + self.cc_emails) # avoid duplicates
+        emails = set(emails + self.cc_emails)
         template = 'issues/ticket_notification.mail'
         context = {
             'ticket': self,
-            'ticket_message': message}
+            'ticket_message': message }
         send_email_template(template, context, emails)
     
     def save(self, *args, **kwargs):
         """ notify stakeholders of new ticket """
-        new_issue = not self.pk
-        super(Ticket, self).save(*args, **kwargs)
-        if new_issue:
+        if not self.pk:
             self.notify()
+        super(Ticket, self).save(*args, **kwargs)
     
     @property
     def cc_emails(self):

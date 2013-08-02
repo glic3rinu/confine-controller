@@ -42,7 +42,7 @@ def markdown_formated_changes(changes):
     for name, values in changes.items():
         context = (name.capitalize(), values[0], values[1])
         markdown += '* **%s** changed from _%s_ to _%s_\n' % context
-    return markdown
+    return markdown + '\n'
 
 
 def get_ticket_changes(modeladmin, request, ticket):

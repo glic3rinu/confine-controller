@@ -80,12 +80,6 @@ class CustomMenu(Menu):
             if is_installed('djcelery'):
                 administration_models += ('djcelery.*',)
             
-            if is_installed('issues'):
-                administration_models += ('issues.*',)
-                
-            if is_installed('firmware'):
-                administration_models += ('firmware.*',)
-            
             admin_item = items.AppList('Administration', models=administration_models)
             
             # Users menu item
@@ -118,6 +112,32 @@ class CustomMenu(Menu):
                     items.MenuItem('Maintenance',
                         reverse('admin:app_list', args=['maintenance']),
                         children=maintenance_items)
+                    )
+            
+            if is_installed('issues'):
+                issues_items = [
+                    items.MenuItem('Tickets',
+                        reverse('admin:issues_ticket_changelist')),
+                    items.MenuItem('Queues',
+                        reverse('admin:issues_queue_changelist'))
+                ]
+                admin_item.children.append(
+                    items.MenuItem('Issues',
+                        reverse('admin:issues_ticket_changelist'),
+                        children=issues_items)
+                    )
+            
+            if is_installed('firmware'):
+                firmware_items = [
+                    items.MenuItem('Configuration',
+                        reverse('admin:firmware_config_change')),
+                    items.MenuItem('Builds',
+                        reverse('admin:firmware_build_changelist'))
+                ]
+                admin_item.children.append(
+                    items.MenuItem('Firmware',
+                        reverse('admin:app_list', args=['firmware']),
+                        children=firmware_items)
                     )
             
             if is_installed('notifications'):

@@ -32,10 +32,6 @@ class MessageInlineForm(forms.ModelForm):
         super(MessageInlineForm, self).__init__(*args, **kwargs)
         self.initial['author_link'] = '</b>'+admin_link(self.user)
         self.initial['created_on'] = ''
-
-#    def clean_content(self):
-#        """  clean HTML tags """
-#        return strip_tags(self.cleaned_data['content'])
     
     def save(self, *args, **kwargs):
         if self.instance.pk is None:
@@ -44,11 +40,9 @@ class MessageInlineForm(forms.ModelForm):
 
 
 class TicketForm(forms.ModelForm):
-    queue = forms.ModelChoiceField(queryset = Queue.objects.all())
-
     class Meta:
         model = Ticket
-
+    
     def __init__(self, *args, **kwargs):
         """ Provide default ticket queue for new tickets """
         super(TicketForm, self).__init__(*args, **kwargs)
@@ -58,3 +52,7 @@ class TicketForm(forms.ModelForm):
             except Queue.DoesNotExist:
                 pass
 
+
+class ChangeReasonForm(forms.Form):
+    reason = forms.CharField(widget=forms.Textarea(attrs={'cols': '100', 'rows': '10'}),
+        required=False)

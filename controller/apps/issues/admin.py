@@ -4,6 +4,7 @@ from django import forms
 from django.conf.urls import patterns
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse
@@ -18,10 +19,10 @@ from controller.admin.utils import (admin_link, get_admin_link, colored, wrap_ad
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
-    open_tickets, mark_as_unread, mark_as_read, set_default_queue)
+    close_tickets, mark_as_unread, mark_as_read, set_default_queue)
 from issues.filters import MyTicketsListFilter, TicketStateListFilter
 from issues.forms import MessageInlineForm, TicketForm
-from issues.helpers import get_ticket_changes, markdown_formated_changes
+from issues.helpers import get_ticket_changes, markdown_formated_changes, filter_actions
 from issues.models import Ticket, Queue, Message
 
 
@@ -133,11 +134,11 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     date_hierarchy = 'created_on'
     search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
         'queue', 'owner__username']
-    actions = [mark_as_unread, mark_as_read, 'delete_selected', open_tickets,
-               reject_tickets, resolve_tickets, take_tickets]
-    sudo_actions = ['delete_selected', open_tickets, reject_tickets, resolve_tickets,
-                    take_tickets]
-#    change_view_actions = [open_tickets, reject_tickets, resolve_tickets, take_tickets]
+    actions = [mark_as_unread, mark_as_read, 'delete_selected', reject_tickets,
+               resolve_tickets, close_tickets, take_tickets]
+    sudo_actions = ['delete_selected']
+    change_view_actions = [resolve_tickets, close_tickets, reject_tickets, take_tickets]
+    change_form_template = "admin/controller/change_form.html"
     readonly_fields = ('display_summary', 'display_description', 'display_queue',
                        'display_group', 'display_owner', 'display_state',
                        'display_priority', 'display_visibility')
@@ -170,7 +171,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     class Media:
         css = { 'all': ('issues/css/admin-ticket.css',) }
         js = ('issues/js/admin-ticket.js',)
-
     
     def display_summary(self, ticket):
         author_url = get_admin_link(ticket.created_by)
@@ -243,8 +243,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         if not request.user.is_superuser:
             qset = Q(visibility=Ticket.PUBLIC)
             qset = Q(qset | Q(visibility=Ticket.PRIVATE, created_by=request.user))
-            qset = Q(qset | Q(visibility=Ticket.INTERNAL, created_by__groups__users=request.user))
-            qs = qs.filter(qset).distinct()
+            qs = qs.filter(qset).exclude(visibility=Ticket.INTERNAL).distinct()
         return qs
     
     def get_fieldsets(self, request, obj=None):
@@ -253,13 +252,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         elif not self.has_change_permission(request, obj=obj, view=False):
             return self.readonly_fieldsets
         return super(TicketAdmin, self).get_fieldsets(request, obj)
-    
-#    def get_readonly_fields(self, request, obj=None):
-#        """ Only superusers can change owner field """
-#        readonly_fields = super(TicketAdmin, self).get_readonly_fields(request, obj=obj)
-#        if not request.user.is_superuser:
-#            readonly_fields += ('owner',)
-#        return readonly_fields
     
     def add_view(self, request, form_url='', extra_context=None):
         """ Do not sow message inlines """
@@ -273,13 +265,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         last_message = messages[0] if messages else False
         
         # Change view actions based on ticket state
-#        if not hasattr(self, 'change_view_actions_backup'):
-#            self.change_view_actions_backup = list(self.change_view_actions)
-#        actions = self.change_view_actions_backup
-#        if ticket.state in [Ticket.NEW]:
-#            self.change_view_actions = [a for a in actions if a.url_name != 'open']
-#        else:
-#            self.change_view_actions = [a for a in actions if a.url_name == 'open']
+        self.change_view_actions = filter_actions(self, ticket, request)
         
         # only include messages inline for change view
         self.inlines = [ MessageReadOnlyInline, MessageInline ]
@@ -309,18 +295,11 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
         return super(TicketAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
-#    def formfield_for_choice_field(self, db_field, request, **kwargs):
-#        """ Remove INTERNAL visibility choice for unprivileged users """
-#        if db_field.name == "visibility" and not request.user.is_superuser:
-#            kwargs['choices'] = [ c for c in db_field.choices if c[0] != Ticket.INTERNAL ]
-#        return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
-    
-#    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-#        """ Filter owner choices to be only superusers """
-#        if db_field.name == 'owner':
-#            User = get_user_model()
-#            kwargs['queryset'] = User.objects.exclude(is_superuser=False)
-#        return super(TicketAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        """ Remove INTERNAL visibility choice for unprivileged users """
+        if db_field.name == "visibility" and not request.user.is_superuser:
+            kwargs['choices'] = [ c for c in db_field.choices if c[0] != Ticket.INTERNAL ]
+        return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Define creator for new tickets """
@@ -348,16 +327,21 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
 
 
 class QueueAdmin(PermissionModelAdmin):
-    class Media:
-        css = { 'all': ('controller/css/hide-inline-id.css',) }
-    
     actions = [set_default_queue]
-    list_display = ['name', 'default', 'num_tickets']
+    list_display = ['name', 'default', 'notify_admins', 'notify_technicians',
+                    'notify_researchers', 'num_tickets']
+    list_editable = ('notify_admins', 'notify_technicians', 'notify_researchers')
     inlines = [TicketInline]
     ordering = ['name']
     
+    class Media:
+        css = { 'all': ('controller/css/hide-inline-id.css',) }
+    
     def num_tickets(self, queue):
-        return queue.tickets.count()
+        num = queue.tickets.count()
+        url = reverse('admin:issues_ticket_changelist')
+        url += '?my_tickets=False&queue=%i' % queue.pk
+        return mark_safe('<a href="%s">%d</a>' % (url, num))
     num_tickets.short_description = 'Tickets'
     num_tickets.admin_order_field = 'tickets__count'
     

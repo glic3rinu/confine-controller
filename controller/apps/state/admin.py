@@ -176,7 +176,7 @@ state_link.short_description = 'Current state'
 state_link.admin_order_field = 'state__last_seen_on'
 
 
-def soft_version(node):
+def firmware_version(node):
     try:
         version = node.state.soft_version
     except NodeState.DoesNotExist:
@@ -187,11 +187,11 @@ def soft_version(node):
         url = STATE_NODE_SOFT_VERSION_URL(version)
         name = STATE_NODE_SOFT_VERSION_NAME(version)
         return mark_safe('<a href="%s">%s</a>' % (url, name))
-soft_version.admin_order_field = 'state__soft_version'
+firmware_version.admin_order_field = 'state__soft_version'
 
 
-insertattr(Node, 'list_display', soft_version)
-insertattr(NodeListAdmin, 'list_display', soft_version)
+insertattr(Node, 'list_display', firmware_version)
+insertattr(NodeListAdmin, 'list_display', firmware_version)
 insertattr(Node, 'list_display', state_link)
 insertattr(NodeListAdmin, 'list_display', state_link)
 insertattr(Sliver, 'list_display', state_link)

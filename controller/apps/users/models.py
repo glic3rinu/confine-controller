@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.core import validators
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from controller.utils import send_email_template
@@ -32,14 +33,11 @@ class Group(models.Model):
     
     @property
     def admins(self):
-        """ return user queryset containing all admins """
-        admins = User.objects.filter(roles__is_admin=True, roles__group=self)
-        if not admins.exists():
-            raise Roles.DoesNotExist("Group Error: the group %s doesn't have any admin." % self)
-        return admins
+        """ returns user queryset containing all admins """
+        return User.objects.filter_by_role(role=Roles.ADMIN, roles__group=self)
     
     def is_member(self, user):
-        return Roles.objects.filter(group=self, user=user).exists()
+        return self.roles.filter(user=user).exists()
     
     def has_role(self, user, role):
         return self.has_roles(user, (role,))
@@ -54,11 +52,19 @@ class Group(models.Model):
                 return True
         return False
     
-    def get_admin_emails(self):
-        return self.admins.values_list('email', flat=True)
+    def get_emails(self, role=False, roles=[]):
+        if role:
+            roles.append(role)
+        users = User.objects.filter_by_role(roles=roles, roles__group=self)
+        return users.values_list('email', flat=True)
 
 
 class Roles(models.Model):
+    SUPERUSER = 'superuser'
+    ADMIN = 'admin'
+    TECHNICIAN = 'technician'
+    RESEARCHER = 'researcher'
+    
     user = models.ForeignKey('users.User', related_name='roles')
     group = models.ForeignKey(Group, related_name='roles')
     is_admin = models.BooleanField(default=False,
@@ -103,6 +109,14 @@ class UserManager(auth_models.BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
+    
+    def filter_by_role(self, role=False, roles=[], *args, **kwargs):
+        if role:
+            roles.append(role)
+        query = Q()
+        for role in roles:
+            query = query | Q(**{'roles__is_%s' % role: True})
+        return self.filter(query).filter(*args, **kwargs).distinct()
 
 
 class User(auth_models.AbstractBaseUser):
@@ -196,15 +210,15 @@ class User(auth_models.AbstractBaseUser):
         roles = set()
         for role in Roles.objects.filter(user=self):
             if role.is_admin:
-                roles.update(['admin'])
+                roles.update([Roles.ADMIN])
             if role.is_technician:
-                roles.update(['technician'])
+                roles.update([Roles.TECHNICIAN])
             if role.is_researcher:
-                roles.update(['researcher'])
+                roles.update([Roles.RESEARCHER])
             if len(roles) > 3:
                 break
         if self.is_superuser:
-            roles.update(['superuser'])
+            roles.update([Roles.SUPERUSER])
         return roles
     
     def has_roles(self, roles):
@@ -266,7 +280,7 @@ class JoinRequest(models.Model):
     
     def send_creation_email(self, site):
         context = { 'request': self, 'site': site }
-        to = self.group.get_admin_emails()
+        to = self.group.get_emails(role=Roles.ADMIN)
         template = 'users/created_join_request.email'
         send_email_template(template=template, context=context, to=to)
     
@@ -322,7 +336,7 @@ class ResourceRequest(models.Model):
     def send_acceptation_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_resource_request.email'
-        to = self.group.get_admin_emails()
+        to = self.group.get_emails(role=Roles.ADMIN)
         send_email_template(template=template, context=context, to=to)
     
     def accept(self):

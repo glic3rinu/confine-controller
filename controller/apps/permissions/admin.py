@@ -40,7 +40,8 @@ class ReadPermModelAdminMixin(object):
         if not request.user.is_superuser:
             for action in self.sudo_actions:
                 name = action.func_name if callable(action) else action
-                del actions[name]
+                if name in actions:
+                    del actions[name]
         return actions
     
     def get_view_permission(self, opts):

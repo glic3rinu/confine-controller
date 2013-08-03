@@ -1,59 +1,79 @@
 [
-  {
-    "model": "issues.queue",
-    "pk": 1,
+{
+    "pk": 1, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Web Interface",
-      "default": "True"
+        "default": true, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Web Interface", 
+        "notify_admins": true
     }
-  },
-  {
-    "model": "issues.queue",
-    "pk": 2,
+},
+{
+    "pk": 2, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Nodes",
-      "default": "False"
+        "default": false, 
+        "notify_technicians": true, 
+        "notify_researchers": false, 
+        "name": "Nodes", 
+        "notify_admins": true
     }
-  },
-  {
-    "model": "issues.queue",
-    "pk": 3,
+},
+{
+    "pk": 3, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Support",
-      "default": "False"
+        "default": false, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Support", 
+        "notify_admins": true
     }
-  },
-  {
-    "model": "issues.queue",
-    "pk": 4,
+},
+{
+    "pk": 4, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Legal",
-      "default": "False"
+        "default": false, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Legal", 
+        "notify_admins": true
     }
-  },
-  {
-    "model": "issues.queue",
-    "pk": 5,
+},
+{
+    "pk": 5, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Administration",
-      "default": "False"
+        "default": false, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Administration", 
+        "notify_admins": true
     }
-  },
-  {
-    "model": "issues.queue",
-    "pk": 6,
+},
+{
+    "pk": 6, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Community Networks",
-      "default": "False"
+        "default": false, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Community Networks", 
+        "notify_admins": true
     }
-  },
-  {
-    "model": "issues.queue",
-    "pk": 7,
+},
+{
+    "pk": 7, 
+    "model": "issues.queue", 
     "fields": {
-      "name": "Other",
-      "default": "False"
+        "default": false, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Other", 
+        "notify_admins": true
     }
-  }
+}
 ]
-

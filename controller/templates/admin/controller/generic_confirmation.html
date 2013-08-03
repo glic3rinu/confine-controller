@@ -1,7 +1,12 @@
 {% extends "admin/base_site.html" %}
 {% load i18n l10n %}
 {% load url from future %}
-{% load admin_urls %}
+{% load admin_urls static utils %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+{% endblock %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -13,6 +18,8 @@
 {% endblock %}
 
 {% block content %}
+  <div>
+    <div style="margin:20px;">
     <p>{{ content_message }}</p>
     <ul>
     {% for deletable_object in deletable_objects %}
@@ -20,6 +27,24 @@
     {% endfor %}
     </ul>
     <form action="" method="post">{% csrf_token %}
+    {% if form %}
+        <fieldset class="module aligned">
+        {% for field in form %}
+        <div class="form-row ">
+            <div >
+            {{ field.errors }}
+            {% if field|is_checkbox %}
+                {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
+            {% else %}
+                {{ field.label_tag }} {{ field }}
+            {% endif %}
+            <p class="help">{{ field.help_text|safe }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        </fieldset>
+    {% endif %}
+    
     <div>
     {% for obj in queryset %}
     <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />

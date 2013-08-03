@@ -55,7 +55,7 @@ def get_firmware(modeladmin, request, queryset):
         'opt_form': OptionalFilesForm(prefix='opt'),
         'plugins': config.plugins.active(),
     }
-
+    
     # No architecture support
     if not base_images.exists():
         msg = "Sorry but currently we do not support %s architectures :(" % node.arch

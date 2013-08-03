@@ -1,9 +1,5 @@
 {% load markdown %}
 
-{% if subject %}
-[{{ site.name }} - Issue #{{ ticket.pk }}] ({{ ticket.state }}) {{ ticket.subject }}
-{% endif %}
-
 {% if message %}
 <html>
 <head>

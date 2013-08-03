@@ -3,7 +3,7 @@ from django.db import models
 
 from controller.models.utils import generate_chainer_manager
 from controller.utils import send_email_template
-from users.models import Group
+from users.models import Group, Roles
 
 from issues import settings
 
@@ -16,6 +16,9 @@ class QueueQuerySet(models.query.QuerySet):
 class Queue(models.Model):
     name = models.CharField(max_length=128, unique=True)
     default = models.BooleanField(default=False)
+    notify_admins = models.BooleanField(default=True)
+    notify_technicians = models.BooleanField(default=False)
+    notify_researchers = models.BooleanField(default=False)
     
     objects = generate_chainer_manager(QueueQuerySet)
     
@@ -30,26 +33,6 @@ class Queue(models.Model):
         elif not existing_default:
             self.default = True
         super(Queue, self).save(*args, **kwargs)
-
-
-class TicketQuerySet(models.query.QuerySet):
-    def progress(self):
-        return self.update(state=Ticket.IN_PROGRESS)
-    
-    def resolve(self):
-        return self.update(state=Ticket.RESOLVED)
-    
-    def feedback(self):
-        return self.update(state=Ticket.FEEDBACK)
-    
-    def reject(self):
-        return self.update(state=Ticket.REJECTED)
-    
-    def close(self):
-        return self.update(state=Ticket.CLOSED)
-    
-    def take(self, owner):
-        return self.update(owner=owner)
 
 
 class Ticket(models.Model):
@@ -82,7 +65,7 @@ class Ticket(models.Model):
     group = models.ForeignKey(Group, null=True, blank=True, related_name='assigned_tickets')
     owner = models.ForeignKey(get_user_model(), null=True, blank=True,
         related_name='owned_tickets', verbose_name='assigned to')
-    queue = models.ForeignKey(Queue, related_name='tickets')
+    queue = models.ForeignKey(Queue, related_name='tickets', null=True, blank=True)
     subject = models.CharField(max_length=256)
     description = models.TextField()
     visibility = models.CharField(max_length=32, choices=VISIBILITY_CHOICES, default=PUBLIC)
@@ -92,26 +75,35 @@ class Ticket(models.Model):
     last_modified_on = models.DateTimeField(auto_now=True)
     cc = models.TextField('CC', blank=True, help_text="emails to send a carbon copy")
     
-    objects = generate_chainer_manager(TicketQuerySet)
-    
     class Meta:
         ordering = ["-last_modified_on"]
     
     def __unicode__(self):
         return str(self.id)
     
-    def notify(self, message=None, content=None):
-        """ Send an email to ticket stakeholders notifying an state update """
+    def get_notification_emails(self):
         emails = settings.ISSUES_SUPPORT_EMAILS
         emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)
         if self.group:
-            emails += self.group.get_admin_emails()
+            roles = [Roles.ADMIN]
+            if self.queue:
+                roles = []
+                if self.queue.notify_admins:
+                    roles.append(Roles.ADMIN)
+                if self.queue.notify_technicians:
+                    roles.append(Roles.TECHNICIAN)
+                if self.queue.notify_researchers:
+                    roles.append(Roles.RESEARCHER)
+            emails += self.group.get_emails(roles=roles)
         for val in self.messages.distinct('author').values('author__email'):
             emails.append(val.get('author__email'))
+        return set(emails + self.cc_emails)
         
-        emails = set(emails + self.cc_emails)
+    def notify(self, message=None, content=None):
+        """ Send an email to ticket stakeholders notifying an state update """
+        emails = self.get_notification_emails()
         template = 'issues/ticket_notification.mail'
         html_template = 'issues/ticket_notification_html.mail'
         context = {
@@ -140,7 +132,18 @@ class Ticket(models.Model):
     
     def is_read_by(self, user):
         return TicketTracker.objects.filter(ticket=self, user=user).exists()
-
+    
+    def resolve(self):
+        self.state = Ticket.RESOLVED
+        self.save()
+    
+    def close(self):
+        self.state = Ticket.CLOSED
+        self.save()
+    
+    def take(self, user):
+        self.owner = user
+        self.save()
 
 class Message(models.Model):
     ticket = models.ForeignKey('issues.Ticket', related_name='messages')
@@ -149,8 +152,8 @@ class Message(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     
     def __unicode__(self):
-        messages = self.ticket.messages.order_by('created_on').values_list('id', flat=True)
-        return "#%s" % str(list(messages).index(self.id)+1)
+        num = self.ticket.messages.filter(id__lte=self.id).order_by('created_on').count()
+        return "#%i" % num
     
     def save(self, *args, **kwargs):
         """ notify stakeholders of ticket update """

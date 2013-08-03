@@ -1,28 +1,21 @@
-from functools import wraps
-
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.utils.decorators import available_attrs
-
 from controller.admin.utils import admin_link
 
 
-#TODO implement using permissions??
-def user_has_perm(func):
-    """
-    Check if the user has the required permission to execute an action
-    Inspired in user_passes_test from django.contrib.auth.decorators
-
-    """
-    @wraps(func, assigned=available_attrs(func))
-    def decorator(modeladmin, request, queryset):
-        if request.user.is_superuser:
-            return func(modeladmin, request, queryset)
-        else:
-            msg = "You don't have enought rights to perform this action!"
-            modeladmin.message_user(request, msg, messages.ERROR)
-            return None #raise PermissionDenied()
-    return decorator
+def filter_actions(modeladmin, ticket, request):
+    if not hasattr(modeladmin, 'change_view_actions_backup'):
+        modeladmin.change_view_actions_backup = list(modeladmin.change_view_actions)
+    actions = modeladmin.change_view_actions_backup
+    if ticket.state == modeladmin.model.CLOSED:
+        del_actions = actions
+    else:
+        from issues.actions import action_map
+        del_actions = [action_map.get(ticket.state, None)]
+        if ticket.owner == request.user:
+            del_actions.append('take')
+    exclude = lambda a: not (a == action or a.url_name == action)
+    for action in del_actions:
+        actions = filter(exclude, actions)
+    return actions
 
 
 def markdown_formated_changes(changes):

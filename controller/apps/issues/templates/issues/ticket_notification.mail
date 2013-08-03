@@ -1,5 +1,9 @@
 {% if subject %}
+{% if not ticket_message %}
 [{{ site.name }} - Issue #{{ ticket.pk }}] ({{ ticket.state }}) {{ ticket.subject }}
+{% else %}
+[{{ site.name }} - Issue #{{ ticket.pk }}] {% if '**State** changed' in ticket_message.content %}({{ ticket.state }}) {% endif %}{{ ticket.subject }}
+{% endif %}
 {% endif %}
 
 {% if message %}

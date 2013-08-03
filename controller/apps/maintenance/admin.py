@@ -144,6 +144,9 @@ class OperationAdmin(PermissionModelAdmin):
     
     class Media:
         css = { 'all': ('controller/css/hide-inline-id.css',) }
+        js = (
+            'controller/js/jquery-1.9.1.js',
+            'controller/js/changes_not_saved_alert.js')
     
     def num_executions(self, instance):
         num = instance.executions.count()

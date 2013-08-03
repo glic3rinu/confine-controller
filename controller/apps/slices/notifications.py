@@ -26,7 +26,7 @@ class SliceExpiration(Notification):
         return obj.expires_on <= (timezone.now()+SLICES_SLICE_EXP_WARN).date()
     
     def get_recipients(self, obj):
-        return obj.group.get_admin_emails()
+        return obj.group.get_emails(role='admin')
     
     def get_context(self, obj):
         context = super(SliceExpiration, self).get_context(obj)

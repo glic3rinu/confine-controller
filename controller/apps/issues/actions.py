@@ -1,67 +1,69 @@
+import sys
+
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.contrib.sites.models import RequestSite
 from django.db import transaction
 from django.template.response import TemplateResponse
 
-from controller.admin.decorators import action_with_confirmation
+from controller.admin.decorators import action_with_confirmation, has_sudo_permissions
 
-from issues.helpers import log_as_message, user_has_perm
-from issues.models import Queue
-
-
-@user_has_perm
-@transaction.commit_on_success
-def resolve_tickets(modeladmin, request, queryset):
-    site = RequestSite(request)
-    queryset.resolve(site)
-    for ticket in queryset:
-        modeladmin.log_change(request, ticket, "Marked as Resolved")
-        log_as_message(modeladmin, ticket, request.user)
-    msg = "%s selected tickets are now resolved" % queryset.count()
-    modeladmin.message_user(request, msg)
-resolve_tickets.url_name = 'resolve'
+from issues.forms import ChangeReasonForm
+from issues.helpers import markdown_formated_changes
+from issues.models import Queue, Ticket
 
 
-@user_has_perm
-@action_with_confirmation('reject', template='admin/issues/reject_confirmation.html')
-@transaction.commit_on_success
-def reject_tickets(modeladmin, request, queryset):
-    if queryset.count() != 1:
-        messages.warning(request, "Please, one ticket at a time.")
-        return None
-
-    obj = queryset.get()
-    site = RequestSite(request)
-    reason = request.POST.get('reason') or ''
-
-    queryset.reject(site) 
-    modeladmin.log_change(request, obj, "Marked as Rejected")
-    log_as_message(modeladmin, obj, request.user, reason)
-
-    msg = "%s selected tickets are now rejected" % queryset.count()
-    modeladmin.message_user(request, msg)
-reject_tickets.url_name = 'reject'
-
-
-@user_has_perm
-def open_tickets(modeladmin, request, queryset):
-    site = RequestSite(request)
-    queryset.open(site)
-    for ticket in queryset:
-        modeladmin.log_change(request, ticket, "Marked as Open")
-        log_as_message(modeladmin, ticket, request.user)
-    msg = "%s selected tickets are now open" % queryset.count()
-    modeladmin.message_user(request, msg)
-open_tickets.url_name = 'open'
+def change_ticket_state_factory(action, final_state):
+    context = {
+        'action': action,
+        'form': ChangeReasonForm() }
+    
+    @has_sudo_permissions
+    @transaction.commit_on_success
+    @action_with_confirmation(action, extra_context=context)
+    def change_ticket_state(modeladmin, request, queryset, action=action, final_state=final_state):
+        form = ChangeReasonForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['reason']
+            for ticket in queryset:
+                if ticket.state != final_state:
+                    modeladmin.log_change(request, ticket, "Marked as %s" % action)
+                    changes = {'state': (ticket.state, final_state)}
+                    getattr(ticket, action)()
+                    content = markdown_formated_changes(changes)
+                    content += reason
+                    ticket.messages.create(content=content, author=request.user)
+            msg = "%s selected tickets are now %s" % (queryset.count(), action)
+            modeladmin.message_user(request, msg)
+        else:
+            context['form'] = form
+            return True
+    change_ticket_state.url_name = action
+    change_ticket_state.short_description = action.capitalize()
+    return change_ticket_state
 
 
-@user_has_perm
+action_map = {
+    Ticket.RESOLVED: 'resolve',
+    Ticket.REJECTED: 'reject',
+    Ticket.CLOSED: 'close' }
+
+
+thismodule = sys.modules[__name__]
+for state, name in action_map.items():
+    action = change_ticket_state_factory(name, state)
+    setattr(thismodule, '%s_tickets' % name, action)
+
+
+@has_sudo_permissions
 @transaction.commit_on_success
 def take_tickets(modeladmin, request, queryset):
-    queryset.take(owner=request.user)
     for ticket in queryset:
-        modeladmin.log_change(request, ticket, "Taken")
+        if ticket.owner != request.user:
+            changes = {'owner': (ticket.owner, request.user)}
+            ticket.take(request.user)
+            modeladmin.log_change(request, ticket, "Taken")
+            content = markdown_formated_changes(changes)
+            ticket.messages.create(content=content, author=request.user)
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 take_tickets.url_name = 'take'
@@ -86,7 +88,7 @@ def mark_as_read(modeladmin, request, queryset):
 
 
 ## Queue actions
-@user_has_perm
+@has_sudo_permissions
 @transaction.commit_on_success
 def set_default_queue(modeladmin, request, queryset):
     """ Set a queue as default issues queue """

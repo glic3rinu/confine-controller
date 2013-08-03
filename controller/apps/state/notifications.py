@@ -21,7 +21,7 @@ class NodeNotAvailable(Notification):
         return (obj.current == NodeState.OFFLINE and obj.last_change_on < timezone.now()-STATE_NODE_OFFLINE_WARNING)
     
     def get_recipients(self, obj):
-        return obj.node.group.get_admin_emails()
+        return obj.node.group.get_emails(role='admin')
     
     def get_context(self, obj):
         context = super(NodeNotAvailable, self).get_context(obj)

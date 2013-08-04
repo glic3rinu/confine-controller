@@ -30,9 +30,9 @@ hr {
 </head>
 <body>
 {% if not ticket_message %}
-Issue #{{ ticket.id }}has been reported by {{ ticket.created_by }}.
+Issue #{{ ticket.id }} has been reported by {{ ticket.created_by }}.
 {% else %}
-Issue #{{ ticket.id }}has been updated by {{ ticket_message.author }}.
+Issue #{{ ticket.id }} has been updated by {{ ticket_message.author }}.
 {% autoescape off %}
 {{ ticket_message.content|markdown }}
 {% endautoescape %}
@@ -42,11 +42,11 @@ Issue #{{ ticket.id }}has been updated by {{ ticket_message.author }}.
 
 <ul>
 <li>Author: {{ ticket.created_by }}</li>
-<li>Status: {{ ticket.state }}</li>
-<li>Priority: {{ ticket.priority }}</li>
-<li>Visibility: {{ ticket.visibility }}</li>
-<li>Group: {{ ticket.group }}</li>
-<li>Assigned to: {{ ticket.assigned_to }}</li>
+<li>Status: {{ ticket.get_state_display }}</li>
+<li>Priority: {{ ticket.get_priority_display }}</li>
+<li>Visibility: {{ ticket.get_visibility_display }}</li>
+<li>Group: {% if ticket.group %}{{ ticket.group }}{% endif %}</li>
+<li>Assigned to: {% if ticket.owner %}{{ ticket.owner }}{% endif %}</li>
 <li>Queue: {{ ticket.queue }}</li>
 </ul>
 {% autoescape off %}

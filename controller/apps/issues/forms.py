@@ -1,25 +1,31 @@
 from django import forms
+from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
+from markdown import markdown
 
 from controller.forms.utils import admin_link
-from controller.forms.widgets import ShowText
+from controller.forms.widgets import ReadOnlyWidget, ShowText
 
 from issues.models import Queue, Ticket
 
 
+markdown_url = '/static/issues/markdown_syntax.html'
+markdown_help_text = ('<a href="%s" onclick=\'window.open("%s", "", "resizable=yes,'
+    'location=no, width=300, height=640, menubar=no, status=no, scrollbars=yes"); '
+    'return false;\'>markdown format</a>' % (markdown_url, markdown_url))
+markdown_help_text = 'HTML not allowed, you can use %s' % markdown_help_text
+
+
 class MarkDownWidget(forms.Textarea):
     """ MarkDown textarea widget with syntax preview """
+    # TODO make this generic, it would be nice to use this widget also for ticket.description
     def render(self, name, value, attrs):
-        url = '/static/issues/markdown_syntax.html'
-        help_link = '<a href="%s" onclick=\'window.open("%s", "", "resizable=yes, \
-            location=no, width=300, height=640, menubar=no, status=no, \
-            scrollbars=yes"); return false;\'>markdown format</a>' % (url, url)
         textarea = super(MarkDownWidget, self).render(name, value, attrs)
-        preview = '<a id="load-preview" href="#">preview</a>\
-                   <div id="content-preview"></div>'
-        return mark_safe("<p class='help'>HTML not allowed, you can use \
-                          %s<br/>%s<br/>%s</p>" % (help_link, textarea, preview))
+        preview = ('<a id="load-preview" href="#">preview</a>'
+                   '<div id="content-preview"></div>')
+        return mark_safe('<p class="help">%s<br/>%s<br/>%s</p>' % (
+            markdown_help_text, textarea, preview))
 
 
 class MessageInlineForm(forms.ModelForm):
@@ -33,6 +39,10 @@ class MessageInlineForm(forms.ModelForm):
         self.initial['author_link'] = '</b>'+admin_link(self.user)
         self.initial['created_on'] = ''
     
+    def clean_content(self):
+        """  clean HTML tags """
+        return strip_tags(self.cleaned_data['content'])
+    
     def save(self, *args, **kwargs):
         if self.instance.pk is None:
             self.instance.author = self.user
@@ -40,17 +50,35 @@ class MessageInlineForm(forms.ModelForm):
 
 
 class TicketForm(forms.ModelForm):
+    display_description = forms.CharField(label="Description", required=False)
+    
     class Meta:
         model = Ticket
     
     def __init__(self, *args, **kwargs):
-        """ Provide default ticket queue for new tickets """
         super(TicketForm, self).__init__(*args, **kwargs)
-        if not 'instance' in kwargs:
+        if 'description' in self.fields:
+            self.fields['description'].help_text = markdown_help_text
+        ticket = kwargs.get('instance', False)
+        if not ticket:
+            # Provide default ticket queue for new ticket
             try:
                 self.initial['queue'] = Queue.objects.get_default().id
             except Queue.DoesNotExist:
                 pass
+        else:
+            description = markdown(ticket.description)
+            # some heuristics for better line breaking
+            description = description.replace('>\n', '#Ha9G9-?8')
+            description = description.replace('\n', '<br>')
+            description = description.replace('#Ha9G9-?8', '>\n')
+            description = '<br><br>' + description
+            widget = ReadOnlyWidget(description, description)
+            self.fields['display_description'].widget = widget
+    
+    def clean_description(self):
+        """  clean HTML tags """
+        return strip_tags(self.cleaned_data['description'])
 
 
 class ChangeReasonForm(forms.Form):

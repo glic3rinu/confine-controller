@@ -12,6 +12,31 @@ h4 {
     color: #666;
 }
 
+
+form .field-display_description p, form .field-display_description ul {
+    margin-left: 0;
+    padding-left: 12px;
+}
+
+form .field-display_description ul {
+    margin-left: 24px;
+}
+
+ul li {
+    list-style-type: disc;
+    padding: 0;
+}
+
+div pre {
+    margin: 1em 1em 1em 1.6em;
+    padding: 2px 2px 2px 0;
+    background-color: #fafafa;
+    border: 1px solid #dadada;
+    width: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 /*** messages format ***/
 #messages-group .timesince {
     background: url(../../admin/img/icon-unknown.gif) 0 50% no-repeat;
@@ -56,3 +81,5 @@ strong.unread {
     padding-left: 21px;
     background: url(../images/unread_ticket.gif) no-repeat left;
 }
+
+

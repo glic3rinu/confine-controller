@@ -51,7 +51,8 @@ class MessageReadOnlyInline(admin.TabularInline):
     def content_html(self, obj):
         time = display_timesince(obj.created_on)
         author_link = get_admin_link(obj.author)
-        header = '<strong style="color:#666;">Updated by %s about %s</strong><hr />' % (author_link, time)
+        summary = 'Updated by %s about %s' % (author_link, time)
+        header = '<strong style="color:#666;">%s</strong><hr />' % summary
         content = markdown(obj.content)
         content = content.replace('>\n', '>')
         return header + content
@@ -92,7 +93,7 @@ class TicketInline(PermissionTabularInline):
               'colored_priority', 'created', 'last_modified']
     readonly_fields =  ['ticket_id', 'subject', 'created_by_link', 'owner_link',
                         'colored_state', 'colored_priority', 'created', 'last_modified']
-
+    
     def ticket_id(self, instance):
         return mark_safe('<b>%s</b>' % get_admin_link(instance))
     ticket_id.short_description = '#'
@@ -121,7 +122,6 @@ class TicketInline(PermissionTabularInline):
 
 
 class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    form = TicketForm
     list_display = ['unbold_id', 'bold_subject', admin_link('created_by'),
         admin_link('owner'), admin_link('queue'), colored('priority', PRIORITY_COLORS, bold=False),
         colored('state', STATE_COLORS, bold=False), 'last_modified']
@@ -139,32 +139,28 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     sudo_actions = ['delete_selected']
     change_view_actions = [resolve_tickets, close_tickets, reject_tickets, take_tickets]
     change_form_template = "admin/controller/change_form.html"
-    readonly_fields = ('display_summary', 'display_description', 'display_queue',
+    form = TicketForm
+    readonly_fields = ('display_summary', 'display_queue',
                        'display_group', 'display_owner', 'display_state',
                        'display_priority', 'display_visibility')
-    fieldsets = (
-        (None, {
-            'fields': ('display_summary', 
-                      ('display_queue',  'display_state', 'display_group',
-                       'display_visibility', 'display_priority', 'display_owner', ),
-                      'display_description')
-        }),
-        ('Update', {
-            'classes': ('collapse',),
-            'fields': ('subject','description',
-                       ('queue', 'state', 'group', 'visibility', 'priority', 'owner'))
-        }),)
     readonly_fieldsets = (
         (None, {
             'fields': ('display_summary', 
-                      ('display_queue',  'display_state', 'display_group',
-                       'display_visibility', 'display_priority', 'display_owner', ),
+                      ('display_queue', 'display_state','display_group',
+                       'display_visibility', 'display_priority', 'display_owner'),
                       'display_description')
+        }),)
+    fieldsets = readonly_fieldsets + (
+        ('Update', {
+            'classes': ('collapse',),
+            'fields': ('subject',
+                       ('queue', 'state', 'group', 'visibility', 'priority', 'owner'),
+                       'description')
         }),)
     add_fieldsets = (
         (None, {
             'fields': ('subject',
-                      ('queue', 'state', 'priority', 'visibility', 'group', 'owner'),
+                      ('queue', 'state', 'group', 'visibility', 'priority', 'owner'),
                       'description')
         }),)
     
@@ -184,11 +180,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         msg = '<h4>Added by %s about %s%s</h4>' % (author_url, created, updated)
         return mark_safe(msg)
     display_summary.short_description = 'Summary'
-    
-    def display_description(self, ticket):
-        description = markdown(ticket.description)
-        return mark_safe(description.replace('>\n', '>'))
-    display_description.short_description = 'description'
     
     def display_queue(self, ticket):
         return get_admin_link(ticket.queue)
@@ -263,10 +254,8 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         ticket = get_object_or_404(Ticket, pk=object_id)
         messages = Message.objects.filter(ticket=object_id).order_by('-created_on')
         last_message = messages[0] if messages else False
-        
         # Change view actions based on ticket state
         self.change_view_actions = filter_actions(self, ticket, request)
-        
         # only include messages inline for change view
         self.inlines = [ MessageReadOnlyInline, MessageInline ]
         if request.method == 'POST':
@@ -278,7 +267,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                 content += request.POST[u'messages-2-0-content']
                 request.POST[u'messages-2-0-content'] = content
         ticket.mark_as_read_by(request.user)
-        
         context = {'title': "Issue #%i - %s" % (ticket.id, ticket.subject)}
         context.update(extra_context or {})
         return super(TicketAdmin, self).change_view(

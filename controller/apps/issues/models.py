@@ -113,9 +113,11 @@ class Ticket(models.Model):
     
     def save(self, *args, **kwargs):
         """ notify stakeholders of new ticket """
-        if not self.pk:
-            self.notify()
+        new_issue = not self.pk
         super(Ticket, self).save(*args, **kwargs)
+        if new_issue:
+            # PK should be available for rendering the template
+            self.notify()
     
     @property
     def cc_emails(self):
@@ -145,6 +147,7 @@ class Ticket(models.Model):
         self.owner = user
         self.save()
 
+
 class Message(models.Model):
     ticket = models.ForeignKey('issues.Ticket', related_name='messages')
     author = models.ForeignKey(get_user_model())
@@ -152,7 +155,7 @@ class Message(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     
     def __unicode__(self):
-        num = self.ticket.messages.filter(id__lte=self.id).order_by('created_on').count()
+        num = self.ticket.messages.filter(id__lte=self.id).count()
         return "#%i" % num
     
     def save(self, *args, **kwargs):

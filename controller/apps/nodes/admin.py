@@ -150,12 +150,10 @@ class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
                 wrap_admin_view(self, self.change_view),
                 name='%s_%s_change' % info),
             url(r'^$',
-                wrap_admin_view(self, self.change_view),
-                {'object_id': '1'},
+                wrap_admin_view(self, self.change_view), {'object_id': '1'},
                 name='%s_%s_change' % info),
             url(r'^$',
-                wrap_admin_view(self, self.change_view),
-                {'object_id': '1'},
+                wrap_admin_view(self, self.change_view), {'object_id': '1'},
                 name='%s_%s_changelist' % info),
         )
         urls = super(ServerAdmin, self).get_urls()

@@ -26,12 +26,15 @@ def change_ticket_state_factory(action, final_state):
             reason = form.cleaned_data['reason']
             for ticket in queryset:
                 if ticket.state != final_state:
-                    modeladmin.log_change(request, ticket, "Marked as %s" % action)
                     changes = {'state': (ticket.state, final_state)}
+                    is_read = ticket.is_read_by(request.user)
                     getattr(ticket, action)()
+                    modeladmin.log_change(request, ticket, "Marked as %s" % action)
                     content = markdown_formated_changes(changes)
                     content += reason
                     ticket.messages.create(content=content, author=request.user)
+                    if is_read and not ticket.is_read_by(request.user):
+                        ticket.mark_as_read_by(request.user)
             msg = "%s selected tickets are now %s" % (queryset.count(), action)
             modeladmin.message_user(request, msg)
         else:
@@ -60,10 +63,13 @@ def take_tickets(modeladmin, request, queryset):
     for ticket in queryset:
         if ticket.owner != request.user:
             changes = {'owner': (ticket.owner, request.user)}
+            is_read = ticket.is_read_by(request.user)
             ticket.take(request.user)
             modeladmin.log_change(request, ticket, "Taken")
             content = markdown_formated_changes(changes)
             ticket.messages.create(content=content, author=request.user)
+            if is_read and not ticket.is_read_by(request.user):
+                ticket.mark_as_read_by(request.user)
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 take_tickets.url_name = 'take'
@@ -96,10 +102,8 @@ def set_default_queue(modeladmin, request, queryset):
         messages.warning(request, "Please, select only one queue.")
         return
     Queue.objects.filter(default=True).update(default=False)
-    #queryset.update(default=True)
     queue = queryset.get()
     queue.default = True
     queue.save()
     modeladmin.log_change(request, queue, "Choosed as default.")
     messages.info(request, "Choosed '%s' as default queue." % queue)
-

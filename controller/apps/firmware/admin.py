@@ -45,10 +45,10 @@ class ConfigUCIInline(admin.TabularInline):
 
 class BuildFileInline(admin.TabularInline):
     """ Readonly inline for displaying build files """
-    model = BuildFile
-    extra = 0
     fields = ['path', 'monospace_content']
     readonly_fields = ['path', 'monospace_content']
+    model = BuildFile
+    extra = 0
     verbose_name_plural = 'Files'
     can_delete = False
     
@@ -99,16 +99,22 @@ class ConfigPluginInline(admin.TabularInline):
 
 
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'node', 'version', colored('state', STATE_COLORS),
-                    'task_link', 'image_link', 'date']
+    list_display = [
+        'pk', 'node', 'version', colored('state', STATE_COLORS), 'task_link',
+        'image_link', 'date'
+    ]
     list_display_links = ['pk', 'node']
     search_fields = ['node__description', 'node__id']
     date_hierarchy = 'date'
     list_filter = ['version']
-    fields = ['node_link', 'base_image', 'image_link', 'image_sha256', 'version',
-              'build_date', 'state', 'task_link', 'task_id', 'kwargs']
-    readonly_fields = ['node_link', 'state', 'image_link', 'image_sha256', 'kwargs',
-                       'version', 'build_date', 'task_link', 'task_id', 'base_image']
+    fields = [
+        'node_link', 'base_image', 'image_link', 'image_sha256', 'version',
+        'build_date', 'state', 'task_link', 'task_id', 'kwargs'
+    ]
+    readonly_fields = [
+        'node_link', 'state', 'image_link', 'image_sha256', 'kwargs', 'version',
+        'build_date', 'task_link', 'task_id', 'base_image'
+    ]
     inlines = [BuildFileInline]
     
     def build_date(self, build):
@@ -139,11 +145,19 @@ class BuildAdmin(admin.ModelAdmin):
 
 
 class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
-    inlines = [BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline,
-        ConfigPluginInline]
+    inlines = [
+        BaseImageInline, ConfigUCIInline, ConfigFileInline, ConfigFileHelpTextInline,
+        ConfigPluginInline
+    ]
     change_view_actions = [sync_plugins]
     change_form_template = "admin/controller/change_form.html"
     save_on_top = True
+    
+    class Media:
+        css = {
+             'all': (
+                'controller/css/hide-inline-id.css',)
+        }
     
     def get_urls(self):
         """ Make URLs singleton aware """
@@ -170,8 +184,10 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if obj is not None and not obj.images.exists():
-                messages.warning(request, "Notice that you don't have any base image configured")
-        return super(ConfigAdmin, self).change_view(request, object_id, extra_context=extra_context)
+                msg = "Notice that you don't have any base image configured"
+                messages.warning(request, msg)
+        return super(ConfigAdmin, self).change_view(request, object_id,
+                extra_context=extra_context)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make value input widget bigger """

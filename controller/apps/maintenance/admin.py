@@ -216,6 +216,7 @@ class ExecutionAdmin(admin.ModelAdmin):
                 "controller/css/github.css",
                 "state/admin/css/details.css",
                 'controller/css/hide-inline-id.css') }
+    
     def display_script(self, instance):
         style = ('<style>code,pre {font-size:1.13em;}</style>'
                  '<div style="padding-left:100px;">')

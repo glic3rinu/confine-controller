@@ -27,7 +27,8 @@ STATES_COLORS = {
     Node.DEBUG: 'darkorange',
     Node.FAILURE: 'red',
     Node.SAFE: 'grey',
-    Node.PRODUCTION: 'green', }
+    Node.PRODUCTION: 'green',
+}
 
 
 class NodePropInline(PermissionTabularInline):

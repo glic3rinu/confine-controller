@@ -30,7 +30,9 @@ class TincHostInline(PermissionGenericTabularInline):
     
     class Media:
         css = {
-             'all': ('tinc/monospace-pubkey.css',)
+             'all': (
+                'tinc/monospace-pubkey.css',
+                'controller/css/hide-inline-id.css')
         }
     
     def tinc_compatible_address(self, instance):
@@ -48,7 +50,8 @@ class TincHostInline(PermissionGenericTabularInline):
     def get_fieldsets(self, request, obj=None):
         """ Warning user if the tinc host is not fully configured """
         if obj and not obj.tinc.pubkey:
-            messages.warning(request, 'This %s misses a tinc public key.' % obj._meta.verbose_name)
+            msg = 'This %s misses a tinc public key.' % obj._meta.verbose_name
+            messages.warning(request, msg)
         return super(TincHostInline, self).get_fieldsets(request, obj=obj)
 
 

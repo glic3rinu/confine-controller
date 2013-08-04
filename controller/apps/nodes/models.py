@@ -131,8 +131,8 @@ class Node(models.Model):
                 raise ValidationError("Can not manually enter to Debug state.")
             elif self.set_state == Node.PRODUCTION:
                 if old.set_state not in [Node.SAFE, Node.PRODUCTION]:
-                    raise ValidationError("Can not make changes nor  manually enter "
-                        "to Production state from another state different than Safe.")
+                    raise ValidationError("Can not make changes nor manually enter "
+                            "to Production state from another state different than Safe.")
         elif self.set_state != Node.DEBUG:
             raise ValidationError("Initial state must be Debug")
         # clean sliver_pub_ipv4 and _range

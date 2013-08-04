@@ -61,6 +61,12 @@ class SliverIfaceInline(PermissionTabularInline):
         'confine-project.eu/arch:node" onclick="return showAddAnotherPopup(this);">(Help)</a>')
     form = SliverIfaceInlineForm
     
+    class Media:
+        css = {
+             'all': (
+                'controller/css/hide-inline-id.css',)
+        }
+    
     def get_formset(self, request, obj=None, **kwargs):
         """ Hook node for future usage in the inline form """
         self.form.node = request._node_
@@ -344,8 +350,15 @@ class SliverInline(PermissionTabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', 'cn_url']
-    readonly_fields = ['sliver_link', 'node_link', 'cn_url', 'sliver_note1',
-                       'sliver_note2']
+    readonly_fields = [
+        'sliver_link', 'node_link', 'cn_url', 'sliver_note1', 'sliver_note2'
+    ]
+    
+    class Media:
+        css = {
+             'all': (
+                'controller/css/hide-inline-id.css',)
+        }
     
     def sliver_note1(self, instance):
         """

@@ -41,6 +41,12 @@ class NotificationAdmin(ChangeViewActions):
     actions = [enable_selected, disable_selected, run_notifications, upgrade_notifications]
     change_view_actions = [run_notifications, upgrade_notifications]
     
+    class Media:
+        css = {
+             'all': (
+                'controller/css/hide-inline-id.css',)
+        }
+    
     def get_urls(self):
         urls = super(NotificationAdmin, self).get_urls()
         admin_site = self.admin_site

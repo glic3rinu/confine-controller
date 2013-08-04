@@ -140,3 +140,4 @@ get_firmware.description = mark_safe('Build and download a customized firmware f
 
 
 sync_plugins = sync_plugins_action('firmwareplugins')
+sync_plugins.verbose_name = 'Sync plugins'

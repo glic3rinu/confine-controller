@@ -1,5 +1,4 @@
 import requests
-
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
@@ -21,17 +20,15 @@ if is_installed('mgmtnetworks.tinc'):
 
 
 class CnHost(models.Model):
-    """
-    Describes a host in the Community Network.
-    """
+    """ Describes a host in the Community Network """
     app_url = models.URLField('community network URL', blank=True,
-        help_text='Optional URL pointing to a description of this host/device '
-                  'in its CN\'s node DB web application.')
+            help_text='Optional URL pointing to a description of this host/device '
+                      'in its CN\'s node DB web application.')
     cndb_uri = URIField('community network database URI', blank=True, unique=True,
-        help_text='Optional URI for this host/device in its CN\'s CNDB REST API')
+            help_text='Optional URI for this host/device in its CN\'s CNDB REST API')
     cndb_cached_on = models.DateTimeField('CNDB cached on', null=True, blank=True,
-        help_text='Last date that CNDB information for this host/device was '
-                  'successfully retrieved.')
+            help_text='Last date that CNDB information for this host/device was '
+                      'successfully retrieved.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -63,8 +60,9 @@ class CnHost(models.Model):
                     "No CNDB credentials defined, are COMMUNITYNETWORKS_CNDB_USER"
                     " and COMMUNITYNETWORKS_CNDB_PASS at settings?"
             )
-
-        data = {'username': username, 'password': password }
+        data = {
+            'username': username,
+            'password': password }
         try:
             auth = requests.post(url_auth, data, verify=ca_bundle)
         except Exception as e:
@@ -89,16 +87,16 @@ class CnHost(models.Model):
             raise ImproperlyConfigured(str(e))
         except Exception as e:
             raise CnHost.CNDBFetchError(str(e))
-
+        
         if resp.status_code != requests.codes.ok:
             raise CnHost.CNDBFetchError("%i - %s" % (resp.status_code, resp.json().get('description')))
-
+        
         return resp.json()
-
+    
     def cache_cndb(self, *fields):
         """ fetches fields from cndb and stores it into the database """
         cndb = self.fetch_cndb()
-
+        
         for field in fields:
             node = self.content_object
             if field == 'gis':
@@ -128,14 +126,15 @@ class CnHost(models.Model):
 #                    'sliver_pub_ipv4_range': lambda j: '#%d' % len(j.get('ips'))
 #                }
 #                value = CNDB_FIELD_MAP[field](cndb)
-
+        
         # update last cached time
         # use timezone aware datetime
         self.cndb_cached_on = now()
         self.save()
-
+    
     class CNDBFetchError(Exception):
         pass
+
 
 # Hook Community Network support for related models
 @property

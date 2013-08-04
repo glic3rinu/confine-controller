@@ -101,7 +101,8 @@ class NodeListAdmin(NodeAdmin):
     actions_on_bottom = True
     
     def execute_node(self, instance):
-        url = reverse('admin:maintenance_operation_execute_node', args=[self.operation_id, instance.pk])
+        args = [self.operation_id, instance.pk]
+        url = reverse('admin:maintenance_operation_execute_node', args=args)
         return mark_safe('<a href="%s">%s</a>' % (url, instance))
     execute_node.short_description = 'Node'
     
@@ -114,10 +115,12 @@ class NodeListAdmin(NodeAdmin):
         """ Just fixing title and breadcrumbs """
         operation = get_object_or_404(Operation, pk=operation_id)
         self.operation_id = operation_id
-        title = 'Select one or more nodes for executing %s operation' % get_admin_link(operation)
-        context = {'title': mark_safe(title),
-                   'header_title': 'Executing %s operation' % operation,
-                   'operation': operation, }
+        link = get_admin_link(operation)
+        title = 'Select one or more nodes for executing %s operation' % link
+        context = {
+            'title': mark_safe(title),
+            'header_title': 'Executing %s operation' % operation,
+            'operation': operation, }
         context.update(extra_context or {})
         # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter
         return admin.ModelAdmin.changelist_view(self, request, extra_context=context)
@@ -216,7 +219,8 @@ class ExecutionAdmin(admin.ModelAdmin):
     def display_script(self, instance):
         style = ('<style>code,pre {font-size:1.13em;}</style>'
                  '<div style="padding-left:100px;">')
-        return mark_safe(style + highlight(instance.script, BashLexer(), HtmlFormatter()))
+        script = highlight(instance.script, BashLexer(), HtmlFormatter())
+        return mark_safe(style + script)
     display_script.short_description = 'script'
     
     def operation_link(self, instance):

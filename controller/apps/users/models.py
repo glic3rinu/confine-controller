@@ -13,20 +13,20 @@ from controller.core.validators import validate_ascii
 
 class Group(models.Model):
     name = models.CharField(max_length=32, unique=True,
-        help_text='A unique name for this group. A single non-empty line of '
-                  'free-form text with no whitespace surrounding it. matching '
-                  'the regular expression',
-        validators=[validators.RegexValidator('^[\w.@+-]+$', 
-                   'Enter a valid name.', 'invalid')])
+            help_text='A unique name for this group. A single non-empty line of '
+                      'free-form text with no whitespace surrounding it. matching '
+                      'the regular expression',
+            validators=[validators.RegexValidator('^[\w.@+-]+$',
+                       'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True)
     allow_nodes = models.BooleanField(default=False,
-        help_text='Whether nodes belonging to this group can be created or set '
-                  'into production (false by default). Its value can only be '
-                  'changed by testbed superusers.')
+            help_text='Whether nodes belonging to this group can be created or set '
+                      'into production (false by default). Its value can only be '
+                      'changed by testbed superusers.')
     allow_slices = models.BooleanField(default=False,
-        help_text='Whether slices belonging to this group can be created or '
-                  'instantiated (false by default). Its value can only be changed '
-                  'by testbed superusers.')
+            help_text='Whether slices belonging to this group can be created or '
+                      'instantiated (false by default). Its value can only be changed '
+                      'by testbed superusers.')
     
     def __unicode__(self):
         return self.name
@@ -68,15 +68,15 @@ class Roles(models.Model):
     user = models.ForeignKey('users.User', related_name='roles')
     group = models.ForeignKey(Group, related_name='roles')
     is_admin = models.BooleanField(default=False,
-        help_text='Whether that user is an administrator in this group. An '
-                  'administrator can manage slices and nodes belonging to the group'
-                  ', members in the group and their roles, and the group itself.')
+            help_text='Whether that user is an administrator in this group. An '
+                      'administrator can manage slices and nodes belonging to the group'
+                      ', members in the group and their roles, and the group itself.')
     is_technician = models.BooleanField(default=False,
-        help_text='Whether that user is a technician in this group. A technician '
-                  'can manage nodes belonging to the group.')
+            help_text='Whether that user is a technician in this group. A technician '
+                      'can manage nodes belonging to the group.')
     is_researcher = models.BooleanField(default=False,
-        help_text='Whether that user is a researcher in this group. A researcher '
-                  'can manage slices belonging to the group.')
+            help_text='Whether that user is a researcher in this group. A researcher '
+                      'can manage slices belonging to the group.')
     
     class Meta:
         unique_together = ('user', 'group')
@@ -98,7 +98,7 @@ class UserManager(auth_models.BaseUserManager):
             raise ValueError('The given username must be set')
         email = UserManager.normalize_email(email)
         user = self.model(username=username, email=email, is_active=True,
-            is_superuser=False, last_login=now, date_joined=now, **extra_fields)
+                is_superuser=False, last_login=now, date_joined=now, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -127,22 +127,22 @@ class User(auth_models.AbstractBaseUser):
     https://docs.djangoproject.com/en/dev/topics/auth/#customizing-the-user-model
     """
     username = models.CharField(max_length=30, unique=True,
-        help_text='Required. 30 characters or fewer. Letters, numbers and '
-                  '@/./+/-/_ characters',
-        validators=[validators.RegexValidator('^[\w.@+-]+$', 
-                    'Enter a valid username.', 'invalid')])
+            help_text='Required. 30 characters or fewer. Letters, numbers and '
+                      '@/./+/-/_ characters',
+            validators=[validators.RegexValidator('^[\w.@+-]+$', 
+                        'Enter a valid username.', 'invalid')])
     email = models.EmailField('Email Address', max_length=255, unique=True)
     description = models.TextField(blank=True, 
-        help_text='An optional free-form textual description of this user, it '
-                  'can include URLs and other information.')
+            help_text='An optional free-form textual description of this user, it '
+                      'can include URLs and other information.')
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True,
-        help_text='Designates whether this user should be treated as '
-                  'active. Unselect this instead of deleting accounts.')
+            help_text='Designates whether this user should be treated as '
+                      'active. Unselect this instead of deleting accounts.')
     is_superuser = models.BooleanField(default=False,
-        help_text='Designates that this user has all permissions without '
-                  'explicitly assigning them.')
+            help_text='Designates that this user has all permissions without '
+                      'explicitly assigning them.')
     date_joined = models.DateTimeField(default=timezone.now)
     groups = models.ManyToManyField(Group, blank=True, through=Roles, related_name='users')
     
@@ -238,12 +238,12 @@ class AuthToken(models.Model):
     contains ASCII characters. (e.g. by using PEM encoding or other ASCII armour).
     """
     user = models.ForeignKey('users.User', related_name='auth_tokens')
-    data = models.TextField(help_text='Authentication token like SSH or other '
-        'kinds of public keys or X.509 certificates to be used for slivers or '
-        'experiments. The exact valid format depends on the type of token as '
-        'long as it is non-empty and only contains ASCII characters '
-        '(e.g. by using PEM encoding or other ASCII armour).',
-        validators=[validate_ascii])
+    data = models.TextField(validators=[validate_ascii],
+            help_text='Authentication token like SSH or other kinds of public keys '
+                      'or X.509 certificates to be used for slivers or experiments. '
+                      'The exact valid format depends on the type of token as long '
+                      'as it is non-empty and only contains ASCII characters '
+                      '(e.g. by using PEM encoding or other ASCII armour).')
     
     class Meta:
         verbose_name = 'authentication token'

@@ -64,7 +64,7 @@ class Ticket(models.Model):
     created_by = models.ForeignKey(get_user_model(), related_name='created_tickets')
     group = models.ForeignKey(Group, null=True, blank=True, related_name='assigned_tickets')
     owner = models.ForeignKey(get_user_model(), null=True, blank=True,
-        related_name='owned_tickets', verbose_name='assigned to')
+            related_name='owned_tickets', verbose_name='assigned to')
     queue = models.ForeignKey(Queue, related_name='tickets', null=True, blank=True)
     subject = models.CharField(max_length=256)
     description = models.TextField()

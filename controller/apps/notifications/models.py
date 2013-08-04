@@ -37,9 +37,9 @@ class Delivered(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     date = models.DateTimeField(auto_now_add=True)
-    is_valid = models.BooleanField(default=True, help_text='Indicates whether the '
-        'notification is still valid. Used in order to avoid repeated notifications '
-        'when the condition is still valid')
+    is_valid = models.BooleanField(default=True,
+            help_text='Indicates whether the notification is still valid. Used in order '
+                      'to avoid repeated notifications when the condition is still valid')
     
     content_object = generic.GenericForeignKey()
     

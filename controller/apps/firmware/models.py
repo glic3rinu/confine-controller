@@ -61,14 +61,14 @@ class Build(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=64)
     image = PrivateFileField(storage=settings.FIRMWARE_BUILD_IMAGE_STORAGE,
-        upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH, max_length=256,
-        condition=any_auth_method(lambda request, self:
-                  request.user.has_perm('nodes.getfirmware_node', obj=self.node)))
+            upload_to=settings.FIRMWARE_BUILD_IMAGE_PATH, max_length=256,
+            condition=any_auth_method(lambda request, self:
+                      request.user.has_perm('nodes.getfirmware_node', obj=self.node)))
     base_image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
-        upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
-        help_text='Image file compressed in gzip. The file name must end in .img.gz')
+            upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
+            help_text='Image file compressed in gzip. The file name must end in .img.gz')
     task_id = models.CharField(max_length=36, unique=True, null=True,
-        help_text="Celery task ID")
+            help_text="Celery task ID")
     kwargs = models.TextField()
     
     objects = generate_chainer_manager(BuildQuerySet)
@@ -184,8 +184,10 @@ class Build(models.Model):
             return False
         config = Config.objects.get()
         exclude = config.files.optional().values_list('pk', flat=True)
-        old_files = set( (f.path,f.content) for f in self.files.exclude(config__pk__in=exclude) )
-        new_files = set( (f.path,f.content) for f in config.eval_files(self.node, exclude=exclude) )
+        old_files = self.files.exclude(config__pk__in=exclude)
+        old_files = set( (f.path,f.content) for f in old_files )
+        new_files = config.eval_files(self.node, exclude=exclude)
+        new_files = set( (f.path,f.content) for f in new_files )
         return new_files == old_files
 
 
@@ -217,9 +219,9 @@ class Config(SingletonModel):
     description = models.CharField(max_length=255)
     version = models.CharField(max_length=64)
     image_name = models.CharField(max_length=255,
-        default="firmware-%(node_name)s-%(arch)s-%(version)s-%(build_id)d.img.gz",
-        help_text="Image file name. Available variables: %(node_name)s, %(arch)s,"
-                  " %(build_id)d, %(version)s and %(node_id)d")
+            default="firmware-%(node_name)s-%(arch)s-%(version)s-%(build_id)d.img.gz",
+            help_text="Image file name. Available variables: %(node_name)s, %(arch)s,"
+                      " %(build_id)d, %(version)s and %(node_id)d")
     
     class Meta:
         verbose_name = "Firmware config"
@@ -283,18 +285,19 @@ class BaseImageQuerySet(models.query.QuerySet):
 class BaseImage(models.Model):
     """ Describes the image used for generating per node customized images """
     name = models.CharField(max_length=256, unique=True,
-        help_text='Unique name for this base image.A single non-empty line of '
-                  'free-form text with no whitespace surrounding it. ',
-        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
-                    'Enter a valid name.', 'invalid')])
+            help_text='Unique name for this base image.A single non-empty line of '
+                      'free-form text with no whitespace surrounding it. ',
+            validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
+                        'Enter a valid name.', 'invalid')])
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
-        upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
-        help_text='Image file compressed in gzip. The file name must end in .img.gz',
-        validators=[validate_file_extensions(FIRMWARE_BASE_IMAGE_EXTENSIONS)])
-    default = models.BooleanField(default=False, help_text='If true this base image '
-        'will be preselected on the firmware generation form')
+            upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
+            help_text='Image file compressed in gzip. The file name must end in .img.gz',
+            validators=[validate_file_extensions(FIRMWARE_BASE_IMAGE_EXTENSIONS)])
+    default = models.BooleanField(default=False,
+            help_text='If true this base image will be preselected on the firmware '
+                      'generation form')
     
     objects = generate_chainer_manager(BaseImageQuerySet)
     
@@ -313,11 +316,12 @@ class ConfigUCI(models.Model):
     that way we can get attributes in a dynamic way.
     """
     config = models.ForeignKey(Config)
-    section = models.CharField(max_length=32, help_text='UCI config statement',
-        default='node')
+    section = models.CharField(max_length=32, default='node',
+            help_text='UCI config statement')
     option = models.CharField(max_length=32, help_text='UCI option statement')
-    value = models.TextField(max_length=255, help_text='Python code that will be '
-        'evaluated for obtining the value from the node. I.e. node.properties[\'ip\']')
+    value = models.TextField(max_length=255,
+            help_text='Python code that will be evaluated for obtining the value '
+                      'from the node. I.e. node.properties[\'ip\']')
     
     class Meta:
         verbose_name_plural = "Config UCI"
@@ -328,10 +332,7 @@ class ConfigUCI(models.Model):
         return "%s.%s" % (self.section, self.option)
     
     def eval_value(self, node):
-        """
-        Evaluates the 'value' as python code in order to get the current value
-        for the given UCI option.
-        """
+        """ Evaluates 'value' as python code """
         safe_locals = {'node': node, 'self': self}
         construct_safe_locals.send(sender=type(self), safe_locals=safe_locals)
         return unicode(eval(self.value, safe_locals))

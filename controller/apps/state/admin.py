@@ -46,7 +46,8 @@ STATES_COLORS = {
     'started': 'green',
     'fail_alloc': 'red',
     'fail_deploy': 'red',
-    'fail_start': 'red' }
+    'fail_start': 'red'
+}
 
 
 class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):

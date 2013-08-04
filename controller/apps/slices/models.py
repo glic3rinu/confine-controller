@@ -38,10 +38,12 @@ def make_upload_to(field_name, base_path, file_name):
         storage_location = field.storage.base_location
         abs_path = os.path.join(storage_location, base_path)
         splited = filename.split('.')
-        context = {'pk': instance.pk,
-                   'original': filename,
-                   'prefix': splited[0],
-                   'suffix': splited[1] if len(splited) > 1 else ''}
+        context = {
+            'pk': instance.pk,
+            'original': filename,
+            'prefix': splited[0],
+            'suffix': splited[1] if len(splited) > 1 else ''
+        }
         if '%(rand)s' in file_name:
             prefix, suffix = file_name.split('%(rand)s')
             prefix = prefix % context
@@ -247,9 +249,9 @@ class SliceProp(models.Model):
     """
     slice = models.ForeignKey(Slice, related_name='properties')
     name = models.CharField(max_length=64,
-        help_text='Per slice unique single line of free-form text with no '
-                  'whitespace surrounding it.',
-        validators=[validate_prop_name])
+            help_text='Per slice unique single line of free-form text with no '
+                      'whitespace surrounding it.',
+            validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -269,32 +271,32 @@ class Sliver(models.Model):
     slice = models.ForeignKey(Slice, related_name='slivers')
     node = models.ForeignKey(Node, related_name='slivers')
     description = models.TextField(blank=True,
-        help_text='An optional free-form textual description of this sliver.')
+            help_text='An optional free-form textual description of this sliver.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
-        help_text='The number of times this sliver has been instructed to be '
-                  'updated (instance sequence number).',
-        verbose_name='instance sequence number')
+            help_text='The number of times this sliver has been instructed to be '
+                      'updated (instance sequence number).',
+            verbose_name='instance sequence number')
     exp_data = models.FileField(blank=True, verbose_name='experiment data',
-        upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
-                                 settings.SLICES_SLIVER_EXP_DATA_NAME),
-        help_text='File containing experiment data for this sliver.')
+            upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
+                                     settings.SLICES_SLIVER_EXP_DATA_NAME),
+            help_text='File containing experiment data for this sliver.')
     exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
-        help_text='If present, the URI of a file containing experiment data for '
-                  'this sliver, instead of the one specified by the slice. Its '
-                  'format and contents depend on the type of the template to be used.')
+            help_text='If present, the URI of a file containing experiment data for '
+                      'this sliver, instead of the one specified by the slice. Its '
+                      'format and contents depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-        help_text='The SHA256 hash of the exp data file, used to check its integrity. '
-                  'Compulsory when a file has been specified.',
-        validators=[validate_sha256])
+            help_text='The SHA256 hash of the exp data file, used to check its integrity. '
+                      'Compulsory when a file has been specified.',
+            validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
-        help_text='If present, the state set on this sliver (set state), instead of '
-                  'the one specified by the slice. Possible values: register (initial), '
-                  'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
-                  'slice-sliver-states">slice and sliver states</a> for the full '
-                  'description of set states and possible transitions.', null=True)
+            help_text='If present, the state set on this sliver (set state), instead of '
+                      'the one specified by the slice. Possible values: register (initial), '
+                      'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
+                      'slice-sliver-states">slice and sliver states</a> for the full '
+                      'description of set states and possible transitions.', null=True)
     template = models.ForeignKey(Template, null=True, blank=True,
-        help_text='If present, the template to be used by this sliver, instead '
-                  'of the one specified by the slice.')
+            help_text='If present, the template to be used by this sliver, instead '
+                      'of the one specified by the slice.')
     
     _iface_registry = {}
     
@@ -361,9 +363,9 @@ class SliverProp(models.Model):
     """
     sliver = models.ForeignKey(Sliver, related_name='properties')
     name = models.CharField(max_length=64,
-        help_text='Per slice unique single line of free-form text with no '
-                  'whitespace surrounding it',
-        validators=[validate_prop_name])
+            help_text='Per slice unique single line of free-form text with no '
+                      'whitespace surrounding it',
+            validators=[validate_prop_name])
     value = models.CharField(max_length=256)
     
     class Meta:
@@ -388,26 +390,26 @@ class SliverIface(models.Model):
     """
     sliver = models.ForeignKey(Sliver, related_name='interfaces')
     nr = models.PositiveIntegerField('number',
-        help_text='The unique 8-bit, positive integer number of this interface '
-                  'in this sliver. Interface #0 is always the private interface.')
+            help_text='The unique 8-bit, positive integer number of this interface '
+                      'in this sliver. Interface #0 is always the private interface.')
     name = models.CharField(max_length=10,
-        help_text='The name of this interface. It must match the regular '
-                  'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
-        validators=[validate_net_iface_name])
+            help_text='The name of this interface. It must match the regular '
+                      'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',
+            validators=[validate_net_iface_name])
     type = models.CharField(max_length=16, choices=IFACE_TYPE_CHOICES,
-        help_text="The type of this interface. Types public4 and public6 are only "
-                  "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 "
-                  "respectively are not none. There can only be one interface of "
-                  "type private, and by default it is configured for both IP4 and "
-                  "IPv6 default routes using the RD's internal addresses. The "
-                  "first public4 interface declared is configured for the default "
-                  "IPv4 route using the CD's IPv4 gateway address, and similarly "
-                  "with public6 interfaces for IPv6.")
+            help_text="The type of this interface. Types public4 and public6 are only "
+                      "available if the node's sliver_pub_ipv4 and sliver_pub_ipv6 "
+                      "respectively are not none. There can only be one interface of "
+                      "type private, and by default it is configured for both IP4 and "
+                      "IPv6 default routes using the RD's internal addresses. The "
+                      "first public4 interface declared is configured for the default "
+                      "IPv4 route using the CD's IPv4 gateway address, and similarly "
+                      "with public6 interfaces for IPv6.")
     parent = models.ForeignKey('nodes.DirectIface', null=True, blank=True,
-        help_text="The name of a direct interface in the research device to use "
-                  "for this interface's traffic (VLAN-tagged); the slice must "
-                  "have a non-null vlan_nr. Only meaningful (and mandatory) for "
-                  "isolated interfaces.")
+            help_text="The name of a direct interface in the research device to use "
+                      "for this interface's traffic (VLAN-tagged); the slice must "
+                      "have a non-null vlan_nr. Only meaningful (and mandatory) for "
+                      "isolated interfaces.")
     
     class Meta:
         unique_together = ('sliver', 'name')

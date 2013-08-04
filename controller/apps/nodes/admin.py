@@ -43,8 +43,9 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['name', 'id', 'arch', colored('set_state', STATES_COLORS, verbose=True, bold=False),
-                    admin_link('group'), 'num_ifaces']
+    list_display = ['name', 'id', 'arch',
+        colored('set_state', STATES_COLORS, verbose=True, bold=False),
+        admin_link('group'), 'num_ifaces']
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
     default_changelist_filters = (('my_nodes', 'True'),)
@@ -89,13 +90,15 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
             user = request.user
-            query = Q( Q(users__roles__is_admin=True) | Q(users__roles__is_technician=True) )
+            is_admin = Q(users__roles__is_admin=True)
+            is_technician = Q(users__roles__is_technician=True)
+            query = Q( is_admin | is_technician )
             query = Q( query & Q(allow_nodes=True) )
             form = filter_group_queryset(form, obj, request.user, query)
         if obj is not None and obj.set_state == obj.FAILURE:
             # removing production choice if in failure state
-            assert (form.base_fields['set_state'].choices.pop(1) == Node.PRODUCTION,
-                "Problem removing PRODUCTION from set_state")
+            is_production = form.base_fields['set_state'].choices.pop(1) == Node.PRODUCTION
+            assert (is_production, "Problem removing PRODUCTION from set_state")
         return form
     
     def queryset(self, request):
@@ -119,8 +122,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         field = super(NodeAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == 'set_state':
             # Removing Debug from choices
-            assert (field.choices.pop(0)[0] == Node.DEBUG,
-                "Problem removing DEBUG from set_state")
+            is_debug = field.choices.pop(0)[0] == Node.DEBUG
+            assert (is_debug, "Problem removing DEBUG from set_state")
         return field
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -129,8 +132,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             obj = self.get_object(request, object_id)
             if obj and not obj.cert:
                 messages.warning(request, 'This node lacks a valid certificate.')
-        return super(NodeAdmin, self).change_view(
-            request, object_id, form_url=form_url, extra_context=extra_context)
+        return super(NodeAdmin, self).change_view(request, object_id,
+                form_url=form_url, extra_context=extra_context)
 
 
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):

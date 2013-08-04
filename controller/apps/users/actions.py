@@ -38,7 +38,6 @@ def join_request(modeladmin, request, queryset):
             site = RequestSite(request)
             jrequest.send_creation_email(site)
             modeladmin.message_user(request, "Your join request has been sent (%s)" % group)
-    
 join_request.short_description = "Request to join the selected groups"
 join_request.url_name = 'join-request'
 
@@ -92,8 +91,8 @@ def confirm_send_email_view(modeladmin, request, queryset, subject, message):
     form = ConfirmSendMailForm(initial={'subject': subject, 'message': message})
     context = {
         "title": "Are you sure?",
-        "content_message": "Are you sure you want to send the following message \
-                            to the selected %s?" % objects_name,
+        "content_message": ("Are you sure you want to send the following message "
+                            "to the selected %s?" % objects_name),
         "action_name": 'send_email',
         "action_value": 'send_email',
         "deletable_objects": queryset,
@@ -108,7 +107,7 @@ def confirm_send_email_view(modeladmin, request, queryset, subject, message):
     
     # Display the confirmation page
     return TemplateResponse(request, 'admin/users/user/send_email_confirmation.html',
-        context, current_app=modeladmin.admin_site.name)
+            context, current_app=modeladmin.admin_site.name)
 
 
 def send_email(modeladmin, request, queryset):
@@ -138,7 +137,6 @@ def send_email(modeladmin, request, queryset):
     
     # Display the confirmation page
     return TemplateResponse(request, 'admin/users/user/send_email.html', context, 
-        current_app=modeladmin.admin_site.name)
-
+            current_app=modeladmin.admin_site.name)
 send_email.url_name = 'send-email'
 send_email.verbose_name = 'Send Email'

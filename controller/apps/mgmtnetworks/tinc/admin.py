@@ -22,29 +22,29 @@ from . import settings
 
 
 class TincHostInline(PermissionGenericTabularInline):
-    model = TincClient
-    max_num = 1
     fields = ['island', 'pubkey', 'clear_pubkey', 'tinc_compatible_address']
     readonly_fields = ['tinc_compatible_address']
+    model = TincClient
+    max_num = 1
     can_delete = False
-
+    
     class Media:
         css = {
              'all': ('tinc/monospace-pubkey.css',)
         }
-
+    
     def tinc_compatible_address(self, instance):
         """ return instance.address in a format compatible with tinc daemon """
         return instance.address.strNormal()
     tinc_compatible_address.short_description = 'Address'
-
+    
     def get_readonly_fields(self, request, obj=None):
         """ pubkey as readonly if exists """
         readonly_fields = super(TincHostInline, self).get_readonly_fields(request, obj=obj)
         if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
             return ['pubkey'] + readonly_fields
         return readonly_fields
-
+    
     def get_fieldsets(self, request, obj=None):
         """ Warning user if the tinc host is not fully configured """
         if obj and not obj.tinc.pubkey:
@@ -125,13 +125,14 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     def help_view(self, request, host_id):
         host = self.get_object(request, host_id)
         opts = self.model._meta
-        context = {'host': host,
-                   'server': Server.objects.get(),
-                   'net_name': settings.TINC_NET_NAME,
-                   'opts': opts,
-                   'app_label': opts.app_label}
+        context = {
+            'host': host,
+            'server': Server.objects.get(),
+            'net_name': settings.TINC_NET_NAME,
+            'opts': opts,
+            'app_label': opts.app_label}
         return TemplateResponse(request, 'admin/tinc/host/help.html', context,
-            current_app=self.admin_site.name)
+                current_app=self.admin_site.name)
     
     def get_form(self, request, *args, **kwargs):
         """ request.user as default host admin """

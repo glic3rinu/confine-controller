@@ -8,6 +8,7 @@ from registration.backends.default.views import ActivationView, RegistrationView
 from .utils import get_backend
 from .views import ActivationRestrictedView, RegistrationClosedView
 
+
 class BackendFactory(object):
     """
     Factory backend creator
@@ -25,7 +26,7 @@ class BackendFactory(object):
             raise ImproperlyConfigured('"%s" is not a valid mode for USERS_REGISTRATION_MODE'
                 ' Available modes are %s' % (mode, ','.join(modes.keys())))
 
-    
+
 class OpenBackend(object):
     """
     Wrapper of the django-registration default backend
@@ -35,9 +36,10 @@ class OpenBackend(object):
     """
     def get_activation_view(self):
         return ActivationView 
-
+    
     def get_registration_view(self):
         return RegistrationView
+
 
 class RestrictedBackend(OpenBackend):
     """
@@ -47,10 +49,10 @@ class RestrictedBackend(OpenBackend):
     def get_activation_view(self):
         return ActivationRestrictedView 
 
+
 class ClosedBackend(OpenBackend):
     """
     Registration disabled. Only the admins can create new users.
     """
     def get_registration_view(self):
         return RegistrationClosedView
-

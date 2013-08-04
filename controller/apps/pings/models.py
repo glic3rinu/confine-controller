@@ -67,6 +67,3 @@ class Ping(models.Model):
             if model == instance.get('model'):
                 if setting:
                     return instance.get(setting)
-                return instance
-
-

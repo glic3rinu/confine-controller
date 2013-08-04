@@ -29,7 +29,8 @@ from issues.models import Ticket, Queue, Message
 PRIORITY_COLORS = { 
     Ticket.HIGH: 'red',
     Ticket.MEDIUM: 'darkorange',
-    Ticket.LOW: 'green',}
+    Ticket.LOW: 'green',
+}
 
 
 STATE_COLORS = { 
@@ -38,7 +39,8 @@ STATE_COLORS = {
     Ticket.FEEDBACK: 'purple',
     Ticket.RESOLVED: 'green',
     Ticket.REJECTED: 'firebrick',
-    Ticket.CLOSED: 'grey',}
+    Ticket.CLOSED: 'grey',
+}
 
 
 class MessageReadOnlyInline(admin.TabularInline):
@@ -86,13 +88,17 @@ class MessageInline(PermissionTabularInline):
 
 
 class TicketInline(PermissionTabularInline):
+    fields = [
+        'ticket_id', 'subject', 'created_by_link', 'owner_link', 'colored_state',
+        'colored_priority', 'created', 'last_modified'
+    ]
+    readonly_fields =  [
+        'ticket_id', 'subject', 'created_by_link', 'owner_link', 'colored_state',
+        'colored_priority', 'created', 'last_modified'
+    ]
     model = Ticket
     extra = 0
     max_num = 0
-    fields = ['ticket_id', 'subject', 'created_by_link', 'owner_link', 'colored_state',
-              'colored_priority', 'created', 'last_modified']
-    readonly_fields =  ['ticket_id', 'subject', 'created_by_link', 'owner_link',
-                        'colored_state', 'colored_priority', 'created', 'last_modified']
     
     def ticket_id(self, instance):
         return mark_safe('<b>%s</b>' % get_admin_link(instance))
@@ -122,51 +128,69 @@ class TicketInline(PermissionTabularInline):
 
 
 class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['unbold_id', 'bold_subject', admin_link('created_by'),
-        admin_link('owner'), admin_link('queue'), colored('priority', PRIORITY_COLORS, bold=False),
-        colored('state', STATE_COLORS, bold=False), 'last_modified']
+    list_display = [
+        'unbold_id', 'bold_subject', admin_link('created_by'), 'display_owner',
+        'display_queue', 'display_priority', 'display_state', 'last_modified'
+    ]
     list_display_links = ('unbold_id', 'bold_subject')
-    list_filter = [MyTicketsListFilter, 'queue__name', 'priority', TicketStateListFilter,
-       'visibility']
+    list_filter = [
+        MyTicketsListFilter, 'queue__name', 'priority', TicketStateListFilter,
+       'visibility'
+    ]
     default_changelist_filters = (
         ('my_tickets', lambda r: 'True' if not r.user.is_superuser else 'False'),
-        ('state', 'OPEN'))
+        ('state', 'OPEN')
+    )
     date_hierarchy = 'created_on'
-    search_fields = ['id', 'subject', 'created_by__username', 'created_by__email',
-        'queue', 'owner__username']
-    actions = [mark_as_unread, mark_as_read, 'delete_selected', reject_tickets,
-               resolve_tickets, close_tickets, take_tickets]
+    search_fields = [
+        'id', 'subject', 'created_by__username', 'created_by__email', 'queue',
+        'owner__username'
+    ]
+    actions = [
+        mark_as_unread, mark_as_read, 'delete_selected', reject_tickets,
+        resolve_tickets, close_tickets, take_tickets
+    ]
     sudo_actions = ['delete_selected']
-    change_view_actions = [resolve_tickets, close_tickets, reject_tickets, take_tickets]
+    change_view_actions = [
+        resolve_tickets, close_tickets, reject_tickets, take_tickets
+    ]
     change_form_template = "admin/controller/change_form.html"
     form = TicketForm
-    readonly_fields = ('display_summary', 'display_queue',
-                       'display_group', 'display_owner', 'display_state',
-                       'display_priority', 'display_visibility')
+    readonly_fields = (
+        'display_summary', 'display_queue', 'display_group', 'display_owner',
+        'display_state', 'display_priority', 'display_visibility'
+    )
     readonly_fieldsets = (
         (None, {
             'fields': ('display_summary', 
-                      ('display_queue', 'display_state','display_group',
-                       'display_visibility', 'display_priority', 'display_owner'),
-                      'display_description')
-        }),)
+                       ('display_queue', 'display_state', 'display_group',
+                        'display_visibility', 'display_priority', 'display_owner'),
+                       'display_description')
+        }),
+    )
     fieldsets = readonly_fieldsets + (
         ('Update', {
             'classes': ('collapse',),
             'fields': ('subject',
                        ('queue', 'state', 'group', 'visibility', 'priority', 'owner'),
                        'description')
-        }),)
+        }),
+    )
     add_fieldsets = (
         (None, {
             'fields': ('subject',
                       ('queue', 'state', 'group', 'visibility', 'priority', 'owner'),
                       'description')
-        }),)
+        }),
+    )
     
     class Media:
-        css = { 'all': ('issues/css/admin-ticket.css',) }
-        js = ('issues/js/admin-ticket.js',)
+        css = {
+            'all': ('issues/css/admin-ticket.css',)
+        }
+        js = (
+            'issues/js/admin-ticket.js',
+        )
     
     def display_summary(self, ticket):
         author_url = get_admin_link(ticket.created_by)
@@ -182,31 +206,36 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     display_summary.short_description = 'Summary'
     
     def display_queue(self, ticket):
-        return get_admin_link(ticket.queue)
+        return get_admin_link(ticket.queue) or '-'
     display_queue.short_description = 'queue'
+    display_queue.admin_order_field = 'queue'
     
     def display_priority(self, ticket):
         """ State colored for change_form """
-        return mark_safe(colored(ticket.priority, PRIORITY_COLORS, bold=False)(ticket))
-    display_priority.short_description = "priority"
-    display_priority.allow_tags = True
+        return colored(ticket.priority, PRIORITY_COLORS, bold=False)(ticket)
+    display_priority.short_description = 'Priority'
+    display_priority.admin_order_field = 'priority'
     
     def display_state(self, ticket):
         """ State colored for change_form """
-        return  mark_safe(colored(ticket.state, STATE_COLORS, bold=False)(ticket))
-    display_state.short_description = "State"
+        return colored(ticket.state, STATE_COLORS, bold=False)(ticket)
+    display_state.short_description = 'State'
+    display_state.admin_order_field = 'state'
     
     def display_visibility(self, ticket):
         return ticket.visibility
     display_visibility.short_description = 'Visibility'
+    display_visibility.admin_order_field = 'visibility'
     
     def display_group(self, ticket):
         return get_admin_link(ticket.group) or '-'
     display_group.short_description = 'Group'
+    display_group.admin_order_field = 'group'
     
     def display_owner(self, ticket):
         return get_admin_link(ticket.owner) or '-'
     display_owner.short_description = 'Assigned to'
+    display_owner.admin_order_field = 'owner'
     
     def unbold_id(self, ticket):
         """ Unbold id if thicket is readed """
@@ -215,6 +244,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return ticket.pk
     unbold_id.allow_tags = True
     unbold_id.short_description = "#"
+    unbold_id.admin_order_field = 'id'
     
     def bold_subject(self, ticket):
         """ Bold subject when tickets are unread for request.user """
@@ -222,7 +252,8 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             return ticket.subject
         return "<strong class='unread'>%s</strong>" % ticket.subject
     bold_subject.allow_tags = True
-    bold_subject.short_description = "Subject"
+    bold_subject.short_description = 'Subject'
+    bold_subject.admin_order_field = 'subject'
     
     def last_modified(self, instance):
         return display_timesince(instance.last_modified_on)
@@ -232,8 +263,9 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         """ Filter tickets according to their visibility preference """
         qs = super(TicketAdmin, self).queryset(request)
         if not request.user.is_superuser:
-            qset = Q(visibility=Ticket.PUBLIC)
-            qset = Q(qset | Q(visibility=Ticket.PRIVATE, created_by=request.user))
+            public = Q(visibility=Ticket.PUBLIC)
+            private = Q(visibility=Ticket.PRIVATE, created_by=request.user)
+            qset = Q(public | private)
             qs = qs.filter(qset).exclude(visibility=Ticket.INTERNAL).distinct()
         return qs
     
@@ -315,15 +347,18 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
 
 
 class QueueAdmin(PermissionModelAdmin):
-    actions = [set_default_queue]
-    list_display = ['name', 'default', 'notify_admins', 'notify_technicians',
-                    'notify_researchers', 'num_tickets']
+    list_display = [
+        'name', 'default', 'notify_admins', 'notify_technicians',
+        'notify_researchers', 'num_tickets'
+    ]
     list_editable = ('notify_admins', 'notify_technicians', 'notify_researchers')
+    actions = [set_default_queue]
     inlines = [TicketInline]
     ordering = ['name']
     
     class Media:
-        css = { 'all': ('controller/css/hide-inline-id.css',) }
+        css = {
+            'all': ('controller/css/hide-inline-id.css',)}
     
     def num_tickets(self, queue):
         num = queue.tickets.count()

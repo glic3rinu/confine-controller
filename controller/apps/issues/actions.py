@@ -15,8 +15,8 @@ from issues.models import Queue, Ticket
 def change_ticket_state_factory(action, final_state):
     context = {
         'action': action,
-        'form': ChangeReasonForm() }
-    
+        'form': ChangeReasonForm()
+    }
     @has_sudo_permissions
     @transaction.commit_on_success
     @action_with_confirmation(action, extra_context=context)
@@ -39,9 +39,12 @@ def change_ticket_state_factory(action, final_state):
             modeladmin.message_user(request, msg)
         else:
             context['form'] = form
+            # action_with_confirmation must display form validation errors
             return True
     change_ticket_state.url_name = action
-    change_ticket_state.short_description = action.capitalize()
+    change_ticket_state.short_description = '%s selected tickets' % action.capitalize()
+    change_ticket_state.description = 'Mark ticket as %s' % final_state.lower()
+    change_ticket_state.__name__ = action
     return change_ticket_state
 
 
@@ -73,6 +76,8 @@ def take_tickets(modeladmin, request, queryset):
     msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 take_tickets.url_name = 'take'
+take_tickets.short_description = 'Take selected tickets'
+take_tickets.description = 'Make yourself owner of the ticket'
 
 
 @transaction.commit_on_success
@@ -93,7 +98,6 @@ def mark_as_read(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 
 
-## Queue actions
 @has_sudo_permissions
 @transaction.commit_on_success
 def set_default_queue(modeladmin, request, queryset):

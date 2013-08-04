@@ -24,9 +24,9 @@ class Host(models.Model):
     management network) with a known administrator.
     """
     description = models.CharField(max_length=256,
-        help_text='Free-form textual description of this host.')
+            help_text='Free-form textual description of this host.')
     owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
-        help_text='The user who administrates this host (its creator by default)')
+            help_text='The user who administrates this host (its creator by default)')
     related_tincclient = generic.GenericRelation('tinc.TincClient')
     
     def __unicode__(self):
@@ -49,7 +49,7 @@ class TincHost(models.Model):
     A Tinc Host could be a Server or a Client.
     """
     pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
-        help_text='PEM-encoded RSA public key used on tinc management network.')
+            help_text='PEM-encoded RSA public key used on tinc management network.')
     
     class Meta:
         abstract = True
@@ -94,7 +94,7 @@ class Gateway(models.Model):
     """
     related_tincserver = generic.GenericRelation('tinc.TincServer')
     description = models.CharField(max_length=256,
-        help_text='Free-form textual description of this gateway.')
+            help_text='Free-form textual description of this gateway.')
     
     @property
     def tinc(self):
@@ -118,9 +118,9 @@ class TincServer(TincHost):
     the testbed server itself.
     """
     is_active = models.BooleanField(default=True,
-        help_text="Whether this tinc server is active. It should only be made "
-                  "false if there are other tinc servers with addresses in the "
-                  "same islands of the addresses provided by this server.")
+            help_text="Whether this tinc server is active. It should only be made "
+                      "false if there are other tinc servers with addresses in the "
+                      "same islands of the addresses provided by this server.")
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -183,12 +183,12 @@ class Island(models.Model):
     through other gateways), or when the server itself is in that island.
     """
     name = models.CharField(max_length=32, unique=True,
-        help_text='The unique name of this island. A single line of free-form '
-                  'text with no whitespace surrounding it.',
-        validators=[validators.RegexValidator('^[\w.@+-]+$',
-                    'Enter a valid name.', 'invalid')])
+            help_text='The unique name of this island. A single line of free-form '
+                      'text with no whitespace surrounding it.',
+            validators=[validators.RegexValidator('^[\w.@+-]+$',
+                        'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True,
-        help_text='Optional free-form textual description of this island.')
+            help_text='Optional free-form textual description of this island.')
     
     def __unicode__(self):
         return self.name
@@ -199,13 +199,13 @@ class TincAddress(models.Model):
     Describes an IP Address of a Tinc Server.
     """
     addr = models.CharField('address', max_length=128,
-        help_text='The tinc IP address or host name of the host this one connects to.',
-        validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
-    port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT, 
-        help_text='TCP/UDP port of this tinc address.')
+            help_text='The tinc IP address or host name of the host this one connects to.',
+            validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
+    port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT,
+            help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey(Island, null=True, blank=True,
-        help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
-                  'at_server">Island</a> this tinc address is reachable from.')
+            help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
+                      'at_server">Island</a> this tinc address is reachable from.')
     server = models.ForeignKey(TincServer, related_name='addresses')
     
     class Meta:
@@ -233,7 +233,7 @@ class TincClient(TincHost):
     or a host.
     """
     island = models.ForeignKey(Island, null=True, blank=True,
-        help_text='An optional island used to hint where this tinc client reaches to.')
+            help_text='An optional island used to hint where this tinc client reaches to.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -285,7 +285,8 @@ class TincClient(TincHost):
         config = ["Name = %s" % self.name]
         for server in self.connect_to.all():
             line = "ConnectTo = %s" % server.name
-            if self.island and server.addresses.filter(island=self.island).exists():
+            has_island = server.addresses.filter(island=self.island).exists()
+            if self.island and has_island:
                 config.insert(0, line)
             else:
                 config.append(line)
@@ -321,4 +322,3 @@ def tinc(self):
 
 Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
 Server.add_to_class('tinc', tinc)
-

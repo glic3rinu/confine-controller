@@ -19,16 +19,16 @@ class BaseState(models.Model):
     STATES = (
         ('unknown', 'UNKNOWN'),
         ('offline', 'OFFLINE'),
-        ('nodata', 'NO DATA'),)
-    
+        ('nodata', 'NO DATA'),
+    )
     data = models.TextField()
     metadata = models.TextField()
-    last_seen_on = models.DateTimeField(null=True, help_text='Last time the state '
-        'retrieval was successfull')
-    last_try_on = models.DateTimeField(null=True, help_text='Last '
-        'time the state retrieval operation has been executed')
-    last_change_on = models.DateTimeField(null=True, help_text='Last time the state '
-        'has change')
+    last_seen_on = models.DateTimeField(null=True,
+            help_text='Last time the state retrieval was successfull')
+    last_try_on = models.DateTimeField(null=True,
+            help_text='Last time the state retrieval operation has been executed')
+    last_change_on = models.DateTimeField(null=True,
+            help_text='Last time the state has change')
     add_date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -90,8 +90,8 @@ class BaseState(models.Model):
         cls = type(self)
         kwargs = {
             'freq': cls.get_setting('SCHEDULE'),
-            'expire_window': cls.get_setting('EXPIRE_WINDOW') }
-        
+            'expire_window': cls.get_setting('EXPIRE_WINDOW')
+        }
         if not self.last_try_on or time() > heartbeat_expires(self.last_try_on, **kwargs):
             return 'nodata'
         
@@ -114,7 +114,7 @@ class BaseState(models.Model):
     def get_url(self):
         URI = type(self).get_setting('URI')
         node = self.get_node()
-        return URI % {'mgmt_addr': node.mgmt_net.addr, 'object_id': self.pk }
+        return URI % { 'mgmt_addr': node.mgmt_net.addr, 'object_id': self.pk }
     
     @property
     def related_object(self):
@@ -137,8 +137,8 @@ class NodeState(BaseState):
         ) + BaseState.STATES
     
     node = models.OneToOneField('nodes.Node', related_name='state', primary_key=True)
-    last_contact_on = models.DateTimeField(null=True, help_text='Last API pull '
-        'received from this node.')
+    last_contact_on = models.DateTimeField(null=True,
+            help_text='Last API pull received from this node.')
     soft_version = models.CharField(max_length=32, blank=True)
     
     def get_node(self):

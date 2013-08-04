@@ -1,6 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
 
-
 # Python 2.7 has an importlib with import_module; for older Pythons,
 # Django's bundled copy provides it.
 try: # pragma: no cover
@@ -17,10 +16,10 @@ def get_backend(path):
     exists, or because the module does not contain a class of the
     appropriate name), ``django.core.exceptions.ImproperlyConfigured``
     is raised.
-    
+
     """
     i = path.rfind('.')
-    module, attr = path[:i], path[i+1:]
+    module, attr = path[:i], path[i + 1:]
     try:
         mod = import_module(module)
     except ImportError, e:
@@ -30,4 +29,3 @@ def get_backend(path):
     except AttributeError:
         raise ImproperlyConfigured('Module "%s" does not define a registration backend named "%s"' % (module, attr))
     return backend_class()
-

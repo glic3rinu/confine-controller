@@ -19,11 +19,12 @@ from .tasks import run_instance
 class Operation(models.Model):
     """ Defines an operation to be executed over a subset of nodes """
     name = models.CharField(max_length=256, help_text='Verbose name')
-    identifier = models.CharField(max_length=16, help_text='Identifier used on the '
-        'command line')
-    script = models.TextField(help_text='Script to be executed on the nodes. Write '
-        'it with atomicity in mind, there is no waranty that the script ends '
-        'executed multiple times.')
+    identifier = models.CharField(max_length=16,
+            help_text='Identifier used on the command line')
+    script = models.TextField(
+            help_text='Script to be executed on the nodes. Writeit with atomicity '
+                      'in mind, there is no waranty that the script ends executed '
+                      'multiple times.')
     
     def __unicode__(self):
         return self.identifier
@@ -48,10 +49,10 @@ class Execution(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     script = models.TextField()
     is_active = models.BooleanField(default=True)
-    retry_if_offline = models.BooleanField(default=True, help_text='The operation '
-        'will be retried if the node is currently offline.')
-    include_new_nodes = models.BooleanField(help_text='If selected the operation '
-        'will be executed on newly created nodes')
+    retry_if_offline = models.BooleanField(default=True,
+            help_text='The operation will be retried if the node is currently offline.')
+    include_new_nodes = models.BooleanField(
+            help_text='If selected the operation will be executed on newly created nodes')
     
     class Meta:
         ordering = ['-created_on']
@@ -78,10 +79,10 @@ class Execution(models.Model):
     
     @classmethod
     def create(cls, operation, nodes, include_new_nodes=False, retry_if_offline=True):
-        cls.objects.filter(operation=operation,
-            include_new_nodes=include_new_nodes).update(include_new_nodes=False)
+        cls.objects.filter(operation=operation, include_new_nodes=include_new_nodes
+                ).update(include_new_nodes=False)
         execution = cls.objects.create(operation=operation, script=operation.script,
-            include_new_nodes=include_new_nodes, retry_if_offline=retry_if_offline)
+                include_new_nodes=include_new_nodes, retry_if_offline=retry_if_offline)
         instances = []
         for node in nodes:
             instance = Instance.create(execution=execution, node=node)
@@ -127,7 +128,7 @@ class Instance(models.Model):
     traceback = models.TextField()
     exit_code = models.IntegerField(null=True)
     task_id = models.CharField(max_length=36, unique=True, null=True,
-        help_text="Celery task ID")
+            help_text="Celery task ID")
     
     def __unicode__(self):
         return "%s@%s" % (self.execution.operation.identifier, self.node)
@@ -136,7 +137,7 @@ class Instance(models.Model):
     def create(cls, execution, node):
         # outdate pending instances
         cls.objects.filter(execution__operation=execution.operation, node=node,
-            state=cls.TIMEOUT).update(state=Instance.OUTDATED)
+                state=cls.TIMEOUT).update(state=Instance.OUTDATED)
         instance = cls.objects.create(execution=execution, node=node)
         return instance
     
@@ -173,7 +174,7 @@ class Instance(models.Model):
 def retry_pending_operations(sender, node, **kwargs):
     """ runs timeout instances when a node heart beat is received """
     instances = Instance.objects.filter(node=node, state=Instance.TIMEOUT,
-        execution__is_active=True, execution__retry_if_offline=True)
+            execution__is_active=True, execution__retry_if_offline=True)
     for instance in instances:
         instance.run()
 
@@ -183,4 +184,4 @@ if is_installed('firmware'):
     @receiver(construct_safe_locals, dispatch_uid="maintenance.update_safe_locals")
     def update_safe_locals(sender, safe_locals, **kwargs):
         safe_locals.update(dict((setting, getattr(settings, setting))
-            for setting in dir(settings) if setting.isupper() ))
+                for setting in dir(settings) if setting.isupper() ))

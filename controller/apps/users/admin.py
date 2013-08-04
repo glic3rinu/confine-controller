@@ -64,7 +64,6 @@ class ReadOnlyRolesInline(PermissionTabularInline):
     extra = 0
     fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
     readonly_fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
-    verbose_name_plural = 'Roles'
     
     def group_link(self, instance):
         """ Link to related Group """
@@ -76,20 +75,21 @@ class ReadOnlyRolesInline(PermissionTabularInline):
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
+        name = 'Roles'
+        groups_url = reverse('admin:users_group_changelist')
         if request.user.is_superuser:
-            self.verbose_name_plural = mark_safe(
-                'Roles <a href="../../group">(Manage groups)</a>')
+            name = 'Roles <a href="%s">(Manage groups)</a>' % groups_url
         elif self.has_change_permission(request, obj, view=False):
-            self.verbose_name_plural = mark_safe(
-                'Roles <a href="../../group">(Request group membership)</a>')
+            name = 'Roles <a href="%s">(Request group membership)</a>' % groups_url
+        self.verbose_name_plural = mark_safe(name)
         return super(ReadOnlyRolesInline, self).get_fieldsets(request, obj=obj)
 
 
 class JoinRequestInline(PermissionTabularInline):
-    model = JoinRequest
-    extra = 0
     fields = ('user_link', 'roles', 'action')
     readonly_fields = ('user_link',)
+    model = JoinRequest
+    extra = 0
     form = JoinRequestForm
     can_delete = False
     
@@ -108,17 +108,21 @@ class JoinRequestInline(PermissionTabularInline):
 
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name',
-                    'group_links', 'is_superuser', 'is_active', )
-    list_filter = ('is_active', 'is_superuser', 'roles__is_admin',
-        'roles__is_researcher', 'roles__is_technician', 'groups')
+    list_display = (
+        'username', 'email', 'first_name', 'last_name', 'group_links', 
+        'is_superuser', 'is_active'
+    )
+    list_filter = (
+        'is_active', 'is_superuser', 'roles__is_admin', 'roles__is_researcher',
+        'roles__is_technician', 'groups'
+    )
     fieldsets = (
         (None, {'fields': ('username', )}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email',
                                       'description',)}),
         ('Permissions', {'fields': ('is_active', 'is_superuser',)}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
-        )
+    )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -154,8 +158,9 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
 
 
 class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
-    list_display = ['name', 'description', 'allow_nodes_info', 'allow_slices_info',
-                    'num_users']
+    list_display = [
+        'name', 'description', 'allow_nodes_info', 'allow_slices_info', 'num_users'
+    ]
     list_filter = [MyGroupsListFilter, 'allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
     inlines = [RolesInline, JoinRequestInline]

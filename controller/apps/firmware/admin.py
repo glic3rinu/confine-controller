@@ -99,7 +99,7 @@ class ConfigPluginInline(admin.TabularInline):
 
 
 class BuildAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'node', 'version', colored('state', STATE_COLORS), 
+    list_display = ['pk', 'node', 'version', colored('state', STATE_COLORS),
                     'task_link', 'image_link', 'date']
     list_display_links = ['pk', 'node']
     search_fields = ['node__description', 'node__id']

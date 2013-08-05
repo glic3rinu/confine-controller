@@ -1,4 +1,7 @@
-import string, random, crypt, os
+import crypt
+import random
+import string
+import os
 from datetime import datetime
 
 from django import forms
@@ -17,11 +20,11 @@ class PasswordPlugin(FirmwarePlugin):
     def get_form(self):
         class PasswordForm(forms.Form):
             password1 = forms.CharField(label='Password', required=False,
-                help_text='Enter a password to be set for the root user. The '
-                    'default password is %s.' % default_password,
-                widget=forms.PasswordInput)
+                    help_text='Enter a password to be set for the root user. The '
+                              'default password is %s.' % default_password,
+                    widget=forms.PasswordInput)
             password2 = forms.CharField(label='Password confirmation', required=False,
-                widget=forms.PasswordInput)
+                    widget=forms.PasswordInput)
             
             def clean_password2(self):
                 password1 = self.cleaned_data.get("password1")
@@ -60,12 +63,14 @@ class PasswordPlugin(FirmwarePlugin):
             'last_changed': d.days,
             'min_days': 0,
             'max_days': 99999,
-            'warn_days': 7 }
+            'warn_days': 7
+        }
         line = '%(user)s:%(pwd)s:%(last_changed)i:%(min_days)i:%(max_days)i:%(warn_days)i:::' % context
         
         context = {
             'line': line.replace('/', '\/'),
             'shadow': os.path.join(image.mnt, 'etc/shadow'),
-            'image': image.mnt }
+            'image': image.mnt
+        }
         run("sed -i 's/^root:.*/%(line)s/' %(shadow)s" % context)
         run('rm -f %(image)s/etc/uci-defaults/confine-passwd.sh' % context)

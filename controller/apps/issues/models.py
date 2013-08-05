@@ -47,7 +47,7 @@ class TicketQuerySet(models.query.QuerySet):
             return self.filter(*args, **kwargs)
         public = Q(visibility=Ticket.PUBLIC)
         private = Q(created_by=user) | Q(owner=user)
-        private = private | Q(messages__author=user) | Q(group__in=user.groups.all())
+        private = private | Q(group__in=user.groups.all())
         private = Q(visibility=Ticket.PRIVATE) & Q(private)
         return self.filter(Q(public | private)).distinct().filter(*args, **kwargs)
 
@@ -120,8 +120,10 @@ class Ticket(models.Model):
                 if self.queue.notify_researchers:
                     roles.append(Roles.RESEARCHER)
             emails += self.group.get_emails(roles=roles)
-        for val in self.messages.distinct('author').values('author__email'):
-            emails.append(val.get('author__email'))
+        for message in self.messages.distinct('author'):
+            author = message.author
+            if self.is_visible_by(author):
+                emails.append(author.email)
         return set(emails + self.cc_emails)
         
     def notify(self, message=None, content=None):
@@ -142,14 +144,15 @@ class Ticket(models.Model):
             # PK should be available for rendering the template
             self.notify()
     
-    def involved_by(self, user):
-        """ user has participated or is referenced on the ticket as owner or member
-            of the group
+    def is_involved_by(self, user):
+        """ returns whether user has participated or is referenced on the ticket
+            as owner or member of the group
         """
-        involved = self.created_by == user or self.owner == user
-        involved = involved or self.messages.filter(author=user).exists()
-        involved = involved or user.is_member(self.group)
-        return involved
+        return Ticket.objects.filter(pk=self.pk).involved_by(user).exists()
+    
+    def is_visible_by(self, user):
+        """ returns whether ticket is visible by user """
+        return Ticket.objects.filter(pk=self.pk).visible_by(user).exists()
     
     @property
     def cc_emails(self):

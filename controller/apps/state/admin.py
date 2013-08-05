@@ -51,8 +51,10 @@ STATES_COLORS = {
 
 
 class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
-    readonly_fields = ['url_link', 'last_seen', 'last_try', 'next_retry', 'current',
-        'last_change', 'display_metadata', 'display_data']
+    readonly_fields = [
+        'url_link', 'last_seen', 'last_try', 'next_retry', 'current', 'last_change',
+        'display_metadata', 'display_data'
+    ]
     change_view_actions = [refresh]
     
     class Media:
@@ -114,8 +116,8 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
             'title': mark_safe('%s (%s)' % (title, related_obj_link)),
             'header_title': title}
         context.update(extra_context or {})
-        return super(BaseStateAdmin, self).change_view(
-            request, object_id, form_url=form_url, extra_context=context)
+        return super(BaseStateAdmin, self).change_view(request, object_id,
+                form_url=form_url, extra_context=context)
 
 
 class NodeStateAdmin(BaseStateAdmin):
@@ -127,7 +129,8 @@ class NodeStateAdmin(BaseStateAdmin):
         }),
         ('Details', {
             'fields': ('display_metadata', 'display_data')
-        }),)
+        }),
+    )
     change_form_template = 'admin/state/nodestate/change_form.html'
     
     def last_contact(self, instance):
@@ -143,7 +146,8 @@ class SliverStateAdmin(BaseStateAdmin):
         }),
         ('Details', {
             'fields': ('display_metadata', 'display_data')
-        }),)
+        }),
+    )
     change_form_template = 'admin/state/sliverstate/change_form.html'
     
     def sliver_link(self, instance):
@@ -219,7 +223,7 @@ def get_urls(self):
     extra_urls = patterns("",
         url("^(?P<slice_id>\d+)/slivers/(?P<object_id>\d+)/state",
             wrap_admin_view(self, wrap_action(show_state,
-                SliceSliversAdmin(Sliver, self.admin_site))),)
+                    SliceSliversAdmin(Sliver, self.admin_site))),)
     )
     return extra_urls + urls
 SliceAdmin.get_urls = get_urls

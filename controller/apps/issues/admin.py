@@ -212,18 +212,18 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def display_priority(self, ticket):
         """ State colored for change_form """
-        return colored(ticket.priority, PRIORITY_COLORS, bold=False)(ticket)
+        return colored('priority', PRIORITY_COLORS, bold=False, verbose=True)(ticket)
     display_priority.short_description = 'Priority'
     display_priority.admin_order_field = 'priority'
     
     def display_state(self, ticket):
         """ State colored for change_form """
-        return colored(ticket.state, STATE_COLORS, bold=False)(ticket)
+        return colored('state', STATE_COLORS, bold=False, verbose=True)(ticket)
     display_state.short_description = 'State'
     display_state.admin_order_field = 'state'
     
     def display_visibility(self, ticket):
-        return ticket.visibility
+        return ticket.get_visibility_display()
     display_visibility.short_description = 'Visibility'
     display_visibility.admin_order_field = 'visibility'
     

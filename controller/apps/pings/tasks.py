@@ -1,12 +1,14 @@
-import os, decimal, subprocess
+import decimal
+import subprocess
+import os
 from datetime import datetime
+
 from celery.task import periodic_task, task
 from django.db.models import get_model
 
 from controller.utils import LockFile, is_installed
 
 from .models import Ping
-
 from .settings import PING_LOCK_DIR, PING_COUNT, PING_INSTANCES
 
 

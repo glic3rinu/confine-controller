@@ -1,4 +1,7 @@
-import time, sys, random, os
+import time
+import random
+import sys
+import os
 from base64 import b64encode
 
 from M2Crypto import RSA, X509, EVP, ASN1, BIO

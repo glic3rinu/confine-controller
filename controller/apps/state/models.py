@@ -72,7 +72,8 @@ class BaseState(models.Model):
             metadata.update({
                 'url': response.url,
                 'headers': response.headers,
-                'status_code': response.status_code})
+                'status_code': response.status_code
+            })
         else:
             state.data = ''
         state.metadata = json.dumps(metadata, indent=4)
@@ -134,7 +135,7 @@ class NodeState(BaseState):
         ('debug', 'DEBUG'),
         ('failure', 'FAILURE'),
         ('crashed', 'CRASHED'),
-        ) + BaseState.STATES
+    ) + BaseState.STATES
     
     node = models.OneToOneField('nodes.Node', related_name='state', primary_key=True)
     last_contact_on = models.DateTimeField(null=True,
@@ -185,7 +186,7 @@ class SliverState(BaseState):
         ('fail_start', 'FAIL_START'),
         ('fail_deploy', 'FAIL_DEPLOY'),
         ('fail_alloc', 'FAIL_ALLOC'),
-        ) + BaseState.STATES
+    ) + BaseState.STATES
     
     sliver = models.OneToOneField('slices.Sliver', related_name='state', primary_key=True)
     

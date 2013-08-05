@@ -11,12 +11,14 @@ from gis.models import Geolocation, NodeGeolocation
 
 class GisInline(admin.TabularInline):
     """ Base class for create an inline that provides geolocation info. """
+    fields = ['address', 'geolocation']
     model = Geolocation
     max_num = 1
-    fields = ['address', 'geolocation']
     formfield_overrides = {
-        map_fields.AddressField: {'widget': map_widgets.OSMAddressWidget(attrs={'id': 'id_address', 'size':'80'})},
-        map_fields.GeoLocationField: {'widget': TextInput(attrs={'id': 'id_geolocation'})},
+        map_fields.AddressField: {
+            'widget': map_widgets.OSMAddressWidget(attrs={'id': 'id_address', 'size':'80'})},
+        map_fields.GeoLocationField: {
+            'widget': TextInput(attrs={'id': 'id_geolocation'})},
     }
     verbose_name_plural = 'Geolocation'
     can_delete = False

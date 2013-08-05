@@ -13,10 +13,10 @@ from communitynetworks.models import CnHost
 
 
 class CnHostInline(PermissionGenericTabularInline):
-    model = CnHost
-    max_num = 1
     fields = ['app_url', 'cndb_uri', 'cndb_cached']
     readonly_fields = ['cndb_cached']
+    model = CnHost
+    max_num = 1
     verbose_name_plural = 'Community host'
     can_delete = False
      

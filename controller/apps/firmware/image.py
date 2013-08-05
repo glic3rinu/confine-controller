@@ -1,10 +1,14 @@
-import functools, os, shutil, tempfile
+import functools
+import os
+import shutil
+import tempfile
 
 from django.core.management.base import CommandError
 
 from controller.utils.system import run, makedirs
 
 from .exceptions import UnexpectedImageFormat
+
 
 r = functools.partial(run, silent=False)
 

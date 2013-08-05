@@ -60,18 +60,15 @@ class RolesInline(PermissionTabularInline):
 
 
 class ReadOnlyRolesInline(PermissionTabularInline):
-    model = Roles
-    extra = 0
     fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
     readonly_fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
+    model = Roles
+    extra = 0
     
     def group_link(self, instance):
         """ Link to related Group """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.group))
     group_link.short_description = 'Group'
-    
-    def has_add_permission(self, *args, **kwargs):
-        return False
     
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
@@ -83,6 +80,9 @@ class ReadOnlyRolesInline(PermissionTabularInline):
             name = 'Roles <a href="%s">(Request group membership)</a>' % groups_url
         self.verbose_name_plural = mark_safe(name)
         return super(ReadOnlyRolesInline, self).get_fieldsets(request, obj=obj)
+    
+    def has_add_permission(self, *args, **kwargs):
+        return False
 
 
 class JoinRequestInline(PermissionTabularInline):

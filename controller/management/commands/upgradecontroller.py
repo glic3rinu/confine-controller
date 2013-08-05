@@ -1,4 +1,7 @@
-import os, random, string
+import functools
+import os
+import random
+import string
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
@@ -6,6 +9,9 @@ from django.core.management.base import BaseCommand, CommandError
 from controller import get_version
 from controller.utils import get_existing_pip_installation
 from controller.utils.system import run, check_root
+
+
+r = functools.partial(run, silent=False)
 
 
 class Command(BaseCommand):
@@ -31,15 +37,18 @@ class Command(BaseCommand):
         pypi_url = 'https://pypi.python.org/pypi/confine-controller'
         grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
         extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'
-        pypi_version = run("wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)).stdout
+        get_version = "wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)
+        pypi_version = run(get_version).stdout
         
         if current_version == pypi_version:
-            raise CommandError("Not upgrading, you already have version %s installed" % current_version)
+            msg = "Not upgrading, you already have version %s installed"
+            raise CommandError(msg % current_version)
         
         elif current_path is not None:
             desired_version = options.get('version')
             if current_version == desired_version:
-                raise CommandError("Not upgrading, you already have version %s installed" % desired_version)
+                msg = "Not upgrading, you already have version %s installed"
+                raise CommandError(msg % desired_version)
             # Create a backup of current installation
             base_path = os.path.abspath(os.path.join(current_path, '..'))
             char_set = string.ascii_uppercase + string.digits
@@ -48,18 +57,20 @@ class Command(BaseCommand):
             run("mv %s %s" % (current_path, backup))
             
             # collect existing eggs previous to the installation
-            eggs = run('ls -d %s' % os.path.join(base_path, 'confine_controller-*.egg-info'))
+            eggs_regex = os.path.join(base_path, 'confine_controller-*.egg-info')
+            eggs = run('ls -d %s' % eggs_regex)
             eggs = eggs.stdout.splitlines()
             try:
                 if desired_version:
-                    run('pip install confine-controller==%s' % desired_version, silent=False)
+                    r('pip install confine-controller==%s' % desired_version)
                 else:
                     # Did I mentioned how I hate PIP?
                     if run('pip --version|cut -d" " -f2').stdout == '1.0':
-                        run('pip install confine-controller --upgrade', silent=False)
+                        r('pip install confine-controller --upgrade')
                     else:
-                        # (Fucking pip)^2, it returns exit code 0 even when fails because requirement already up-to-date
-                        run('pip install confine-controller --upgrade --force', silent=False)
+                        # (Fucking pip)^2, it returns exit code 0 even when fails
+                        # because requirement already up-to-date
+                        r('pip install confine-controller --upgrade --force')
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)
@@ -70,7 +81,8 @@ class Command(BaseCommand):
                 # Remove all backups
                 run('rm -fr %s' % os.path.join(base_path, 'controller\.*'))
                 # Clean old egg files, yeah, cleaning PIP shit :P
-                version = run('python -c "from controller import get_version; print get_version();"').stdout
+                get_version = 'from controller import get_version; print get_version()'
+                version = run('python -c "%s;"' % get_version).stdout
                 for egg in eggs:
                     # Do not remove the actual egg file when upgrading twice the same version
                     if egg.split('/')[-1] != "confine_controller-%s.egg-info" % version:

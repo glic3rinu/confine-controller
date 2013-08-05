@@ -107,7 +107,7 @@ class PingAdmin(PermissionModelAdmin):
                 'obj_opts': obj._meta,
                 'obj': obj,
                 'ip_addr': addr,
-                'metrics_url': reverse('admin:pings_ping_timeseries', args=args), 
+                'metrics_url': reverse('admin:pings_ping_timeseries', args=args),
                 'has_change_permission': self.has_change_permission(request, obj=obj, view=False),
             })
             self.change_list_template = 'admin/pings/ping/ping_list.html'

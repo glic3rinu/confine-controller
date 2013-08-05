@@ -17,8 +17,7 @@ class TicketPermission(Permission):
     def change(self, obj, cls, user):
         if obj is None:
             return True
-        involved = obj.involved_by(user)
-        return involved
+        return obj.is_involved_by(user)
     
     def delete(self, obj, cls, user):
         return self.change(obj, cls, user)

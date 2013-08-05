@@ -1,4 +1,6 @@
-import os, glob, time
+import glob
+import os
+import time
 
 from celery.task import task
 
@@ -52,5 +54,6 @@ def update_tincd():
     # In some systems it is mandatory to send a HUP signal in order to reload new subnets
     # We fail silently because we don't want to bother most users
     context = { 'tincd_bin': TINC_TINCD_BIN, 'net_name': TINC_NET_NAME }
-    return run("sudo %(tincd_bin)s -kHUP -n %(net_name)s" % context, err_codes=[0,1]).stderr
+    tinc_hup = "sudo %(tincd_bin)s -kHUP -n %(net_name)s" % context
+    return run(tinc_hup, err_codes=[0,1]).stderr
 

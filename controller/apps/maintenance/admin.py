@@ -10,7 +10,7 @@ from pygments.lexers import BashLexer
 from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import (get_admin_link, colored, admin_link, wrap_admin_view, 
+from controller.admin.utils import (get_admin_link, colored, admin_link, wrap_admin_view,
     action_to_view)
 from controller.utils.html import monospace_format, MONOSPACE_FONTS
 from nodes.admin import NodeAdmin
@@ -32,12 +32,14 @@ STATE_COLORS = {
     Instance.REVOKED: 'purple',
     Instance.OUTDATED: 'dark',
     Execution.PROGRESS: 'blue',
-    Execution.COMPLETE: 'green'}
+    Execution.COMPLETE: 'green'
+}
 
 
 def num_instances(execution):
     total = execution.instances.count()
-    done = execution.instances.exclude(state__in=[Instance.RECEIVED, Instance.STARTED])
+    final_states = [Instance.RECEIVED, Instance.STARTED]
+    done = execution.instances.exclude(state__in=final_states)
     if execution.retry_if_offline:
         done = done.exclude(state=Instance.TIMEOUT)
     done = done.count()
@@ -54,9 +56,11 @@ colored_state.short_description = 'State'
 
 
 class ExecutionInline(admin.TabularInline):
+    fields = [
+        num_instances, 'is_active', 'include_new_nodes', 'retry_if_offline',
+        'created_on', 'state'
+    ]
     model = Execution
-    fields = [num_instances, 'is_active', 'include_new_nodes', 'retry_if_offline',
-              'created_on', 'state']
     readonly_fields = ['created_on', num_instances, 'state']
     extra = 0
     form = ExecutionInlineForm
@@ -120,7 +124,8 @@ class NodeListAdmin(NodeAdmin):
         context = {
             'title': mark_safe(title),
             'header_title': 'Executing %s operation' % operation,
-            'operation': operation, }
+            'operation': operation
+        }
         context.update(extra_context or {})
         # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter
         return admin.ModelAdmin.changelist_view(self, request, extra_context=context)
@@ -136,8 +141,10 @@ class NodeListAdmin(NodeAdmin):
 
 
 class OperationAdmin(PermissionModelAdmin):
-    list_display = ['name', 'identifier', 'num_executions', 'has_active_executions',
-                    'has_include_new_nodes', 'num_instances']
+    list_display = [
+        'name', 'identifier', 'num_executions', 'has_active_executions',
+        'has_include_new_nodes', 'num_instances'
+    ]
     list_display_links = ['name', 'identifier']
     list_filter = ['executions__is_active']
     inlines = [ExecutionInline]
@@ -202,20 +209,25 @@ class OperationAdmin(PermissionModelAdmin):
 
 
 class ExecutionAdmin(admin.ModelAdmin):
-    list_display = ['__unicode__', admin_link('operation'), 'is_active',
-                    'include_new_nodes', 'retry_if_offline', num_instances]
+    list_display = [
+        '__unicode__', admin_link('operation'), 'is_active', 'include_new_nodes',
+        'retry_if_offline', num_instances
+    ]
+    list_filter = ['is_active', 'include_new_nodes', 'retry_if_offline', 'operation']
     inlines = [InstanceInline]
     readonly_fields = ['operation_link', 'display_script']
-    list_filter = ['is_active', 'include_new_nodes', 'retry_if_offline', 'operation']
-    fields = ['operation_link', 'display_script', 'is_active', 'include_new_nodes',
-              'retry_if_offline']
+    fields = [
+        'operation_link', 'display_script', 'is_active', 'include_new_nodes',
+        'retry_if_offline'
+    ]
     
     class Media:
         css = {
             "all": (
                 "controller/css/github.css",
                 "state/admin/css/details.css",
-                'controller/css/hide-inline-id.css') }
+                "controller/css/hide-inline-id.css")
+        }
     
     def display_script(self, instance):
         style = ('<style>code,pre {font-size:1.13em;}</style>'
@@ -230,15 +242,23 @@ class ExecutionAdmin(admin.ModelAdmin):
 
 
 class InstanceAdmin(ChangeViewActions):
-    list_display = ['__unicode__', admin_link('execution__operation'), admin_link('execution'),
-                    admin_link('node'), colored('state', STATE_COLORS), 'last_try', 
-                    'execution__retry_if_offline']
-    list_filter = ['state', 'execution__operation__identifier', 'execution__is_active',
-                   'execution__retry_if_offline']
-    fields = ['execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
-              'traceback', 'state', 'task_link']
-    readonly_fields = ['execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr',
-                       'exit_code', 'traceback', 'state', 'task_link']
+    list_display = [
+        '__unicode__', admin_link('execution__operation'), admin_link('execution'),
+        admin_link('node'), colored('state', STATE_COLORS), 'last_try', 
+        'execution__retry_if_offline'
+    ]
+    list_filter = [
+        'state', 'execution__operation__identifier', 'execution__is_active',
+        'execution__retry_if_offline'
+    ]
+    fields = [
+        'execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
+        'traceback', 'state', 'task_link'
+    ]
+    readonly_fields = [
+        'execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
+        'traceback', 'state', 'task_link'
+    ]
     actions = [kill_instance, revoke_instance, run_instance]
     change_view_actions = [kill_instance, revoke_instance, run_instance]
     change_form_template = 'admin/maintenance/instance/change_form.html'

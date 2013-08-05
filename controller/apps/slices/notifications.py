@@ -23,7 +23,8 @@ class SliceExpiration(Notification):
         'Ops team.\n')
     
     def check_condition(self, obj):
-        return obj.expires_on <= (timezone.now()+SLICES_SLICE_EXP_WARN).date()
+        threshold = (timezone.now()+SLICES_SLICE_EXP_WARN).date()
+        return obj.expires_on <= threshold
     
     def get_recipients(self, obj):
         return obj.group.get_emails(role='admin')
@@ -32,7 +33,8 @@ class SliceExpiration(Notification):
         context = super(SliceExpiration, self).get_context(obj)
         context.update({
             'slice': obj,
-            'expiration_days': (obj.expires_on-timezone.now().date()).days })
+            'expiration_days': (obj.expires_on-timezone.now().date()).days
+        })
         return context
 
 

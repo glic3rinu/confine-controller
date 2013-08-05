@@ -18,7 +18,9 @@ class NodeNotAvailable(Notification):
         'Your node appear as offline')
     
     def check_condition(self, obj):
-        return (obj.current == NodeState.OFFLINE and obj.last_change_on < timezone.now()-STATE_NODE_OFFLINE_WARNING)
+        offline = obj.current == NodeState.OFFLINE
+        threshold = obj.last_change_on < timezone.now()-STATE_NODE_OFFLINE_WARNING
+        return offline and threshold
     
     def get_recipients(self, obj):
         return obj.node.group.get_emails(role='admin')
@@ -27,5 +29,6 @@ class NodeNotAvailable(Notification):
         context = super(NodeNotAvailable, self).get_context(obj)
         context.update({
             'slice': obj,
-            'exp_warn': STATE_NODE_OFFLINE_WARNING })
+            'exp_warn': STATE_NODE_OFFLINE_WARNING
+        })
         return context

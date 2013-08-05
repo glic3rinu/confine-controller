@@ -1,4 +1,8 @@
-import requests, gevent, os, json
+import json
+import os
+
+import gevent
+import requests, gevent
 from celery.task import periodic_task, task
 from django.db.models import get_model
 

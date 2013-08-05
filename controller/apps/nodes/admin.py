@@ -44,9 +44,9 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['name', 'id', 'arch',
-        colored('set_state', STATES_COLORS, verbose=True, bold=False),
-        admin_link('group'), 'num_ifaces']
+    list_display = [
+        'name', 'id', 'arch', 'display_set_state', admin_link('group'), 'num_ifaces'
+    ]
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
     default_changelist_filters = (('my_nodes', 'True'),)
@@ -63,10 +63,15 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                        'display_cert', 'priv_ipv4_prefix', 'sliver_mac_prefix',
                        'sliver_pub_ipv6', 'boot_sn')
         }),
-        )
+    )
     actions = [request_cert, reboot_selected]
     change_view_actions = [reboot_selected, request_cert]
     change_form_template = "admin/controller/change_form.html"
+    
+    def display_set_state(self, node):
+        return colored('set_state', STATES_COLORS, verbose=True, bold=False)(node)
+    display_set_state.short_description = 'Set state'
+    display_set_state.admin_order_field = 'set_state'
     
     def display_cert(self, node):
         """ Display certificate with some contextual help if cert is not present """

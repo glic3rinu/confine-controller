@@ -1,4 +1,7 @@
-import re, string, base64, struct
+import base64
+import re
+import string
+import struct
 from uuid import UUID
 
 from django.core import validators
@@ -12,7 +15,8 @@ def validate_uuid(value):
     try: 
         UUID(value)
     except:
-        raise ValidationError('%s is a badly formed hexadecimal UUID string.' % value)
+        msg = '%s is a badly formed hexadecimal UUID string.' % value
+        raise ValidationError(msg)
 
 
 def validate_rsa_pubkey(value):
@@ -29,7 +33,8 @@ def validate_rsa_pubkey(value):
             bio = BIO.MemoryBuffer(pk)
             RSA.load_pub_key_bio(bio)
         except:
-            raise ValidationError('This is not a valid RSA (X.501 or PKCS#1) public key.')
+            msg = 'This is not a valid RSA (X.501 or PKCS#1) public key.'
+            raise ValidationError(msg)
 
 
 def validate_ssh_pubkey(value):
@@ -45,19 +50,19 @@ def validate_ssh_pubkey(value):
 
 def validate_net_iface_name(value):
     validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'),
-        'Enter a valid network interface name.', 'invalid')(value)
+            'Enter a valid network interface name.', 'invalid')(value)
 
 
 def validate_host_name(value):
     ValidHostnameRegex = ("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)"
                           "*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$")
     validators.RegexValidator(re.compile(ValidHostnameRegex),
-        'Insert a valid host name.', 'invalid')(value)
+            'Insert a valid host name.', 'invalid')(value)
 
 
 def validate_prop_name(value):
     validators.RegexValidator(re.compile('^[a-z][_0-9a-z]*[0-9a-z]$'),
-        'Enter a valid property name.', 'invalid')(value)
+            'Enter a valid property name.', 'invalid')(value)
 
 
 def validate_ascii(value):
@@ -95,7 +100,7 @@ class OrValidator(object):
         for validator in self.validators:
             try:
                 validator(value)
-            except ValidationError, e: 
+            except ValidationError, e:
                 # TODO get exception message in a readable way not:
                 #      [u'blabana'] or [u'kajkja'] ....
                 msg.append(str(e))

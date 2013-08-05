@@ -1,4 +1,8 @@
-import getpass, pwd, re, os, functools
+import functools
+import getpass
+import pwd
+import re
+import os
 from optparse import make_option
 
 from django.contrib.contenttypes.models import ContentType
@@ -114,10 +118,11 @@ class Command(BaseCommand):
             'tincd_bin': TINC_TINCD_BIN,
             'net_name': tinc_net_name,
             'net_root': os.path.join(TINC_TINCD_ROOT, tinc_net_name),
-            'tinc_conf': ( "BindToAddress = %s\n"
-                           "Port = %s\n"
-                           "Name = server\n"
-                           "StrictSubnets = yes" % (tinc_address, tinc_port)),
+            'tinc_conf': (
+                "BindToAddress = %s\n"
+                "Port = %s\n"
+                "Name = server\n"
+                "StrictSubnets = yes" % (tinc_address, tinc_port)),
             'tinc_up': tinc_server.get_tinc_up(),
             'tinc_down': tinc_server.get_tinc_down(),
             'mgmt_prefix': mgmt_prefix.split('::')[0],
@@ -155,8 +160,9 @@ class Command(BaseCommand):
         tinc_server.pubkey = pub_key
         tinc_server.save()
         
-        sudoers_hup = ("%(user)s\s\s*ALL=NOPASSWD:\s\s*%(tincd_bin)s\s\s*"
-                       "-kHUP\s\s*-n %(net_name)s") % context
+        sudoers_hup = (
+            "%(user)s\s\s*ALL=NOPASSWD:\s\s*%(tincd_bin)s\s\s*-kHUP\s\s*-n %(net_name)s"
+        ) % context
         sudoers_exists = run('grep "%s" /etc/sudoers' % sudoers_hup, err_codes=[0,1,2])
         if sudoers_exists.return_code == 1:
             cmd = "%(user)s ALL=NOPASSWD: %(tincd_bin)s -kHUP -n %(net_name)s" % context

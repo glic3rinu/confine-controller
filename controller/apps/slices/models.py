@@ -1,4 +1,6 @@
-import inspect, os, tempfile
+import inspect
+import os
+import tempfile
 from hashlib import sha256
 
 from django_transaction_signals import defer
@@ -14,7 +16,7 @@ from controller.models.fields import MultiSelectField, NullableCharField
 from controller.utils.ip import lsb, msb, int_to_hex_str
 from controller.utils import autodiscover
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
-    validate_sha256)
+        validate_sha256, validate_file_extensions)
 from nodes.models import Node
 from nodes.settings import NODES_NODE_ARCHS
 
@@ -62,29 +64,30 @@ class Template(models.Model):
     Describes a template available in the testbed for slices and slivers to use.
     """
     name = models.CharField(max_length=32, unique=True,
-        help_text='The unique name of this template. A single line of free-form '
-                  'text with no whitespace surrounding it, it can include '
-                  'version numbers and other information.',
-        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
-                   'Enter a valid name.', 'invalid')])
+            help_text='The unique name of this template. A single line of free-form '
+                      'text with no whitespace surrounding it, it can include '
+                      'version numbers and other information.',
+            validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
+                       'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True,
-        help_text='An optional free-form textual description of this template.')
+            help_text='An optional free-form textual description of this template.')
     type = models.CharField(max_length=32, choices=settings.SLICES_TEMPLATE_TYPES,
-        help_text='The system type of this template. Roughly equivalent to the '
-                  'distribution the template is based on, e.g. debian (Debian, '
-                  'Ubuntu...), fedora (Fedora, RHEL...), suse (openSUSE, SUSE '
-                  'Linux Enterprise...). To instantiate a sliver based on a '
-                  'template, the research device must support its type.',
-        default=settings.SLICES_TEMPLATE_TYPE_DFLT)
+            help_text='The system type of this template. Roughly equivalent to the '
+                      'distribution the template is based on, e.g. debian (Debian, '
+                      'Ubuntu...), fedora (Fedora, RHEL...), suse (openSUSE, SUSE '
+                      'Linux Enterprise...). To instantiate a sliver based on a '
+                      'template, the research device must support its type.',
+            default=settings.SLICES_TEMPLATE_TYPE_DFLT)
     node_archs = MultiSelectField(max_length=256, choices=NODES_NODE_ARCHS,
-        help_text='The node architectures accepted by this template (as reported '
-                  'by uname -m, non-empty). Slivers using this template should '
-                  'run on nodes whose architecture is listed here.',
-        default='i586,')
+            help_text='The node architectures accepted by this template (as reported '
+                      'by uname -m, non-empty). Slivers using this template should '
+                      'run on nodes whose architecture is listed here.',
+            default='i586,')
     is_active = models.BooleanField(default=True)
-    image = models.FileField(help_text='Template\'s image file.',
-        upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
-                                 settings.SLICES_TEMPLATE_IMAGE_NAME))
+    image = models.FileField(help_text="Template's image file.",
+            upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
+                                     settings.SLICES_TEMPLATE_IMAGE_NAME),
+            validators=[validate_file_extensions(settings.SLICES_TEMPLATE_IMAGE_EXTENSIONS)])
     
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.type)
@@ -110,54 +113,55 @@ class Slice(models.Model):
               (START, 'START'),)
     
     name = models.CharField(max_length=64, unique=True,
-        help_text='A unique name of this slice. A single non-empty line of free-form '
-                  'text with no whitespace surrounding it.',
-        validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
-                   'Enter a valid name.', 'invalid')])
+            help_text='A unique name of this slice. A single non-empty line of free-form '
+                      'text with no whitespace surrounding it.',
+            validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
+                       'Enter a valid name.', 'invalid')])
     description = models.TextField(blank=True,
-        help_text='An optional free-form textual description of this slice.')
+            help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
-        help_text='Expiration date of this slice. Automatically deleted once '
-                  'expires.')
+            help_text='Expiration date of this slice. Automatically deleted once '
+                      'expires.')
     instance_sn = models.PositiveIntegerField(default=0, blank=True,
-        help_text='The number of times this slice has been instructed to be reset '
-                  '(instance sequence number). Automatically incremented by the '
-                  'reset function.',
-        verbose_name='instance sequence number')
+            help_text='The number of times this slice has been instructed to be reset '
+                      '(instance sequence number). Automatically incremented by the '
+                      'reset function.',
+            verbose_name='instance sequence number')
     new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
-        help_text='The instance sequence number that newly created slivers will '
-                  'get. Automatically incremented whenever a sliver of this slice '
-                  'is instructed to be updated.',
-        verbose_name='New sliver instance sequence number')
+            help_text='The instance sequence number that newly created slivers will '
+                      'get. Automatically incremented whenever a sliver of this slice '
+                      'is instructed to be updated.',
+            verbose_name='New sliver instance sequence number')
     vlan_nr = models.IntegerField('VLAN number', null=True, blank=True,
-        help_text='VLAN number allocated to this slice. The only values that can '
-                  'be set are null which means that no VLAN is wanted for the '
-                  'slice, and -1 which asks the server to allocate for the slice '
-                  'a new VLAN number (100 <= vlan_nr < 0xFFF) while the slice is '
-                  'instantiated (or active). It cannot be changed on an '
-                  'instantiated slice with slivers having isolated interfaces.')
+            help_text='VLAN number allocated to this slice. The only values that can '
+                      'be set are null which means that no VLAN is wanted for the '
+                      'slice, and -1 which asks the server to allocate for the slice '
+                      'a new VLAN number (100 <= vlan_nr < 0xFFF) while the slice is '
+                      'instantiated (or active). It cannot be changed on an '
+                      'instantiated slice with slivers having isolated interfaces.')
     exp_data = models.FileField(blank=True, verbose_name='experiment data',
-        upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
-                                 settings.SLICES_SLICE_EXP_DATA_NAME,),
-        help_text='File containing experiment data for slivers (if they do not '
-                  'explicitly indicate one)')
+            upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
+                                     settings.SLICES_SLICE_EXP_DATA_NAME,),
+            help_text='File containing experiment data for slivers (if they do not '
+                      'explicitly indicate one)',
+            validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
     exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
-        help_text='The URI of a file containing experiment data for slivers (if '
-                  'they do not explicitly indicate one). Its format and contents '
-                  'depend on the type of the template to be used.')
+            help_text='The URI of a file containing experiment data for slivers (if '
+                      'they do not explicitly indicate one). Its format and contents '
+                      'depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-        help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
-                  'Compulsory when a file has been specified.',
-        validators=[validate_sha256])
+            help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
+                      'Compulsory when a file has been specified.',
+            validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
-        help_text='The state set on this slice (set state) and its slivers (if they '
-                  'do not explicitly indicate one). Possible values: register (initial), '
-                  'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
-                  'slice-sliver-states">slice and sliver states</a> for the full '
-                  'description of set states and possible transitions.')
+            help_text='The state set on this slice (set state) and its slivers (if they '
+                      'do not explicitly indicate one). Possible values: register (initial), '
+                      'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
+                      'slice-sliver-states">slice and sliver states</a> for the full '
+                      'description of set states and possible transitions.')
     template = models.ForeignKey(Template,
-        help_text='The template to be used by the slivers of this slice (if they '
-                  'do not explicitly indicate one).')
+            help_text='The template to be used by the slivers of this slice (if they '
+                      'do not explicitly indicate one).')
     group = models.ForeignKey('users.Group', related_name='slices')
     
     def __unicode__(self):
@@ -279,7 +283,8 @@ class Sliver(models.Model):
     exp_data = models.FileField(blank=True, verbose_name='experiment data',
             upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
                                      settings.SLICES_SLIVER_EXP_DATA_NAME),
-            help_text='File containing experiment data for this sliver.')
+            help_text='File containing experiment data for this sliver.',
+            validators=[validate_file_extensions(settings.SLICES_SLIVER_EXP_DATA_EXTENSIONS)])
     exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
             help_text='If present, the URI of a file containing experiment data for '
                       'this sliver, instead of the one specified by the slice. Its '

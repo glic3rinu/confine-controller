@@ -11,14 +11,14 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_admin_link, colored, admin_link, wrap_admin_view,
-    action_to_view)
+    action_to_view, display_timesince)
 from controller.utils.html import monospace_format, MONOSPACE_FONTS
 from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 
 from .actions import ( execute_operation, execute_operation_changelist, run_instance,
-    kill_instance, revoke_instance )
+    kill_instance, revoke_instance, manage_instances )
 from .forms import ExecutionInlineForm
 from .models import Operation, Execution, Instance
 
@@ -55,15 +55,34 @@ def colored_state(instance):
 colored_state.short_description = 'State'
 
 
+def state_link(instance):
+    state = colored_state(instance)
+    return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name=state))
+state_link.short_description = 'State'
+state_link.admin_order_field = 'state'
+
+
+def last_try(instance):
+    return display_timesince(instance.last_try)
+last_try.admin_order_field = 'last_try'
+
+
 class ExecutionInline(admin.TabularInline):
     fields = [
-        num_instances, 'is_active', 'include_new_nodes', 'retry_if_offline',
-        'created_on', 'state'
+        'execution_link', num_instances, 'is_active', 'include_new_nodes',
+        'retry_if_offline', 'created', 'state'
     ]
     model = Execution
-    readonly_fields = ['created_on', num_instances, 'state']
+    readonly_fields = ['execution_link', 'created', num_instances, 'state']
     extra = 0
     form = ExecutionInlineForm
+    
+    def execution_link(self, execution):
+        return mark_safe('<b>' + get_admin_link(execution) + '</b>')
+    execution_link.short_description = '#'
+    
+    def created(self, execution):
+        return display_timesince(execution.created_on)
     
     def has_add_permission(self, *args, **kwargs):
         return False
@@ -77,18 +96,13 @@ class InstanceInline(admin.TabularInline):
     model = Instance
     extra = 0
     max_num = 0
-    fields = ['node_link', 'state_link', 'last_try', 'exit_code']
-    readonly_fields = ['node_link', 'state_link', 'last_try', 'exit_code']
+    fields = ['node_link', state_link, last_try, 'exit_code']
+    readonly_fields = ['node_link', state_link, last_try, 'exit_code']
     
     def node_link(self, instance):
         """ Link to related node used on change_view """
         return mark_safe("<b>%s</b>" % get_admin_link(instance.node))
     node_link.short_description = 'Node'
-    
-    def state_link(self, instance):
-        state = colored_state(instance)
-        return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name=state))
-    state_link.short_description = 'State'
     
     def has_add_permission(self, *args, **kwargs):
         return False
@@ -143,7 +157,7 @@ class NodeListAdmin(NodeAdmin):
         return False
 
 
-class OperationAdmin(PermissionModelAdmin):
+class OperationAdmin(PermissionModelAdmin, ChangeViewActions):
     list_display = [
         'name', 'identifier', 'num_executions', 'has_active_executions',
         'has_include_new_nodes', 'num_instances'
@@ -152,14 +166,13 @@ class OperationAdmin(PermissionModelAdmin):
     list_filter = ['executions__is_active']
     inlines = [ExecutionInline]
     save_and_continue = True
+    actions = [manage_instances]
+    change_view_actions = [manage_instances]
     # TODO fix this annoying mandatory declaration once and for all
     change_form_template = "admin/maintenance/operation/change_form.html"
     
     class Media:
         css = { 'all': ('controller/css/hide-inline-id.css',) }
-        js = (
-            'controller/js/jquery-1.9.1.js',
-            'controller/js/changes_not_saved_alert.js')
     
     def num_executions(self, instance):
         num = instance.executions.count()
@@ -211,7 +224,7 @@ class OperationAdmin(PermissionModelAdmin):
         return super(OperationAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class ExecutionAdmin(admin.ModelAdmin):
+class ExecutionAdmin(ChangeViewActions):
     list_display = [
         '__unicode__', admin_link('operation'), 'is_active', 'include_new_nodes',
         'retry_if_offline', num_instances
@@ -223,6 +236,7 @@ class ExecutionAdmin(admin.ModelAdmin):
         'operation_link', 'display_script', 'is_active', 'include_new_nodes',
         'retry_if_offline'
     ]
+    change_view_actions = [manage_instances]
     
     class Media:
         css = {
@@ -246,21 +260,20 @@ class ExecutionAdmin(admin.ModelAdmin):
 
 class InstanceAdmin(ChangeViewActions):
     list_display = [
-        '__unicode__', admin_link('execution__operation'), admin_link('execution'),
-        admin_link('node'), colored('state', STATE_COLORS), 'last_try', 
-        'execution__retry_if_offline'
+        '__unicode__', 'display_operation', 'display_execution',
+        admin_link('node'), state_link, last_try, 'execution__retry_if_offline'
     ]
     list_filter = [
         'state', 'execution__operation__identifier', 'execution__is_active',
         'execution__retry_if_offline'
     ]
     fields = [
-        'execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
-        'traceback', 'state', 'task_link'
+        'display_operation', 'display_execution', 'node', last_try, 'mono_stdout',
+        'mono_stderr', 'exit_code', 'traceback', 'state', 'task_link'
     ]
     readonly_fields = [
-        'execution', 'node', 'last_try', 'mono_stdout', 'mono_stderr', 'exit_code',
-        'traceback', 'state', 'task_link'
+        'display_operation', 'display_execution', 'node', last_try, 'mono_stdout',
+        'mono_stderr', 'exit_code', 'traceback', 'state', 'task_link'
     ]
     actions = [kill_instance, revoke_instance, run_instance]
     change_view_actions = [kill_instance, revoke_instance, run_instance]
@@ -278,6 +291,16 @@ class InstanceAdmin(ChangeViewActions):
     task_link.allow_tags = True
     task_link.short_description = "Task"
     
+    def display_operation(self, instance):
+        return get_admin_link(instance.execution.operation)
+    display_operation.short_description = 'Operation'
+    display_operation.admin_order_field = 'execution__operation'
+    
+    def display_execution(self, instance):
+        return get_admin_link(instance.execution)
+    display_execution.short_description = 'execution'
+    display_execution.admin_order_field = 'execution'
+    
     def lookup_allowed(self, key, value):
         if key == 'execution__operation':
             return True
@@ -290,6 +313,25 @@ class InstanceAdmin(ChangeViewActions):
     def mono_stderr(self, instance):
         return monospace_format(instance.stderr)
     mono_stderr.short_description = 'stderr'
+    
+    def changelist_view(self, request, extra_context=None):
+        context = {}
+        for query, model in [('execution__operation', Operation), ('execution', Execution)]:
+            pk = request.GET.get(query, False)
+            if pk:
+                related_object = model.objects.get(pk=pk)
+                url = get_admin_link(related_object)
+                name = related_object._meta.object_name.lower()
+                changelist_url = reverse('admin:maintenance_%s_changelist' % name)
+                changelist_url = '<a href="%s">%s</a>' % (changelist_url, name.capitalize())
+                context = {
+                    'title': mark_safe('Manage instances of %s %s' % (name, url)),
+                    'related_object_url': url,
+                    'related_object_changelist_url': mark_safe(changelist_url)
+                }
+                break
+        context.update(extra_context or {})
+        return super(InstanceAdmin, self).changelist_view(request, extra_context=context)
 
 
 admin.site.register(Operation, OperationAdmin)

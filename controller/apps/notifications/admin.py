@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import action_to_view, wrap_admin_view
-from controller.utils.plugins import sync_plugins_action
+from plugins.actions import sync_plugins_action
 
 from notifications.actions import (enable_selected, disable_selected, run_notifications,
     upgrade_notifications)

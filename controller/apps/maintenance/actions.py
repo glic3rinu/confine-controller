@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
@@ -89,3 +90,17 @@ def run_instance(modeladmin, request, queryset):
 run_instance.url_name = 'run'
 run_instance.verbose_name = 'run'
 
+
+def manage_instances(modeladmin, request, queryset):
+    if queryset.count() != 1:
+        messages.warning(request, "One element at a time")
+        return
+    obj = queryset.get()
+    related_field = 'execution'
+    if obj._meta.object_name.lower() == 'operation':
+        related_field += '__operation'
+    url = reverse('admin:maintenance_instance_changelist')
+    url += '?%s=%i' % (related_field, obj.pk)
+    return redirect(url)
+manage_instances.url = 'mgmt-instances'
+manage_instances.verbose_name = 'Manage instances'

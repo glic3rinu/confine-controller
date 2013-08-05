@@ -58,7 +58,8 @@ class Execution(models.Model):
         ordering = ['-created_on']
     
     def __unicode__(self):
-        return self.operation.identifier
+        num = self.operation.executions.filter(pk__lte=self.pk).count()
+        return "%s#%i" % (self.operation.identifier, num)
     
     def revoke(self):
         for instance in self.instances:

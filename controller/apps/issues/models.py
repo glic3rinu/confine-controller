@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Q
 
 from controller.models.utils import generate_chainer_manager
 from controller.utils import send_email_template
@@ -35,31 +36,51 @@ class Queue(models.Model):
         super(Queue, self).save(*args, **kwargs)
 
 
+class TicketQuerySet(models.query.QuerySet):
+    def involved_by(self, user, *args, **kwargs):
+        qset = Q(created_by=user) | Q(owner=user)
+        qset = qset | Q(messages__author=user) | Q(group__in=user.groups.all())
+        return self.filter(qset, *args, **kwargs).distinct()
+    
+    def visible_by(self, user, *args, **kwargs):
+        if user.is_superuser:
+            return self.filter(*args, **kwargs)
+        public = Q(visibility=Ticket.PUBLIC)
+        private = Q(created_by=user) | Q(owner=user)
+        private = private | Q(messages__author=user) | Q(group__in=user.groups.all())
+        private = Q(visibility=Ticket.PRIVATE) & Q(private)
+        return self.filter(Q(public | private)).distinct().filter(*args, **kwargs)
+
+
 class Ticket(models.Model):
     HIGH = 'HIGH'
     MEDIUM = 'MEDIUM'
     LOW = 'LOW'
-    PRIORITIES = ((HIGH, "High"),
-                  (MEDIUM, "Medium"),
-                  (LOW, "Low"),)
+    PRIORITIES = (
+        (HIGH, 'High'),
+        (MEDIUM, 'Medium'),
+        (LOW, 'Low'),
+    )
     NEW = 'NEW'
     IN_PROGRESS = 'IN_PROGRESS'
     RESOLVED = 'RESOLVED'
     FEEDBACK = 'FEEDBACK'
     REJECTED = 'REJECTED'
     CLOSED = 'CLOSED'
-    STATES = ((NEW, "New"),
-              (IN_PROGRESS, "In Progress"),
-              (RESOLVED, "Resolved"),
-              (FEEDBACK, "Feedback"),
-              (REJECTED, "Rejected"),
-              (CLOSED, "Closed"),)
-    INTERNAL = 'INTERNAL'
+    STATES = (
+        (NEW, 'New'),
+        (IN_PROGRESS, 'In Progress'),
+        (RESOLVED, 'Resolved'),
+        (FEEDBACK, 'Feedback'),
+        (REJECTED, 'Rejected'),
+        (CLOSED, 'Closed'),
+    )
     PUBLIC = 'PUBLIC'
     PRIVATE = 'PRIVATE'
-    VISIBILITY_CHOICES = ((INTERNAL, "Internal"),
-                          (PUBLIC,  "Public"),
-                          (PRIVATE, "Private"),)
+    VISIBILITY_CHOICES = (
+        (PUBLIC,  'Public'),
+        (PRIVATE, 'Private'),
+    )
     
     created_by = models.ForeignKey(get_user_model(), related_name='created_tickets')
     group = models.ForeignKey(Group, null=True, blank=True, related_name='assigned_tickets')
@@ -74,6 +95,8 @@ class Ticket(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified_on = models.DateTimeField(auto_now=True)
     cc = models.TextField('CC', blank=True, help_text="emails to send a carbon copy")
+    
+    objects = generate_chainer_manager(TicketQuerySet)
     
     class Meta:
         ordering = ["-last_modified_on"]
@@ -118,6 +141,15 @@ class Ticket(models.Model):
         if new_issue:
             # PK should be available for rendering the template
             self.notify()
+    
+    def involved_by(self, user):
+        """ user has participated or is referenced on the ticket as owner or member
+            of the group
+        """
+        involved = self.created_by == user or self.owner == user
+        involved = involved or self.messages.filter(author=user).exists()
+        involved = involved or user.is_member(self.group)
+        return involved
     
     @property
     def cc_emails(self):

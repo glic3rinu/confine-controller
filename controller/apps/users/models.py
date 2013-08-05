@@ -228,6 +228,9 @@ class User(auth_models.AbstractBaseUser):
     
     def has_role(self, role):
         return self.has_roles((role,))
+    
+    def is_member(self, group):
+        return self.roles.filter(group=group).exists()
 
 
 class AuthToken(models.Model):

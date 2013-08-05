@@ -17,7 +17,8 @@ class TicketPermission(Permission):
     def change(self, obj, cls, user):
         if obj is None:
             return True
-        return obj.created_by == user
+        involved = obj.involved_by(user)
+        return involved
     
     def delete(self, obj, cls, user):
         return self.change(obj, cls, user)
@@ -25,14 +26,7 @@ class TicketPermission(Permission):
 
 class MessagePermission(Permission):
     def view(self, obj, cls, user):
-        if obj is None:
-            return True
-        if obj.visibility == Message.PUBLIC:
-            return True
-        elif obj.visibility == Message.PRIVATE:
-            return obj.author == user
-        elif obj.visibility == Message.INERNAL:
-            return obj.ticket.group.is_member(user)
+        return True
     
     def add(self, obj, cls, user):
         return True

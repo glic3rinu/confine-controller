@@ -16,9 +16,7 @@ class MyTicketsListFilter(MySimpleListFilter):
     
     def queryset(self, request, queryset):
         if self.value() == 'True':
-            if request.user.is_superuser:
-                return queryset.filter(owner=request.user)
-            return queryset.filter(created_by=request.user)
+            return queryset.involved_by(request.user)
 
 
 class TicketStateListFilter(MySimpleListFilter):

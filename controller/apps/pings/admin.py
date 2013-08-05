@@ -23,15 +23,18 @@ from .tasks import ping
 STATES_COLORS = {
     'OFFLINE': 'red',
     'NODATA': 'purple',
-    'ONLINE': 'green',}
+    'ONLINE': 'green',
+}
 
 
 class PingAdmin(PermissionModelAdmin):
-    list_display = ('content_object', 'packet_loss_percentage', 'min', 'avg',
-                    'max', 'mdev', 'date_since')
+    list_display = (
+        'content_object', 'packet_loss_percentage', 'min', 'avg', 'max', 'mdev',
+        'date_since'
+    )
+    list_display_links = ('content_object',)
     fields = list_display
     date_hierarchy = 'date'
-    list_display_links = ('content_object',)
     readonly_fields = list_display
     sudo_actions = ['delete_selected']
     
@@ -105,7 +108,8 @@ class PingAdmin(PermissionModelAdmin):
                 'obj': obj,
                 'ip_addr': addr,
                 'metrics_url': reverse('admin:pings_ping_timeseries', args=args), 
-                'has_change_permission': self.has_change_permission(request, obj=obj, view=False),})
+                'has_change_permission': self.has_change_permission(request, obj=obj, view=False),
+            })
             self.change_list_template = 'admin/pings/ping/ping_list.html'
         else:
             self.change_list_template = None

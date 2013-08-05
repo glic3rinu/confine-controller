@@ -262,12 +262,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def queryset(self, request):
         """ Filter tickets according to their visibility preference """
         qs = super(TicketAdmin, self).queryset(request)
-        if not request.user.is_superuser:
-            public = Q(visibility=Ticket.PUBLIC)
-            private = Q(visibility=Ticket.PRIVATE, created_by=request.user)
-            qset = Q(public | private)
-            qs = qs.filter(qset).exclude(visibility=Ticket.INTERNAL).distinct()
-        return qs
+        return qs.visible_by(request.user)
     
     def get_fieldsets(self, request, obj=None):
         if not obj:
@@ -314,12 +309,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         if db_field.name == 'subject':
             kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
         return super(TicketAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-    
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
-        """ Remove INTERNAL visibility choice for unprivileged users """
-        if db_field.name == "visibility" and not request.user.is_superuser:
-            kwargs['choices'] = [ c for c in db_field.choices if c[0] != Ticket.INTERNAL ]
-        return super(TicketAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Define creator for new tickets """

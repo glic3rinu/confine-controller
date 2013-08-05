@@ -65,9 +65,9 @@ class TincServerInline(TincHostInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     # TODO warn user when it tries to modify a tincserver with depends on more than 
     #      one client without alternative path
+    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address', 'is_active']
     model = TincServer
     verbose_name_plural = 'tinc server'
-    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address', 'is_active']
     form = TincServerInlineForm
 
 

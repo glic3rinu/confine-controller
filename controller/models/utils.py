@@ -1,7 +1,8 @@
 import os
 
 from django.db import models
-from singleton_models.models import SingletonModel
+
+from singletons.models import SingletonModel
 
 
 def generate_chainer_manager(qs_class):

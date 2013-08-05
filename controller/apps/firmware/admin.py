@@ -3,13 +3,13 @@ from __future__ import absolute_import
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
-from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
     colored, wrap_admin_view)
 from controller.utils.html import monospace_format
 from nodes.models import Node
+from singletons.admin import SingletonModelAdmin
 
 from firmware.actions import get_firmware, sync_plugins
 from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
@@ -158,26 +158,6 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
              'all': (
                 'controller/css/hide-inline-id.css',)
         }
-    
-    def get_urls(self):
-        """ Make URLs singleton aware """
-        info = self.model._meta.app_label, self.model._meta.module_name
-        urlpatterns = patterns('',
-            url(r'^(?P<object_id>\d+)/history/$',
-                wrap_admin_view(self, self.history_view),
-                name='%s_%s_history' % info),
-            url(r'^(?P<object_id>\d+)/delete/$',
-                wrap_admin_view(self, self.delete_view),
-                name='%s_%s_delete' % info),
-            url(r'^(?P<object_id>\d+)$',
-                wrap_admin_view(self, self.change_view),
-                name='%s_%s_change' % info),
-            url(r'^$',
-                wrap_admin_view(self,  self.change_view), {'object_id': '1'},
-                name='%s_%s_changelist' % info),
-        )
-        urls = super(ConfigAdmin, self).get_urls()
-        return urlpatterns + urls
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Warning if the firmware doesn't have any image """

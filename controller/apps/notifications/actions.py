@@ -1,6 +1,6 @@
 from django.db import transaction
 
-from controller.utils.plugins import sync_plugins_action
+from plugins.actions import sync_plugins_action
 
 from .tasks import notify
 

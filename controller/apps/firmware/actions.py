@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.core import management
@@ -9,7 +11,7 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from controller.utils.plugins import sync_plugins_action
+from plugins.actions import sync_plugins_action
 
 from firmware.forms import BaseImageForm, OptionalFilesForm
 from firmware.models import Build, Config

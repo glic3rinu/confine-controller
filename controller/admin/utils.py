@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 
+from functools import update_wrapper
+
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.shortcuts import redirect
-from django.utils.functional import update_wrapper
 from django.utils.html import escape
 from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe

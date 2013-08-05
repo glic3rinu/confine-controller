@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os
 import re
 from hashlib import sha256
@@ -12,16 +14,16 @@ from django.template import Context
 from django_transaction_signals import defer
 from djcelery.models import TaskState
 from private_files import PrivateFileField
-from singleton_models.models import SingletonModel
 
 from controller import settings as controller_settings
 from controller.core.validators import validate_file_extensions
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
-from controller.utils.plugins import PluginModel
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
+from plugins.models import PluginModel
+from singletons.models import SingletonModel
 
 from firmware import settings
 from firmware.context import context

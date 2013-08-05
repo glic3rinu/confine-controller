@@ -147,7 +147,7 @@ function install_requirements () {
                pygments \
                requests==1.2.0 \
                gevent \
-               simplejson"
+               simplejson" # TODO remove
     PRODUCTION_PIP="django-simple-captcha \
                     django-registration==1.0 \
                     django-google-maps"

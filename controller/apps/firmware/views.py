@@ -1,8 +1,9 @@
+import json
+
 from celery.result import AsyncResult
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import simplejson
 
 from controller.admin.utils import get_modeladmin
 from nodes.models import Node
@@ -29,7 +30,7 @@ def build_info_view(request, node_id):
             'description': "%s ..." % result.get('description', 'Waiting for your build task to begin.'),
             'id': build.pk,
             'content_message': build.state_description }
-    return HttpResponse(simplejson.dumps(info), mimetype="application/json")
+    return HttpResponse(json.dumps(info), content_type="application/json")
 
 
 @transaction.commit_on_success

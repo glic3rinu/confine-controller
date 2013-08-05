@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.safestring import mark_safe
-from singleton_models.admin import SingletonModelAdmin
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
@@ -15,6 +14,7 @@ from controller.admin.utils import (colored, admin_link, wrap_admin_view,
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from singletons.admin import SingletonModelAdmin
 from users.helpers import filter_group_queryset
 
 from nodes.actions import request_cert, reboot_selected
@@ -144,29 +144,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
 
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
-    
-    def get_urls(self):
-        """ Make urls singleton aware """
-        info = self.model._meta.app_label, self.model._meta.module_name
-        urlpatterns = patterns('',
-            url(r'^(?P<object_id>\d+)/history/$',
-                wrap_admin_view(self, self.history_view),
-                name='%s_%s_history' % info),
-            url(r'^(?P<object_id>\d+)/delete/$',
-                wrap_admin_view(self, self.delete_view),
-                name='%s_%s_delete' % info),
-            url(r'^(?P<object_id>\d+)$',
-                wrap_admin_view(self, self.change_view),
-                name='%s_%s_change' % info),
-            url(r'^$',
-                wrap_admin_view(self, self.change_view), {'object_id': '1'},
-                name='%s_%s_change' % info),
-            url(r'^$',
-                wrap_admin_view(self, self.change_view), {'object_id': '1'},
-                name='%s_%s_changelist' % info),
-        )
-        urls = super(ServerAdmin, self).get_urls()
-        return urlpatterns + urls
     
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete the server """

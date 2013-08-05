@@ -1,5 +1,5 @@
 from controller.utils import get_controller_site
-from controller.utils.plugins import PluginMount
+from plugins import PluginMount
 
 
 class Notification(object):

@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
-import time, datetime
+import datetime
+import json
+import time
 
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
@@ -8,7 +10,6 @@ from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
-from django.utils import simplejson
 from django.utils.safestring import mark_safe
 
 from controller.admin.utils import display_timesince, wrap_admin_view
@@ -132,8 +133,9 @@ class PingAdmin(PermissionModelAdmin):
         series = []
         for date, loss, avg, min, max in pings.order_by('date')[500:]:
             date = int(str(time.mktime(date.timetuple())).split('.')[0] + '000')
-            series.append([date, loss, avg, min, max])
-        return HttpResponse(simplejson.dumps(series), mimetype="application/json")
+            values = [float(v) if v else None for v in [loss, avg, min, max]]
+            series.append([date, ] + values)
+        return HttpResponse(json.dumps(series), content_type="application/json")
 
 
 admin.site.register(Ping, PingAdmin)

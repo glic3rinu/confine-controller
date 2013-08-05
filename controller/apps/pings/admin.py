@@ -37,6 +37,7 @@ class PingAdmin(PermissionModelAdmin):
     date_hierarchy = 'date'
     readonly_fields = list_display
     sudo_actions = ['delete_selected']
+    deletable_objects_excluded = True
     
     def packet_loss_percentage(self, instance):
         return str(instance.packet_loss) + '%'

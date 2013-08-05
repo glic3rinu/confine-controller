@@ -89,6 +89,9 @@ class InstanceInline(admin.TabularInline):
         state = colored_state(instance)
         return mark_safe("<b>%s</b>" % get_admin_link(instance, href_name=state))
     state_link.short_description = 'State'
+    
+    def has_add_permission(self, *args, **kwargs):
+        return False
 
 
 class NodeListAdmin(NodeAdmin):

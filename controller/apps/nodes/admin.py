@@ -103,8 +103,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             form = filter_group_queryset(form, obj, request.user, query)
         if obj is not None and obj.set_state == obj.FAILURE:
             # removing production choice if in failure state
-            is_production = form.base_fields['set_state'].choices.pop(1) == Node.PRODUCTION
-            assert (is_production, "Problem removing PRODUCTION from set_state")
+            is_production = form.base_fields['set_state'].choices.pop(1)[0] == Node.PRODUCTION
+            assert is_production, "Problem removing PRODUCTION from set_state"
         return form
     
     def queryset(self, request):
@@ -129,7 +129,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if db_field.name == 'set_state':
             # Removing Debug from choices
             is_debug = field.choices.pop(0)[0] == Node.DEBUG
-            assert (is_debug, "Problem removing DEBUG from set_state")
+            assert is_debug, "Problem removing DEBUG from set_state"
         return field
     
     def change_view(self, request, object_id, form_url='', extra_context=None):

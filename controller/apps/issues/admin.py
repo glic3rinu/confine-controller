@@ -129,8 +129,8 @@ class TicketInline(PermissionTabularInline):
 
 class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
-        'unbold_id', 'bold_subject', admin_link('created_by'), 'display_owner',
-        'display_queue', 'display_priority', 'display_state', 'last_modified'
+        'unbold_id', 'bold_subject', 'display_created_by', 'display_group', 'display_owner',
+        'display_queue', 'display_priority', 'display_state', 'is_public', 'last_modified'
     ]
     list_display_links = ('unbold_id', 'bold_subject')
     list_filter = [
@@ -205,6 +205,10 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return mark_safe(msg)
     display_summary.short_description = 'Summary'
     
+    def display_created_by(self, ticket):
+        return get_admin_link(ticket.created_by)
+    display_created_by.short_description = 'Author'
+    
     def display_queue(self, ticket):
         return get_admin_link(ticket.queue) or '-'
     display_queue.short_description = 'queue'
@@ -231,6 +235,12 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return get_admin_link(ticket.group) or '-'
     display_group.short_description = 'Group'
     display_group.admin_order_field = 'group'
+    
+    def is_public(self, ticket):
+        return ticket.visibility == Ticket.PUBLIC
+    is_public.short_description = 'Public'
+    is_public.admin_order_field = 'visibility'
+    is_public.boolean = True
     
     def display_owner(self, ticket):
         return get_admin_link(ticket.owner) or '-'

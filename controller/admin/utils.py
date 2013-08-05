@@ -152,14 +152,17 @@ def set_default_filter(queryarg, request, value):
         request.META['QUERY_STRING'] = request.GET.urlencode()
 
 
-def display_timesince(date):
+def display_timesince(date, double=False):
     """ 
     Format date for messages create_on: show a relative time
     with contextual helper to show fulltime format.
     """
     if not date:
         return 'Never'
-    date_rel = timesince(date) + ' ago'
+    date_rel = timesince(date)
+    if not double:
+        date_rel = date_rel.split(',')[0]
+    date_rel += ' ago'
     date_abs = date.strftime("%Y-%m-%d %H:%M:%S %Z")
     return mark_safe("<span title='%s'>%s</span>" % (date_abs, date_rel))
 

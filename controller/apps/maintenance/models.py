@@ -130,6 +130,9 @@ class Instance(models.Model):
     task_id = models.CharField(max_length=36, unique=True, null=True,
             help_text="Celery task ID")
     
+    class Meta:
+        ordering = ['-last_try']
+    
     def __unicode__(self):
         return "%s@%s" % (self.execution.operation.identifier, self.node)
     

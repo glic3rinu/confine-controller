@@ -37,8 +37,8 @@ class Command(BaseCommand):
         pypi_url = 'https://pypi.python.org/pypi/confine-controller'
         grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
         extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'
-        get_version = "wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)
-        pypi_version = run(get_version).stdout
+        pypi_version = "wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)
+        pypi_version = run(pypi_version).stdout
         
         if current_version == pypi_version:
             msg = "Not upgrading, you already have version %s installed"
@@ -81,8 +81,8 @@ class Command(BaseCommand):
                 # Remove all backups
                 run('rm -fr %s' % os.path.join(base_path, 'controller\.*'))
                 # Clean old egg files, yeah, cleaning PIP shit :P
-                get_version = 'from controller import get_version; print get_version()'
-                version = run('python -c "%s;"' % get_version).stdout
+                c_version = 'from controller import get_version; print get_version()'
+                version = run('python -c "%s;"' % c_version).stdout
                 for egg in eggs:
                     # Do not remove the actual egg file when upgrading twice the same version
                     if egg.split('/')[-1] != "confine_controller-%s.egg-info" % version:

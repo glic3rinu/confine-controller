@@ -250,7 +250,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def unbold_id(self, ticket):
         """ Unbold id if thicket is readed """
         if ticket.is_read_by(self.user):
-            return '<span style="font-weight:normal;">%s</span>' % ticket.pk
+            return '<span style="font-weight:normal;font-size:11px;">%s</span>' % ticket.pk
         return ticket.pk
     unbold_id.allow_tags = True
     unbold_id.short_description = "#"

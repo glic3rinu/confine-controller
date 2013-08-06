@@ -69,7 +69,7 @@ class UsersIterator(forms.models.ModelChoiceIterator):
                 yield ('Group', list(group.values_list('pk', 'username')))
                 users = users.exclude(groups=self.ticket.group)
         if users:
-            yield ('Users', list(users.values_list('pk', 'username')))
+            yield ('Other', list(users.values_list('pk', 'username')))
 
 
 class TicketForm(forms.ModelForm):

@@ -159,16 +159,6 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
                 'controller/css/hide-inline-id.css',)
         }
     
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        """ Warning if the firmware doesn't have any image """
-        if request.method == 'GET':
-            obj = self.get_object(request, object_id)
-            if obj is not None and not obj.images.exists():
-                msg = "Notice that you don't have any base image configured"
-                messages.warning(request, msg)
-        return super(ConfigAdmin, self).change_view(request, object_id,
-                extra_context=extra_context)
-    
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make value input widget bigger """
         if db_field.name == 'image_name':
@@ -178,6 +168,16 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete a singleton configuration """
         return False
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """ Warning if the firmware doesn't have any image """
+        if request.method == 'GET':
+            obj = self.get_object(request, object_id)
+            if obj is not None and not obj.images.exists():
+                msg = "Notice that you don't have any base image configured"
+                messages.warning(request, msg)
+        return super(ConfigAdmin, self).change_view(request, object_id,
+                extra_context=extra_context)
 
 
 admin.site.register(Config, ConfigAdmin)

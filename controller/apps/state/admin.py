@@ -82,14 +82,14 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     next_retry.help_text = 'Next time the state retrieval operation will be executed'
     
     def display_metadata(self, instance):
-        style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
+        style = '<style>code,pre {font-size:1.13em;}</style><br>'
         metadata = break_headers(instance.metadata)
         metadata = highlight(metadata, JsonLexer(), HtmlFormatter())
         return mark_safe(style + urlize(metadata))
     display_metadata.short_description = 'metadata'
     
     def display_data(self, instance):
-        style = '<style>code,pre {font-size:1.13em;}</style><br></br>'
+        style = '<style>code,pre {font-size:1.13em;}</style><br>'
         # TODO render data according to header content-type
         #      (when it becomes available in the node)
         data = break_lines(instance.data)

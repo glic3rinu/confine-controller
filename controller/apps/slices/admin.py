@@ -217,19 +217,6 @@ class NodeListAdmin(NodeAdmin):
         actions = super(NodeListAdmin, self).get_actions(request)
         return { 'create_slivers': actions['create_slivers'] }
     
-    def changelist_view(self, request, slice_id, extra_context=None):
-        """ Just fixing title and breadcrumbs """
-        slice = get_object_or_404(Slice, pk=slice_id)
-        self.slice_id = slice_id
-        title = 'Select one or more nodes for creating %s slivers' % get_admin_link(slice)
-        context = {
-            'title': mark_safe(title),
-            'slice': slice,
-        }
-        context.update(extra_context or {})
-        # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter
-        return admin.ModelAdmin.changelist_view(self, request, extra_context=context)
-    
     def queryset(self, request):
         """ Filter node list excluding nodes with already slivers of the slice """
         qs = super(NodeListAdmin, self).queryset(request)
@@ -245,6 +232,19 @@ class NodeListAdmin(NodeAdmin):
     def has_add_permission(self, *args, **kwargs):
         """ Prevent node addition on this ModelAdmin """
         return False
+    
+    def changelist_view(self, request, slice_id, extra_context=None):
+        """ Just fixing title and breadcrumbs """
+        slice = get_object_or_404(Slice, pk=slice_id)
+        self.slice_id = slice_id
+        title = 'Select one or more nodes for creating %s slivers' % get_admin_link(slice)
+        context = {
+            'title': mark_safe(title),
+            'slice': slice,
+        }
+        context.update(extra_context or {})
+        # call admin.ModelAdmin to avoid my_nodes default NodeAdmin changelist filter
+        return admin.ModelAdmin.changelist_view(self, request, extra_context=context)
 
 
 class SliceSliversAdmin(SliverAdmin):
@@ -268,32 +268,17 @@ class SliceSliversAdmin(SliverAdmin):
         return super(SliceSliversAdmin, self).node_link(instance)
     node_link.short_description = 'Node'
     
-    def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
-        """ Customizations needed for being nested to slices """
-        # hook for future use on self.save_model()
-        slice = get_object_or_404(Slice, pk=slice_id)
-        node = get_object_or_404(Node, pk=node_id)
-        self.slice_id = slice_id
-        self.node_id = node_id
-        title = 'Add sliver %s@%s' % (get_admin_link(slice), get_admin_link(node))
-        context = {
-            'title': mark_safe(title),
-            'slice': slice,
-        }
-        context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).add_view(request, form_url='',
-                extra_context=context)
-    
-    def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
-        """ Customizations needed for being nested to slices """
-        slice = get_object_or_404(Slice, pk=slice_id)
-        sliver = get_object_or_404(Sliver, pk=object_id)
-        self.slice_id = slice_id
-        self.node_id = sliver.node_id
-        context = { 'slice': slice }
-        context.update(extra_context or {})
-        return super(SliceSliversAdmin, self).change_view(request, object_id,
-                form_url=form_url, extra_context=context)
+    def get_form(self, request, obj=None, **kwargs):
+        """ Hook node reference for future processing in IsolatedIfaceInline """
+        if obj: 
+            request._node_ = obj.node
+            request._slice_ = obj.slice
+        else:
+            node = get_object_or_404(Node, pk=self.node_id)
+            slice = get_object_or_404(Slice, pk=self.slice_id)
+            request._node_ = node
+            request._slice_ = slice
+        return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Provde node and slice attributes to obj sliver """
@@ -303,6 +288,10 @@ class SliceSliversAdmin(SliverAdmin):
         super(SliceSliversAdmin, self).save_model(request, obj, *args, **kwargs)
         slice_modeladmin = SliceAdmin(slice, self.admin_site)
         slice_modeladmin.log_change(request, slice, 'Added sliver "%s"' % obj)
+    
+    def has_add_permission(self, *args, **kwargs):
+        """ Skip SliverAdmin.has_add_permission definition """
+        return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
     
     def response_add(self, request, obj, post_url_continue=None):
         """ Customizations needed for being nested to slices """
@@ -336,21 +325,32 @@ class SliceSliversAdmin(SliverAdmin):
             return HttpResponseRedirect(url)
         return response
     
-    def has_add_permission(self, *args, **kwargs):
-        """ Skip SliverAdmin.has_add_permission definition """
-        return super(SliverAdmin, self).has_add_permission(*args, **kwargs)
+    def add_view(self, request, slice_id, node_id, form_url='', extra_context=None):
+        """ Customizations needed for being nested to slices """
+        # hook for future use on self.save_model()
+        slice = get_object_or_404(Slice, pk=slice_id)
+        node = get_object_or_404(Node, pk=node_id)
+        self.slice_id = slice_id
+        self.node_id = node_id
+        title = 'Add sliver %s@%s' % (get_admin_link(slice), get_admin_link(node))
+        context = {
+            'title': mark_safe(title),
+            'slice': slice,
+        }
+        context.update(extra_context or {})
+        return super(SliceSliversAdmin, self).add_view(request, form_url='',
+                extra_context=context)
     
-    def get_form(self, request, obj=None, **kwargs):
-        """ Hook node reference for future processing in IsolatedIfaceInline """
-        if obj: 
-            request._node_ = obj.node
-            request._slice_ = obj.slice
-        else:
-            node = get_object_or_404(Node, pk=self.node_id)
-            slice = get_object_or_404(Slice, pk=self.slice_id)
-            request._node_ = node
-            request._slice_ = slice
-        return super(SliverAdmin, self).get_form(request, obj, **kwargs)
+    def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
+        """ Customizations needed for being nested to slices """
+        slice = get_object_or_404(Slice, pk=slice_id)
+        sliver = get_object_or_404(Sliver, pk=object_id)
+        self.slice_id = slice_id
+        self.node_id = sliver.node_id
+        context = { 'slice': slice }
+        context.update(extra_context or {})
+        return super(SliceSliversAdmin, self).change_view(request, object_id,
+                form_url=form_url, extra_context=context)
 
 
 class SliverInline(PermissionTabularInline):

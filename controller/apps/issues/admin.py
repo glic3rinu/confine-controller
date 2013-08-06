@@ -281,6 +281,27 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             return self.readonly_fieldsets
         return super(TicketAdmin, self).get_fieldsets(request, obj)
     
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """ Make value input widget bigger """
+        if db_field.name == 'subject':
+            kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
+        return super(TicketAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def save_model(self, request, obj, *args, **kwargs):
+        """ Define creator for new tickets """
+        if not obj.pk:
+            obj.created_by = request.user
+        super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
+        obj.mark_as_read_by(request.user)
+    
+    def get_urls(self):
+        """ add markdown preview url """
+        urls = super(TicketAdmin, self).get_urls()
+        my_urls = patterns('',
+            (r'^preview/$', wrap_admin_view(self, self.message_preview_view))
+        )
+        return my_urls + urls
+    
     def add_view(self, request, form_url='', extra_context=None):
         """ Do not sow message inlines """
         self.inlines = []
@@ -313,27 +334,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         # Hook user for bold_subject
         self.user = request.user
         return super(TicketAdmin,self).changelist_view(request, extra_context=extra_context)
-    
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        """ Make value input widget bigger """
-        if db_field.name == 'subject':
-            kwargs['widget'] = forms.TextInput(attrs={'size':'120'})
-        return super(TicketAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-    
-    def save_model(self, request, obj, *args, **kwargs):
-        """ Define creator for new tickets """
-        if not obj.pk:
-            obj.created_by = request.user
-        super(TicketAdmin, self).save_model(request, obj, *args, **kwargs)
-        obj.mark_as_read_by(request.user)
-    
-    def get_urls(self):
-        """ add markdown preview url """
-        urls = super(TicketAdmin, self).get_urls()
-        my_urls = patterns('',
-            (r'^preview/$', wrap_admin_view(self, self.message_preview_view))
-        )
-        return my_urls + urls
     
     def message_preview_view(self, request):
         """ markdown preview render via ajax """

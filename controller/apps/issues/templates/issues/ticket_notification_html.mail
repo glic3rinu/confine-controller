@@ -50,7 +50,7 @@ Issue #{{ ticket.id }} has been updated by {{ ticket_message.author }}.
 <li>Queue: {{ ticket.queue }}</li>
 </ul>
 {% autoescape off %}
-{{ ticket.description }}
+{{ ticket.description|markdown }} }}
 {% endautoescape %}
 <hr />
 <span class="footer"><p>You have received this notification because you have either subscribed to it, or are involved in it.<br />

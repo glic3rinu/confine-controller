@@ -6,6 +6,7 @@ from markdown import markdown
 
 from controller.forms.utils import admin_link
 from controller.forms.widgets import ReadOnlyWidget, ShowText
+from users.models import User
 
 from issues.models import Queue, Ticket
 
@@ -49,6 +50,28 @@ class MessageInlineForm(forms.ModelForm):
         return super(MessageInlineForm, self).save(*args, **kwargs)
 
 
+class UsersIterator(forms.models.ModelChoiceIterator):
+    """ Group ticket owner by superusers, ticket.group and regular users """
+    def __init__(self, *args, **kwargs):
+        self.ticket = kwargs.pop('ticket', False)
+        super(forms.models.ModelChoiceIterator, self).__init__(*args, **kwargs)
+
+    def __iter__(self):
+        yield ('', '---------')
+        users = User.objects.all()
+        superusers = users.filter(is_superuser=True)
+        if superusers:
+            yield ('Operators', list(superusers.values_list('pk', 'username')))
+            users = users.exclude(is_superuser=True)
+        if self.ticket and self.ticket.group:
+            group = users.filter(groups=self.ticket.group)
+            if group:
+                yield ('Group', list(group.values_list('pk', 'username')))
+                users = users.exclude(groups=self.ticket.group)
+        if users:
+            yield ('Users', list(users.values_list('pk', 'username')))
+
+
 class TicketForm(forms.ModelForm):
     display_description = forms.CharField(label="Description", required=False)
     
@@ -66,6 +89,7 @@ class TicketForm(forms.ModelForm):
                 self.initial['queue'] = Queue.objects.get_default().id
             except Queue.DoesNotExist:
                 pass
+            user_choices = UsersIterator()
         else:
             description = markdown(ticket.description)
             # some heuristics for better line breaking
@@ -75,6 +99,8 @@ class TicketForm(forms.ModelForm):
             description = '<br><br>' + description
             widget = ReadOnlyWidget(description, description)
             self.fields['display_description'].widget = widget
+            user_choices = UsersIterator(ticket=ticket)
+        self.fields['owner'].choices = user_choices
     
     def clean_description(self):
         """  clean HTML tags """

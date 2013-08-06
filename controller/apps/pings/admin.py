@@ -131,7 +131,7 @@ class PingAdmin(PermissionModelAdmin):
         pings = Ping.objects.filter(content_type=content_type_id, object_id=object_id)
         pings = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
         series = []
-        for date, loss, avg, min, max in pings.order_by('date')[500:]:
+        for date, loss, avg, min, max in pings.order_by('date'):
             date = int(str(time.mktime(date.timetuple())).split('.')[0] + '000')
             values = [float(v) if v else None for v in [loss, avg, min, max]]
             series.append([date, ] + values)

@@ -2,7 +2,6 @@ import json
 from datetime import timedelta
 from time import time
 
-import django.dispatch
 from django.db import models
 from django.dispatch import Signal
 from django.utils import timezone
@@ -94,7 +93,7 @@ class BaseState(models.Model):
             'expire_window': cls.get_setting('EXPIRE_WINDOW')
         }
         if not self.last_try_on or time() > heartbeat_expires(self.last_try_on, **kwargs):
-            return 'nodata'
+            return self.NODATA
         
         if self.last_seen_on and time() < heartbeat_expires(self.last_seen_on, **kwargs):
             if self.data:
@@ -102,8 +101,8 @@ class BaseState(models.Model):
                     return json.loads(self.data).get('state', 'unknown')
                 except ValueError:
                     pass
-            return 'unknown'
-        return 'offline'
+            return self.UNKNOWN
+        return self.OFFLINE
     
     def get_current_display(self):
         current = self.current
@@ -169,12 +168,12 @@ class NodeState(BaseState):
     def current(self):
         """ node is crashed if we do not receive node heartbeats beyond a timeout """
         state = super(NodeState, self).current
-        if state not in ['offline', 'nodata']:
+        if state not in [self.OFFLINE, self.NODATA]:
             # offline and nodata are worst than crashed :)
             timeout_expire = timezone.now()-settings.STATE_NODE_PULL_TIMEOUT
             if self.add_date < timeout_expire:
                 if not self.last_contact_on or self.last_contact_on < timeout_expire:
-                    return 'crashed'
+                    return self.CRASHED
         return state
 
 

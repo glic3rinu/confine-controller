@@ -34,6 +34,7 @@ class Command(BaseCommand):
         current_path = get_existing_pip_installation()
         
         # Getting version that will be installed, yeah pip doesn't support it :)
+        # TODO use this version for the pip install
         pypi_url = 'https://pypi.python.org/pypi/confine-controller'
         grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
         extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'

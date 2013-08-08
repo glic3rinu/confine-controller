@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.template import Context, Template
 
 from controller.utils import send_email_template
-from plugins.models import PluginModel
+from controller.utils.plugins.models import PluginModel
 
 
 class Notification(PluginModel):

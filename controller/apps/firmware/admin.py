@@ -9,7 +9,7 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
     colored, wrap_admin_view)
 from controller.utils.html import monospace_format
 from nodes.models import Node
-from singletons.admin import SingletonModelAdmin
+from controller.utils.singletons.admin import SingletonModelAdmin
 
 from firmware.actions import get_firmware, sync_plugins
 from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,

@@ -1,6 +1,6 @@
 import os, glob
 
-from plugins import PluginMount
+from controller.utils.plugins import PluginMount
 
 
 class FirmwarePlugin(object):

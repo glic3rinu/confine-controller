@@ -14,7 +14,7 @@ from controller.admin.utils import (colored, admin_link, wrap_admin_view,
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
-from singletons.admin import SingletonModelAdmin
+from controller.utils.singletons.admin import SingletonModelAdmin
 from users.helpers import filter_group_queryset
 
 from nodes.actions import request_cert, reboot_selected

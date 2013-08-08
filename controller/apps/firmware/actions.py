@@ -11,7 +11,7 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 
-from plugins.actions import sync_plugins_action
+from controller.utils.plugins.actions import sync_plugins_action
 
 from firmware.forms import BaseImageForm, OptionalFilesForm
 from firmware.models import Build, Config

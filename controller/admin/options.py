@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.conf.urls import patterns, url
 
 from controller.admin.utils import action_to_view, set_default_filter
-from singletons.admin import SingletonModelAdmin
+from controller.utils.singletons.admin import SingletonModelAdmin
 
 from .helpers import FuncAttrWrapper
 

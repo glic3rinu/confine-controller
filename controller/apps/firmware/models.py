@@ -22,8 +22,8 @@ from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
-from plugins.models import PluginModel
-from singletons.models import SingletonModel
+from controller.utils.plugins.models import PluginModel
+from controller.utils.singletons.models import SingletonModel
 
 from firmware import settings
 from firmware.context import context

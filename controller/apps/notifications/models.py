@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
@@ -11,6 +11,11 @@ from controller.utils.plugins.models import PluginModel
 class Notification(PluginModel):
     subject = models.CharField(max_length=256)
     message = models.TextField()
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.hook_delivered_generic_relation()
+        super(Notification, self).save(*args, **kwargs)
     
     def process(self):
         instance = self.instance
@@ -30,6 +35,14 @@ class Notification(PluginModel):
         message = Template(self.instance.default_message).render(context)
         send_mail(subject, message, email_from, email_to)
         self.delivered.create(content_object=obj)
+    
+    def hook_delivered_generic_relation(self):
+        model = self.instance.model
+        for field in model._meta.local_many_to_many:
+            if field.rel.to == Delivered:
+                return
+        relation = generic.GenericRelation('notifications.Delivered')
+        model.add_to_class('notifications', relation)
 
 
 class Delivered(models.Model):
@@ -45,3 +58,9 @@ class Delivered(models.Model):
     
     def __unicode__(self):
         return str(self.content_object)
+
+
+cursor = connection.cursor()
+if Notification._meta.db_table in connection.introspection.get_table_list(cursor):
+    for notification in Notification.objects.all():
+        notification.hook_delivered_generic_relation()

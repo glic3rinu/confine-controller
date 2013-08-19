@@ -257,6 +257,10 @@ class ExecutionAdmin(ChangeViewActions):
         return mark_safe("<b>%s</b>" % get_admin_link(instance.operation))
     operation_link.short_description = 'operation'
 
+    def has_add_permission(self, request):
+        """ Avoid add execution directly, must be added via an operation """
+        return False
+
 
 class InstanceAdmin(ChangeViewActions):
     list_display = [

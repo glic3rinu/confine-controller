@@ -20,11 +20,11 @@ markdown_help_text = 'HTML not allowed, you can use %s' % markdown_help_text
 
 class MarkDownWidget(forms.Textarea):
     """ MarkDown textarea widget with syntax preview """
-    # TODO make this generic, it would be nice to use this widget also for ticket.description
     def render(self, name, value, attrs):
+        widget_id = attrs['id'] if attrs and 'id' in attrs else 'id_%s' % name
         textarea = super(MarkDownWidget, self).render(name, value, attrs)
-        preview = ('<a id="load-preview" href="#">preview</a>'
-                   '<div id="content-preview"></div>')
+        preview = ('<a class="load-preview" href="#" data-field="{0}">preview</a>'\
+                   '<div id="{0}-preview" class="content-preview"></div>'.format(widget_id))
         return mark_safe('<p class="help">%s<br/>%s<br/>%s</p>' % (
             markdown_help_text, textarea, preview))
 
@@ -74,14 +74,13 @@ class UsersIterator(forms.models.ModelChoiceIterator):
 
 class TicketForm(forms.ModelForm):
     display_description = forms.CharField(label="Description", required=False)
+    description = forms.CharField(widget=MarkDownWidget(attrs={'class':'vLargeTextField'}))
     
     class Meta:
         model = Ticket
     
     def __init__(self, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)
-        if 'description' in self.fields:
-            self.fields['description'].help_text = markdown_help_text
         ticket = kwargs.get('instance', False)
         if not ticket:
             # Provide default ticket queue for new ticket

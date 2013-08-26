@@ -13,6 +13,7 @@ table td code { font-size: 1.2em; }
 table td h1 { font-size: 1.8em; text-align: left; }
 table td h2 { font-size: 1.4em; text-align: left; }
 table td h3 { font-size: 1.2em; text-align: left; }
+table td span { background-color: red; letter-spacing: 2px; }
 
 </style>
 </head>
@@ -26,6 +27,11 @@ table td h3 { font-size: 1.2em; text-align: left; }
 <tr><th></th><td>_Italic_</td><td><em>Italic</em></td></tr>
 <tr><th></th><td>> Quote</td><td><cite>Quote</cite></td></tr>
 <tr><th></th><td>&nbsp;&nbsp;&nbsp;&nbsp; 4 or more spaces</td><td><code>Code block</code></td></tr>
+
+<tr><th colspan="2">Break Lines</th></tr>
+<tr><th></th><td>end a line with 2 or more spaces<span>&nbsp;&nbsp;</span></td><td><code>first line <br/>new line</code></td></tr>
+<tr><th></th><td>type an empty line<br/><span>&nbsp;</span><br/> (or containing only spaces)</td><td><code>first line <br/>new line</code></td></tr>
+
 
 <tr><th colspan="2">Lists</th></tr>
 <tr><th></th><td>* Item 1<br />* Item 2</td><td><ul><li>Item 1</li><li>Item 2</li></ul></td></tr>

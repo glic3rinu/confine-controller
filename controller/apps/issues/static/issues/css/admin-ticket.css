@@ -70,9 +70,19 @@ div pre {
     width: 99%;
 }
 
-#content-preview {
+.content-preview {
     border: 1px solid #ccc;
     padding: 2px 5px;
+}
+
+/** ticket.description preview CSS overrides **/
+.aligned .content-preview p {
+    margin-left: 5px;
+    padding-left: 0;
+}
+.module .content-preview ol,
+.module .content-preview ul {
+    margin-left: 5px;
 }
 
 /** unread messages admin changelist **/

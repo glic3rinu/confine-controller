@@ -337,12 +337,9 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def message_preview_view(self, request):
         """ markdown preview render via ajax """
-        from markdown import markdown
         data = request.POST.get("data")
-        markdown = markdown(strip_tags(strip_tags(data)))
-        # bugfix preview break lines differs from final result
-        markdown = '<br />'.join(markdown.split('\n'))
-        return HttpResponse(markdown)
+        data_formated = markdown(strip_tags(data))
+        return HttpResponse(data_formated)
 
 
 class QueueAdmin(PermissionModelAdmin):

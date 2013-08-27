@@ -1,7 +1,11 @@
+/** 
+    CSS trick to hide admin original:
+    http://stackoverflow.com/a/5556813/1538221 
+**/
+
 .inline-group .tabular td.original p {
     visibility: hidden;
 }
-
 
 .inline-group .tabular tr.has_original td {
     padding-top: 0.8em;

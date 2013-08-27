@@ -41,7 +41,12 @@ class RolesInline(PermissionTabularInline):
     extra = 0
     formset = RolesFormSet
     form = RolesInlineForm
+    verbose_name = "member"
+    verbose_name_plural = "members" #"roles"
     
+    class Media:
+        css = { 'all': ('controller/css/hide-inline-id.css',) }
+
     def get_formset(self, request, obj=None, **kwargs):
         """
         Hook obj into formset to tell the difference bewteen add or change so it

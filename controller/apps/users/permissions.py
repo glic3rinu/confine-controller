@@ -27,7 +27,7 @@ class RolesPermission(Permission):
     
     def add(self, obj, cls, user):
         if obj is None:
-            return user.has_role('admin')
+            return True
         return obj.group.has_role(user, 'admin')
     
     def change(self, obj, cls, user):

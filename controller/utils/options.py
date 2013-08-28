@@ -81,9 +81,9 @@ def send_email_template(template, context, to, email_from=None, html=None):
     """
     from django.template.loader import render_to_string
     from django.template import Context
-    if type(context) is dict:
+    if isinstance(context, dict):
         context = Context(context)
-    if type(to) is str or type(to) is unicode:
+    if type(to) in [str, unicode]:
         to = [to]
     
     if not 'site' in context: # fallback site value

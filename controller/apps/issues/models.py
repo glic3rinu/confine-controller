@@ -105,7 +105,7 @@ class Ticket(models.Model):
         return str(self.id)
     
     def get_notification_emails(self):
-        emails = settings.ISSUES_SUPPORT_EMAILS
+        emails = list(settings.ISSUES_SUPPORT_EMAILS)
         emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)

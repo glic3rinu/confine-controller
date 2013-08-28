@@ -33,17 +33,16 @@ class Command(BaseCommand):
         current_version = get_version()
         current_path = get_existing_pip_installation()
         
-        # Getting version that will be installed, yeah pip doesn't support it :)
-        # TODO use this version for the pip install
-        pypi_url = 'https://pypi.python.org/pypi/confine-controller'
-        grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
-        extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'
-        pypi_version = "wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)
-        pypi_version = run(pypi_version).stdout
-        
-        if current_version == pypi_version:
-            msg = "Not upgrading, you already have version %s installed"
-            raise CommandError(msg % current_version)
+#        # Getting version that will be installed, yeah pip doesn't support it :)
+#        pypi_url = 'https://pypi.python.org/pypi/confine-controller'
+#        grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
+#        extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'
+#        pypi_version = "wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)
+#        pypi_version = run(pypi_version).stdout
+#        
+#        if current_version == pypi_version:
+#            msg = "Not upgrading, you already have version %s installed"
+#            raise CommandError(msg % current_version)
         
         elif current_path is not None:
             desired_version = options.get('version')

@@ -98,7 +98,7 @@ class BaseState(models.Model):
         if self.last_seen_on and time() < heartbeat_expires(self.last_seen_on, **kwargs):
             if self.data:
                 try:
-                    return json.loads(self.data).get('state', 'unknown')
+                    return json.loads(self.data).get('state', self.UNKNOWN)
                 except ValueError:
                     pass
             return self.UNKNOWN

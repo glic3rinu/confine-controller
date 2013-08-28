@@ -42,7 +42,7 @@ class USBImagePlugin(FirmwarePlugin):
                 image.gzip()
                 run('mv %s %s' % (image.file, dst))
                 install.umount()
-            finally:
+            except:
                 install.clean()
             image.file = install.file
             image.tmp = install.tmp

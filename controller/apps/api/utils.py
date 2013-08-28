@@ -12,7 +12,7 @@ def link_header(relations, request):
     links = []
     for rel in relations:
         args = []
-        if type(rel) is tuple:
+        if isinstance(rel, tuple):
             rel, pk = rel
             args = [pk]
         url = reverse(rel, args=args or [], request=request)

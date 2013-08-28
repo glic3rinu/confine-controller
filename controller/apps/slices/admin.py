@@ -334,6 +334,7 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = node_id
         title = 'Add sliver %s@%s' % (get_admin_link(slice), get_admin_link(node))
         context = {
+            'header_title': 'Add sliver',
             'title': mark_safe(title),
             'slice': slice,
         }

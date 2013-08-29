@@ -1,6 +1,5 @@
 from django.conf import settings
 
-ugettext = lambda s: s
 
 TINC_PORT_DFLT = getattr(settings, 'TINC_PORT_DFLT', '655')
 

@@ -41,8 +41,9 @@ class RolesInline(PermissionTabularInline):
     extra = 0
     formset = RolesFormSet
     form = RolesInlineForm
+    ordering = ['user__username']
     verbose_name = "member"
-    verbose_name_plural = "members" #"roles"
+    verbose_name_plural = "members" 
     
     class Media:
         css = { 'all': ('controller/css/hide-inline-id.css',) }

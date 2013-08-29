@@ -44,7 +44,7 @@ class Command(BaseCommand):
 #            msg = "Not upgrading, you already have version %s installed"
 #            raise CommandError(msg % current_version)
         
-        elif current_path is not None:
+        if current_path is not None:
             desired_version = options.get('version')
             if current_version == desired_version:
                 msg = "Not upgrading, you already have version %s installed"

@@ -79,6 +79,7 @@ class Roles(models.Model):
                       'can manage slices belonging to the group.')
     
     class Meta:
+        ordering = ['user__username']
         unique_together = ('user', 'group')
     
     def __unicode__(self):

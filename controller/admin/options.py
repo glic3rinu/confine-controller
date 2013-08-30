@@ -111,21 +111,25 @@ class ChangeListDefaultFilter(object):
         return response
 
 class SortableTabularInline(admin.options.TabularInline):
-    """ Inline that provides sortable functionallity """
+    """ 
+        Inline that provides sortable functionallity
+        Supports field override for related object attribute sort
+        e.g. sortable_fields = {'node': 'node__name'} should replace
+        sort by node id with sort by node name.
+    """
     # Mandatory fields that must be defined when subclassing
-    sortable_fields = ()
+    sortable_fields = {}
 
     # TODO: check at the template if the field is sortable
     # TODO: define CSS class and styles for remark the current ordering state
     template = "admin/controller/edit_inline/tabular.html"
 
+    def __init__(self, *args, **kwargs):
+        super(SortableTabularInline, self).__init__(*args, **kwargs)
+        self.sortable_fields = self.get_sortable_fields()
+
     def get_ordering(self, request):
         """ Define dynamic ordering based on request parameters """
-        # TODO: how to get current fields to avoid explicity define sortable_fields
-        # self.form.fields -- NOT working
-        # self.form.base_fields -- NOT working
-        # self.form.declared_fields -- NOT working
-        #####
         try:
             ordering = int(request.GET.get('ordering'))
             reverse = request.GET.get('ordering_reverse')
@@ -135,4 +139,35 @@ class SortableTabularInline(admin.options.TabularInline):
             return [sort_by]
         except (IndexError, TypeError, ValueError):
             return self.ordering # default ordering or None
+
+
+    def get_sortable_fields(self):
+        """ 
+            Hack for get the inline fields SHOWED at admin page 
+            NOTE: excludes primary key and hidden foreign key
+        """
+        sortable_fields = []
+
+        #TODO join cases... refactor
+
+        if self.fields:
+            for field in self.fields:
+                field_name = field
+                if field not in self.model._meta.fields:
+                    field_name = 'id' # FIXME this is a hack ~not ordering
+                #TODO overrides
+                sortable_fields.append(field_name) 
+            return sortable_fields
+
+        for field in self.model._meta.fields:
+            if field.get_internal_type() == "ForeignKey":
+                if field.rel.to is self.parent_model:
+                    continue
+            elif field.get_internal_type() == "AutoField":
+                continue
+            # insert overrides
+            field_name = self.sortable_fields.get(field.name, field.name)
+            sortable_fields.append(field_name)
+        
+        return sortable_fields
 

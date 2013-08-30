@@ -41,7 +41,7 @@ class RolesInline(PermissionTabularInline, SortableTabularInline):
     extra = 0
     formset = RolesFormSet
     form = RolesInlineForm
-    sortable_fields = ('user__username', 'is_admin', 'is_technician', 'is_researcher')
+    sortable_fields = {'user': 'user__username'}
     verbose_name = "member"
     verbose_name_plural = "members" 
 

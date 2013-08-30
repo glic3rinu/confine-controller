@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse, resolve
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from controller.admin import ChangeViewActions
+from controller.admin import ChangeViewActions, SortableTabularInline
 from controller.admin.utils import get_admin_link
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
@@ -36,15 +36,15 @@ class AuthTokenInline(PermissionTabularInline):
         return super(AuthTokenInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class RolesInline(PermissionTabularInline):
+class RolesInline(PermissionTabularInline, SortableTabularInline):
     model = Roles
     extra = 0
     formset = RolesFormSet
     form = RolesInlineForm
-    ordering = ['user__username']
+    sortable_fields = ('user__username', 'is_admin', 'is_technician', 'is_researcher')
     verbose_name = "member"
     verbose_name_plural = "members" 
-    
+
     class Media:
         css = { 'all': ('controller/css/hide-inline-id.css',) }
 

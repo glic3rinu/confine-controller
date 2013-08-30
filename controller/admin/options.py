@@ -109,3 +109,30 @@ class ChangeListDefaultFilter(object):
         if hasattr(response, 'context_data') and 'cl' in response.context_data:
             response.context_data['cl'].default_changelist_filters = defaults
         return response
+
+class SortableTabularInline(admin.options.TabularInline):
+    """ Inline that provides sortable functionallity """
+    # Mandatory fields that must be defined when subclassing
+    sortable_fields = ()
+
+    # TODO: check at the template if the field is sortable
+    # TODO: define CSS class and styles for remark the current ordering state
+    template = "admin/controller/edit_inline/tabular.html"
+
+    def get_ordering(self, request):
+        """ Define dynamic ordering based on request parameters """
+        # TODO: how to get current fields to avoid explicity define sortable_fields
+        # self.form.fields -- NOT working
+        # self.form.base_fields -- NOT working
+        # self.form.declared_fields -- NOT working
+        #####
+        try:
+            ordering = int(request.GET.get('ordering'))
+            reverse = request.GET.get('ordering_reverse')
+            sort_by = self.sortable_fields[ordering]
+            if reverse:
+                sort_by = "-%s" % sort_by
+            return [sort_by]
+        except (IndexError, TypeError, ValueError):
+            return self.ordering # default ordering or None
+

@@ -133,7 +133,6 @@ function install_requirements () {
                      django-celery-email \
                      django-fluent-dashboard \
                      south \
-                     django-private-files \
                      IPy \
                      django-singletons \
                      django-extensions \

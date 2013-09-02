@@ -142,7 +142,7 @@ function install_requirements () {
                      markdown \
                      django-filter \
                      django-admin-tools \
-                     djangorestframework==2.3.5"
+                     djangorestframework==2.3.7"
     LOCAL_PIP="paramiko \
                pygments \
                requests==1.2.0 \

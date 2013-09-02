@@ -28,6 +28,9 @@ class Group(models.Model):
                       'instantiated (false by default). Its value can only be changed '
                       'by testbed superusers.')
     
+    class Meta:
+        ordering = ['name']
+    
     def __unicode__(self):
         return self.name
     

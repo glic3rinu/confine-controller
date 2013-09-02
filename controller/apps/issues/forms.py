@@ -58,7 +58,7 @@ class UsersIterator(forms.models.ModelChoiceIterator):
 
     def __iter__(self):
         yield ('', '---------')
-        users = User.objects.all()
+        users = User.objects.all().order_by('username')
         superusers = users.filter(is_superuser=True)
         if superusers:
             yield ('Operators', list(superusers.values_list('pk', 'username')))

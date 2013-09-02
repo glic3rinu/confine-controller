@@ -140,7 +140,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'djcelery',
     'djcelery_email',
-    'private_files',
+    'privatefiles',
     'registration',
     'captcha', 
     'django_google_maps',

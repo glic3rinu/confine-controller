@@ -18,10 +18,10 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
 
         # Changing field 'Sliver.exp_data'
-        db.alter_column(u'slices_sliver', 'exp_data', self.gf('private_files.models.fields.PrivateFileField')(max_length=100))
+        db.alter_column(u'slices_sliver', 'exp_data', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=100))
 
         # Changing field 'Slice.exp_data'
-        db.alter_column(u'slices_slice', 'exp_data', self.gf('private_files.models.fields.PrivateFileField')(max_length=100))
+        db.alter_column(u'slices_slice', 'exp_data', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=100))
 
     models = {
         u'communitynetworks.cnhost': {

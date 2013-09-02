@@ -18,10 +18,10 @@ class Migration(SchemaMigration):
 
 
         # Changing field 'Sliver.exp_data'
-        db.alter_column(u'slices_sliver', 'exp_data', self.gf('private_files.models.fields.PrivateFileField')(max_length=100))
+        db.alter_column(u'slices_sliver', 'exp_data', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=100))
 
         # Changing field 'Slice.exp_data'
-        db.alter_column(u'slices_slice', 'exp_data', self.gf('private_files.models.fields.PrivateFileField')(max_length=100))
+        db.alter_column(u'slices_slice', 'exp_data', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=100))
 
     def backwards(self, orm):
         # Adding field 'Template.arch'
@@ -115,7 +115,7 @@ class Migration(SchemaMigration):
         u'slices.slice': {
             'Meta': {'object_name': 'Slice'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'exp_data': ('private_files.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
+            'exp_data': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
             'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2013, 1, 16, 0, 0)', 'null': 'True', 'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -138,7 +138,7 @@ class Migration(SchemaMigration):
         u'slices.sliver': {
             'Meta': {'unique_together': "(('slice', 'node'),)", 'object_name': 'Sliver'},
             'description': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
-            'exp_data': ('private_files.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
+            'exp_data': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Node']"}),

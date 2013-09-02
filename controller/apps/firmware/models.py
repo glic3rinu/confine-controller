@@ -13,7 +13,7 @@ from django.dispatch import Signal, receiver
 from django.template import Context
 from django_transaction_signals import defer
 from djcelery.models import TaskState
-from private_files import PrivateFileField
+from privatefiles import PrivateFileField
 
 from controller import settings as controller_settings
 from controller.core.validators import validate_file_extensions

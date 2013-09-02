@@ -77,7 +77,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "['-date']", 'object_name': 'Build'},
             'base_image': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'image': ('private_files.models.fields.PrivateFileField', [], {'max_length': '256'}),
+            'image': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '256'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['nodes.Node']", 'unique': 'True', 'primary_key': 'True'}),
             'task_id': ('django.db.models.fields.CharField', [], {'max_length': '36', 'unique': 'True', 'null': 'True'}),
             'version': ('django.db.models.fields.CharField', [], {'max_length': '64'})

@@ -14,7 +14,7 @@ class Migration(SchemaMigration):
             ('node', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['nodes.Node'], unique=True)),
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('version', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('image', self.gf('private_files.models.fields.PrivateFileField')(max_length=100)),
+            ('image', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=100)),
             ('task_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=36)),
         ))
         db.send_create_signal(u'firmware', ['Build'])
@@ -114,7 +114,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "['-date']", 'object_name': 'Build'},
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('private_files.models.fields.PrivateFileField', [], {'max_length': '100'}),
+            'image': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '100'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['nodes.Node']", 'unique': 'True'}),
             'task_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '36'}),
             'version': ('django.db.models.fields.CharField', [], {'max_length': '64'})

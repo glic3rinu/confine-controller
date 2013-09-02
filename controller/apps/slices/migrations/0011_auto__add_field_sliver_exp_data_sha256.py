@@ -62,7 +62,7 @@ class Migration(SchemaMigration):
         u'slices.slice': {
             'Meta': {'object_name': 'Slice'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'exp_data': ('private_files.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
+            'exp_data': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
             'exp_data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'exp_data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2013, 2, 28, 0, 0)', 'null': 'True', 'blank': 'True'}),
@@ -85,7 +85,7 @@ class Migration(SchemaMigration):
         u'slices.sliver': {
             'Meta': {'unique_together': "(('slice', 'node'),)", 'object_name': 'Sliver'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'exp_data': ('private_files.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
+            'exp_data': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '100', 'blank': 'True'}),
             'exp_data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'exp_data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

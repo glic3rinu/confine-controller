@@ -49,7 +49,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "['-date']", 'object_name': 'Build'},
             'base_image': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'image': ('private_files.models.fields.PrivateFileField', [], {'max_length': '256'}),
+            'image': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '256'}),
             'kwargs': ('django.db.models.fields.TextField', [], {}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'firmware_build'", 'unique': 'True', 'primary_key': 'True', 'to': u"orm['nodes.Node']"}),
             'task_id': ('django.db.models.fields.CharField', [], {'max_length': '36', 'unique': 'True', 'null': 'True'}),

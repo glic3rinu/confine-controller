@@ -16,7 +16,7 @@ class PrivateFieldFile(FieldFile):
         pk = self.instance.pk
         filename = os.path.basename(self.path)
         args = [app_label, model_name, field_name, pk, filename]
-        return reverse('private_files-file', args=args)
+        return reverse('privatefiles-file', args=args)
     
     url = property(_get_url)
     

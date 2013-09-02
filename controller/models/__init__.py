@@ -6,11 +6,11 @@ except (ImportError, AttributeError):
     pass
 
 
-## Add South introspect rules for private_files.PrivateField
+## Add South introspect rules for privatefiles.PrivateField
 from django.conf import settings
-if 'private_files' and 'south' in settings.INSTALLED_APPS:
-    from private_files import PrivateFileField
+if 'privatefiles' and 'south' in settings.INSTALLED_APPS:
+    from privatefiles import PrivateFileField
     from south.modelsinspector import add_introspection_rules
     rules = [((PrivateFileField,), [], {"attachment" : ["attachment", {"default": True}],},)]
-    add_introspection_rules(rules, ["^private_files\.models\.fields\.PrivateFileField"])
+    add_introspection_rules(rules, ["^privatefiles\.models\.fields\.PrivateFileField"])
 

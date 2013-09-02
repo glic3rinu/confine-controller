@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     # Admin
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin_tools/', include('admin_tools.urls')),
-    url(r'^private/', include('private_files.urls')),
+    url(r'^private/', include('privatefiles.urls')),
 )
 
 

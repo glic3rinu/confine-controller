@@ -10,12 +10,12 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'Build.image'
-        db.alter_column(u'firmware_build', 'image', self.gf('private_files.models.fields.PrivateFileField')(max_length=256))
+        db.alter_column(u'firmware_build', 'image', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=256))
 
     def backwards(self, orm):
 
         # Changing field 'Build.image'
-        db.alter_column(u'firmware_build', 'image', self.gf('private_files.models.fields.PrivateFileField')(max_length=100))
+        db.alter_column(u'firmware_build', 'image', self.gf('privatefiles.models.fields.PrivateFileField')(max_length=100))
 
     models = {
         u'communitynetworks.cnhost': {
@@ -46,7 +46,7 @@ class Migration(SchemaMigration):
             'base_image': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['firmware.BaseImage']", 'null': 'True'}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('private_files.models.fields.PrivateFileField', [], {'max_length': '256'}),
+            'image': ('privatefiles.models.fields.PrivateFileField', [], {'max_length': '256'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['nodes.Node']", 'unique': 'True'}),
             'task_id': ('django.db.models.fields.CharField', [], {'max_length': '36', 'unique': 'True', 'null': 'True'}),
             'version': ('django.db.models.fields.CharField', [], {'max_length': '64'})

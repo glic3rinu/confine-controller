@@ -108,7 +108,7 @@ class Ticket(models.Model):
         emails = list(settings.ISSUES_SUPPORT_EMAILS)
         if settings.ISSUES_NOTIFY_SUPERUSERS:
             superusers = User.objects.filter(is_superuser=True)
-            emails.append(superusers.values_list('email', flat=True))
+            emails += superusers.values_list('email', flat=True)
         emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)

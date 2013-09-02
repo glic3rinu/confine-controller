@@ -46,6 +46,11 @@ class BaseState(models.Model):
         return cls._meta.get_field(field_name).rel.to
     
     @property
+    def id(self):
+        """ To avoid AttributeError("'NodeState' object has no attribute 'id'") """
+        return self.pk
+    
+    @property
     def next_retry_on(self):
         freq = type(self).get_setting('SCHEDULE')
         return self.last_try_on + timedelta(seconds=freq)

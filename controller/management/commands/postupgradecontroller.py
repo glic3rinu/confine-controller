@@ -157,4 +157,3 @@ class Command(BaseCommand):
                 '    ** UPGRADE NOTES **\n'
                 '    ===================\n\n' +
                 '\n'.join(upgrade_notes) + '\033[m\n')
-

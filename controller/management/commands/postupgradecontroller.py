@@ -142,6 +142,15 @@ class Command(BaseCommand):
             upgrade_notes.append('Celery workers configuration has been updated. '
                 'Please update it by running:\n'
                 '  > sudo python manage.py setupceleryd\n')
+        if version < 904:
+            # Change template types for more generic ones
+            from slices.models import Template
+            from slices.settings import SLICES_TEMPLATE_TYPES
+            template_types = [ t[0] for t in SLICES_TEMPLATE_TYPES ]
+            if 'debian' in template_types:
+                Template.objects.filter(type='debian6').update(type='debian')
+            if 'openwrt' in template_types:
+                Template.objects.filter(type='openwrt-backfire').update(type='openwrt')
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'
                 '    ===================\n'

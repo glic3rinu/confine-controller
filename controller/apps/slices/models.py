@@ -154,9 +154,10 @@ class Slice(models.Model):
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
-            help_text='The state set on this slice (set state) and its slivers (if they '
-                      'do not explicitly indicate one). Possible values: register (initial), '
-                      'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
+            help_text='The state set on this slice (set state) and its slivers '
+                      '(if they do not explicitly indicate a lower one). '
+                      'Possible values: register (initial), &lt; deploy &lt; start. '
+                      'See <a href="https://wiki.confine-project.eu/arch:'
                       'slice-sliver-states">slice and sliver states</a> for the full '
                       'description of set states and possible transitions.')
     template = models.ForeignKey(Template,
@@ -294,9 +295,11 @@ class Sliver(models.Model):
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
-            help_text='If present, the state set on this sliver (set state), instead of '
-                      'the one specified by the slice. Possible values: register (initial), '
-                      'deploy, start. See <a href="https://wiki.confine-project.eu/arch:'
+            help_text='If present, the state set on this sliver (set state), '
+                      'which overrides a higher one specified by the slice '
+                      '(e.g. register overrides start, but start does not override register). '
+                      'Possible values: register (initial) &lt; deploy &lt; start. '
+                      'See <a href="https://wiki.confine-project.eu/arch:'
                       'slice-sliver-states">slice and sliver states</a> for the full '
                       'description of set states and possible transitions.', null=True)
     template = models.ForeignKey(Template, null=True, blank=True,

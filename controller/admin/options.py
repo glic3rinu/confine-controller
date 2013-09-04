@@ -4,7 +4,7 @@ from django.conf.urls import patterns, url
 from controller.admin.utils import action_to_view, set_default_filter
 from controller.utils.singletons.admin import SingletonModelAdmin
 
-from .helpers import FuncAttrWrapper
+from .helpers import FuncAttrWrapper, SortableField
 
 
 class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
@@ -116,47 +116,47 @@ class SortableTabularInline(admin.options.TabularInline):
         Supports field override for related object attribute sort
         e.g. sortable_fields = {'node': 'node__name'} should replace
         sort by node id with sort by node name.
+        Example usage:
+        class SliverInline(PermissionTabularInline, SortableTabularInline):
+            sortable_fields = {'node_link':'node__name'}
     """
-    # Mandatory fields that must be defined when subclassing
-    sortable_fields = {}
-
-    # TODO: check at the template if the field is sortable
-    # TODO: define CSS class and styles for remark the current ordering state
     template = "admin/controller/edit_inline/tabular.html"
-
-    def __init__(self, *args, **kwargs):
-        super(SortableTabularInline, self).__init__(*args, **kwargs)
-        self.sortable_fields = self.get_sortable_fields()
+    sortable_fields = {} # optional field that allows override sorting
 
     def get_ordering(self, request):
         """ Define dynamic ordering based on request parameters """
+        sortable_fields = self.get_sortable_fields(request)
+        #### TODO: how to insert as extra_context and avoid using session??
+        request.session['sortable_fields'] = sortable_fields
+        ordering = request.GET.get('o')
         try:
-            ordering = int(request.GET.get('ordering'))
-            reverse = request.GET.get('ordering_reverse')
-            sort_by = self.sortable_fields[ordering]
-            if reverse:
-                sort_by = "-%s" % sort_by
-            return [sort_by]
-        except (IndexError, TypeError, ValueError):
+            # check user input
+            column = abs(int(ordering))
+            current_sfield = sortable_fields[column]
+        except (IndexError, TypeError, ValueError) as e:
             return self.ordering # default ordering or None
 
+        current_sfield.update(ordering)
+        return [current_sfield.sort_by()]
 
-    def get_sortable_fields(self):
+    def get_sortable_fields(self, request):
         """ 
             Hack for get the inline fields SHOWED at admin page 
             NOTE: excludes primary key and hidden foreign key
+            Returns SortableFields list
         """
         sortable_fields = []
 
-        #TODO join cases... refactor
-
         if self.fields:
+            # generated admin fields cannot be selected as sort column
             for field in self.fields:
-                field_name = field
-                if field not in self.model._meta.fields:
-                    field_name = 'id' # FIXME this is a hack ~not ordering
-                #TODO overrides
-                sortable_fields.append(field_name) 
+                sortable = field in self.model._meta.fields
+                sortable_field = SortableField(field, len(sortable_fields), sortable)
+                # insert overrides
+                if field in self.sortable_fields:
+                    sortable_field.name = self.sortable_fields.get(field)
+                    sortable_field.sortable = True
+                sortable_fields.append(sortable_field)
             return sortable_fields
 
         for field in self.model._meta.fields:
@@ -165,9 +165,10 @@ class SortableTabularInline(admin.options.TabularInline):
                     continue
             elif field.get_internal_type() == "AutoField":
                 continue
+            sortable_field = SortableField(field.name, len(sortable_fields))
             # insert overrides
-            field_name = self.sortable_fields.get(field.name, field.name)
-            sortable_fields.append(field_name)
+            sortable_field.name = self.sortable_fields.get(field.name, field.name)
+            sortable_fields.append(sortable_field)
         
         return sortable_fields
 

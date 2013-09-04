@@ -1,4 +1,4 @@
-{% load i18n admin_static admin_modify %}
+{% load i18n admin_static admin_modify utils %}
 <div class="inline-group" id="{{ inline_admin_formset.formset.prefix }}-group">
   <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
 {{ inline_admin_formset.formset.management_form }}
@@ -9,18 +9,28 @@
      <thead><tr>
      {% for field in inline_admin_formset.fields %}
        {% if not field.widget.is_hidden %}
-         <th{% if forloop.first %} colspan="2"{% endif %}{% if field.required %} class="required"{% endif %}>
-            {# if items are ordered by this column append reverse parameter #}
-            <a href="?ordering={{ forloop.counter0 }}{% if forloop.counter0|stringformat:'s' == request.GET.ordering and request.GET.ordering_reverse != 'true' %}&ordering_reverse=true" class="asc{% endif %}">
+            {# Inline fields sorting staff #}
+            {% get request.session.sortable_fields forloop.counter0  as sfield %}
+         <th{% if forloop.first %} colspan="2"{% endif %} 
+            class="{% if field.required %}required{% endif %}{% if sfield.sortable %} sortable{% endif %}{% if sfield.is_sorted %} sorted{% endif %}">
+            {% if sfield.is_sorted %}
+            <div class="sortoptions">
+            <a href="?o={{ sfield.order }}" {% if sfield.is_sorted %}
+                class="{{ sfield.order_type }}"{% endif %}></a>
+            </div>
+            {% endif %}
+            <div class="text">
+            {% if sfield.sortable %}<a href="?o={{ sfield.order }}">{% else %}<span>{% endif %}
                 {{ field.label|capfirst }}
-            </a>
-         {% if field.help_text %}&nbsp;<img src="{% static "admin/img/icon-unknown.gif" %}" class="help help-tooltip" width="10" height="10" alt="({{ field.help_text|striptags }})" title="{{ field.help_text|striptags }}" />{% endif %}
+            {% if field.help_text %}&nbsp;<img src="{% static "admin/img/icon-unknown.gif" %}" class="help help-tooltip" width="10" height="10" alt="({{ field.help_text|striptags }})" title="{{ field.help_text|striptags }}" />{% endif %}
+            {% if sfield.sortable %}</a>{% else %}</span>{% endif %}
+            </div>
+            <div class="clear"></div>
          </th>
        {% endif %}
      {% endfor %}
      {% if inline_admin_formset.formset.can_delete %}<th>{% trans "Delete?" %}</th>{% endif %}
      </tr></thead>
-
      <tbody>
      {% for inline_admin_form in inline_admin_formset %}
         {% if inline_admin_form.form.non_field_errors %}

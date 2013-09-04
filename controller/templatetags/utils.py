@@ -22,6 +22,16 @@ def app_is_installed(app_name):
 def controller_version():
     return get_version()
 
+@register.assignment_tag()
+def get(array, index):
+    """
+    Allow variable index access in templates
+    http://code.djangoproject.com/ticket/3371
+    """
+    try:
+        return array[index]
+    except IndexError:
+        return None
 
 @register.simple_tag(name="admin_url", takes_context=True)
 def rest_to_admin_url(context):

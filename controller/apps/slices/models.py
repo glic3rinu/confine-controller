@@ -340,6 +340,15 @@ class Sliver(models.Model):
     def max_num_ifaces(self):
         return 256 # limited by design -> #nr: unsigned 8 bits
     
+    @property
+    def effective_set_state(self):
+        slice = self.slice
+        if slice.set_state == slice.DEPLOY and self.set_state == slice.REGISTER:
+            return self.set_state
+        elif slice.set_state == slice.START and self.set_state in [slice.REGISTER, slice.DEPLOY]:
+            return self.set_state
+        return slice.set_state
+    
     def update(self):
         self.instance_sn += 1
         self.save()

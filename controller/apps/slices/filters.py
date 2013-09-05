@@ -49,6 +49,7 @@ class SliverSetStateListFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         state = self.value()
         if state:
+            # TODO use sliver.effective_state ?
             return queryset.filter(Q(set_state=state)|
                 Q(set_state__isnull=True, slice__set_state=state))
 

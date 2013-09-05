@@ -142,7 +142,7 @@ class Command(BaseCommand):
             upgrade_notes.append('Celery workers configuration has been updated. '
                 'Please update it by running:\n'
                 '  > sudo python manage.py setupceleryd\n')
-        if version < 904:
+        if version < 905:
             # Change template types for more generic ones
             from slices.models import Template
             from slices.settings import SLICES_TEMPLATE_TYPES

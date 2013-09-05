@@ -125,10 +125,16 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     new_instance_sn.short_description ='Instance sequence number'
     
     def computed_set_state(self, sliver):
-        state = sliver.set_state if sliver.set_state else sliver.slice.set_state
+        sliver_state = sliver.set_state
+        state = sliver.effective_set_state
+        effective = state != sliver_state
         color = STATE_COLORS.get(state, "black")
         state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
-        return mark_safe('<span style="color:%s;">%s</spam>' % (color, state))
+        title = ''
+        if effective:
+            title = 'Set state from slice, the sliver state is %s' % sliver_state
+            state += '*'
+        return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
     computed_set_state.short_description = 'Set state'
     
     def has_add_permission(self, *args, **kwargs):

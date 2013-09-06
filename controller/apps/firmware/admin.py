@@ -104,7 +104,7 @@ class BuildAdmin(admin.ModelAdmin):
         'image_link', 'date'
     ]
     list_display_links = ['pk', 'node']
-    search_fields = ['node__description', 'node__id']
+    search_fields = ['node__description', 'node__id', 'node__name']
     date_hierarchy = 'date'
     list_filter = ['version']
     fields = [

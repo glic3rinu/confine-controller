@@ -143,7 +143,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     )
     date_hierarchy = 'created_on'
     search_fields = [
-        'id', 'subject', 'created_by__username', 'created_by__email', 'queue',
+        'id', 'subject', 'created_by__username', 'created_by__email', 'queue__name',
         'owner__username'
     ]
     actions = [

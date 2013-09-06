@@ -1,6 +1,8 @@
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import get_model
+from django.http import Http404
 from django.shortcuts import redirect
 
 from controller.admin.utils import get_modeladmin
@@ -56,10 +58,12 @@ def refresh_state(modeladmin, request, queryset):
         msg = 'The state of %d %ss has been updated' % (queryset.count(), opts.object_name)
         modeladmin.message_user(request, msg)
 
-
 def show_state(modeladmin, request, queryset):
     """ links to state information (state change view) """
-    obj = queryset.get()
+    try:
+        obj = queryset.get()
+    except ObjectDoesNotExist:
+        raise Http404
     model_name = obj._meta.verbose_name_raw
     # Create state if not exists yet
     state_model = type(obj)._meta.get_field_by_name('state')[0].model

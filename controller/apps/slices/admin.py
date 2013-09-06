@@ -90,7 +90,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         }),
     )
     readonly_fields = ['new_instance_sn', 'exp_data_sha256']
-    search_fields = ['description', 'node__description', 'slice__name']
+    search_fields = ['description', 'node__description', 'node__name', 'slice__name']
     inlines = [SliverIfaceInline]
     actions = [update_selected]
     change_view_actions = [update_selected]

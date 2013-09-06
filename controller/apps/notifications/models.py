@@ -60,7 +60,12 @@ class Delivered(models.Model):
         return str(self.content_object)
 
 
-cursor = connection.cursor()
-if Notification._meta.db_table in connection.introspection.get_table_list(cursor):
-    for notification in Notification.objects.all():
-        notification.hook_delivered_generic_relation()
+try:
+    # This may fail when the database does not exists
+    cursor = connection.cursor()
+except:
+    pass
+else:
+    if Notification._meta.db_table in connection.introspection.get_table_list(cursor):
+        for notification in Notification.objects.all():
+            notification.hook_delivered_generic_relation()

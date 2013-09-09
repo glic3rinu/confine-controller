@@ -1,7 +1,7 @@
+import hashlib
 import inspect
 import os
 import tempfile
-from hashlib import sha256
 
 from django_transaction_signals import defer
 from django.conf import settings as project_settings
@@ -203,22 +203,25 @@ class Slice(models.Model):
         self.update_set_state(commit=False)
         if not self.pk:
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
-            if self.exp_data:
-                # Dirty hack in order to allow pk values on exp_data filename
-                exp_data = self.exp_data
-                self.exp_data = None
-                super(Slice, self).save(*args, **kwargs)
-                self.exp_data = exp_data
+            for field in ('exp_data', 'overlay'):
+                if getattr(self, field):
+                    # Dirty hack in order to allow pk values on exp_data filename
+                    field_value = getattr(self, field)
+                    setattr(self, field, None)
+                    super(Slice, self).save(*args, **kwargs)
+                    setattr(self, field, field_value)
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):
         super(Slice, self).clean()
-        if self.exp_data:
-            if self.exp_data_uri:
-                raise ValidationError('exp_data or exp_data_uri ?')
-            self.exp_data_sha256 = sha256(self.exp_data.file.read()).hexdigest()
-        if self.exp_data_uri and not self.exp_data_sha256:
-            raise ValidationError('Missing exp_data_sha256.')
+        for field in ('exp_data', 'overlay'):
+            if getattr(self, field):
+                if getattr(self, field+'_uri'):
+                    raise ValidationError('%s or %s_uri ?' % (field, field))
+                sha256 = hashlib.sha256(getattr(self, field).file.read()).hexdigest()
+                setattr(self, field+'_sha256', sha256)
+            if getattr(self, field+'_uri') and not getattr(self, field+'_sha256'):
+                raise ValidationError('Missing %s_sha256.' % field)
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
@@ -352,12 +355,14 @@ class Sliver(models.Model):
     
     def clean(self):
         super(Sliver, self).clean()
-        if self.exp_data:
-            if self.exp_data_uri:
-                raise ValidationError('exp_data or exp_data_uri ?')
-            self.exp_data_sha256 = sha256(self.exp_data.file.read()).hexdigest()
-        if self.exp_data_uri and not self.exp_data_sha256:
-            raise ValidationError('Missing exp_data_sha256.')
+        for field in ('exp_data', 'overlay'):
+            if getattr(self, field):
+                if getattr(self, field+'_uri'):
+                    raise ValidationError('%s or %s_uri ?' % (field, field))
+                sha256 = hashlib.sha256(getattr(self, field).file.read()).hexdigest()
+                setattr(self, field+'_sha256', sha256)
+            if getattr(self, field+'_uri') and not getattr(self, field+'_sha256'):
+                raise ValidationError('Missing %s_sha256.' % field)
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice

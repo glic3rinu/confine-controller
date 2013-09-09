@@ -151,6 +151,7 @@ INSTALLED_APPS = (
     'admin_tools.theming',
     'admin_tools.menu',
     'admin_tools.dashboard',
+    'django_orphaned',
     
     # Django.contrib
     'django.contrib.auth',

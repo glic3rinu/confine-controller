@@ -141,7 +141,8 @@ function install_requirements () {
                      markdown \
                      django-filter \
                      django-admin-tools \
-                     djangorestframework==2.3.7"
+                     djangorestframework==2.3.7 \
+                     https://github.com/admin947/django-orphaned/archive/master.zip"
     LOCAL_PIP="paramiko \
                pygments \
                requests==1.2.0 \

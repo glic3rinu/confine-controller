@@ -68,11 +68,14 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     exp_data_uri = serializers.HyperlinkedFileField(source='exp_data', required=False,
         read_only=True)
     exp_data_sha256 = serializers.Field()
+    overlay_uri = serializers.HyperlinkedFileField(source='overlay', required=False,
+        read_only=True)
+    overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Sliver
-        exclude = ('exp_data',)
+        exclude = ('exp_data', 'overlay')
 
 
 class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
@@ -83,13 +86,16 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     exp_data_uri = serializers.HyperlinkedFileField(source='exp_data', required=False,
         read_only=True)
     exp_data_sha256 = serializers.Field()
+    overlay_uri = serializers.HyperlinkedFileField(source='overlay', required=False,
+        read_only=True)
+    overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     expires_on = serializers.DateTimeField(read_only=True)
     
     class Meta:
         model = Slice
-        exclude = ('exp_data',)
+        exclude = ('exp_data', 'overlay')
 
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):

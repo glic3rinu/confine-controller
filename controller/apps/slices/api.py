@@ -54,40 +54,40 @@ class Reset(APIView):
         raise exceptions.ParseError(detail='This endpoint only accepts null data')
 
 
-def make_upload_exp_data(model):
-    class ExpDataSerializer(serializers.Serializer):
-        """ Just for the browsable API """
-        exp_data = serializers.FileField()
+def make_upload_file(model, field, field_url):
+    # Just for the browsabe API
+    attrs = {field: serializers.FileField()}
+    UploadFlieSerializer = type(field+'Serializer', (serializers.Serializer,), attrs)
     
     # TODO ApiPermissionsMixin
-    class UploadExpData(generics.CreateAPIView):
+    class UploadFile(generics.CreateAPIView):
         """
-        **Relation type:** [`http://confine-project.eu/rel/server/do-upload-exp-data`](
-            http://confine-project.eu/rel/server/do-upload-exp-data)
+        **Relation type:** [`http://confine-project.eu/rel/server/do-upload-%(field_url)s`](
+            http://confine-project.eu/rel/server/do-upload-%(field_url)s)
         
-        Contains the function URI used to upload this resource's experiment data file
+        Contains the function URI used to upload this resource's %(field)s file
         to some remote storage. The URI of the stored file will be placed in the
-        `exp_data_uri` member and its hash in `exp_data_sha256`.
+        `%(field)s_uri` member and its hash in `%(field)s_sha256`.
         
         POST data: `the contents of the file`
         
-        Example: `curl -X POST -F "exp_data=@experiment_data.tgz" ...`
-        """
-        url_name = 'upload-exp-data'
-        serializer_class = ExpDataSerializer
+        Example: `curl -X POST -F "%(field)s=@%(field)s.tgz" ...`
+        """ % {'field': field, 'field_url': field_url}
+        url_name = 'upload-%s' % field_url
+        serializer_class = UploadFlieSerializer
         
         def post(self, request, *args, **kwargs):
-            if request.FILES and 'exp_data' in request.FILES:
+            if request.FILES and field in request.FILES:
                 obj = get_object_or_404(model, pk=kwargs.get('pk'))
                 self.check_object_permissions(self.request, obj)
-                uploaded_file = request.FILES.get('exp_data')
-                obj.exp_data.save(uploaded_file.name, uploaded_file)
+                uploaded_file = request.FILES.get(field)
+                getattr(obj, field).save(uploaded_file.name, uploaded_file)
                 obj.clean()
                 obj.save()
                 response_data = {'detail': 'File uploaded correctly'}
                 return Response(response_data, status=status.HTTP_200_OK)
             raise exceptions.ParseError(detail='This endpoint only accepts null data')
-    return UploadExpData
+    return UploadFile
 
 
 class Update(APIView):
@@ -136,7 +136,10 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Slice
     serializer_class = SliceSerializer
-    ctl = [Renew, Reset, make_upload_exp_data(Slice)]
+    ctl = [
+        Renew, Reset, make_upload_file(Slice, 'exp_data', 'exp-data'),
+        make_upload_file(Slice, 'overlay', 'overlay'),
+    ]
 
 
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -166,7 +169,10 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
-    ctl = [Update, make_upload_exp_data(Sliver)]
+    ctl = [
+        Update, make_upload_file(Sliver, 'exp_data', 'exp-data'),
+        make_upload_file(Sliver, 'overlay', 'overlay'),
+    ]
 
 
 class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):

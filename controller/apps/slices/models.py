@@ -153,6 +153,23 @@ class Slice(models.Model):
             help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
+    overlay = models.FileField(blank=True,
+            upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
+                                     settings.SLICES_SLICE_OVERLAY_NAME,),
+            help_text='File containing overlay for slivers (if they do not explicitly '
+                      'indicate one)',
+            validators=[validate_file_extensions(settings.SLICES_SLICE_OVERLAY_EXTENSIONS)])
+    overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
+            help_text='The URI of a file containing an overlay for slivers (if they '
+                      'do not explicitly indicate one). The file must be an archive '
+                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
+                      'and will be applied on top of the used template. This member '
+                      'may be set directly or through the do-upload-overlay function.')
+    overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the previous file, used to check its integrity. '
+                      'This member may be set directly or through the do-upload-overlay '
+                      'function. Compulsory when a file has been specified.',
+            validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
             help_text='The state set on this slice (set state) and its slivers '
                       '(if they do not explicitly indicate a lower one). '
@@ -208,7 +225,9 @@ class Slice(models.Model):
                 raise ValidationError("Initial state must be Register")
         else:
             old = Slice.objects.get(pk=self.pk)
-            if self.vlan_nr != old.vlan_nr and old.set_state != self.REGISTER and self.vlan_nr == '-1':
+            is_register = old.set_state != self.REGISTER
+            vlan_requested = self.vlan_nr == '-1'
+            if self.vlan_nr != old.vlan_nr and is_register and vlan_requested:
                 raise ValidationError("Vlan can not be requested in state != register")
     
     def renew(self):
@@ -293,6 +312,23 @@ class Sliver(models.Model):
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the exp data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
+            validators=[validate_sha256])
+    overlay = models.FileField(blank=True,
+            upload_to=make_upload_to('overlay', settings.SLICES_SLIVER_OVERLAY_DIR,
+                                     settings.SLICES_SLIVER_OVERLAY_NAME),
+            help_text='File containing overlay for this sliver.',
+            validators=[validate_file_extensions(settings.SLICES_SLIVER_OVERLAY_EXTENSIONS)])
+    overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
+            help_text='If present, the URI of a file containing an overlay for this '
+                      'sliver, instead of the one specified by the slice. The file '
+                      'must be an archive (e.g. a .tar.gz) of the upper directory '
+                      'of an overlayfs filesystem, and will be applied on top of the '
+                      'used template. This member may be set directly or through the '
+                      'do-upload-overlay function.')
+    overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the previous file, used to check its integrity. '
+                      'This member may be set directly or through the do-upload-overlay '
+                      'function. Compulsory when a file has been specified.',
             validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
             help_text='If present, the state set on this sliver (set state), '

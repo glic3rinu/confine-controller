@@ -82,14 +82,15 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice__name']
     fieldsets = (
         (None, {
-            'fields': ('description', 'template', 'exp_data', 'set_state')
+            'fields': ('description', 'template', 'exp_data', 'overlay',
+                       'set_state')
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('new_instance_sn', 'exp_data_sha256',)
+            'fields': ('new_instance_sn', 'exp_data_sha256', 'overlay_sha256')
         }),
     )
-    readonly_fields = ['new_instance_sn', 'exp_data_sha256']
+    readonly_fields = ['new_instance_sn', 'exp_data_sha256', 'overlay_sha256']
     search_fields = ['description', 'node__description', 'node__name', 'slice__name']
     inlines = [SliverIfaceInline]
     actions = [update_selected]
@@ -439,7 +440,8 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
     readonly_fields = [
-        'instance_sn', 'new_sliver_instance_sn', 'expires_on', 'exp_data_sha256'
+        'instance_sn', 'new_sliver_instance_sn', 'expires_on', 'exp_data_sha256',
+        'overlay_sha256'
     ]
     date_hierarchy = 'expires_on'
     search_fields = ['name']
@@ -448,12 +450,13 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'template', 'exp_data', 'set_state',
-                       'vlan_nr', 'expires_on', 'group'),
+            'fields': ('name', 'description', 'template', 'exp_data', 'overlay',
+                       'set_state', 'vlan_nr', 'expires_on', 'group'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('instance_sn', 'new_sliver_instance_sn', 'exp_data_sha256')
+            'fields': ('instance_sn', 'new_sliver_instance_sn', 'exp_data_sha256',
+                       'overlay_sha256')
         }),
     )
     change_form_template = "admin/slices/slice/change_form.html"

@@ -49,14 +49,14 @@ def request_cert(modeladmin, request, queryset):
     
     form = RequestCertificateForm()
     
-    # User has provided a SCR
+    # User has provided a CSR
     if request.POST.get('post'):
         form = RequestCertificateForm(request.POST)
         # form.node is needed in form.clean()
         form.node = node
         if form.is_valid():
-            scr = form.cleaned_data['scr']
-            node.sign_cert_request(scr)
+            csr = form.cleaned_data['csr']
+            node.sign_cert_request(csr)
             modeladmin.log_change(request, node, "Certificate requested")
             return
     

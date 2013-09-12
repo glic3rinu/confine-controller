@@ -33,8 +33,8 @@ def validate_dhcp_range(value):
         raise ValidationError('Range %s has not a valid format (#N).' % value)
 
 
-# TODO rename to csr and replace everywhere else
 def validate_csr(csr, node):
+    """ Validate Certificate Signing Request (CSR) """
     try:
         csr = X509.load_request_string(str(csr))
     except:
@@ -42,7 +42,8 @@ def validate_csr(csr, node):
     
     subject = csr.get_subject()
     if not subject.CN or node.mgmt_net.addr != IP(subject.CN):
-        raise ValidationError("CN != node.mgmt_net.addr: %s != %s" % (subject.CN, node.mgmt_net.addr))
+        raise ValidationError("Common Name (CN) must be equeal than the "\
+            "node management address: %s != %s" % (subject.CN, node.mgmt_net.addr))
     
     if not Group.objects.filter(nodes=node, roles__user__email=subject.emailAddress, roles__is_admin=True).exists():
         raise ValidationError("No admin with '%s' email address for this node." % subject.emailAddress)

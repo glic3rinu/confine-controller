@@ -45,7 +45,7 @@ class DirectIfaceInline(PermissionTabularInline):
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     class Media:
-        js = ("nodes/js/nodes_admin.js",)
+        js = ("nodes/js/nodes-admin.js",)
 
     list_display = [
         'name', 'id', 'arch', 'display_set_state', admin_link('group'), 'num_ifaces'

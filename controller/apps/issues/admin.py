@@ -186,10 +186,10 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     class Media:
         css = {
-            'all': ('issues/css/admin-ticket.css',)
+            'all': ('issues/css/ticket-admin.css',)
         }
         js = (
-            'issues/js/admin-ticket.js',
+            'issues/js/ticket-admin.js',
         )
     
     def display_summary(self, ticket):

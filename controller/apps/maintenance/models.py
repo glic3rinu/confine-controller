@@ -9,7 +9,7 @@ from djcelery.models import TaskState
 
 from controller.utils import is_installed
 from nodes.models import Node
-from state.models import NodeState, node_heartbeat
+from state.models import State, node_heartbeat
 
 from . import settings
 from .exceptions import ConcurrencyError
@@ -174,7 +174,7 @@ class Instance(models.Model):
         return self.execution.script
 
 
-@receiver(node_heartbeat, sender=NodeState, dispatch_uid="maintenance.retry_pending_operations")
+@receiver(node_heartbeat, sender=State, dispatch_uid="maintenance.retry_pending_operations")
 def retry_pending_operations(sender, node, **kwargs):
     """ runs timeout instances when a node heart beat is received """
     instances = Instance.objects.filter(node=node, state=Instance.TIMEOUT,

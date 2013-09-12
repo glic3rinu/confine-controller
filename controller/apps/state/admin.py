@@ -28,7 +28,7 @@ from slices.models import Sliver
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
 from .helpers import break_headers, break_lines
-from .models import NodeState, SliverState, BaseState
+from .models import State, StateHistory
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
 
@@ -50,10 +50,19 @@ STATES_COLORS = {
 }
 
 
-class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
+class StateAdmin(ChangeViewActions, PermissionModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': ('url_link', 'last_seen', 'last_contact',
+                       'last_try', 'next_retry', 'last_change', 'current')
+        }),
+        ('Details', {
+            'fields': ('display_metadata', 'display_data')
+        }),
+    )
     readonly_fields = [
         'url_link', 'last_seen', 'last_try', 'next_retry', 'current', 'last_change',
-        'display_metadata', 'display_data'
+        'display_metadata', 'display_data', 'last_contact'
     ]
     change_view_actions = [refresh]
     
@@ -67,15 +76,14 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def last_seen(self, instance):
         return display_timesince(instance.last_seen_on)
-    last_seen.help_text = get_help_text(BaseState, 'last_seen_on')
+    last_seen.help_text = get_help_text(State, 'last_seen_on')
     
     def last_try(self, instance):
         return display_timesince(instance.last_try_on)
-    last_try.help_text = get_help_text(BaseState, 'last_try_on')
+    last_try.help_text = get_help_text(State, 'last_try_on')
     
     def last_change(self, instance):
         return display_timesince(instance.last_change_on)
-    last_change.help_text = get_help_text(BaseState, 'last_change_on')
     
     def next_retry(self, instance):
         return display_timeuntil(instance.next_retry_on)
@@ -116,39 +124,12 @@ class BaseStateAdmin(ChangeViewActions, PermissionModelAdmin):
             'title': mark_safe('%s (%s)' % (title, related_obj_link)),
             'header_title': title}
         context.update(extra_context or {})
-        return super(BaseStateAdmin, self).change_view(request, object_id,
+        return super(StateAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
-
-
-class NodeStateAdmin(BaseStateAdmin):
-    readonly_fields = ['last_contact'] + BaseStateAdmin.readonly_fields
-    fieldsets = (
-        (None, {
-            'fields': ('url_link', 'last_seen', 'last_contact',
-                       'last_try', 'next_retry', 'last_change', 'current')
-        }),
-        ('Details', {
-            'fields': ('display_metadata', 'display_data')
-        }),
-    )
-    change_form_template = 'admin/state/nodestate/change_form.html'
     
     def last_contact(self, instance):
         return display_timesince(instance.last_contact_on)
-    last_contact.help_text = get_help_text(NodeState, 'last_contact_on')
-
-
-class SliverStateAdmin(BaseStateAdmin):
-    fieldsets = (
-        (None, {
-            'fields': ('url_link', 'last_seen', 'last_try',
-                       'next_retry', 'last_change', 'current')
-        }),
-        ('Details', {
-            'fields': ('display_metadata', 'display_data')
-        }),
-    )
-    change_form_template = 'admin/state/sliverstate/change_form.html'
+    last_contact.help_text = get_help_text(State, 'last_contact_on')
     
     def sliver_link(self, instance):
         """ Link to related sliver used on change_view """
@@ -156,8 +137,7 @@ class SliverStateAdmin(BaseStateAdmin):
     sliver_link.short_description = 'Sliver'
 
 
-admin.site.register(NodeState, NodeStateAdmin)
-admin.site.register(SliverState, SliverStateAdmin)
+admin.site.register(State, StateAdmin)
 
 
 # Monkey Patch section
@@ -165,17 +145,15 @@ admin.site.register(SliverState, SliverStateAdmin)
 def state_link(*args):
     obj = args[-1]
     if not obj.pk:
-        # Don't know why state_link is called without a real object :(
+        # Don't know why state_link is ever called without a real object :(
         return
     color = colored('current', STATES_COLORS, verbose=True)
     try:
-        state = obj.state
-    except NodeState.DoesNotExist:
-        state = NodeState.objects.create(node=obj)
-    except SliverState.DoesNotExist:
-        state = SliverState.objects.create(sliver=obj)
+        state = obj.state.get()
+    except State.DoesNotExist:
+        state = obj.state.create()
     model_name = obj._meta.verbose_name_raw
-    url = reverse('admin:state_%sstate_change' % model_name, args=[state.pk])
+    url = reverse('admin:state_state_change', args=[state.object_id])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
 state_link.short_description = 'Current state'
 state_link.admin_order_field = 'state__last_seen_on'
@@ -184,7 +162,7 @@ state_link.admin_order_field = 'state__last_seen_on'
 def firmware_version(node):
     try:
         version = node.state.soft_version
-    except NodeState.DoesNotExist:
+    except State.DoesNotExist:
         return 'No data'
     else:
         if not version:
@@ -195,8 +173,8 @@ def firmware_version(node):
 firmware_version.admin_order_field = 'state__soft_version'
 
 
-insertattr(Node, 'list_display', firmware_version)
-insertattr(NodeListAdmin, 'list_display', firmware_version)
+#insertattr(Node, 'list_display', firmware_version)
+#insertattr(NodeListAdmin, 'list_display', firmware_version)
 insertattr(Node, 'list_display', state_link)
 insertattr(NodeListAdmin, 'list_display', state_link)
 insertattr(Sliver, 'list_display', state_link)
@@ -205,7 +183,7 @@ insertattr(Node, 'actions', refresh_state)
 insertattr(Sliver, 'actions', refresh_state)
 insertattr(Node, 'list_filter', NodeStateListFilter)
 insertattr(Sliver, 'list_filter', SliverStateListFilter)
-insertattr(Node, 'list_filter', 'state__soft_version')
+#insertattr(Node, 'list_filter', 'state__soft_version')
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')

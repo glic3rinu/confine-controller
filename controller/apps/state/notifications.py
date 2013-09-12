@@ -4,12 +4,12 @@ from django.utils import timezone
 
 from notifications import Notification
 
-from .models import NodeState
+from .models import State
 from .settings import STATE_NODE_OFFLINE_WARNING
 
 
 class NodeNotAvailable(Notification):
-    model = NodeState
+    model = State
     description = 'Notificate %s days after the node goes offline' % STATE_NODE_OFFLINE_WARNING.days
     verbose_name = 'Node not available notification'
     default_subject = 'Node {{ node.name }} appear OFFLINE for more than {{ exp_warn.days }} days'
@@ -18,7 +18,7 @@ class NodeNotAvailable(Notification):
         'Your node appear as offline')
     
     def check_condition(self, obj):
-        offline = obj.current == NodeState.OFFLINE
+        offline = obj.current == State.OFFLINE
         threshold = obj.last_change_on < timezone.now()-STATE_NODE_OFFLINE_WARNING
         return offline and threshold
     

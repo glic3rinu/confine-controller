@@ -1,6 +1,6 @@
 from django.contrib.admin import SimpleListFilter
 
-from .models import NodeState, SliverState
+from .models import State
 
 
 class NodeStateListFilter(SimpleListFilter):
@@ -8,7 +8,7 @@ class NodeStateListFilter(SimpleListFilter):
     parameter_name = 'state'
     
     def lookups(self, request, model_admin):
-        return NodeState.STATES
+        return State.NODE_STATES
     
     def queryset(self, request, queryset):
         if self.value():
@@ -21,7 +21,7 @@ class SliverStateListFilter(SimpleListFilter):
     parameter_name = 'state'
     
     def lookups(self, request, model_admin):
-        return SliverState.STATES
+        return State.SLIVER_STATES
     
     def queryset(self, request, queryset):
         if self.value():

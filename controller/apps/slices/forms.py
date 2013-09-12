@@ -50,7 +50,6 @@ class SliceAdminForm(forms.ModelForm):
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
     """ Provides initial Direct ifaces """
     def __init__(self, *args, **kwargs):
-#        print kwargs['instance'].node_id
         if not kwargs['instance'].pk and 'data' not in kwargs:
             all_ifaces = Sliver.get_registered_ifaces()
             auto_ifaces = [ (t,o) for t,o in all_ifaces.items()

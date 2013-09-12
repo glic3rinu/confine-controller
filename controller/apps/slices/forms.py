@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.admin.templatetags.admin_list import _boolean_icon
 
 from controller.forms.widgets import ShowText
+from nodes.models import Node
 
 from .models import Slice, Sliver
 
@@ -49,6 +50,7 @@ class SliceAdminForm(forms.ModelForm):
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
     """ Provides initial Direct ifaces """
     def __init__(self, *args, **kwargs):
+#        print kwargs['instance'].node_id
         if not kwargs['instance'].pk and 'data' not in kwargs:
             all_ifaces = Sliver.get_registered_ifaces()
             auto_ifaces = [ (t,o) for t,o in all_ifaces.items()
@@ -72,27 +74,34 @@ class SliverIfaceInlineForm(forms.ModelForm):
         super(SliverIfaceInlineForm, self).__init__(*args, **kwargs)
         if 'parent' in self.fields:
             # readonly forms doesn't have model fields
-            # TODO handle this on the permission application?
             self.fields['parent'].queryset = self.node.direct_ifaces
-            # TODO: this is very hacky
             # Hook slice for future processing on iface.model_clean()
             self.instance.slice = self.slice
+        # Remove unallowed iface types from choices
+        queryset = Node.objects.filter(pk=self.node.id)
+        choices = self.fields['type'].choices
+        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+            if not iface_object.is_allowed(self.slice, queryset):
+                choices = [choice for choice in choices if choice[0] != iface_type]
+        self.fields['type'].choices = choices
 
 
 class SliverIfaceBulkForm(forms.Form):
     """ Display available ifaces on add sliver bulk action """
-    def __init__(self, *args, **kwargs):
-        # TODO: isolated iface requires vlan_nr
+    def __init__(self, slice, queryset, *args, **kwargs):
         super(SliverIfaceBulkForm, self).__init__(*args, **kwargs)
         for iface_type, iface_object in Sliver.get_registered_ifaces().items():
-            if iface_object.ALLOW_BULK:
-                kwargs = {
-                    'label': iface_type,
-                    'required': False,
-                    'help_text': iface_object.__doc__.strip() }
+            kwargs = {
+                'label': iface_type,
+                'required': False,
+                'help_text': iface_object.__doc__.strip() }
+            if iface_object.ALLOW_BULK and iface_object.is_allowed(slice, queryset):
                 if iface_object.AUTO_CREATE:
                     kwargs['initial'] = _boolean_icon(True)
                     kwargs['widget'] = ShowText()
                 if iface_object.CREATE_BY_DEFAULT:
                     kwargs['initial'] = True
-                self.fields[iface_type] = forms.BooleanField(**kwargs)
+            else:
+                kwargs['initial'] = _boolean_icon(False)
+                kwargs['widget'] = ShowText()
+            self.fields[iface_type] = forms.BooleanField(**kwargs)

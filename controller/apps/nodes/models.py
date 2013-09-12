@@ -31,15 +31,18 @@ class Node(models.Model):
         (PRODUCTION, 'PRODUCTION'),
         (FAILURE, 'FAILURE'),
     )
+    NONE = 'none'
+    DHCP = 'dhcp'
+    AUTO = 'auto'
     IPV6_METHODS = (
-        ('none', 'None'),
-        ('dhcp', 'DHCP'),
-        ('auto', 'Auto'),
+        (NONE, 'None'),
+        (DHCP, 'DHCP'),
+        (AUTO, 'Auto'),
     )
     IPV4_METHODS = (
-        ('none', 'None'),
-        ('dhcp', 'DHCP'),
-        ('range', 'Range'),
+        (NONE, 'None'),
+        (DHCP, 'DHCP'),
+        (AUTO, 'Auto'),
     )
     
     name = models.CharField(max_length=256, unique=True,

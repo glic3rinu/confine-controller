@@ -3,7 +3,7 @@ from IPy import IP
 
 from controller.settings import DEBUG_IPV6_PREFIX
 from controller.utils.ip import int_to_hex_str, split_len
-
+from nodes.models import Node
 
 from .models import Sliver
 
@@ -34,6 +34,9 @@ class BaseIface(object):
     
     def ipv4_addr(self, iface):
         return None
+    
+    def is_allowed(self, slice, queryset):
+        return True
 
 
 class IsolatedIface(BaseIface):
@@ -52,6 +55,9 @@ class IsolatedIface(BaseIface):
             raise ValidationError("Slice vlan_nr is mandatory for isolated interfaces.")
         if not iface.parent:
             raise ValidationError("Parent is mandatory for isolated interfaces.")
+    
+    def is_allowed(self, slice, queryset):
+        return bool(slice.vlan_nr)
 
 
 class Pub4Iface(BaseIface):
@@ -82,6 +88,9 @@ class Pub6Iface(BaseIface):
     
     def ipv6_addr(self, iface):
         return 'Unknown'
+    
+    def is_allowed(self, slice, queryset):
+        return not queryset.filter(sliver_pub_ipv6=Node.NONE).exists()
 
 
 class DebugIface(BaseIface):

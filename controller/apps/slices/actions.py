@@ -81,7 +81,7 @@ def create_slivers(modeladmin, request, queryset):
         return redirect('admin:slices_slice_add_sliver', modeladmin.slice_id, node.pk)
     
     if request.POST.get('post'):
-        form = SliverIfaceBulkForm(request.POST)
+        form = SliverIfaceBulkForm(slice, queryset, request.POST)
         if form.is_valid():
             optional_ifaces = form.cleaned_data
             requested_ifaces = [ field for field, value in optional_ifaces.iteritems() if value ]
@@ -113,7 +113,7 @@ def create_slivers(modeladmin, request, queryset):
         "opts": opts,
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-        'form': SliverIfaceBulkForm(),
+        'form': SliverIfaceBulkForm(slice, queryset),
     }
     
     return TemplateResponse(request, "admin/slices/slice/create_slivers_confirmation.html",

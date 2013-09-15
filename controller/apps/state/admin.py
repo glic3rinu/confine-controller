@@ -50,6 +50,68 @@ STATES_COLORS = {
 }
 
 
+class StateHistoryAdmin(admin.ModelAdmin):
+    list_display = [
+        'state', colored('value', STATES_COLORS, verbose=True), 'date_since_start',
+        'date_since_end', 'duration'
+    ]
+    list_display_links = ['state']
+    actions = None
+    
+    def get_list_display(self, request):
+        list_display = super(StateHistoryAdmin, self).get_list_display(request)
+        if hasattr(request, 'state_id'):
+            return list_display[1:]
+        return list_display
+    
+    def date_since_start(self, instance):
+        return display_timesince(instance.start)
+    date_since_start.admin_order_field = 'start'
+
+    def date_since_end(self, instance):
+        return display_timesince(instance.end)
+    date_since_start.admin_order_field = 'end'
+    
+    def duration(self, instance):
+        delta = instance.end-instance.start
+        if delta.seconds < 60:
+            return "%i seconds" % delta.seconds
+        elif delta.seconds < 3600:
+            return "%i minutes" % ((delta.seconds//60)%60)
+        elif delta.seconds < 86400:
+            return "%i hours" % (delta.seconds//3600)
+        return "%i days" % delta.days
+    
+    def get_changelist(self, request, **kwargs):
+        """ Filter changelist by object """
+        from django.contrib.admin.views.main import ChangeList
+        class ObjectChangeList(ChangeList):
+            def get_query_set(self, *args, **kwargs):
+                qs = super(ObjectChangeList, self).get_query_set(*args, **kwargs)
+                if hasattr(request, 'state_id'):
+                    return qs.filter(state=request.state_id)
+                return qs
+        return ObjectChangeList
+    
+    def changelist_view(self, request, *args, **kwargs):
+        """ Provide ping action """
+        object_id = kwargs.get('object_id')
+        request.state_id = object_id
+        state = get_object_or_404(State, pk=object_id)
+        related_obj_link = get_admin_link(state.content_object)
+        context = kwargs.get('extra_context', {})
+        context.update({
+            'title': mark_safe('State history (%s)' % related_obj_link)
+        })
+        return super(StateHistoryAdmin, self).changelist_view(request, extra_context=context)
+    
+    def has_add_permission(self, *args, **kwargs):
+        return False
+    
+    def changes(self, request, object_id):
+        state = get_object_or_404(State, pk=object_id)
+#        for value,records in state.history.all().group_by('value'):
+            
 class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     fieldsets = (
         (None, {
@@ -65,9 +127,28 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
         'display_metadata', 'display_data', 'last_contact'
     ]
     change_view_actions = [refresh]
+    change_form_template = 'admin/state/state/change_form.html'
     
     class Media:
         css = { "all": ("controller/css/github.css",)}
+    
+    def get_urls(self):
+        admin_site = self.admin_site
+        urls = patterns("",
+#            url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/$",
+#                wrap_admin_view(self, self.changelist_view),
+#                name='pings_ping_list'),
+#            url("^ping/(?P<content_type_id>\d+)/(?P<object_id>\d+)/$",
+#                wrap_admin_view(self, self.ping_view),
+#                name='pings_ping_ping'),
+            url("^(?P<object_id>\d+)/changes/$",
+                wrap_admin_view(self, StateHistoryAdmin(StateHistory, admin_site).changes),
+                name='state_history_changes'),
+            url("^(?P<object_id>\d+)/history/$",
+                wrap_admin_view(self, StateHistoryAdmin(StateHistory, admin_site).changelist_view),
+                name='state_history'),
+        )
+        return urls + super(StateAdmin, self).get_urls()
     
     def url_link(self, instance):
         url = instance.get_url()
@@ -117,12 +198,10 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         state = get_object_or_404(self.model, pk=object_id)
-        related_obj = state.get_related_model().objects.get(pk=object_id)
-        related_obj_link = get_admin_link(related_obj)
-        title = force_text(self.opts.verbose_name).capitalize()
+        related_obj_link = get_admin_link(state.content_object)
         context = {
-            'title': mark_safe('%s (%s)' % (title, related_obj_link)),
-            'header_title': title}
+            'title': mark_safe('State (%s)' % (related_obj_link)),
+            'header_title': 'State'}
         context.update(extra_context or {})
         return super(StateAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
@@ -138,6 +217,7 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
 
 
 admin.site.register(State, StateAdmin)
+admin.site.register(StateHistory, StateHistoryAdmin)
 
 
 # Monkey Patch section
@@ -148,12 +228,9 @@ def state_link(*args):
         # Don't know why state_link is ever called without a real object :(
         return
     color = colored('current', STATES_COLORS, verbose=True)
-    try:
-        state = obj.state.get()
-    except State.DoesNotExist:
-        state = obj.state.create()
+    state = obj.state
     model_name = obj._meta.verbose_name_raw
-    url = reverse('admin:state_state_change', args=[state.object_id])
+    url = reverse('admin:state_state_change', args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
 state_link.short_description = 'Current state'
 state_link.admin_order_field = 'state__last_seen_on'

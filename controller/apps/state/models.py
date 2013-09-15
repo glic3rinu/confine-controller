@@ -1,5 +1,6 @@
 import json
-from datetime import timedelta
+import functools
+from datetime import datetime, timedelta
 from time import time
 
 from django.contrib.contenttypes import generic
@@ -19,17 +20,19 @@ class State(models.Model):
     UNKNOWN = 'unknown'
     OFFLINE = 'offline'
     NODATA = 'nodata'
+    FAILURE = 'failure'
+    CRASHED = 'crashed'
     BASE_STATES = (
-        ('unknown', UNKNOWN),
-        ('offline', OFFLINE),
-        ('nodata', NODATA),
+        (UNKNOWN, 'UNKNOWN'),
+        (OFFLINE, 'OFFLINE'),
+        (NODATA, 'NODATA'),
     )
     NODE_STATES = BASE_STATES + (
         ('production', 'PRODUCTION'),
         ('safe', 'SAFE'),
         ('debug', 'DEBUG'),
-        ('failure', 'FAILURE'),
-        ('crashed', 'CRASHED'),
+        (FAILURE, 'FAILURE'),
+        (CRASHED, 'CRASHED'),
     )
     SLIVER_STATES = BASE_STATES + (
         ('started', 'STARTED'),
@@ -52,6 +55,7 @@ class State(models.Model):
     value = models.CharField(max_length=32, choices=STATES)
     metadata = models.TextField()
     data = models.TextField()
+    add_date = models.DateTimeField(auto_now_add=True)
     
     content_object = generic.GenericForeignKey()
     
@@ -63,24 +67,40 @@ class State(models.Model):
     
     @property
     def last_change_on(self):
-        return self.history.all().order_by('-date')[0].date
+        last_state = self.last
+        return last_state.date if last_state else None
     
     @property
     def soft_version(self):
         return json.loads(self.data).get('soft_version', '')
     
     @property
+    def heartbeat_expires(self):
+        model = self.content_type.model_class()
+        schedule = State.get_setting(model, 'SCHEDULE')
+        window = State.get_setting(model, 'EXPIRE_WINDOW')
+        return functools.partial(heartbeat_expires, freq=schedule, expire_window=window)
+    
+    @property
+    def last(self):
+        history = self.history.all().order_by('-start')
+        return history[0] if history else None
+    
+    @property
     def current(self):
-        expiration_time = heartbeat_expires(self.last_try_on, freq=settings.STATE_SCHEDULE,
-                expire_window=settings.STATE_EXPIRE_WINDOW)
-        if not self.last_try_on or time() > expiration_time:
+        if not self.last_try_on or time() > self.heartbeat_expires(self.last_try_on):
             return self.NODATA
         return self.value
     
+    @property
+    def next_retry_on(self):
+        model = self.content_type.model_class()
+        freq = State.get_setting(model, 'SCHEDULE')
+        return self.last_try_on + timedelta(seconds=freq)
+    
     @classmethod
     def store_glet(cls, obj, glet, get_data=lambda g: g.value):
-        state, __ = obj.state.get_or_create(object_id=obj.id)
-        old_state = state.current
+        state = obj.state
         now = timezone.now()
         state.last_try_on = now
         metadata = {
@@ -99,36 +119,106 @@ class State(models.Model):
         else:
             state.data = ''
         state.metadata = json.dumps(metadata, indent=4)
-        if old_state != state.current and old_state != BaseState.NODATA:
-            state.history.create(state=state.current)
+        state._coumpute_current()
+        state.history.store()
         state.save()
         return state
     
     @classmethod
     def register_heartbeat(cls, obj):
-        state, __ = obj.state.get_or_create(object_id=obj.id)
+        state = obj.state
         state.last_seen_on = timezone.now()
         state.last_contact_on = state.last_seen_on
         state.save()
         node_heartbeat.send(sender=cls, node=obj.node or obj)
+    
+    def _coumpute_current(self):
+        if (not self.last_seen_on and time() > self.heartbeat_expires(self.add_date) or
+                self.last_seen_on and time() > self.heartbeat_expires(self.last_seen_on)):
+            self.value = State.OFFLINE
+        else:
+            try:
+                self.value = json.loads(self.data).get('state', self.UNKNOWN)
+            except ValueError:
+                pass
+            else:
+                self.value = self.UNKNOWN
+            if self.value != State.FAILURE:
+                # check if CRASHED
+                timeout_expire = timezone.now()-settings.STATE_NODE_PULL_TIMEOUT
+                if self.add_date < timeout_expire:
+                    if not self.last_contact_on or self.last_contact_on < timeout_expire:
+                        self.value = self.CRASHED
+    
+    @classmethod
+    def get_setting(cls, model, setting):
+        name = model.__name__.upper()
+        return getattr(settings, "STATE_%s_%s" % (name, setting))
+    
+    def get_url(self):
+        model = self.content_type.model_class()
+        URI = State.get_setting(model, 'URI')
+        node = getattr(self.content_object, 'node', self.content_object)
+        context = {
+            'mgmt_addr': node.mgmt_net.addr,
+            'object_id': self.object_id
+        }
+        return URI % context
+    
+    def get_current_display(self):
+        current = self.current
+        for name,verbose in State.STATES:
+            if name == current:
+                return verbose
+        return current
+
+
+class StateHistoryManager(models.Manager):
+    def store(self, **kwargs):
+        state = self.instance
+        last_state = state.last
+        now = timezone.now()
+        if not last_state:
+            last_state = state.history.create(value=state.value)
+        else:
+            expiration = state.heartbeat_expires(last_state.end)
+            if time() > expiration:
+                last_state.end = datetime.fromtimestamp(expiration)
+                last_state.save()
+                state.history.create(value=State.NODATA, start=last_state.end, end=now)
+                last_state = state.history.create(value=state.value, start=now, end=now)
+            else:
+                last_state.end = now
+                last_state.save()
+                if last_state.value != state.value:
+                    last_state = state.history.create(value=state.value, start=now, end=now)
+        return last_state
+
+
+class StateHistory(models.Model):
+    state = models.ForeignKey(State, related_name='history')
+    value = models.CharField(max_length=32, choices=State.STATES)
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    
+    objects = StateHistoryManager()
+    
+    class Meta:
+        ordering = ['-start']
+    
+    def __unicode__(self):
+        return self.value
 
 
 node_heartbeat = Signal(providing_args=["instance", "node"])
 
 
+@property
+def state(self):
+    ct = ContentType.objects.get_for_model(type(self))
+    return self.state_set.get_or_create(object_id=self.id, content_type=ct)[0]
+
 for model in [Node, Sliver]:
-    model.add_to_class('state', generic.GenericRelation('state.State'))
+    model.add_to_class('state_set', generic.GenericRelation('state.State'))
+    model.state = state
 
-
-class StateHistory(models.Model):
-    state = models.ForeignKey(State)
-    value = models.CharField(max_length=32, choices=State.STATES)
-    date = models.DateTimeField(auto_now_add=True)
-    
-    content_object = generic.GenericForeignKey()
-    
-    class Meta:
-        ordering = ['-date']
-    
-    def __unicode__(self):
-        return self.value

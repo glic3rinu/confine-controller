@@ -8,22 +8,22 @@ STATE_LOCK_DIR = getattr(settings, 'STATE_LOCK_DIR', '/dev/shm/')
 STATE_NODE_PULL_TIMEOUT = getattr(settings, 'STATE_NODE_PULL_TIMEOUT', timedelta(hours=2))
 
 
-STATE_NODESTATE_URI = getattr(settings, 'STATE_NODESTATE_URI',
+STATE_NODE_URI = getattr(settings, 'STATE_NODESTATE_URI',
     'http://[%(mgmt_addr)s]/confine/api/node/')
 
-STATE_NODESTATE_SCHEDULE = getattr(settings, 'STATE_NODESTATE_SCHEDULE', 200)
+STATE_NODE_SCHEDULE = getattr(settings, 'STATE_NODE_SCHEDULE', 200)
 
 # Percentage
-STATE_NODESTATE_EXPIRE_WINDOW = getattr(settings, 'STATE_NODESTATE_EXPIRE_WINDOW', 150)
+STATE_NODE_EXPIRE_WINDOW = getattr(settings, 'STATE_NODE_EXPIRE_WINDOW', 150)
 
 
-STATE_SLIVERSTATE_URI = getattr(settings, 'STATE_SLIVERSTATE_URI',
+STATE_SLIVER_URI = getattr(settings, 'STATE_SLIVER_URI',
     'http://[%(mgmt_addr)s]/confine/api/slivers/%(object_id)d')
 
-STATE_SLIVERSTATE_SCHEDULE = getattr(settings, 'STATE_SLIVERSTATE_SCHEDULE', 200)
+STATE_SLIVER_SCHEDULE = getattr(settings, 'STATE_SLIVER_SCHEDULE', 200)
 
 # Percentage
-STATE_SLIVERSTATE_EXPIRE_WINDOW = getattr(settings, 'STATE_SLIVERSTATE_EXPIRE_WINDOW', 150)
+STATE_SLIVER_EXPIRE_WINDOW = getattr(settings, 'STATE_SLIVER_EXPIRE_WINDOW', 150)
 
 
 STATE_NODE_SOFT_VERSION_URL = getattr(settings, 'STATE_NODE_SOFT_VERSION_URL',

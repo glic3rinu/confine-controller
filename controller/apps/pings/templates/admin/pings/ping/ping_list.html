@@ -157,7 +157,7 @@
 {% block object-tools %}
 <ul class="object-tools">
     {% if 'state'|isinstalled and obj_opts.verbose_name_plural == 'nodes' %}
-        <li><a href="{% url 'admin:state_nodestate_change' obj.pk %}"> State </a></li>
+        <li><a href="{% url 'admin:state_state_change' obj.state.pk %}"> State </a></li>
     {% endif %}
     <li>
       <a href="{{ ping_url }}" class="historylink" title="Perform a ping operation on this address"> Ping machine ! </a>

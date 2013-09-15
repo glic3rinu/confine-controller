@@ -474,7 +474,6 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         """ Hook sliver management URLs on slice admin """
         urls = super(SliceAdmin, self).get_urls()
         admin_site = self.admin_site
-        opts = self.model._meta
         extra_urls = patterns("",
             url("^(?P<slice_id>\d+)/add_sliver/$",
                 wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view),

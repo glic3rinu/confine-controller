@@ -5,11 +5,17 @@
 {% for item in object_tools_items %}
     {% if item.always_display or has_change_permission %}
     {% if 'pings'|isinstalled %}
-        <li><a href="{% url 'admin:pings_ping_ping' original.node.tinc|content_type original.node.tinc.pk %}">Pings</a></li>
+        <li><a href="{% url 'admin:pings_ping_ping' original.content_object.tinc|content_type original.content_object.tinc.pk %}">Pings</a></li>
     {% endif %}
     <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
     {% endif %}
 {% endfor %}
+
+<li>
+    <a href="{% url 'admin:state_history' original.pk %}" class="historylink">History</a>
+</li>
+
+
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -17,7 +23,7 @@
 <a href="{% url 'admin:index' %}">Home</a>
 &rsaquo; <a href="{% url 'admin:app_list' app_label='nodes' %}">Nodes</a>
 &rsaquo; <a href="{% url 'admin:nodes_node_changelist' %}">Nodes</a>
-&rsaquo; <a href="{% url 'admin:nodes_node_change' original.node.pk %}">{{ original.node|truncatewords:"18" }}</a>
+&rsaquo; <a href="{% url 'admin:nodes_node_change' original.object_id %}">{{ original.node|truncatewords:"18" }}</a>
 &rsaquo; State
 </div>
 {% endblock %}

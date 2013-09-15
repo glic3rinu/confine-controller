@@ -8,17 +8,18 @@ from django.db.models import get_model
 
 from controller.utils import LockFile
 
-from .settings import STATE_LOCK_DIR, STATE_NODESTATE_SCHEDULE, STATE_SLIVERSTATE_SCHEDULE
+from .models import State
+from .settings import STATE_LOCK_DIR, STATE_NODE_SCHEDULE, STATE_SLIVER_SCHEDULE
 
 
 @task(name="state.get_state")
 def get_state(state_module, ids=[], lock=True, patch=False):
-    state_model = get_model(*state_module.split('.'))
-    lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_model.__name__)
-    freq = state_model.get_setting('SCHEDULE')
+    model = get_model(*state_module.split('.'))
+    lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % model.__name__)
+    freq = State.get_setting(model, 'SCHEDULE')
     # Prevent concurrent executions
     with LockFile(lock_file, expire=freq-(freq*0.2), unlocked=not lock):
-        objects = state_model.objects.all()
+        objects = model.objects.all()
         if ids:
             objects = objects.filter(pk__in=ids)
         
@@ -29,30 +30,27 @@ def get_state(state_module, ids=[], lock=True, patch=False):
         glets = []
         for obj in objects:
             try:
-                etag = json.loads(obj.metadata)['headers']['etag']
+                etag = json.loads(obj.state.metadata)['headers']['etag']
             except (ValueError, KeyError):
                 headers = {}
             else:
                 headers = {'If-None-Match': etag}
-            glets.append(gevent.spawn(requests.get, obj.get_url(), headers=headers))
+            glets.append(gevent.spawn(requests.get, obj.state.get_url(), headers=headers))
         
         # wait for all greenlets to finish
         gevent.joinall(glets)
         
         # look at the results
         for obj, glet in zip(objects, glets):
-            state_model.store_glet(obj, glet)
-    
+            State.store_glet(obj, glet)
     return len(objects)
 
 
-@periodic_task(name="state.nodestate", run_every=STATE_NODESTATE_SCHEDULE,
-               expires=STATE_NODESTATE_SCHEDULE)
+@periodic_task(name="state.node", run_every=STATE_NODE_SCHEDULE, expires=STATE_NODE_SCHEDULE)
 def node_state():
-    return get_state('state.NodeState')
+    return get_state('nodes.Node')
 
 
-@periodic_task(name="state.sliverstate", run_every=STATE_SLIVERSTATE_SCHEDULE,
-               expires=STATE_SLIVERSTATE_SCHEDULE)
+@periodic_task(name="state.sliver", run_every=STATE_SLIVER_SCHEDULE, expires=STATE_SLIVER_SCHEDULE)
 def sliver_state():
-    return get_state('state.SliverState')
+    return get_state('slices.Sliver')

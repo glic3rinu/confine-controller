@@ -35,7 +35,7 @@ from slices.models import Sliver
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
 from .helpers import break_headers, break_lines
-from .models import State, StateHistory
+from .models import State, StateHistory, NodeSoftwareVersion
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
 
@@ -309,7 +309,7 @@ state_link.admin_order_field = 'state_set__value'
 def firmware_version(node):
     try:
         version = node.soft_version.value
-    except State.DoesNotExist:
+    except NodeSoftwareVersion.DoesNotExist:
         return 'No data'
     else:
         if not version:

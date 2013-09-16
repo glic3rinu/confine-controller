@@ -223,10 +223,11 @@ class StateHistory(models.Model):
 
 class NodeSoftwareVersionManager(models.Manager):
     def store(self, node, version):
-        soft_version, __ = self.get_or_create(node=node)
-        if soft_version.value != version:
-            soft_version.value = version
-            soft_version.save()
+        if version:
+            soft_version, __ = self.get_or_create(node=node)
+            if soft_version.value != version:
+                soft_version.value = version
+                soft_version.save()
 
 
 class NodeSoftwareVersion(models.Model):

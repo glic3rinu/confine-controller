@@ -39,15 +39,14 @@ refresh.always_display = True
 def refresh_state(modeladmin, request, queryset):
     """ gate_state from Node/Sliver queryset synchronously """
     opts = queryset.model._meta
-    state_module = 'state.%sState' % opts.object_name
-    state_model = get_model(*state_module.split('.'))
-    ids = queryset.values_list('state__pk', flat=True)
+    module = '%s.%s' % (opts.app_label, opts.object_name)
+    ids = queryset.values_list('pk', flat=True)
     # Execute get_state isolated on a process to avoid gevent polluting the stack
     # and preventing this silly complain "gevent is only usable from a single thread"
     # Don't know yet why ids has to be copied, otherwise task doesn't get monitored
     # Maybe because somehow ids can not be properly serialized ?? WTF
     try:
-        result = get_state.delay(state_module, ids=list(ids))
+        result = get_state.delay(module, ids=list(ids))
         result.get()
     except OperationLocked:
         msg = 'This operation is currently being executed by another process'

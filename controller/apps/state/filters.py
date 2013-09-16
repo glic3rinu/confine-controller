@@ -12,18 +12,9 @@ class NodeStateListFilter(SimpleListFilter):
     
     def queryset(self, request, queryset):
         if self.value():
-            pks = [node.pk for node in queryset.all() if node.state.current == self.value()]
-            return queryset.filter(pk__in=pks)
+            return queryset.filter(state_set__value=self.value())
 
 
-class SliverStateListFilter(SimpleListFilter):
-    title = 'Current state'
-    parameter_name = 'state'
-    
+class SliverStateListFilter(NodeStateListFilter):
     def lookups(self, request, model_admin):
         return State.SLIVER_STATES
-    
-    def queryset(self, request, queryset):
-        if self.value():
-            pks = [sliver.pk for sliver in queryset.all() if sliver.state.current == self.value()]
-            return queryset.filter(pk__in=pks)

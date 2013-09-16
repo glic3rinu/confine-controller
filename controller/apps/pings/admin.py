@@ -70,7 +70,8 @@ class PingAdmin(PermissionModelAdmin):
                 wrap_admin_view(self, self.timeseries_view),
                 name='pings_ping_timeseries'),
         )
-        return urls + super(PingAdmin, self).get_urls()
+        return urls
+        # + super(PingAdmin, self).get_urls()
     
     def get_changelist(self, request, **kwargs):
         """ Filter changelist by object """

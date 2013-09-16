@@ -68,7 +68,7 @@ class State(models.Model):
     @property
     def last_change_on(self):
         last_state = self.last
-        return last_state.date if last_state else None
+        return last_state.start if last_state else None
     
     @property
     def soft_version(self):
@@ -116,10 +116,12 @@ class State(models.Model):
                 'headers': response.headers,
                 'status_code': response.status_code
             })
+            state._coumpute_current()
         else:
+            # Exception, we assume OFFLINE state
             state.data = ''
+            state.value = State.OFFLINE
         state.metadata = json.dumps(metadata, indent=4)
-        state._coumpute_current()
         state.history.store()
         state.save()
         return state
@@ -130,7 +132,7 @@ class State(models.Model):
         state.last_seen_on = timezone.now()
         state.last_contact_on = state.last_seen_on
         state.save()
-        node_heartbeat.send(sender=cls, node=obj.node or obj)
+        node_heartbeat.send(sender=cls, node=obj.state.get_node())
     
     def _coumpute_current(self):
         if (not self.last_seen_on and time() > self.heartbeat_expires(self.add_date) or
@@ -140,8 +142,6 @@ class State(models.Model):
             try:
                 self.value = json.loads(self.data).get('state', self.UNKNOWN)
             except ValueError:
-                pass
-            else:
                 self.value = self.UNKNOWN
             if self.value != State.FAILURE:
                 # check if CRASHED
@@ -158,9 +158,8 @@ class State(models.Model):
     def get_url(self):
         model = self.content_type.model_class()
         URI = State.get_setting(model, 'URI')
-        node = getattr(self.content_object, 'node', self.content_object)
         context = {
-            'mgmt_addr': node.mgmt_net.addr,
+            'mgmt_addr': self.get_node().mgmt_net.addr,
             'object_id': self.object_id
         }
         return URI % context
@@ -171,6 +170,9 @@ class State(models.Model):
             if name == current:
                 return verbose
         return current
+    
+    def get_node(self):
+        return getattr(self.content_object, 'node', self.content_object)
 
 
 class StateHistoryManager(models.Manager):
@@ -179,7 +181,7 @@ class StateHistoryManager(models.Manager):
         last_state = state.last
         now = timezone.now()
         if not last_state:
-            last_state = state.history.create(value=state.value)
+            last_state = state.history.create(value=state.value, start=now, end=now)
         else:
             expiration = state.heartbeat_expires(last_state.end)
             if time() > expiration:

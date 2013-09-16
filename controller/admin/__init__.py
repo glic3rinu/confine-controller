@@ -20,7 +20,7 @@ def get_deleted_objects(objs, opts, user, admin_site, using):
                 cleaned.append(clean_empty(obj))
             elif obj != '':
                 cleaned.append(obj)
-        return cleaned
+        return cleaned if cleaned else '"Hidden objects"'
     
     def format_callback(obj):
         has_admin = admin_site._registry.get(obj.__class__, False)

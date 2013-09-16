@@ -1,12 +1,15 @@
 from __future__ import absolute_import
 
+import json
 import re
+import time
 
 from django.contrib import admin
 from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
@@ -57,6 +60,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
     ]
     list_display_links = ['state']
     actions = None
+    deletable_objects_excluded = True
     
     def get_list_display(self, request):
         list_display = super(StateHistoryAdmin, self).get_list_display(request)
@@ -70,17 +74,19 @@ class StateHistoryAdmin(admin.ModelAdmin):
 
     def date_since_end(self, instance):
         return display_timesince(instance.end)
-    date_since_start.admin_order_field = 'end'
+    date_since_end.admin_order_field = 'end'
     
     def duration(self, instance):
         delta = instance.end-instance.start
         if delta.seconds < 60:
-            return "%i seconds" % delta.seconds
+            context = (delta.seconds, 'second')
         elif delta.seconds < 3600:
-            return "%i minutes" % ((delta.seconds//60)%60)
+            context = ((delta.seconds//60)%60, 'minute')
         elif delta.seconds < 86400:
-            return "%i hours" % (delta.seconds//3600)
-        return "%i days" % delta.days
+            context = (delta.seconds//3600, 'hour')
+        else:
+            context = (delta.days, 'day')
+        return "%i %s" % context if context[0] == 1 else "%i %ss" % context
     
     def get_changelist(self, request, **kwargs):
         """ Filter changelist by object """
@@ -101,17 +107,31 @@ class StateHistoryAdmin(admin.ModelAdmin):
         related_obj_link = get_admin_link(state.content_object)
         context = kwargs.get('extra_context', {})
         context.update({
-            'title': mark_safe('State history (%s)' % related_obj_link)
+            'title': mark_safe('State history (%s)' % related_obj_link),
+            'obj_opts': state.content_object._meta,
+            'obj': state.content_object,
+            'ip_addr': state.get_node().mgmt_net.addr,
         })
         return super(StateHistoryAdmin, self).changelist_view(request, extra_context=context)
     
     def has_add_permission(self, *args, **kwargs):
         return False
     
-    def changes(self, request, object_id):
+    def changes_view(self, request, object_id):
         state = get_object_or_404(State, pk=object_id)
-#        for value,records in state.history.all().group_by('value'):
-            
+        changes = state.history.all().values_list('value', 'start', 'end')
+        json_date = lambda d: int(str(time.mktime(d.timetuple())).split('.')[0] + '000')
+        series = {}
+        for value, start, end in changes:
+            if value.startswith('fail'):
+                value = 'failure'
+            series.setdefault(value, []).append([json_date(start), 0, 0])
+            series[value].append([json_date(start), 0, 1])
+            series[value].append([json_date(end), 0, 1])
+            series[value].append([json_date(end), 0, 0])
+        return HttpResponse(json.dumps(series), content_type="application/json")
+
+
 class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     fieldsets = (
         (None, {
@@ -134,18 +154,13 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def get_urls(self):
         admin_site = self.admin_site
+        history_admin = StateHistoryAdmin(StateHistory, admin_site)
         urls = patterns("",
-#            url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/$",
-#                wrap_admin_view(self, self.changelist_view),
-#                name='pings_ping_list'),
-#            url("^ping/(?P<content_type_id>\d+)/(?P<object_id>\d+)/$",
-#                wrap_admin_view(self, self.ping_view),
-#                name='pings_ping_ping'),
-            url("^(?P<object_id>\d+)/changes/$",
-                wrap_admin_view(self, StateHistoryAdmin(StateHistory, admin_site).changes),
+            url("^(?P<object_id>\d+)/history/changes/$",
+                wrap_admin_view(self, history_admin.changes_view),
                 name='state_history_changes'),
             url("^(?P<object_id>\d+)/history/$",
-                wrap_admin_view(self, StateHistoryAdmin(StateHistory, admin_site).changelist_view),
+                wrap_admin_view(self, history_admin.changelist_view),
                 name='state_history'),
         )
         return urls + super(StateAdmin, self).get_urls()
@@ -165,6 +180,8 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def last_change(self, instance):
         return display_timesince(instance.last_change_on)
+    last_change.help_text = mark_safe('Last time the state has change, '
+                                      'see <a href="history/">state history</a>')
     
     def next_retry(self, instance):
         return display_timeuntil(instance.next_retry_on)
@@ -187,7 +204,8 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     display_data.short_description = 'data'
     
     def current(self, instance):
-        return mark_safe(colored('current', STATES_COLORS, verbose=True)(instance))
+        state = colored('current', STATES_COLORS, verbose=True)(instance)
+        return mark_safe('<a href="history">%s</a>' % state)
     
     def has_add_permission(self, request):
         """ Object states can not be manually created """
@@ -198,10 +216,12 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         state = get_object_or_404(self.model, pk=object_id)
-        related_obj_link = get_admin_link(state.content_object)
         context = {
-            'title': mark_safe('State (%s)' % (related_obj_link)),
-            'header_title': 'State'}
+            'title': 'State',
+            'obj_opts': state.content_object._meta,
+            'obj': state.content_object,
+            'ip_addr': state.get_node().mgmt_net.addr
+        }
         context.update(extra_context or {})
         return super(StateAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
@@ -233,7 +253,7 @@ def state_link(*args):
     url = reverse('admin:state_state_change', args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
 state_link.short_description = 'Current state'
-state_link.admin_order_field = 'state__last_seen_on'
+state_link.admin_order_field = 'state_set__value'
 
 
 def firmware_version(node):

@@ -3,7 +3,7 @@ from IPy import IP
 
 from controller import settings
 
-from mgmtnetworks.tinc.models import TincClient, TincServer, Gateway
+from .tinc.models import TincClient, TincServer, Gateway
 
 
 def reverse(ip):

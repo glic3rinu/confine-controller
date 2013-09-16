@@ -4,7 +4,7 @@ from django.db import transaction
 from django.utils.safestring import mark_safe
 from django.template.response import TemplateResponse
 
-from communitynetworks.models import CnHost
+from .models import CnHost
 
 
 @transaction.commit_on_success

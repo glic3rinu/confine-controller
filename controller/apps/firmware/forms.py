@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 
-from firmware.models import BaseImage, Config
+from .models import BaseImage, Config
 
 
 class OptionalFilesForm(forms.Form):

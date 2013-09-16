@@ -25,11 +25,11 @@ from nodes.settings import NODES_NODE_ARCHS
 from controller.utils.plugins.models import PluginModel
 from controller.utils.singletons.models import SingletonModel
 
-from firmware import settings
-from firmware.context import context
-from firmware.exceptions import ConcurrencyError
-from firmware.settings import FIRMWARE_BASE_IMAGE_EXTENSIONS
-from firmware.tasks import build
+from . import settings
+from .context import context
+from .exceptions import ConcurrencyError
+from .settings import FIRMWARE_BASE_IMAGE_EXTENSIONS
+from .tasks import build
 
 
 class BuildQuerySet(models.query.QuerySet):

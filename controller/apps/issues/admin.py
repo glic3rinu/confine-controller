@@ -18,12 +18,12 @@ from controller.admin.utils import (admin_link, get_admin_link, colored, wrap_ad
     display_timesince)
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
-from issues.actions import (reject_tickets, resolve_tickets, take_tickets,
-    close_tickets, mark_as_unread, mark_as_read, set_default_queue)
-from issues.filters import MyTicketsListFilter, TicketStateListFilter
-from issues.forms import MessageInlineForm, TicketForm
-from issues.helpers import get_ticket_changes, markdown_formated_changes, filter_actions
-from issues.models import Ticket, Queue, Message
+from .actions import (reject_tickets, resolve_tickets, take_tickets,close_tickets,
+    mark_as_unread, mark_as_read, set_default_queue)
+from .filters import MyTicketsListFilter, TicketStateListFilter
+from .forms import MessageInlineForm, TicketForm
+from .helpers import get_ticket_changes, markdown_formated_changes, filter_actions
+from .models import Ticket, Queue, Message
 
 
 PRIORITY_COLORS = { 

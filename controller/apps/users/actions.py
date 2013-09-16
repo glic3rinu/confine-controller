@@ -9,8 +9,8 @@ from django.utils.encoding import force_text
 from controller.admin.decorators import action_with_confirmation
 from controller.utils.options import send_email_template
 
-from users.forms import SendMailForm, ConfirmSendMailForm
-from users.models import JoinRequest
+from .forms import SendMailForm, ConfirmSendMailForm
+from .models import JoinRequest
 
 
 @action_with_confirmation('send a join request to')

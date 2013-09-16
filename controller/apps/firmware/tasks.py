@@ -5,7 +5,7 @@ from celery.task import task
 
 from controller.models.utils import get_file_field_base_path
 
-from firmware.image import Image
+from .image import Image
 
 
 def update_state(build, progress, next, description):

@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from controller.core.validators import validate_rsa_pubkey
 from controller.forms.widgets import ShowText
 
-from nodes.settings import NODES_NODE_DIRECT_IFACES_DFLT
+from .settings import NODES_NODE_DIRECT_IFACES_DFLT
 from .validators import validate_csr
 
 

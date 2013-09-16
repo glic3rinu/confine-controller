@@ -5,8 +5,8 @@ from django_google_maps import fields as map_fields
 from controller.admin.utils import insertattr
 from nodes.models import Node
 
-from gis import widgets as map_widgets
-from gis.models import Geolocation, NodeGeolocation
+from . import widgets as map_widgets
+from .models import Geolocation, NodeGeolocation
 
 
 class GisInline(admin.TabularInline):

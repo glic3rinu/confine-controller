@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from controller.admin.filters import MySimpleListFilter
 
-from slices.models import Slice
+from .models import Slice
 
 
 class MySlicesListFilter(MySimpleListFilter):

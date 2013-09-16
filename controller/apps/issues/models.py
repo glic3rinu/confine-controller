@@ -6,7 +6,7 @@ from controller.models.utils import generate_chainer_manager
 from controller.utils import send_email_template
 from users.models import Group, Roles, User
 
-from issues import settings
+from . import settings
 
 
 class QueueQuerySet(models.query.QuerySet):

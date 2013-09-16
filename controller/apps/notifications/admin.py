@@ -9,9 +9,9 @@ from controller.admin import ChangeViewActions
 from controller.admin.utils import action_to_view, wrap_admin_view
 from controller.utils.plugins.actions import sync_plugins_action
 
-from notifications.actions import (enable_selected, disable_selected, run_notifications,
+from .actions import (enable_selected, disable_selected, run_notifications,
     upgrade_notifications)
-from notifications.models import Notification, Delivered
+from .models import Notification, Delivered
 
 
 class DeliveredInline(admin.TabularInline):

@@ -8,7 +8,7 @@ from controller.forms.utils import admin_link
 from controller.forms.widgets import ReadOnlyWidget, ShowText
 from users.models import User
 
-from issues.models import Queue, Ticket
+from .models import Queue, Ticket
 
 
 markdown_url = '/static/issues/markdown_syntax.html'

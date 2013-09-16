@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
 from api import serializers
-from users.models import User, Group, Roles, AuthToken
+
+from .models import User, Group, Roles, AuthToken
 
 
 class GroupRolesSerializer(serializers.ModelSerializer):

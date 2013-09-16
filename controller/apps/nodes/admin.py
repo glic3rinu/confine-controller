@@ -17,10 +17,10 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from controller.utils.singletons.admin import SingletonModelAdmin
 from users.helpers import filter_group_queryset
 
-from nodes.actions import request_cert, reboot_selected
-from nodes.filters import MyNodesListFilter
-from nodes.forms import DirectIfaceInlineFormSet
-from nodes.models import Node, NodeProp, Server, DirectIface
+from .actions import request_cert, reboot_selected
+from .filters import MyNodesListFilter
+from .forms import DirectIfaceInlineFormSet
+from .models import Node, NodeProp, Server, DirectIface
 
 
 STATES_COLORS = {

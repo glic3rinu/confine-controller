@@ -18,7 +18,7 @@ STATE_NODE_EXPIRE_WINDOW = getattr(settings, 'STATE_NODE_EXPIRE_WINDOW', 150)
 
 
 STATE_SLIVER_URI = getattr(settings, 'STATE_SLIVER_URI',
-    'http://[%(mgmt_addr)s]/confine/api/slivers/%(object_id)d')
+    'http://[%(mgmt_addr)s]/confine/api/slivers/%(object_id)d/')
 
 STATE_SLIVER_SCHEDULE = getattr(settings, 'STATE_SLIVER_SCHEDULE', 200)
 

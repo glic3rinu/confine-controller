@@ -13,8 +13,8 @@ from django.utils.translation import ugettext_lazy
 
 from controller.utils.plugins.actions import sync_plugins_action
 
-from firmware.forms import BaseImageForm, OptionalFilesForm
-from firmware.models import Build, Config
+from .forms import BaseImageForm, OptionalFilesForm
+from .models import Build, Config
 
 
 @transaction.commit_on_success

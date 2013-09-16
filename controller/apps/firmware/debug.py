@@ -1,5 +1,5 @@
-from firmware.image import Image
-from firmware.models import Config
+from .image import Image
+from .models import Config
 
 
 def debug_build(node, base_image=None, exclude=[]):

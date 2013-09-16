@@ -8,13 +8,13 @@ from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
     colored, wrap_admin_view)
 from controller.utils.html import monospace_format
-from nodes.models import Node
 from controller.utils.singletons.admin import SingletonModelAdmin
+from nodes.models import Node
 
-from firmware.actions import get_firmware, sync_plugins
-from firmware.models import (BaseImage, Config, ConfigUCI, Build, ConfigFile,
-    ConfigFileHelpText, BuildFile, ConfigPlugin)
-from firmware.views import build_info_view, delete_build_view
+from .actions import get_firmware, sync_plugins
+from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile, ConfigPlugin,
+    ConfigFileHelpText, BuildFile)
+from .views import build_info_view, delete_build_view
 
 
 STATE_COLORS = {

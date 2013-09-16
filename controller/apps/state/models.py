@@ -114,7 +114,7 @@ class State(models.Model):
                 'headers': response.headers,
                 'status_code': response.status_code
             })
-            state._coumpute_current()
+            state._compute_current()
         else:
             # Exception, we assume OFFLINE state
             state.data = ''
@@ -129,13 +129,13 @@ class State(models.Model):
         state = obj.state
         state.last_seen_on = timezone.now()
         state.last_contact_on = state.last_seen_on
-        if state.value == cls.CRASHED:
-            state._compute_current(self)
+        if state.value in (cls.CRASHED, cls.OFFLINE):
+            state._compute_current()
             state.history.store()
         state.save()
         node_heartbeat.send(sender=cls, node=obj.state.get_node())
     
-    def _coumpute_current(self):
+    def _compute_current(self):
         if (not self.last_seen_on and time() > self.heartbeat_expires(self.add_date) or
                 self.last_seen_on and time() > self.heartbeat_expires(self.last_seen_on)):
             self.value = State.OFFLINE
@@ -251,4 +251,3 @@ def state(self):
 for model in [Node, Sliver]:
     model.add_to_class('state_set', generic.GenericRelation('state.State'))
     model.state = state
-

@@ -118,6 +118,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
         context = kwargs.get('extra_context', {})
         context.update({
             'title': mark_safe('State history (%s)' % related_obj_link),
+            'header_title': 'State history',
             'obj_opts': state.content_object._meta,
             'obj': state.content_object,
             'ip_addr': state.get_node().mgmt_net.addr,
@@ -330,7 +331,7 @@ insertattr(Node, 'actions', refresh_state)
 insertattr(Sliver, 'actions', refresh_state)
 insertattr(Node, 'list_filter', NodeStateListFilter)
 insertattr(Sliver, 'list_filter', SliverStateListFilter)
-insertattr(Node, 'list_filter', 'soft_version')
+insertattr(Node, 'list_filter', 'soft_version__value')
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')

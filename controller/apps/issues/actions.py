@@ -7,9 +7,9 @@ from django.template.response import TemplateResponse
 
 from controller.admin.decorators import action_with_confirmation, has_sudo_permissions
 
-from issues.forms import ChangeReasonForm
-from issues.helpers import markdown_formated_changes
-from issues.models import Queue, Ticket
+from .forms import ChangeReasonForm
+from .helpers import markdown_formated_changes
+from .models import Queue, Ticket
 
 
 def change_ticket_state_factory(action, final_state):

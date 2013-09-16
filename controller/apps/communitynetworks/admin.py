@@ -8,8 +8,8 @@ from controller.utils import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
 
-from communitynetworks.actions import cache_node_db
-from communitynetworks.models import CnHost
+from .actions import cache_node_db
+from .models import CnHost
 
 
 class CnHostInline(PermissionGenericTabularInline):

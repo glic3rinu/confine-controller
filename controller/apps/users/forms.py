@@ -8,7 +8,7 @@ from controller.forms.fields import MultiSelectFormField
 from controller.admin.utils import get_admin_link
 from controller.forms.widgets import ReadOnlyWidget
 
-from users.models import User, Group, JoinRequest, ResourceRequest
+from .models import User, Group, JoinRequest, ResourceRequest
 
 
 class UserCreationForm(forms.ModelForm):

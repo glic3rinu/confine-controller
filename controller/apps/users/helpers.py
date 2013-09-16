@@ -2,7 +2,7 @@ from django.db.models import Q
 
 from controller.forms.widgets import ReadOnlyWidget
 
-from users.models import Group
+from .models import Group
 
 
 def filter_group_queryset(form, obj, user, query):

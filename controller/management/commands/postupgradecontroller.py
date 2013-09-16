@@ -143,6 +143,12 @@ class Command(BaseCommand):
                 'Please update it by running:\n'
                 '  > sudo python manage.py setupceleryd\n')
         if version < 905:
+            # TODO find the root cause of this
+            # maybe is shit imported on settings that import settings like add_app
+            # Prevent crazy import erros to appear :S
+            from django.utils import translation
+            saved_lang = translation.get_language()
+            translation.activate('en-us')
             # Change template types for more generic ones
             from slices.models import Template
             from slices.settings import SLICES_TEMPLATE_TYPES

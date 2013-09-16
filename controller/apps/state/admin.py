@@ -249,7 +249,13 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def current(self, instance):
         state = colored('current', STATES_COLORS, verbose=True)(instance)
-        return mark_safe('<a href="history">%s</a>' % state)
+        try:
+            errors = json.loads(instance.data).get('errors', '')
+        except ValueError:
+            errors = ''
+        else:
+            errors = str(errors)[2:-2].replace("u'", "'")
+        return mark_safe('<a href="history" title="%s">%s</a>' % (errors, state))
     
     def has_add_permission(self, request):
         """ Object states can not be manually created """

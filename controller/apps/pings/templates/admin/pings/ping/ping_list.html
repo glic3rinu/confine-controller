@@ -7,7 +7,6 @@
     <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
-
     <script type="text/javascript">
     $(function() {
         $.getJSON('{{ metrics_url }}', function(data) {
@@ -44,6 +43,9 @@
                         }
                     },
                     zoomType: 'x'
+                },
+                credits: {
+                    enabled: false
                 },
                 rangeSelector: {
                     buttons: [{

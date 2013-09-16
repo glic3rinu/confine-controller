@@ -7,7 +7,6 @@
     <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
-    
     <script type="text/javascript">
     $(function() {
         $.getJSON('{% url "admin:state_history_changes" obj.state.pk %}', function(data) {
@@ -17,6 +16,9 @@
             $('#statechart').highcharts({
             chart: {
                 type: 'area'
+            },
+            credits: {
+                enabled: false
             },
             title: {
                 text: false
@@ -52,9 +54,9 @@
                 }
             },
             series: data['series']
+            });
         });
     });
-        });
     </script>
 {% endblock %}
 
@@ -76,9 +78,7 @@
 
 {% block object-tools %}
 <ul class="object-tools">
-    {% if 'state'|isinstalled and obj_opts.verbose_name_plural == 'nodes' %}
-        <li><a href="{% url 'admin:state_state_change' obj.state.pk %}"> State </a></li>
-    {% endif %}
+    <li><a href="{% url 'admin:state_state_change' obj.state.pk %}"> State </a></li>
 </ul>
 {% endblock %}
 

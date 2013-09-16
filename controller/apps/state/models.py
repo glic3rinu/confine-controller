@@ -51,7 +51,7 @@ class State(models.Model):
     last_try_on = models.DateTimeField(null=True,
             help_text='Last time the state retrieval operation has been executed')
     last_contact_on = models.DateTimeField(null=True,
-            help_text='Last API pull received from the node.')
+            help_text='Last API pull of this resource received from the node.')
     value = models.CharField(max_length=32, choices=STATES)
     metadata = models.TextField()
     data = models.TextField()
@@ -69,10 +69,6 @@ class State(models.Model):
     def last_change_on(self):
         last_state = self.last
         return last_state.start if last_state else None
-    
-    @property
-    def soft_version(self):
-        return json.loads(self.data).get('soft_version', '')
     
     @property
     def heartbeat_expires(self):
@@ -135,6 +131,7 @@ class State(models.Model):
         state.last_contact_on = state.last_seen_on
         if state.value == cls.CRASHED:
             state._compute_current(self)
+            state.history.store()
         state.save()
         node_heartbeat.send(sender=cls, node=obj.state.get_node())
     

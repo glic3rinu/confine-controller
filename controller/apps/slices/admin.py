@@ -44,7 +44,7 @@ def num_slivers(instance):
     url += '?my_slivers=False&%s=%s' % (instance._meta.module_name, instance.pk)
     return mark_safe('<a href="%s">%d</a>' % (url, num))
 num_slivers.short_description = 'Slivers'
-num_slivers.admin_order_field = 'sliver__count'
+num_slivers.admin_order_field = 'slivers__count'
 
 
 class SliverPropInline(PermissionTabularInline):

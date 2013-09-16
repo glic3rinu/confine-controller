@@ -155,6 +155,9 @@ class User(auth_models.AbstractBaseUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
     
+    class Mate:
+        ordering = ['username']
+    
     def __unicode__(self):
         return self.username
     

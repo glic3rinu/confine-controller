@@ -1,0 +1,92 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls admin_static admin_list utils %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
+    
+    <script type="text/javascript">
+    $(function() {
+        $.getJSON('{% url "admin:state_history_changes" obj.state.pk %}', function(data) {
+            // Create a timer
+            var start = + new Date();
+            // create the chart
+            $('#statechart').highcharts({
+            chart: {
+                type: 'area'
+            },
+            title: {
+                text: false
+            },
+            subtitle: {
+                text: false
+            },
+            xAxis: {
+                categories: data['categories'],
+                tickmarkPlacement: 'on',
+                title: {
+                    enabled: false
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Percent'
+                }
+            },
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f} seconds)<br/>',
+                shared: true
+            },
+            plotOptions: {
+                area: {
+                    stacking: 'percent',
+                    lineColor: '#ffffff',
+                    lineWidth: 1,
+                    marker: {
+                        lineWidth: 1,
+                        lineColor: '#ffffff'
+                    }
+                }
+            },
+            series: data['series']
+        });
+    });
+        });
+    </script>
+{% endblock %}
+
+{% block content_title %}{% if title %}<h1>State history of {{ obj_opts.object_name.lower }} 
+    <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
+    (<a href="http://[{{ ip_addr }}]">{{ ip_addr }}</a>)</h1>
+{% endif %}{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=obj_opts.app_label %}">{{ obj_opts.app_label|capfirst|escape }}</a>
+    &rsaquo; <a href="{% url obj_opts|admin_urlname:'changelist' %}">{{ obj_opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
+    &rsaquo; <a href="{% url 'admin:state_state_change' obj.state.pk %}"> State</a>
+    &rsaquo; History
+    </div>
+{% endblock %}
+
+{% block object-tools %}
+<ul class="object-tools">
+    {% if 'state'|isinstalled and obj_opts.verbose_name_plural == 'nodes' %}
+        <li><a href="{% url 'admin:state_state_change' obj.state.pk %}"> State </a></li>
+    {% endif %}
+</ul>
+{% endblock %}
+
+
+{% block date_hierarchy %}
+    <div id="statechart" style="margin: 2;"></div>
+    <hr>
+    {{ block.super }}
+{% endblock %}
+
+

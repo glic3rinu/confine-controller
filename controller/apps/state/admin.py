@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 
+import datetime
 import json
 import re
 import time
+from dateutil.relativedelta import relativedelta
 
 from django.contrib import admin
 from django.contrib.admin.util import unquote
@@ -11,6 +13,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from pygments import highlight
@@ -22,6 +25,7 @@ from controller.admin.utils import (insertattr, get_admin_link, colored, get_mod
     wrap_admin_view, display_timesince, display_timeuntil)
 from controller.models.utils import get_help_text
 from controller.utils.html import urlize
+from controller.utils.time import timesince
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
@@ -55,8 +59,8 @@ STATES_COLORS = {
 
 class StateHistoryAdmin(admin.ModelAdmin):
     list_display = [
-        'state', colored('value', STATES_COLORS, verbose=True), 'date_since_start',
-        'date_since_end', 'duration'
+        'state', colored('value', STATES_COLORS, verbose=True), 'display_start_date',
+        'display_end_date', 'duration'
     ]
     list_display_links = ['state']
     actions = None
@@ -68,13 +72,19 @@ class StateHistoryAdmin(admin.ModelAdmin):
             return list_display[1:]
         return list_display
     
-    def date_since_start(self, instance):
-        return display_timesince(instance.start)
-    date_since_start.admin_order_field = 'start'
-
-    def date_since_end(self, instance):
-        return display_timesince(instance.end)
-    date_since_end.admin_order_field = 'end'
+    def display_start_date(self, instance):
+        time = instance.start.strftime('%b. %d, %Y, %I:%M %P')
+        time_since = timesince(instance.start)
+        return mark_safe('<span title="%s">%s</span>' % (time_since, time))
+    display_start_date.admin_order_field = 'start'
+    display_start_date.short_description = 'Started Date/time'
+    
+    def display_end_date(self, instance):
+        time = instance.end.strftime('%b. %d, %Y, %I:%M %P')
+        time_since = timesince(instance.end)
+        return mark_safe('<span title="%s">%s</span>' % (time_since, time))
+    display_end_date.admin_order_field = 'end'
+    display_end_date.short_description = 'Ended Date/time'
     
     def duration(self, instance):
         delta = instance.end-instance.start
@@ -119,17 +129,51 @@ class StateHistoryAdmin(admin.ModelAdmin):
     
     def changes_view(self, request, object_id):
         state = get_object_or_404(State, pk=object_id)
-        changes = state.history.all().values_list('value', 'start', 'end')
-        json_date = lambda d: int(str(time.mktime(d.timetuple())).split('.')[0] + '000')
-        series = {}
-        for value, start, end in changes:
-            if value.startswith('fail'):
-                value = 'failure'
-            series.setdefault(value, []).append([json_date(start), 0, 0])
-            series[value].append([json_date(start), 0, 1])
-            series[value].append([json_date(end), 0, 1])
-            series[value].append([json_date(end), 0, 0])
-        return HttpResponse(json.dumps(series), content_type="application/json")
+        history = state.history
+        now = timezone.now()
+        delta = relativedelta(months=+1)
+        final = datetime.datetime(year=now.year, month=now.month+1, day=1, tzinfo=timezone.utc)
+        durations = {}
+        distinct_states = set()
+        # Get monthly changes
+        for m in range(1, 13):
+            initial = final-delta
+            changes = history.filter(start__lt=final, end__gt=initial)
+            if not changes:
+                break
+            total = 0
+            states = {}
+            for value, start, end in changes.values_list('value', 'start', 'end'):
+                distinct_states = distinct_states.union(set((value,)))
+                if start < initial:
+                    start = initial
+                if end > final:
+                    end = final
+                duration = (end-start).seconds
+                states[value] = states.get(value, 0)+duration
+            durations[initial.strftime("%B")] = states
+            final = initial
+        # Fill missing states
+        percentils = {}
+        for month, states in durations.iteritems():
+            current_states = set()
+            for state in states:
+                percentils.setdefault(state, []).append(states[state])
+                current_states = current_states.union(set((state,)))
+            for missing in distinct_states-current_states:
+                percentils.setdefault(state, []).append(0)
+        # Construct final data structure
+        series = []
+        for state in percentils:
+            series.append({
+                'name': state,
+                'data': percentils[state]
+            })
+        data = {
+            'categories': list(durations.keys()),
+            'series': series
+        }
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 class StateAdmin(ChangeViewActions, PermissionModelAdmin):
@@ -258,7 +302,7 @@ state_link.admin_order_field = 'state_set__value'
 
 def firmware_version(node):
     try:
-        version = node.state.soft_version
+        version = node.soft_version.value
     except State.DoesNotExist:
         return 'No data'
     else:
@@ -267,11 +311,11 @@ def firmware_version(node):
         url = STATE_NODE_SOFT_VERSION_URL(version)
         name = STATE_NODE_SOFT_VERSION_NAME(version)
         return mark_safe('<a href="%s">%s</a>' % (url, name))
-firmware_version.admin_order_field = 'state__soft_version'
+firmware_version.admin_order_field = 'soft_version'
 
 
-#insertattr(Node, 'list_display', firmware_version)
-#insertattr(NodeListAdmin, 'list_display', firmware_version)
+insertattr(Node, 'list_display', firmware_version)
+insertattr(NodeListAdmin, 'list_display', firmware_version)
 insertattr(Node, 'list_display', state_link)
 insertattr(NodeListAdmin, 'list_display', state_link)
 insertattr(Sliver, 'list_display', state_link)
@@ -280,7 +324,7 @@ insertattr(Node, 'actions', refresh_state)
 insertattr(Sliver, 'actions', refresh_state)
 insertattr(Node, 'list_filter', NodeStateListFilter)
 insertattr(Sliver, 'list_filter', SliverStateListFilter)
-#insertattr(Node, 'list_filter', 'state__soft_version')
+insertattr(Node, 'list_filter', 'soft_version')
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')

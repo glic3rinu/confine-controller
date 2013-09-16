@@ -55,6 +55,7 @@ def refresh_state(modeladmin, request, queryset):
         msg = 'The state of %d %ss has been updated' % (queryset.count(), opts.object_name)
         modeladmin.message_user(request, msg)
 
+
 def show_state(modeladmin, request, queryset):
     """ links to state information (state change view) """
     try:

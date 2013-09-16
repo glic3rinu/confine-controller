@@ -390,6 +390,11 @@ class Sliver(models.Model):
             return self.set_state
         return slice.set_state
     
+    @property
+    def mgmt_iface(self):
+        iface = self.interfaces.filter(type='management')
+        return iface.get() if iface else None
+    
     def update(self):
         self.instance_sn += 1
         self.save()

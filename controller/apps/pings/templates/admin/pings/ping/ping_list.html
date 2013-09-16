@@ -154,6 +154,7 @@
     </div>
 {% endblock %}
 
+
 {% block object-tools %}
 <ul class="object-tools">
     {% if 'state'|isinstalled and obj_opts.verbose_name_plural == 'nodes' %}
@@ -168,7 +169,6 @@
 
 {% block date_hierarchy %}
     <div id="pingchart" style="margin: 2;"></div>
+    <hr>
     {{ block.super }}
 {% endblock %}
-
-

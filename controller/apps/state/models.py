@@ -111,6 +111,8 @@ class State(models.Model):
             state.last_seen_on = now
             if response.status_code != 304:
                 state.data = response.content
+                if isinstance(obj, Node):
+                    state._store_soft_version()
             metadata.update({
                 'url': response.url,
                 'headers': response.headers,
@@ -131,6 +133,8 @@ class State(models.Model):
         state = obj.state
         state.last_seen_on = timezone.now()
         state.last_contact_on = state.last_seen_on
+        if state.value == cls.CRASHED:
+            state._compute_current(self)
         state.save()
         node_heartbeat.send(sender=cls, node=obj.state.get_node())
     
@@ -149,6 +153,14 @@ class State(models.Model):
                 if self.add_date < timeout_expire:
                     if not self.last_contact_on or self.last_contact_on < timeout_expire:
                         self.value = self.CRASHED
+    
+    def _store_soft_version(self):
+            try:
+                version = json.loads(self.data).get('soft_version')
+            except ValueError:
+                pass
+            else:
+                NodeSoftwareVersion.objects.store(self.content_object, version)
     
     @classmethod
     def get_setting(cls, model, setting):
@@ -207,6 +219,24 @@ class StateHistory(models.Model):
     
     class Meta:
         ordering = ['-start']
+    
+    def __unicode__(self):
+        return self.value
+
+
+class NodeSoftwareVersionManager(models.Manager):
+    def store(self, node, version):
+        soft_version, __ = self.get_or_create(node=node)
+        if soft_version.value != version:
+            soft_version.value = version
+            soft_version.save()
+
+
+class NodeSoftwareVersion(models.Model):
+    node = models.OneToOneField('nodes.Node', related_name='soft_version')
+    value = models.CharField(max_length=256)
+    
+    objects = NodeSoftwareVersionManager()
     
     def __unicode__(self):
         return self.value

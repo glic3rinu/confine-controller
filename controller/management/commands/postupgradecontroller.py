@@ -72,8 +72,8 @@ class Command(BaseCommand):
                 run("controller-admin.sh install_requirements " + extra)
                 run("python manage.py collectstatic --noinput")
             
-            run("python manage.py syncdb")
-            run("python manage.py migrate")
+            run("python manage.py syncdb --noinput")
+            run("python manage.py migrate --noinput")
             if is_installed('firmware'):
                 run("python manage.py syncfirmwareplugins")
             if is_installed('notifications'):

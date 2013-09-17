@@ -95,7 +95,7 @@ class Template(models.Model):
     @property
     def image_sha256(self):
         try:
-            return sha256(self.image.file.read()).hexdigest()
+            return hashlib.sha256(self.image.file.read()).hexdigest()
         except:
             return None
 

@@ -22,6 +22,7 @@ from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .exceptions import VlanAllocationError, IfaceAllocationError
+from .helpers import save_files_with_pk_value
 from .tasks import force_slice_update, force_sliver_update
 
 
@@ -203,13 +204,7 @@ class Slice(models.Model):
         self.update_set_state(commit=False)
         if not self.pk:
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
-            for field in ('exp_data', 'overlay'):
-                if getattr(self, field):
-                    # Dirty hack in order to allow pk values on exp_data filename
-                    field_value = getattr(self, field)
-                    setattr(self, field, None)
-                    super(Slice, self).save(*args, **kwargs)
-                    setattr(self, field, field_value)
+            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):
@@ -375,6 +370,7 @@ class Sliver(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             self.instance_sn = self.slice.new_sliver_instance_sn
+            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
         super(Sliver, self).save(*args, **kwargs)
     
     @property

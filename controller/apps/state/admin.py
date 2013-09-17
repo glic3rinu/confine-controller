@@ -88,11 +88,12 @@ class StateHistoryAdmin(admin.ModelAdmin):
     
     def duration(self, instance):
         delta = instance.end-instance.start
-        if delta.seconds < 60:
+        seconds = int(delta.total_seconds())
+        if seconds < 60:
             context = (delta.seconds, 'second')
-        elif delta.seconds < 3600:
+        elif seconds < 3600:
             context = ((delta.seconds//60)%60, 'minute')
-        elif delta.seconds < 86400:
+        elif seconds < 86400:
             context = (delta.seconds//3600, 'hour')
         else:
             context = (delta.days, 'day')
@@ -149,7 +150,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
                     start = initial
                 if end > final:
                     end = final
-                duration = (end-start).seconds
+                duration = int((end-start).total_seconds())
                 states[value] = states.get(value, 0)+duration
             monthly[initial.strftime("%B")] = states
             final = initial

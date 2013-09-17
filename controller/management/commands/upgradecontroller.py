@@ -93,4 +93,4 @@ class Command(BaseCommand):
         
         # version specific upgrade operations
         if not options.get('pip_only'):
-            call_command("postupgradecontroller", **{'from': current_version})
+            call_command("postupgradecontroller", version=current_version)

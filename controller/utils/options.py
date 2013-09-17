@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import os
 import time
+import warnings
 from distutils.sysconfig import get_python_lib
 from urlparse import urlparse
 
@@ -41,21 +42,16 @@ def is_installed(app):
 
 def add_app(INSTALLED_APPS, app, prepend=False, append=True):
     """ add app to installed_apps """
-    if app not in INSTALLED_APPS:
-        if prepend:
-            return (app,) + INSTALLED_APPS
-        else:
-            return INSTALLED_APPS + (app,)
-    return INSTALLED_APPS
+    from .apps import add_app
+    warnings.warn("Deprecated: use controller.utils.apps.add_app", DeprecationWarning)
+    return add_app(INSTALLED_APPS, app)
 
 
 def remove_app(INSTALLED_APPS, app):
     """ remove app from installed_apps """
-    if app in INSTALLED_APPS:
-        apps = list(INSTALLED_APPS)
-        apps.remove(app)
-        return tuple(apps)
-    return INSTALLED_APPS
+    from .apps import remove_app
+    warnings.warn("Deprecated: use controller.utils.apps.remove_app", DeprecationWarning)
+    return remove_app(INSTALLED_APPS, app)
 
 
 def get_controller_site():

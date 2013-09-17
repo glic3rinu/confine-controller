@@ -134,7 +134,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
         now = timezone.now()
         delta = relativedelta(months=+1)
         final = datetime.datetime(year=now.year, month=now.month+1, day=1, tzinfo=timezone.utc)
-        durations = {}
+        monthly = {}
         distinct_states = set()
         # Get monthly changes
         for m in range(1, 13):
@@ -142,7 +142,6 @@ class StateHistoryAdmin(admin.ModelAdmin):
             changes = history.filter(start__lt=final, end__gt=initial)
             if not changes:
                 break
-            total = 0
             states = {}
             for value, start, end in changes.values_list('value', 'start', 'end'):
                 distinct_states = distinct_states.union(set((value,)))
@@ -152,26 +151,26 @@ class StateHistoryAdmin(admin.ModelAdmin):
                     end = final
                 duration = (end-start).seconds
                 states[value] = states.get(value, 0)+duration
-            durations[initial.strftime("%B")] = states
+            monthly[initial.strftime("%B")] = states
             final = initial
         # Fill missing states
-        percentils = {}
-        for month, states in durations.iteritems():
+        data = {}
+        for month, duration in monthly.iteritems():
             current_states = set()
-            for state in states:
-                percentils.setdefault(state, []).append(states[state])
+            for state in duration:
+                data.setdefault(state, []).append(duration[state])
                 current_states = current_states.union(set((state,)))
             for missing in distinct_states-current_states:
-                percentils.setdefault(state, []).append(0)
+                data.setdefault(state, []).append(0)
         # Construct final data structure
         series = []
-        for state in percentils:
+        for state in data:
             series.append({
                 'name': state,
-                'data': percentils[state]
+                'data': data[state],
             })
         data = {
-            'categories': list(durations.keys()),
+            'categories': list(monthly.keys()),
             'series': series
         }
         return HttpResponse(json.dumps(data), content_type="application/json")

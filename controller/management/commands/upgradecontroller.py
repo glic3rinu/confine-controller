@@ -4,6 +4,7 @@ import random
 import string
 from optparse import make_option
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 from controller import get_version
@@ -92,4 +93,4 @@ class Command(BaseCommand):
         
         # version specific upgrade operations
         if not options.get('pip_only'):
-            run("python manage.py postupgradecontroller --from %s" % current_version)
+            call_command("postupgradecontroller", **{'from': current_version})

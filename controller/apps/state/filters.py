@@ -22,7 +22,7 @@ class SliverStateListFilter(NodeStateListFilter):
 
 
 class FirmwareVersionListFilter(SimpleListFilter):
-    title = 'Firmware version'
+    title = 'Firmware ver'
     parameter_name = 'soft_version'
     
     def lookups(self, request, model_admin):
@@ -30,8 +30,11 @@ class FirmwareVersionListFilter(SimpleListFilter):
         values = values.exclude(soft_version__value__isnull=True).distinct()
         values = [ (value, STATE_NODE_SOFT_VERSION_NAME(value)) for value in values ]
         values.sort(key=lambda a: 'x'+a[1] if a[1].startswith('m') else a[1], reverse=True)
+        values.append(('None', 'No data'))
         return values
     
     def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(soft_version__value=self.value())
+        value = self.value()
+        if value == 'None':
+            return queryset.filter(soft_version__value__isnull=True)
+        return queryset.filter(soft_version__value=value)

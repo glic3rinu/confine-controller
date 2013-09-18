@@ -57,10 +57,27 @@ STATES_COLORS = {
 }
 
 
+def display_metadata(instance):
+    style = '<style>code,pre {font-size:1.13em;}</style><br>'
+    metadata = break_headers(instance.metadata)
+    metadata = highlight(metadata, JsonLexer(), HtmlFormatter())
+    return mark_safe(style + urlize(metadata))
+display_metadata.short_description = 'metadata'
+
+
+def display_data(instance):
+    style = '<style>code,pre {font-size:1.13em;}</style><br>'
+    # TODO render data according to header content-type
+    #      (when it becomes available in the node)
+    data = break_lines(instance.data)
+    data = highlight(data, JsonLexer(), HtmlFormatter())
+    return mark_safe(style + urlize(data))
+display_data.short_description = 'data'
+
+
 class StateHistoryAdmin(admin.ModelAdmin):
     list_display = [
-        'state', colored('value', STATES_COLORS, verbose=True), 'display_start_date',
-        'display_end_date', 'duration'
+        'state', 'display_value', 'display_start_date', 'display_end_date', 'duration'
     ]
     list_display_links = ['state']
     actions = None
@@ -71,6 +88,10 @@ class StateHistoryAdmin(admin.ModelAdmin):
         if hasattr(request, 'state_id'):
             return list_display[1:]
         return list_display
+    
+    def display_value(self, instance):
+        value = colored('value', STATES_COLORS, verbose=True)(instance)
+        return mark_safe('<a class="show-popup" href="#">%s</a>' % value)
     
     def display_start_date(self, instance):
         time = instance.start.strftime('%b. %d, %Y, %I:%M %P')
@@ -129,6 +150,14 @@ class StateHistoryAdmin(admin.ModelAdmin):
     def has_add_permission(self, *args, **kwargs):
         return False
     
+    def data_view(self, request, object_id):
+        history = get_object_or_404(StateHistory, pk=object_id)
+        data = {
+            'metadata': display_metadata(history),
+            'data': display_data(history)
+        }
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    
     def changes_view(self, request, object_id):
         state = get_object_or_404(State, pk=object_id)
         history = state.history
@@ -184,12 +213,12 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
                        'last_try', 'next_retry', 'last_change', 'current')
         }),
         ('Details', {
-            'fields': ('display_metadata', 'display_data')
+            'fields': (display_metadata, display_data)
         }),
     )
     readonly_fields = [
         'url_link', 'last_seen', 'last_try', 'next_retry', 'current', 'last_change',
-        'display_metadata', 'display_data', 'last_contact'
+        display_metadata, display_data, 'last_contact'
     ]
     change_view_actions = [refresh]
     change_form_template = 'admin/state/state/change_form.html'
@@ -204,6 +233,9 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
             url("^(?P<object_id>\d+)/history/changes/$",
                 wrap_admin_view(self, history_admin.changes_view),
                 name='state_history_changes'),
+            url("^(?P<object_id>\d+)/history/data/$",
+                wrap_admin_view(self, history_admin.data_view),
+                name='state_history_data'),
             url("^(?P<object_id>\d+)/history/$",
                 wrap_admin_view(self, history_admin.changelist_view),
                 name='state_history'),
@@ -231,22 +263,6 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     def next_retry(self, instance):
         return display_timeuntil(instance.next_retry_on)
     next_retry.help_text = 'Next time the state retrieval operation will be executed'
-    
-    def display_metadata(self, instance):
-        style = '<style>code,pre {font-size:1.13em;}</style><br>'
-        metadata = break_headers(instance.metadata)
-        metadata = highlight(metadata, JsonLexer(), HtmlFormatter())
-        return mark_safe(style + urlize(metadata))
-    display_metadata.short_description = 'metadata'
-    
-    def display_data(self, instance):
-        style = '<style>code,pre {font-size:1.13em;}</style><br>'
-        # TODO render data according to header content-type
-        #      (when it becomes available in the node)
-        data = break_lines(instance.data)
-        data = highlight(data, JsonLexer(), HtmlFormatter())
-        return mark_safe(style + urlize(data))
-    display_data.short_description = 'data'
     
     def current(self, instance):
         state = colored('current', STATES_COLORS, verbose=True)(instance)

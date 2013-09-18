@@ -214,8 +214,8 @@ class StateHistory(models.Model):
     value = models.CharField(max_length=32, choices=State.STATES)
     start = models.DateTimeField()
     end = models.DateTimeField()
-    data = models.TextField(blank=True)
-    metadata = models.TextField(blank=True)
+    data = models.TextField(blank=True, default='')
+    metadata = models.TextField(blank=True, default='')
     
     objects = StateHistoryManager()
     

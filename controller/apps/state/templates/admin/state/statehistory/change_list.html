@@ -3,6 +3,9 @@
 
 {% block extrahead %}
     {{ block.super }}
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "state/css/overlay.css" %}" />
+    <link type="text/css" media="all" rel="stylesheet" href="{% static "controller/css/github.css" %}" />
+    
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
@@ -58,12 +61,35 @@
         });
     });
     </script>
+    <script>
+    $(document).ready(function(){
+        $('html').click(function() {
+            $('.overlay-bg').hide(); // hide the overlay
+        });
+        // show popup when you click on the link
+        $('.show-popup').click(function(event){
+            event.preventDefault(); // disable normal link function so that it doesn't refresh the page
+            $.get( "/admin/state/state/52/history/data/", function( data ) {
+                document.getElementById("overlay-metadata").innerHTML = data.metadata;
+                document.getElementById("overlay-data").innerHTML = data.data;
+            }, "json" );
+            $('.overlay-bg').show(); //display your popup
+            event.stopPropagation();
+        });
+        // hide popup when user clicks on close button
+        $('.close-btn').click(function(){
+            $('.overlay-bg').hide(); // hide the overlay
+        });
+    });
+    </script>
 {% endblock %}
+
 
 {% block content_title %}{% if title %}<h1>State history of {{ obj_opts.object_name.lower }} 
     <a href="{% url obj_opts|admin_urlname:'change' obj.pk %}">{{ obj|truncatewords:"18" }}</a>
     (<a href="http://[{{ ip_addr }}]">{{ ip_addr }}</a>)</h1>
 {% endif %}{% endblock %}
+
 
 {% block breadcrumbs %}
     <div class="breadcrumbs">
@@ -76,6 +102,7 @@
     </div>
 {% endblock %}
 
+
 {% block object-tools %}
 <ul class="object-tools">
     <li><a href="{% url 'admin:state_state_change' obj.state.pk %}"> State </a></li>
@@ -87,6 +114,15 @@
     <div id="statechart" style="margin: 2;"></div>
     <hr>
     {{ block.super }}
+    
+    <div class="overlay-bg">
+        <div class="overlay-content">
+            <a class="boxclose" id="boxclose"></a>
+            <h2>Metadata</h2>
+            <div id="overlay-metadata"></div>
+            <h2>Data</h2>
+            <div id="overlay-data"></div>
+
+        </div>
+    </div>
 {% endblock %}
-
-

@@ -1,0 +1,48 @@
+.overlay-bg {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height:100%;
+    width: 100%;
+    background: #000; /* fallback */
+    background: rgba(0,0,0,0.75);
+}
+
+
+.overlay-content {
+    background: #fff;
+    padding: 0.5%;
+    width:900px;
+    height: 99%;
+    position:fixed;
+    top:1%;
+    left:50%;
+    margin-left:-450px; /* negative half the size of width */
+    margin: 0 0 0 -20%; /* add negative left margin for half the width to center the div */
+    font-size: 10px;
+    overflow-y: scroll;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.9);
+}
+
+a.boxclose{
+    float: right;
+    margin-top: -10px;
+    margin-right: -10px;
+    cursor: pointer;
+    color: white;
+    border: 1px solid #AEAEAE;
+    border-radius: 5px;
+    background: #605F61;
+    font-size: 31px;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 0px;
+    padding: 14px 2px;
+}
+
+.boxclose:before {
+    content: "×";
+}
+

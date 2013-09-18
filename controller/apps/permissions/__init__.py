@@ -7,4 +7,4 @@ from .options import *
 autodiscover('models')
 autodiscover('permissions')
 
-REQUIRED_APPS = ['__all__']
+REQUIRED_APPS = ['django.contrib.admin']

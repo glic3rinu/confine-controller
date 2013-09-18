@@ -63,9 +63,7 @@ def add_app(INSTALLED_APPS, app):
     apps = list(INSTALLED_APPS)
     index = 0
     for dependency in app_dependencies(app):
-        if dependency == '__all__':
-            index = len(apps) # append the app
-        elif not dependency in apps:
+        if not dependency in apps:
             apps = list(add_app(apps, dependency))
         index = max(index, apps.index(dependency) + 1) # insert after last dependency
     apps.insert(index, app)

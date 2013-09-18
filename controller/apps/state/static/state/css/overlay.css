@@ -19,7 +19,6 @@
     top:1%;
     left:50%;
     margin-left:-450px; /* negative half the size of width */
-    margin: 0 0 0 -20%; /* add negative left margin for half the width to center the div */
     font-size: 10px;
     overflow-y: scroll;
     border-radius: 4px;

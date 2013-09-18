@@ -22,7 +22,7 @@ from pygments.formatters import HtmlFormatter
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (insertattr, get_admin_link, colored, get_modeladmin,
-    wrap_admin_view, display_timesince, display_timeuntil)
+        wrap_admin_view, display_timesince, display_timeuntil)
 from controller.models.utils import get_help_text
 from controller.utils.html import urlize
 from controller.utils.time import timesince
@@ -36,7 +36,8 @@ from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter
 from .helpers import break_headers, break_lines
 from .models import State, StateHistory, NodeSoftwareVersion
-from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
+from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
+        STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
 
 
 STATES_COLORS = {
@@ -71,6 +72,27 @@ def display_data(instance):
     data = highlight(data, JsonLexer(), HtmlFormatter())
     return mark_safe(style + urlize(data))
 display_data.short_description = 'data'
+
+
+def display_current(instance):
+    try:
+        title = json.loads(instance.data).get('errors', '')
+    except ValueError:
+        title = ''
+    else:
+        title = str(title)[2:-2].replace("u'", "'")
+    state = instance.current
+    color = STATES_COLORS.get(state, "black")
+    state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
+    start = datetime.datetime.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
+    changes = instance.history.filter(start__gt=start).count()
+    if changes >= STATE_FLAPPING_CHANGES:
+        context = (changes, STATE_FLAPPING_MINUTES)
+        title += 'This state is flapping (%i/%imin)' % context
+        state += '*'
+    else:
+        state = '<b>%s</b>' % state
+    return '<span style="color:%s;" title="%s">%s</span>' % (color, title, state)
 
 
 class StateHistoryAdmin(admin.ModelAdmin):
@@ -264,14 +286,9 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     next_retry.help_text = 'Next time the state retrieval operation will be executed'
     
     def current(self, instance):
-        state = colored('current', STATES_COLORS, verbose=True)(instance)
-        try:
-            errors = json.loads(instance.data).get('errors', '')
-        except ValueError:
-            errors = ''
-        else:
-            errors = str(errors)[2:-2].replace("u'", "'")
-        return mark_safe('<a href="history" title="%s">%s</a>' % (errors, state))
+        state = display_current(instance)
+        return mark_safe('<a href="history">%s</a>' % (state))
+    display_current.short_description = 'current'
     
     def has_add_permission(self, request):
         """ Object states can not be manually created """
@@ -313,11 +330,11 @@ def state_link(*args):
     if not obj.pk:
         # Don't know why state_link is ever called without a real object :(
         return
-    color = colored('current', STATES_COLORS, verbose=True)
     state = obj.state
+    colored = display_current(state)
     model_name = obj._meta.verbose_name_raw
     url = reverse('admin:state_state_change', args=[state.pk])
-    return mark_safe('<a href="%s">%s</a>' % (url, color(state)))
+    return mark_safe('<a href="%s">%s</a>' % (url, colored))
 state_link.short_description = 'Current state'
 state_link.admin_order_field = 'state_set__value'
 

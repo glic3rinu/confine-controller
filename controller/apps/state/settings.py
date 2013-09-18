@@ -11,19 +11,17 @@ STATE_NODE_PULL_TIMEOUT = getattr(settings, 'STATE_NODE_PULL_TIMEOUT', timedelta
 STATE_NODE_URI = getattr(settings, 'STATE_NODESTATE_URI',
     'http://[%(mgmt_addr)s]/confine/api/node/')
 
-STATE_NODE_SCHEDULE = getattr(settings, 'STATE_NODE_SCHEDULE', 200)
+STATE_SCHEDULE = getattr(settings, 'STATE_SCHEDULE', 200)
 
 # Percentage
-STATE_NODE_EXPIRE_WINDOW = getattr(settings, 'STATE_NODE_EXPIRE_WINDOW', 150)
+STATE_EXPIRE_WINDOW = getattr(settings, 'STATE_EXPIRE_WINDOW', 150)
 
+STATE_FLAPPING_CHANGES = getattr(settings, 'STATE_FLAPPING_CHANGES', 2)
+
+STATE_FLAPPING_MINUTES = getattr(settings, 'STATE_FLAPPING_MINUTES', 15)
 
 STATE_SLIVER_URI = getattr(settings, 'STATE_SLIVER_URI',
     'http://[%(mgmt_addr)s]/confine/api/slivers/%(object_id)d/')
-
-STATE_SLIVER_SCHEDULE = getattr(settings, 'STATE_SLIVER_SCHEDULE', 200)
-
-# Percentage
-STATE_SLIVER_EXPIRE_WINDOW = getattr(settings, 'STATE_SLIVER_EXPIRE_WINDOW', 150)
 
 
 STATE_NODE_SOFT_VERSION_URL = getattr(settings, 'STATE_NODE_SOFT_VERSION_URL',
@@ -36,3 +34,4 @@ STATE_NODE_SOFT_VERSION_NAME = getattr(settings, 'STATE_NODE_SOFT_VERSION_NAME',
 
 
 STATE_NODE_OFFLINE_WARNING = getattr(settings, 'STATE_NODE_OFFLINE_WARNING', timedelta(days=1))
+

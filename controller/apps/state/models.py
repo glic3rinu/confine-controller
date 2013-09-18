@@ -73,8 +73,8 @@ class State(models.Model):
     @property
     def heartbeat_expires(self):
         model = self.content_type.model_class()
-        schedule = State.get_setting(model, 'SCHEDULE')
-        window = State.get_setting(model, 'EXPIRE_WINDOW')
+        schedule = settings.STATE_SCHEDULE
+        window = settings.STATE_EXPIRE_WINDOW
         return functools.partial(heartbeat_expires, freq=schedule, expire_window=window)
     
     @property
@@ -91,7 +91,7 @@ class State(models.Model):
     @property
     def next_retry_on(self):
         model = self.content_type.model_class()
-        freq = State.get_setting(model, 'SCHEDULE')
+        freq = settings.STATE_SCHEDULE
         return self.last_try_on + timedelta(seconds=freq)
     
     @classmethod
@@ -159,14 +159,11 @@ class State(models.Model):
             else:
                 NodeSoftwareVersion.objects.store(self.content_object, version)
     
-    @classmethod
-    def get_setting(cls, model, setting):
-        name = model.__name__.upper()
-        return getattr(settings, "STATE_%s_%s" % (name, setting))
-    
     def get_url(self):
         model = self.content_type.model_class()
-        URI = State.get_setting(model, 'URI')
+        name = model.__name__.upper()
+        # TODO get URI from the node/sliver api_path ?
+        URI = getattr(settings, "STATE_%s_%s" % (name, 'URI'))
         context = {
             'mgmt_addr': self.get_node().mgmt_net.addr,
             'object_id': self.object_id

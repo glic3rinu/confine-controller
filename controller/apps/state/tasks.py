@@ -9,16 +9,16 @@ from django.db.models import get_model
 from controller.utils import LockFile
 
 from .models import State
-from .settings import STATE_LOCK_DIR, STATE_NODE_SCHEDULE, STATE_SLIVER_SCHEDULE
+from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
 
 @task(name="state.get_state")
 def get_state(state_module, ids=[], lock=True, patch=False):
-    model = get_model(*state_module.split('.'))
-    lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % model.__name__)
-    freq = State.get_setting(model, 'SCHEDULE')
+    lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_module)
+    freq = STATE_SCHEDULE
     # Prevent concurrent executions
     with LockFile(lock_file, expire=freq-(freq*0.2), unlocked=not lock):
+        model = get_model(*state_module.split('.'))
         objects = model.objects.all()
         if ids:
             objects = objects.filter(pk__in=ids)
@@ -46,11 +46,11 @@ def get_state(state_module, ids=[], lock=True, patch=False):
     return len(objects)
 
 
-@periodic_task(name="state.node", run_every=STATE_NODE_SCHEDULE, expires=STATE_NODE_SCHEDULE)
+@periodic_task(name="state.node", run_every=STATE_SCHEDULE, expires=STATE_SCHEDULE)
 def node_state():
     return get_state('nodes.Node')
 
 
-@periodic_task(name="state.sliver", run_every=STATE_SLIVER_SCHEDULE, expires=STATE_SLIVER_SCHEDULE)
+@periodic_task(name="state.sliver", run_every=STATE_SCHEDULE, expires=STATE_SCHEDULE)
 def sliver_state():
     return get_state('slices.Sliver')

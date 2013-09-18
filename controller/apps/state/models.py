@@ -17,6 +17,7 @@ from slices.models import Sliver
 from . import settings
 from .tasks import get_state
 
+
 class State(models.Model):
     UNKNOWN = 'unknown'
     OFFLINE = 'offline'

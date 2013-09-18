@@ -33,7 +33,7 @@ from slices.helpers import wrap_action
 from slices.models import Sliver
 
 from .actions import refresh, refresh_state, show_state
-from .filters import NodeStateListFilter, SliverStateListFilter
+from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
 from .helpers import break_headers, break_lines
 from .models import State, StateHistory, NodeSoftwareVersion
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
@@ -363,7 +363,7 @@ insertattr(Node, 'actions', refresh_state)
 insertattr(Sliver, 'actions', refresh_state)
 insertattr(Node, 'list_filter', NodeStateListFilter)
 insertattr(Sliver, 'list_filter', SliverStateListFilter)
-insertattr(Node, 'list_filter', 'soft_version__value')
+insertattr(Node, 'list_filter', FirmwareVersionListFilter)
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')

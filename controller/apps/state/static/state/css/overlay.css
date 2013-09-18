@@ -13,12 +13,12 @@
 .overlay-content {
     background: #fff;
     padding: 0.5%;
-    width:900px;
+    width: 800px;
     height: 99%;
     position:fixed;
     top:1%;
     left:50%;
-    margin-left:-450px; /* negative half the size of width */
+    margin-left:-400px; /* negative half the size of width */
     font-size: 10px;
     overflow-y: auto;
     border-radius: 4px;

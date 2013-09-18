@@ -135,7 +135,7 @@ class State(models.Model):
         if state.value in (cls.CRASHED, cls.OFFLINE):
             opts = type(obj)._meta
             module = '%s.%s' % (opts.app_label, opts.object_name)
-            defer(get_state.delay, module)
+            defer(get_state.delay, module, ids=[obj.pk], lock=False)
         node_heartbeat.send(sender=cls, node=obj.state.get_node())
     
     def _compute_current(self):

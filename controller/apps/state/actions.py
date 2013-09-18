@@ -19,8 +19,7 @@ def refresh(modeladmin, request, queryset):
     ids = queryset.values_list('object_id', flat=True)
     # Execute get_state isolated on a process to avoid gevent polluting the stack
     # and preventing this silly complain "gevent is only usable from a single thread"
-    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored
-    # Maybe because somehow ids can not be properly serialized ?? WTF
+    # ids listqueryset is converted in a list in order to be properly serialized
     result = get_state.delay(module, ids=list(ids), lock=False)
     try:
         # Block until finish
@@ -43,10 +42,9 @@ def refresh_state(modeladmin, request, queryset):
     ids = queryset.values_list('pk', flat=True)
     # Execute get_state isolated on a process to avoid gevent polluting the stack
     # and preventing this silly complain "gevent is only usable from a single thread"
-    # Don't know yet why ids has to be copied, otherwise task doesn't get monitored
-    # Maybe because somehow ids can not be properly serialized ?? WTF
+    # ids listqueryset is converted in a list in order to be properly serialized
     try:
-        result = get_state.delay(module, ids=list(ids))
+        result = get_state.delay(module, ids=list(ids), lock=False)
         result.get()
     except OperationLocked:
         msg = 'This operation is currently being executed by another process'

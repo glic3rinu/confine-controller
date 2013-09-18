@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from django.views.generic.base import TemplateView
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from registration.backends.default.urls import urlpatterns as registration_urlpatterns
 
 from . import BackendFactory

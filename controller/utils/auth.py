@@ -2,7 +2,7 @@ import base64
 
 from django.contrib.auth import authenticate, login
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 
 
 def any_auth_method(condition):

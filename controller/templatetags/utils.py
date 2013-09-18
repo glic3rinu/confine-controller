@@ -7,7 +7,7 @@ from django.forms import CheckboxInput
 from django.utils.safestring import mark_safe
 
 from controller import get_version
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 
 
 register = template.Library()

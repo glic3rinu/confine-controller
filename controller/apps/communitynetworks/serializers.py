@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from rest_framework import serializers
 
 from api import api
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from nodes.models import Server, Node
 
 from .models import CnHost

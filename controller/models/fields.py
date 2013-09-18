@@ -4,7 +4,7 @@ from django.utils.text import capfirst
 
 from controller.core.validators import validate_rsa_pubkey
 from controller.forms.fields import MultiSelectFormField
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 
 
 class MultiSelectField(models.Field):

@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models import get_model
 from django.utils import timezone
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from controller.utils.time import heartbeat_expires
 
 from .settings import PING_INSTANCES

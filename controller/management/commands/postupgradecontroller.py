@@ -3,7 +3,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
 
 

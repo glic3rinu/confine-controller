@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.contenttypes import generic
 
 from controller.admin.utils import insertattr, insert_change_view_action, link
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
 

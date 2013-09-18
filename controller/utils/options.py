@@ -36,8 +36,9 @@ def autodiscover(module):
 
 def is_installed(app):
     """ returns True if app is installed """
-    from django.conf import settings
-    return app in settings.INSTALLED_APPS
+    from .apps import is_installed
+    warnings.warn("Deprecated: use controller.utils.apps.add_app", DeprecationWarning)
+    is_installed(app)
 
 
 def add_app(INSTALLED_APPS, app, prepend=False, append=True):
@@ -64,7 +65,8 @@ def get_controller_site():
     return {
         'domain': url.netloc,
         'name': controller_settings.SITE_NAME,
-        'scheme': url.scheme}
+        'scheme': url.scheme
+    }
 
 
 def send_email_template(template, context, to, email_from=None, html=None):

@@ -1,7 +1,7 @@
 from admin_tools.menu import items, Menu
 from django.core.urlresolvers import reverse
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 
 
 def api_link(context):

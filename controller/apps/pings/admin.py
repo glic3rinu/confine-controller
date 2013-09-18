@@ -13,7 +13,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils.safestring import mark_safe
 
 from controller.admin.utils import display_timesince, wrap_admin_view
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from permissions.admin import PermissionModelAdmin
 
 from .models import Ping

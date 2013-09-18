@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from controller.models.fields import URIField
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from nodes.models import Node, Server
 
 from . import settings

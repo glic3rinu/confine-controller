@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from django_transaction_signals import defer
 from djcelery.models import TaskState
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 from nodes.models import Node
 from state.models import State, node_heartbeat
 

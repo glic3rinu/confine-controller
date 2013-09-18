@@ -190,19 +190,22 @@ class StateHistoryManager(models.Manager):
         last_state = state.last
         now = timezone.now()
         if not last_state:
-            last_state = state.history.create(value=state.value, start=now, end=now)
+            last_state = state.history.create(value=state.value, start=now,
+                    end=now, data=state.data, metadata=state.metadata)
         else:
             expiration = state.heartbeat_expires(last_state.end)
             if time() > expiration:
                 last_state.end = datetime.fromtimestamp(expiration)
                 last_state.save()
                 state.history.create(value=State.NODATA, start=last_state.end, end=now)
-                last_state = state.history.create(value=state.value, start=now, end=now)
+                last_state = state.history.create(value=state.value, start=now,
+                        end=now, data=state.data, metadata=state.metadata)
             else:
                 last_state.end = now
                 last_state.save()
                 if last_state.value != state.value:
-                    last_state = state.history.create(value=state.value, start=now, end=now)
+                    last_state = state.history.create(value=state.value, start=now,
+                            end=now, data=state.data, metadata=state.metadata)
         return last_state
 
 
@@ -211,6 +214,8 @@ class StateHistory(models.Model):
     value = models.CharField(max_length=32, choices=State.STATES)
     start = models.DateTimeField()
     end = models.DateTimeField()
+    data = models.TextField(blank=True)
+    metadata = models.TextField(blank=True)
     
     objects = StateHistoryManager()
     

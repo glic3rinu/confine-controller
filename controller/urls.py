@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.contrib import admin
 from django.conf.urls import patterns, include, url
 
-from controller.utils import is_installed
+from controller.utils.apps import is_installed
 
 
 admin.autodiscover()

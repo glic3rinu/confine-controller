@@ -27,8 +27,10 @@ class FirmwareVersionListFilter(SimpleListFilter):
     
     def lookups(self, request, model_admin):
         values = model_admin.model.objects.values_list('soft_version__value', flat=True)
-        values = values.order_by('-soft_version__value')
-        return [(value, STATE_NODE_SOFT_VERSION_NAME(value)) for value in values ]
+        values = values.exclude(soft_version__value__isnull=True).distinct()
+        values = [ (value, STATE_NODE_SOFT_VERSION_NAME(value)) for value in values ]
+        values.sort(key=lambda a: 'x'+a[1] if a[1].startswith('m') else a[1], reverse=True)
+        return values
     
     def queryset(self, request, queryset):
         if self.value():

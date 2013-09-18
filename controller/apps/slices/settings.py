@@ -16,7 +16,6 @@ SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', 'debi
 
 SLICES_TEMPLATE_ARCHS = getattr(settings, 'SLICES_TEMPLATE_ARCHS', (
         ('amd64', 'amd64'),
-        ('ia64', 'ia64'),
         ('x86', 'x86'),
 ))
 

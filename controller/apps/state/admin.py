@@ -58,7 +58,7 @@ STATES_COLORS = {
 
 
 def display_metadata(instance):
-    style = '<style>code,pre {font-size:1.13em;}</style><br>'
+    style = '<style>code,pre {font-size:1.13em;}</style><p></p>'
     metadata = break_headers(instance.metadata)
     metadata = highlight(metadata, JsonLexer(), HtmlFormatter())
     return mark_safe(style + urlize(metadata))
@@ -66,9 +66,7 @@ display_metadata.short_description = 'metadata'
 
 
 def display_data(instance):
-    style = '<style>code,pre {font-size:1.13em;}</style><br>'
-    # TODO render data according to header content-type
-    #      (when it becomes available in the node)
+    style = '<style>code,pre {font-size:1.13em;}</style><p></p>'
     data = break_lines(instance.data)
     data = highlight(data, JsonLexer(), HtmlFormatter())
     return mark_safe(style + urlize(data))
@@ -91,7 +89,8 @@ class StateHistoryAdmin(admin.ModelAdmin):
     
     def display_value(self, instance):
         value = colored('value', STATES_COLORS, verbose=True)(instance)
-        return mark_safe('<a class="show-popup" href="#">%s</a>' % value)
+        url = reverse('admin:state_history_data', args=[instance.pk])
+        return mark_safe('<a class="show-popup" href="#" url="%s">%s</a>' % (url, value))
     
     def display_start_date(self, instance):
         time = instance.start.strftime('%b. %d, %Y, %I:%M %P')

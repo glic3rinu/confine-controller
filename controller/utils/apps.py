@@ -50,6 +50,8 @@ def _try_import(module_name):
 def app_dependencies(app):
     """ Get the app dependencies """
     module = _try_import(app)
+    if module is None:
+        raise DependencyImportError("No module named '%s'" % (app))
     req_apps = ['controller'] # All depend on the controller
     if hasattr(module, "REQUIRED_APPS"):
         req_apps += module.REQUIRED_APPS

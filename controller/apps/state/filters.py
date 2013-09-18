@@ -34,7 +34,8 @@ class FirmwareVersionListFilter(SimpleListFilter):
         return values
     
     def queryset(self, request, queryset):
-        value = self.value()
-        if value == 'None':
+        if self.value() == 'None':
             return queryset.filter(soft_version__value__isnull=True)
-        return queryset.filter(soft_version__value=value)
+        if self.value():
+            return queryset.filter(soft_version__value=self.value())
+

@@ -8,12 +8,12 @@ from django.db.models import get_model
 
 from controller.utils import LockFile
 
-from .models import State
 from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
 
 @task(name="state.get_state")
 def get_state(state_module, ids=[], lock=True, patch=False):
+    from .models import State
     lock_file = os.path.join(STATE_LOCK_DIR, '.%s.lock' % state_module)
     freq = STATE_SCHEDULE
     # Prevent concurrent executions

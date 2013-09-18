@@ -84,7 +84,7 @@ def display_current(instance):
     state = instance.current
     color = STATES_COLORS.get(state, "black")
     state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
-    start = datetime.datetime.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
+    start = timezone.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
     changes = instance.history.filter(start__gt=start).count()
     if changes >= STATE_FLAPPING_CHANGES:
         context = (changes, STATE_FLAPPING_MINUTES)

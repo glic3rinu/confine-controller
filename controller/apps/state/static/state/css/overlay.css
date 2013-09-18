@@ -20,10 +20,11 @@
     left:50%;
     margin-left:-450px; /* negative half the size of width */
     font-size: 10px;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-radius: 4px;
     box-shadow: 0 0 5px rgba(0,0,0,0.9);
 }
+
 
 a.boxclose{
     float: right;
@@ -41,7 +42,7 @@ a.boxclose{
     padding: 14px 2px;
 }
 
+
 .boxclose:before {
     content: "×";
 }
-

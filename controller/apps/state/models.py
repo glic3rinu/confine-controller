@@ -8,13 +8,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.dispatch import Signal
 from django.utils import timezone
+from django_transaction_signals import defer
 
 from controller.utils.time import heartbeat_expires
 from nodes.models import Node
 from slices.models import Sliver
 
 from . import settings
-
+from .tasks import get_state
 
 class State(models.Model):
     UNKNOWN = 'unknown'
@@ -129,10 +130,11 @@ class State(models.Model):
         state = obj.state
         state.last_seen_on = timezone.now()
         state.last_contact_on = state.last_seen_on
-        if state.value in (cls.CRASHED, cls.OFFLINE):
-            state._compute_current()
-            state.history.store()
         state.save()
+        if state.value in (cls.CRASHED, cls.OFFLINE):
+            opts = type(obj)._meta
+            module = '%s.%s' % (opts.app_label, opts.object_name)
+            defer(get_state.delay, module)
         node_heartbeat.send(sender=cls, node=obj.state.get_node())
     
     def _compute_current(self):

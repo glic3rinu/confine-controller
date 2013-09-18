@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import (insert_list_display, insert_action)
+from controller.admin.utils import insertattr
 
 from users.admin import GroupAdmin
 from users.models import Group
@@ -69,6 +69,6 @@ def is_approved(group):
 is_approved.boolean = True
 
 
-insert_list_display(GroupAdmin, is_approved)
-insert_action(Group, approve_group)
-insert_action(Group, reject_group)
+insertattr(GroupAdmin, 'list_display', is_approved)
+insertattr(Group, 'actions', approve_group)
+insertattr(Group, 'actions', reject_group)

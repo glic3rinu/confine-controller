@@ -13,9 +13,7 @@
     <script type="text/javascript">
     $(function() {
         $.getJSON('{% url "admin:state_history_changes" obj.state.pk %}', function(data) {
-            // Create a timer
             var start = + new Date();
-            // create the chart
             $('#statechart').highcharts({
             chart: {
                 type: 'column'
@@ -84,6 +82,10 @@
             document.getElementById("overlay-metadata").innerHTML = '';
             document.getElementById("overlay-data").innerHTML = '';
         });
+        // do not propagating events on data and metadata
+        $('#overlay-metadata, #overlay-data').click(function(event){
+            event.stopPropagation();
+        });
     });
     </script>
 {% endblock %}
@@ -115,10 +117,8 @@
 
 
 {% block date_hierarchy %}
-    <div id="statechart" style="margin: 2;"></div>
-    <hr>
+    <div id="statechart" style="margin: 2;"></div><hr>
     {{ block.super }}
-    
     <div class="overlay-bg">
         <div class="overlay-content">
             <a class="boxclose" id="boxclose"></a>
@@ -126,7 +126,6 @@
             <div id="overlay-metadata"></div>
             <h2>Data</h2>
             <div id="overlay-data"></div>
-
         </div>
     </div>
 {% endblock %}

@@ -212,7 +212,7 @@ class StateHistoryManager(models.Manager):
 class StateHistory(models.Model):
     state = models.ForeignKey(State, related_name='history')
     value = models.CharField(max_length=32, choices=State.STATES)
-    start = models.DateTimeField()
+    start = models.DateTimeField(db_index=True)
     end = models.DateTimeField()
     data = models.TextField(blank=True, default='')
     metadata = models.TextField(blank=True, default='')

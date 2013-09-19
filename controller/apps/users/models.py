@@ -130,7 +130,7 @@ class User(auth_models.AbstractBaseUser):
     The implementation is based on auth.models.AbstractBaseUser, more:
     https://docs.djangoproject.com/en/dev/topics/auth/#customizing-the-user-model
     """
-    username = models.CharField(max_length=30, unique=True,
+    username = models.CharField(max_length=30, unique=True, db_index=True,
             help_text='Required. 30 characters or fewer. Letters, numbers and '
                       '@/./+/-/_ characters',
             validators=[validators.RegexValidator('^[\w.@+-]+$', 

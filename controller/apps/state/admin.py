@@ -44,17 +44,17 @@ STATES_COLORS = {
     'offline': 'red',
     'crashed': 'red',
     'debug': 'darkorange',
-    'safe': 'grey',
+    'safe': 'blue',
     'production': 'green',
     'failure': 'red',
-    'online': 'green',
     'unknown': 'grey',
-    'registered': 'grey',
+    'registered': 'blue',
     'deployed': 'darkorange',
     'started': 'green',
     'fail_alloc': 'red',
     'fail_deploy': 'red',
-    'fail_start': 'red'
+    'fail_start': 'red',
+    'nodata': 'black',
 }
 
 
@@ -117,14 +117,14 @@ class StateHistoryAdmin(admin.ModelAdmin):
     def display_start_date(self, instance):
         time = instance.start.strftime('%b. %d, %Y, %I:%M %P')
         time_since = timesince(instance.start)
-        return mark_safe('<span title="%s">%s</span>' % (time_since, time))
+        return mark_safe('<span title="%s ago">%s</span>' % (time_since, time))
     display_start_date.admin_order_field = 'start'
     display_start_date.short_description = 'Started Date/time'
     
     def display_end_date(self, instance):
         time = instance.end.strftime('%b. %d, %Y, %I:%M %P')
         time_since = timesince(instance.end)
-        return mark_safe('<span title="%s">%s</span>' % (time_since, time))
+        return mark_safe('<span title="%s ago">%s</span>' % (time_since, time))
     display_end_date.admin_order_field = 'end'
     display_end_date.short_description = 'Ended Date/time'
     
@@ -219,6 +219,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
             series.append({
                 'name': state,
                 'data': data[state],
+                'color': STATES_COLORS.get(state, None)
             })
         data = {
             'categories': list(monthly.keys()),

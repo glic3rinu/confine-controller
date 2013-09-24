@@ -26,9 +26,11 @@ from controller.admin.utils import (insertattr, get_admin_link, colored, get_mod
 from controller.models.utils import get_help_text
 from controller.utils.html import urlize
 from controller.utils.time import timesince
+from nodes.admin import STATES_COLORS as NODE_STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
+from slices.admin import STATE_COLORS as SLICE_STATES_COLORS
 from slices.helpers import wrap_action
 from slices.models import Sliver
 
@@ -40,22 +42,16 @@ from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
 
 
-STATES_COLORS = {
+STATES_COLORS = dict(SLICE_STATES_COLORS, **NODE_STATES_COLORS)
+STATES_COLORS.update({
     'offline': 'red',
     'crashed': 'red',
-    'debug': 'darkorange',
-    'safe': 'blue',
-    'production': 'green',
-    'failure': 'red',
     'unknown': 'grey',
-    'registered': 'blue',
-    'deployed': 'darkorange',
-    'started': 'green',
     'fail_alloc': 'red',
     'fail_deploy': 'red',
     'fail_start': 'red',
     'nodata': 'black',
-}
+})
 
 
 def display_metadata(instance):

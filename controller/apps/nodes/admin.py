@@ -26,7 +26,7 @@ from .models import Node, NodeProp, Server, DirectIface
 STATES_COLORS = {
     Node.DEBUG: 'darkorange',
     Node.FAILURE: 'red',
-    Node.SAFE: 'grey',
+    Node.SAFE: 'blue',
     Node.PRODUCTION: 'green',
 }
 

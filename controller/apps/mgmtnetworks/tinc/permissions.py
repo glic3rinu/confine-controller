@@ -7,7 +7,9 @@ from .models import TincClient, TincServer, Host, Gateway, Island, TincAddress
 
 class HostPermission(Permission):
     def view(self, obj, cls, user):
-        return True
+        if obj is None:
+            return True
+        return obj.owner == user
     
     def add(self, obj, cls, user):
         return True

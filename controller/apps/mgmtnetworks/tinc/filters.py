@@ -7,9 +7,13 @@ class MyHostsListFilter(MySimpleListFilter):
     parameter_name = 'my_hosts'
     
     def lookups(self, request, model_admin):
+        if request.user.is_superuser:
+            return (
+                ('True', 'My Hosts'),
+                ('False', 'All'),
+            )
         return (
             ('True', 'My Hosts'),
-            ('False', 'All'),
         )
     
     def queryset(self, request, queryset):

@@ -7,6 +7,15 @@ from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
 
 
+def deprecate_periodic_task(name):
+    from djcelery.models import PeriodicTask
+    PeriodicTask.objects.filter(name=name).delete()
+    run('rabbitmqctl stop_app')
+    run('rabbitmqctl reset')
+    run('rabbitmqctl start_app')
+    run('service celeryd restart')
+
+
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -91,13 +100,7 @@ class Command(BaseCommand):
             # Clean existing sessions because of change on auth backend
             run('echo "delete from django_session;" | python manage.py dbshell')
         if version < 801:
-            # Deprecate ping.state
-            from djcelery.models import PeriodicTask
-            PeriodicTask.objects.filter(name='state.ping').delete()
-            run('rabbitmqctl stop_app')
-            run('rabbitmqctl reset')
-            run('rabbitmqctl start_app')
-            run('service celeryd restart')
+            deprecate_periodic_task('state.ping')
         if version < 809:
             # Add PKI directories
             from pki import ca
@@ -157,6 +160,9 @@ class Command(BaseCommand):
                 Template.objects.filter(type='debian6').update(type='debian')
             if 'openwrt' in template_types:
                 Template.objects.filter(type='openwrt-backfire').update(type='openwrt')
+        if version < 906:
+            deprecate_periodic_task('state.nodestate')
+            deprecate_periodic_task('state.sliverstate')
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'
                 '    ===================\n'

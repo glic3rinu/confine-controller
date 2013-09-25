@@ -53,7 +53,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state']
     default_changelist_filters = (('my_nodes', 'True'),)
-    search_fields = ['description', 'name']
+    search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
     inlines = [DirectIfaceInline, NodePropInline]
     fieldsets = (

@@ -10,6 +10,9 @@ class NodePullHeartBeat(object):
                     State.register_heartbeat(client)
                 elif view_func.func_name == 'SliverDetail':
                     from slices.models import Sliver
-                    # FIXME
-                    sliver = Sliver.objects.get(pk=view_kwargs.get('pk'))
-                    State.register_heartbeat(sliver)
+                    try:
+                        sliver = Sliver.objects.get(pk=view_kwargs.get('pk'))
+                    except Sliver.DoesNotExist:
+                        pass
+                    else:
+                        State.register_heartbeat(sliver)

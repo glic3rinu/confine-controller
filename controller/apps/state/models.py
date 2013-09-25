@@ -10,7 +10,7 @@ from django.dispatch import Signal
 from django.utils import timezone
 from django_transaction_signals import defer
 
-from controller.utils.time import heartbeat_expires
+from controller.utils.time import heartbeat_expires as heartbeatexpires
 from nodes.models import Node
 from slices.models import Sliver
 
@@ -77,7 +77,7 @@ class State(models.Model):
         model = self.content_type.model_class()
         schedule = settings.STATE_SCHEDULE
         window = settings.STATE_EXPIRE_WINDOW
-        return functools.partial(heartbeat_expires, freq=schedule, expire_window=window)
+        return functools.partial(heartbeatexpires, freq=schedule, expire_window=window)
     
     @property
     def last(self):

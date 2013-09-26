@@ -79,11 +79,14 @@ class ReadOnlyRolesInline(PermissionTabularInline):
     def get_fieldsets(self, request, obj=None):
         """ HACK display message using the field name of the inline form """
         name = 'Roles'
-        groups_url = reverse('admin:users_group_changelist')
-        if request.user.is_superuser:
-            name = 'Roles <a href="%s">(Manage groups)</a>' % groups_url
-        elif self.has_change_permission(request, obj, view=False):
-            name = 'Roles <a href="%s">(Request group membership)</a>' % groups_url
+        if obj is not None:
+            if request.user.is_superuser:
+                roles_url = reverse('admin:users_roles_changelist')
+                roles_url += '?user=%i' % obj.pk
+                name = 'Roles <a href="%s">(Manage roles)</a>' % roles_url
+            elif self.has_change_permission(request, obj, view=False):
+                groups_url = reverse('admin:users_group_changelist')
+                name = 'Roles <a href="%s">(Request group membership)</a>' % groups_url
         self.verbose_name_plural = mark_safe(name)
         return super(ReadOnlyRolesInline, self).get_fieldsets(request, obj=obj)
     
@@ -161,6 +164,14 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
         return super(UserAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def get_inline_instances(self, request, obj=None):
+        """ show/hide inlines depending if is a new obj """
+        inlines = super(UserAdmin, self).get_inline_instances(request, obj=obj)
+        if obj is None:
+            # Remove roles inline
+            return inlines[:1]
+        return inlines
 
 
 class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
@@ -198,7 +209,8 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
         elif self.has_change_permission(request, obj, view=False):
             return inlines
         else:
-            return inlines[:1] #remove(JoinRequestInline)
+            # remove JoinRequestInline
+            return inlines[:1] 
 
     def get_readonly_fields(self, request, obj=None):
         """ Make allow_resource readonly accordingly """
@@ -248,6 +260,53 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
         return qs
 
 
+class RolesAdmin(admin.ModelAdmin):
+    list_display = [
+        'user_query_string', 'group_link', 'is_admin', 'is_technician', 'is_researcher'
+    ]
+    list_editable = ['is_admin', 'is_technician', 'is_researcher']
+    list_filter = ['is_admin', 'is_technician', 'is_researcher', 'group']
+    
+    def group_link(self, instance):
+        """ Link to related Group """
+        return get_admin_link(instance.group)
+    group_link.short_description = 'Group'
+    group_link.admin_order_field = 'group'
+    
+    def user_query_string(self, instance):
+        query_string = '?'+self.__request__.META['QUERY_STRING']
+        url = reverse('admin:users_roles_change', args=[instance.pk])+query_string
+        return mark_safe('<a href="%s">%s</a>' % (url, instance.user))
+    user_query_string.short_description = 'User'
+    user_query_string.admin_order_field = 'user'
+    
+    def changelist_view(self, request, *args, **kwargs):
+        """ hook request for use in user_query_string """
+        self.__request__ = request
+        return super(RolesAdmin, self).changelist_view(request, *args, **kwargs)
+    
+    def _preserve_query_string(self, request, response):
+        query_string = '?' + request.META['QUERY_STRING']
+        location = response._headers['location']
+        response._headers['location'] = (location[0], location[1]+query_string)
+        return response
+    
+    def response_add(self, request, *args, **kwargs):
+        """ Customizations needed for being nested to slices """
+        response = super(RolesAdmin, self).response_add(request, *args, **kwargs)
+        return self._preserve_query_string(request, response)
+    
+    def response_change(self, request, obj):
+        """ Customizations needed for being nested to slices """
+        response = super(RolesAdmin, self).response_change(request, obj)
+        return self._preserve_query_string(request, response)
+    
+    def response_action(self, request, queryset):
+        response = super(RolesAdmin, self).response_action(request, queryset)
+        return response
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
+admin.site.register(Roles, RolesAdmin)
 admin.site.unregister(AuthGroup)

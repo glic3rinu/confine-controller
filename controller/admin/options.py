@@ -24,7 +24,6 @@ class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
         else:
             if hasattr(self, 'change_form'):
                 self.form = self.change_form
-        
         return super(AddOrChangeInlineFormMixin, self).get_formset(request, obj=obj, **kwargs)
 
 
@@ -110,6 +109,7 @@ class ChangeListDefaultFilter(object):
             response.context_data['cl'].default_changelist_filters = defaults
         return response
 
+
 class SortableTabularInline(admin.options.TabularInline):
     """ 
         Inline that provides sortable functionallity
@@ -122,7 +122,7 @@ class SortableTabularInline(admin.options.TabularInline):
     """
     template = "admin/controller/edit_inline/tabular.html"
     sortable_fields = {} # optional field that allows override sorting
-
+    
     def get_ordering(self, request):
         """ Define dynamic ordering based on request parameters """
         sortable_fields = self.get_sortable_fields(request)
@@ -135,10 +135,10 @@ class SortableTabularInline(admin.options.TabularInline):
             current_sfield = sortable_fields[column]
         except (IndexError, TypeError, ValueError) as e:
             return self.ordering # default ordering or None
-
+        
         current_sfield.update(ordering)
         return [current_sfield.sort_by()]
-
+    
     def get_sortable_fields(self, request):
         """ 
             Hack for get the inline fields SHOWED at admin page 
@@ -146,7 +146,7 @@ class SortableTabularInline(admin.options.TabularInline):
             Returns SortableFields list
         """
         sortable_fields = []
-
+    
         if self.fields:
             # generated admin fields cannot be selected as sort column
             for field in self.fields:
@@ -158,7 +158,7 @@ class SortableTabularInline(admin.options.TabularInline):
                     sortable_field.sortable = True
                 sortable_fields.append(sortable_field)
             return sortable_fields
-
+        
         for field in self.model._meta.fields:
             if field.get_internal_type() == "ForeignKey":
                 if field.rel.to is self.parent_model:

@@ -87,7 +87,9 @@ class CustomMenu(Menu):
                 items.MenuItem('User',
                     reverse('admin:users_user_changelist')),
                 items.MenuItem('Group',
-                    reverse('admin:users_group_changelist'))
+                    reverse('admin:users_group_changelist')),
+                items.MenuItem('Roles',
+                    reverse('admin:users_roles_changelist')),
             ]
             
             if is_installed('registration'):

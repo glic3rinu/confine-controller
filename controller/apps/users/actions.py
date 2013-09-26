@@ -38,6 +38,7 @@ def join_request(modeladmin, request, queryset):
             site = RequestSite(request)
             jrequest.send_creation_email(site)
             modeladmin.message_user(request, "Your join request has been sent (%s)" % group)
+            modeladmin.log_change(request, group, "Requested to join this group.")
 join_request.short_description = "Request to join the selected groups"
 join_request.url_name = 'join-request'
 

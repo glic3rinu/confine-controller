@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.template.defaultfilters import mark_safe
 
 from controller.forms.fields import MultiSelectFormField
-from controller.admin.utils import get_admin_link
+from controller.admin.utils import get_admin_link, get_modeladmin
 from controller.forms.widgets import ReadOnlyWidget
 
 from .models import User, Group, JoinRequest, ResourceRequest
@@ -71,10 +71,10 @@ class RolesInlineForm(forms.ModelForm):
             instance = kwargs.get('instance', None)
             if instance:
                 self.fields['user'].widget = ReadOnlyWidget(original_value=instance.user.pk,
-                    display_value=mark_safe('<b>'+get_admin_link(instance.user)))
+                        display_value=mark_safe('<b>'+get_admin_link(instance.user)))
             elif self.group:
-                users = User.objects.exclude(roles__group=self.group).distinct().order_by('username')
-                self.fields['user'].queryset = users
+                users = User.objects.exclude(roles__group=self.group).distinct()
+                self.fields['user'].queryset = users.order_by('username')
 
 
 class GroupAdminForm(forms.ModelForm):
@@ -141,7 +141,8 @@ class JoinRequestForm(forms.ModelForm):
         ('technician', 'Technician'),
         ('researcher', 'Researcher'))
     
-    action = forms.ChoiceField(label='Action', choices=ACTIONS, required=False, widget=forms.RadioSelect)
+    action = forms.ChoiceField(label='Action', choices=ACTIONS, required=False,
+            widget=forms.RadioSelect)
     roles = MultiSelectFormField(label='Roles', choices=ROLES, required=False)
     
     class Meta:
@@ -157,17 +158,26 @@ class JoinRequestForm(forms.ModelForm):
     def save(self, commit=True):
         action = self.cleaned_data.get('action')
         roles = self.cleaned_data.get('roles')
-        site = RequestSite(self.__request__)
+        request = self.__request__
+        site = RequestSite(request)
+        jrequest = self.instance
+        username = jrequest.user.get_full_name()
+        log = ''
         if roles and action in ['accept', '']:
             # Accept if explicit and also when a role is selected without any action
-            self.instance.accept(roles=roles)
-            self.instance.send_acceptation_email(site=site)
+            jrequest.accept(roles=roles)
+            jrequest.send_acceptation_email(site=site)
+            log = "Accepted join request of user %s with initial roles: %s." % (username, roles)
         elif action == 'reject':
-            self.instance.reject()
-            self.instance.send_rejection_email(site=site)
+            jrequest.reject()
+            jrequest.send_rejection_email(site=site)
+            log = "Rejected join request of user %s." % username
         elif action == 'ignore':
-            self.instance.delete()
-
+            jrequest.delete()
+            log = "Ignored join request of user %s." % username
+        if log:
+            modeladmin = get_modeladmin(Group)
+            modeladmin.log_change(request, jrequest.group, log)
 
 class SendMailForm(forms.Form):
     subject = forms.CharField(widget=forms.TextInput(attrs={'size':'118'}))

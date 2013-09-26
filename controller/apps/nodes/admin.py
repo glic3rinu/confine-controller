@@ -12,10 +12,10 @@ from IPy import IP
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
     docstring_as_help_tip)
+from controller.core.exceptions import InvalidMgmtAddress
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
-from mgmtnetworks.utils import reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
@@ -23,6 +23,7 @@ from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
 from .models import Node, NodeProp, Server, DirectIface
+from .utils import get_mgmt_backend_class
 
 
 STATES_COLORS = {
@@ -116,21 +117,22 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         """ Annotate direct iface counter to allow ordering on change list """
         qs = super(NodeAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('direct_ifaces', distinct=True))
-
-        ### HACK for search nodes by IP ###
-        if 'q' in request.GET:
-            query = request.GET.get('q')
-            try:
-                ip = IP(query)
-            except ValueError:
-                pass # normal workflow
-            else:
-                # avoid django admin filtering
-                request.GET._mutable = True
-                request.GET.pop('q')
-                request.GET._mutable = False
-                node = reverse(ip)
-                qs = qs.filter(id=node.id)
+        # HACK for searching nodes by IP
+        search = request.GET.get('q', False)
+        if search:
+            for query in search.split('+'):
+                mgmt_backend = get_mgmt_backend_class()
+                try:
+                    node = mgmt_backend.reverse(query)
+                except InvalidMgmtAddress:
+                    pass
+                else:
+                    # Skip django admin filtering
+                    request.GET._mutable = True
+                    request.GET.pop('q')
+                    request.GET._mutable = False
+                    qs = qs.filter(id=node.id)
+                    break
         return qs
     
     def get_readonly_fields(self, request, obj=None):

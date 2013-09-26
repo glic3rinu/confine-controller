@@ -11,7 +11,7 @@ from controller.utils.singletons.models import SingletonModel
 from pki import ca, Bob
 
 from . import settings
-from .utils import get_mgmt_backend
+from .utils import get_mgmt_backend_class
 from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
 
 
@@ -169,7 +169,7 @@ class Node(models.Model):
     
     @property
     def mgmt_net(self):
-        return get_mgmt_backend(self)
+        return get_mgmt_backend_class()(self)
     
     def reboot(self):
         self.boot_sn += 1

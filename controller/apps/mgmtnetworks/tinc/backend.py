@@ -1,12 +1,14 @@
-from .utils import reverse
-
-
 class TincBackend(object):
     """
     Management Backend class that provides the managemnt address to some testbed components
     """
     def __init__(self, obj):
         self.obj = obj
+    
+    @classmethod
+    def reverse(cls, ip_addr):
+        from .utils import reverse
+        return reverse(ip_addr)
     
     @property
     def name(self):
@@ -16,6 +18,10 @@ class TincBackend(object):
     def addr(self):
         return self.obj.tinc.address
     
+    @property
+    def native(self):
+        return None
+    
     def tinc_client(self):
         return self.obj.tinc if self.name == 'tinc_client' else None
     
@@ -24,10 +30,3 @@ class TincBackend(object):
     
     def is_configured(self):
         return bool(self.obj.tinc.pubkey)
-    
-    @property
-    def native(self):
-        return None
-    
-    def reverse(self, ip_addr):
-        return reverse(ip_addr)

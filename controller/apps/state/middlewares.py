@@ -1,12 +1,15 @@
 class NodePullHeartBeat(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if view_func.func_name in ('NodeDetail', 'SliverDetail'):
+            from controller.core.exceptions import InvalidMgmtAddress
+            from nodes.utils import get_mgmt_backend_class
+            mgmt_backend = get_mgmt_backend_class()
+            try:
+                client = mgmt_backend.reverse(request.META['REMOTE_ADDR'])
+            except InvalidMgmtAddress:
+                return
             from nodes.models import Node
-            from nodes.utils import get_mgmt_backend
-            mgmt_backend = get_mgmt_backend()
-            client = mgmt_backend.reverse(request.META['REMOTE_ADDR'])
-            pk = view_kwargs.get('pk')
-            if client and isinstance(client, Node):
+            if isinstance(client, Node):
                 from .models import State
                 if view_func.func_name == 'NodeDetail':
                     State.register_heartbeat(client)

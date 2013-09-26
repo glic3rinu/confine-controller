@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.sites.models import RequestSite
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mass_mail
 from django.db import transaction
 from django.template.response import TemplateResponse

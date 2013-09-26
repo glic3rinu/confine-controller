@@ -20,7 +20,8 @@ class BackendFactory(object):
             'RESTRICTED': 'users.registration.RestrictedBackend',
             'CLOSED': 'users.registration.ClosedBackend' }
         try:
-            backend = modes.get(settings.USERS_REGISTRATION_MODE)
+            mode = settings.USERS_REGISTRATION_MODE
+            backend = modes.get(mode)
             return get_backend(backend)
         except KeyError:
             raise ImproperlyConfigured('"%s" is not a valid mode for USERS_REGISTRATION_MODE'

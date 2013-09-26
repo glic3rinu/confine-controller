@@ -56,7 +56,6 @@ class CnHost(models.Model):
         username = settings.COMMUNITYNETWORKS_CNDB_USER
         password = settings.COMMUNITYNETWORKS_CNDB_PASS
         if not username or not password:
-            from django.core.exceptions import ImproperlyConfigured
             raise ImproperlyConfigured(
                     "No CNDB credentials defined, are COMMUNITYNETWORKS_CNDB_USER"
                     " and COMMUNITYNETWORKS_CNDB_PASS at settings?"

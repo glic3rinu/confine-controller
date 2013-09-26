@@ -1,7 +1,6 @@
 import os
 from random import choice
 
-from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
 from controller.utils import get_project_root

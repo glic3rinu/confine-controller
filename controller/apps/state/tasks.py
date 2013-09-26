@@ -2,7 +2,7 @@ import json
 import os
 
 import gevent
-import requests, gevent
+import requests
 from celery.task import periodic_task, task
 from django.db.models import get_model
 

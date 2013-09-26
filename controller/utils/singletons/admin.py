@@ -36,8 +36,6 @@ class SingletonModelAdmin(admin.ModelAdmin):
         """
         Determines the HttpResponse for the change_view stage.
         """
-        opts = obj._meta
-        
         msg = '%(obj)s was changed successfully.' % {'obj': force_unicode(obj)}
         if request.POST.has_key("_continue"):
             self.message_user(request, msg + " You may edit it again below.")

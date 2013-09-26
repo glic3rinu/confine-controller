@@ -1,6 +1,3 @@
-from controller.admin.utils import admin_link
-
-
 def filter_actions(modeladmin, ticket, request):
     if not hasattr(modeladmin, 'change_view_actions_backup'):
         modeladmin.change_view_actions_backup = list(modeladmin.change_view_actions)

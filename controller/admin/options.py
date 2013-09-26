@@ -24,7 +24,7 @@ class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
         else:
             if hasattr(self, 'change_form'):
                 self.form = self.change_form
-        return super(AddOrChangeInlineFormMixin, self).get_formset(request, obj=obj, **kwargs)
+        return super(AddOrChangeInlineForm, self).get_formset(request, obj=obj, **kwargs)
 
 
 class ChangeViewActions(admin.options.ModelAdmin):
@@ -133,7 +133,7 @@ class SortableTabularInline(admin.options.TabularInline):
             # check user input
             column = abs(int(ordering))
             current_sfield = sortable_fields[column]
-        except (IndexError, TypeError, ValueError) as e:
+        except (IndexError, TypeError, ValueError):
             return self.ordering # default ordering or None
         
         current_sfield.update(ordering)

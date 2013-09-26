@@ -7,7 +7,6 @@ def wrap_action(action, modeladmin):
         queryset = modeladmin.model.objects.filter(pk=object_id)
         response = action(modeladmin, request, queryset)
         if not response:
-            opts = modeladmin.model._meta
             return HttpResponseRedirect(reverse('admin:slices_slice_slivers', 
                 kwargs={'slice_id': slice_id, 'object_id': object_id}))
         return response

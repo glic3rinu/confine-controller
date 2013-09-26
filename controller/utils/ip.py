@@ -1,6 +1,3 @@
-import re
-
-
 def lsb(u16):
     """ Less significant bits """
     return '%.2x' % (u16 & 0xff)

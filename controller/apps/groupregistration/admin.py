@@ -1,5 +1,3 @@
-from django.contrib import admin
-
 from controller.admin import ChangeViewActions
 from controller.admin.utils import insertattr
 

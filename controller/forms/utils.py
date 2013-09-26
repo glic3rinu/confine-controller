@@ -1,5 +1,4 @@
 from django.core.urlresolvers import reverse
-from django.contrib.contenttypes.generic import BaseGenericInlineFormSet
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 

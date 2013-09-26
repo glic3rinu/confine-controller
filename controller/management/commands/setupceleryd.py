@@ -1,7 +1,6 @@
 from optparse import make_option
 from os import path
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from controller.utils.paths import get_site_root, get_controller_root

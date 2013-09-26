@@ -1,17 +1,14 @@
 from __future__ import absolute_import
 
 from django import forms
-from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.safestring import mark_safe
-from IPy import IP
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
-from controller.admin.utils import (colored, admin_link, wrap_admin_view,
-    docstring_as_help_tip)
+from controller.admin.utils import colored, admin_link, docstring_as_help_tip
 from controller.core.exceptions import InvalidMgmtAddress
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
@@ -101,7 +98,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         form = super(NodeAdmin, self).get_form(request, obj=obj, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
-            user = request.user
             is_admin = Q(users__roles__is_admin=True)
             is_technician = Q(users__roles__is_technician=True)
             query = Q( is_admin | is_technician )

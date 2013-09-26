@@ -1,5 +1,4 @@
 from django import forms
-from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 from markdown import markdown

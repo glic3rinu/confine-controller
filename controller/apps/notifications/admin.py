@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
-from controller.admin.utils import action_to_view, wrap_admin_view
+from controller.admin.utils import wrap_admin_view
 from controller.utils.plugins.actions import sync_plugins_action
 
 from .actions import (enable_selected, disable_selected, run_notifications,
@@ -50,7 +50,6 @@ class NotificationAdmin(ChangeViewActions):
     def get_urls(self):
         urls = super(NotificationAdmin, self).get_urls()
         admin_site = self.admin_site
-        opts = self.model._meta
         extra_urls = patterns("",
             url("^sync-plugins/$",
                 wrap_admin_view(self, NotificationAdmin(Notification, admin_site).sync_plugins_view),

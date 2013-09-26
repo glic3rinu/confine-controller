@@ -26,10 +26,10 @@ from controller.utils.plugins.models import PluginModel
 from controller.utils.singletons.models import SingletonModel
 
 from . import settings
-from .context import context
+from .context import context as eval_context
 from .exceptions import ConcurrencyError
 from .settings import FIRMWARE_BASE_IMAGE_EXTENSIONS
-from .tasks import build
+from .tasks import build as build_task
 
 
 class BuildQuerySet(models.query.QuerySet):
@@ -105,7 +105,7 @@ class Build(models.Model):
     
     @property
     def task(self):
-        return build.AsyncResult(self.task_id)
+        return build_task.AsyncResult(self.task_id)
     
     @property
     def state(self):
@@ -168,9 +168,9 @@ class Build(models.Model):
         build_obj = Build.objects.create(node=node, version=config.version,
             base_image=base_image.image, kwargs=kwargs)
         if async:
-            defer(build.delay, build_obj.pk, exclude=exclude, **kwargs)
+            defer(build_task.delay, build_obj.pk, exclude=exclude, **kwargs)
         else:
-            build_obj = build(build_obj.pk, exclude=exclude, **kwargs)
+            build_obj = build_task(build_obj.pk, exclude=exclude, **kwargs)
         return build_obj
     
     def add_file(self, path, content, config):
@@ -371,7 +371,7 @@ class ConfigFile(models.Model):
         safe_locals = kwargs
         kwargs.update({'node': node, 'self': self})
         construct_safe_locals.send(sender=type(self), safe_locals=safe_locals)
-        safe_locals.update(context.get())
+        safe_locals.update(eval_context.get())
         try:
             paths = eval(self.path, safe_locals)
         except (NameError, SyntaxError):

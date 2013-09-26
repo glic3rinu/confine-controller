@@ -1,6 +1,4 @@
-from optparse import make_option
-
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from firmware.models import Config, ConfigPlugin
 from firmware.plugins import FirmwarePlugin

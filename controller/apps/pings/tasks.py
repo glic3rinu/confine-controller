@@ -1,7 +1,6 @@
 import decimal
 import subprocess
 import os
-from datetime import datetime
 
 from celery.task import periodic_task, task
 from django.db.models import get_model

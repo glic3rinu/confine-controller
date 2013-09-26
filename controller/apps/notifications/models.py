@@ -4,7 +4,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.template import Context, Template
 
-from controller.utils import send_email_template
 from controller.utils.plugins.models import PluginModel
 
 

@@ -5,7 +5,6 @@
 """
 
 import sys
-import traceback
 
 
 class DependencyImportError(ImportError):

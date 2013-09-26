@@ -74,7 +74,6 @@ class State(models.Model):
     
     @property
     def heartbeat_expires(self):
-        model = self.content_type.model_class()
         schedule = settings.STATE_SCHEDULE
         window = settings.STATE_EXPIRE_WINDOW
         return functools.partial(heartbeatexpires, freq=schedule, expire_window=window)
@@ -92,7 +91,6 @@ class State(models.Model):
     
     @property
     def next_retry_on(self):
-        model = self.content_type.model_class()
         freq = settings.STATE_SCHEDULE
         return self.last_try_on + timedelta(seconds=freq)
     

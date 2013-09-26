@@ -5,8 +5,6 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils.six.moves import input
 
-from controller.models.utils import get_file_field_base_path
-from controller.utils.apps import is_installed
 from controller.utils.paths import get_project_root, get_site_root, get_project_name
 from controller.utils.system import run, check_root, get_default_celeryd_username
 

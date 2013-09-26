@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
 from celery.result import AsyncResult
-from rest_framework.reverse import reverse
 
 from api import serializers
 
-from .models import Build, Config
+from .models import Config
 
 
 class FirmwareSerializer(serializers.Serializer):

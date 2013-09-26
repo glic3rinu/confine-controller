@@ -1,19 +1,14 @@
 import hashlib
-import inspect
 import os
 import tempfile
 
 from django_transaction_signals import defer
-from django.conf import settings as project_settings
-from django.contrib.auth import get_user_model
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now
-from IPy import IP
 
 from controller.models.fields import MultiSelectField, NullableCharField
-from controller.utils.ip import lsb, msb, int_to_hex_str
 from controller.utils import autodiscover
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
         validate_sha256, validate_file_extensions)

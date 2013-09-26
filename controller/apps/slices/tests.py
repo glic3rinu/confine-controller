@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from slices.models import Slice, Sliver, Template
-from nodes.models import Node
+
 
 class SliceTestCase(TestCase):
 #    fixtures = ['slices', 'nodes',]

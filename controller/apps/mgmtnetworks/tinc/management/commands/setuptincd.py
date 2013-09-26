@@ -1,7 +1,5 @@
 import functools
-import getpass
 import pwd
-import re
 import os
 from optparse import make_option
 
@@ -86,7 +84,7 @@ class Command(BaseCommand):
                 # validate username
                 try:
                     prompt_username = pwd.getpwnam(value).pw_name
-                except KeyError:
+                except KeyError, e:
                     self.stderr.write("Error: %s" % '; '.join(e.messages))
                     prompt_username = None
                     continue

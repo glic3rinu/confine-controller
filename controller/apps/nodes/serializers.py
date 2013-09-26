@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from api import serializers
 
-from .models import Server, Node, DirectIface
+from .models import Server, Node
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):

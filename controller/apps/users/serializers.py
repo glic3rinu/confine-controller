@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from api import serializers
 
-from .models import User, Group, Roles, AuthToken
+from .models import User, Group, Roles
 
 
 class GroupRolesSerializer(serializers.ModelSerializer):

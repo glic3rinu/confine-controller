@@ -1,5 +1,3 @@
-from django_extensions.db import fields
-from django_transaction_signals import defer
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -275,4 +273,4 @@ class Server(SingletonModel):
     
     @property
     def mgmt_net(self):
-        return get_mgmt_backend(self)
+        return get_mgmt_backend_class()(self)

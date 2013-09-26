@@ -3,7 +3,6 @@ from django.core.urlresolvers import reverse
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
-from controller.core.validators import validate_rsa_pubkey
 from controller.forms.widgets import ShowText
 
 from .settings import NODES_NODE_DIRECT_IFACES_DFLT

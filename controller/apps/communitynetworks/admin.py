@@ -1,8 +1,5 @@
 from __future__ import absolute_import
 
-from django.contrib import admin
-from django.contrib.contenttypes import generic
-
 from controller.admin.utils import insertattr, insert_change_view_action, link
 from controller.utils.apps import is_installed
 from nodes.models import Server, Node

@@ -4,7 +4,6 @@ from rest_framework.generics import *
 
 from controller.models.utils import is_singleton
 
-from . import serializers
 from .utils import link_header
 
 

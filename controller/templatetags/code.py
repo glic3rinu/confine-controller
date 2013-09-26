@@ -25,7 +25,7 @@ class CodeNode(template.Node):
             try:
                 lexer = lexers.guess_lexer(code)
             except:
-                lexer = PythonLexer()
+                lexer = lexers.PythonLexer()
         return highlight(code, lexer, HtmlFormatter(linenos='table'))
 
 

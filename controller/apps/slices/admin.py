@@ -1,21 +1,20 @@
 from __future__ import absolute_import
 
 from django import forms
-from django.conf.urls import patterns, url, include
-from django.contrib import admin, messages
+from django.conf.urls import patterns, url
+from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, link, get_admin_link,
-    insertattr, action_to_view, get_modeladmin, wrap_admin_view, docstring_as_help_tip)
+    insertattr, get_modeladmin, wrap_admin_view, docstring_as_help_tip)
 from controller.admin.widgets import LinkedRelatedFieldWidgetWrapper
-from nodes.admin import NodeAdmin, STATES_COLORS
+from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset

@@ -5,7 +5,6 @@ from rest_framework.reverse import reverse
 
 from api import ApiRoot
 from controller import settings
-from controller.utils.apps import is_installed
 
 
 class Base(ApiRoot):

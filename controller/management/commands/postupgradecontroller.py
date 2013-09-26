@@ -151,7 +151,6 @@ class Command(BaseCommand):
             # maybe is shit imported on settings that import settings like add_app
             # Prevent crazy import erros to appear :S
             from django.utils import translation
-            saved_lang = translation.get_language()
             translation.activate('en-us')
             # Change template types for more generic ones
             from slices.models import Template

@@ -2,7 +2,6 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
-from controller.utils.paths import get_site_root
 from pki import Bob
 
 from maintenance.settings import MAINTENANCE_KEY_PATH, MAINTENANCE_PUB_KEY_PATH
@@ -24,7 +23,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # TODO correct key file permissions
         overide = options.get('overide')
-        interactive = options.get('interactive')
         
         bob = Bob()
         

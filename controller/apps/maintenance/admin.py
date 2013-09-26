@@ -1,6 +1,6 @@
 from django import forms
 
-from django.conf.urls import patterns, url, include
+from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
@@ -17,8 +17,8 @@ from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 
-from .actions import ( execute_operation, execute_operation_changelist, run_instance,
-    kill_instance, revoke_instance, manage_instances )
+from .actions import ( execute_operation, run_instance, kill_instance,
+    revoke_instance, manage_instances )
 from .forms import ExecutionInlineForm
 from .models import Operation, Execution, Instance
 
@@ -205,7 +205,6 @@ class OperationAdmin(PermissionModelAdmin, ChangeViewActions):
     def get_urls(self):
         urls = super(OperationAdmin, self).get_urls()
         admin_site = self.admin_site
-        opts = self.model._meta
         extra_urls = patterns("",
             url("^(?P<operation_id>\d+)/execute/$",
                 wrap_admin_view(self, NodeListAdmin(Node, admin_site).changelist_view),

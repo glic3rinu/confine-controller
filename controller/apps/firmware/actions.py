@@ -2,10 +2,9 @@ from __future__ import absolute_import
 
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core import management
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db import router, transaction
+from django.db import transaction
 from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
@@ -27,7 +26,6 @@ def get_firmware(modeladmin, request, queryset):
     app_label = opts.app_label
     site_name = modeladmin.admin_site.name
     
-    using = router.db_for_write(modeladmin.model)
     node = queryset.get()
     config = get_object_or_404(Config)
     base_images = config.get_images(node)

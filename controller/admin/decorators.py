@@ -2,7 +2,6 @@ from functools import wraps
 
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.core.exceptions import PermissionDenied
 from django.template.response import TemplateResponse
 from django.utils.decorators import available_attrs
 from django.utils.encoding import force_text

@@ -1,11 +1,9 @@
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import get_model
 from django.http import Http404
 from django.shortcuts import redirect
 
-from controller.admin.utils import get_modeladmin
 from controller.core.exceptions import OperationLocked
 
 from .tasks import get_state
@@ -60,7 +58,6 @@ def show_state(modeladmin, request, queryset):
         obj = queryset.get()
     except ObjectDoesNotExist:
         raise Http404
-    model_name = obj._meta.verbose_name_raw
     state = obj.state
     return redirect('admin:state_state_change', state.pk)
 show_state.url_name = 'state'

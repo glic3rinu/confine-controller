@@ -1,22 +1,18 @@
 from __future__ import absolute_import
 
-from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
-from django.contrib.auth import get_user_model
 from django.template.response import TemplateResponse
-from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeListDefaultFilter
-from controller.admin.utils import (insertattr, admin_link, get_modeladmin, link,
-    wrap_admin_view)
+from controller.admin.utils import insertattr, admin_link, get_modeladmin, wrap_admin_view
 from controller.forms.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincClientInlineForm, TincServerInlineForm, HostInlineAdminForm
+from .forms import TincClientInlineForm, TincServerInlineForm
 from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
 from . import settings
 
@@ -116,8 +112,6 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     
     def get_urls(self):
         urls = super(HostAdmin, self).get_urls()
-        admin_site = self.admin_site
-        opts = self.model._meta
         extra_urls = patterns("", 
             url("^(?P<host_id>\d+)/help",
                 wrap_admin_view(self, self.help_view),

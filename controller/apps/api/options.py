@@ -3,11 +3,10 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.conf.urls import patterns, url
 from django.utils import six
-from django.utils.encoding import smart_str, force_unicode
+from django.utils.encoding import force_unicode
 from django.utils.importlib import import_module
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
 from controller.models.utils import is_singleton
 from controller.utils import autodiscover

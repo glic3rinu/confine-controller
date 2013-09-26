@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.sites.models import RequestSite
 from django.core.exceptions import ValidationError
 from django.template.defaultfilters import mark_safe

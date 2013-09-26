@@ -5,8 +5,6 @@ from time import time
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import get_model
-from django.utils import timezone
 
 from controller.utils.apps import is_installed
 from controller.utils.time import heartbeat_expires

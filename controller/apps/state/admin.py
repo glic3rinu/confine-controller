@@ -2,19 +2,14 @@ from __future__ import absolute_import
 
 import datetime
 import json
-import re
-import time
 from dateutil.relativedelta import relativedelta
 
 from django.contrib import admin
-from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
-from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from pygments import highlight
 from pygments.lexers import JsonLexer
@@ -329,7 +324,6 @@ def state_link(*args):
         return
     state = obj.state
     colored = display_current(state)
-    model_name = obj._meta.verbose_name_raw
     url = reverse('admin:state_state_change', args=[state.pk])
     return mark_safe('<a href="%s">%s</a>' % (url, colored))
 state_link.short_description = 'Current state'

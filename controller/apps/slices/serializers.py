@@ -4,7 +4,7 @@ import ast
 
 from api import serializers, exceptions
 
-from .models import Slice, Sliver, Template, SliverIface
+from .models import Slice, Sliver, Template
 
 
 class IfaceField(serializers.WritableField):
@@ -35,7 +35,7 @@ class IfaceField(serializers.WritableField):
             model = getattr(parent.opts.model, self.source or 'interfaces').related.model
             try:
                 list_ifaces = ast.literal_eval(str(value))
-            except SyntaxError as e:
+            except SyntaxError:
                 raise exceptions.ParseError("Malformed Iface: %s" % str(value))
             if not related_manager:
                 # POST (new parent object

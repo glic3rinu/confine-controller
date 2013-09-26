@@ -3,10 +3,8 @@ from __future__ import absolute_import
 from django import forms
 from django.conf.urls import patterns
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.html import strip_tags
@@ -14,8 +12,7 @@ from django.utils.safestring import mark_safe
 from markdown import markdown
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
-from controller.admin.utils import (admin_link, get_admin_link, colored, wrap_admin_view,
-    display_timesince)
+from controller.admin.utils import (get_admin_link, colored, wrap_admin_view, display_timesince)
 from permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from .actions import (reject_tickets, resolve_tickets, take_tickets,close_tickets,
@@ -310,8 +307,6 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Change view actions based on ticket state """
         ticket = get_object_or_404(Ticket, pk=object_id)
-        messages = Message.objects.filter(ticket=object_id).order_by('-created_on')
-        last_message = messages[0] if messages else False
         # Change view actions based on ticket state
         self.change_view_actions = filter_actions(self, ticket, request)
         # only include messages inline for change view

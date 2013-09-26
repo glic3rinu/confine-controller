@@ -1,4 +1,3 @@
-from django.utils.safestring import mark_safe
 from rest_framework.reverse import reverse
 
 from .settings import API_REL_BASE_URL

@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy, ugettext as _
+from django.utils.translation import ugettext_lazy
 
 from controller.admin.decorators import action_with_confirmation
 

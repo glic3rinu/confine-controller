@@ -2,8 +2,6 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from controller import get_version
-
 
 class Command(BaseCommand):
     help = 'Get username given a session id'

@@ -26,7 +26,7 @@ def force_slice_update(slice_id):
     from slices.models import Slice
     slice = Slice.objects.get(pk=slice_id)
     for sliver in slice.slivers.all():
-        force_sliver_update(seliver.pk)
+        force_sliver_update(sliver.pk)
 
 
 @task(name="slices.force_sliver_update")

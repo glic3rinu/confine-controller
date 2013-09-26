@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.shortcuts import redirect
 from django.utils.html import escape
-from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from controller.models.utils import get_field_value

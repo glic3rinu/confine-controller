@@ -165,7 +165,7 @@ class Ticket(models.Model):
         TicketTracker.objects.get_or_create(ticket=self, user=user)
     
     def mark_as_unread_by(self, user):
-        ReadTicket.objects.filter(ticket=self, user=user).delete()
+        TicketTracker.objects.filter(ticket=self, user=user).delete()
     
     def mark_as_unread(self):
         TicketTracker.objects.filter(ticket=self).delete()

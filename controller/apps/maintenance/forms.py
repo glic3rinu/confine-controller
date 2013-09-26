@@ -2,7 +2,7 @@ from django import forms
 
 from controller.forms.widgets import ReadOnlyBooleanWidget
 
-from .models import Execution, Instance
+from .models import Execution
 
 
 class ExecutionInlineForm(forms.ModelForm):

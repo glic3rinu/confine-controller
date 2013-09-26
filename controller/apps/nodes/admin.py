@@ -127,7 +127,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             else:
                 # avoid django admin filtering
                 request.GET._mutable = True
-                request.GET['q'] = ''
+                request.GET.pop('q')
                 request.GET._mutable = False
                 node = reverse(ip)
                 qs = qs.filter(id=node.id)

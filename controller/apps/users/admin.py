@@ -292,12 +292,10 @@ class RolesAdmin(admin.ModelAdmin):
         return response
     
     def response_add(self, request, *args, **kwargs):
-        """ Customizations needed for being nested to slices """
         response = super(RolesAdmin, self).response_add(request, *args, **kwargs)
         return self._preserve_query_string(request, response)
     
     def response_change(self, request, obj):
-        """ Customizations needed for being nested to slices """
         response = super(RolesAdmin, self).response_change(request, obj)
         return self._preserve_query_string(request, response)
     

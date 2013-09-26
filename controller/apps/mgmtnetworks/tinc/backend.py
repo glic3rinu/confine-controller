@@ -1,3 +1,6 @@
+from .utils import reverse
+
+
 class TincBackend(object):
     """
     Management Backend class that provides the managemnt address to some testbed components
@@ -25,3 +28,6 @@ class TincBackend(object):
     @property
     def native(self):
         return None
+    
+    def reverse(self, ip_addr):
+        return reverse(ip_addr)

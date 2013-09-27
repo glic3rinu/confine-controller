@@ -88,12 +88,12 @@ except KeyError:
 
 def get_file(request, app_label, model_name, field_name, object_id, filename):
     model = get_model(app_label, model_name)
-    instance = get_object_or_404(model, pk=unquote(object_id))
-    condition = getattr(instance, field_name).condition
-    if not model:
+    if model is None:
         raise Http404("")
+    instance = get_object_or_404(model, pk=unquote(object_id))
     if not hasattr(instance, field_name):
         raise Http404("")
+    condition = getattr(instance, field_name).condition
     if condition(request, instance):
         pre_download.send(sender=model, instance=instance, field_name=field_name, request=request)
         return METHOD(request, instance, field_name)

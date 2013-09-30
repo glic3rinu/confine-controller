@@ -1,5 +1,6 @@
 import json
 import functools
+import logging
 from datetime import datetime, timedelta
 from time import time
 
@@ -16,6 +17,9 @@ from slices.models import Sliver
 
 from . import settings
 from .tasks import get_state
+
+
+logger = logging.getLogger('state.models')
 
 
 class State(models.Model):
@@ -187,23 +191,26 @@ class StateHistoryManager(models.Manager):
         state = self.instance
         last_state = state.last
         now = timezone.now()
-        if not last_state:
-            last_state = state.history.create(value=state.value, start=now,
-                    end=now, data=state.data, metadata=state.metadata)
-        else:
+        if last_state:
             expiration = state.heartbeat_expires(last_state.end)
+            logger.debug('StateHistory.store last_state.end: %s (%s)' % (
+                    last_state.end.strftime("%s"), last_state.end))
+            logger.debug('StateHistory.store expiration: %s (%s)' % (expiration,
+                    datetime.fromtimestamp(expiration)))
+            logger.debug('StateHistory.store time: %s (%s)' % (time(),
+                    datetime.fromtimestamp(time())))
+            logger.debug('StateHistory.store now: %s (%s)' % (now.strftime("%s"), now))
             if time() > expiration:
                 last_state.end = datetime.fromtimestamp(expiration)
                 last_state.save()
-                state.history.create(value=State.NODATA, start=last_state.end, end=now)
-                last_state = state.history.create(value=state.value, start=now,
-                        end=now, data=state.data, metadata=state.metadata)
+                last_state = state.history.create(start=last_state.end, end=now,
+                        value=State.NODATA)
             else:
                 last_state.end = now
                 last_state.save()
-                if last_state.value != state.value:
-                    last_state = state.history.create(value=state.value, start=now,
-                            end=now, data=state.data, metadata=state.metadata)
+        if not last_state or last_state.value != state.value:
+            last_state = state.history.create(value=state.value, start=now, end=now,
+                    data=state.data, metadata=state.metadata)
         return last_state
 
 

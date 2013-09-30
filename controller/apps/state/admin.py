@@ -25,9 +25,9 @@ from nodes.admin import STATES_COLORS as NODE_STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
-from slices.admin import STATE_COLORS as SLICE_STATES_COLORS
+from slices.admin import STATE_COLORS as SLIVER_STATES_COLORS
 from slices.helpers import wrap_action
-from slices.models import Sliver
+from slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
@@ -37,15 +37,18 @@ from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
 
 
-STATES_COLORS = dict(SLICE_STATES_COLORS, **NODE_STATES_COLORS)
+STATES_COLORS = dict(NODE_STATES_COLORS)
 STATES_COLORS.update({
-    'offline': 'red',
-    'crashed': 'red',
-    'unknown': 'grey',
+    State.OFFLINE: 'red',
+    State.CRASHED: 'red',
+    State.UNKNOWN: 'grey',
+    State.NODATA: 'nodata',
+    'registered': SLIVER_STATES_COLORS[Slice.REGISTER],
+    'deployed': SLIVER_STATES_COLORS[Slice.DEPLOY],
+    'started': SLIVER_STATES_COLORS[Slice.START],
     'fail_alloc': 'red',
     'fail_deploy': 'red',
     'fail_start': 'red',
-    'nodata': 'black',
 })
 
 
@@ -74,6 +77,7 @@ def display_current(instance):
         title = str(title)[2:-2].replace("u'", "'")
     state = instance.current
     color = STATES_COLORS.get(state, "black")
+    print state, STATES_COLORS, color
     state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
     start = timezone.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
     changes = instance.history.filter(start__gt=start).count()
@@ -341,7 +345,7 @@ def firmware_version(node):
         url = STATE_NODE_SOFT_VERSION_URL(version)
         name = STATE_NODE_SOFT_VERSION_NAME(version)
         return mark_safe('<a href="%s">%s</a>' % (url, name))
-firmware_version.admin_order_field = 'soft_version'
+firmware_version.admin_order_field = 'soft_version__value'
 
 
 insertattr(Node, 'list_display', firmware_version)

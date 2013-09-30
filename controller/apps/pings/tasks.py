@@ -31,12 +31,14 @@ def pinger(ip):
     ping.wait()
     if ping.returncode == 0:
         stdout = ping.stdout.readlines()
+        ping.stdout.close()
         packet_loss = decimal.Decimal(stdout[-2].split(',')[2].split('%')[0])
         perf_type = ['min', 'avg', 'max', 'mdev']
         perf_data = stdout[-1].split(' ')[3].split('/')
         result = dict((k, decimal.Decimal(v)) for k,v in zip(perf_type, perf_data))
         result.update({'packet_loss': packet_loss})
         yield result
+    ping.stdout.close()
     yield {'packet_loss': 100}
 
 

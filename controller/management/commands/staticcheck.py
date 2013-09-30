@@ -1,3 +1,5 @@
+# Adapted from http://djangosnippets.org/snippets/1762/
+
 import ast
 import os
 import sys
@@ -8,7 +10,7 @@ from pyflakes import checker, messages
 from controller.utils.paths import get_controller_root
 
 
-# BlackHole, PySyntaxError and checking based on 
+# BlackHole, PySyntaxError and checking based on
 # https://github.com/patrys/gedit-pyflakes-plugin.git
 class BlackHole(object):
     write = flush = lambda *args, **kwargs: None
@@ -41,19 +43,17 @@ def check(codeString, filename):
     @return: The number of warnings emitted.
     @rtype: C{int}
     """
-    
     try:
         with BlackHole():
             tree = ast.parse(codeString, filename)
     except SyntaxError, e:
         return [PySyntaxError(filename, e.lineno, e.offset, e.text)]
     else:
-        # Okay, it's syntactically valid.  Now parse it into an ast and check
-        # it.
+        # Okay, it's syntactically valid.  Now parse it into an ast and check it
         w = checker.Checker(tree, filename)
- 
+        
         lines = codeString.split('\n')
-        # honour pyflakes:ignore comments
+        # honour pyflakes: ignore comments
         messages = [message for message in w.messages
                     if lines[message.lineno-1].find('pyflakes:ignore') < 0]
         messages.sort(lambda a, b: cmp(a.lineno, b.lineno))
@@ -63,7 +63,6 @@ def check(codeString, filename):
 def checkPath(filename):
     """
     Check the given path, printing out any warnings detected.
-    
     @return: the number of warnings printed
     """
     try:

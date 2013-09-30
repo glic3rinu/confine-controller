@@ -80,6 +80,8 @@ def run(command, display=True, err_codes=[0], silent=True):
     
     out = _AttributeString(stdout.strip())
     err = _AttributeString(stderr.strip())
+    p.stdout.close()
+    p.stderr.close()
     
     out.failed = False
     out.return_code = returnCode

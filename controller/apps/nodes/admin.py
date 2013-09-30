@@ -44,9 +44,6 @@ class DirectIfaceInline(PermissionTabularInline):
 
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    class Media:
-        js = ("nodes/js/nodes-admin.js",)
-
     list_display = [
         'name', 'id', 'arch', 'display_set_state', admin_link('group'), 'num_ifaces'
     ]
@@ -71,6 +68,9 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     change_view_actions = [reboot_selected, request_cert]
     change_form_template = "admin/controller/change_form.html"
     
+    class Media:
+        js = ("nodes/js/nodes-admin.js",)
+    
     def display_set_state(self, node):
         return colored('set_state', STATES_COLORS, verbose=True, bold=False)(node)
     display_set_state.short_description = 'Set state'
@@ -92,6 +92,11 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         return node.direct_ifaces.count()
     num_ifaces.short_description = 'Ifaces'
     num_ifaces.admin_order_field = 'direct_ifaces__count'
+    
+    def lookup_allowed(self, key, value):
+        if key in ('slivers__slice',):
+            return True
+        return super(NodeAdmin, self).lookup_allowed(key, value)
     
     def get_form(self, request, obj=None, *args, **kwargs):
         """ request.user as default node admin """
@@ -116,7 +121,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         # HACK for searching nodes by IP
         search = request.GET.get('q', False)
         if search:
-            for query in search.split('+'):
+            for query in search.split(' '):
                 mgmt_backend = get_mgmt_backend_class()
                 try:
                     node = mgmt_backend.reverse(query)

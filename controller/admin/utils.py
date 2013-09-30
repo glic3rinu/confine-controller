@@ -24,7 +24,7 @@ def get_modeladmin(model, import_module=True):
             return v
 
 
-def insertattr(model, name, value, prepend=False):
+def insertattr(model, name, value, weight=5):
     is_model = models.Model in model.__mro__
     modeladmin = get_modeladmin(model) if is_model else model
     # Avoid inlines defined on parent class be shared between subclasses
@@ -32,10 +32,15 @@ def insertattr(model, name, value, prepend=False):
     # the tuple in modeladmin.__init__
     if not getattr(modeladmin, name):
         setattr(type(modeladmin), name, [])
-    if prepend:
-        setattr(modeladmin, name, [value] + modeladmin.inlines)
-    else:
-        getattr(modeladmin, name).append(value)
+    
+    inserted_attrs = getattr(modeladmin, '__inserted_attrs__', {})
+    if not name in inserted_attrs:
+        inserted_attrs[name] = [ (attr, 5) for attr in getattr(modeladmin, name) ]
+    
+    inserted_attrs[name].append((value, weight))
+    inserted_attrs[name].sort(key=lambda a: a[1])
+    setattr(modeladmin, name, [ attr[0] for attr in inserted_attrs[name] ])
+    setattr(modeladmin, '__inserted_attrs__', inserted_attrs)
 
 
 def insert_change_view_action(model, action):

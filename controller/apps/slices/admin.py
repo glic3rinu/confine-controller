@@ -398,7 +398,6 @@ class SliverInline(PermissionTabularInline):
             self.verbose_name_plural = mark_safe(add_button)
         if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]
-    
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
     def has_delete_permission(self, request, obj=None):
@@ -420,6 +419,21 @@ class SliverInline(PermissionTabularInline):
         """ Display node change link on the inline form """
         return get_admin_link(instance.node)
     node_link.short_description = 'Node'
+
+
+class SliverNodeInline(SliverInline):
+    fields = ['sliver_link', 'slice_link', computed_sliver_set_state]
+    readonly_fields = ['sliver_link', 'slice_link', computed_sliver_set_state]
+    
+    class Media:
+        js = ('slices/js/collapsed_sliver_inline.js',)
+    
+    def get_fieldsets(self, request, obj=None):
+        return super(SliverInline, self).get_fieldsets(request, obj=obj)
+    
+    def slice_link(self, instance):
+        return get_admin_link(instance.slice)
+    slice_link.short_description = 'Slice'
 
 
 class SlicePropInline(PermissionTabularInline):
@@ -563,3 +577,4 @@ def queryset(request):
 node_modeladmin.queryset = queryset
 
 insertattr(Node, 'list_display', num_slivers)
+insertattr(Node, 'inlines', SliverNodeInline, weight=10)

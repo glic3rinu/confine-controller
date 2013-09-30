@@ -24,7 +24,8 @@ from controller.utils.time import timesince
 from nodes.admin import STATES_COLORS as NODE_STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
-from slices.admin import SliverInline, NodeListAdmin, SliceSliversAdmin, SliceAdmin
+from slices.admin import (SliverInline, SliverNodeInline, NodeListAdmin, SliceAdmin,
+    SliceSliversAdmin)
 from slices.admin import STATE_COLORS as SLIVER_STATES_COLORS
 from slices.helpers import wrap_action
 from slices.models import Sliver, Slice
@@ -77,7 +78,6 @@ def display_current(instance):
         title = str(title)[2:-2].replace("u'", "'")
     state = instance.current
     color = STATES_COLORS.get(state, "black")
-    print state, STATES_COLORS, color
     state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
     start = timezone.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
     changes = instance.history.filter(start__gt=start).count()
@@ -362,6 +362,10 @@ insertattr(Node, 'list_filter', FirmwareVersionListFilter)
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')
+
+SliverNodeInline.sliver_state = state_link
+SliverNodeInline.readonly_fields.append('sliver_state')
+SliverNodeInline.fields.append('sliver_state')
 
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action(show_state)

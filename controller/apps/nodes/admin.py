@@ -7,14 +7,16 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.safestring import mark_safe
+from IPy import IP
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, wrap_admin_view,
     docstring_as_help_tip)
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
-from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from controller.utils.singletons.admin import SingletonModelAdmin
+from mgmtnetworks.utils import reverse
+from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
 from .actions import request_cert, reboot_selected
@@ -114,6 +116,21 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         """ Annotate direct iface counter to allow ordering on change list """
         qs = super(NodeAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('direct_ifaces', distinct=True))
+
+        ### HACK for search nodes by IP ###
+        if 'q' in request.GET:
+            query = request.GET.get('q')
+            try:
+                ip = IP(query)
+            except ValueError:
+                pass # normal workflow
+            else:
+                # avoid django admin filtering
+                request.GET._mutable = True
+                request.GET.pop('q')
+                request.GET._mutable = False
+                node = reverse(ip)
+                qs = qs.filter(id=node.id)
         return qs
     
     def get_readonly_fields(self, request, obj=None):

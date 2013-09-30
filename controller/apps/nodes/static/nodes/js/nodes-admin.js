@@ -9,6 +9,8 @@
         $('#node_form').live("submit", function() {
             return warn_failure_choosed();
         });
+        // add search placeholder. FIXME: generate based on admin search_fields
+        $('#searchbar').attr("placeholder", "search by name, description, IP address...")
     });
     /** Show a confirm box to verify the action **/
     function warn_failure_choosed() {

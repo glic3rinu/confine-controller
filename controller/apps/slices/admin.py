@@ -46,6 +46,20 @@ num_slivers.short_description = 'Slivers'
 num_slivers.admin_order_field = 'slivers__count'
 
 
+def computed_sliver_set_state(sliver):
+    sliver_state = sliver.set_state
+    state = sliver.effective_set_state
+    effective = state != sliver_state
+    color = STATE_COLORS.get(state, "black")
+    state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
+    title = ''
+    if effective:
+        title = 'Set state from slice, the sliver state is %s' % sliver_state
+        state += '*'
+    return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
+computed_sliver_set_state.short_description = 'Set state'
+
+
 class SliverPropInline(PermissionTabularInline):
     model = SliverProp
     extra = 0
@@ -76,7 +90,7 @@ class SliverIfaceInline(PermissionTabularInline):
 
 class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
-        '__unicode__', admin_link('node'), admin_link('slice'), 'computed_set_state'
+        '__unicode__', admin_link('node'), admin_link('slice'), computed_sliver_set_state
     ]
     list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice__name']
     fieldsets = (
@@ -123,19 +137,6 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             return instance.instance_sn
         return instance.slice.new_sliver_instance_sn
     new_instance_sn.short_description ='Instance sequence number'
-    
-    def computed_set_state(self, sliver):
-        sliver_state = sliver.set_state
-        state = sliver.effective_set_state
-        effective = state != sliver_state
-        color = STATE_COLORS.get(state, "black")
-        state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
-        title = ''
-        if effective:
-            title = 'Set state from slice, the sliver state is %s' % sliver_state
-            state += '*'
-        return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
-    computed_set_state.short_description = 'Set state'
     
     def has_add_permission(self, *args, **kwargs):
         """ 
@@ -364,9 +365,10 @@ class SliverInline(PermissionTabularInline):
     """ Show slivers in read only fashion """
     model = Sliver
     max_num = 0
-    fields = ['sliver_link', 'node_link', 'cn_url']
+    fields = ['sliver_link', 'node_link', computed_sliver_set_state]
     readonly_fields = [
-        'sliver_link', 'node_link', 'cn_url', 'sliver_note1', 'sliver_note2'
+        'sliver_link', 'node_link', computed_sliver_set_state, 'sliver_note1',
+        'sliver_note2'
     ]
     
     class Media:
@@ -418,11 +420,6 @@ class SliverInline(PermissionTabularInline):
         """ Display node change link on the inline form """
         return get_admin_link(instance.node)
     node_link.short_description = 'Node'
-    
-    def cn_url(self, instance):
-        """ Display CN url on the inline form """
-        node = instance.node
-        return mark_safe("<a href='%s'>%s</a>" % (node.cn_url, node.cn_url))
 
 
 class SlicePropInline(PermissionTabularInline):

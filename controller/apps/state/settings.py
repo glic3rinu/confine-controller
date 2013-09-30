@@ -30,7 +30,7 @@ STATE_NODE_SOFT_VERSION_URL = getattr(settings, 'STATE_NODE_SOFT_VERSION_URL',
 
 
 STATE_NODE_SOFT_VERSION_NAME = getattr(settings, 'STATE_NODE_SOFT_VERSION_NAME',
-    lambda version: '%s.%s' % (version.split('.')[0], version.split('-')[1]) if len(version.split('-')) > 1 else version)
+    lambda version: '%s.%s' % (version.split('.')[0], version.split('-')[1].split('.')[0]) if len(version.split('-')) > 1 else version)
 
 
 STATE_NODE_OFFLINE_WARNING = getattr(settings, 'STATE_NODE_OFFLINE_WARNING', timedelta(days=1))

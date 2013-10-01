@@ -64,6 +64,9 @@ class SliverPropInline(PermissionTabularInline):
     model = SliverProp
     extra = 0
     verbose_name_plural = mark_safe('Sliver properties %s' % docstring_as_help_tip(SliverProp))
+    
+    class Media:
+        js = ('slices/js/collapsed_properties.js',)
 
 
 class SliverIfaceInline(PermissionTabularInline):
@@ -105,7 +108,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     )
     readonly_fields = ['new_instance_sn', 'exp_data_sha256', 'overlay_sha256']
     search_fields = ['description', 'node__description', 'node__name', 'slice__name']
-    inlines = [SliverIfaceInline]
+    inlines = [SliverIfaceInline, SliverPropInline]
     actions = [update_selected]
     change_view_actions = [update_selected]
     default_changelist_filters = (('my_slivers', 'True'),)
@@ -439,8 +442,10 @@ class SliverNodeInline(SliverInline):
 class SlicePropInline(PermissionTabularInline):
     model = SliceProp
     extra = 0
-    verbose_name_plural = mark_safe('Slice Properties %s' % docstring_as_help_tip(SliceProp))
-
+    verbose_name_plural = mark_safe('Slice properties %s' % docstring_as_help_tip(SliceProp))
+    
+    class Media:
+        js = ('slices/js/collapsed_properties.js',)
 
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
@@ -455,7 +460,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     ]
     date_hierarchy = 'expires_on'
     search_fields = ['name']
-    inlines = [SliverInline]
+    inlines = [SlicePropInline, SliverInline]
     actions = [reset_selected, renew_selected_slices]
     form = SliceAdminForm
     fieldsets = (
@@ -577,4 +582,4 @@ def queryset(request):
 node_modeladmin.queryset = queryset
 
 insertattr(Node, 'list_display', num_slivers)
-insertattr(Node, 'inlines', SliverNodeInline, weight=10)
+insertattr(Node, 'inlines', SliverNodeInline, weight=5)

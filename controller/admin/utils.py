@@ -24,7 +24,7 @@ def get_modeladmin(model, import_module=True):
             return v
 
 
-def insertattr(model, name, value, weight=5):
+def insertattr(model, name, value, weight=0):
     is_model = models.Model in model.__mro__
     modeladmin = get_modeladmin(model) if is_model else model
     # Avoid inlines defined on parent class be shared between subclasses
@@ -35,7 +35,7 @@ def insertattr(model, name, value, weight=5):
     
     inserted_attrs = getattr(modeladmin, '__inserted_attrs__', {})
     if not name in inserted_attrs:
-        inserted_attrs[name] = [ (attr, 5) for attr in getattr(modeladmin, name) ]
+        inserted_attrs[name] = [ (attr, 0) for attr in getattr(modeladmin, name) ]
     
     inserted_attrs[name].append((value, weight))
     inserted_attrs[name].sort(key=lambda a: a[1])

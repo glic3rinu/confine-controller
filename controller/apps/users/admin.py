@@ -14,8 +14,8 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request, enable_account, send_email
 from .filters import MyGroupsListFilter
-from .forms import (UserCreationForm, UserChangeForm, RolesFormSet, JoinRequestForm,
-    GroupAdminForm, RolesInlineForm)
+from .forms import (UserCreationForm, UserChangeForm, GroupRolesFormSet,
+    UserRolesForm, JoinRequestForm, GroupAdminForm, GroupRolesInlineForm)
 from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
 
 
@@ -36,18 +36,18 @@ class AuthTokenInline(PermissionTabularInline):
         return super(AuthTokenInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class RolesInline(PermissionTabularInline, SortableTabularInline):
+class GroupRolesInline(PermissionTabularInline, SortableTabularInline):
     model = Roles
     extra = 0
-    formset = RolesFormSet
-    form = RolesInlineForm
+    formset = GroupRolesFormSet
+    form = GroupRolesInlineForm
     sortable_fields = {'user': 'user__username'}
-    verbose_name = "member"
-    verbose_name_plural = "members" 
-
+    verbose_name = 'member'
+    verbose_name_plural = 'members'
+    
     class Media:
         css = { 'all': ('controller/css/hide-inline-id.css',) }
-
+    
     def get_formset(self, request, obj=None, **kwargs):
         """
         Hook obj into formset to tell the difference bewteen add or change so it
@@ -56,20 +56,21 @@ class RolesInline(PermissionTabularInline, SortableTabularInline):
         """
         self.formset.group = obj
         self.form.group = obj
-        return super(RolesInline, self).get_formset(request, obj=obj, **kwargs)
+        return super(GroupRolesInline, self).get_formset(request, obj=obj, **kwargs)
     
     def has_add_permission(self, request):
         """ Disable add roles when adding a new group """
         if resolve(request.path).url_name == 'users_group_add':
             return False
-        return super(RolesInline, self).has_add_permission(request)
+        return super(GroupRolesInline, self).has_add_permission(request)
 
 
-class ReadOnlyRolesInline(PermissionTabularInline):
-    fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
-    readonly_fields = ['group_link', 'is_admin', 'is_technician', 'is_researcher']
+class UserRolesInline(PermissionTabularInline):
+    fields = ['group_link', 'group', 'is_admin', 'is_technician', 'is_researcher']
+    readonly_fields = ['group_link', 'group', 'is_admin', 'is_technician', 'is_researcher']
     model = Roles
     extra = 0
+    form = UserRolesForm
     
     def group_link(self, instance):
         """ Link to related Group """
@@ -80,18 +81,28 @@ class ReadOnlyRolesInline(PermissionTabularInline):
         """ HACK display message using the field name of the inline form """
         name = 'Roles'
         if obj is not None:
-            if request.user.is_superuser:
-                roles_url = reverse('admin:users_roles_changelist')
-                roles_url += '?user=%i' % obj.pk
-                name = 'Roles <a href="%s">(Manage roles)</a>' % roles_url
-            elif self.has_change_permission(request, obj, view=False):
+            if self.has_change_permission(request, obj, view=False):
                 groups_url = reverse('admin:users_group_changelist')
                 name = 'Roles <a href="%s">(Request group membership)</a>' % groups_url
         self.verbose_name_plural = mark_safe(name)
-        return super(ReadOnlyRolesInline, self).get_fieldsets(request, obj=obj)
+        fieldsets = super(UserRolesInline, self).get_fieldsets(request, obj=obj)
+        fields = list(fieldsets[0][1]['fields'])
+        if request.user.is_superuser:
+            fields.remove('group_link')
+        else:
+            fields.remove('group')
+        fieldsets[0][1]['fields'] = fields
+        return fieldsets
     
-    def has_add_permission(self, *args, **kwargs):
-        return False
+    def get_readonly_fields(self, request, obj=None):
+        """ Makes all fields read only if user doesn't have change permissions """
+        fields = super(UserRolesInline, self).get_readonly_fields(request, obj)
+        if request.user.is_superuser:
+            return ['group_link']
+        return fields
+    
+    def has_add_permission(self, request, **kwargs):
+        return request.user.is_superuser
 
 
 class JoinRequestInline(PermissionTabularInline):
@@ -130,7 +141,10 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name', 'email',
                                       'description',)}),
         ('Permissions', {'fields': ('is_active', 'is_superuser',)}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ('Important dates', {
+            'classes': ('collapse',),
+            'fields': ('last_login', 'date_joined')
+        }),
     )
     add_fieldsets = (
         (None, {
@@ -139,7 +153,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         ),)
     
     search_fields = ('username', 'email', 'first_name', 'last_name')
-    inlines = [AuthTokenInline, ReadOnlyRolesInline]
+    inlines = [AuthTokenInline, UserRolesInline]
     actions = [enable_account, send_email]
     sudo_actions = ['delete_selected', 'enable_account', 'send_email']
     filter_horizontal = ()
@@ -180,7 +194,7 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
     ]
     list_filter = [MyGroupsListFilter, 'allow_slices', 'allow_nodes']
     search_fields = ['name', 'description']
-    inlines = [RolesInline, JoinRequestInline]
+    inlines = [GroupRolesInline, JoinRequestInline]
     actions = [join_request]
     change_view_actions = [join_request]
     change_form_template = 'admin/users/group/change_form.html'

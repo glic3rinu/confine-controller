@@ -7,7 +7,7 @@ from controller.forms.fields import MultiSelectFormField
 from controller.admin.utils import get_admin_link, get_modeladmin
 from controller.forms.widgets import ReadOnlyWidget
 
-from .models import User, Group, JoinRequest, ResourceRequest
+from .models import User, Group, JoinRequest, ResourceRequest, Roles
 
 
 class UserCreationForm(forms.ModelForm):
@@ -48,11 +48,11 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
-class RolesFormSet(forms.models.BaseInlineFormSet):
+class GroupRolesFormSet(forms.models.BaseInlineFormSet):
     """ At least on admin per group """
     # TODO: ensure this also when deleting a user (more triky though)
     def clean(self):
-        super(RolesFormSet, self).clean()
+        super(GroupRolesFormSet, self).clean()
         # Only checking in change forms
         if self.group is not None:
             for form in self.forms:
@@ -61,10 +61,30 @@ class RolesFormSet(forms.models.BaseInlineFormSet):
             raise ValidationError('The group must have at least one admin')
 
 
-class RolesInlineForm(forms.ModelForm):
+class UserRolesForm(forms.ModelForm):
+    """ At least on admin per group """
+    def __init__(self, *args, **kwargs):
+        super(UserRolesForm, self).__init__(*args, **kwargs)
+        if 'group' in self.fields:
+            # readonly forms doesn't have fields
+            instance = kwargs.get('instance', None)
+            if instance:
+                self.fields['group'].widget = ReadOnlyWidget(original_value=instance.group.pk,
+                        display_value=mark_safe('<b>'+get_admin_link(instance.group)))
+    
+    def clean(self):
+        if not self.cleaned_data.get('is_admin'):
+            role = self.instance
+            admins = Roles.objects.filter(group=role.group, is_admin=True).exclude(pk=role.pk)
+            if not admins.exists():
+                raise ValidationError('The group must have at least one admin')
+        return super(UserRolesForm, self).clean()
+
+
+class GroupRolesInlineForm(forms.ModelForm):
     """ Display user as link and limits user queryset to the remaining ones """
     def __init__(self, *args, **kwargs):
-        super(RolesInlineForm, self).__init__(*args, **kwargs)
+        super(GroupRolesInlineForm, self).__init__(*args, **kwargs)
         if 'user' in self.fields:
             # readonly forms doesn't have fields
             instance = kwargs.get('instance', None)
@@ -101,8 +121,8 @@ class GroupAdminForm(forms.ModelForm):
                 # show a message to the operators if exists a resource request
                 elif has_request and 'allow_%s' % resource in self.fields:
                     label = mark_safe("%s <span class='help' style='color:black'>"
-                        "(resource requested by the admin of the group)</span>"
-                        % self.fields['allow_%s' % resource].label)
+                            "(resource requested by the admin of the group)</span>"
+                            % self.fields['allow_%s' % resource].label)
                     self.fields['allow_%s' % resource].label = label
     
     def save(self, commit=True):

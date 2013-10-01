@@ -1,9 +1,9 @@
 (function($) {
     $(document).ready(function() {
-        var selector = "h2:contains('Slivers')";
+        var selector = "h2:contains('properties')";
         $(selector).parent().addClass("collapsed");
-        $(selector).append(" (<a class=\"collapse-toggle\" id=\"slivercollapser\" href=\"#\">Show</a>)");
-        $("#slivercollapser").click(function(e) {
+        $(selector).append(" (<a class=\"collapse-toggle\" id=\"propertiescollapser\" href=\"#\">Show</a>)");
+        $("#propertiescollapser").click(function(e) {
             $(selector).parent().toggleClass("collapsed");
             if ($(selector).children().text() == 'Show') {
                 $(selector).children().text('Hide');

@@ -43,7 +43,7 @@ STATES_COLORS.update({
     State.OFFLINE: 'red',
     State.CRASHED: 'red',
     State.UNKNOWN: 'grey',
-    State.NODATA: 'nodata',
+    State.NODATA: 'purple',
     'registered': SLIVER_STATES_COLORS[Slice.REGISTER],
     'deployed': SLIVER_STATES_COLORS[Slice.DEPLOY],
     'started': SLIVER_STATES_COLORS[Slice.START],

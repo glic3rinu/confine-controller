@@ -35,7 +35,9 @@ class NodePropInline(PermissionTabularInline):
     model = NodeProp
     extra = 0
     verbose_name_plural = mark_safe('Node properties %s' % docstring_as_help_tip(NodeProp))
-
+    
+    class Media:
+        js = ('nodes/js/collapsed_node_properties.js',)
 
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
@@ -55,13 +57,13 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     inlines = [DirectIfaceInline, NodePropInline]
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'group', 'arch', 'set_state'),
+            'fields': ('name', 'description', 'group', 'set_state'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'local_iface',
-                       'display_cert', 'priv_ipv4_prefix', 'sliver_mac_prefix',
-                       'sliver_pub_ipv6', 'boot_sn')
+            'fields': ('arch', 'sliver_pub_ipv4', 'sliver_pub_ipv4_range',
+                       'local_iface', 'display_cert', 'priv_ipv4_prefix',
+                       'sliver_mac_prefix', 'sliver_pub_ipv6', 'boot_sn')
         }),
     )
     actions = [request_cert, reboot_selected]

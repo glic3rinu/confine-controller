@@ -345,7 +345,7 @@ LOGGING = {
         'logfile': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': "/tmp/controller.log",
+            'filename': '/var/log/controller.log',
             'maxBytes': 50000,
             'backupCount': 2,
             'formatter': 'standard',
@@ -368,7 +368,8 @@ LOGGING = {
             'propagate': False,
         },
         'state.models': {
-            'handlers': ['console', 'logfile'],
+#            'handlers': ['console', 'logfile'],
+            'handlers': ['console'],
             'level': 'DEBUG',
         },
     }

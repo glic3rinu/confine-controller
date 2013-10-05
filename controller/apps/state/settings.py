@@ -14,7 +14,7 @@ STATE_NODE_URI = getattr(settings, 'STATE_NODESTATE_URI',
 STATE_SCHEDULE = getattr(settings, 'STATE_SCHEDULE', 200)
 
 # Percentage
-STATE_EXPIRE_WINDOW = getattr(settings, 'STATE_EXPIRE_WINDOW', 150)
+STATE_EXPIRE_WINDOW = getattr(settings, 'STATE_EXPIRE_WINDOW', 250)
 
 STATE_FLAPPING_CHANGES = getattr(settings, 'STATE_FLAPPING_CHANGES', 2)
 

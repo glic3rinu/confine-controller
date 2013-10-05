@@ -35,7 +35,10 @@ def insertattr(model, name, value, weight=0):
     
     inserted_attrs = getattr(modeladmin, '__inserted_attrs__', {})
     if not name in inserted_attrs:
-        inserted_attrs[name] = [ (attr, 0) for attr in getattr(modeladmin, name) ]
+        weights = {}
+        if hasattr(modeladmin, 'weights') and name in modeladmin.weights:
+            weights = modeladmin.weights.get(name)
+        inserted_attrs[name] = [ (attr, weights.get(attr, 0)) for attr in getattr(modeladmin, name) ]
     
     inserted_attrs[name].append((value, weight))
     inserted_attrs[name].sort(key=lambda a: a[1])

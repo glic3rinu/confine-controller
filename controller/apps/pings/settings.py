@@ -1,3 +1,5 @@
+from dateutil.relativedelta import relativedelta
+
 from django.conf import settings
 
 
@@ -15,6 +17,11 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
         'app': 'mgmtnetworks.tinc',
         'schedule': 200,
         'expire_window': 150,
+        'downsamples': (
+            (relativedelta(months=3), 20),
+            (relativedelta(months=2), 10),
+            (relativedelta(weeks=2), 5),
+        ),
         'get_addr': lambda obj: getattr(obj, 'address') 
     }, {
         'model': 'slices.SliverIface',
@@ -24,6 +31,11 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
         'app': 'slices',
         'schedule': 200,
         'expire_window': 150,
+        'downsamples': (
+            (relativedelta(months=3), 20),
+            (relativedelta(months=2), 10),
+            (relativedelta(weeks=2), 5),
+        ),
         'filter': {'type': 'management'},
         'get_addr': lambda obj: getattr(obj, 'ipv6_addr') }
     ))

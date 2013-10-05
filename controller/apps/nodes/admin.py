@@ -55,6 +55,11 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
     inlines = [DirectIfaceInline, NodePropInline]
+    weights = {
+        'inlines': {
+            NodePropInline: 2
+        }
+    }
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'group', 'set_state'),

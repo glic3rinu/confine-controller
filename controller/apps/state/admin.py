@@ -25,7 +25,7 @@ from nodes.admin import STATES_COLORS as NODE_STATES_COLORS
 from nodes.models import Node
 from permissions.admin import PermissionModelAdmin
 from slices.admin import (SliverInline, SliverNodeInline, NodeListAdmin, SliceAdmin,
-    SliceSliversAdmin)
+        SliceSliversAdmin)
 from slices.admin import STATE_COLORS as SLIVER_STATES_COLORS
 from slices.helpers import wrap_action
 from slices.models import Sliver, Slice
@@ -207,7 +207,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
                 data.setdefault(state, []).append(duration[state])
                 current_states = current_states.union(set((state,)))
             for missing in distinct_states-current_states:
-                data.setdefault(state, []).append(0)
+                data.setdefault(missing, []).append(0)
         # Construct final data structure
         series = []
         for state in data:

@@ -345,7 +345,7 @@ LOGGING = {
         'logfile': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/controller.log',
+            'filename': '/dev/null',
             'maxBytes': 50000,
             'backupCount': 2,
             'formatter': 'standard',

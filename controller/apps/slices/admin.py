@@ -98,12 +98,12 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice__name']
     fieldsets = (
         (None, {
-            'fields': ('description', 'template', 'exp_data', 'overlay',
-                       'set_state')
+            'fields': ('description', 'template', 'set_state')
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('new_instance_sn', 'exp_data_sha256', 'overlay_sha256')
+            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
+                       'new_instance_sn')
         }),
     )
     readonly_fields = ['new_instance_sn', 'exp_data_sha256', 'overlay_sha256']
@@ -465,13 +465,13 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'template', 'exp_data', 'overlay',
-                       'set_state', 'vlan_nr', 'expires_on', 'group'),
+            'fields': ('name', 'description', 'template', 'set_state','expires_on', 'group'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('instance_sn', 'new_sliver_instance_sn', 'exp_data_sha256',
-                       'overlay_sha256')
+            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
+                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
+            )
         }),
     )
     change_form_template = "admin/slices/slice/change_form.html"

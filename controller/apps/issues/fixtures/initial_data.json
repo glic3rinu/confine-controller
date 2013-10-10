@@ -75,5 +75,16 @@
         "name": "Other", 
         "notify_admins": true
     }
+},
+{
+    "pk": 8, 
+    "model": "issues.queue", 
+    "fields": {
+        "default": false, 
+        "notify_technicians": false, 
+        "notify_researchers": false, 
+        "name": "Documentation", 
+        "notify_admins": true
+    }
 }
 ]

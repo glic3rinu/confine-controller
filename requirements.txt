@@ -19,6 +19,5 @@ pygments
 requests
 https://github.com/madisona/django-google-maps/archive/master.zip
 paramiko
-https://github.com/admin947/django-orphaned/archive/master.zip
 django-jsonfield
 

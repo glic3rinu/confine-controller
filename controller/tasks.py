@@ -4,9 +4,12 @@ from StringIO import StringIO
 from celery.task import periodic_task
 from celery.task.schedules import crontab
 from django.core import management
+from django.core.exceptions import ImproperlyConfigured
+from StringIO import StringIO
 
+from .utils.apps import is_installed
 
-@periodic_task(name="controller.delete_orphan_files", run_every=crontab(minute=0, hour=0))
+@periodic_task(name="controller.delete_orphan_files", run_every=crontab(minute=0, hour=0), enabled=False)
 def delete_orphan(*args, **kwargs):
     """
     Delete orphan files like old build firmwares, old base images...
@@ -15,6 +18,10 @@ def delete_orphan(*args, **kwargs):
     ORPHANED_APPS_MEDIABASE_DIRS, more info at django-orphaned site
     https://github.com/ledil/django-orphaned/
     """
+    if not is_installed('django_orphaned'):
+        raise ImproperlyConfigured("'delete_orphan' task requires django-orphan "\
+             "app and is not installed.")
+
     orig_stdout = sys.stdout
     sys.stdout = content = StringIO()
     

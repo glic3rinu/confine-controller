@@ -62,7 +62,7 @@ class Monitor(object):
                         c = current_value.get(field)
                         p = previous_value.get(field)
                         if p and c > p:
-                            c = (c-p)
+                            c = (c-p) / seconds
                             current_value['current-%s' % field] = c
             current.value = current_value
     
@@ -129,16 +129,16 @@ class FreeMonitor(Monitor):
     verbose_name = 'Memory Usage'
     average_fields = ['total', 'real-used', 'shared', 'buffers', 'cached']
     cmd = (
-        'DATA=$(free -b | tail -n3 | head -n2); '
+        'DATA=$(free -k | tail -n3 | head -n2); '
         'echo $DATA | awk {\'print "{'
-        ' \\"total\\": "$2",'
-        ' \\"used\\": "$3",'
-        ' \\"free\\": "$4",'
-        ' \\"shared\\": "$5",'
-        ' \\"buffers\\": "$6",'
-        ' \\"cached\\": "$7",'
-        ' \\"real-used\\": "$10",'
-        ' \\"real-free\\": "$11" '
+        ' \\"total\\": "$2*1024",'
+        ' \\"used\\": "$3*1024",'
+        ' \\"free\\": "$4*1024",'
+        ' \\"shared\\": "$5*1024",'
+        ' \\"buffers\\": "$6*1024",'
+        ' \\"cached\\": "$7*1024",'
+        ' \\"real-used\\": "$10*1024",'
+        ' \\"real-free\\": "$11*1024" '
         '}"\'}'
     )
 
@@ -256,7 +256,7 @@ class NumPocessesMonitor(Monitor):
 class ProcessesMemoryMonitor(Monitor):
     type = 'processesmemory'
     verbose_name = 'Memory consumption per process'
-    cmd = 'cat /proc/{0}/statm|awk -v page="$(getconf PAGESIZE)" {{\'print $2*page*1024\'}}'
+    cmd = 'cat /proc/{0}/statm|awk -v page="$(getconf PAGESIZE)" {{\'print $2*page\'}}'
     
     def execute(self):
         ps = run('ps -A -o pid,cmd')

@@ -80,14 +80,15 @@ function debugpageloadtime(url, tag) {
                 },
                 style: {
                     color: '#4572A7'
-                }
+                },
             },
             title: {
                 text: 'Load Time',
                 style: {
                     color: '#4e9a06'
                 }
-            }
+            },
+            min: 0
         }],
         tooltip: {
             color: 'blue',

@@ -79,7 +79,7 @@ function nginxstatus(url, tag) {
             },
             yAxis: [{ // Primary yAxis
                 title: {
-                    text: 'Requests',
+                    text: 'Requests per second',
                     style: {
                         color: '#ef2929'
                     }
@@ -97,7 +97,19 @@ function nginxstatus(url, tag) {
             }],
         tooltip: {
             color: 'blue',
-            shared: true
+            shared: true,
+            formatter: function() {
+                var s = '<span style="font-size:10px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M', this.x)+'</span>';
+                $.each(this.points, function(i, point) {
+                    s += '<br/><span style="color:'+point.series.color+';">'+ point.series.name +'</span>: <b>';
+                    if (point.series.name != 'Handled requests')
+                        s += (point.point.high-point.point.low)+'</b>';
+                    else
+                        s += point.y+' r/s</b>';
+                });
+                
+                return s;
+            },
         },
         scrollbar : {
             enabled : false

@@ -76,8 +76,22 @@ function loadavg(url, tag) {
         yAxis: [{ // Primary yAxis
             title: {
                 text: 'Load'
-            }
+            },
+            min: 0,
         }],
+        tooltip: {
+            color: 'blue',
+            shared: true,
+            formatter: function() {
+                var s = '<span style="font-size:10px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M', this.x)+'</span>';
+                $.each(this.points, function(i, point) {
+                    s += '<br/><span style="color:'+point.series.color+';">'+ point.series.name +'</span>: <b>'+
+                        (point.point.high-point.point.low).toFixed(2)+'</b>';
+                });
+                
+                return s;
+            },
+        },
         scrollbar : {
             enabled : false
         },

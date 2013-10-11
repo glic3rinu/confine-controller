@@ -41,20 +41,25 @@ function processescpu(url, tag, keys) {
             		value: 0,
             		width: 2,
             		color: 'silver'
-            	}]
+            	}],
+                title: {
+                    text: 'CPU ticks per second',
+                },
+                min: 0,
             },
-            
-//            plotOptions: {
-//            	series: {
-//            		compare: 'percent'
-//            	}
-//            },
-//            
-//            tooltip: {
-//            	pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
-//            	valueDecimals: 2
-//            },
-            
+            tooltip: {
+                color: 'blue',
+                shared: true,
+                formatter: function() {
+                    var s = '<span style="font-size:10px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M', this.x)+'</span>';
+                    $.each(this.points, function(i, point) {
+                        s += '<br/><span style="color:'+point.series.color+';">'+ point.series.name +'</span>: <b>'+
+                            (point.point.high-point.point.low).toFixed(2)+'</b> tps';
+                    });
+                    
+                    return s;
+                },
+            },
             series: seriesOptions
         });
     }

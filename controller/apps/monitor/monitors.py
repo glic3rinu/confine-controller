@@ -102,9 +102,9 @@ class BasicNetMonitor(Monitor):
     verbose_name = 'Network IO (%(iface)s)'
     relativity_fields = ['RX', 'TX']
     cmd = (
-        'grep %(iface)s /proc/net/dev | awk {\'print "{'
-        ' \\"RX\\": "$2/1024",'
-        ' \\"TX\\": "$10/1024"'
+        'grep %(iface)s /proc/net/dev | awk -F " *|:" {\'print "{'
+        ' \\"RX\\": "$2",'
+        ' \\"TX\\": "$10"'
         '}"\'}'
     )
 
@@ -257,7 +257,7 @@ class NumPocessesMonitor(Monitor):
 class ProcessesMemoryMonitor(Monitor):
     type = 'processesmemory'
     verbose_name = 'Memory consumption per process'
-    cmd = 'cat /proc/{0}/statm|awk -v page="$(getconf PAGESIZE)" {{\'print $2*page/1024\'}}'
+    cmd = 'cat /proc/{0}/statm|awk -v page="$(getconf PAGESIZE)" {{\'print $2*page\'}}'
     
     def execute(self):
         ps = run('ps -A -o pid,cmd')

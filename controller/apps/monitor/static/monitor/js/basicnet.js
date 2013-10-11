@@ -66,22 +66,6 @@ function basicnet(url, tag) {
                 }],
                 selected: 3
             },
-        yAxis: [{ // Primary yAxis
-            labels: {
-                formatter: function() {
-                    return this.value + ' KBytes';
-                },
-                style: {
-                    color: '#4572A7'
-                }
-            },
-            title: {
-                text: 'Bytes',
-                style: {
-                    color: '#4e9a06'
-                }
-            }
-        }],
         tooltip: {
             color: 'blue',
             shared: true

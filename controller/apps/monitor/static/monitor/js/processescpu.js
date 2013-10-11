@@ -37,11 +37,6 @@ function processescpu(url, tag, keys) {
                 selected: 4
             },
             yAxis: {
-            	labels: {
-            		formatter: function() {
-            			return (this.value > 0 ? '+' : '') + this.value + '%';
-            		}
-            	},
             	plotLines: [{
             		value: 0,
             		width: 2,

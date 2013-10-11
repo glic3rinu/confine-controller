@@ -105,7 +105,7 @@ function nginxstatus(url, tag) {
                     if (point.series.name != 'Handled requests')
                         s += (point.point.high-point.point.low)+'</b>';
                     else
-                        s += point.y+' r/s</b>';
+                        s += point.y.toFixed(2)+' r/s</b>';
                 });
                 
                 return s;

@@ -128,6 +128,7 @@ class FreeMonitor(Monitor):
     type = 'memory'
     verbose_name = 'Memory Usage'
     average_fields = ['total', 'real-used', 'shared', 'buffers', 'cached']
+    # There is a bug in some systems and free -b does not return correct total memory
     cmd = (
         'DATA=$(free -k | tail -n3 | head -n2); '
         'echo $DATA | awk {\'print "{'
@@ -186,7 +187,6 @@ class Apache2StatusMonitor(Monitor):
 class DebugPageLoadTimeMonitor(Monitor):
     type = 'debugpageloadtime'
     verbose_name = 'Page load time (%(url)s)'
-#    average_fields = ['elapsed', 'system', 'user', 'queries']
     cmd = (
         'DATA=$(wget -O - -q --no-check %(url)s --header "Accept:text/html"|grep -A1 "time</td>\|queries)");'
         'CELAPSED=$(echo "$DATA"|grep -A1 Elapsed|tail -n1|cut -d" " -f1|cut -d">" -f2);'
@@ -281,4 +281,3 @@ class ProcessesCPUMonitor(ProcessesMemoryMonitor):
     def __init__(self, **kwargs):
         super(ProcessesCPUMonitor, self).__init__(**kwargs)
         self.relativity_fields = [ p[0] for p in self.processes ]
-

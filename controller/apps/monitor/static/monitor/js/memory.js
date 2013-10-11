@@ -110,6 +110,9 @@ function memory(url, tag) {
         scrollbar : {
             enabled : false
         },
+        navigator: {
+            baseSeries: 3,
+        },
         series: [{
                 name: 'Used',
                 data: used,

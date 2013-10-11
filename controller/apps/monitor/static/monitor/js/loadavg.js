@@ -79,6 +79,9 @@ function loadavg(url, tag) {
             },
             min: 0,
         }],
+        navigator: {
+            baseSeries: 2,
+        },
         tooltip: {
             color: 'blue',
             shared: true,

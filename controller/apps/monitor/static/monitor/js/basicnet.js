@@ -88,6 +88,9 @@ function basicnet(url, tag) {
         scrollbar : {
             enabled : false
         },
+        navigator: {
+            baseSeries: 1,
+        },
         series: [{
                 step: true,
                 name: 'TX',

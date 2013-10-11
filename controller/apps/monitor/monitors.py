@@ -102,7 +102,7 @@ class BasicNetMonitor(Monitor):
     verbose_name = 'Network IO (%(iface)s)'
     relativity_fields = ['RX', 'TX']
     cmd = (
-        'grep %(iface)s /proc/net/dev | awk -F " *|:" {\'print "{'
+        'grep %(iface)s /proc/net/dev | awk -F "[ :]*" {\'print "{'
         ' \\"RX\\": "$2",'
         ' \\"TX\\": "$10"'
         '}"\'}'

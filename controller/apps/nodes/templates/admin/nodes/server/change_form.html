@@ -1,5 +1,5 @@
 {% extends "admin/permissions_change_form.html" %}
-{% load i18n %}
+{% load i18n utils %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -7,5 +7,18 @@
     <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo; 
     {{ opts.verbose_name|capfirst }}
 </div>
+{% endblock %}
+
+{% block object-tools-items %}
+{% for item in object_tools_items %}
+    {% if item.always_display or has_change_permission %}
+    <li><a href="{{item.url_name}}/" class="{{item.css_class}}" title="{{item.description}}">{{item.verbose_name}}</a></li>
+    {% endif %}
+{% endfor %}
+{% if 'monitor'|isinstalled %}
+    <li><a href="{% url 'admin:nodes_server_monitor' %}">State</a></li>
+{% endif %}
+<li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+{% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
 {% endblock %}
 

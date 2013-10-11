@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import json
+import simplejson
 import time
 
 from django.contrib import admin
@@ -129,13 +129,9 @@ class PingAdmin(PermissionModelAdmin):
     
     def timeseries_view(self, request, content_type_id, object_id):
         pings = Ping.objects.filter(content_type=content_type_id, object_id=object_id)
-        pings = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
-        series = []
-        for date, loss, avg, min, max in pings.order_by('date'):
-            date = int(str(time.mktime(date.timetuple())).split('.')[0] + '000')
-            values = [float(v) if v else None for v in [loss, avg, min, max]]
-            series.append([date, ] + values)
-        return HttpResponse(json.dumps(series), content_type="application/json")
+        pings = pings.order_by('date').extra(select={'date': "EXTRACT(EPOCH FROM date)"})
+        series = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
+        return HttpResponse(simplejson.dumps(list(series)), content_type="application/json")
 
 
 admin.site.register(Ping, PingAdmin)

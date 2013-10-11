@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import datetime
+from datetime import datetime
 from time import mktime
 
 from django.utils.timesince import timesince as django_timesince
@@ -10,7 +10,7 @@ from django.utils.timezone import is_aware, utc
 def timesince(d, now=None, reversed=False):
     """ Hack to provide second precission under 2 minutes """
     if not now:
-        now = datetime.datetime.now(utc if is_aware(d) else None)
+        now = datetime.now(utc if is_aware(d) else None)
     
     delta = (d - now) if reversed else (now - d)
     s = django_timesince(d, now=now, reversed=reversed)
@@ -38,3 +38,58 @@ def timeuntil(d, now=None):
 def heartbeat_expires(date, freq, expire_window):
     timestamp = mktime(date.timetuple())
     return timestamp + freq * (expire_window / 1e2)
+
+
+def group_by_interval(series, delta, fill_empty=False, key=lambda s: s.date):
+    initial = key(series[0])
+    isdatetime = isinstance(initial, datetime)
+    if not isdatetime:
+        initial = datetime.fromtimestamp(initial, utc)
+    if not isinstance(delta, int):
+        delta = delta.seconds
+    
+    kwargs = {
+        'year': initial.year,
+        'month': initial.month
+    }
+    if delta < 60*60*24:
+        kwargs['day'] = initial.day
+    if delta < 60*60:
+        kwargs['hour'] = initial.hour
+    ini = float(datetime(tzinfo=utc, **kwargs).strftime('%s'))
+    end = ini+delta
+    group = []
+    timestamp = 0
+    num = 0
+    for serie in series:
+        date = key(serie)
+        if isdatetime:
+            date = float(date.strftime('%s'))
+        if date > ini and date <= end:
+            timestamp += date
+            group.append(serie)
+            num += 1
+        elif date > end:
+            while date > end:
+                ini = end
+                end += delta
+                if group:
+                    timestamp = timestamp/num
+                else:
+                    if num == 0 or not fill_empty:
+                        continue
+                    timestamp = (end+ini)/2
+                if isdatetime:
+                    timestamp = datetime.fromtimestamp(timestamp, utc)
+                yield (timestamp, group)
+                group = []
+            group = [serie]
+            timestamp = date
+            num = 1
+        else:
+            raise NotImplementedError('only ordered lists are supported')
+    if group:
+        timestamp = timestamp/num
+        if isdatetime:
+            timestamp = datetime.fromtimestamp(timestamp, utc)
+        yield (timestamp, group)

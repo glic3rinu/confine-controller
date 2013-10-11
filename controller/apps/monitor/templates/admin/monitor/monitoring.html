@@ -1,0 +1,108 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load url from future %}
+{% load admin_urls static utils %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+    <script type="text/javascript" src="{% static "controller/js/jquery-1.9.1.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
+    {% for monitor in monitors %}
+        {% if monitor.has_graph %}
+        <script type="text/javascript" src="{% static "monitor/js/"|add:monitor.type|add:".js" %}"></script>
+        {% endif %}
+    {% endfor %}
+    <script type="text/javascript">
+    window.onload = function () {
+    {% for monitor in monitors %}
+        {% if monitor.has_graph %}
+        {{ monitor.type }}('{{ base_url }}/{{ monitor.name }}', '{{ monitor.name }}chart', [{% for k in monitor.last.value.keys %}'{{ k }}'{% if not forloop.last %},{% endif %} {% endfor %}]);
+        {% endif %}
+    {% endfor %}
+    }
+    </script>
+{% endblock %}
+
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {{ action_name }} Monitoring summary
+</div>
+{% endblock %}
+
+{% block object-tools %}
+<li><a href="/" class="historylink">Refresh</a></li>
+{% endblock %}
+
+{% block content %}
+<ul class="object-tools">
+    <li><a href="" class="historylink">Refresh</a></li>
+</ul>
+<div style="border:1px solid #ccc;background:white;">
+    <div style="margin:20px;">
+    {% for monitor in monitors %}
+        {% if monitor.num_processes %}
+        <h2>{{ monitor.verbose_name }}</h2>
+        <div id="contentBox" style="margin:0px auto; width:95%">
+            <div id="column1" style="float:left; margin:0; width:33%;">
+            <ul>
+            {% for name,values in monitor.get_value_with_configuration.items %}
+            {% if not forloop.counter|divisibleby:"3" and not forloop.counter|divisibleby:"2" %}
+                 <li> {% if values.min and values.value < values.min or values.max and values.value > values.max %}
+                 <img src="{% static "admin/img/icon-no.gif" %}" alt="False">{% else %}
+                 <img src="{% static "admin/img/icon-yes.gif" %}" alt="False">{% endif %}
+                 <b style="font-size:11.5px;">{{ values.value }} {{ values.verbose }}</b> ({{ values.min }}, {{ values.max }})</li>
+            {% endif %}
+            {% endfor %}
+            </ul>
+            </div>
+            <div id="column2" style="float:left; margin:0;width:33%;">
+            <ul>
+            {% for name,values in monitor.get_value_with_configuration.items %}
+            {% if not forloop.counter|divisibleby:"3" and forloop.counter|divisibleby:"2" %}
+                 <li> {% if values.min and values.value < values.min or values.max and values.value > values.max %}
+                 <img src="{% static "admin/img/icon-no.gif" %}" alt="False">{% else %}
+                 <img src="{% static "admin/img/icon-yes.gif" %}" alt="False">{% endif %}
+                 <b style="font-size:11.5px;">{{ values.value }} {{ values.verbose }}</b> ({{ values.min }}, {{ values.max }})</li>
+            {% endif %}
+            {% endfor %}
+            </ul>
+            </div>
+            <div id="column3" style="float:left; margin:0;width:33%">
+            <ul>
+            {% for name,values in monitor.get_value_with_configuration.items %}
+            {% if forloop.counter|divisibleby:"3" %}
+                 <li> {% if values.min and values.value < values.min or values.max and values.value > values.max %}
+                 <img src="{% static "admin/img/icon-no.gif" %}" alt="False">{% else %}
+                 <img src="{% static "admin/img/icon-yes.gif" %}" alt="False">{% endif %}
+                 <b style="font-size:11.5px;">{{ values.value }} {{ values.verbose }}</b> ({{ values.min }}, {{ values.max }})</li>
+            {% endif %}
+            {% endfor %}
+            </ul>
+            </div>
+        </div>
+        <p>
+        <hr>
+        {% endif %}
+    {% endfor %}
+    <h2>Resources</h2>
+    {% for monitor in monitors %}
+        {% if not monitor.num_processes %}
+        <h3>{{ monitor.verbose_name }}</h3>
+        <p> Last Data: <code style="border-radius:3px;-webkit-border-radius:3px;-moz-border-radius=3px;font-family:Monaco,Menlo,Consolas,monospace;padding: 2px 4px;color: #d14;background-color: #f7f7f9;border: 1px solid #e1e1e8;">{% for key, value in monitor.last.value.items %}{{ key }}: {{ value }}{% if not forloop.last %},{% endif %} {% endfor %}</code></p>
+        {% if monitor.has_graph %}
+        <div id="{{ monitor.name }}chart"></div>
+        {% endif %}
+        <hr>
+        {% endif %}
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

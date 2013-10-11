@@ -138,6 +138,7 @@ function install_requirements () {
                      django-extensions \
                      django_transaction_signals \
                      django-celery \
+                     jsonfield \
                      markdown \
                      django-filter \
                      django-admin-tools \

@@ -89,15 +89,19 @@ def ping(model, ids=[], lock=True):
 
 @transaction.commit_on_success
 def downsample(model):
-    def aggregate(aggregated, slot_kwargs, minutes):
+    def aggregate(aggregated):
         THREEPLACES=decimal.Decimal('0.001')
         num_pings = len(aggregated)
         num_data = 0
         if num_pings > 1:
-            min = avg = max = mdev = decimal.Decimal(0)
-            packet_loss = 0
+            min = decimal.Decimal(0)
+            avg = decimal.Decimal(0)
+            max = decimal.Decimal(0)
+            mdev = decimal.Decimal(0)
+            packet_loss = timestamp = 0
             for ping in aggregated:
                 packet_loss += ping.packet_loss
+                timestamp += int(ping.date.strftime('%s'))
                 if ping.min:
                     min += ping.min
                     avg += ping.avg
@@ -105,18 +109,15 @@ def downsample(model):
                     mdev += ping.mdev
                     num_data += 1
                 ping.delete()
-            kwargs = dict(slot_kwargs)
-            # FIXME get the mean time instead
-            kwargs['minute'] -= (minutes/2)
             ping = Ping(
                 packet_loss=(packet_loss/num_pings),
-                date=datetime(tzinfo=timezone.utc, **kwargs),
+                date=datetime.fromtimestamp(timestamp/num_pings, timezone.utc),
                 content_object=ping.content_object)
             if num_data:
                 ping.min = (min/num_data).quantize(THREEPLACES)
                 ping.avg = (avg/num_data).quantize(THREEPLACES)
                 ping.max = (max/num_data).quantize(THREEPLACES)
-                # FIXME http://stats.stackexchange.com/questions/25848/how-to-sum-a-standard-deviation
+                # FIXME http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics
                 ping.mdev = (mdev/num_data).quantize(THREEPLACES)
             ping.save()
     
@@ -150,12 +151,12 @@ def downsample(model):
                 if ping.date <= slot_date:
                     aggregated.append(ping)
                 else:
-                    aggregate(aggregated, slot_kwargs, minutes)
+                    aggregate(aggregated)
                     aggregated = []
                     slot_kwargs['minute'] += minutes
                     if slot_kwargs['minute'] > 59:
                         slot_kwargs = get_hourly_slot(ping, minutes)
-            aggregate(aggregated, slot_kwargs, minutes)
+            aggregate(aggregated)
             end = ini
 
 

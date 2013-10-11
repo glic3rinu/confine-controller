@@ -62,7 +62,7 @@ class Monitor(object):
                         c = current_value.get(field)
                         p = previous_value.get(field)
                         if p and c > p:
-                            c = (c-p) / seconds
+                            c = (c-p)
                             current_value['current-%s' % field] = c
             current.value = current_value
     
@@ -129,7 +129,7 @@ class FreeMonitor(Monitor):
     verbose_name = 'Memory Usage'
     average_fields = ['total', 'real-used', 'shared', 'buffers', 'cached']
     cmd = (
-        'DATA=$(free -k | tail -n3 | head -n2); '
+        'DATA=$(free -b | tail -n3 | head -n2); '
         'echo $DATA | awk {\'print "{'
         ' \\"total\\": "$2",'
         ' \\"used\\": "$3",'
@@ -146,7 +146,6 @@ class FreeMonitor(Monitor):
 class NginxStatusMonitor(Monitor):
     type = 'nginxstatus'
     verbose_name = 'Nginx status'
-    has_graph = False
     relativity_fields = ['accepted-connections', 'handled-connections', 'handled-requests']
     average_fields = ['active', 'reading', 'writing', 'waiting']
     cmd = (

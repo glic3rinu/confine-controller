@@ -257,7 +257,7 @@ class NumPocessesMonitor(Monitor):
 class ProcessesMemoryMonitor(Monitor):
     type = 'processesmemory'
     verbose_name = 'Memory consumption per process'
-    cmd = 'cat /proc/{0}/statm|awk -v page="$(getconf PAGESIZE)" {{\'print $2*page\'}}'
+    cmd = 'cat /proc/{0}/statm|awk -v page="$(getconf PAGESIZE)" {{\'print $2*page*1024\'}}'
     
     def execute(self):
         ps = run('ps -A -o pid,cmd')

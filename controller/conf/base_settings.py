@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'pki',
     'maintenance',
     'notifications',
+    'monitor',
     
     # Third-party apps
     'south',

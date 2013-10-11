@@ -150,7 +150,7 @@ class NginxStatusMonitor(Monitor):
     relativity_fields = ['accepted-connections', 'handled-connections', 'handled-requests']
     average_fields = ['active', 'reading', 'writing', 'waiting']
     cmd = (
-        'DATA=$(wget --no-check -O - -q $(url)s); '
+        'DATA=$(wget --no-check -O - -q %(url)s); '
         'echo $DATA | awk {\'print "{'
          ' \\"accepted-connections\\": "$8",'
          ' \\"handled-connections\\": "$9",'
@@ -249,7 +249,7 @@ class NumPocessesMonitor(Monitor):
                 problems.append(msg % (name, min_procs, num))
             elif max_procs and num > max_procs:
                 msg = 'Process %s has more than %i running instances (%i)'
-                problems.append(msg % (name, man_procs, num))
+                problems.append(msg % (name, max_procs, num))
             value[name] = num
         return value, problems
 

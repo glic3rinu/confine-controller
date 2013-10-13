@@ -294,8 +294,9 @@ class ProcessesCPUMonitor(ProcessesMemoryMonitor):
                 pid = int(pid)
                 ppid = int(ppid)
                 stat = run(self.cmd.format(pid)).stdout.split(' ')
-                worked = int(stat[0]) if stat else 0
-                waited = int(stat[1]) if stat else 0
+                correct = (len(stat) == 2)
+                worked = int(stat[0]) if correct else 0
+                waited = int(stat[1]) if correct else 0
                 pstree.insert(pid, ppid, worked, waited)
             ticks[name] = pstree.total_ticks()
         return ticks, []

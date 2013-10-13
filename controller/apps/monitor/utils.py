@@ -32,5 +32,5 @@ class PsTree(object):
         child_ticks = 0
         for cpid in self.tree[pid]:
             child_ticks += self.total_ticks(cpid)
-        child_ticks = abs(child_ticks-self.attributes[pid]['waited'])
+        child_ticks = max(self.attributes[pid]['waited'], child_ticks)
         return self.attributes[pid]['worked'] + child_ticks

@@ -93,12 +93,12 @@ function basicnet(url, tag) {
         },
         series: [{
                 step: true,
-                name: 'TX',
-                data: tx,
-        }, {
-                step: true,
                 name: 'RX',
                 data: rx,
+        }, {
+                step: true,
+                name: 'TX',
+                data: tx,
         }]
         });
     });

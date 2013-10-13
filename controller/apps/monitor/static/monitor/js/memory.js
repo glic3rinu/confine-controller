@@ -111,11 +111,28 @@ function memory(url, tag) {
             enabled : false
         },
         navigator: {
-            baseSeries: 3,
+            baseSeries: 2,
         },
+        colors: [
+           '#f28f43', // bright brown/orage
+           '#0d233a', // darkblue
+           '#2f7ed8', // skyblue
+           '#8bbc21', // bright green
+           '#910000', // darkred
+           
+           '#1aadce', // turkey
+           '#492970', // purple
+           '#77a1e5', // bright blue
+           '#c42525', // red
+           '#a6c96a', // greene
+        ],
         series: [{
-                name: 'Used',
-                data: used,
+                type: 'line',
+                name: 'Total',
+                data: total,
+        }, {
+                name: 'Shared',
+                data: shared,
         }, {
                 name: 'Buffers',
                 data: buffers,
@@ -123,12 +140,8 @@ function memory(url, tag) {
                 name: 'Cached',
                 data: cached,
         }, {
-                name: 'Shared',
-                data: shared,
-        }, {
-                type: 'line',
-                name: 'Total',
-                data: total,
+                name: 'Used',
+                data: used,
         }]
         });
     });

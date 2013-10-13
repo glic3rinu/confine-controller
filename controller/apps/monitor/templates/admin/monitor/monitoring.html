@@ -108,7 +108,7 @@
     {% for monitor in monitors %}
         {% if not monitor.num_processes %}
         <h3>{{ monitor.verbose_name }}</h3>
-        <p> Last Data: <code style="border-radius:3px;-webkit-border-radius:3px;-moz-border-radius=3px;font-family:Monaco,Menlo,Consolas,monospace;padding: 2px 4px;color: #d14;background-color: #f7f7f9;border: 1px solid #e1e1e8;">{% for key, value in monitor.last.value.items %}{{ key }}: {{ value }}{% if not forloop.last %},{% endif %} {% endfor %}</code></p>
+        <p> Last data: <code style="border-radius:3px;-webkit-border-radius:3px;-moz-border-radius=3px;font-family:Monaco,Menlo,Consolas,monospace;padding: 2px 4px;color: #d14;background-color: #f7f7f9;border: 1px solid #e1e1e8;">{% for key, value in monitor.last.value.items %}{{ key }}: {{ value }}{% if not forloop.last %},{% endif %} {% endfor %}</code></p>
         {% if monitor.has_graph %}
         <div id="{{ monitor.name }}chart"></div>
         {% endif %}

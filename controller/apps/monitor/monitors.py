@@ -114,7 +114,7 @@ class BasicNetMonitor(Monitor):
 
 class LoadAvgMonitor(Monitor):
     type = 'loadavg'
-    verbose_name = 'CPU Load avg'
+    verbose_name = 'CPU load avg'
     average_fields = ['1min', '5min', '15min']
     cmd = (
         'cat /proc/loadavg | awk -F " |/" {\'print "{'
@@ -129,7 +129,7 @@ class LoadAvgMonitor(Monitor):
 
 class FreeMonitor(Monitor):
     type = 'memory'
-    verbose_name = 'Memory Usage'
+    verbose_name = 'Memory usage'
     average_fields = ['total', 'real-used', 'shared', 'buffers', 'cached']
     # There is a bug in some systems and free -b does not return correct total memory
     cmd = (

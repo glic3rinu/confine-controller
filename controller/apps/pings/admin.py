@@ -131,7 +131,8 @@ class PingAdmin(PermissionModelAdmin):
         pings = Ping.objects.filter(content_type=content_type_id, object_id=object_id)
         pings = pings.order_by('date').extra(select={'date': "EXTRACT(EPOCH FROM date)"})
         series = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
-        return HttpResponse(simplejson.dumps(list(series)), content_type="application/json")
+        data = [ [int(str(d).split('.')[0] + '000'),w,x,y,z] for d,w,x,y,z in series ]
+        return HttpResponse(simplejson.dumps(data), content_type="application/json")
 
 
 admin.site.register(Ping, PingAdmin)

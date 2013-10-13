@@ -1,6 +1,5 @@
 function processesmemory(url, tag, keys) {
     var seriesOptions = [],
-        yAxisOptions = [],
         seriesCounter = 0,
         colors = Highcharts.getOptions().colors;
     $.getJSON(url, function(data) {
@@ -23,6 +22,7 @@ function processesmemory(url, tag, keys) {
                 data: current
             };
         });
+        seriesOptions.reverse();
     createChart();
     });
     
@@ -52,6 +52,9 @@ function processesmemory(url, tag, keys) {
             },
             navigator: {
                 baseSeries: 2,
+            },
+            scrollbar : {
+                enabled : false
             },
             tooltip: {
                 color: 'blue',

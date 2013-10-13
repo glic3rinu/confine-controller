@@ -1,6 +1,5 @@
 function processescpu(url, tag, keys) {
     var seriesOptions = [],
-        yAxisOptions = [],
         seriesCounter = 0,
         colors = Highcharts.getOptions().colors;
     
@@ -24,6 +23,7 @@ function processescpu(url, tag, keys) {
                 data: current
             };
         });
+        seriesOptions.reverse();
     createChart();
     });
     
@@ -54,6 +54,9 @@ function processescpu(url, tag, keys) {
             navigator: {
                 baseSeries: 2,
             },
+            scrollbar : {
+                enabled : false
+            },
             tooltip: {
                 color: 'blue',
                 shared: true,
@@ -61,7 +64,7 @@ function processescpu(url, tag, keys) {
                     var s = '<span style="font-size:10px;">'+Highcharts.dateFormat('%A, %b %e, %H:%M', this.x)+'</span>';
                     $.each(this.points, function(i, point) {
                         s += '<br/><span style="color:'+point.series.color+';">'+ point.series.name +'</span>: <b>'+
-                            (point.point.high-point.point.low).toFixed(2)+'</b> tps';
+                            (point.point.high-point.point.low).toFixed(3)+'</b> tps';
                     });
                     
                     return s;

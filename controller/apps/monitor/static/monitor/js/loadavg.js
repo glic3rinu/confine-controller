@@ -98,17 +98,14 @@ function loadavg(url, tag) {
             enabled : false
         },
         series: [{
-                name: '1min',
-                data: one_min,
-//                color: 'yellow',
+                name: '15min',
+                data: fiveteen_min,
         }, {
                 name: '5min',
                 data: five_min,
-//                color: 'orange',
         }, {
-                name: '15min',
-                data: fiveteen_min,
-//                color: 'red',
+                name: '1min',
+                data: one_min,
         }]
         });
     });

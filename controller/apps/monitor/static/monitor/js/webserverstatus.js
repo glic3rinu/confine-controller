@@ -99,7 +99,7 @@ function webserverstatus(url, tag) {
                     if (point.series.name != 'Handled requests')
                         s += (point.point.high-point.point.low)+'</b>';
                     else
-                        s += point.y.toFixed(2)+' r/s</b>';
+                        s += point.y.toFixed(3)+' r/s</b>';
                 });
                 
                 return s;
@@ -111,17 +111,31 @@ function webserverstatus(url, tag) {
         navigator: {
             baseSeries: 2,
         },
+        colors: [
+           '#8bbc21', // bright green
+           '#505c6f', // darkblue
+           '#2f7ed8', // skyblue
+           '#910000', // darkred
+           
+           '#492970', // purple
+           '#8bbc21', // bright green
+           '#1aadce', // turkey
+           '#f28f43', // bright brown/orage
+           '#77a1e5', // bright blue
+           '#c42525', // red
+           '#a6c96a', // greene
+        ],
         series: [{
-                name: 'Reading',
-                data: reading,
+                name: 'Waiting',
+                data: waiting,
                 yAxis: 1
         }, {
                 name: 'Writing',
                 data: writing,
                 yAxis: 1
         }, {
-                name: 'Waiting',
-                data: waiting,
+                name: 'Reading',
+                data: reading,
                 yAxis: 1
         }, {
                 type: 'line',

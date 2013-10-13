@@ -36,7 +36,6 @@ function loadavg(url, tag) {
                     }
                 },
                 zoomType: 'x',
-                alignTicks: false,
                 type: 'arearange'
             },
             credits: {
@@ -101,15 +100,15 @@ function loadavg(url, tag) {
         series: [{
                 name: '1min',
                 data: one_min,
-                color: 'yellow',
+//                color: 'yellow',
         }, {
                 name: '5min',
                 data: five_min,
-                color: 'orange',
+//                color: 'orange',
         }, {
                 name: '15min',
                 data: fiveteen_min,
-                color: 'red',
+//                color: 'red',
         }]
         });
     });

@@ -99,6 +99,7 @@ class Command(BaseCommand):
             'master       = true\n'
             'processes    = %(processes)d\n'
             'chmod-socket = 664\n'
+            'stats        = /run/uwsgi/%%(deb-confnamespace)/%%(deb-confname)/statsocket\n'
             'vacuum       = true\n'
             'uid          = %(user)s\n'
             'gid          = %(group)s\n'

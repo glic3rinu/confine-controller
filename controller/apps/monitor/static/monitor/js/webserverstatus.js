@@ -1,4 +1,4 @@
-function nginxstatus(url, tag) {
+function webserverstatus(url, tag) {
     $.getJSON(url, function(data) {
         // Create a timer
         var start = + new Date();
@@ -80,17 +80,11 @@ function nginxstatus(url, tag) {
             yAxis: [{ // Primary yAxis
                 title: {
                     text: 'Requests per second',
-                    style: {
-                        color: '#ef2929'
-                    }
                 },
                 min: 0,
             }, { // Secondary yAxis
                 title: {
                     text: 'Workers',
-                    style: {
-                        color: '#4e9a06'
-                    }
                 },
                 opposite: true,
                 min: 0,
@@ -113,6 +107,9 @@ function nginxstatus(url, tag) {
         },
         scrollbar : {
             enabled : false
+        },
+        navigator: {
+            baseSeries: 2,
         },
         series: [{
                 name: 'Reading',

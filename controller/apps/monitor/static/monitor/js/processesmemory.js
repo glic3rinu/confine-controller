@@ -30,10 +30,14 @@ function processesmemory(url, tag, keys) {
     function createChart() {
         $('#'+tag).highcharts('StockChart', {
             chart: {
-                type: 'arearange'
+                type: 'arearange',
+                zoomType: 'x',
             },
             rangeSelector: {
                 selected: 4
+            },
+            credits: {
+                enabled: false
             },
             yAxis: {
             	plotLines: [{

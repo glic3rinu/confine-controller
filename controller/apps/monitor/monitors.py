@@ -8,7 +8,7 @@ from controller.utils.system import run
 
 from . import settings
 from .models import TimeSerie
-
+from .utils import PsTree
 
 run = partial(run, display=False)
 
@@ -20,11 +20,14 @@ class Monitor(object):
     cmd = None
     num_processes = False
     has_graph = True
+    graph = None
     relativity_fields = []
     average_fields = []
     
     def __init__(self, **kwargs):
         self.name = self.type
+        if self.graph is None:
+            self.graph = self.type
         if kwargs:
             self.verbose_name = self.verbose_name % kwargs
             if self.cmd:
@@ -147,6 +150,7 @@ class FreeMonitor(Monitor):
 class NginxStatusMonitor(Monitor):
     type = 'nginxstatus'
     verbose_name = 'Nginx status'
+    graph = 'webserverstatus'
     relativity_fields = ['accepted-connections', 'handled-connections', 'handled-requests']
     average_fields = ['active', 'reading', 'writing', 'waiting']
     cmd = (
@@ -166,7 +170,7 @@ class NginxStatusMonitor(Monitor):
 class Apache2StatusMonitor(Monitor):
     type = 'apache2status'
     verbose_name = 'Apache2 status'
-    has_graph = False
+    graph = 'webserverstatus'
     relativity_fields = ['handled-requests',]
     average_fields = ['active', 'reading', 'writing', 'waiting']
     cmd = (
@@ -261,23 +265,37 @@ class ProcessesMemoryMonitor(Monitor):
     def execute(self):
         ps = run('ps -A -o pid,cmd')
         value = {}
-        names = []
-        for name, regex, min_procs, max_procs in self.processes:
-            processes = re.findall('\n\s*[0-9]* '+regex, ps.stdout)
+        for name, regex, __, __ in self.processes:
+            processes = re.findall('\n\s*([0-9]+) '+regex, ps.stdout)
             value[name] = 0
-            for process in processes:
-                pid = int(process.strip().split(' ')[0])
+            for pid in processes:
+                pid = int(pid)
                 mem = run(self.cmd.format(pid)).stdout
                 value[name] += int(mem) if mem else 0
-            names.append(name)
         return value, []
 
 
 class ProcessesCPUMonitor(ProcessesMemoryMonitor):
     type = 'processescpu'
     verbose_name = 'CPU consumption per process'
-    cmd = "cat /proc/{0}/stat|awk {{'print $10+$11+$12'}}"
+    cmd = 'cat /proc/{0}/stat|awk {{\'print $14+$15 " " $16+$17\'}}'
     
     def __init__(self, **kwargs):
         super(ProcessesCPUMonitor, self).__init__(**kwargs)
         self.relativity_fields = [ p[0] for p in self.processes ]
+    
+    def execute(self):
+        ps = run('ps -A -o pid,ppid,cmd')
+        ticks = {}
+        for name, regex, __, __ in self.processes:
+            processes = re.findall('\n\s*([0-9]+)\s*([0-9]+) '+regex, ps.stdout)
+            pstree = PsTree()
+            for pid, ppid in processes:
+                pid = int(pid)
+                ppid = int(ppid)
+                worked, waited = run(self.cmd.format(pid)).stdout.split(' ')
+                worked = int(worked)
+                waited = int(waited)
+                pstree.insert(pid, ppid, worked, waited)
+            ticks[name] = pstree.total_ticks()
+        return ticks, []

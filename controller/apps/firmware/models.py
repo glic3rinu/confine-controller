@@ -379,6 +379,7 @@ class ConfigFile(models.Model):
         
         # get contents
         try:
+            print self.content
             contents = eval(self.content, safe_locals)
         except IndexError:
             contents = ('Confine-controller firmware generation message: \n'

@@ -15,7 +15,7 @@ WSGI = ('wsgi', '\(wsgi', 2, None)
 NGINX = ('nginx', '\n.*nginx', 3, None)
 UWSGI = ('uwsgi', '\n.*uwsgi', 8, None)
 POSTGRESQL = ('postgresql', '.*postgres', 1, None)
-RABBITMQ = ('rabbitmq', '.*rabbit', 2, 2)
+RABBITMQ = ('rabbitmq', '[./]*rabbit', 2, 2)
 
 
 MONITOR_MONITORS = getattr(settings, 'MONITOR_MONITORS', (

@@ -32,7 +32,7 @@
     window.onload = function () {
     {% for monitor in monitors %}
         {% if monitor.has_graph %}
-        {{ monitor.graph }}('{{ base_url }}/{{ monitor.name }}', '{{ monitor.name }}chart', [{% for k in monitor.last.value.keys %}'{{ k }}'{% if not forloop.last %},{% endif %} {% endfor %}]);
+        {{ monitor.graph }}('{{ base_url }}/{{ monitor.name }}{{ querystring|safe }}', '{{ monitor.name }}chart', [{% for k in monitor.last.value.keys %}'{{ k }}'{% if not forloop.last %},{% endif %} {% endfor %}]);
         {% endif %}
     {% endfor %}
     }

@@ -30,4 +30,4 @@ class NodeGisInline(GisInline):
 
 
 # Monkey-Patching Section
-insertattr(Node, 'inlines', NodeGisInline)
+#insertattr(Node, 'inlines', NodeGisInline)  # disabled: admin iface more clean

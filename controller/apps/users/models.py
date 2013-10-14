@@ -237,6 +237,13 @@ class User(auth_models.AbstractBaseUser):
     
     def is_member(self, group):
         return self.roles.filter(group=group).exists()
+    
+    @classmethod
+    def get_emails(cls, role=False, roles=[]):
+        if role:
+            roles.append(role)
+        users = cls.objects.filter_by_role(roles=roles)
+        return users.values_list('email', flat=True)
 
 
 class AuthToken(models.Model):

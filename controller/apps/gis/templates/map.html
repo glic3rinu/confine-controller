@@ -13,74 +13,12 @@
     <div id="map_canvas" style="width: 100%; height: 480px"></div>
 </div>
 
-{# OpenLayers #}
+{# OpenLayers + AnimatedCluster: http://acuriousanimal.com/code/animatedCluster/ #}
 <script src="{% static "gis/openlayers/OpenLayers.js" %}"></script>
+<script src="{% static "gis/openlayers/AnimatedCluster.js" %}"></script>
+<script src="{% static "gis/js/gis-map.js" %}"></script>
+
 <script>
-// KML Layer for displaying nodes //
-var kml_layer = new OpenLayers.Layer.Vector("KML", {
-            strategies: [new OpenLayers.Strategy.Fixed()],
-            protocol: new OpenLayers.Protocol.HTTP({
-                url: "{{ kml_url }}",
-                format: new OpenLayers.Format.KML({
-                    extractStyles: true,
-                    extractAttributes: true,
-                    maxDepth: 2
-                })
-            })
-        });
-// Map init //
-var map = new OpenLayers.Map({
-    div: "map_canvas",
-    layers: [
-        new OpenLayers.Layer.OSM(),
-        kml_layer
-    ]});
-map.setCenter(
-    new OpenLayers.LonLat({{ center.lng }}, {{ center.lat }}).transform(
-        new OpenLayers.Projection("EPSG:4326"),
-        map.getProjectionObject()
-    ), {{ zoom }}
-);
-
-// Popup for displaying marker info //
-/** create the popup **/
-function onPopupClose(evt) {
-    selectControl.unselect(this.feature);
-}
-/** display the popup updating location and information **/
-function onFeatureSelect(evt) {
-    feature = evt.feature;
-    popup = new OpenLayers.Popup.FramedCloud("featurePopup",
-                             feature.geometry.getBounds().getCenterLonLat(),
-                             new OpenLayers.Size(100,100),
-                             "<h2>"+feature.attributes.name + "</h2>" +
-                             feature.attributes.description,
-                             null, true, onPopupClose);
-    feature.popup = popup;
-    popup.feature = feature;
-    map.addPopup(popup);
-}
-
-/** hide the popup **/
-function onFeatureUnselect(evt) {
-    feature = evt.feature;
-    if (feature.popup) {
-        popup.feature = null;
-        map.removePopup(feature.popup);
-        feature.popup.destroy();
-        feature.popup = null;
-    }
-}
-
-// enable events the KML layer
-kml_layer.events.on({
-    'featureselected': onFeatureSelect,
-    'featureunselected': onFeatureUnselect
-});
-
-// init the select feature control and add to the map
-selectControl = new OpenLayers.Control.SelectFeature(kml_layer);
-map.addControl(selectControl);
-selectControl.activate();
+var map = OsmMap({{ center.lat }}, {{ center.lng }}, {{ zoom }}, "{{ kml_url }}");
 </script>
 {% endblock %}

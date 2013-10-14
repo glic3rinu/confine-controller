@@ -2,7 +2,8 @@ from django.contrib.gis.shortcuts import render_to_kml
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 
-from gis.models import NodeGeolocation
+from .models import NodeGeolocation
+from .settings import GIS_MAP_CENTER, GIS_MAP_ZOOM
 
 #TODO generalization of those functions to allow using other models.
 #       --> add new parameter == Model
@@ -35,7 +36,7 @@ def map(request):
     opts = {
         'iframe': iframe,
         'kml_url': kml_url,
-        'center': {'lat': 44.813029, 'lng': 15.977895},
-        'zoom': 5
+        'center': GIS_MAP_CENTER,
+        'zoom': GIS_MAP_ZOOM
     }
     return render(request, 'map.html', opts)

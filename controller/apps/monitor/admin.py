@@ -45,7 +45,7 @@ def time_serie_view(request, name):
         date_from = datetime.fromtimestamp(float(date_from), timezone.utc)
         date_to = datetime.fromtimestamp(float(date_to), timezone.utc)
         series = series.filter(date__gte=date_from, date__lte=date_to)
-    if raw.capitalize() == 'True':
+    if raw and raw.capitalize() == 'True':
         series = [ [False, [serie]] for serie in series ]
     else:
         series = group_by_interval(series, timedelta(minutes=5))

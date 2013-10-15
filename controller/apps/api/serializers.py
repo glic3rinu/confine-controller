@@ -1,5 +1,6 @@
-import ast
+import json
 
+from rest_framework import exceptions
 from rest_framework.serializers import *
 
 # Haking rest_framework in order to meet our crazy design specifications
@@ -17,7 +18,9 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
         return {'uri': url}
     
     def from_native(self, value):
-        value = ast.literal_eval(str(value)).pop('uri')
+        # TODO this is bullshit, fixit!
+        value = value.replace("u'", '"').replace("'", '"')
+        value = json.loads(value).pop('uri')
         return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 
@@ -49,7 +52,7 @@ class PropertyField(WritableField):
     """
     def to_native(self, value):
         """ Dict-like representation of a Property Model"""
-        return dict((prop.name, prop.value) for prop in value.all())
+        return json.dumps(dict((prop.name, prop.value) for prop in value.all()))
     
     def from_native(self, value):
         """ Convert a dict-like representation back to a Property Model """
@@ -58,7 +61,10 @@ class PropertyField(WritableField):
         properties = []
         if value:
             model = getattr(parent.opts.model, self.source or 'properties').related.model
-            dict_value = ast.literal_eval(str(value))
+            try:
+                dict_value = json.loads(value)
+            except:
+                exceptions.ParseError("Malformed property: %s" % str(value))
             if not related_manager:
                 # POST (new parent object)
                 return [ model(name=n, value=v) for n,v in dict_value.iteritems() ]

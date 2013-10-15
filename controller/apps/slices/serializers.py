@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import ast
+import json
 
 from api import serializers, exceptions
 
@@ -34,11 +34,11 @@ class IfaceField(serializers.WritableField):
         if value:
             model = getattr(parent.opts.model, self.source or 'interfaces').related.model
             try:
-                list_ifaces = ast.literal_eval(str(value))
-            except SyntaxError:
+                list_ifaces = json.loads(value)
+            except:
                 raise exceptions.ParseError("Malformed Iface: %s" % str(value))
             if not related_manager:
-                # POST (new parent object
+                # POST (new parent object)
                 return [ model(name=iface['name'],
                                type=iface['type'],
                                parent=get_node_iface(iface)) for iface in list_ifaces ]
@@ -56,6 +56,7 @@ class IfaceField(serializers.WritableField):
                     iface.type = iface['type']
                     iface.parent = get_node_iface(iface)
                 ifaces.append(iface)
+        # TODO this is bullshit because it changes ifacenr!! better override existing by iface name
         # Discart old values
         if related_manager:
             related_manager.all().delete()

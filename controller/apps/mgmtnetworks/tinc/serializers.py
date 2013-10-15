@@ -70,4 +70,4 @@ class HostSerializer(serializers.UriHyperlinkedModelSerializer):
 
 
 api.aggregate(Server, MgmtNetConfSerializer, name='mgmt_net')
-api.aggregate(Node, MgmtNetConfSerializer, name='mgmt_net')
+api.aggregate(Node, MgmtNetConfSerializer, name='mgmt_net', read_only=True)

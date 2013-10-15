@@ -17,6 +17,7 @@ def link_header(relations, request):
         url = reverse(rel, args=args or [], request=request)
         if args:
             rel = 'do-%s' % url.split('/')[-2]
+        #TODO custom relations
         links.append('<%s>; rel="%s"' % (url, reverse_rel(rel)))
     return ', '.join(links)
 

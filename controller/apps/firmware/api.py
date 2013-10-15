@@ -12,7 +12,6 @@ from .models import Build
 from .serializers import FirmwareSerializer
 
 
-
 class Firmware(APIView):
     url_name = 'firmware'
     

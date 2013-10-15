@@ -84,12 +84,12 @@ class RestApi(object):
         autodiscover('api')
         autodiscover('serializers')
     
-    def aggregate(self, model, field, name):
+    def aggregate(self, model, field, name, **kwargs):
         """ Dynamically add new fields to an existing serializer """
         # TODO provide support for hooking with nested serializers
         if model in self._registry:
-            self._registry[model][0].serializer_class.base_fields.update({name: field()})
-            self._registry[model][1].serializer_class.base_fields.update({name: field()})
+            self._registry[model][0].serializer_class.base_fields.update({name: field(**kwargs)})
+            self._registry[model][1].serializer_class.base_fields.update({name: field(**kwargs)})
     
 
 # singleton

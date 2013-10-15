@@ -32,7 +32,6 @@ class FirmwareSerializer(serializers.Serializer):
         return getattr(self, 'result', {}).get('next', None)
     
     def get_description(self, instance):
-        return 'aaaa'
         return getattr(self, 'result', {}).get('description', None)
     
     def get_content_message(self, instance):

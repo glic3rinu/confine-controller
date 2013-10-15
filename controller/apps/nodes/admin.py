@@ -50,7 +50,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         'name', 'id', 'arch', 'display_set_state', admin_link('group'), 'num_ifaces'
     ]
     list_display_links = ['name', 'id']
-    list_filter = [MyNodesListFilter, 'arch', 'set_state']
+    list_filter = [MyNodesListFilter, 'arch', 'set_state', 'group']
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']

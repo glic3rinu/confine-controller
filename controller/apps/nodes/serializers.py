@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+import six
 
 from api import serializers, exceptions
 
@@ -11,10 +12,6 @@ class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Server
 
-class DirectIfaceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DirectIface
-        fields = ('name',)
 
 class DirectIfaceField(serializers.WritableField):
     def to_native(self, value):
@@ -24,18 +21,20 @@ class DirectIfaceField(serializers.WritableField):
         if value:
             parent = self.parent
             model = getattr(parent.opts.model, self.source or 'direct_ifaces').related.model
-            try:
-                posted_ifaces = json.loads(value)
-            except:
-                raise exceptions.ParseError("Malformed iaface: %s" % str(value))
+            if isinstance(value, six.text_type):
+                try:
+                    value = json.loads(value)
+                except:
+                    raise exceptions.ParseError("Malformed iaface: %s" % str(value))
             related_manager = getattr(parent.object, self.source or 'direct_ifaces', False)
             if not related_manager:
                 # POST (new parent object)
-                return [ model(name=iface) for iface in posted_ifaces ]
+                return [ model(name=iface) for iface in value ]
             # PUT
             current_ifaces = related_manager.all().values_list('name', flat=True)
-            to_delete = set(current_ifaces)-set(posted_ifaces)
-            to_create = set(posted_ifaces)-set(current_ifaces)
+            to_delete = set(current_ifaces)-set(value)
+            to_create = set(value)-set(current_ifaces)
+            # TODO 
 #            for iface in to_delete:
 #                related_manager.filter(name=iface).delete()
             return [ model(name=iface) for iface in to_create ]

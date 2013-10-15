@@ -1,4 +1,5 @@
 import json
+import six
 
 from rest_framework import exceptions
 from rest_framework.serializers import *
@@ -19,8 +20,10 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
     
     def from_native(self, value):
         # TODO this is bullshit, fixit!
-        value = value.replace("u'", '"').replace("'", '"')
-        value = json.loads(value).pop('uri')
+        if isinstance(value, six.text_type):
+            value = value.replace("u'", '"').replace("'", '"')
+            value = json.loads(value)
+        value = value.pop('uri')
         return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 
@@ -52,7 +55,7 @@ class PropertyField(WritableField):
     """
     def to_native(self, value):
         """ Dict-like representation of a Property Model"""
-        return json.dumps(dict((prop.name, prop.value) for prop in value.all()))
+        return dict((prop.name, prop.value) for prop in value.all())
     
     def from_native(self, value):
         """ Convert a dict-like representation back to a Property Model """
@@ -61,15 +64,16 @@ class PropertyField(WritableField):
         properties = []
         if value:
             model = getattr(parent.opts.model, self.source or 'properties').related.model
-            try:
-                dict_value = json.loads(value)
-            except:
-                exceptions.ParseError("Malformed property: %s" % str(value))
+            if isinstance(value, six.text_type):
+                try:
+                    value = json.loads(value)
+                except:
+                    raise exceptions.ParseError("Malformed property: %s" % str(value))
             if not related_manager:
                 # POST (new parent object)
-                return [ model(name=n, value=v) for n,v in dict_value.iteritems() ]
+                return [ model(name=n, value=v) for n,v in value.iteritems() ]
             # PUT
-            for (name, value) in dict_value.iteritems():
+            for (name, value) in value.iteritems():
                 try:
                     # Update existing property
                     prop = related_manager.get(name=name)

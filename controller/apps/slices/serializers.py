@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+import six
 
 from api import serializers, exceptions
 
@@ -33,17 +34,18 @@ class IfaceField(serializers.WritableField):
         ifaces = []
         if value:
             model = getattr(parent.opts.model, self.source or 'interfaces').related.model
-            try:
-                list_ifaces = json.loads(value)
-            except:
-                raise exceptions.ParseError("Malformed Iface: %s" % str(value))
+            if isinstance(value, six.text_type):
+                try:
+                    value = json.loads(value)
+                except:
+                    raise exceptions.ParseError("Malformed Iface: %s" % str(value))
             if not related_manager:
                 # POST (new parent object)
                 return [ model(name=iface['name'],
                                type=iface['type'],
-                               parent=get_node_iface(iface)) for iface in list_ifaces ]
+                               parent=get_node_iface(iface)) for iface in value ]
             # PUT
-            for iface in list_ifaces:
+            for iface in value:
                 try:
                     # Update existing ifaces
                     iface = related_manager.get(name=iface['name'])

@@ -1,38 +1,50 @@
 from __future__ import absolute_import
 
-from celery.result import AsyncResult
-
 from api import serializers
 
-from .models import Config
+from .models import Config, Build
 
 
 class FirmwareSerializer(serializers.Serializer):
-    state = serializers.CharField(read_only=True)
+    state = serializers.Field()
     progress = serializers.SerializerMethodField('get_progress')
     next = serializers.SerializerMethodField('get_next')
     description = serializers.SerializerMethodField('get_description')
     content_message = serializers.SerializerMethodField('get_content_message')
     image_url = serializers.HyperlinkedFileField(source='image', read_only=True)
     
-    def __init__(self, build, **kwargs):
-        super(FirmwareSerializer, self).__init__(build, **kwargs)
-        config = Config.objects.get()
-        for f in config.files.active().optional():
-            field_name = '%s_%d' % (f.path.split('/')[-1].replace('.', '_'), f.pk)
-            setattr(build, field_name, False)
-            self.fields["%s" % field_name] = serializers.BooleanField(required=False)
-        if build.pk:
-            self.result = AsyncResult(build.task_id).result or {}
+    class Meta:
+        model = Build
+    
+    def get_state(self, instance):
+        if self.build:
+            return self.build.state
+        return 'non'
+    
+    def get_task_info(self, info):
+        if self.object:
+            task = self.object.task
+            result = task.result or {}
+            return result.get(info, None)
+        return None
     
     def get_progress(self, instance):
-        return getattr(self, 'result', {}).get('progress', None)
+        return self.get_task_info('progress')
     
     def get_next(self, instance):
-        return getattr(self, 'result', {}).get('next', None)
+        return self.get_task_info('next')
     
     def get_description(self, instance):
-        return getattr(self, 'result', {}).get('description', None)
+        if self.object:
+            task = self.object.task
+            result = task.result or {}
+            description = result.get('description', 'Waiting for your build task to begin.')
+            if self.get_progress(instance) == 100:
+                return "Building process finished"
+            return "%s ..." % description
+        return ""
     
     def get_content_message(self, instance):
-        return instance.state_description
+        if self.object:
+            return self.object.state_description
+        return ""

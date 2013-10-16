@@ -85,4 +85,4 @@ def build(build_id, *args, **kwargs):
     
     build_obj.image = dest_path
     build_obj.save()
-    return { 'progress': 99, 'description': 'Redirecting', 'result': dest_path }
+    return { 'progress': 100, 'description': 'Redirecting', 'result': dest_path }

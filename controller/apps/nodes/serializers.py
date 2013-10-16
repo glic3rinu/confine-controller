@@ -13,32 +13,25 @@ class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
         model = Server
 
 
-class DirectIfaceField(serializers.WritableField):
-    def to_native(self, value):
-        return value.all().values_list('name', flat=True)
+class DirectIfaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DirectIface
+        fields = ('name',)
     
-    def from_native(self, value):
-        if value:
-            parent = self.parent
-            model = getattr(parent.opts.model, self.source or 'direct_ifaces').related.model
-            if isinstance(value, six.text_type):
-                try:
-                    value = json.loads(value)
-                except:
-                    raise exceptions.ParseError("Malformed iaface: %s" % str(value))
-            related_manager = getattr(parent.object, self.source or 'direct_ifaces', False)
-            if not related_manager:
-                # POST (new parent object)
-                return [ model(name=iface) for iface in value ]
-            # PUT
-            current_ifaces = related_manager.all().values_list('name', flat=True)
-            to_delete = set(current_ifaces)-set(value)
-            to_create = set(value)-set(current_ifaces)
-            # TODO 
-#            for iface in to_delete:
-#                related_manager.filter(name=iface).delete()
-            return [ model(name=iface) for iface in to_create ]
-        return []
+    def to_native(self, value):
+        return value.name
+    
+    def field_from_native(self, data, files, field_name, into):
+        ifaces = data.get(field_name, [])
+        if ifaces:
+            data[field_name] = [{'name': iface_name} for iface_name in ifaces]
+        return super(DirectIfaceSerializer, self).field_from_native(data, files, field_name, into)
+    
+    def get_identity(self, data):
+        try:
+            return data.get('name', None)
+        except AttributeError:
+            return data
 
 
 class NodeSerializer(serializers.UriHyperlinkedModelSerializer):
@@ -46,7 +39,7 @@ class NodeSerializer(serializers.UriHyperlinkedModelSerializer):
     properties = serializers.PropertyField(required=False)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
-    direct_ifaces = DirectIfaceField(required=False)
+    direct_ifaces = DirectIfaceSerializer(required=False, many=True, allow_add_remove=True)
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)
     

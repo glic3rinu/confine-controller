@@ -107,9 +107,7 @@ class Build(models.Model):
     def task(self):
         return build_task.AsyncResult(self.task_id)
     
-    @property
-    def state(self):
-        """ Gives the current state of the build """
+    def _compute_state(self):
         if self.image:
             try:
                 self.image.file
@@ -128,6 +126,14 @@ class Build(models.Model):
         if self.task and self.task.state == celery_states.STARTED:
             return self.BUILDING
         return self.FAILED
+    
+    @property
+    def state(self):
+        """ Gives the current state of the build """
+        if hasattr(self, '_cached_state'):
+            return self._cached_state
+        self._cached_state = self._compute_state()
+        return self._cached_state
     
     @property
     def state_description(self):

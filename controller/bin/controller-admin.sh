@@ -143,8 +143,7 @@ function install_requirements () {
                      django-filter \
                      django-admin-tools \
                      djangorestframework==2.3.8 \
-                     https://github.com/admin947/django-orphaned/archive/master.zip \
-                     django-jsonfield"
+                     https://github.com/admin947/django-orphaned/archive/master.zip"
     LOCAL_PIP="paramiko \
                pygments \
                requests==1.2.0 \

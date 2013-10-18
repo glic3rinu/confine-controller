@@ -33,7 +33,7 @@ STATES_COLORS = {
 
 class NodePropInline(PermissionTabularInline):
     model = NodeProp
-    extra = 0
+    extra = 1
     verbose_name_plural = mark_safe('Node properties %s' % docstring_as_help_tip(NodeProp))
     
     class Media:

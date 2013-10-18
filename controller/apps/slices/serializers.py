@@ -9,9 +9,11 @@ from .models import Slice, Sliver, Template, SliverIface
 
 
 class SliverIfaceSerializer(serializers.ModelSerializer):
+    parent_name = serializers.Field(source='parent')
+    
     class Meta:
         model = SliverIface
-        fields = ('nr', 'name', 'type', 'parent')
+        fields = ('nr', 'name', 'type', 'parent_name')
     
     def get_identity(self, data):
         try:

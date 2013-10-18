@@ -83,6 +83,7 @@ class PropertyField(WritableField):
                 else:
                     prop.value = value
                 properties.append(prop)
+        # TODO this should be done on save()
         # Discart old values
         if related_manager:
             related_manager.all().delete()

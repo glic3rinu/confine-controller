@@ -21,7 +21,7 @@ from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
-from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet
+from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet, SliceSliversForm
 from .helpers import wrap_action, remove_slice_id
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
@@ -62,7 +62,7 @@ computed_sliver_set_state.short_description = 'Set state'
 
 class SliverPropInline(PermissionTabularInline):
     model = SliverProp
-    extra = 0
+    extra = 1
     verbose_name_plural = mark_safe('Sliver properties %s' % docstring_as_help_tip(SliverProp))
     
     class Media:
@@ -263,6 +263,7 @@ class SliceSliversAdmin(SliverAdmin):
     """
     add_form_template = 'admin/slices/slice/add_sliver.html'
     change_form_template = 'admin/slices/slice/change_sliver.html'
+    form = SliceSliversForm
     
     def slice_link(self, instance):
         """ Link to related slice used on change_view """
@@ -280,15 +281,16 @@ class SliceSliversAdmin(SliverAdmin):
     
     def get_form(self, request, obj=None, **kwargs):
         """ Hook node reference for future processing in IsolatedIfaceInline """
+        form = super(SliverAdmin, self).get_form(request, obj, **kwargs)
         if obj: 
-            request._node_ = obj.node
-            request._slice_ = obj.slice
+            form.node = obj.node
+            form.slice = obj.slice
         else:
-            node = get_object_or_404(Node, pk=self.node_id)
-            slice = get_object_or_404(Slice, pk=self.slice_id)
-            request._node_ = node
-            request._slice_ = slice
-        return super(SliverAdmin, self).get_form(request, obj, **kwargs)
+            form.node = get_object_or_404(Node, pk=self.node_id)
+            form.slice = get_object_or_404(Slice, pk=self.slice_id)
+        request._slice_ = form.slice
+        request._node_ = form.node
+        return form
     
     def save_model(self, request, obj, *args, **kwargs):
         """ Provde node and slice attributes to obj sliver """
@@ -441,7 +443,7 @@ class SliverNodeInline(SliverInline):
 
 class SlicePropInline(PermissionTabularInline):
     model = SliceProp
-    extra = 0
+    extra = 1
     verbose_name_plural = mark_safe('Slice properties %s' % docstring_as_help_tip(SliceProp))
     
     class Media:

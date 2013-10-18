@@ -27,10 +27,16 @@ class ApiRoot(APIView):
     -H "Accept: application/json; indent=4"`
     """
     def get(base_view, request, format=None):
-        relations = ['base']
+        relations = [
+            ('base', 'http://confine-project.eu/rel/server/base'),
+            ('api-token-auth', 'http://confine-project.eu/rel/controller/api-token-auth')
+        ]
+        # http://confine-project.eu/rel/server like resources
         for model in api._registry:
             name = force_unicode(model._meta.verbose_name)
-            relations.append(name if is_singleton(model) else '%s-list' % name)
+            name = name if is_singleton(model) else '%s-list' % name
+            rel = 'http://confine-project.eu/rel/server/%s' % name
+            relations.append((name, rel))
         headers = {'Link': link_header(relations, request)}
         return Response({}, headers=headers)
 

@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
-from api.utils import reverse_rel
 from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
@@ -25,6 +24,7 @@ class Reboot(APIView):
     POST data: `null`
     """
     url_name = 'reboot'
+    rel = 'http://confine-project.eu/rel/server/do-reboot'
     
     def post(self, request, *args, **kwargs):
         if request.DATA is None:
@@ -47,6 +47,7 @@ class RequestCert(APIView):
     POST data: `ASCII-armored PEM representation of the CSR as a string.`
     """
     url_name = 'request-cert'
+    rel = 'http://confine-project.eu/rel/server/do-request-api-cert'
     
     def post(self, request, *args, **kwargs):
         csr = request.DATA
@@ -93,7 +94,8 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
         response = super(NodeDetail, self).get(request, *args, **kwargs)
         node = self.get_object()
         url = NODES_NODE_API_NODE_BASE_URL % {'mgmt_addr': node.mgmt_net.addr}
-        response['Link'] += ', <%s>; rel="%s"' % (url, reverse_rel('node-base'))
+        rel = 'http://confine-project.eu/rel/server/node-base'
+        response['Link'] += ', <%s>; rel="%s"' % (url, rel)
         return response
 
 

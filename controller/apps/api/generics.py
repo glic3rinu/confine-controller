@@ -21,7 +21,8 @@ class URIListCreateAPIView(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         """ Add link header """
         response = super(URIListCreateAPIView, self).get(request, *args, **kwargs)
-        response['Link'] = link_header(['base'], request)
+        base_link = ('base', 'http://confine-project.eu/rel/server/base')
+        response['Link'] = link_header([base_link], request)
         return response
 
 
@@ -31,11 +32,14 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         """ Add link header """
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
         name = force_unicode(self.model._meta.verbose_name)
-        links = ['base']
+        links = [('base', 'http://confine-project.eu/rel/server/base')]
         if not is_singleton(self.model):
-            links.append('%s-list' % name)
+            resource = '%s-list' % name
+            link = (resource, 'http://confine-project.eu/rel/server/%s' % resource)
+            links.append(link)
         object_id = kwargs.get('pk')
         for endpoint in getattr(self, 'ctl', []):
-            links.append(('%s-ctl-%s' % (name, endpoint.url_name), object_id))
+            resource = '%s-ctl-%s' % (name, endpoint.url_name)
+            links.append((resource, endpoint.rel, object_id))
         response['Link'] = link_header(links, request)
         return response

@@ -5,7 +5,7 @@ from api import serializers
 from .models import Config, Build
 
 
-class FirmwareSerializer(serializers.Serializer):
+class FirmwareSerializer(serializers.ModelSerializer):
     state = serializers.Field()
     progress = serializers.SerializerMethodField('get_progress')
     next = serializers.SerializerMethodField('get_next')
@@ -15,11 +15,14 @@ class FirmwareSerializer(serializers.Serializer):
     
     class Meta:
         model = Build
+        fields = (
+            'state', 'progress', 'next', 'description', 'content_message', 'image_url', 'date'
+        )
     
     def get_state(self, instance):
         if self.build:
             return self.build.state
-        return 'non'
+        return None
     
     def get_task_info(self, info):
         if self.object:
@@ -35,13 +38,13 @@ class FirmwareSerializer(serializers.Serializer):
         return self.get_task_info('next')
     
     def get_description(self, instance):
+        # TODO move to model ?
         if self.object:
             task = self.object.task
             result = task.result or {}
-            description = result.get('description', 'Waiting for your build task to begin.')
             if self.get_progress(instance) == 100:
                 return "Building process finished"
-            return "%s ..." % description
+            return "%s ..." % result.get('description', 'Waiting for your building task to begin.')
         return ""
     
     def get_content_message(self, instance):

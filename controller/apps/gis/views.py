@@ -2,8 +2,12 @@ from django.contrib.gis.shortcuts import render_to_kml
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 
+from nodes.models import Node
+from state.models import State
 from .models import NodeGeolocation
 from .settings import GIS_MAP_CENTER, GIS_MAP_ZOOM
+
+STATES_LIST = sorted([state[0] for state in State.NODE_STATES])
 
 #TODO generalization of those functions to allow using other models.
 #       --> add new parameter == Model
@@ -13,16 +17,11 @@ def generate_kml(request):
     Generate a Google Maps compatible KML file containing
     the nodes gelocation information.
     """
-    locations = NodeGeolocation.objects.all().values('node__name', 'node__description', 'geolocation')
-    places = []
-    for loc in locations:
-        try:
-            loc['lat'], loc['lng'] = loc['geolocation'].split(',')
-        except: # ignore not well
-            continue
-        places.append(loc)
-
-    return render_to_kml('locations.kml', {'locations':places})
+    nodes = Node.objects.filter(gis__isnull=False).exclude(gis__geolocation='')
+    return render_to_kml('locations.kml', {
+        'locations': nodes,
+        'states': STATES_LIST
+    })
 
 def map(request):
     """
@@ -37,6 +36,7 @@ def map(request):
         'iframe': iframe,
         'kml_url': kml_url,
         'center': GIS_MAP_CENTER,
-        'zoom': GIS_MAP_ZOOM
+        'zoom': GIS_MAP_ZOOM,
+        'states': STATES_LIST
     }
     return render(request, 'map.html', opts)

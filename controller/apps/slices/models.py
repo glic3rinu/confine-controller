@@ -222,6 +222,10 @@ class Slice(models.Model):
             vlan_requested = self.vlan_nr == '-1'
             if self.vlan_nr != old.vlan_nr and is_register and vlan_requested:
                 raise ValidationError("Vlan can not be requested in state != register")
+        # check group allowed resources
+        if not self.group.allow_slices and self.set_state in [Slice.DEPLOY, Slice.START]:
+             raise ValidationError("Your group is not allowed to enter slices "
+                    "to Deploy or Start state.")
     
     def renew(self):
         self.expires_on = get_expires_on()

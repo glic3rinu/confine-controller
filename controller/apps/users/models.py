@@ -4,8 +4,6 @@ from django.core.mail import send_mail
 from django.core import validators
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 from controller.utils import send_email_template
@@ -35,6 +33,21 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
     
+    def save(self, *args, **kwargs):
+        """ Make sure nodes and slices are disabled if not allowed
+            NOTE: state will be kept if current state is lower
+        """
+        original = Group.objects.get(pk=self.pk) if self.pk else False
+        super(Group, self).save(*args, **kwargs)
+        if not original: return
+        if original.allow_slices and not self.allow_slices:
+            from slices.models import Slice
+            Slice.objects.filter(group=self, \
+                set_state=Slice.START).update(set_state=Slice.DEPLOY)
+        if original.allow_nodes and not self.allow_nodes:
+            from nodes.models import Node
+            Node.objects.filter(group=self, \
+                set_state=Node.PRODUCTION).update(set_state=Node.SAFE)
     @property
     def admins(self):
         """ returns user queryset containing all admins """
@@ -62,29 +75,6 @@ class Group(models.Model):
         users = User.objects.filter_by_role(roles=roles, roles__group=self)
         return users.values_list('email', flat=True)
 
-@receiver(pre_save, sender=Group)
-def do_something_if_changed(sender, instance, **kwargs):
-    """
-        Handle resources when allow_{nodes|slices} change to false 
-        Slices go to DEPLOY state: stop VM but keep data
-        Nodes go to SAFE: disallow deploy slices but keep node reachable
-        NOTE: state will be kept unchanged if current state is lower
-        @ref https://wiki.confine-project.eu/arch:node-states
-        @ref https://wiki.confine-project.eu/arch:slice-sliver-states
-    """
-    try:
-        orig = Group.objects.get(pk=instance.pk)
-    except Group.DoesNotExist:
-        pass
-    else:
-        if orig.allow_slices and not instance.allow_slices:
-            from slices.models import Slice
-            Slice.objects.filter(group=instance, \
-                set_state=Slice.START).update(set_state=Slice.DEPLOY)
-        if orig.allow_nodes and not instance.allow_nodes:
-            from nodes.models import Node
-            Node.objects.filter(group=instance, \
-                set_state=Node.PRODUCTION).update(set_state=Node.SAFE)
 
 class Roles(models.Model):
     SUPERUSER = 'superuser'

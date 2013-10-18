@@ -32,6 +32,13 @@ class Geolocation(models.Model):
                   'using the address. You can drag the marker in the map to '
                   'make any correction if needed.')
 
+    @property
+    def lat(self):
+        return self.geolocation.lat
+
+    @property
+    def lon(self):
+        return self.geolocation.lon
 
 class NodeGeolocation(Geolocation):
     """ Class for append geolocation information to a Node """

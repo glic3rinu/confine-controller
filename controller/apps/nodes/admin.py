@@ -168,6 +168,10 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             obj = self.get_object(request, object_id)
             if obj and not obj.cert:
                 messages.warning(request, 'This node lacks a valid certificate.')
+            if obj and not obj.group.allow_nodes:
+                messages.warning(request, 'This node belongs to a group not \
+                    allowed to enter nodes to Production state, except by \
+                    superuser.')
         return super(NodeAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
 

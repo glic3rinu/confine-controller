@@ -130,9 +130,6 @@ class Node(models.Model):
             elif self.set_state == Node.DEBUG and old.set_state != Node.DEBUG:
                 raise ValidationError("Can not manually enter to Debug state.")
             elif self.set_state == Node.PRODUCTION:
-                if not self.group.allow_nodes:
-                    raise ValidationError("Your group is not allowed to enter nodes "
-                            "to Production state.")
                 if old.set_state not in [Node.SAFE, Node.PRODUCTION]:
                     raise ValidationError("Can not make changes nor manually enter "
                             "to Production state from another state different than Safe.")

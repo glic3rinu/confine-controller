@@ -4,20 +4,27 @@
 <Document>
     <name>community lab</name>
     <description><![CDATA[CONFINE Nodes recording info.]]></description>
-    <Style id="markerStyle">
-	    <IconStyle>
-		    <Icon>
-		        <href>{% static "gis/openlayers/img/marker-wifi.png" %}</href>
-	        </Icon>
-	    </IconStyle>
+  {% for state in states %}
+    <Style id="state_{{ state }}">
+        <IconStyle>
+	      <Icon>
+            <href>{% static "gis/openlayers/img/nodes/"|add:state|add:".png" %}</href>
+          </Icon>
+        </IconStyle>
     </Style>
+  {% endfor %}
   {% for location in locations %}
     <Placemark>
-        <name>{{ location.node__name }}</name>
-        <description><![CDATA[{{ location.node__description }}]]></description>
-        <styleUrl>#markerStyle</styleUrl>
+        <name>{{ location.name }}</name>
+        <description><![CDATA[
+            <strong>Group:</strong> <a href="{% url 'admin:users_group_change' group.id  %}">{{ location.group }}</a><br/>
+            <strong>State:</strong> {{ location.state.value }}<br/>
+            {{ location.description }}<br/>
+            <a href="{% url 'admin:nodes_node_change' location.id %}">more info</a>
+        ]]></description>
+        <styleUrl>#state_{{ location.state.value }}</styleUrl>
         <Point>
-            <coordinates>{{location.lng}},{{location.lat}},0.000000</coordinates>
+            <coordinates>{{location.gis.lon}},{{location.gis.lat}},0.000000</coordinates>
         </Point> 
     </Placemark>
   {% endfor %}

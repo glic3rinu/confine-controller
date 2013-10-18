@@ -22,6 +22,7 @@ class Renew(APIView):
     POST data: `null`
     """
     url_name = 'renew'
+    rel = 'http://confine-project.eu/rel/server/do-renew'
     
     def post(self, request, *args, **kwargs):
         if request.DATA is None:
@@ -43,6 +44,7 @@ class Reset(APIView):
     POST data: `null`
     """
     url_name = 'reset'
+    rel = 'http://confine-project.eu/rel/server/do-reset'
     
     def post(self, request, *args, **kwargs):
         if request.DATA is None:
@@ -74,6 +76,7 @@ def make_upload_file(model, field, field_url):
         Example: `curl -X POST -F "%(field)s=@%(field)s.tgz" ...`
         """ % {'field': field, 'field_url': field_url}
         url_name = 'upload-%s' % field_url
+        rel = 'http://confine-project.eu/rel/server/do-%s' % url_name
         serializer_class = UploadFlieSerializer
         
         def post(self, request, *args, **kwargs):
@@ -100,6 +103,7 @@ class Update(APIView):
     POST data: `null`
     """
     url_name = 'update'
+    rel = 'http://confine-project.eu/rel/server/do-update'
     
     def post(self, request, *args, **kwargs):
         if request.DATA is None:

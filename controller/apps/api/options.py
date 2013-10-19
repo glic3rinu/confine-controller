@@ -29,7 +29,7 @@ class ApiRoot(APIView):
     def get(base_view, request, format=None):
         relations = [
             ('base', 'http://confine-project.eu/rel/server/base'),
-            ('api-token-auth', 'http://confine-project.eu/rel/controller/api-token-auth')
+            ('api-token-auth', 'http://confine-project.eu/rel/controller/do-get-auth-token')
         ]
         # http://confine-project.eu/rel/server like resources
         for model in api._registry:

@@ -69,12 +69,13 @@ def get_firmware(modeladmin, request, queryset):
         kwargs = {}
         all_valid = True
         for plugin in context['plugins']:
-            form = plugin.instance.form(request.POST)
-            plugin.instance.form = form
-            if form.is_valid():
-                kwargs.update(plugin.instance.process_form_post(form))
-            else:
-                all_valid = False
+            if plugin.instance.form:
+                form = plugin.instance.form(request.POST)
+                plugin.instance.form = form
+                if form.is_valid():
+                    kwargs.update(plugin.instance.process_form_post(form))
+                else:
+                    all_valid = False
         # base image and optional files forms
         img_form = BaseImageForm(data=request.POST, arch=node.arch)
         opt_form = OptionalFilesForm(request.POST, prefix='opt')

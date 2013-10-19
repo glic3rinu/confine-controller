@@ -192,7 +192,7 @@ class Build(models.Model):
             return False
         config = Config.objects.get()
         exclude = config.files.optional().values_list('pk', flat=True)
-        old_files = self.files.exclude(config__pk__in=exclude)
+        old_files = self.files.exclude(config__is_optional=True)
         old_files = set( (f.path,f.content) for f in old_files )
         new_files = config.eval_files(self.node, exclude=exclude)
         new_files = set( (f.path,f.content) for f in new_files )

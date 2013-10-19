@@ -1,5 +1,7 @@
 import decimal
+import math
 import subprocess
+import sys
 import os
 from datetime import datetime
 
@@ -11,6 +13,7 @@ from django.utils import timezone
 
 from controller.utils import LockFile
 from controller.utils.apps import is_installed
+from controller.utils.time import group_by_interval
 
 from .models import Ping
 from .settings import PING_LOCK_DIR, PING_COUNT, PING_INSTANCES
@@ -82,82 +85,64 @@ def ping(model, ids=[], lock=True):
         # Get the results
         for obj, coroutine in zip(objects, pool):
             result = coroutine.next()
-            Ping.objects.create(content_object=obj, **result)
+            Ping.objects.create(content_object=obj, samples=PING_COUNT, **result)
             coroutine.close()
     return len(objects)
 
 
 @transaction.commit_on_success
 def downsample(model):
-    def aggregate(aggregated):
-        THREEPLACES=decimal.Decimal('0.001')
-        num_pings = len(aggregated)
+    def aggregate(ping_set):
+        THREEPLACES = decimal.Decimal('0.001')
+        num_pings = len(ping_set)
         num_data = 0
         if num_pings > 1:
-            min = decimal.Decimal(0)
+            minimum = 0
+            maximum = 0
             avg = decimal.Decimal(0)
-            max = decimal.Decimal(0)
             mdev = decimal.Decimal(0)
-            packet_loss = timestamp = 0
-            for ping in aggregated:
+            packet_loss = 0
+            samples = 0
+            for ping in ping_set:
+                ping_min = sys.maxint if ping.min is None else ping.min
+                minimum = min(minimum, ping_min) or ping.min
+                maximum = max(maximum, ping.max) or ping.max
                 packet_loss += ping.packet_loss
-                timestamp += int(ping.date.strftime('%s'))
-                if ping.min:
-                    min += ping.min
-                    avg += ping.avg
-                    max += ping.max
-                    mdev += ping.mdev
-                    num_data += 1
+                samples += ping.samples
+                if ping.avg:
+                    avg += ping.avg*ping.samples
+                    # http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics
+                    mdev += (ping.samples-1)*(ping.mdev**2) + ping.samples*(ping.avg**2)
+                    num_data += ping.samples
                 ping.delete()
-            ping = Ping(
-                packet_loss=(packet_loss/num_pings),
-                date=datetime.fromtimestamp(timestamp/num_pings, timezone.utc),
-                content_object=ping.content_object)
+            packet_loss = packet_loss/num_pings
+            ping = Ping(samples=samples, packet_loss=packet_loss, date=ping.date,
+                    content_object=ping.content_object)
             if num_data:
-                ping.min = (min/num_data).quantize(THREEPLACES)
-                ping.avg = (avg/num_data).quantize(THREEPLACES)
-                ping.max = (max/num_data).quantize(THREEPLACES)
-                # FIXME http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics
-                ping.mdev = (mdev/num_data).quantize(THREEPLACES)
+                avg = avg/num_data
+                mdev = math.sqrt((mdev-(num_data*(avg**2))) / (num_data-1))
+                ping.min = minimum.quantize(THREEPLACES)
+                ping.max = maximum.quantize(THREEPLACES)
+                ping.avg = avg.quantize(THREEPLACES)
+                ping.mdev = round(mdev, 3)
             ping.save()
-    
-    def get_hourly_slot(ping, minutes):
-        return {
-            'year': ping.date.year,
-            'month': ping.date.month,
-            'day': ping.date.day,
-            'hour': ping.date.hour,
-            'minute': minutes-1,
-            'second': datetime.max.second,
-            'microsecond': datetime.max.microsecond
-        }
     
     model = get_model(*model.split('.'))
     settings = Ping.get_instance_settings(model)
     downsamples = settings.get('downsamples')
     now = timezone.now()
     for obj in model.objects.all():
-        end = None
+        ini = None
         for downsample in downsamples:
-            delta, minutes = downsample
-            ini = now-delta
-            pings = obj.pings.order_by('date').filter(date__lte=ini.strftime('%Y-%m-%d'))
-            if end:
-                pings = pings.filter(date__gt=end.strftime('%Y-%m-%d'))
-            slot_kwargs = get_hourly_slot(pings[0], minutes)
-            aggregated = []
-            for ping in pings:
-                slot_date = datetime(tzinfo=timezone.utc, **slot_kwargs)
-                if ping.date <= slot_date:
-                    aggregated.append(ping)
-                else:
-                    aggregate(aggregated)
-                    aggregated = []
-                    slot_kwargs['minute'] += minutes
-                    if slot_kwargs['minute'] > 59:
-                        slot_kwargs = get_hourly_slot(ping, minutes)
-            aggregate(aggregated)
-            end = ini
+            period, delta = downsample
+            end = now-period
+            pings = obj.pings.order_by('date').filter(date__lte=end.strftime('%Y-%m-%d'))
+            if ini:
+                pings = pings.filter(date__gt=ini.strftime('%Y-%m-%d'))
+            if pings:
+                for __, ping_set in group_by_interval(pings, delta):
+                    aggregate(ping_set)
+            ini = end
 
 
 for instance in PING_INSTANCES:
@@ -171,8 +156,8 @@ for instance in PING_INSTANCES:
         def ping_instance(model=instance.get('model')):
             return ping(model)
         
-#        name = "pings.%s_aggregate" % instance.get('app')
-#        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
-#        def aggregate_pings(model=instance.get('model')):
-#            return downsample(model)
+        name = "pings.%s_downsample" % instance.get('app')
+        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
+        def downsample_pings(model=instance.get('model')):
+            return downsample(model)
         hour += 1

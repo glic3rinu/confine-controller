@@ -54,6 +54,6 @@ def run_instance(instance_id):
         ssh.close()
         instance.save()
     except:
-        instance.state = Instance.FAILURE
+        instance.state = Instance.ERROR
         instance.traceback = ExceptionInfo(sys.exc_info()).traceback
         instance.save()

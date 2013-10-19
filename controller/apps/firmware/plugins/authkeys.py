@@ -46,7 +46,7 @@ class AuthKeysPlugin(FirmwarePlugin):
         auth_keys = kwargs.get('auth_keys', '')
         context = {
             'auth_keys': auth_keys,
-            'auth_keys_path': path.join(image.mnt, '/etc/dropbear/authorized_keys')
+            'auth_keys_path': path.join(image.mnt, 'etc/dropbear/authorized_keys')
         }
         run('echo "%(auth_keys)s" > %(auth_keys_path)s' % context)
         run('chown root:root %(auth_keys_path)s' % context)

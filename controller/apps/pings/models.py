@@ -9,7 +9,7 @@ from django.db import models
 from controller.utils.apps import is_installed
 from controller.utils.time import heartbeat_expires
 
-from .settings import PING_INSTANCES
+from .settings import PING_INSTANCES, PING_COUNT
 
 
 for instance in PING_INSTANCES:
@@ -29,6 +29,7 @@ class Ping(models.Model):
     
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
+    samples = models.PositiveIntegerField(default=PING_COUNT)
     packet_loss = models.PositiveIntegerField(null=True)
     min = models.DecimalField('RTT min', decimal_places=3, max_digits=9, null=True)
     avg = models.DecimalField('RTT avg', decimal_places=3, max_digits=9, null=True)

@@ -1,4 +1,5 @@
 from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 
 from django.conf import settings
 
@@ -18,9 +19,9 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
         'schedule': 200,
         'expire_window': 150,
         'downsamples': (
-            (relativedelta(months=3), 20),
-            (relativedelta(months=2), 10),
-            (relativedelta(weeks=2), 5),
+            (relativedelta(months=3), timedelta(minutes=20)),
+            (relativedelta(months=2), timedelta(minutes=10)),
+            (relativedelta(weeks=2), timedelta(minutes=5)),
         ),
         'get_addr': lambda obj: getattr(obj, 'address') 
     }, {

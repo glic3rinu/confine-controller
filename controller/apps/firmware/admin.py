@@ -96,6 +96,10 @@ class ConfigPluginInline(admin.TabularInline):
     
     def description(self, plugin):
         return plugin.instance.description
+    
+    def has_add_permission(self, *args, **kwargs):
+        """ Don't show add another link on the inline """
+        return False
 
 
 class BuildAdmin(admin.ModelAdmin):

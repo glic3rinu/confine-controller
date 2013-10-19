@@ -37,6 +37,7 @@
     </fieldset>
     
     {% for plugin in plugins %}
+    {% if plugin.instance.form %}
     <fieldset class="module aligned ">
       <h2>{{ plugin.instance.verbose_name }}</h2>
         {% for field in plugin.instance.form %}
@@ -53,6 +54,7 @@
         </div>
         {% endfor %}
     </fieldset>
+    {% endif %}
     {% endfor %}
     
     </div>

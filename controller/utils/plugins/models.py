@@ -22,7 +22,8 @@ class PluginModel(models.Model):
     @property
     def instance(self):
         if not hasattr(self, '_instance'):
-            module = __import__(self.module, fromlist=[self.label])
+            label = str(self.label)
+            module = __import__(self.module, fromlist=[label])
             plugin_class = getattr(module, self.label)
             self._instance = plugin_class()
         return self._instance

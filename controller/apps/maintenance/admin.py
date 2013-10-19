@@ -263,19 +263,19 @@ class ExecutionAdmin(ChangeViewActions):
 
 class InstanceAdmin(ChangeViewActions):
     list_display = [
-        '__unicode__', 'display_operation', 'display_execution',
-        admin_link('node'), state_link, last_try, 'execution__retry_if_offline'
+        '__unicode__', 'display_operation', 'display_execution', 'node_link',
+        state_link, last_try, 'execution__retry_if_offline'
     ]
     list_filter = [
         'state', 'execution__operation__identifier', 'execution__is_active',
         'execution__retry_if_offline'
     ]
     fields = [
-        'display_operation', 'display_execution', 'node', last_try, 'mono_stdout',
+        'display_operation', 'display_execution', 'node_link', last_try, 'mono_stdout',
         'mono_stderr', 'exit_code', 'traceback', 'state', 'task_link'
     ]
     readonly_fields = [
-        'display_operation', 'display_execution', 'node', last_try, 'mono_stdout',
+        'display_operation', 'display_execution', 'node_link', last_try, 'mono_stdout',
         'mono_stderr', 'exit_code', 'traceback', 'state', 'task_link'
     ]
     actions = [kill_instance, revoke_instance, run_instance]
@@ -286,6 +286,10 @@ class InstanceAdmin(ChangeViewActions):
         return instance.execution.retry_if_offline
     execution__retry_if_offline.short_description = 'retry if offline'
     execution__retry_if_offline.boolean = True
+    
+    def node_link(self, instance):
+        return get_admin_link(instance.node)
+    node_link.short_description = 'Node'
     
     def task_link(self, build):
         """ Display Celery task change view if exists """

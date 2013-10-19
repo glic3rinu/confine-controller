@@ -107,6 +107,7 @@ class Instance(models.Model):
     STARTED = 'STARTED'
     SUCCESS = 'SUCCESS'
     FAILURE = 'FAILURE'
+    ERROR = 'ERROR'
     REVOKED = 'REVOKED'
     OUTDATED = 'OUTDATED'
     
@@ -116,6 +117,7 @@ class Instance(models.Model):
         (STARTED, STARTED),
         (SUCCESS, SUCCESS),
         (FAILURE, FAILURE),
+        (ERROR, ERROR),
         (REVOKED, REVOKED),
         (OUTDATED, OUTDATED))
     

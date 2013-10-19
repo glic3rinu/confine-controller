@@ -541,12 +541,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        """ Warning user if the slice's group cannot instantiate slices """
+        """ Warn user when the slice's group cannot manage slices """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if obj and not obj.group.allow_slices:
-                messages.warning(request, 'This slice belongs to a group not \
-                    allowed to instantiate slices, except by superuser.')
+                msg = "The slice group does not have permissions to manage slices"
+                messages.warning(request, msg)
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
 

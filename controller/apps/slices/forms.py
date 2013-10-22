@@ -39,7 +39,6 @@ class SliceAdminForm(forms.ModelForm):
         
     def clean_vlan_nr(self):
         """ Return -1 if user requests vlan_nr """
-        super(SliceAdminForm, self).clean_vlan_nr()
         vlan_nr = self.cleaned_data['vlan_nr']
         if isinstance(vlan_nr, bool):
             # Register state

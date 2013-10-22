@@ -83,7 +83,7 @@ function memory(url, tag) {
                     type: 'all',
                     text: 'All'
                 }],
-                selected: 3
+                selected: 1
             },
         tooltip: {
             color: 'blue',

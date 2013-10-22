@@ -185,6 +185,8 @@ class Build(models.Model):
     
     def match(self, config):
         """ Checks if a a given build is up-to-date or not """
+        # TODO including non-atomic content (like cryptographyc keys) files
+        #      will result in False matching
         if self.version != config.version:
             return False
         base_images = [ image.image for image in config.get_images(self.node) ]

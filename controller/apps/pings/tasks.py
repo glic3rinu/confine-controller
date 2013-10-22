@@ -40,7 +40,7 @@ def pinger(ip):
     if ping.returncode == 0:
         stdout = ping.stdout.readlines()
         ping.stdout.close()
-        packet_loss = decimal.Decimal(stdout[-2].split(',')[2].split('%')[0])
+        packet_loss = decimal.Decimal(stdout[-2].split(', ')[-2].split('%')[0])
         perf_type = ['min', 'avg', 'max', 'mdev']
         perf_data = stdout[-1].split(' ')[3].split('/')
         result = dict((k, decimal.Decimal(v)) for k,v in zip(perf_type, perf_data))
@@ -97,7 +97,7 @@ def downsample(model):
         set_size = len(ping_set)
         aggregated = 0
         num_data = 0
-        print ping_set[0].date
+#        print ping_set[0].date
         if set_size > 1:
             minimum = 0
             maximum = 0
@@ -144,11 +144,10 @@ def downsample(model):
         ini = None
         for downsample in downsamples:
             period, delta = downsample
-            end = get_sloted_start(now-period, delta)
+            end = get_sloted_start(now-period, period)
             pings = obj.pings.order_by('date').filter(date__lte=end)
             if ini:
                 pings = pings.filter(date__gt=ini)
-            print '^', ini, end
             if pings:
                 for __, ping_set in group_by_interval(pings, delta):
                     aggregated, set_size = aggregate(ping_set)

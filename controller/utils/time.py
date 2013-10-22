@@ -43,16 +43,24 @@ def heartbeat_expires(date, freq, expire_window):
 def get_sloted_start(initial, delta):
     if not isinstance(initial, datetime):
         initial = datetime.fromtimestamp(initial, utc)
-    if not isinstance(delta, int):
+    if not isinstance(delta, int) and not isinstance(delta, float):
+        # Works with timedelta and relativedelta
         delta = int(initial.strftime('%s')) - int((initial-delta).strftime('%s'))
     kwargs = {
         'year': initial.year,
-        'month': initial.month
+        'month': initial.month,
+        'day': 1,
+        'hour': 0,
+        'minute': 0,
+        'second': 0
     }
+    
     if delta < 60*60*24:
         kwargs['day'] = initial.day
     if delta < 60*60:
         kwargs['hour'] = initial.hour
+    if delta < 60*60*24*364:
+        kwargs['month'] = initial.month
     return datetime(tzinfo=utc, **kwargs)
 
 
@@ -95,7 +103,7 @@ def group_by_interval(series, delta, fill_empty=False, key=lambda s: s.date):
             timestamp = date
             num = 1
         else:
-            raise NotImplementedError('only ordered lists are supported')
+            raise NotImplementedError('Only ordered lists are supported')
     if group:
         timestamp = timestamp/num
         if isdatetime:

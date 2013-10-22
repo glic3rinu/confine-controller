@@ -9,3 +9,5 @@ TINC_TINCD_ROOT = getattr(settings, 'TINC_TINCD_ROOT', '/etc/tinc')
 TINC_NET_NAME = getattr(settings, 'TINC_NET_NAME', 'confine')
 
 TINC_TINCD_BIN = getattr(settings, 'TINC_TINCD_BIN', '/usr/sbin/tincd')
+
+TINC_TINCD_SEND_HUP = getattr(settings, 'TINC_TINCD_SEND_HUP', True)

@@ -23,7 +23,7 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
             (relativedelta(months=2), timedelta(minutes=10)),
             (relativedelta(weeks=2), timedelta(minutes=5)),
         ),
-        'get_addr': lambda obj: getattr(obj, 'address') 
+        'get_addr': lambda obj: getattr(obj, 'address')
     }, {
         'model': 'slices.SliverIface',
         'admin_classes': (
@@ -38,6 +38,7 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
             (relativedelta(weeks=2), 5),
         ),
         'filter': {'type': 'management'},
-        'get_addr': lambda obj: getattr(obj, 'ipv6_addr') }
-    ))
+        'get_addr': lambda obj: getattr(obj, 'ipv6_addr')
+    }
+))
 

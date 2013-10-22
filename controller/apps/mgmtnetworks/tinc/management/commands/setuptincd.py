@@ -15,7 +15,7 @@ from controller.utils.system import check_root, run, get_default_celeryd_usernam
 from nodes.models import Server
 
 from mgmtnetworks.tinc.settings import (TINC_NET_NAME, TINC_PORT_DFLT,
-    TINC_TINCD_ROOT, TINC_TINCD_BIN)
+    TINC_TINCD_ROOT, TINC_TINCD_BIN, TINC_TINCD_SEND_HUP)
 
 
 class Command(BaseCommand):
@@ -43,6 +43,9 @@ class Command(BaseCommand):
                 help='Tinc BindToAddress'),
             make_option('--net_name', dest='net_name', default=TINC_NET_NAME,
                 help='Tinc net name'),
+            make_option('--nohup', dest='nohup', default=TINC_TINCD_SEND_HUP,
+                help='Whether we want to send a HUP signal to tinc after an update'
+                     ' or not. It requires sudo'),
             make_option('--noinput', action='store_false', dest='interactive',
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
@@ -158,12 +161,17 @@ class Command(BaseCommand):
         tinc_server.pubkey = pub_key
         tinc_server.save()
         
-        sudoers_hup = (
-            "%(user)s\s\s*ALL=NOPASSWD:\s\s*%(tincd_bin)s\s\s*-kHUP\s\s*-n %(net_name)s"
-        ) % context
-        sudoers_exists = run('grep "%s" /etc/sudoers' % sudoers_hup, err_codes=[0,1,2])
-        if sudoers_exists.return_code == 1:
-            cmd = "%(user)s ALL=NOPASSWD: %(tincd_bin)s -kHUP -n %(net_name)s" % context
-            r("echo '%s' >> /etc/sudoers" % cmd)
-        
+        if options.get('nohup'):
+            sudoers_hup = (
+                "%(user)s\s\s*ALL=NOPASSWD:\s\s*%(tincd_bin)s\s\s*-kHUP\s\s*-n %(net_name)s"
+            ) % context
+            sudoers_exists = run('grep "%s" /etc/sudoers' % sudoers_hup, err_codes=[0,1,2])
+            if sudoers_exists.return_code == 1:
+                cmd = "%(user)s ALL=NOPASSWD: %(tincd_bin)s -kHUP -n %(net_name)s" % context
+                r("echo '%s' >> /etc/sudoers" % cmd)
+            elif sudoers_exists.return_code == 2:
+                raise CommandError('Sudo is not installed on your system. \n'
+                    'You may want to use --nohup option, so sudo will not be a requirement')
+        else:
+            update_settings(TINC_TINCD_SEND_HUP=False)
         self.stdout.write('Tincd server successfully created and configured.')

@@ -108,20 +108,21 @@ def get_existing_pip_installation():
 
 
 def update_settings(monkey_patch=None, **options):
-    """ Warning this only works with a very simple setting format: NAME = 'value' """
+    """ Warning this only works with a very simple setting format: NAME = value """
     from django.conf import settings
     for name, value in options.iteritems():
         if getattr(settings, name, None) != value:
             settings_file = os.path.join(get_project_root(), 'settings.py')
             context = {
                 'name': name,
-                'value': value,
-                'settings': settings_file,}
-            if run("grep '%(name)s' %(settings)s" % context, err_codes=[0,1]):
+                'value': value if not isinstance(value, basestring) else "'%s'" % value,
+                'settings': settings_file,
+            }
+            if run("grep '^%(name)s *=' %(settings)s" % context, err_codes=[0,1]):
                 # Update existing settings_file
-                run("sed -i \"s#%(name)s = *'.*' *#%(name)s = '%(value)s'#\" %(settings)s" % context)
+                run("sed -i \"s#%(name)s *=.*#%(name)s = %(value)s#\" %(settings)s" % context)
             else:
-                run("echo \"%(name)s = '%(value)s'\" >> %(settings)s" % context)
+                run("echo \"%(name)s = %(value)s\" >> %(settings)s" % context)
             # Monkeypatch controller settings to make available the change globally
             if monkey_patch is not None:
                 module = import_module(monkey_patch)

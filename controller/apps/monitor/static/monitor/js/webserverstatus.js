@@ -75,7 +75,7 @@ function webserverstatus(url, tag) {
                     type: 'all',
                     text: 'All'
                 }],
-                selected: 3
+                selected: 1
             },
             yAxis: [{ // Primary yAxis
                 title: {

@@ -64,7 +64,7 @@ function basicnet(url, tag) {
                     type: 'all',
                     text: 'All'
                 }],
-                selected: 3
+                selected: 1
             },
         yAxis: [{
             title: {

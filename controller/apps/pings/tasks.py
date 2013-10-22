@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from controller.utils import LockFile
 from controller.utils.apps import is_installed
-from controller.utils.time import group_by_interval
+from controller.utils.time import group_by_interval, get_sloted_start
 
 from .models import Ping
 from .settings import PING_LOCK_DIR, PING_COUNT, PING_INSTANCES
@@ -94,9 +94,11 @@ def ping(model, ids=[], lock=True):
 def downsample(model):
     def aggregate(ping_set):
         THREEPLACES = decimal.Decimal('0.001')
-        num_pings = len(ping_set)
+        set_size = len(ping_set)
+        aggregated = 0
         num_data = 0
-        if num_pings > 1:
+        print ping_set[0].date
+        if set_size > 1:
             minimum = 0
             maximum = 0
             avg = decimal.Decimal(0)
@@ -115,7 +117,8 @@ def downsample(model):
                     mdev += (ping.samples-1)*(ping.mdev**2) + ping.samples*(ping.avg**2)
                     num_data += ping.samples
                 ping.delete()
-            packet_loss = packet_loss/num_pings
+                aggregated += 1
+            packet_loss = packet_loss/set_size
             ping = Ping(samples=samples, packet_loss=packet_loss, date=ping.date,
                     content_object=ping.content_object)
             if num_data:
@@ -126,23 +129,34 @@ def downsample(model):
                 ping.avg = avg.quantize(THREEPLACES)
                 ping.mdev = round(mdev, 3)
             ping.save()
+        return aggregated, set_size
     
     model = get_model(*model.split('.'))
     settings = Ping.get_instance_settings(model)
     downsamples = settings.get('downsamples')
+    result = {
+        'aggregated': 0,
+        'created': 0,
+        'total': 0,
+    }
     now = timezone.now()
     for obj in model.objects.all():
         ini = None
         for downsample in downsamples:
             period, delta = downsample
-            end = now-period
-            pings = obj.pings.order_by('date').filter(date__lte=end.strftime('%Y-%m-%d'))
+            end = get_sloted_start(now-period, delta)
+            pings = obj.pings.order_by('date').filter(date__lte=end)
             if ini:
-                pings = pings.filter(date__gt=ini.strftime('%Y-%m-%d'))
+                pings = pings.filter(date__gt=ini)
+            print '^', ini, end
             if pings:
                 for __, ping_set in group_by_interval(pings, delta):
-                    aggregate(ping_set)
+                    aggregated, set_size = aggregate(ping_set)
+                    result['aggregated'] += aggregated
+                    result['total'] += set_size
+                    result['created'] += 1 if aggregated else 0
             ini = end
+    return "(%(aggregated)s -> %(created)s) / %(total)s" % result
 
 
 for instance in PING_INSTANCES:
@@ -156,8 +170,8 @@ for instance in PING_INSTANCES:
         def ping_instance(model=instance.get('model')):
             return ping(model)
         
-        name = "pings.%s_downsample" % instance.get('app')
-        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
-        def downsample_pings(model=instance.get('model')):
-            return downsample(model)
+#        name = "pings.%s_downsample" % instance.get('app')
+#        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
+#        def downsample_pings(model=instance.get('model')):
+#            return downsample(model)
         hour += 1

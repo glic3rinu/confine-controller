@@ -1,9 +1,10 @@
 import sys
+from StringIO import StringIO
 
 from celery.task import periodic_task
 from celery.task.schedules import crontab
 from django.core import management
-from StringIO import StringIO
+
 
 @periodic_task(name="controller.delete_orphan_files", run_every=crontab(minute=0, hour=0))
 def delete_orphan(*args, **kwargs):
@@ -16,9 +17,9 @@ def delete_orphan(*args, **kwargs):
     """
     orig_stdout = sys.stdout
     sys.stdout = content = StringIO()
-
+    
     management.call_command('deleteorphaned')
-
+    
     sys.stdout = orig_stdout
     content.seek(0)
     result = content.getvalue()

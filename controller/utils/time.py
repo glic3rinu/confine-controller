@@ -40,14 +40,11 @@ def heartbeat_expires(date, freq, expire_window):
     return timestamp + freq * (expire_window / 1e2)
 
 
-def group_by_interval(series, delta, fill_empty=False, key=lambda s: s.date):
-    initial = key(series[0])
-    isdatetime = isinstance(initial, datetime)
-    if not isdatetime:
+def get_sloted_start(initial, delta):
+    if not isinstance(initial, datetime):
         initial = datetime.fromtimestamp(initial, utc)
     if not isinstance(delta, int):
-        delta = delta.seconds
-    
+        delta = int(initial.strftime('%s')) - int((initial-delta).strftime('%s'))
     kwargs = {
         'year': initial.year,
         'month': initial.month
@@ -56,7 +53,18 @@ def group_by_interval(series, delta, fill_empty=False, key=lambda s: s.date):
         kwargs['day'] = initial.day
     if delta < 60*60:
         kwargs['hour'] = initial.hour
-    ini = float(datetime(tzinfo=utc, **kwargs).strftime('%s'))
+    return datetime(tzinfo=utc, **kwargs)
+
+
+def group_by_interval(series, delta, fill_empty=False, key=lambda s: s.date):
+    initial = key(series[0])
+    isdatetime = isinstance(initial, datetime)
+    if not isdatetime:
+        initial = datetime.fromtimestamp(initial, utc)
+    if not isinstance(delta, int):
+        delta = delta.total_seconds()
+    
+    ini = float(get_sloted_start(initial, delta).strftime('%s'))
     end = ini+delta
     group = []
     timestamp = 0

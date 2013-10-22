@@ -1,10 +1,14 @@
 import json
+import os
 import re
 import socket
+import time
 from optparse import make_option
 
 from django.core.mail import mail_admins, get_connection
 from django.core.management.base import BaseCommand
+
+from controller.utils.system import touch
 
 from monitor import settings
 from monitor.models import TimeSerie
@@ -42,9 +46,22 @@ class Command(BaseCommand):
             else:
                 message = 'No problems detected'
             if problems and email:
-                connection = get_connection(backend='django.core.mail.backends.smtp.EmailBackend')
-                connection.open()
-                mail_admins(subject , message, fail_silently=False, connection=connection)
-                connection.close()
+                # Send email if new alert or lock has expired
+                send = True
+                if os.path.exists(settings.MONITOR_ALERT_LOCK):
+                    with open(settings.MONITOR_ALERT_LOCK, 'r') as lock_file:
+                        if lock_file.readlines() == message.splitlines():
+                            send = False
+                    lock_time = os.path.getmtime(settings.MONITOR_ALERT_LOCK)
+                    alert_expiration = settings.MONITOR_ALERT_EXPIRATION.total_seconds()
+                    if time.time()-lock_time < alert_expiration:
+                        send = False
+                if send:
+                    connection = get_connection(backend='django.core.mail.backends.smtp.EmailBackend')
+                    connection.open()
+                    mail_admins(subject , message, fail_silently=False, connection=connection)
+                    connection.close()
+                    with open(settings.MONITOR_ALERT_LOCK, 'w') as lock_file:
+                        lock_file.write(message)
             if not email:
                 self.stdout.write(message)

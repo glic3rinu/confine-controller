@@ -35,7 +35,7 @@ class Ping(models.Model):
     avg = models.DecimalField('RTT avg', decimal_places=3, max_digits=9, null=True)
     max = models.DecimalField('RTT max', decimal_places=3, max_digits=9, null=True)
     mdev = models.DecimalField('RTT mdev', decimal_places=3, max_digits=9, null=True)
-    date = models.DateTimeField(auto_now_add=True, null=True)
+    date = models.DateTimeField()
     
     content_object = generic.GenericForeignKey()
     

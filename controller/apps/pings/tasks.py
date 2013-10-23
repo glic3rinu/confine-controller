@@ -82,10 +82,11 @@ def ping(model, ids=[], lock=True):
             coroutine = pinger(get_addr(obj))
             coroutine.next()
             pool.append(coroutine)
+        now = timezone.now()
         # Get the results
         for obj, coroutine in zip(objects, pool):
             result = coroutine.next()
-            Ping.objects.create(content_object=obj, samples=PING_COUNT, **result)
+            Ping.objects.create(content_object=obj, samples=PING_COUNT, **result, date=now)
             coroutine.close()
     return len(objects)
 

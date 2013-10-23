@@ -169,8 +169,8 @@ for instance in PING_INSTANCES:
         def ping_instance(model=instance.get('model')):
             return ping(model)
         
-#        name = "pings.%s_downsample" % instance.get('app')
-#        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
-#        def downsample_pings(model=instance.get('model')):
-#            return downsample(model)
+        name = "pings.%s_downsample" % instance.get('app')
+        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
+        def downsample_pings(model=instance.get('model')):
+            return downsample(model)
         hour += 1

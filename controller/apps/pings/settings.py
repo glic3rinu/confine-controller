@@ -6,39 +6,41 @@ from django.conf import settings
 
 PING_LOCK_DIR = getattr(settings, 'PING_LOCK_DIR', '/dev/shm/')
 
+
 PING_COUNT = getattr(settings, 'PING_COUNT', 4)
 
-PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
+
+PING_DEFAULT_INSTANCE = getattr(settings, 'PING_DEFAULT_INSTANCE', (
     {
-        'model': 'tinc.TincClient',
-        'admin_classes': (
-            ('TincClientInline', 'tinc_compatible_address', '', 'content_object'),
-            ('HostAdmin', 'address', 'tinc', ''),
-        ),
-        'app': 'mgmtnetworks.tinc',
         'schedule': 200,
         'expire_window': 150,
         'downsamples': (
+            # Limitations: you can not say 16 months or 40 days
+            #              but you can say 2 years or 2 months
             (relativedelta(months=3), timedelta(minutes=20)),
             (relativedelta(months=2), timedelta(minutes=10)),
             (relativedelta(weeks=2), timedelta(minutes=5)),
         ),
         'get_addr': lambda obj: getattr(obj, 'address')
+    }
+))
+
+
+PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
+    {
+        'app': 'mgmtnetworks.tinc',
+        'model': 'tinc.TincClient',
+        'admin_classes': (
+            ('TincClientInline', 'tinc_compatible_address', '', 'content_object'),
+            ('HostAdmin', 'address', 'tinc', ''),
+        ),
     }, {
+        'app': 'slices',
         'model': 'slices.SliverIface',
         'admin_classes': (
             ('SliverIfaceInline', 'ipv6_addr', '', 'sliver'),
         ),
-        'app': 'slices',
-        'schedule': 200,
-        'expire_window': 150,
-        'downsamples': (
-            (relativedelta(months=3), 20),
-            (relativedelta(months=2), 10),
-            (relativedelta(weeks=2), 5),
-        ),
         'filter': {'type': 'management'},
-        'get_addr': lambda obj: getattr(obj, 'ipv6_addr')
+        'get_addr': lambda obj: getattr(obj, 'ipv6_addr'),
     }
 ))
-

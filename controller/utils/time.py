@@ -48,13 +48,9 @@ def get_sloted_start(initial, delta):
         delta = int(initial.strftime('%s')) - int((initial-delta).strftime('%s'))
     kwargs = {
         'year': initial.year,
-        'month': initial.month,
-        'day': 1,
-        'hour': 0,
-        'minute': 0,
-        'second': 0
+        'month': 1,
+        'day': 1
     }
-    
     if delta < 60*60*24:
         kwargs['day'] = initial.day
     if delta < 60*60:

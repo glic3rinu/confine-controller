@@ -9,7 +9,7 @@ from django.db import models
 from controller.utils.apps import is_installed
 from controller.utils.time import heartbeat_expires
 
-from .settings import PING_INSTANCES, PING_COUNT
+from .settings import PING_DEFAULT_INSTANCE, PING_INSTANCES, PING_COUNT
 
 
 for instance in PING_INSTANCES:
@@ -64,7 +64,9 @@ class Ping(models.Model):
         if not (isinstance(model, unicode) or isinstance(model, str)):
             model = "%s.%s" % (model._meta.app_label, model._meta.object_name)
         for instance in PING_INSTANCES:
-            if model == instance.get('model'):
+            settings = PING_DEFAULT_INSTANCE.copy()
+            settings.update(instance)
+            if model == settings.get('model'):
                 if setting:
-                    return instance.get(setting)
-                return instance
+                    return settings.get(setting)
+                return settings

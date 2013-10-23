@@ -21,6 +21,7 @@ class CacheCNDB(APIView):
     POST data: `null`
     """
     url_name = 'cache-cndb'
+    rel = 'http://confine-project.eu/rel/server/do-cache-cndb'
     
     def get_object(self, pk):
         return get_object_or_404(Node, pk=pk)

@@ -97,7 +97,6 @@ def downsample(model):
         set_size = len(ping_set)
         aggregated = 0
         num_data = 0
-#        print ping_set[0].date
         if set_size > 1:
             minimum = 0
             maximum = 0

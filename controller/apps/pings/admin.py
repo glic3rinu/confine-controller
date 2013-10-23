@@ -30,7 +30,7 @@ STATES_COLORS = {
 class PingAdmin(PermissionModelAdmin):
     list_display = (
         'content_object', 'packet_loss_percentage', 'min', 'avg', 'max', 'mdev',
-        'date_since'
+        'samples', 'date_since'
     )
     list_display_links = ('content_object',)
     fields = list_display

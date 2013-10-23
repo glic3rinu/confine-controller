@@ -86,7 +86,7 @@ def ping(model, ids=[], lock=True):
         # Get the results
         for obj, coroutine in zip(objects, pool):
             result = coroutine.next()
-            Ping.objects.create(content_object=obj, samples=PING_COUNT, **result, date=now)
+            Ping.objects.create(content_object=obj, samples=PING_COUNT, date=now, **result)
             coroutine.close()
     return len(objects)
 

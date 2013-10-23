@@ -10,56 +10,11 @@
     <script type="text/javascript" src="{% static "js/highstock/highstock.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/highcharts-more.js" %}"></script>
     <script type="text/javascript" src="{% static "js/highstock/modules/exporting.js" %}"></script>
+    <script type="text/javascript" src="{% static "state/js/stategraph.js" %}"></script>
     <script type="text/javascript">
-    $(function() {
-        $.getJSON('{% url "admin:state_history_changes" obj.state.pk %}', function(data) {
-            var start = + new Date();
-            $('#statechart').highcharts({
-            chart: {
-                type: 'column'
-            },
-            credits: {
-                enabled: false
-            },
-            title: {
-                text: false
-            },
-            subtitle: {
-                text: false
-            },
-            xAxis: {
-                categories: data['categories'],
-                tickmarkPlacement: 'on',
-                title: {
-                    enabled: false
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Percent'
-                }
-            },
-            tooltip: {
-                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f} seconds)<br/>',
-                shared: true
-            },
-            plotOptions: {
-                column: {
-                    stacking: 'percent',
-                    lineColor: '#ffffff',
-                    lineWidth: 1,
-                    marker: {
-                        lineWidth: 1,
-                        lineColor: '#ffffff'
-                    }
-                }
-            },
-            series: data['series']
-            });
-        });
-    });
+        stategraph('{% url "admin:state_history_changes" obj.state.pk %}');
     </script>
-    <script>
+    <script type="text/javascript">
     $(document).ready(function(){
         $('html').click(function() {
             $('.overlay-bg').hide(); // hide the overlay
@@ -74,7 +29,7 @@
                 document.getElementById("overlay-data").innerHTML = data.data;
             }, "json" );
             $('.overlay-bg').show(); //display your popup
-            event.stopPropagation();
+                event.stopPropagation();
         });
         // hide popup when user clicks on close button
         $('.close-btn').click(function(){
@@ -83,7 +38,7 @@
             document.getElementById("overlay-data").innerHTML = '';
         });
         // do not propagating events on data and metadata
-        $('#overlay-metadata, #overlay-data').click(function(event){
+            $('#overlay-metadata, #overlay-data').click(function(event){
             event.stopPropagation();
         });
     });

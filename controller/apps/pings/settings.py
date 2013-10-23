@@ -28,15 +28,15 @@ PING_DEFAULT_INSTANCE = getattr(settings, 'PING_DEFAULT_INSTANCE', (
 
 PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
     {
-        'app': 'mgmtnetworks.tinc',
         'model': 'tinc.TincClient',
+        'app': 'mgmtnetworks.tinc',
         'admin_classes': (
             ('TincClientInline', 'tinc_compatible_address', '', 'content_object'),
             ('HostAdmin', 'address', 'tinc', ''),
         ),
     }, {
-        'app': 'slices',
         'model': 'slices.SliverIface',
+        'app': 'slices',
         'admin_classes': (
             ('SliverIfaceInline', 'ipv6_addr', '', 'sliver'),
         ),

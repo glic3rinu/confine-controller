@@ -32,8 +32,8 @@ from slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
-from .helpers import break_headers, break_lines
-from .models import State, StateHistory, NodeSoftwareVersion
+from .helpers import break_headers, break_lines, conditional_colored
+from .models import NodeSoftwareVersion, Report, State, StateHistory
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
 
@@ -316,6 +316,54 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     sliver_link.short_description = 'Sliver'
 
 
+
+REPORT_COLOURS = {
+    'online': 'green',
+    'offline': 'red',
+    'unknown': 'darkorange',
+    'sliver_registered': SLIVER_STATES_COLORS[Slice.REGISTER],
+    'sliver_deployed': SLIVER_STATES_COLORS[Slice.DEPLOY],
+    'sliver_started': SLIVER_STATES_COLORS[Slice.START],
+}
+
+REPORT_ATTRIBUTES = (
+    'online', 'offline', 'unknown', 'total', 'slices', 'sliver_registered',
+    'sliver_deployed', 'sliver_started', 'sliver_total'
+)
+
+REPORT_DISPLAY_FN = tuple(["display_%s" % x for x in REPORT_ATTRIBUTES])
+
+class ReportAdmin(PermissionModelAdmin):
+    actions = None
+    list_display = ('group',) + REPORT_DISPLAY_FN
+    ordering = ['group__name']
+    readonly_fields = ['group', 'value']
+    
+    class Media:
+        css = {
+            "all": ("state/css/report.css",)
+        }
+        js = ("state/js/report.js",)
+    
+    def __init__(self, *args, **kwargs):
+        """ Add dynamically display attributes """
+        for key, attribute in zip(REPORT_DISPLAY_FN, REPORT_ATTRIBUTES):
+            setattr(self, key, conditional_colored(attribute, REPORT_COLOURS))
+        super(ReportAdmin, self).__init__(*args, **kwargs)
+    
+    def has_add_permission(self, request):
+        """ Object states can not be manually created """
+        return False
+    
+    def has_delete_permission(self, *args, **kwargs):
+        return False
+
+# hack for allow dynamic attribute adding to ReportAdmin
+for attribute in REPORT_ATTRIBUTES:
+    fn_name = "display_%s" % attribute
+    setattr(ReportAdmin, fn_name, None)
+
+admin.site.register(Report, ReportAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(StateHistory, StateHistoryAdmin)
 

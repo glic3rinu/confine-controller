@@ -1,0 +1,29 @@
+#result_list tr.row1 td span,
+#result_list tr.row2 td span {
+    font-weight: bold;
+}
+
+#result_list td.nowrap {
+    font-weight: bold;
+    color: #5b80b2;
+}
+
+#result_list tbody .last-child th.nowrap,
+#result_list tbody .last-child td {
+    background: #ddd;
+    font-weight: bold;
+    border-top: 3px solid black;
+}
+
+#result_list .last-child th a {
+    display: none
+}
+
+#result_list tr th,
+#result_list tr td {
+    text-align: center;
+}
+
+#result_list thead th.empty {
+/*    border-bottom: 0;*/
+}

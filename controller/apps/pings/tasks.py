@@ -170,7 +170,7 @@ for instance in PING_INSTANCES:
             return ping(model)
         
         name = "pings.%s_downsample" % instance.get('app')
-        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour))
+        @periodic_task(name=name, run_every=crontab(minute=0, hour=hour), time_limit=60*60*2)
         def downsample_pings(model=instance.get('model')):
             return downsample(model)
         hour += 1

@@ -17,7 +17,7 @@
     <Placemark>
         <name>{{ location.name }}</name>
         <description><![CDATA[
-            <strong>Group:</strong> <a href="{% url 'admin:users_group_change' group.id  %}">{{ location.group }}</a><br/>
+            <strong>Group:</strong> <a href="{% url 'admin:users_group_change' location.group.id  %}">{{ location.group }}</a><br/>
             <strong>State:</strong> {{ location.state.value }}<br/>
             {{ location.description }}<br/>
             <a href="{% url 'admin:nodes_node_change' location.id %}">more info</a>

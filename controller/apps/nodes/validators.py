@@ -16,6 +16,15 @@ def validate_sliver_mac_prefix(value):
         raise ValidationError('%s is not a 16-bit integer number in hex' % value)
 
 
+def validate_priv_ipv4_prefix(value):
+    try:
+        ip = IP(value)
+    except:
+        raise ValidationError('"%s" is not a IPv4/24 private network' % value)
+    if ip.version() != 4 or ip.strNetmask() != '255.255.255.0' or ip.iptype() != 'PRIVATE':
+        raise ValidationError('"%s" is not a IPv4/24 private network' % ip)
+
+
 def validate_ipv4_range(value):
     try: 
         ip, offset = value.split('#')

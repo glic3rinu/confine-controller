@@ -15,7 +15,6 @@ class Command(NoArgsCommand):
             'key': ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)]),
             'settings': os.path.join(get_project_root(), 'settings.py')}
         
-        run("echo hola")
         if run("grep 'SECRET_KEY' %(settings)s" % context, err_codes=[0,1]).return_code == 0:
             run("sed -i \"s/SECRET_KEY = '\w*'/SECRET_KEY = '%(key)s'/\" %(settings)s" % context)
         else:

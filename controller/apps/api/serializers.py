@@ -64,7 +64,7 @@ class PropertyField(WritableField):
         properties = []
         if value:
             model = getattr(parent.opts.model, self.source or 'properties').related.model
-            if isinstance(value, six.text_type):
+            if isinstance(value, basestring):
                 try:
                     value = json.loads(value)
                 except:
@@ -73,6 +73,7 @@ class PropertyField(WritableField):
                 # POST (new parent object)
                 return [ model(name=n, value=v) for n,v in value.iteritems() ]
             # PUT
+            to_save = []
             for (name, value) in value.iteritems():
                 try:
                     # Update existing property
@@ -82,9 +83,13 @@ class PropertyField(WritableField):
                     prop = model(name=name, value=value)
                 else:
                     prop.value = value
+                    to_save.append(prop.pk)
                 properties.append(prop)
-        # TODO this should be done on save()
+        
         # Discart old values
         if related_manager:
-            related_manager.all().delete()
+            for obj in related_manager.all():
+                if obj.pk not in to_save:
+                    # TODO do it in serializer.save()
+                    obj.delete()
         return properties

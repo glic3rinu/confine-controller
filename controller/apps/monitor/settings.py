@@ -4,7 +4,9 @@ from django.conf import settings
 
 
 MONITOR_ALERT_EXPIRATION = getattr(settings, 'MONITOR_ALERT_EXPIRATION', timedelta(days=1))
-MONITOR_ALERT_LOCK = getattr(settings, 'MONITOR_ALERT_LOCK', '/dev/shm/controller.monitor.lock')
+
+MONITOR_ALERT_LOCK = getattr(settings, 'MONITOR_ALERT_LOCK', '/dev/shm/.controller.monitor.lock')
+
 MONITOR_EXPIRE_SECONDS = getattr(settings, 'MONITOR_EXPIRE_SECONDS', 300)
 
 

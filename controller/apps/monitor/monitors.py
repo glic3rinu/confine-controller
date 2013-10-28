@@ -47,7 +47,8 @@ class Monitor(object):
         return TimeSerie.objects.filter(name=self.name)
     
     def execute(self):
-        return json.loads(run(self.cmd).stdout), []
+        env = "export LINES=1000; export COLUMNS=1000; "
+        return json.loads(run(env + self.cmd).stdout), []
     
     def store(self, value):
         TimeSerie.objects.create(name=self.name, value=value)

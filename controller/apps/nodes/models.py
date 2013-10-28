@@ -10,7 +10,8 @@ from pki import ca, Bob
 
 from . import settings
 from .utils import get_mgmt_backend_class
-from .validators import validate_sliver_mac_prefix, validate_ipv4_range, validate_dhcp_range
+from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
+        validate_dhcp_range, validate_priv_ipv4_prefix)
 
 
 class Node(models.Model):
@@ -92,8 +93,8 @@ class Node(models.Model):
                       'used as the node sliver MAC prefix. See <a href="http://wiki.'
                       'confine-project.eu/arch:addressing">addressing</a> for legal '
                       'values. %s when null.</a>.' % SLIVER_MAC_PREFIX_DFLT)
-    priv_ipv4_prefix = models.GenericIPAddressField('Private IPv4 prefix',
-            protocol='IPv4', null=True, blank=True,
+    priv_ipv4_prefix = NullableCharField('Private IPv4 prefix', null=True,
+            blank=True, max_length=19, validators=[validate_priv_ipv4_prefix],
             help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '
                       'prefix. See <a href="http://wiki.confine-project.eu/arch:'
                       'addressing">addressing</a> for legal values. %s When null.'

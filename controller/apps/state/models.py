@@ -1,6 +1,5 @@
 import json
 import functools
-import logging
 from datetime import datetime, timedelta
 from time import time
 
@@ -17,9 +16,6 @@ from slices.models import Sliver
 
 from . import settings
 from .tasks import get_state
-
-
-logger = logging.getLogger('state.models')
 
 
 class State(models.Model):
@@ -110,7 +106,7 @@ class State(models.Model):
         if response is not None:
             state.last_seen_on = now
             if response.status_code != 304:
-                state.data = response.content
+                state.data = response.text
                 if isinstance(obj, Node):
                     state._store_soft_version()
             metadata.update({
@@ -193,13 +189,6 @@ class StateHistoryManager(models.Manager):
         now = timezone.now()
         if last_state:
             expiration = state.heartbeat_expires(last_state.end)
-            logger.debug('StateHistory.store last_state.end: %s (%s)' % (
-                    last_state.end.strftime("%s"), last_state.end))
-            logger.debug('StateHistory.store expiration: %s (%s)' % (expiration,
-                    datetime.fromtimestamp(expiration)))
-            logger.debug('StateHistory.store time: %s (%s)' % (time(),
-                    datetime.fromtimestamp(time())))
-            logger.debug('StateHistory.store now: %s (%s)' % (now.strftime("%s"), now))
             if time() > expiration:
                 last_state.end = datetime.fromtimestamp(expiration)
                 last_state.save()

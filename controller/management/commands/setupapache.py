@@ -112,11 +112,11 @@ class Command(BaseCommand):
                     if confirm == 'no':
                         return
                     break
-            run("cp %(apache_conf_file)s %(apache_conf_file)s.save" % context)
+            run("cp %(apache_conf_file)s %(apache_conf_file)s.\$save" % context)
             run("echo '%(apache_conf)s' > %(apache_conf_file)s" % context)
             self.stdout.write("\033[1;31mA new version of %(apache_conf_file)s "
                 "has been installed.\n The old version has been placed at "
-                "%(apache_conf_file)s.save\033[m" % context)
+                "%(apache_conf_file)s.$save\033[m" % context)
         
 #        include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
 #        if include_httpd.return_code == 1:

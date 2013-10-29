@@ -4,7 +4,6 @@ import os
 import gevent
 import requests
 from celery.task import periodic_task, task
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import get_model
 
 from controller.utils import LockFile
@@ -57,63 +56,3 @@ def sliver_state():
     return get_state('slices.Sliver')
 
 
-REPORT_NODE_STATES = (
-    ('online', ['production']),
-    ('unknown', ['unknown', 'nodata']),
-    ('offline', ['debug', 'safe', 'offline', 'crashed', 'failure']),
-)
-
-REPORT_SLIVER_STATES = (
-    ('sliver_registered', 'registered'),
-    ('sliver_started', 'started'),
-    ('sliver_deployed', 'deployed'),
-)
-
-@periodic_task(name="state.report", run_every=STATE_SCHEDULE, expires=STATE_SCHEDULE)
-def update_state_report():
-    """ Update Reports with aggregated data of nodes/slivers state """
-    from slices.models import Slice
-    from users.models import Group
-    from .models import Report, State
-
-    ct_node = ContentType.objects.get(name='node')
-    qs_nodes = State.objects.filter(content_type=ct_node,
-                    node__group__isnull=False)
-    ct_sliver = ContentType.objects.get(name='sliver')
-    qs_slivers = State.objects.filter(content_type=ct_sliver)
-
-    qs_slices = Slice.objects.all()
-    for group in Group.objects.all():
-        value = _get_aggregated_data(qs_nodes, qs_slivers, qs_slices, group)
-        report, created = Report.objects.get_or_create(group=group)
-        report.value = value
-        report.save()
-
-    # TOTAL AGGREGATION: create a special report for all the groups together
-    value = _get_aggregated_data(qs_nodes, qs_slivers, qs_slices)
-    report, created = Report.objects.get_or_create(group=None)
-    report.value = value
-    report.save()
-
-def _get_aggregated_data(qs_nodes, qs_slivers, qs_slices, group=None):
-    value = {}
-    
-    if group is not None:
-        qs_nodes = qs_nodes.filter(node__group=group)
-        qs_slivers = qs_slivers.filter(sliver__slice__group=group)
-        qs_slices = qs_slices.filter(group=group)
-    
-    # get nodes info
-    for key, states in REPORT_NODE_STATES:
-        value[key] = qs_nodes.filter(value__in=states).count()
-    value['total'] = qs_nodes.count()
-    
-    # get slivers info
-    for key, state in REPORT_SLIVER_STATES:
-        value[key] = qs_slivers.filter(value=state).count()
-    value['sliver_total'] = qs_slivers.count()
-    
-    # get slices info
-    value['slices'] = qs_slices.count()
-    
-    return value

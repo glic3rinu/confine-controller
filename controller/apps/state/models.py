@@ -1,7 +1,6 @@
 import json
 import functools
 from datetime import datetime, timedelta
-from jsonfield import JSONField
 from time import time
 
 from django.contrib.contenttypes import generic
@@ -251,19 +250,4 @@ def state(self):
 for model in [Node, Sliver]:
     model.add_to_class('state_set', generic.GenericRelation('state.State'))
     model.state = state
-
-
-
-class Report(models.Model):
-    """ Aggregated data showing the testbed status: nodes, slices, slivers """
-
-    group = models.ForeignKey('users.Group', related_name='reports',
-        null=True, unique=True)
-    value = JSONField()
-    
-    def __init__(self, *args, **kwargs):
-        """ Extract value JSON data adding as object properties """
-        super(Report, self).__init__(*args, **kwargs)
-        for key, val in self.value.items():
-            self.__dict__[key] = val
 

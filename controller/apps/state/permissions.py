@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from permissions import ReadOnlyPermission
 
-from .models import Report, State
+from .models import State
 
 
 class StatePermission(ReadOnlyPermission):
@@ -12,9 +12,5 @@ class StatePermission(ReadOnlyPermission):
             return user.has_roles(('admin', 'technician'))
         return obj.node.group.has_roles(user, roles=['admin', 'technician'])
 
-class ReportPermission(ReadOnlyPermission):
-    pass
 
-Report.has_permission = ReportPermission()
 State.has_permission = StatePermission()
-

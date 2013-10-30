@@ -15,12 +15,21 @@
   {% endfor %}
   {% for location in locations %}
     <Placemark>
-        <name>{{ location.name }}</name>
+        <name><![CDATA[
+            {{ location.name }}
+            <a href="{% url 'admin:nodes_node_change' location.id %}" target="_parent">[details]</a>
+            {% if location.cn.app_url %}
+            <a href="{{ location.cn.app_url }}" target="_parent">[Community Network device]</a>
+            {% endif %}
+        ]]></name>
         <description><![CDATA[
-            <strong>Group:</strong> <a href="{% url 'admin:users_group_change' location.group.id  %}">{{ location.group }}</a><br/>
-            <strong>State:</strong> {{ location.state.value }}<br/>
-            {{ location.description }}<br/>
-            <a href="{% url 'admin:nodes_node_change' location.id %}">more info</a>
+            {% if location.description %}
+            <p class="description"><span class="label">Description:</span> {{ location.description }}</p>
+            {% endif %}
+            <span class="label">Group:</span> <a href="{% url 'admin:users_group_change' location.group.id  %}">{{ location.group }}</a>
+            <span class="label">State:</span> <span class="{{ location.state.value }}">{{ location.state.value }}</span>
+            <span class="label">#slices:</span> {{ location.slices|length }}
+            <span class="label">#slivers:</span> {{ location.slices__slivers|length }}<br/>
         ]]></description>
         <styleUrl>#state_{{ location.state.value }}</styleUrl>
         <Point>

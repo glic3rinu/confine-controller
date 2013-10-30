@@ -18,3 +18,19 @@
     vertical-align: middle;
     margin-right: 10px;
 }
+
+#featurePopup_contentDiv h2 a {
+    font-size: x-small;
+    vertical-align: top;
+}
+
+.description .label { margin-left: 0; }
+.label { font-weight: bold; margin-left: 10px; }
+
+/** state colored **/
+.offline, .crashed, .failure { color: red; }
+.nodata { color: purple; }
+.unknown { color: gray; }}
+.debug { color: orange; }
+.production { color: green; }
+.safe { color: blue; }

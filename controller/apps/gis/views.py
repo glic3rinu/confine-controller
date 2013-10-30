@@ -7,7 +7,7 @@ from state.models import State
 from .models import NodeGeolocation
 from .settings import GIS_MAP_CENTER, GIS_MAP_ZOOM
 
-STATES_LIST = sorted([state[0] for state in State.NODE_STATES])
+STATES_LIST = ['online', 'offline', 'unknown'] # aggregated states as in report
 
 #TODO generalization of those functions to allow using other models.
 #       --> add new parameter == Model

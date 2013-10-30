@@ -9,7 +9,6 @@ function OsmMap(lat, lng, zoom, kml_url) {
     /** display the popup updating location and information **/
     function onFeatureSelect(evt) {
         feature = evt.feature;
-        console.log(feature);
         if(feature.attributes.name == null) {
             // Center the map and zoom in to the selected feature
             map.panTo(feature.geometry.getBounds().getCenterLonLat());
@@ -41,9 +40,9 @@ function OsmMap(lat, lng, zoom, kml_url) {
     // Define three colors that will be used to style the cluster features
     // depending on the number of features they contain.
     var colors = {
-        low: "rgb(181, 226, 140)",
-        middle: "rgb(241, 211, 87)",
-        high: "rgb(253, 156, 115)"
+        low: "rgb(28, 28, 200)", /** neutral color, different than node states! **/
+        middle: "rgb(20, 28, 200)",
+        high: "rgb(28, 28, 200)"
     };
 
     // Define three rules to style the cluster features.
@@ -141,7 +140,11 @@ function OsmMap(lat, lng, zoom, kml_url) {
     var map = new OpenLayers.Map({
         div: "map_canvas",
         layers: [
-            new OpenLayers.Layer.OSM(),
+            new OpenLayers.Layer.OSM({
+                numZoomLevels: null,
+                minZoomLevel: 8,
+                maxZoomLevel: 15
+            }),
             kml_layer
         ]});
 

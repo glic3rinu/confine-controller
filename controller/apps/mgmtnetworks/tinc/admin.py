@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.template.response import TemplateResponse
 
 from controller.admin import ChangeListDefaultFilter
-from controller.admin.utils import insertattr, admin_link, get_modeladmin, wrap_admin_view
+from controller.admin.utils import insertattr, admin_link, wrap_admin_view
 from controller.forms.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
@@ -163,5 +163,3 @@ admin.site.register(Gateway, GatewayAdmin)
 
 insertattr(Node, 'inlines', TincClientInline, weight=-5)
 insertattr(Server, 'inlines', TincServerInline)
-
-node_modeladmin = get_modeladmin(Node)

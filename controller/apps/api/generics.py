@@ -33,7 +33,7 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
         name = force_unicode(self.model._meta.verbose_name)
         links = [('base', 'http://confine-project.eu/rel/server/base')]
-        if not is_singleton(self.model):
+        if not is_singleton(self.model) and getattr(self, 'list', True):
             resource = '%s-list' % name
             link = (resource, 'http://confine-project.eu/rel/server/%s' % resource)
             links.append(link)

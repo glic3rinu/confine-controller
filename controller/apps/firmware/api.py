@@ -20,10 +20,11 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
     rel = 'http://confine-project.eu/rel/controller/firmware'
     serializer_class = FirmwareSerializer
     model = Build
+    list = False
     
     def post(self, request, pk, *args, **kwargs):
         node = get_object_or_404(Node, pk=pk)
-        if request.DATA is None:
+        if not request.DATA:
             config = get_object_or_404(Config)
             base_image = config.get_images(node).order_by('default')[0]
             build = Build.build(node, base_image, async=True)

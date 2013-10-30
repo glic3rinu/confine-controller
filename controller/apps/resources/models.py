@@ -12,9 +12,7 @@ autodiscover('resources')
 
 
 class BaseResource(models.Model):
-    name = models.CharField(max_length=128,
-            # TODO based on providers and consumers
-            choices=[ (r.name, r.name) for r in ResourcePlugin.plugins ])
+    name = models.CharField(max_length=128)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -40,12 +38,22 @@ class BaseResource(models.Model):
             if instance.name == self.name:
                 return instance
         raise KeyError('Resource "%s" not registered' % self.name)
+    
+    # TODO validate names depending on content_type!
 
 
 class Resource(BaseResource):
     max_sliver = models.PositiveIntegerField(null=True, blank=True)
-    dflt_sliver = models.PositiveIntegerField()
+    dflt_sliver = models.PositiveIntegerField("Default sliver")
 
 
 class ResourceReq(BaseResource):
     req = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Resource request"
+        verbose_name_plural = "Resource requests"
+
+from nodes.models import Node
+Node.add_to_class('resources', generic.GenericRelation('resources.Resource'))
+

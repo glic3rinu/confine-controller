@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 
 def break_headers(header):
@@ -35,6 +36,26 @@ def get_state_report(state):
             return key
     raise ValueError("Uknown node state value: '%s'" % state)
 
+# Using RAW SQL until this bug is fixed (annotate not filtering per content_type)
+# https://code.djangoproject.com/ticket/10461
+# REPLACE IT when nodes.query == RAW_SQL_NODES and slivers.query == RAW_SQL_SLIVERS
+RAW_SQL_NODES = 'SELECT "users_group"."id", "state_state"."value", COUNT("nodes_node"."id") AS "nodes__count" \
+    FROM "users_group" \
+    LEFT OUTER JOIN "nodes_node" ON ("users_group"."id" = "nodes_node"."group_id") \
+    LEFT OUTER JOIN "state_state" ON ("nodes_node"."id" = "state_state"."object_id" AND "state_state"."content_type_id" = %s) \
+    GROUP BY "users_group"."id", "state_state"."value" \
+    ORDER BY "users_group"."name" ASC'
+    #nodes = qs_base.values('id', 'nodes__state_set__value').annotate(Count('nodes'))
+
+RAW_SQL_SLIVERS = 'SELECT "users_group"."id", "state_state"."value", COUNT("slices_sliver"."id") AS "slices__slivers__count" \
+    FROM "users_group" \
+    LEFT OUTER JOIN "slices_slice" ON ("users_group"."id" = "slices_slice"."group_id") \
+    LEFT OUTER JOIN "slices_sliver" ON ("slices_slice"."id" = "slices_sliver"."slice_id") \
+    LEFT OUTER JOIN "state_state" ON ("slices_sliver"."id" = "state_state"."object_id" AND "state_state"."content_type_id" = %s) \
+    GROUP BY "users_group"."id", "state_state"."value", "users_group"."name" \
+    ORDER BY "users_group"."name" ASC'
+    #slivers = qs_base.values('id', 'slices__slivers__state_set__value').annotate(Count('slices__slivers'))
+
 def get_report_data():
     """ Fetch testbed data to generate the report """
     from nodes.models import Node
@@ -42,9 +63,16 @@ def get_report_data():
     from users.models import Group
     # get data from the database
     # multiple annotations: http://stackoverflow.com/a/1266787/1538221
-    qs_groups = Group.objects.all().order_by('name').annotate(Count('slices', distinct=True), Count('nodes', distinct=True), Count('slices__slivers', distinct=True))
-    nodes = qs_groups.values('id', 'nodes__state_set__value').annotate(Count('nodes'))
-    slivers = qs_groups.values('id', 'slices__slivers__state_set__value').annotate(Count('slices__slivers'))
+    qs_base = Group.objects.all().order_by('name')
+    qs_groups = qs_base.annotate(
+                    Count('slices', distinct=True),
+                    Count('nodes', distinct=True),
+                    Count('slices__slivers', distinct=True)
+                )
+    ct_node = ContentType.objects.get(model='node')
+    nodes = Group.objects.raw(RAW_SQL_NODES, [ct_node.id])
+    ct_sliver = ContentType.objects.get(model='sliver')
+    slivers = Group.objects.raw(RAW_SQL_SLIVERS, [ct_sliver.id])
 
     # normalice and prepare data to the template
     groups = OrderedDict()
@@ -54,12 +82,12 @@ def get_report_data():
     del(item)
 
     for node in nodes: # aggregate in aggrupated states
-        group = groups.get(node.get('id'))
-        state = node.get('nodes__state_set__value')
-        if state is None:
+        group = groups.get(node.id)
+        state = node.value
+        if state is None or state == '':
             continue
         state_report = "nodes__count__%s" % get_state_report(state)
-        nodes_count = node.get('nodes__count')
+        nodes_count = node.nodes__count
         if state_report in group.keys():
             group[state_report] += nodes_count
         else: 
@@ -67,9 +95,9 @@ def get_report_data():
     del(node, nodes)
         
     for slv in slivers:
-        group = groups.get(slv.get('id'))
-        state = "slices__slivers__count__%s" % slv.get('slices__slivers__state_set__value')
-        group[state]  = slv.get('slices__slivers__count')
+        group = groups.get(slv.id)
+        state = "slices__slivers__count__%s" % slv.value
+        group[state]  = slv.slices__slivers__count
     del(slv, slivers)
 
     # calculate TOTAL

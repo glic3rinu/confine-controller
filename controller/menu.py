@@ -33,15 +33,21 @@ class CustomMenu(Menu):
             items.Bookmarks(),]
         
         if is_installed('nodes') and user.has_module_perms('nodes'):
+            node_items = [
+                items.MenuItem('Nodes',
+                    reverse('admin:nodes_node_changelist')),
+                items.MenuItem('Summary',
+                    reverse('admin:state_report')),
+            ]
+            if is_installed('gis'):
+                node_items.insert(
+                    1,
+                    items.MenuItem('Nodes Map', reverse('gis_map'))
+                )
             self.children.append(
                 items.MenuItem('Nodes',
                     reverse('admin:nodes_node_changelist'),
-                    children=[
-                        items.MenuItem('Nodes',
-                            reverse('admin:nodes_node_changelist')),
-                        items.MenuItem('Server',
-                            reverse('admin:nodes_server_changelist')),
-                    ]))
+                    children=node_items))
         
         if is_installed('slices') and user.has_module_perms('slices'):
             self.children.append(items.MenuItem('Slices',

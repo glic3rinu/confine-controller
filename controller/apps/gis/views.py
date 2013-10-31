@@ -7,7 +7,8 @@ from state.models import State
 from .models import NodeGeolocation
 from .settings import GIS_MAP_CENTER, GIS_MAP_ZOOM
 
-STATES_LIST = ['online', 'offline', 'unknown'] # aggregated states as in report
+STATES_LEGEND = ['online', 'offline', 'unknown'] # aggregated states as in report
+STATES_LIST = sorted([state[0] for state in State.NODE_STATES])
 
 #TODO generalization of those functions to allow using other models.
 #       --> add new parameter == Model
@@ -37,6 +38,6 @@ def map(request):
         'kml_url': kml_url,
         'center': GIS_MAP_CENTER,
         'zoom': GIS_MAP_ZOOM,
-        'states': STATES_LIST
+        'states': STATES_LEGEND
     }
     return render(request, 'map.html', opts)

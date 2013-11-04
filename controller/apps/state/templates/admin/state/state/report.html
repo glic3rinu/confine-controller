@@ -25,7 +25,7 @@
                 <th rowspan="2" class="expanded">Group</th>
                 <th colspan="4">Nodes</th>
                 <th rowspan="2" class="expanded">Slices</th>
-                <th colspan="4">Slivers</th>
+                <th colspan="5">Slivers</th>
             </tr>
             <tr>
                 {# nodes #}
@@ -38,37 +38,40 @@
                 <th>registered</th>
                 <th>deployed</th>
                 <th>started</th>
+                <th>offline</th>
                 <th>total</th>
             </tr>
           </thead>
           <tbody>
-          {% for key, group in groups.items %}
-            <tr class="{% cycle 'row1' 'row2' %}">
-                <th><a href="{% url 'admin:users_group_change' group.id %}">{{ group.name }}</a></th>
-                <td class="online">{{ group.nodes__count__online|default:0 }}</td>
-                <td class="offline">{{ group.nodes__count__offline|default:0 }}</td>
-                <td class="unknown">{{ group.nodes__count__unknown|default:0 }}</td>
-                <td>{{ group.nodes__count }}</td>
-                <td>{{ group.slices__count }}</td>
-                <td class="registered">{{ group.slices__slivers__count__registered|default:0 }}</td>
-                <td class="deployed">{{ group.slices__slivers__count__deployed|default:0 }}</td>
-                <td class="started">{{ group.slices__slivers__count__started|default:0 }}</td>
-                <td>{{ group.slices__slivers__count }}</td>
-            </tr>
-          {% endfor %}
+              {% for group, states in data.groups.iteritems %}
+                <tr class="{% cycle 'row1' 'row2' %}">
+                    <th><a href="{% url 'admin:users_group_change' group.id %}">{{ group.name }}</a></th>
+                    <td class="online">{{ states.nodes.online|default:0 }}</td>
+                    <td class="offline">{{ states.nodes.offline|default:0 }}</td>
+                    <td class="unknown">{{ states.nodes.unknown|default:0 }}</td>
+                    <td>{{ states.nodes.total }}</td>
+                    <td>{{ states.slices.total }}</td>
+                    <td class="registered">{{ states.slivers.registered|default:0 }}</td>
+                    <td class="deployed">{{ states.slivers.deployed|default:0 }}</td>
+                    <td class="started">{{ states.slivers.started|default:0 }}</td>
+                    <td class="offline">{{ states.slivers.offline|default:0 }}</td>
+                    <td>{{ states.slivers.total }}</td>
+                </tr>
+              {% endfor %}
           </tbody>
           <tfoot>
             <tr>
               <th>TOTAL</th>
-              <td class="online">{{ total.nodes_online }}</td>
-              <td class="offline">{{ total.nodes_offline }}</td>
-              <td class="unknown">{{ total.nodes_unknown }}</td>
-              <td>{{ total.nodes_total }}</td>
-              <td>{{ total.slices_total }}</td>
-              <td class="registered">{{ total.slivers_registered }}</td>
-              <td class="deployed">{{ total.slivers_deployed }}</td>
-              <td class="started">{{ total.slivers_started }}</td>
-              <td>{{ total.slivers_total }}</td>
+              <td class="online">{{ data.totals.nodes.online|default:0 }}</td>
+              <td class="offline">{{ data.totals.nodes.offline|default:0 }}</td>
+              <td class="unknown">{{ data.totals.nodes.unknown|default:0 }}</td>
+              <td>{{ data.totals.nodes.total|default:0 }}</td>
+              <td>{{ data.totals.slices.total|default:0 }}</td>
+              <td class="registered">{{ data.totals.slivers.registered|default:0 }}</td>
+              <td class="deployed">{{ data.totals.slivers.deployed|default:0 }}</td>
+              <td class="started">{{ data.totals.slivers.started|default:0 }}</td>
+              <td class="offline">{{ data.totals.slivers.offline|default:0 }}</td>
+              <td>{{ data.totals.slivers.total|default:0 }}</td>
             </tr>
           </tfoot>
         </table>

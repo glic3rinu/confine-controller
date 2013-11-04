@@ -271,11 +271,10 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
 
         template = 'admin/state/state/report.html'
         iframe = request.GET.get("iframe", False)
-        groups, total = get_report_data()
+        data = get_report_data()
         
         opt = {
-            'groups': groups,
-            'total': total,
+            'data': data,
             'iframe': iframe,
         }
 

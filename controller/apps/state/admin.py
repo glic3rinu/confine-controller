@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import datetime
 import json
+from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 
 from django.contrib import admin
@@ -181,7 +182,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
         now = timezone.now()
         delta = relativedelta(months=+1)
         final = datetime.datetime(year=now.year, month=now.month+1, day=1, tzinfo=timezone.utc)
-        monthly = {}
+        monthly = OrderedDict()
         distinct_states = set()
         # Get monthly changes
         for m in range(1, 13):
@@ -205,12 +206,14 @@ class StateHistoryAdmin(admin.ModelAdmin):
         for month, duration in monthly.iteritems():
             current_states = set()
             for state in duration:
-                data.setdefault(state, []).append(duration[state])
+                data.setdefault(state, []).insert(0, duration[state])
                 current_states = current_states.union(set((state,)))
             for missing in distinct_states-current_states:
-                data.setdefault(missing, []).append(0)
+                data.setdefault(missing, []).insert(0, 0)
         # Construct final data structure
         series = []
+        months = monthly.keys()
+        months.reverse()
         for state in data:
             series.append({
                 'name': state,
@@ -218,7 +221,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
                 'color': STATES_COLORS.get(state, None)
             })
         data = {
-            'categories': list(monthly.keys()),
+            'categories': months,
             'series': series
         }
         return HttpResponse(json.dumps(data), content_type="application/json")

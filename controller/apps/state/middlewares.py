@@ -4,8 +4,10 @@ class NodePullHeartBeat(object):
             from controller.core.exceptions import InvalidMgmtAddress
             from nodes.utils import get_mgmt_backend_class
             mgmt_backend = get_mgmt_backend_class()
+            META = request.META
+            remote_addr = META.get('HTTP_X_REAL_IP', META['REMOTE_ADDR'])
             try:
-                client = mgmt_backend.reverse(request.META['REMOTE_ADDR'])
+                client = mgmt_backend.reverse(remote_addr)
             except InvalidMgmtAddress:
                 return
             from nodes.models import Node

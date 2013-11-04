@@ -2,7 +2,12 @@
     height: 75px; /* Reserve space to nav bar */
 }
 
-#result_list { width: 100%; }
+#result_list { 
+    border: 1px solid #CCC;
+    margin: 10px;
+    width: 98%;
+
+}
 
 #result_list tr th,
 #result_list tr td {

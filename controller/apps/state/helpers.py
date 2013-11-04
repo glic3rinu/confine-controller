@@ -1,9 +1,14 @@
+import datetime
 from collections import OrderedDict
+from dateutil.relativedelta import relativedelta
+
+from django.utils import timezone
 
 from nodes.models import Node
 from slices.models import Slice
 from state.models import State
 from users.models import Group
+
 
 def break_headers(header):
     header = header.replace(', <', ',\n                 <')
@@ -19,6 +24,54 @@ def break_lines(text, every=150):
             line = line.replace('\\n', '\n' + ' '*distance)
         result.append(line)
     return '\n'.join(result)
+
+
+def get_changes_data(state):
+    from .admin import STATES_COLORS
+    
+    history = state.history
+    now = timezone.now()
+    delta = relativedelta(months=+1)
+    final = datetime.datetime(year=now.year, month=now.month+1, day=1, tzinfo=timezone.utc)
+    monthly = OrderedDict()
+    distinct_states = set()
+    # Get monthly changes
+    for m in range(1, 13):
+        initial = final-delta
+        changes = history.filter(start__lt=final, end__gt=initial)
+        if not changes:
+            break
+        states = {}
+        for value, start, end in changes.values_list('value', 'start', 'end'):
+            distinct_states = distinct_states.union(set((value,)))
+            if start < initial:
+                start = initial
+            if end > final:
+                end = final
+            duration = int((end-start).total_seconds())
+            states[value] = states.get(value, 0)+duration
+        monthly[initial.strftime("%B")] = states
+        final = initial
+    # Fill missing states
+    data = {}
+    for month, duration in monthly.iteritems():
+        current_states = set()
+        for state in duration:
+            data.setdefault(state, []).insert(0, duration[state])
+            current_states = current_states.union(set((state,)))
+        for missing in distinct_states-current_states:
+            data.setdefault(missing, []).insert(0, 0)
+    # Construct final data structure
+    series = []
+    months = monthly.keys()
+    months.reverse()
+    for state in data:
+        series.append({
+            'name': state,
+            'data': data[state],
+            'color': STATES_COLORS.get(state, None)
+        })
+    return { 'categories': months, 'series': series }
 
 
 def get_report_data():

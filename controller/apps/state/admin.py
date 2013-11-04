@@ -2,14 +2,13 @@ from __future__ import absolute_import
 
 import datetime
 import json
-from collections import OrderedDict
-from dateutil.relativedelta import relativedelta
 
 from django.contrib import admin
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from pygments import highlight
@@ -33,7 +32,7 @@ from slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
-from .helpers import break_headers, break_lines
+from .helpers import break_headers, break_lines, get_changes_data, get_report_data
 from .models import NodeSoftwareVersion, State, StateHistory
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
@@ -178,52 +177,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
     
     def changes_view(self, request, object_id):
         state = get_object_or_404(State, pk=object_id)
-        history = state.history
-        now = timezone.now()
-        delta = relativedelta(months=+1)
-        final = datetime.datetime(year=now.year, month=now.month+1, day=1, tzinfo=timezone.utc)
-        monthly = OrderedDict()
-        distinct_states = set()
-        # Get monthly changes
-        for m in range(1, 13):
-            initial = final-delta
-            changes = history.filter(start__lt=final, end__gt=initial)
-            if not changes:
-                break
-            states = {}
-            for value, start, end in changes.values_list('value', 'start', 'end'):
-                distinct_states = distinct_states.union(set((value,)))
-                if start < initial:
-                    start = initial
-                if end > final:
-                    end = final
-                duration = int((end-start).total_seconds())
-                states[value] = states.get(value, 0)+duration
-            monthly[initial.strftime("%B")] = states
-            final = initial
-        # Fill missing states
-        data = {}
-        for month, duration in monthly.iteritems():
-            current_states = set()
-            for state in duration:
-                data.setdefault(state, []).insert(0, duration[state])
-                current_states = current_states.union(set((state,)))
-            for missing in distinct_states-current_states:
-                data.setdefault(missing, []).insert(0, 0)
-        # Construct final data structure
-        series = []
-        months = monthly.keys()
-        months.reverse()
-        for state in data:
-            series.append({
-                'name': state,
-                'data': data[state],
-                'color': STATES_COLORS.get(state, None)
-            })
-        data = {
-            'categories': months,
-            'series': series
-        }
+        data = get_changes_data(state)
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
@@ -268,19 +222,13 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def report_view(self, request):
         """ Testbed report status view """
-        from django.shortcuts import render_to_response
-        from django.template import RequestContext
-        from .helpers import get_report_data
-
         template = 'admin/state/state/report.html'
         iframe = request.GET.get("iframe", False)
         data = get_report_data()
-        
         opt = {
             'data': data,
             'iframe': iframe,
         }
-
         context = RequestContext(request)
         return render_to_response(template, opt, context_instance=context)
     

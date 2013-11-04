@@ -51,7 +51,6 @@ def get_report_data():
                     if current in states:
                         groups[group][relation].setdefault(report, 0)
                         groups[group][relation][report] += 1
-                        groups[group][relation].setdefault(report, 0)
                         totals[relation].setdefault(report, 0)
                         totals[relation][report] += 1
                         total += 1

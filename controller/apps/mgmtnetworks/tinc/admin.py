@@ -55,7 +55,7 @@ class TincClientInline(TincHostInline):
     model = TincClient
     verbose_name_plural = 'tinc client'
     form = TincClientInlineForm
-    
+
 
 class TincServerInline(TincHostInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025

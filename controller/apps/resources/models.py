@@ -49,11 +49,14 @@ class Resource(BaseResource):
 
 class ResourceReq(BaseResource):
     req = models.PositiveIntegerField(null=True, blank=True)
-
+    
     class Meta:
         verbose_name = "Resource request"
         verbose_name_plural = "Resource requests"
 
-from nodes.models import Node
-Node.add_to_class('resources', generic.GenericRelation('resources.Resource'))
 
+for producer_model in ResourcePlugin.get_producers_models():
+    producer_model.add_to_class('resources', generic.GenericRelation('resources.Resource'))
+
+for consumer_model in ResourcePlugin.get_consumers_models():
+    consumer_model.add_to_class('resources', generic.GenericRelation('resources.ResourceReq'))

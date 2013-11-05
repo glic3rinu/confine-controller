@@ -16,7 +16,7 @@ class TincHostInlineForm(forms.ModelForm):
         if self.cleaned_data['clear_pubkey']:
             self.instance.pubkey = None
         super(TincHostInlineForm, self).save(commit=commit)
-    
+
 
 class TincClientInlineForm(TincHostInlineForm):
     class Meta:

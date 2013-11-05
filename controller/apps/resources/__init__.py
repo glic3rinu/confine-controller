@@ -16,11 +16,11 @@ class ResourcePlugin(object):
     __metaclass__ = plugins.PluginMount
     
     @classmethod
-    def get_producers_model(cls):
+    def get_producers_models(cls):
         return cls._get_related_models('producers')
     
     @classmethod
-    def get_consumers_model(cls):
+    def get_consumers_models(cls):
         return cls._get_related_models('consumers')
     
     @classmethod
@@ -28,8 +28,15 @@ class ResourcePlugin(object):
         return cls._get_resources_by_type(producer, 'producers')
     
     @classmethod
-    def get_resources_for_consume(cls, consumer):
+    def get_resources_for_consumer(cls, consumer):
         return cls._get_resources_by_type(consumer, 'consumers')
+    
+    @classmethod
+    def get(cls, name):
+        for resource in cls.plugins:
+            if resource.name == name:
+                return resource
+        raise KeyError('Resource with name %s can not be found' % name)
     
     @classmethod
     def _get_related_models(cls, type):

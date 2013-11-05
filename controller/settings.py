@@ -41,3 +41,6 @@ RESTART_SERVICES = getattr(settings, 'RESTART_SERVICES',
 STOP_SERVICES = getattr(settings, 'STOP_SERVICES',
     [['apache2', ('uwsgi', 'nginx')], 'celerybeat', 'celeryd', 'celeryevcam', 'tinc', 'postgresql'])
 
+
+# Periodically clean orphan files task
+CLEAN_ORPHAN_FILES = getattr(settings, 'CLEAN_ORPHAN_FILES', False)

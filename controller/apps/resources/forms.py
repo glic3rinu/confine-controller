@@ -43,8 +43,8 @@ class ResourceInlineFormSet(generic.BaseGenericInlineFormSet):
 class ResourceReqInlineFormSet(generic.BaseGenericInlineFormSet):
     """ Provides initial resource values """
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get('instance')
         if not args and not 'data' in kwargs:
+            instance = kwargs.get('instance')
             initial_data = {}
             prefix = kwargs['prefix']
             available = ResourcePlugin.get_resources_for_consumer(type(instance))

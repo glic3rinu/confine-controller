@@ -26,25 +26,65 @@ class ResourceInlineFormSet(generic.BaseGenericInlineFormSet):
         if not instance.pk and 'data' not in kwargs:
             resources = ResourcePlugin.get_resources_for_producer(type(instance))
             total = len(resources)
-            prefix = 'resources-resource-content_type-object_id-'
+            prefix = kwargs['prefix']
             initial_data = {
-                prefix+'TOTAL_FORMS': unicode(total),
-                prefix+'INITIAL_FORMS': u'0',
-                prefix+'MAX_NUM_FORMS': unicode(total),
+                prefix+'-TOTAL_FORMS': unicode(total),
+                prefix+'-INITIAL_FORMS': u'0',
+                prefix+'-MAX_NUM_FORMS': unicode(total),
             }
             for num, resource in enumerate(resources):
-                initial_data[prefix+'%d-name' % num] = resource.name
-                initial_data[prefix+'%d-max_sliver' % num] = resource.max_sliver
-                initial_data[prefix+'%d-dflt_sliver' % num] = resource.dflt_sliver
+                initial_data[prefix+'-%d-name' % num] = resource.name
+                initial_data[prefix+'-%d-max_sliver' % num] = resource.max_sliver
+                initial_data[prefix+'-%d-dflt_sliver' % num] = resource.dflt_sliver
             kwargs['data'] = initial_data
         super(ResourceInlineFormSet, self).__init__(*args, **kwargs)
 
 
-
-class ResourceReqInlineForm(forms.ModelForm):
+class ResourceReqInlineFormSet(generic.BaseGenericInlineFormSet):
+    """ Provides initial resource values """
     def __init__(self, *args, **kwargs):
-        super(ResourceReqInlineForm, self).__init__(*args, **kwargs)
-        choices = []
-        for resource in ResourcePlugin.get_resources_for_consumer(self.parent_model):
-            choices.append((resource.name, resource.verbose_name))
-        self.fields['name'] = forms.ChoiceField(choices=choices)
+        if not args and not 'data' in kwargs:
+            instance = kwargs.get('instance')
+            initial_data = {}
+            prefix = kwargs['prefix']
+            available = ResourcePlugin.get_resources_for_consumer(type(instance))
+            existing = instance.resources.all() if instance.pk else []
+            total = len(available)
+            initial_data = {
+                prefix+'-TOTAL_FORMS': unicode(total),
+                prefix+'-MAX_NUM_FORMS': unicode(total),
+            }
+            availables = []
+            existings = []
+            for availableres in available:
+                exists = False
+                for existingres in existing:
+                    if availableres.name == existingres.name:
+                        exists = True
+                        existings.append(existingres)
+                if not exists:
+                    availables.append(availableres)
+            for num, resource in enumerate(existings):
+                initial_data[prefix+'-%d-id' % num] = resource.id
+                initial_data[prefix+'-%d-name' % num] = resource.name
+                initial_data[prefix+'-%d-req' % num] = resource.req
+                initial_data[prefix+'-%d-unit' % num] = resource.unit
+            for num, resource in enumerate(availables, len(existings)):
+                initial_data[prefix+'-%d-name' % num] = resource.name
+                initial_data[prefix+'-%d-unit' % num] = resource.unit
+                kwargs['data'] = initial_data
+            initial_data[prefix+'-INITIAL_FORMS'] = unicode(len(existings))
+        super(ResourceReqInlineFormSet, self).__init__(*args, **kwargs)
+    
+    def save_new(self, form, commit=True):
+        """ Do not save empty objects """
+        if not form.cleaned_data['req']:
+            return super(ResourceReqInlineFormSet, self).save_new(form, commit=False)
+        return super(ResourceReqInlineFormSet, self).save_new(form, commit=commit)
+    
+    def save_existing(self, form, instance, commit=True):
+        """ Remove empty objects """
+        if not form.cleaned_data['req']:
+            instance.delete()
+            return instance
+        return super(ResourceReqInlineFormSet, self).save_existing(form, instance, commit=commit)

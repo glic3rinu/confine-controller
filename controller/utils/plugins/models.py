@@ -1,5 +1,7 @@
 from django.db import models
 
+from controller.utils.functional import cached
+
 
 class PluginModelQuerySet(models.Manager):
     def active(self, **kwargs):
@@ -20,13 +22,12 @@ class PluginModel(models.Model):
         return self.label
     
     @property
+    @cached
     def instance(self):
-        if not hasattr(self, '_instance'):
-            label = str(self.label)
-            module = __import__(self.module, fromlist=[label])
-            plugin_class = getattr(module, self.label)
-            self._instance = plugin_class()
-        return self._instance
+        label = str(self.label)
+        module = __import__(self.module, fromlist=[label])
+        plugin_class = getattr(module, self.label)
+        return plugin_class()
     
     @property
     def description(self):

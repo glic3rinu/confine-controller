@@ -10,6 +10,7 @@ from django.dispatch import Signal
 from django.utils import timezone
 from django_transaction_signals import defer
 
+from controller.utils.functional import cached
 from controller.utils.time import heartbeat_expires as heartbeatexpires
 from nodes.models import Node
 from slices.models import Sliver
@@ -68,28 +69,33 @@ class State(models.Model):
         return self.value
     
     @property
+    @cached
     def last_change_on(self):
         last_state = self.last
         return last_state.start if last_state else None
     
     @property
+    @cached
     def heartbeat_expires(self):
         schedule = settings.STATE_SCHEDULE
         window = settings.STATE_EXPIRE_WINDOW
         return functools.partial(heartbeatexpires, freq=schedule, expire_window=window)
     
     @property
+    @cached
     def last(self):
         history = self.history.all().order_by('-start')
         return history[0] if history else None
     
     @property
+    @cached
     def current(self):
         if not self.last_try_on or time() > self.heartbeat_expires(self.last_try_on):
             return self.NODATA
         return self.value
     
     @property
+    @cached
     def next_retry_on(self):
         freq = settings.STATE_SCHEDULE
         return self.last_try_on + timedelta(seconds=freq)

@@ -15,6 +15,13 @@ class ResourcePlugin(object):
     
     __metaclass__ = plugins.PluginMount
     
+    
+    def clean(self, resource):
+        pass
+    
+    def clean_req(self, resource):
+        pass
+    
     @classmethod
     def get_producers_models(cls):
         return cls._get_related_models('producers')
@@ -35,7 +42,7 @@ class ResourcePlugin(object):
     def get(cls, name):
         for resource in cls.plugins:
             if resource.name == name:
-                return resource
+                return resource()
         raise KeyError('Resource with name %s can not be found' % name)
     
     @classmethod

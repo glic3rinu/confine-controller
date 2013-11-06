@@ -10,6 +10,7 @@ from django.utils.timezone import now
 
 from controller.models.fields import MultiSelectField, NullableCharField
 from controller.utils import autodiscover
+from controller.utils.functional import cached
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
         validate_sha256, validate_file_extensions)
 from nodes.models import Node
@@ -89,6 +90,7 @@ class Template(models.Model):
         return "%s (%s)" % (self.name, self.type)
     
     @property
+    @cached
     def image_sha256(self):
         try:
             return hashlib.sha256(self.image.file.read()).hexdigest()

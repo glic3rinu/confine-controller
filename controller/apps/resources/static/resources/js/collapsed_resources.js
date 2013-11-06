@@ -1,7 +1,7 @@
 (function($) {
     $(document).ready(function() {
-        var id = 'sliver';
-        var selector = "h2:contains('Slivers')";
+        var id = 'resources';
+        var selector = "h2:contains('Resources')";
         
         if ($(selector).parent().find("ul.errorlist").length == 0){
             $(selector).parent().addClass("collapsed");
@@ -18,3 +18,5 @@
         };
     });
 })(django.jQuery);
+
+

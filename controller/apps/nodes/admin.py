@@ -39,6 +39,7 @@ class NodePropInline(PermissionTabularInline):
     class Media:
         js = ('nodes/js/collapsed_node_properties.js',)
 
+
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
     extra = 1

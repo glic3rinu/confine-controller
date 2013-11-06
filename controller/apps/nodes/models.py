@@ -5,6 +5,7 @@ from django.db import models
 from controller.models.fields import NullableCharField, NullableTextField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_prop_name, validate_net_iface_name
+from controller.utils.functional import cached
 from controller.utils.singletons.models import SingletonModel
 from pki import ca, Bob
 
@@ -167,6 +168,7 @@ class Node(models.Model):
         super(Node, self).save(*args, **kwargs)
     
     @property
+    @cached
     def mgmt_net(self):
         return get_mgmt_backend_class()(self)
     
@@ -273,5 +275,6 @@ class Server(SingletonModel):
         return 'Server'
     
     @property
+    @cached
     def mgmt_net(self):
         return get_mgmt_backend_class()(self)

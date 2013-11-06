@@ -47,6 +47,8 @@ class TincHostInline(PermissionGenericTabularInline):
         """ Warning user if the tinc host is not fully configured """
         if obj and not obj.tinc.pubkey:
             msg = 'This %s misses a tinc public key.' % obj._meta.verbose_name
+            # HACK This shit gets called 2 times in django 1.6 :(
+            # if msg not in [m.message for m in messages.get_messages(request)]:
             messages.warning(request, msg)
         return super(TincHostInline, self).get_fieldsets(request, obj=obj)
 

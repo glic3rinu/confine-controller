@@ -449,6 +449,7 @@ class SlicePropInline(PermissionTabularInline):
     class Media:
         js = ('slices/js/collapsed_properties.js',)
 
+
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
         'name', 'id', 'vlan_nr', colored_set_state, num_slivers, admin_link('template'),

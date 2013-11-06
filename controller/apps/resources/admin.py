@@ -19,14 +19,15 @@ class ResourceAdminInline(PermissionGenericTabularInline):
     max_num = 0
     can_delete = False
     
+    class Media:
+        js = ('resources/js/collapsed_resources.js',)
+    
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Readonly resource name but form intput still hidden """
         if db_field.name == 'name':
             kwargs['widget'] = VerboseNameShowTextWidget()
         return super(ResourceAdminInline, self).formfield_for_dbfield(db_field, **kwargs)
-    
-    class Media:
-        js = ('resources/js/collapsed_resources.js',)
+
 
 
 class ResourceReqAdminInline(PermissionGenericTabularInline):
@@ -45,11 +46,6 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
         if db_field.name == 'name':
             kwargs['widget'] = VerboseNameShowTextWidget()
         return super(ResourceReqAdminInline, self).formfield_for_dbfield(db_field, **kwargs)
-    
-    def get_formset(self, request, obj=None, **kwargs):
-        self.form.parent_model = self.parent_model
-        self.extra = 2
-        return super(ResourceReqAdminInline, self).get_formset(request, obj=obj, **kwargs)
 
 
 for producer_model in ResourcePlugin.get_producers_models():

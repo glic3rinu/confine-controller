@@ -39,16 +39,17 @@ class BaseResource(models.Model):
     def clean(self):
         """ Make sure self.name is a valid resource """
         super(BaseResource, self).clean()
-        category = self.PRODUCER if type(self) is Resource else self.CONSUMER
-        opts = self.content_type.model_class()._meta
-        label = '%s.%s' % (opts.app_label, opts.object_name)
         try:
             instance = self.instance
         except KeyError as e:
             raise ValidationError(str(e))
-        if not label in getattr(instance, category+'s'):
-            msg = "%s is not a resource %s of %s" % (label, category, instance.name)
-            raise ValidationError(msg)
+        # FIXME self.content_type is not available during form.full_clean()
+#        category = self.PRODUCER if type(self) is Resource else self.CONSUMER
+#        opts = self.content_type.model_class()._meta
+#        label = '%s.%s' % (opts.app_label, opts.object_name)
+#        if not label in getattr(instance, category+'s'):
+#            msg = "%s is not a resource %s of %s" % (label, category, instance.name)
+#            raise ValidationError(msg)
 
 
 class Resource(BaseResource):

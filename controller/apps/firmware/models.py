@@ -11,6 +11,7 @@ from django.core import validators
 from django.db import models
 from django.dispatch import Signal, receiver
 from django.template import Context
+from django.utils.functional import cached_property
 from django_transaction_signals import defer
 from djcelery.models import TaskState
 from privatefiles import PrivateFileField
@@ -20,6 +21,7 @@ from controller.core.validators import validate_file_extensions
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
+from controller.utils.functional import cached
 from nodes.models import Server
 from nodes.settings import NODES_NODE_ARCHS
 from controller.utils.plugins.models import PluginModel
@@ -36,10 +38,9 @@ class BuildQuerySet(models.query.QuerySet):
     def get_current(self, node):
         """ Given an node returns an up-to-date builded image, if exists """
         build = Build.objects.get(node=node)
-        config = Config.objects.get()
         if build.state != Build.AVAILABLE: 
             return build
-        if build.match(config):
+        if build.match_config:
             return build
         else: 
             raise Build.DoesNotExist()
@@ -94,6 +95,7 @@ class Build(models.Model):
         return self.image.name.split('/')[-1]
     
     @property
+    @cached
     def db_task(self):
         """ Returns the celery task responsible for 'self' image build """
         if not self.task_id:
@@ -107,7 +109,10 @@ class Build(models.Model):
     def task(self):
         return build_task.AsyncResult(self.task_id)
     
-    def _compute_state(self):
+    @property
+    @cached
+    def state(self):
+        """ Gives the current state of the build """
         if self.image:
             try:
                 self.image.file
@@ -115,7 +120,7 @@ class Build(models.Model):
                 return self.DELETED
             else: 
                 config = Config.objects.get()
-                if self.match(config):
+                if self.match_config:
                     return self.AVAILABLE
                 else:
                     return self.OUTDATED
@@ -126,14 +131,6 @@ class Build(models.Model):
         if self.task and self.task.state == celery_states.STARTED:
             return self.BUILDING
         return self.FAILED
-    
-    @property
-    def state(self):
-        """ Gives the current state of the build """
-        if hasattr(self, '_cached_state'):
-            return self._cached_state
-        self._cached_state = self._compute_state()
-        return self._cached_state
     
     @property
     def state_description(self):
@@ -150,6 +147,7 @@ class Build(models.Model):
         return description.get(self.state, '')
     
     @property
+    @cached
     def image_sha256(self):
         try:
             return sha256(self.image.file.read()).hexdigest()
@@ -183,16 +181,17 @@ class Build(models.Model):
         """ Add a new generated file to the build """
         BuildFile.objects.create(build=self, path=path, content=content, config=config)
     
-    def match(self, config):
+    @cached_property
+    def match_config(self):
         """ Checks if a a given build is up-to-date or not """
-        # TODO including non-atomic content (like cryptographyc keys) files
-        #      will result in False matching
+        # TODO including non-idempotent files (like cryptographyc keys)
+        #      will allways evaluate to false
+        config = Config.objects.get()
         if self.version != config.version:
             return False
         base_images = [ image.image for image in config.get_images(self.node) ]
         if not self.base_image or self.base_image not in base_images:
             return False
-        config = Config.objects.get()
         exclude = config.files.optional().values_list('pk', flat=True)
         old_files = self.files.exclude(config__is_optional=True)
         old_files = set( (f.path,f.content) for f in old_files )
@@ -405,6 +404,7 @@ class ConfigFile(models.Model):
         return files
     
     @property
+    @cached
     def help_text(self):
         """ Provides help_text file if exists """
         try:

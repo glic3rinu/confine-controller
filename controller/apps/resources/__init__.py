@@ -39,20 +39,20 @@ class ResourcePlugin(object):
         raise KeyError('Resource with name %s can not be found' % name)
     
     @classmethod
-    def _get_related_models(cls, type):
+    def _get_related_models(cls, category):
         models = set()
         for resource in cls.plugins:
-            for related in getattr(resource, type):
+            for related in getattr(resource, category):
                 if related:
                     models.add(get_model(*related.split('.')))
         return models
     
     @classmethod
-    def _get_resources_by_type(cls, model, type):
+    def _get_resources_by_type(cls, model, category):
         resources = []
         opts = model._meta
         model = "%s.%s" % (opts.app_label, opts.object_name)
         for resource in cls.plugins:
-            if model in getattr(resource, type):
+            if model in getattr(resource, category):
                 resources.append(resource)
         return resources

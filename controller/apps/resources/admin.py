@@ -3,7 +3,6 @@ from django.contrib import admin
 
 from controller.admin.utils import insertattr
 from controller.forms.widgets import ShowText
-from nodes.models import Node
 from permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin
@@ -37,9 +36,8 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
     def get_max_num(self, request, obj=None, **kwargs):
         """Hook for customizing the max number of extra inline forms."""
         return len(ResourcePlugin.get_resources_for_consumer(type(self.parent_model)))
-
+    
     def get_formset(self, request, obj=None, **kwargs):
-        """ Hook node for future usage in the inline form """
         self.form.parent_model = self.parent_model
         return super(ResourceReqAdminInline, self).get_formset(request, obj=obj, **kwargs)
 
@@ -47,5 +45,6 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
 for producer_model in ResourcePlugin.get_producers_models():
     insertattr(producer_model, 'inlines', ResourceAdminInline)
 
-for consumer_model in ResourcePlugin.get_consumers_models():
+from slices.admin import SliceSliversAdmin
+for consumer_model in list(ResourcePlugin.get_consumers_models()) + [SliceSliversAdmin]:
     insertattr(consumer_model, 'inlines', ResourceReqAdminInline)

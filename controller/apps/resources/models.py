@@ -1,14 +1,12 @@
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import lazy
 
 from controller.utils import autodiscover
 
 from . import ResourcePlugin
-
-
-autodiscover('resources')
 
 
 class BaseResource(models.Model):
@@ -27,19 +25,24 @@ class BaseResource(models.Model):
     
     @property
     def unit(self):
-        try:
-            return self.instance.unit
-        except KeyError:
-            return ''
+        return self.instance.unit if self.name else ''
     
     @property
     def instance(self):
-        for instance in ResourcePlugin.plugins:
-            if instance.name == self.name:
-                return instance
-        raise KeyError('Resource "%s" not registered' % self.name)
+        return ResourcePlugin.get(self.name)
     
-    # TODO validate names depending on content_type!
+    def validate(self):
+        """ Make sure self.name is a valid resource """
+        super(BaseResource, self).validate()
+        category = 'producer' if type(self) is Resource else 'consumer'
+        opts = self.content_type.model_class()._meta
+        label = "%s.%s" % (opts.object_name, opts.app_label)
+        try:
+            instance = self.instance
+        except KeyError as e:
+            raise ValidationError(str(e))
+        if not label in getattr(instance, category):
+            raise ValidationError('%s is not a resource %' % (label, category))
 
 
 class Resource(BaseResource):
@@ -54,6 +57,8 @@ class ResourceReq(BaseResource):
         verbose_name = "Resource request"
         verbose_name_plural = "Resource requests"
 
+
+autodiscover('resources')
 
 for producer_model in ResourcePlugin.get_producers_models():
     producer_model.add_to_class('resources', generic.GenericRelation('resources.Resource'))

@@ -5,7 +5,7 @@ from django.db import transaction
 
 
 def sync_plugins_action(name):
-    @transaction.commit_on_success
+    @transaction.atomic
     def sync_plugins(modeladmin, request, queryset):
         content = StringIO()
         call_command('sync%s' % name, stdout=content)

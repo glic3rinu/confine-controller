@@ -13,7 +13,7 @@ from .forms import ExecutionForm
 from .models import Operation, Instance
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def execute_operation_changelist(modeladmin, request, queryset):
     if queryset.count() != 1:
         messages.warning(request, "One operation at a time")
@@ -23,7 +23,7 @@ def execute_operation_changelist(modeladmin, request, queryset):
 execute_operation_changelist.short_description = 'Execute operation'
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def execute_operation(modeladmin, request, queryset):
     if not request.user.is_superuser:
         raise PermissionDenied
@@ -67,7 +67,7 @@ def execute_operation(modeladmin, request, queryset):
                             context, current_app=modeladmin.admin_site.name)
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def revoke_instance(modeladmin, request, queryset):
     for instance in queryset:
         instance.revoke()
@@ -75,7 +75,7 @@ revoke_instance.url_name = 'revoke'
 revoke_instance.verbose_name = 'revoke'
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def kill_instance(modeladmin, request, queryset):
     for instance in queryset:
         instance.kill()
@@ -83,7 +83,7 @@ kill_instance.url_name = 'kill'
 kill_instance.verbose_name = 'kill'
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def run_instance(modeladmin, request, queryset):
     for instance in queryset:
         instance.run()

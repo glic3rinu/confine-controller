@@ -16,7 +16,7 @@ def change_ticket_state_factory(action, final_state):
         'form': ChangeReasonForm()
     }
     @has_sudo_permissions
-    @transaction.commit_on_success
+    @transaction.atomic
     @action_with_confirmation(action, extra_context=context)
     def change_ticket_state(modeladmin, request, queryset, action=action, final_state=final_state):
         form = ChangeReasonForm(request.POST)
@@ -59,7 +59,7 @@ for state, name in action_map.items():
 
 
 @has_sudo_permissions
-@transaction.commit_on_success
+@transaction.atomic
 def take_tickets(modeladmin, request, queryset):
     for ticket in queryset:
         if ticket.owner != request.user:
@@ -78,7 +78,7 @@ take_tickets.short_description = 'Take selected tickets'
 take_tickets.description = 'Make yourself owner of the ticket'
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def mark_as_unread(modeladmin, request, queryset):
     """ Mark a tickets as unread """
     for ticket in queryset:
@@ -87,7 +87,7 @@ def mark_as_unread(modeladmin, request, queryset):
     modeladmin.message_user(request, msg)
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def mark_as_read(modeladmin, request, queryset):
     """ Mark a tickets as unread """
     for ticket in queryset:
@@ -97,7 +97,7 @@ def mark_as_read(modeladmin, request, queryset):
 
 
 @has_sudo_permissions
-@transaction.commit_on_success
+@transaction.atomic
 def set_default_queue(modeladmin, request, queryset):
     """ Set a queue as default issues queue """
     if queryset.count() != 1:

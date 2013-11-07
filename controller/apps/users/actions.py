@@ -15,7 +15,7 @@ from .models import JoinRequest
 
 
 @action_with_confirmation('send a join request to')
-@transaction.commit_on_success
+@transaction.atomic
 def join_request(modeladmin, request, queryset):
     """
     The user can create request to join some groups.
@@ -44,7 +44,7 @@ join_request.short_description = "Request to join the selected groups"
 join_request.url_name = 'join-request'
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def enable_account(modeladmin, request, queryset):
     """
     The testbed operators can enable the users

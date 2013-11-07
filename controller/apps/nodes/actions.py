@@ -13,7 +13,7 @@ from .forms import RequestCertificateForm
 
 
 @action_with_confirmation('reboot')
-@transaction.commit_on_success
+@transaction.atomic
 def reboot_selected(modeladmin, request, queryset):
     # Check that the user has change permission for the actual model
     # performance improvement: if superuser skip
@@ -37,7 +37,7 @@ reboot_selected.url_name = 'reboot'
 reboot_selected.description = mark_safe('Restart this node to apply configuration changes&#8230;')
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def request_cert(modeladmin, request, queryset):
     if queryset.count() != 1:
         messages.warning(request, "Please, one node at a time.")

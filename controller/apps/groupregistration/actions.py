@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 
 from groupregistration.models import GroupRegistration
 
-@transaction.commit_on_success
+@transaction.atomic
 def approve_group(modeladmin, request, queryset):
     rows_updated = 0
     for group in queryset:
@@ -19,7 +19,7 @@ def approve_group(modeladmin, request, queryset):
     return redirect('admin:users_group_changelist')
 approve_group.short_description = "Approve selected groups"
 
-@transaction.commit_on_success
+@transaction.atomic
 def reject_group(modeladmin, request, queryset):
     rows_updated = 0
     for group in queryset:

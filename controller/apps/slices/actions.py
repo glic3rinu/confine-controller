@@ -13,7 +13,7 @@ from .models import Slice, Sliver, SliverIface
 from .settings import SLICES_SLICE_EXP_INTERVAL
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def renew_selected_slices(modeladmin, request, queryset):
     # TODO queryset.renew() ?
     for obj in queryset:
@@ -29,7 +29,7 @@ renew_selected_slices.url_name = 'renew'
 renew_selected_slices.description = 'Delay the slice expiration date for %s days' % SLICES_SLICE_EXP_INTERVAL.days
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def reset_selected(modeladmin, request, queryset):
     # TODO queryset.reset() ?
     for obj in queryset:
@@ -46,7 +46,7 @@ reset_selected.description = ('Stop, redeploy and restart all the slivers in thi
     'slice without changing their configuration')
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def update_selected(modeladmin, request, queryset):
     # TODO queryset.update() ?
     for obj in queryset:
@@ -63,7 +63,7 @@ update_selected.description = ('Stop and undeploy this sliver, then try to deplo
     'it again with its latest configuration')
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def create_slivers(modeladmin, request, queryset):
     """ Create slivers in selected nodes """
     opts = modeladmin.model._meta

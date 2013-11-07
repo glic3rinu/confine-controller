@@ -91,7 +91,7 @@ def ping(model, ids=[], lock=True):
     return len(objects)
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def downsample(model):
     def aggregate(ping_set):
         THREEPLACES = decimal.Decimal('0.001')

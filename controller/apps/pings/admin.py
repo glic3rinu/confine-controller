@@ -35,6 +35,7 @@ class PingAdmin(PermissionModelAdmin):
     list_display_links = ('content_object',)
     fields = list_display
     date_hierarchy = 'date'
+    ordering = ('-date',)
     readonly_fields = list_display
     sudo_actions = ['delete_selected']
     deletable_objects_excluded = True

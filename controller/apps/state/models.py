@@ -218,9 +218,9 @@ class StateHistory(models.Model):
     metadata = models.TextField(blank=True, default='')
     
     objects = StateHistoryManager()
-    
+
     class Meta:
-        ordering = ['-start']
+        ordering = ('-start',)
     
     def __unicode__(self):
         return self.value

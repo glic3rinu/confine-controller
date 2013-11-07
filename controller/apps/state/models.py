@@ -254,6 +254,5 @@ def state(self):
     return self.state_set.get_or_create(object_id=self.id, content_type=ct)[0]
 
 for model in [Node, Sliver]:
-    print Node, Sliver
     model.add_to_class('state_set', generic.GenericRelation('state.State'))
     model.state = state

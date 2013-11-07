@@ -32,7 +32,7 @@ upgrade_notifications.description = ('Override current subject and message for '
 sync_notifications = sync_plugins_action('notifications')
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def enable_selected(modeladmin, request, queryset):
     queryset.update(is_active=True)
     msg = 'Selected %i notifications had been enabled' % queryset.count()
@@ -41,7 +41,7 @@ enable_selected.description = "Enable selected notifications"
 enable_selected.short_description = "Enable selected notifications"
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def disable_selected(modeladmin, request, queryset):
     queryset.update(is_active=False)
     msg = 'Selected %i notifications had been disabled' % queryset.count()

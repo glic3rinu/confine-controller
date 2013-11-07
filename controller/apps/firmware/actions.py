@@ -16,7 +16,7 @@ from .forms import BaseImageForm, OptionalFilesForm
 from .models import Build, Config
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def get_firmware(modeladmin, request, queryset):
     if queryset.count() != 1:
         messages.warning(request, "One node at a time")

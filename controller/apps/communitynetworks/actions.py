@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from .models import CnHost
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def cache_node_db(modeladmin, request, queryset):
     """
     Update CNDB cache for the selected nodes. This actions makes a

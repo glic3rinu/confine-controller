@@ -13,7 +13,7 @@ def clean_expired_slices():
     # Delete expired slices
     deletable_slices = Slice.objects.filter(expires_on__lte=now)
     for slice in deletable_slices:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             slice.delete()
     
     # Just for the record

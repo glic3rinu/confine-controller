@@ -9,7 +9,7 @@ from controller.core.exceptions import OperationLocked
 from .tasks import get_state
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def refresh(modeladmin, request, queryset):
     """ get_state from State queryset synchronously """
     opts = queryset[0].content_object._meta
@@ -32,7 +32,7 @@ refresh.description = "Retrieve the current state of the related object"
 refresh.always_display = True
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def refresh_state(modeladmin, request, queryset):
     """ gate_state from Node/Sliver queryset synchronously """
     opts = queryset.model._meta

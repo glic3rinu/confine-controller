@@ -34,7 +34,7 @@ def build_info_view(request, node_id):
     return HttpResponse(json.dumps(info), content_type="application/json")
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def delete_build_view(request, node_id):
     """ View for deleting a firmware build (with confirmation) """
     node = get_object_or_404(Node, pk=node_id)

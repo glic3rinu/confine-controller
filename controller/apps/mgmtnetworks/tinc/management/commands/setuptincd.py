@@ -56,7 +56,7 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list
     help = 'Creates the tincd config files and Server.tinc object'
     
-    @transaction.commit_on_success
+    @transaction.atomic
     @check_root
     def handle(self, *args, **options):
         from mgmtnetworks.tinc.models import TincServer, TincAddress

@@ -12,5 +12,5 @@ def notify(ids=[]):
     else:
         notifications = Notification.objects.active()
     for notification in notifications:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             notification.process()

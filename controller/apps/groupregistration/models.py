@@ -21,7 +21,7 @@ class GroupRegistrationManager(models.Manager):
     creation and its management [aceept|reject] (including emailing).
     
     """
-    @transaction.commit_on_success
+    @transaction.atomic
     def create_group_registration(self, name, desc, username, email, password, user=None):
         """
         Creates a new group registration associating the user who

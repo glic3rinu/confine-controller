@@ -18,7 +18,7 @@ else:
 
 
 class UserGroup(DefaultBackend):
-    @transaction.commit_on_success
+    @transaction.atomic
     def group_register(self, request, **kwargs):
         """
         Create a new group registration.

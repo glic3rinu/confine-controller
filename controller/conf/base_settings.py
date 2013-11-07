@@ -22,7 +22,7 @@ DATABASES = {
 }
 
 # Enable persistent connections
-CONN_MAX_AGE = 60
+CONN_MAX_AGE = 60*10
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

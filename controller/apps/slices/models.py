@@ -469,7 +469,6 @@ class SliverIface(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
-        ordering = ['nr']
         verbose_name = 'sliver interface'
         verbose_name_plural = 'sliver interfaces'
     

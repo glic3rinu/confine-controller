@@ -41,7 +41,6 @@ class Ping(models.Model):
     
     class Meta:
         index_together = [['object_id', 'content_type', 'date']]
-        ordering = ('-date',)
         get_latest_by = 'date'
     
     @classmethod

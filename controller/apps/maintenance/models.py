@@ -50,7 +50,7 @@ class Execution(models.Model):
     is_active = models.BooleanField(default=True)
     retry_if_offline = models.BooleanField(default=True,
             help_text='The operation will be retried if the node is currently offline.')
-    include_new_nodes = models.BooleanField(default=False
+    include_new_nodes = models.BooleanField(default=False,
             help_text='If selected the operation will be executed on newly created nodes')
     
     class Meta:

@@ -8,23 +8,14 @@ from jsonfield import JSONField
 from . import settings
 
 
-class TimeSerieManager(models.Manager):
-    def last(self, *args, **kwargs):
-        try:
-            return self.filter(*args, **kwargs).order_by('-date')[0]
-        except IndexError:
-            raise TimeSerie.DoesNotExist
-
-
 class TimeSerie(models.Model):
     name = models.CharField(max_length=64)
     value = JSONField()
     date = models.DateTimeField(auto_now_add=True)
     
-    objects = TimeSerieManager()
-    
     class Meta:
         index_together = [['name', 'date']]
+        get_latest_by = 'date'
     
     @property
     def has_expired(self):

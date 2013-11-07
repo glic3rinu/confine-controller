@@ -243,7 +243,7 @@ class Slice(models.Model):
     
     def _get_vlan_nr(self):
         qset = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')
-        last_nr = qset[0].vlan_nr if qset else 0
+        last_nr = qset.first().vlan_nr if qset else 0
         if last_nr < self.min_vlan_nr:
             return self.min_vlan_nr
         if last_nr >= self.max_vlan_nr:
@@ -525,7 +525,7 @@ class SliverIface(models.Model):
         # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
         if not SliverIface.objects.filter(sliver=self.sliver).exists():
             return 1
-        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr')[0].nr
+        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr').first().nr
         if last_nr >= self.max_nr:
             # try to recycle old values
             for new_nr in range(1, self.max_nr):

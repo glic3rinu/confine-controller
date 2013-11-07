@@ -38,7 +38,7 @@ class Monitor(object):
     @property
     def last(self):
         try:
-            return TimeSerie.objects.last(name=self.name)
+            return TimeSerie.objects.filter(name=self.name).latest()
         except TimeSerie.DoesNotExist:
             return None
     

@@ -413,6 +413,8 @@ class SliverInline(PermissionTabularInline):
     
     def sliver_link(self, instance):
         """ Display sliver change link on the inline form """
+        if not instance.pk:
+            return
         kwargs = {
             'slice_id': instance.slice_id,
             'object_id': instance.id}

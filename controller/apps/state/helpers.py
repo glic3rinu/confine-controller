@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
 from nodes.models import Node
-from slices.models import Slice
+from slices.models import Slice, Sliver
 from state.models import State
 from users.models import Group
 
@@ -87,12 +87,11 @@ def get_report_data():
     
     totals = {}
     groups = OrderedDict()
-    base_query = State.objects.values_list('value', flat=True)
     for group in Group.objects.all().order_by('name'):
         groups[group] = {}
         queryes = {
-           'nodes': base_query.filter(node__group=group, content_type__model='node'),
-           'slivers': base_query.filter(sliver__slice__group=group, content_type__model='sliver'),
+           'nodes': Node.objects.filter(group=group).values_list('state_set__value', flat=True),
+           'slivers': Sliver.objects.filter(slice__group=group).values_list('state_set__value', flat=True),
            'slices': Slice.objects.filter(group=group).values_list('set_state', flat=True),
         }
         for relation, query in queryes.iteritems():

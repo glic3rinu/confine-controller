@@ -42,11 +42,12 @@ class Ping(models.Model):
     class Meta:
         index_together = [['object_id', 'content_type', 'date']]
         ordering = ('-date',)
+        get_latest_by = 'date'
     
     @classmethod
     def get_state(cls, obj):
         try:
-            last = obj.pings.all().order_by('-date')[0]
+            last = obj.pings.all().latest()
         except IndexError:
             return cls.NODATA
         settings = cls.get_instance_settings(obj)

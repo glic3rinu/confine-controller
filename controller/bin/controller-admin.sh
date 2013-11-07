@@ -136,7 +136,7 @@ function install_requirements () {
                      IPy==0.81 \
                      django-extensions==1.1.1 \
                      django-transaction-signals==1.0.0 \
-                     django-celery==3.0.21 \
+                     django-celery==3.0.23 \
                      jsonfield==0.9.19 \
                      Markdown==2.3.1 \
                      django-filter==0.6 \

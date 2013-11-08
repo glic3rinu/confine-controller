@@ -153,8 +153,8 @@ class User(auth_models.AbstractBaseUser):
     description = models.TextField(blank=True, 
             help_text='An optional free-form textual description of this user, it '
                       'can include URLs and other information.')
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
+    first_name = '' # compatibility purpose
+    last_name = '' # not store into the DB
     is_active = models.BooleanField(default=True,
             help_text='Designates whether this user should be treated as '
                       'active. Unselect this instead of deleting accounts.')
@@ -174,13 +174,12 @@ class User(auth_models.AbstractBaseUser):
     
     def __unicode__(self):
         return self.username
-    
+
     def get_full_name(self):
-        full_name = '%s %s' % (self.first_name, self.last_name)
-        return full_name.strip()
+        return self.username
     
     def get_short_name(self):
-        return self.first_name
+        return self.username
     
     def has_perm(self, perm, obj=None):
         """
@@ -225,6 +224,14 @@ class User(auth_models.AbstractBaseUser):
     def email_user(self, subject, message, from_email=None):
         """ Used for django-registration """
         send_mail(subject, message, from_email, [self.email])
+
+    @property
+    def name(self):
+        return self.username
+
+    @name.setter
+    def name(self, name):
+        self.username = name
     
     @property
     def role_set(self):

@@ -1,12 +1,12 @@
 (function($) {
     $(document).ready(function($) {        
         // warn twice user when set_state is set to failure
-        $('#id_set_state').live("change", function() {
+        $('#id_set_state').on("change", function() {
             if(warn_failure_choosed() == false) {
                 $(this).val("safe");
             }
         });
-        $('#node_form').live("submit", function() {
+        $('#node_form').on("submit", function() {
             return warn_failure_choosed();
         });
         // add search placeholder. FIXME: generate based on admin search_fields

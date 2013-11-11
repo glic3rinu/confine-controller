@@ -15,7 +15,7 @@
         });
         
         // load markdown preview
-        $('.load-preview').live("click", function() {
+        $('.load-preview').on("click", function() {
             var field = '#' + $(this).attr('data-field'),
                 data = { 
                     'data': $(field).val(),

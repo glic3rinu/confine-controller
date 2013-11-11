@@ -8,8 +8,8 @@ from controller.utils import plugins
 class ResourcePlugin(object):
     name = ''
     unit = ''
-    max_sliver = 0
-    dflt_sliver = 0
+    max_req = 0
+    dflt_req = 0
     producers = []
     consumers = []
     

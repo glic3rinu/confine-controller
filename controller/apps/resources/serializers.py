@@ -12,7 +12,7 @@ class ResourceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Resource
-        fields = ['name', 'max_sliver', 'dflt_sliver', 'unit']
+        fields = ['name', 'max_req', 'dflt_req', 'unit']
 
 
 class ResourceReqSerializer(serializers.ModelSerializer):

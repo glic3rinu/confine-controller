@@ -37,7 +37,7 @@ class UserSerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = User
-        exclude = ['password', 'groups', 'username']
+        exclude = ['password', 'groups', 'first_name', 'last_name', 'username']
 
 
 class GroupSerializer(serializers.UriHyperlinkedModelSerializer):

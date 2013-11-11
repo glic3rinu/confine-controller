@@ -138,7 +138,7 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
             # ronly forms doesn't have initial
             user = request.user
             if not user.is_superuser:
-                ro_widget = ReadOnlyWidget(user.id, user.username)
+                ro_widget = ReadOnlyWidget(user.id, user.get_username())
                 form.base_fields['owner'].widget = ro_widget
                 form.base_fields['owner'].required = False
             else:

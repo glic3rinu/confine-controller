@@ -96,7 +96,6 @@ class Roles(models.Model):
                       'can manage slices belonging to the group.')
     
     class Meta:
-        ordering = ['user__username']
         unique_together = ('user', 'group')
     
     def __unicode__(self):
@@ -107,7 +106,7 @@ class Roles(models.Model):
 
 
 class UserManager(auth_models.BaseUserManager):
-    def create_user(self, username, email=None, password=None, **extra_fields):
+    def create_user(self, username, email, password=None, **extra_fields):
         """
         Creates and saves a User with the given username, email and password.
         """

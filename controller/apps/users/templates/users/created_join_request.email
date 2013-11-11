@@ -1,6 +1,6 @@
 {% if subject %}New membership request for group {{ request.group.name }}{% endif %}
 {% if message %}Hi,
-user {{ request.user.username }} has filed a membership request for your group {{ request.group.name }}.
+user {{ request.user.get_username }} has filed a membership request for your group {{ request.group.name }}.
 
 The following URL allows you to process this request:
 https://{{ site }}{% url 'admin:users_group_change' request.group.pk %}

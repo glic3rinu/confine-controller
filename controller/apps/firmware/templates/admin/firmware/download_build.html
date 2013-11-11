@@ -24,7 +24,7 @@
         {% code 'bash' %}curl --user {{ user }} \
     http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }}
 
-wget --user {{ user }} --ask-password --auth-no-challenge --no-check-certificate \
+wget --user {{ user.get_username }} --ask-password --auth-no-challenge --no-check-certificate \
     http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }}
 {% endcode %}
         <p>The following command can be used for flashing this image (remember to change the destination device):</p>

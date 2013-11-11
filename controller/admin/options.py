@@ -127,7 +127,8 @@ class SortableTabularInline(admin.options.TabularInline):
         """ Define dynamic ordering based on request parameters """
         sortable_fields = self.get_sortable_fields(request)
         #### TODO: how to insert as extra_context and avoid using session??
-        request.session['sortable_fields'] = sortable_fields
+        sfields_serialized = [x.serialize() for x in sortable_fields]
+        request.session['sortable_fields'] = sfields_serialized
         ordering = request.GET.get('o')
         try:
             # check user input
@@ -137,7 +138,8 @@ class SortableTabularInline(admin.options.TabularInline):
             return self.ordering # default ordering or None
         
         current_sfield.update(ordering)
-        return [current_sfield.sort_by()]
+        sort_by = getattr(current_sfield, 'sort_by')
+        return [sort_by]
     
     def get_sortable_fields(self, request):
         """ 

@@ -41,3 +41,13 @@ class SortableField(object):
         else:
             return "-%s" % self.order_value
 
+    def serialize(self):
+        dump = self.__dict__
+        dump.update({
+            'order_type': self.order_type(),
+            'sort_by': self.sort_by(),
+            'is_reverse': self.is_reverse(),
+            'order': self.order(),
+            'reverse_order_value': self.reverse_order_value(),
+        })
+        return dump

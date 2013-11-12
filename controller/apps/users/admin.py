@@ -129,8 +129,7 @@ class JoinRequestInline(PermissionTabularInline):
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
     list_display = (
-        'username', 'email', 'first_name', 'last_name', 'group_links', 
-        'is_superuser', 'is_active'
+        'username', 'email', 'name', 'group_links', 'is_superuser', 'is_active'
     )
     list_filter = (
         'is_active', 'is_superuser', 'roles__is_admin', 'roles__is_researcher',
@@ -138,8 +137,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
     )
     fieldsets = (
         (None, {'fields': ('username', )}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email',
-                                      'description',)}),
+        ('Personal info', {'fields': ('name', 'email', 'description',)}),
         ('Permissions', {'fields': ('is_active', 'is_superuser',)}),
         ('Important dates', {
             'classes': ('collapse',),
@@ -152,7 +150,7 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
             'fields': ('username', 'password1', 'password2', 'email')}
         ),)
     
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    search_fields = ('username', 'email', 'name')
     inlines = [AuthTokenInline, UserRolesInline]
     actions = [enable_account, send_email]
     sudo_actions = ['delete_selected', 'enable_account', 'send_email']

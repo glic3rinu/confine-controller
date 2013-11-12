@@ -151,8 +151,10 @@ class User(auth_models.AbstractBaseUser):
     description = models.TextField(blank=True, 
             help_text='An optional free-form textual description of this user, it '
                       'can include URLs and other information.')
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
+    first_name = '' # fluent dashboard compatibility
+    last_name = ''
+    name = models.CharField(max_length=60, unique=True, db_index=True,
+            help_text='Required. 60 characters or fewer. Free text')
     is_active = models.BooleanField(default=True,
             help_text='Designates whether this user should be treated as '
                       'active. Unselect this instead of deleting accounts.')
@@ -174,11 +176,10 @@ class User(auth_models.AbstractBaseUser):
         return self.username
     
     def get_full_name(self):
-        full_name = '%s %s' % (self.first_name, self.last_name)
-        return full_name.strip()
+        return self.name
     
     def get_short_name(self):
-        return self.first_name
+        return self.name
     
     def has_perm(self, perm, obj=None):
         """

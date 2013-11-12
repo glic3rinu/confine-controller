@@ -4,8 +4,7 @@
     "model": "users.user", 
     "fields": {
         "username": "super",
-        "first_name": "", 
-        "last_name": "", 
+        "name": "super",
         "description": "", 
         "is_active": true, 
         "is_superuser": true, 
@@ -20,8 +19,7 @@
     "model": "users.user", 
     "fields": {
         "username": "admin",
-        "first_name": "", 
-        "last_name": "", 
+        "name": "admin",
         "description": "", 
         "is_active": true, 
         "is_superuser": false, 
@@ -36,8 +34,7 @@
     "model": "users.user", 
     "fields": {
         "username": "user",
-        "first_name": "", 
-        "last_name": "", 
+        "name": "user",
         "description": "", 
         "is_active": true, 
         "is_superuser": false, 
@@ -52,8 +49,7 @@
     "model": "users.user", 
     "fields": {
         "username": "tech",
-        "first_name": "", 
-        "last_name": "", 
+        "name": "tech",
         "description": "", 
         "is_active": true, 
         "is_superuser": false, 
@@ -68,8 +64,7 @@
     "model": "users.user", 
     "fields": {
         "username": "researcher",
-        "first_name": "", 
-        "last_name": "", 
+        "name": "researcher",
         "description": "", 
         "is_active": true, 
         "is_superuser": false, 

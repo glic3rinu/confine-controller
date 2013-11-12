@@ -35,11 +35,10 @@ class UserSerializer(serializers.UriHyperlinkedModelSerializer):
     is_superuser = serializers.BooleanField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True)
-    name = serializers.CharField(source='username')
     
     class Meta:
         model = User
-        exclude = ['password', 'groups', 'first_name', 'last_name', 'username']
+        exclude = ['password', 'groups', 'username']
 
 
 class GroupSerializer(serializers.UriHyperlinkedModelSerializer):

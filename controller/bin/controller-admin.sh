@@ -129,7 +129,7 @@ function install_requirements () {
     
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
     
-    DEVELOPMENT_PIP="Django==1.5 \
+    DEVELOPMENT_PIP="Django==1.6 \
                      django-celery-email==1.0.3 \
                      django-fluent-dashboard==0.3.5 \
                      South==0.8.1 \
@@ -137,6 +137,7 @@ function install_requirements () {
                      django-extensions==1.1.1 \
                      django-transaction-signals==1.0.0 \
                      django-celery==3.0.23 \
+                     celery==3.0.24 \
                      jsonfield==0.9.19 \
                      Markdown==2.3.1 \
                      django-filter==0.6 \

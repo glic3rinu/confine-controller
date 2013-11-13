@@ -74,10 +74,13 @@ class UserRolesForm(forms.ModelForm):
     
     def clean(self):
         if not self.cleaned_data.get('is_admin'):
-            role = self.instance
-            admins = Roles.objects.filter(group=role.group, is_admin=True).exclude(pk=role.pk)
-            if not admins.exists():
-                raise ValidationError('The group must have at least one admin')
+            group = self.cleaned_data.get('group')
+            if group:
+                admins = Roles.objects.filter(group=group, is_admin=True)
+                if self.instance.pk:
+                    admins = admins.exclude(pk=self.instance.pk)
+                if not admins.exists():
+                    raise ValidationError('The group must have at least one admin')
         return super(UserRolesForm, self).clean()
 
 
@@ -197,6 +200,7 @@ class JoinRequestForm(forms.ModelForm):
         if log:
             modeladmin = get_modeladmin(Group)
             modeladmin.log_change(request, jrequest.group, log)
+
 
 class SendMailForm(forms.Form):
     subject = forms.CharField(widget=forms.TextInput(attrs={'size':'118'}))

@@ -138,6 +138,7 @@ function install_requirements () {
                      django-transaction-signals==1.0.0 \
                      django-celery==3.0.23 \
                      celery==3.0.24 \
+                     kombu==2.5.14 \
                      jsonfield==0.9.19 \
                      Markdown==2.3.1 \
                      django-filter==0.6 \

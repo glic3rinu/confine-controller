@@ -73,12 +73,14 @@ class UserRolesForm(forms.ModelForm):
                         display_value=mark_safe('<b>'+get_admin_link(instance.group)))
     
     def clean(self):
+        """ prevent groups without any admin """
         if not self.cleaned_data.get('is_admin'):
             group = self.cleaned_data.get('group')
-            if group:
-                admins = Roles.objects.filter(group=group, is_admin=True)
-                if self.instance.pk:
-                    admins = admins.exclude(pk=self.instance.pk)
+            role = self.instance
+            # Adding roles is harmless and avoid to display this validation error
+            # when there is no group selected
+            if group and role.pk:
+                admins = Roles.objects.filter(group=group, is_admin=True).exclude(pk=role.pk)
                 if not admins.exists():
                     raise ValidationError('The group must have at least one admin')
         return super(UserRolesForm, self).clean()

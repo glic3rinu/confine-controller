@@ -73,7 +73,7 @@ class UserRolesForm(forms.ModelForm):
                         display_value=mark_safe('<b>'+get_admin_link(instance.group)))
     
     def clean(self):
-        """ prevent groups without any admin """
+        """ prevent groups without no admins """
         if not self.cleaned_data.get('is_admin'):
             group = self.cleaned_data.get('group')
             role = self.instance

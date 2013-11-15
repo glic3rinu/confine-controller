@@ -63,6 +63,7 @@ class Command(BaseCommand):
                 "        'PASSWORD': '%(db_password)s',\n"
                 "        'HOST': '%(db_host)s',\n"
                 "        'PORT': '%(db_port)s',\n"
+                "        'ATOMIC_REQUESTS': True,\n"
                 "    }\n"
                 "}\n" % context)
             context.update({'db_config': db_config})

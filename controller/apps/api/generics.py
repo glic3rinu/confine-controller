@@ -24,6 +24,12 @@ class URIListCreateAPIView(ListCreateAPIView):
         base_link = ('base', 'http://confine-project.eu/rel/server/base')
         response['Link'] = link_header([base_link], request)
         return response
+    
+    def get_success_headers(self, data):
+        try:
+            return {'Location': data['uri']}
+        except (TypeError, KeyError):
+            return {}
 
 
 

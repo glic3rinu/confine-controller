@@ -27,8 +27,8 @@ class AuthTokenField(serializers.WritableField):
 
 
 class UserSerializer(serializers.UriHyperlinkedModelSerializer):
-    group_roles = GroupRolesSerializer(source='roles')
-    auth_tokens = AuthTokenField()
+    group_roles = GroupRolesSerializer(source='roles', required=False)
+    auth_tokens = AuthTokenField(required=False)
     is_active = serializers.BooleanField(read_only=True)
     is_superuser = serializers.BooleanField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)

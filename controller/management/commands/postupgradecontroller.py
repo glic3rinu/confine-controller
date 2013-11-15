@@ -162,6 +162,14 @@ class Command(BaseCommand):
                 Template.objects.filter(type='openwrt-backfire').update(type='openwrt')
         if version < 906:
             deprecate_periodic_tasks(('state.nodestate', 'state.sliverstate'))
+        if version <= 907:
+            upgrade_notes.append("It is extremly recommended to update your database "
+                "settings to enable atomic request behaviour:\n"
+                "  https://docs.djangoproject.com/en/dev/topics/db/transactions/#tying-transactions-to-http-requests\n"
+                "Just add:\n"
+                "   'ATOMIC_REQUESTS': True,\n"
+                "into DATABASES setting within <project_name>/<project_name>/settings.py")
+        
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'
                 '    ===================\n'

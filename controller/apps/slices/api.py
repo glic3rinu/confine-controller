@@ -204,7 +204,9 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Template
     serializer_class = TemplateSerializer
-
+    ctl = [
+        make_upload_file(Template, 'image', 'image'),
+    ]
 
 api.register(SliceList, SliceDetail)
 api.register(SliverList, SliverDetail)

@@ -41,7 +41,7 @@ class GroupRolesInline(PermissionTabularInline, SortableTabularInline):
     extra = 0
     formset = GroupRolesFormSet
     form = GroupRolesInlineForm
-    sortable_fields = {'user': 'user__username'}
+    sortable_fields = {'user': 'user__name'}
     verbose_name = 'member'
     verbose_name_plural = 'members'
     
@@ -129,7 +129,7 @@ class JoinRequestInline(PermissionTabularInline):
 
 class UserAdmin(UserAdmin, PermissionModelAdmin):
     list_display = (
-        'username', 'email', 'name', 'group_links', 'is_superuser', 'is_active'
+        'name', 'email', 'group_links', 'is_superuser', 'is_active'
     )
     list_filter = (
         'is_active', 'is_superuser', 'roles__is_admin', 'roles__is_researcher',

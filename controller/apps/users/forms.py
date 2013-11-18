@@ -41,6 +41,10 @@ class UserChangeForm(forms.ModelForm):
     class Meta:
         model = User
     
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        return name.strip()
+    
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
         # This is done here, rather than on the field, because the

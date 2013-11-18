@@ -154,7 +154,10 @@ class User(auth_models.AbstractBaseUser):
     first_name = '' # fluent dashboard compatibility
     last_name = ''
     name = models.CharField(max_length=60, unique=True, db_index=True,
-            help_text='Required. 60 characters or fewer. Free text')
+            help_text='A unique name for this user. A single non-empty line of '
+                      'free-form text with no whitespace surrounding it.',
+            validators=[validators.RegexValidator('^([\w.@+-]+\s)+[\w.@+-]+$',
+                       'Enter a valid name.', 'invalid')])
     is_active = models.BooleanField(default=True,
             help_text='Designates whether this user should be treated as '
                       'active. Unselect this instead of deleting accounts.')
@@ -173,7 +176,7 @@ class User(auth_models.AbstractBaseUser):
         ordering = ['username']
     
     def __unicode__(self):
-        return self.username
+        return self.name
     
     def get_full_name(self):
         return self.name

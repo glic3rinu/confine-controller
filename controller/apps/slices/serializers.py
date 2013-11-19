@@ -3,8 +3,6 @@ from __future__ import absolute_import
 import json
 import six
 
-from rest_framework.compat import smart_text
-
 from api import serializers, exceptions
 from nodes.settings import NODES_NODE_ARCHS
 

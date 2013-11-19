@@ -98,16 +98,7 @@ class PropertyField(WritableField):
 class MultiSelectField(ChoiceField):
     def valid_value(self, value):
         for arch in value:
-            valid = False
-            for k, v in self.choices:
-                if isinstance(v, (list, tuple)):
-                    # This is an optgroup, so look inside the group for options
-                    for k2, v2 in v:
-                        if arch == smart_text(k2):
-                            valid =  True
-                else:
-                    if arch == smart_text(k) or arch == k:
-                        valid =  True
+            valid = super(MultiSelectField, self).valid_value(arch)
             if not valid:
                 return False
         return True

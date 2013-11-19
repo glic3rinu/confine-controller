@@ -3,7 +3,10 @@ from __future__ import absolute_import
 import json
 import six
 
+from rest_framework.compat import smart_text
+
 from api import serializers, exceptions
+from nodes.settings import NODES_NODE_ARCHS
 
 from .models import Slice, Sliver, Template, SliverIface
 
@@ -60,8 +63,10 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
+    node_archs = serializers.MultiSelectField(choices=NODES_NODE_ARCHS)
     image_sha256 = serializers.CharField(read_only=True)
-    image_uri = serializers.HyperlinkedFileField(source='image')
+    image_uri = serializers.HyperlinkedFileField(source='image', required=False,
+        read_only=True)
     
     class Meta:
         model = Template

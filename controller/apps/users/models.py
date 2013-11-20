@@ -115,12 +115,14 @@ class UserManager(auth_models.BaseUserManager):
         email = UserManager.normalize_email(email)
         user = self.model(username=username, email=email, is_active=True,
                 is_superuser=False, last_login=now, date_joined=now, **extra_fields)
+        user.name = username # fill mandatory field
         user.set_password(password)
         user.save(using=self._db)
         return user
     
     def create_superuser(self, username, email, password, **extra_fields):
         user = self.create_user(username, email, password, **extra_fields)
+        user.name = username # fill mandatory field
         user.is_active = True
         user.is_superuser = True
         user.save(using=self._db)
@@ -156,7 +158,7 @@ class User(auth_models.AbstractBaseUser):
     name = models.CharField(max_length=60, unique=True, db_index=True,
             help_text='A unique name for this user. A single non-empty line of '
                       'free-form text with no whitespace surrounding it.',
-            validators=[validators.RegexValidator('^([\w.@+-]+\s)+[\w.@+-]+$',
+            validators=[validators.RegexValidator('^([\w.@+-]+\s?)+[\w.@+-]+$',
                        'Enter a valid name.', 'invalid')])
     is_active = models.BooleanField(default=True,
             help_text='Designates whether this user should be treated as '

@@ -39,6 +39,16 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Sliver
         exclude = ('exp_data', 'overlay')
+    
+    def validate(self, attrs):
+        """ workaround about nested serialization
+            sliverifaces need to be validated with an associated sliver
+        """
+        super(SliverSerializer, self).validate(attrs)
+        ifaces = attrs['interfaces']
+        for iface in ifaces:
+            Sliver.get_registered_ifaces()[iface.type].clean_model(iface)
+        return attrs
 
 
 class SliceSerializer(serializers.UriHyperlinkedModelSerializer):

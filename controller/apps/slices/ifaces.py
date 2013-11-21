@@ -22,7 +22,7 @@ class BaseIface(object):
         """ additional logic to be executed during model.clean() """
         if iface.parent:
             raise ValidationError("parent not allowed for this type of iface")
-        if self.UNIQUE:
+        if self.UNIQUE and iface.sliver_id:
             private_qs = type(iface).objects.filter(sliver=iface.sliver, type=iface.type)
             if iface.pk:
                 private_qs = private_qs.exclude(pk=iface.pk)
@@ -51,7 +51,7 @@ class IsolatedIface(BaseIface):
     ALLOW_BULK = False
     
     def clean_model(self, iface):
-        if not iface.sliver.slice.vlan_nr:
+        if iface.sliver_id and not iface.sliver.slice.vlan_nr:
             raise ValidationError("Slice vlan_nr is mandatory for isolated interfaces.")
         if not iface.parent:
             raise ValidationError("Parent is mandatory for isolated interfaces.")
@@ -70,7 +70,7 @@ class Pub4Iface(BaseIface):
     
     def clean_model(self, iface):
         super(Pub4Iface, self).clean_model(iface)
-        if iface.sliver.node.sliver_pub_ipv4 == 'none':
+        if iface.sliver_id and iface.sliver.node.sliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
     
     def ipv4_addr(self, iface):

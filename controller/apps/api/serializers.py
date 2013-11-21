@@ -23,7 +23,8 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
         if isinstance(value, six.text_type):
             value = value.replace("u'", '"').replace("'", '"')
             value = json.loads(value)
-        value = value.pop('uri')
+        if isinstance(value, dict):
+            value = value.pop('uri')
         return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 

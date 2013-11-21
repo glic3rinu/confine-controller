@@ -89,7 +89,8 @@ def make_upload_file(model, field, field_url):
                 obj.save()
                 response_data = {'detail': 'File uploaded correctly'}
                 return Response(response_data, status=status.HTTP_200_OK)
-            raise exceptions.ParseError(detail='This endpoint only accepts null data')
+            msg = "File name '%s' not found in the MultiPart request" % field
+            raise exceptions.ParseError(detail=msg)
     return UploadFile
 
 

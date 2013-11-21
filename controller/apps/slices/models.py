@@ -10,7 +10,6 @@ from django.utils.timezone import now
 
 from controller.models.fields import MultiSelectField, NullableCharField
 from controller.utils import autodiscover
-from controller.utils.functional import cached
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
         validate_sha256, validate_file_extensions)
 from nodes.models import Node
@@ -25,6 +24,17 @@ from .tasks import force_slice_update, force_sliver_update
 def get_expires_on():
     """ Used by slice.renew and Slice.expires_on """
     return now() + settings.SLICES_SLICE_EXP_INTERVAL
+
+
+def clean_sha256(self, fields):
+    for field in fields:
+        if getattr(self, field):
+            if getattr(self, field+'_uri'):
+                raise ValidationError('%s or %s_uri ?' % (field, field))
+            sha256 = hashlib.sha256(getattr(self, field).file.read()).hexdigest()
+            setattr(self, field+'_sha256', sha256)
+        if getattr(self, field+'_uri') and not getattr(self, field+'_sha256'):
+            raise ValidationError('Missing %s_sha256.' % field)
 
 
 def make_upload_to(field_name, base_path, file_name):
@@ -85,17 +95,23 @@ class Template(models.Model):
             upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
                                      settings.SLICES_TEMPLATE_IMAGE_NAME),
             validators=[validate_file_extensions(settings.SLICES_TEMPLATE_IMAGE_EXTENSIONS)])
+    image_uri = models.CharField('image URI', max_length=256, blank=True,
+            help_text='The URI of a file containing an image for slivers (if they '
+                      'do not explicitly indicate one). The file must be an archive '
+                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
+                      'and will be applied on top of the used template. This member '
+                      'may be set directly or through the do-upload-overlay function.')
+    image_sha256 = models.CharField('image SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the image file, used to check its integrity. '
+                      'Compulsory when a file has been specified.',
+            validators=[validate_sha256])
     
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.type)
     
-    @property
-    @cached
-    def image_sha256(self):
-        try:
-            return hashlib.sha256(self.image.file.read()).hexdigest()
-        except:
-            return None
+    def clean(self):
+        super(Template, self).clean()
+        clean_sha256(self, ('image',))
 
 
 class Slice(models.Model):
@@ -206,14 +222,7 @@ class Slice(models.Model):
     
     def clean(self):
         super(Slice, self).clean()
-        for field in ('exp_data', 'overlay'):
-            if getattr(self, field):
-                if getattr(self, field+'_uri'):
-                    raise ValidationError('%s or %s_uri ?' % (field, field))
-                sha256 = hashlib.sha256(getattr(self, field).file.read()).hexdigest()
-                setattr(self, field+'_sha256', sha256)
-            if getattr(self, field+'_uri') and not getattr(self, field+'_sha256'):
-                raise ValidationError('Missing %s_sha256.' % field)
+        clean_sha256(self, ('exp_data', 'overlay'))
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
@@ -243,7 +252,7 @@ class Slice(models.Model):
     
     def _get_vlan_nr(self):
         qset = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')
-        last_nr = qset[0].vlan_nr if qset else 0
+        last_nr = qset.first().vlan_nr if qset else 0
         if last_nr < self.min_vlan_nr:
             return self.min_vlan_nr
         if last_nr >= self.max_vlan_nr:
@@ -347,14 +356,7 @@ class Sliver(models.Model):
     
     def clean(self):
         super(Sliver, self).clean()
-        for field in ('exp_data', 'overlay'):
-            if getattr(self, field):
-                if getattr(self, field+'_uri'):
-                    raise ValidationError('%s or %s_uri ?' % (field, field))
-                sha256 = hashlib.sha256(getattr(self, field).file.read()).hexdigest()
-                setattr(self, field+'_sha256', sha256)
-            if getattr(self, field+'_uri') and not getattr(self, field+'_sha256'):
-                raise ValidationError('Missing %s_sha256.' % field)
+        clean_sha256(self, ('exp_data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice
@@ -469,7 +471,6 @@ class SliverIface(models.Model):
     
     class Meta:
         unique_together = ('sliver', 'name')
-        ordering = ['nr']
         verbose_name = 'sliver interface'
         verbose_name_plural = 'sliver interfaces'
     
@@ -525,7 +526,7 @@ class SliverIface(models.Model):
         # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
         if not SliverIface.objects.filter(sliver=self.sliver).exists():
             return 1
-        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr')[0].nr
+        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr').first().nr
         if last_nr >= self.max_nr:
             # try to recycle old values
             for new_nr in range(1, self.max_nr):

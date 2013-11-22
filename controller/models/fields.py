@@ -58,7 +58,6 @@ class MultiSelectField(models.Field):
         arr_choices = self.get_choices_selected(self.get_choices_default())
         for opt_select in value:
             if (opt_select not in arr_choices):  # the int() here is for comparing with integer choices
-                raise
                 raise exceptions.ValidationError(self.error_messages['invalid_choice'] % value)
         return
     

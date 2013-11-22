@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions, serializers
 from rest_framework.response import Response
@@ -80,17 +81,28 @@ def make_upload_file(model, field, field_url):
         serializer_class = UploadFlieSerializer
         
         def post(self, request, *args, **kwargs):
-            if request.FILES and field in request.FILES:
-                obj = get_object_or_404(model, pk=kwargs.get('pk'))
-                self.check_object_permissions(self.request, obj)
-                uploaded_file = request.FILES.get(field)
-                getattr(obj, field).save(uploaded_file.name, uploaded_file)
-                obj.clean()
-                obj.save()
-                response_data = {'detail': 'File uploaded correctly'}
-                return Response(response_data, status=status.HTTP_200_OK)
-            msg = "File name '%s' not found in the MultiPart request" % field
-            raise exceptions.ParseError(detail=msg)
+            obj = get_object_or_404(model, pk=kwargs.get('pk')) 
+            self.check_object_permissions(self.request, obj)
+            if request.FILES:
+                if len(request.FILES) > 1:
+                    raise exceptions.ParseError(detail='Multiple files is not supported')
+                uploaded_file = request.FILES.get(request.FILES.keys()[0])
+            else:
+                msg = "Only multipart/form-data is supported"
+                raise exceptions.ParseError(detail=msg)
+            # TODO move this validation logic elsewhere
+            for validator in model._meta.get_field_by_name(field)[0].validators:
+                try:
+                    validator(uploaded_file)
+                except ValidationError as e:
+                    raise exceptions.ParseError(detail=str(e))
+            getattr(obj, field).save(uploaded_file.name, uploaded_file)
+            setattr(obj, field+'_uri', getattr(obj, field).url)
+            obj.clean()
+            obj.save()
+            response_data = {'detail': 'File uploaded correctly'}
+            return Response(response_data, status=status.HTTP_200_OK)
+
     return UploadFile
 
 

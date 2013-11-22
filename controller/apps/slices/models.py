@@ -27,14 +27,13 @@ def get_expires_on():
 
 
 def clean_sha256(self, fields):
-    for field in fields:
-        if getattr(self, field):
-            if getattr(self, field+'_uri'):
-                raise ValidationError('%s or %s_uri ?' % (field, field))
-            sha256 = hashlib.sha256(getattr(self, field).file.read()).hexdigest()
-            setattr(self, field+'_sha256', sha256)
-        if getattr(self, field+'_uri') and not getattr(self, field+'_sha256'):
-            raise ValidationError('Missing %s_sha256.' % field)
+    for field_name in fields:
+        field = getattr(self, field_name)
+        if field:
+            sha256 = hashlib.sha256(field.file.read()).hexdigest()
+            setattr(self, field_name+'_sha256', sha256)
+        if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
+            raise ValidationError('Missing %s_sha256.' % field_name)
 
 
 def make_upload_to(field_name, base_path, file_name):

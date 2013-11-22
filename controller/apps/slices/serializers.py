@@ -11,6 +11,20 @@ from nodes.settings import NODES_NODE_ARCHS
 from .models import Slice, Sliver, Template, SliverIface
 
 
+class FakeFileField(serializers.CharField):
+    """ workaround for displaying related files in a file_uri field """
+    def __init__(self, *args, **kwargs):
+        self.field_name = kwargs.pop('field')
+        super(FakeFileField, self).__init__(*args, **kwargs)
+    
+    def to_native(self, value):
+        if getattr(self.parent.object, self.field_name):
+            request = self.context.get('request', None)
+            format = self.context.get('format', None)
+            return request.build_absolute_uri(value)
+        return value
+
+
 class SliverIfaceSerializer(serializers.ModelSerializer):
     parent_name = serializers.Field(source='parent')
     
@@ -28,11 +42,9 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField(required=False)
-    exp_data_uri = serializers.HyperlinkedFileField(source='exp_data', required=False,
-        read_only=True)
+    exp_data_uri = FakeFileField(field='exp_data')
     exp_data_sha256 = serializers.Field()
-    overlay_uri = serializers.HyperlinkedFileField(source='overlay', required=False,
-        read_only=True)
+    overlay_uri = FakeFileField(field='overlay')
     overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     
@@ -56,11 +68,9 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     properties = serializers.PropertyField(required=False)
-    exp_data_uri = serializers.HyperlinkedFileField(source='exp_data', required=False,
-        read_only=True)
+    exp_data_uri = FakeFileField(field='exp_data')
     exp_data_sha256 = serializers.Field()
-    overlay_uri = serializers.HyperlinkedFileField(source='overlay', required=False,
-        read_only=True)
+    overlay_uri = FakeFileField(field='overlay')
     overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
@@ -73,6 +83,7 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
+    image_uri = FakeFileField(field='image')
     node_archs = serializers.MultiSelectField(choices=NODES_NODE_ARCHS)
     
     class Meta:

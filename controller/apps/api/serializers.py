@@ -1,6 +1,7 @@
 import json
 import six
 
+from django.forms import widgets
 from rest_framework import exceptions
 from rest_framework.serializers import *
 
@@ -97,9 +98,43 @@ class PropertyField(WritableField):
 
 
 class MultiSelectField(ChoiceField):
+    widget = widgets.CheckboxSelectMultiple
+
+    def field_from_native(self, data, files, field_name, into):
+        """
+        Given a dictionary and a field name, updates the dictionary `into`,
+        with the field and it's deserialized value.
+
+        Overrides WritableField method for getting a *list* of values.
+        """
+        if self.read_only:
+            return
+
+        try:
+            data = data or {}
+            native = data.getlist(field_name) # list of values
+        except KeyError:
+            if self.default is not None and not self.partial:
+                # Note: partial updates shouldn't set defaults
+                if is_simple_callable(self.default):
+                    native = self.default()
+                else:
+                    native = self.default
+            else:
+                if self.required:
+                    raise ValidationError(self.error_messages['required'])
+                return
+
+        value = self.from_native(native)
+        self.validate(value)
+        self.run_validators(value)
+        into[self.source or field_name] = value
+    
     def valid_value(self, value):
-        for arch in value:
-            valid = super(MultiSelectField, self).valid_value(arch)
+        """ Checks for each list item if is a valid value """
+        assert not isinstance(value, basestring), "value must be a list or a tuple: %s" % value
+        for val in value:
+            valid = super(MultiSelectField, self).valid_value(val)
             if not valid:
                 return False
         return True

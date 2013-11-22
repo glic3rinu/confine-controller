@@ -18,7 +18,14 @@ class FakeFileField(serializers.CharField):
         super(FakeFileField, self).__init__(*args, **kwargs)
     
     def to_native(self, value):
-        if getattr(self.parent.object, self.field_name):
+        try:
+            has_file = getattr(self.parent.object, self.field_name)
+        except AttributeError:
+            # List with queryset
+            template_id = self.parent.fields['id']
+            template = self.parent.object.get(id=template_id._value)
+            has_file = getattr(template, self.field_name)
+        if has_file:
             request = self.context.get('request', None)
             format = self.context.get('format', None)
             return request.build_absolute_uri(value)

@@ -181,7 +181,6 @@ class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete the server """
-        raise
         return False
 
 

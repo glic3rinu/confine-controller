@@ -20,12 +20,17 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
         return {'uri': url}
     
     def from_native(self, value):
-        # TODO this is bullshit, fixit!
+        """ converts from url: "http//example.org" to { "uri": "http://example.org" } """
         if isinstance(value, six.text_type):
             value = value.replace("u'", '"').replace("'", '"')
-            value = json.loads(value)
+            try:
+                value = json.loads(value)
+            except ValueError:
+                raise exceptions.ParseError("%s is not an object" % value)
         if isinstance(value, dict):
-            value = value.pop('uri')
+            value = value.pop('uri', None)
+        else:
+            raise exceptions.ParseError("%s is not an object" % value)
         return super(RelHyperlinkedRelatedField, self).from_native(value)
 
 
@@ -92,7 +97,7 @@ class PropertyField(WritableField):
         if related_manager:
             for obj in related_manager.all():
                 if obj.pk not in to_save:
-                    # TODO do it in serializer.save()
+                    # TODO do it in serializer.save() self.object._deleted ?
                     obj.delete()
         return properties
 

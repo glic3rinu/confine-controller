@@ -17,6 +17,8 @@ class FakeFileField(serializers.CharField):
         self.field_name = kwargs.pop('field')
         super(FakeFileField, self).__init__(*args, **kwargs)
     
+#   TODO remove file object._delete
+#    def from_native(self, value):
     def to_native(self, value):
         try:
             has_file = getattr(self.parent.object, self.field_name)
@@ -49,9 +51,9 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField(required=False)
-    exp_data_uri = FakeFileField(field='exp_data')
+    exp_data_uri = FakeFileField(field='exp_data', required=False)
     exp_data_sha256 = serializers.Field()
-    overlay_uri = FakeFileField(field='overlay')
+    overlay_uri = FakeFileField(field='overlay', required=False)
     overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     
@@ -64,7 +66,7 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
             sliverifaces need to be validated with an associated sliver
         """
         super(SliverSerializer, self).validate(attrs)
-        ifaces = attrs['interfaces']
+        ifaces = attrs.get('interfaces', []) or []
         for iface in ifaces:
             Sliver.get_registered_ifaces()[iface.type].clean_model(iface)
         return attrs
@@ -75,9 +77,9 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     properties = serializers.PropertyField(required=False)
-    exp_data_uri = FakeFileField(field='exp_data')
+    exp_data_uri = FakeFileField(field='exp_data', required=False)
     exp_data_sha256 = serializers.Field()
-    overlay_uri = FakeFileField(field='overlay')
+    overlay_uri = FakeFileField(field='overlay', required=False)
     overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)

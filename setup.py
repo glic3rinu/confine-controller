@@ -37,7 +37,7 @@ setup(
                    'networking and distributed systems testbeds.'),
     scripts=['controller/bin/controller-admin.sh'],
     url = 'http://wiki.confine-project.eu/soft:server',
-    author = 'Confine Project',
+    author = 'CONFINE Project',
     author_email = 'support@confine-project.eu',
 #    install_requires=[
 #        'paramiko',

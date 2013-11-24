@@ -14,7 +14,7 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
     """
     def to_native(self, obj):
         """ 
-        Confine specs to DRF compat
+        CONFINE specs to DRF compat
         converts from "http//example.org" to { "uri": "http://example.org" }
         """
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
@@ -24,7 +24,7 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
     
     def from_native(self, value):
         """ 
-        Confine specs to DRF compat
+        CONFINE specs to DRF compat
         converts from { "uri": "http://example.org" } to "http//example.org"
         """
         if isinstance(value, six.text_type):

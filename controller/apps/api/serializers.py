@@ -5,7 +5,7 @@ from django.forms import widgets
 from rest_framework import exceptions
 from rest_framework.serializers import *
 
-# Haking rest_framework in order to meet our crazy design specifications
+# CONFINE compatibility layer for DRF
 
 
 class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
@@ -49,11 +49,13 @@ class UriHyperlinkedModelSerializer(HyperlinkedModelSerializer):
     
 
     def __init__(self, *args, **kwargs):
+        """ url to uri renaming """
         super(UriHyperlinkedModelSerializer, self).__init__(*args, **kwargs)
         self.fields['uri'] = self.fields.pop('url', None)
-   
+
 
 class HyperlinkedFileField(FileField):
+    """ display file url instead of file path """
     def to_native(self, value):
         if value:
             request = self.context.get('request')
@@ -67,7 +69,7 @@ class PropertyField(WritableField):
     need a custom override of restore_object method.
     """
     def to_native(self, value):
-        """ Dict-like representation of a Property Model"""
+        """ dict-like representation of a Property Model"""
         return dict((prop.name, prop.value) for prop in value.all())
     
     def from_native(self, value):
@@ -122,7 +124,7 @@ class MultiSelectField(ChoiceField):
         return super(MultiSelectField, self).field_from_native(data, files, field_name, into)
     
     def valid_value(self, value):
-        """ Checks for each list item if is a valid value """
+        """ checks for each item if is a valid value """
         for val in value.split(','):
             valid = super(MultiSelectField, self).valid_value(val)
             if not valid:

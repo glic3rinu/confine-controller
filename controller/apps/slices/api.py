@@ -81,7 +81,7 @@ def make_upload_file(model, field, field_url):
         serializer_class = UploadFlieSerializer
         
         def post(self, request, *args, **kwargs):
-            obj = get_object_or_404(model, pk=kwargs.get('pk')) 
+            obj = get_object_or_404(model, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, obj)
             if request.FILES:
                 if len(request.FILES) > 1:

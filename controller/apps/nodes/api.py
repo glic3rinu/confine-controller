@@ -27,13 +27,13 @@ class Reboot(APIView):
     rel = 'http://confine-project.eu/rel/server/do-reboot'
     
     def post(self, request, *args, **kwargs):
-        if request.DATA is None:
+        if not request.DATA:
             node = get_object_or_404(Node, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, node)
             node.reboot()
             response_data = {'detail': 'Node instructed to reboot'}
-            return Response(response_data, status=status.HTTP_202_ACCEPTED)
-        raise exceptions.ParseError(detail='This endpoint only accepts null data')
+            return Response(response_data, status=status.HTTP_200_OK)
+        raise exceptions.ParseError(detail='This endpoint do not accept data')
 
 
 class RequestCert(APIView):

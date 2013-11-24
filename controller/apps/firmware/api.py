@@ -29,7 +29,7 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
             base_image = config.get_images(node).order_by('default')[0]
             build = Build.build(node, base_image, async=True)
             serializer = self.serializer_class(build, data=request.DATA)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         raise exceptions.ParseError(detail='This endpoint only accepts null data')
 
 

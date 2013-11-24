@@ -13,14 +13,20 @@ class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
     HyperlinkedRelatedField field providing a relation object rather than flat URL 
     """
     def to_native(self, obj):
-        # FIXME this doesn't work when posting
+        """ 
+        Confine specs to DRF compat
+        converts from "http//example.org" to { "uri": "http://example.org" }
+        """
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
         if url is None:
              return None
-        return {'uri': url}
+        return { 'uri': url }
     
     def from_native(self, value):
-        """ converts from url: "http//example.org" to { "uri": "http://example.org" } """
+        """ 
+        Confine specs to DRF compat
+        converts from { "uri": "http://example.org" } to "http//example.org"
+        """
         if isinstance(value, six.text_type):
             value = value.replace("u'", '"').replace("'", '"')
             try:

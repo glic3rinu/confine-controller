@@ -28,6 +28,7 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list
     help = "Upgrading controller's installation"
     can_import_settings = False
+    leave_locale_alone = True
     
     @check_root
     def handle(self, *args, **options):

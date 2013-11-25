@@ -38,6 +38,7 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list
     help = 'Upgrades confine-controller installation'
     # This command must be able to run in an environment with unsatisfied dependencies
+    leave_locale_alone = True
     can_import_settings = False
     requires_model_validation = False
     

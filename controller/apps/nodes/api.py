@@ -47,7 +47,7 @@ class RequestCert(APIView):
     POST data: `ASCII-armored PEM representation of the CSR as a string.`
     """
     url_name = 'request-cert'
-    rel = 'http://confine-project.eu/rel/server/do-request-api-cert'
+    rel = 'http://confine-project.eu/rel/controller/do-request-api-cert'
     
     def post(self, request, *args, **kwargs):
         csr = request.DATA

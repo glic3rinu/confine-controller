@@ -21,19 +21,19 @@ class CacheCNDB(APIView):
     POST data: `null`
     """
     url_name = 'cache-cndb'
-    rel = 'http://confine-project.eu/rel/server/do-cache-cndb'
+    rel = 'http://confine-project.eu/rel/controller/do-cache-cndb'
     
     def get_object(self, pk):
         return get_object_or_404(Node, pk=pk)
     
     def post(self, request, *args, **kwargs):
-        if request.DATA is None:
+        if not request.DATA:
             node = get_object_or_404(Node, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, node)
             node.cn.cache_node_db()
             response_data = {'detail': 'Node description updated according to CNDB description'}
             return Response(response_data, status=status.HTTP_200_OK)
-        raise exceptions.ParseError(detail='This endpoint only accepts null data')
+        raise exceptions.ParseError(detail='This endpoint do not accept data')
 
 
 # Monkey patching

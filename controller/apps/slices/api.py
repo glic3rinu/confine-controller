@@ -65,8 +65,8 @@ def make_upload_file(model, field, field_url):
     # TODO ApiPermissionsMixin
     class UploadFile(generics.CreateAPIView):
         """
-        **Relation type:** [`http://confine-project.eu/rel/server/do-upload-%(field_url)s`](
-            http://confine-project.eu/rel/server/do-upload-%(field_url)s)
+        **Relation type:** [`http://confine-project.eu/rel/controller/do-upload-%(field_url)s`](
+            http://confine-project.eu/rel/controller/do-upload-%(field_url)s)
         
         Contains the function URI used to upload this resource's %(field)s file
         to some remote storage. The URI of the stored file will be placed in the
@@ -77,7 +77,7 @@ def make_upload_file(model, field, field_url):
         Example: `curl -X POST -F "%(field)s=@%(field)s.tgz" ...`
         """ % {'field': field, 'field_url': field_url}
         url_name = 'upload-%s' % field_url
-        rel = 'http://confine-project.eu/rel/server/do-%s' % url_name
+        rel = 'http://confine-project.eu/rel/controller/do-%s' % url_name
         serializer_class = UploadFlieSerializer
         
         def post(self, request, *args, **kwargs):
@@ -102,7 +102,7 @@ def make_upload_file(model, field, field_url):
             obj.save()
             response_data = {'detail': 'File uploaded correctly'}
             return Response(response_data, status=status.HTTP_200_OK)
-
+    
     return UploadFile
 
 

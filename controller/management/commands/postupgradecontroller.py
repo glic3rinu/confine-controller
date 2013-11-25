@@ -1,4 +1,5 @@
 import re
+import os
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
@@ -76,11 +77,14 @@ class Command(BaseCommand):
             # Common stuff
             development = options.get('development')
             local = options.get('local')
+            controller_admin = os.path.join(os.path.dirname(__file__), '../../bin/')
+            controller_admin = os.path.join(controller_admin, 'controller-admin.sh')
+            run('chmod +x %s' % controller_admin)
             if local:
-                run("controller-admin.sh install_requirements --local")
+                run("%s install_requirements --local" % controller_admin)
             else:
                 extra = '--development' if development else ''
-                run("controller-admin.sh install_requirements " + extra)
+                run("%s install_requirements " % controller_admin + extra)
                 run("python manage.py collectstatic --noinput")
             
             run("python manage.py syncdb --noinput")
@@ -107,10 +111,9 @@ class Command(BaseCommand):
             # Add PKI directories
             from pki import ca
             from controller.utils.paths import get_site_root
-            from os import path
             site_root = get_site_root()
             username = run("stat -c %%U %s" % site_root)
-            get_dir = lambda f: path.dirname(getattr(ca, f+'_path'))
+            get_dir = lambda f: os.path.dirname(getattr(ca, f+'_path'))
             for d in set( get_dir(f) for f in ['priv_key', 'pub_key', 'cert'] ):
                 run('mkdir -p %s' % d)
                 run('chown %s %s' % (username, d))

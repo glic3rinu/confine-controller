@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from django.core.exceptions import ValidationError
+
 from api import serializers
 
 from .models import User, Group, Roles
@@ -41,7 +43,7 @@ class UserSerializer(serializers.UriHyperlinkedModelSerializer):
 
 
 class GroupSerializer(serializers.UriHyperlinkedModelSerializer):
-    user_roles = UserRolesSerializer(source='roles')
+    user_roles = UserRolesSerializer(source='roles', required=False, many=True)
     allow_nodes = serializers.BooleanField(read_only=True)
     allow_slices = serializers.BooleanField(read_only=True)
     slices = serializers.RelHyperlinkedRelatedField(many=True, source='slices',
@@ -51,3 +53,11 @@ class GroupSerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = Group
+    
+    def validate_user_roles(self, attrs, name):
+        """ checks at least one admin per group """
+        for role in attrs.get(name, []):
+            if role.is_admin:
+                return attrs
+        raise ValidationError('The group must have at least one admin')
+

@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from api import api, generics
@@ -23,19 +24,17 @@ class ChangePassword(APIView):
     """
     url_name = 'change-password'
     rel = 'http://confine-project.eu/rel/controller/do-change-password'
-
+    
     def post(self, request, *args, **kwargs):
-        if request.DATA is not None:
-            password = request.DATA
-            if not password: # check if the password is empty
-                raise exceptions.ParseError(detail='You must provide new password value')
+        password = request.DATA
+        if not password:
             user = get_object_or_404(User, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, user)
             user.set_password(password)
             user.save()
             response_data = {'detail': 'User password changed successfully'}
-            return Response(response_data, status=status.HTTP_202_ACCEPTED)
-        raise exceptions.ParseError(detail='You must provide new password value')
+            return Response(response_data, status=status.HTTP_200_OK)
+        raise exceptions.ParseError(detail='Passoword value not provided')
 
 
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -74,6 +73,16 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Group
     serializer_class = GroupSerializer
 #    filter_fields = ('username',)
+    
+    def post(self, request, *args, **kwargs):
+        """ adds current request.user as default group admin """
+        request.DATA['user_roles'] = [{
+            'user': {
+                'uri': reverse('user-detail', args=[request.user.pk], request=request)
+            },
+            'is_admin': True
+        }]
+        return super(GroupList, self).post(request, *args, **kwargs)
 
 
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):

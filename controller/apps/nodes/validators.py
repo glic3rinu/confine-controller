@@ -59,8 +59,3 @@ def validate_csr(csr, node):
     if node.mgmt_net.addr != cnip:
         msg = "Common Name (CN) must be equeal to node management address: '%s' != '%s'"
         raise ValidationError(msg % (subject.CN, node.mgmt_net.addr))
-    admins = Group.objects.filter(nodes=node, roles__is_admin=True)
-    if not admins.filter(roles__user__email=subject.emailAddress).exists():
-        msg = "No admin with '%s' email address exists for this node"
-        raise ValidationError(msg % subject.emailAddress)
-

@@ -4,9 +4,10 @@ import datetime
 import json
 
 from django.contrib import admin
+from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
@@ -267,11 +268,7 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
         return False
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        try:
-            object_id = int(object_id)
-        except ValueError:
-            raise Http404("No State matches the given query.")
-        state = get_object_or_404(self.model, pk=object_id)
+        state = get_object_or_404(self.model, pk=unquote(object_id))
         context = {
             'title': 'State',
             'obj_opts': state.content_object._meta,

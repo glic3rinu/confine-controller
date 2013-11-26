@@ -6,8 +6,6 @@ from django.conf import settings
 SLICES_TEMPLATE_TYPES = getattr(settings, 'SLICES_TEMPLATE_TYPES', (
         ('debian', 'Debian'),
         ('openwrt', 'OpenWRT'),
-        ('ubuntu', 'Ubuntu'),
-        ('other', 'Other'),
 ))
 
 SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', 'debian6')

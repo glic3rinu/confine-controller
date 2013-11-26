@@ -38,8 +38,8 @@ class Reboot(APIView):
 
 class RequestCert(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-request-cert`](
-        http://confine-project.eu/rel/server/do-request-cert)
+    **Relation type:** [`http://confine-project.eu/rel/controller/do-request-cert`](
+        http://confine-project.eu/rel/controller/do-request-cert)
     
     Contains the function URI used to upload this node's certificate request to 
     be signed by the testbed CA and set as the node's certificate.

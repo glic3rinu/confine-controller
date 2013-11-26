@@ -13,8 +13,8 @@ from nodes.api import NodeDetail
 
 class CacheCNDB(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/cache-cndb`](
-        http://confine-project.eu/rel/server/do-cache-cndb)
+    **Relation type:** [`http://confine-project.eu/rel/controller/do-cache-cndb`](
+        http://confine-project.eu/rel/controller/do-cache-cndb)
     
     Endpoint containing the function URI used to cache CNDB description of this node.
     
@@ -33,7 +33,7 @@ class CacheCNDB(APIView):
             node.cn.cache_node_db()
             response_data = {'detail': 'Node description updated according to CNDB description'}
             return Response(response_data, status=status.HTTP_200_OK)
-        raise exceptions.ParseError(detail='This endpoint do not accept data')
+        raise exceptions.ParseError(detail='This endpoint does not accept data')
 
 
 # Monkey patching

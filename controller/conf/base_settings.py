@@ -178,6 +178,8 @@ EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 # Storage configuration
 DEFAULT_FILE_STORAGE = 'controller.core.storage.DoubleExtensionAwareFileSystemStorage'
 
+# The numeric mode (i.e. 0644) to set newly uploaded files to
+FILE_UPLOAD_PERMISSIONS = 0644
 
 #################################
 ## 3RD PARTY APPS CONIGURATION ##

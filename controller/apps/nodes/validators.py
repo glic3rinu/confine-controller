@@ -54,12 +54,13 @@ def validate_csr(csr, node):
     try:
         cnip = IP(subject.CN)
     except ValueError:
-        raise ValidationError("Subject Common Name (CN) is not a valid IP address")
+        msg = "Subject Common Name (CN) '%s' is not a valid IP address"
+        raise ValidationError(msg % subject.CN)
     if node.mgmt_net.addr != cnip:
-        raise ValidationError("Common Name (CN) must be equeal than the "
-            "node management address: %s != %s" % (subject.CN, node.mgmt_net.addr))
+        msg = "Common Name (CN) must be equeal to node management address: '%s' != '%s'"
+        raise ValidationError(msg % (subject.CN, node.mgmt_net.addr))
     admins = Group.objects.filter(nodes=node, roles__is_admin=True)
     if not admins.filter(roles__user__email=subject.emailAddress).exists():
-        raise ValidationError("No admin with '%s' email address for this node."
-                              % subject.emailAddress)
+        msg = "No admin with '%s' email address exists for this node"
+        raise ValidationError(msg % subject.emailAddress)
 

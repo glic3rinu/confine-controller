@@ -48,12 +48,18 @@ def validate_csr(csr, node):
         csr = X509.load_request_string(str(csr))
     except:
         raise ValidationError('Not a valid CSR')
-    
     subject = csr.get_subject()
-    if not subject.CN or node.mgmt_net.addr != IP(subject.CN):
-        raise ValidationError("Common Name (CN) must be equeal than the "\
+    if not subject.CN:
+        raise ValidationError("Required subject Common Name (CN) not provided")
+    try:
+        cnip = IP(subject.CN)
+    except ValueError:
+        raise ValidationError("Subject Common Name (CN) is not a valid IP address")
+    if node.mgmt_net.addr != cnip:
+        raise ValidationError("Common Name (CN) must be equeal than the "
             "node management address: %s != %s" % (subject.CN, node.mgmt_net.addr))
-    
-    if not Group.objects.filter(nodes=node, roles__user__email=subject.emailAddress, roles__is_admin=True).exists():
-        raise ValidationError("No admin with '%s' email address for this node." % subject.emailAddress)
+    admins = Group.objects.filter(nodes=node, roles__is_admin=True)
+    if not admins.filter(roles__user__email=subject.emailAddress).exists():
+        raise ValidationError("No admin with '%s' email address for this node."
+                              % subject.emailAddress)
 

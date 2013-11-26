@@ -63,6 +63,8 @@ display_metadata.short_description = 'metadata'
 
 
 def display_data(instance):
+    if not instance.data:
+        return ''
     style = '<style>code,pre {font-size:1.13em;}</style><p></p>'
     data = json.dumps(json.loads(instance.data), indent=4, ensure_ascii=False)
     data = break_lines(data)

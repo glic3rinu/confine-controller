@@ -28,12 +28,13 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 
 class TincClientSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
+    name = serializers.CharField(read_only=True)
     island = serializers.RelHyperlinkedRelatedField(view_name='island-detail', required=False)
+    pubkey = serializers.CharField(required=True)
     
     class Meta:
         model = TincClient
-        exclude = ('object_id', 'content_type', 'id')
+        fields = ('name', 'island', 'pubkey')
 
 
 class TincServerSerializer(serializers.ModelSerializer):
@@ -47,10 +48,10 @@ class TincServerSerializer(serializers.ModelSerializer):
 
 class MgmtNetConfSerializer(serializers.Serializer):
     addr = serializers.Field()
-    backend = serializers.CharField(source='name')
-    tinc_client = TincClientSerializer()
-    tinc_server = TincServerSerializer()
-    native = serializers.Field()
+    backend = serializers.CharField(source='name', read_only=True)
+    tinc_client = TincClientSerializer(required=False)
+    tinc_server = TincServerSerializer(required=False)
+    native = serializers.BooleanField(required=False)
 
 
 class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
@@ -63,11 +64,11 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
 
 class HostSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    mgmt_net = MgmtNetConfSerializer()
+    mgmt_net = MgmtNetConfSerializer(read_only=True)
     
     class Meta:
         model = Host
 
 
-api.aggregate(Server, MgmtNetConfSerializer, name='mgmt_net')
+api.aggregate(Server, MgmtNetConfSerializer, name='mgmt_net', read_only=True)
 api.aggregate(Node, MgmtNetConfSerializer, name='mgmt_net', read_only=True)

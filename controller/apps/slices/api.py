@@ -221,6 +221,7 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
         make_upload_file(Template, 'image', 'image'),
     ]
 
+
 api.register(SliceList, SliceDetail)
 api.register(SliverList, SliverDetail)
 api.register(TemplateList, TemplateDetail)

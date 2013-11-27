@@ -1,10 +1,36 @@
 from __future__ import absolute_import
 
+from django.shortcuts import get_object_or_404
+from rest_framework import status, exceptions
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
+
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Island, Host, Gateway
 from .serializers import IslandSerializer, HostSerializer, GatewaySerializer
+
+
+class UploadPubkey(APIView):
+    """
+    HACK ENDPOINT
+    """
+    url_name = 'upload-pubkey'
+    rel = 'http://confine-project.eu/rel/controller/do-upload-pubkey'
+    
+    def post(self, request, *args, **kwargs):
+        pubkey = request.DATA
+        if pubkey:
+            host = get_object_or_404(Host, pk=kwargs.get('pk'))
+            self.check_object_permissions(self.request, host)
+            tincclient = host.related_tincclient.all()[0]
+            tincclient.pubkey=pubkey
+            tincclient.save()
+            response_data = {'detail': 'host pubkey changed successfully'}
+            return Response(response_data, status=status.HTTP_200_OK)
+        raise exceptions.ParseError(detail='pubkey value not provided')
 
 
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -47,6 +73,13 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Host
     serializer_class = HostSerializer
+    
+    def post(self, request, *args, **kwargs):
+        """ adds current request.user as default host owner """
+        request.DATA['owner'] = {
+            'uri': reverse('user-detail', args=[request.user.pk], request=request)
+        }
+        return super(HostList, self).post(request, *args, **kwargs)
 
 
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -59,6 +92,7 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Host
     serializer_class = HostSerializer
+    ctl = [UploadPubkey]
 
 
 class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):

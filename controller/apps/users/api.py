@@ -27,7 +27,7 @@ class ChangePassword(APIView):
     
     def post(self, request, *args, **kwargs):
         password = request.DATA
-        if not password:
+        if password:
             user = get_object_or_404(User, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, user)
             user.set_password(password)

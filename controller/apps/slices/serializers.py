@@ -24,9 +24,11 @@ class FakeFileField(serializers.CharField):
             has_file = getattr(self.parent.object, self.field_name)
         except AttributeError:
             # List with queryset
-            template_id = self.parent.fields['id']
-            template = self.parent.object.get(id=template_id._value)
-            has_file = getattr(template, self.field_name)
+            object_id = self.parent.fields['id']
+            if hasattr(object_id, '_value'):
+                obj = self.parent.object.get(id=object_id._value)
+                has_file = getattr(obj, self.field_name)
+            has_file = False
         if has_file:
             request = self.context.get('request', None)
             format = self.context.get('format', None)
@@ -53,9 +55,7 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField(required=False)
     exp_data_uri = FakeFileField(field='exp_data', required=False)
-    exp_data_sha256 = serializers.Field()
     overlay_uri = FakeFileField(field='overlay', required=False)
-    overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
@@ -79,9 +79,7 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
         view_name='sliver-detail')
     properties = serializers.PropertyField(required=False)
     exp_data_uri = FakeFileField(field='exp_data', required=False)
-    exp_data_sha256 = serializers.Field()
     overlay_uri = FakeFileField(field='overlay', required=False)
-    overlay_sha256 = serializers.Field()
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     expires_on = serializers.DateTimeField(read_only=True)

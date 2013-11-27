@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils import timezone
@@ -270,7 +270,9 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
         return False
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        state = get_object_or_404(self.model, pk=unquote(object_id))
+        state = self.get_object(request, unquote(object_id))
+        if state is None:
+            raise Http404('State with id "%s" does not exists' % object_id)
         context = {
             'title': 'State',
             'obj_opts': state.content_object._meta,

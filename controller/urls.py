@@ -11,10 +11,22 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Password reset
-    url(r'^admin/password_reset/$', 'django.contrib.auth.views.password_reset', name='password_reset'),
-    url(r'^password_reset/done/$', 'django.contrib.auth.views.password_reset_done'),
-    url(r'^reset/(?P<uidb36>[-\w]+)/(?P<token>[-\w]+)/$', 'django.contrib.auth.views.password_reset_confirm'),
-    url(r'^reset/done/$', 'django.contrib.auth.views.password_reset_complete'),
+    url(r'^admin/password_reset/$',
+        'django.contrib.auth.views.password_reset',
+        name='password_reset'
+    ),
+    url(r'^admin/password_reset/done/$',
+        'django.contrib.auth.views.password_reset_done',
+        name='password_reset_done'
+    ),
+    url(r'^admin/password_reset/(?P<uidb64>[-\w]+)/(?P<token>[-\w]+)/$',
+        'django.contrib.auth.views.password_reset_confirm',
+        name='password_reset_confirm'
+    ),
+    url(r'^admin/password_reset/complete/$',
+        'django.contrib.auth.views.password_reset_complete',
+        name='password_reset_complete'
+    ),
     # Admin
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin_tools/', include('admin_tools.urls')),

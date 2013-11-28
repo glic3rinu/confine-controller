@@ -71,6 +71,14 @@ def validate_ascii(value):
     except UnicodeDecodeError:
         raise ValidationError('This is not an ASCII string.')
 
+def validate_name(value):
+    """
+        A single non-empty line of free-form text with no whitespace
+        surrounding it.
+    """
+    validators.RegexValidator('^[\w.@+-]+$',
+            'Enter a valid name.', 'invalid')(value)
+
 
 def validate_sha256(value):
     """ SHA256 hex digest """

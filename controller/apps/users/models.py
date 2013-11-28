@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from controller.utils import send_email_template
-from controller.core.validators import validate_ascii
+from controller.core.validators import validate_ascii, validate_name
 
 
 class Group(models.Model):
@@ -15,8 +15,7 @@ class Group(models.Model):
             help_text='A unique name for this group. A single non-empty line of '
                       'free-form text with no whitespace surrounding it. matching '
                       'the regular expression',
-            validators=[validators.RegexValidator('^[\w.@+-]+$',
-                       'Enter a valid name.', 'invalid')])
+            validators=[validate_name])
     description = models.TextField(blank=True)
     allow_nodes = models.BooleanField(default=False,
             help_text='Whether nodes belonging to this group can be created or set '

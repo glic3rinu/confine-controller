@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from api import api, generics
+from controller.core.validators import validate_name
 from permissions.api import ApiPermissionsMixin
 
 from .models import User, Group
@@ -34,7 +36,7 @@ class ChangePassword(APIView):
             user.save()
             response_data = {'detail': 'User password changed successfully'}
             return Response(response_data, status=status.HTTP_200_OK)
-        raise exceptions.ParseError(detail='Passoword value not provided')
+        raise exceptions.ParseError(detail='Password value not provided')
 
 
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -76,6 +78,14 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         """ adds current request.user as default group admin """
+        # check if POST only has accepted data
+        for key in request.DATA.keys():
+            if key not in ['name', 'description', 'sfa']:
+                raise exceptions.ParseError(detail='Invalid extra data provided %s' % key)
+        # check if POST has required data
+        if 'name' not in request.DATA:
+            raise exceptions.ParseError(detail='Field "name" required')
+        # add the group creator as group admin
         request.DATA['user_roles'] = [{
             'user': {
                 'uri': reverse('user-detail', args=[request.user.pk], request=request)

@@ -38,7 +38,7 @@ body.login {
 .login .form-row label,
 .login .submit-row label {
     float: left;
-    width: 10em;
+    width: 12.5em;
     padding-right: 0.5em;
     line-height: 2em;
     text-align: right;

@@ -13,8 +13,7 @@ from controller.core.validators import validate_ascii, validate_name
 class Group(models.Model):
     name = models.CharField(max_length=32, unique=True,
             help_text='A unique name for this group. A single non-empty line of '
-                      'free-form text with no whitespace surrounding it. matching '
-                      'the regular expression',
+                      'free-form text with no whitespace surrounding it.',
             validators=[validate_name])
     description = models.TextField(blank=True)
     allow_nodes = models.BooleanField(default=False,
@@ -158,8 +157,7 @@ class User(auth_models.AbstractBaseUser):
     name = models.CharField(max_length=60, unique=True, db_index=True,
             help_text='A unique name for this user. A single non-empty line of '
                       'free-form text with no whitespace surrounding it.',
-            validators=[validators.RegexValidator('^([\w.@+-]+\s?)+[\w.@+-]+$',
-                       'Enter a valid name.', 'invalid')])
+            validators=[validate_name])
     is_active = models.BooleanField(default=True,
             help_text='Designates whether this user should be treated as '
                       'active. Unselect this instead of deleting accounts.')

@@ -1,4 +1,8 @@
 /** gis map styles **/
+#header {
+    height: 75px; /* Reserve space to nav bar */
+}
+
 #content-main {
     position: relative;
 }
@@ -12,6 +16,10 @@
     right: 0;
     top: 0;
     z-index: 9990;
+}
+
+#map_legend li {
+    list-style: none;
 }
 
 #map_legend li img {

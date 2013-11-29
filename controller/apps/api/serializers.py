@@ -116,6 +116,7 @@ class MultiSelectField(ChoiceField):
     def field_from_native(self, data, files, field_name, into):
         """ convert multiselect data into comma separated string """
         if field_name in data:
+            data = data.copy()
             try:
                 # data is a querydict when using forms
                 data[field_name] = ','.join(data.getlist(field_name))

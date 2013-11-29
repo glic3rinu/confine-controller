@@ -28,12 +28,16 @@ def get_expires_on():
 
 def clean_sha256(self, fields):
     for field_name in fields:
+        if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
+            raise ValidationError('Missing %s_sha256.' % field_name)
+
+
+def set_sha256(self, fields):
+    for field_name in fields:
         field = getattr(self, field_name)
         if field:
             sha256 = hashlib.sha256(field.file.read()).hexdigest()
             setattr(self, field_name+'_sha256', sha256)
-        if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
-            raise ValidationError('Missing %s_sha256.' % field_name)
 
 
 def make_upload_to(field_name, base_path, file_name):
@@ -111,6 +115,10 @@ class Template(models.Model):
     def clean(self):
         super(Template, self).clean()
         clean_sha256(self, ('image',))
+    
+    def save(self, *args, **kwargs):
+        set_sha256(self, ('image',))
+        super(Template, self).save(*args, **kwargs)
 
 
 class Slice(models.Model):
@@ -217,6 +225,7 @@ class Slice(models.Model):
         if not self.pk:
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
             save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('exp_data', 'overlay'))
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):
@@ -369,6 +378,7 @@ class Sliver(models.Model):
         if not self.pk:
             self.instance_sn = self.slice.new_sliver_instance_sn
             save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('exp_data', 'overlay'))
         super(Sliver, self).save(*args, **kwargs)
     
     @property

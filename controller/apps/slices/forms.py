@@ -83,13 +83,13 @@ class SliverIfaceInlineForm(forms.ModelForm):
             self.fields['parent'].queryset = self.node.direct_ifaces
             # Hook slice for future processing on iface.model_clean()
             self.instance.slice = self.slice
-        # Remove unallowed iface types from choices
-        queryset = Node.objects.filter(pk=self.node.id)
-        choices = self.fields['type'].choices
-        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
-            if not iface_object.is_allowed(self.slice, queryset):
-                choices = [choice for choice in choices if choice[0] != iface_type]
-        self.fields['type'].choices = choices
+            # Remove unallowed iface types from choices
+            queryset = Node.objects.filter(pk=self.node.id)
+            choices = self.fields['type'].choices
+            for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+                if not iface_object.is_allowed(self.slice, queryset):
+                    choices = [choice for choice in choices if choice[0] != iface_type]
+            self.fields['type'].choices = choices
 
 
 class SliverIfaceBulkForm(forms.Form):

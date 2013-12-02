@@ -52,6 +52,12 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     serializer_class = UserSerializer
 #    filter_fields = ('username',)
 
+    def pre_save(self, obj):
+        """ Initialize username value """
+        super(UserList, self).pre_save(obj)
+        if not obj.username:
+            obj.username = obj.name
+
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     """

@@ -25,14 +25,14 @@ class FakeFileField(serializers.CharField):
         except AttributeError:
             # List with queryset
             object_id = self.parent.fields['id']
+            has_file = False
             if hasattr(object_id, '_value'):
                 obj = self.parent.object.get(id=object_id._value)
                 has_file = getattr(obj, self.field_name)
-            has_file = False
         if has_file:
             request = self.context.get('request', None)
             format = self.context.get('format', None)
-            return request.build_absolute_uri(value)
+            return request.build_absolute_uri(has_file.url)
         return value
 
 

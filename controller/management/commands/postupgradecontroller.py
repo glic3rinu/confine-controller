@@ -167,6 +167,10 @@ class Command(BaseCommand):
         if version < 906:
             deprecate_periodic_tasks(('state.nodestate', 'state.sliverstate'))
         if version <= 907:
+            # Generate sha256
+            from slices.models import Template
+            for template in Template.objects.all():
+                template.save()
             upgrade_notes.append("It is extremly recommended to update your database "
                 "settings to enable atomic request behaviour:\n"
                 "  https://docs.djangoproject.com/en/dev/topics/db/transactions/#tying-transactions-to-http-requests\n"

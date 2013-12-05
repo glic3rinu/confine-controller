@@ -9,7 +9,6 @@ from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from pygments import highlight
@@ -33,10 +32,12 @@ from slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
-from .helpers import break_headers, break_lines, get_changes_data, get_report_data
+from .helpers import break_headers, break_lines, get_changes_data
 from .models import NodeSoftwareVersion, State, StateHistory
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
+from .views import (report_view, slices_view, slivers_view, get_slices_data,
+    get_slivers_data)
 
 
 STATES_COLORS = dict(NODE_STATES_COLORS)
@@ -217,23 +218,24 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
             url("^(?P<object_id>\d+)/history/$",
                 wrap_admin_view(self, history_admin.changelist_view),
                 name='state_history'),
+            # URLs not wrapped by admin_view for allow anonymous users
             url("^report/$",
-                self.report_view, # Allow anonymous users
+                report_view,
                 name='state_report'),
+            url("^slices/$",
+                slices_view,
+                name='state_slices'),
+            url("^slices.json$",
+                get_slices_data,
+                name='state_slices_data'),
+            url("^slivers/$",
+                slivers_view,
+                name='state_slivers'),
+            url("^slivers.json$",
+                get_slivers_data,
+                name='state_slivers_data'),
         )
         return urls + super(StateAdmin, self).get_urls()
-    
-    def report_view(self, request):
-        """ Testbed report status view """
-        template = 'admin/state/state/report.html'
-        iframe = request.GET.get("iframe", False)
-        data = get_report_data()
-        opt = {
-            'data': data,
-            'iframe': iframe,
-        }
-        context = RequestContext(request)
-        return render_to_response(template, opt, context_instance=context)
     
     def url_link(self, instance):
         url = instance.get_url()

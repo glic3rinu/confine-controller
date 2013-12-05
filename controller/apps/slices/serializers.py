@@ -20,19 +20,11 @@ class FakeFileField(serializers.CharField):
 #   TODO remove file object._delete
 #    def from_native(self, value):
     def to_native(self, value):
-        try:
-            has_file = getattr(self.parent.object, self.field_name)
-        except AttributeError:
-            # List with queryset
-            object_id = self.parent.fields['id']
-            has_file = False
-            if hasattr(object_id, '_value'):
-                obj = self.parent.object.get(id=object_id._value)
-                has_file = getattr(obj, self.field_name)
-        if has_file:
+        object_file = getattr(self.parent.__object__, self.field_name)
+        if object_file:
             request = self.context.get('request', None)
             format = self.context.get('format', None)
-            return request.build_absolute_uri(has_file.url)
+            return request.build_absolute_uri(object_file.url)
         return value
 
 
@@ -71,6 +63,11 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         for iface in ifaces:
             Sliver.get_registered_ifaces()[iface.type].clean_model(iface)
         return attrs
+    
+    def to_native(self, obj):
+        """ hack for implementing dynamic file_uri's on FakeFile """
+        self.__object__ = obj
+        return super(SliverSerializer, self).to_native(obj)
 
 
 class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
@@ -87,6 +84,11 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Slice
         exclude = ('exp_data', 'overlay')
+    
+    def to_native(self, obj):
+        """ hack for implementing dynamic file_uri's on FakeFile """
+        self.__object__ = obj
+        return super(SliceSerializer, self).to_native(obj)
 
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
@@ -97,4 +99,9 @@ class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Template
         exclude = ['image']
+    
+    def to_native(self, obj):
+        """ hack for implementing dynamic file_uri's on FakeFile """
+        self.__object__ = obj
+        return super(TemplateSerializer, self).to_native(obj)
 

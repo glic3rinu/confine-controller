@@ -179,7 +179,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def changes_view(self, request, object_id):
-        state = get_object_or_404(StateHistory, pk=object_id)
+        state = get_object_or_404(State, pk=object_id)
         data = get_changes_data(state)
         return HttpResponse(json.dumps(data), content_type="application/json")
 

@@ -171,7 +171,7 @@ class StateHistoryAdmin(admin.ModelAdmin):
         return False
     
     def data_view(self, request, object_id):
-        history = get_object_or_404(StateHistory, pk=object_id)
+        history = get_object_or_404(State, pk=object_id)
         data = {
             'metadata': display_metadata(history),
             'data': display_data(history)

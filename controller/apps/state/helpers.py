@@ -32,7 +32,7 @@ def get_changes_data(state):
     history = state.history
     now = timezone.now()
     delta = relativedelta(months=+1)
-    final = datetime.datetime(year=now.year, month=(now.month+1)%12, day=1, tzinfo=timezone.utc)
+    final = datetime.datetime(year=now.year, month=(now.month%12)+1, day=1, tzinfo=timezone.utc)
     monthly = OrderedDict()
     distinct_states = set()
     # Get monthly changes

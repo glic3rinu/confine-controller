@@ -145,10 +145,9 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         }),
     )
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'email')}
-        ),)
+        (None, {'fields': ('username', 'password1', 'password2',), 'classes': ('wide',)}),
+        ('Personal info', {'fields': ('name', 'email',), 'classes': ('wide',)}),
+    )
     
     search_fields = ('username', 'email', 'name')
     inlines = [AuthTokenInline, UserRolesInline]

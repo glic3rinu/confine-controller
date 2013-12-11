@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from controller.utils import send_email_template
 from controller.core.validators import validate_ascii, validate_name
+from controller.models.fields import TrimmedCharField
 
 
 class Group(models.Model):
@@ -154,7 +155,7 @@ class User(auth_models.AbstractBaseUser):
                       'can include URLs and other information.')
     first_name = '' # fluent dashboard compatibility
     last_name = ''
-    name = models.CharField(max_length=60, unique=True, db_index=True,
+    name = TrimmedCharField(max_length=60, unique=True, db_index=True,
             help_text='A unique name for this user. A single non-empty line of '
                       'free-form text with no whitespace surrounding it.',
             validators=[validate_name])

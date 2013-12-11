@@ -106,6 +106,14 @@ class NullableTextField(models.TextField):
          return value or None
 
 
+class TrimmedCharField(models.CharField):
+    """ Remove trailing spaces """
+    __metaclass__ = models.SubfieldBase
+
+    def to_python(self, value):
+        if value: value = value.strip()
+        return super(TrimmedCharField, self).to_python(value)
+
 if is_installed('south'):
     from south.modelsinspector import add_introspection_rules
     add_introspection_rules([], ["^controller\.models\.fields\.MultiSelectField"])
@@ -113,4 +121,5 @@ if is_installed('south'):
     add_introspection_rules([], ["^controller\.models\.fields\.URIField"])
     add_introspection_rules([], ["^controller\.models\.fields\.NullableCharField"])
     add_introspection_rules([], ["^controller\.models\.fields\.NullableTextField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.TrimmedCharField"])
 

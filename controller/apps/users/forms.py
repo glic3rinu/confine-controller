@@ -18,11 +18,6 @@ class UserCreationForm(forms.ModelForm):
         model = User
         fields = ('username', 'name', 'email')
     
-    def clean_name(self):
-        """ Strip whitespace surrounding """
-        name = self.cleaned_data["name"]
-        return name.strip()
-
     def clean_password2(self):
         # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
@@ -45,11 +40,6 @@ class UserChangeForm(forms.ModelForm):
     
     class Meta:
         model = User
-    
-    def clean_name(self):
-        """ Strip whitespace surrounding """
-        name = self.cleaned_data["name"]
-        return name.strip()
     
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.

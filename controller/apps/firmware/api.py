@@ -29,10 +29,10 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
             base_image = config.get_images(node).order_by('default')[0]
             async = True
             success_status = status.HTTP_202_ACCEPTED
-            if 'expect' in request and '201-created' == request['expect']:
+            if 'expect' in request.POST and '201-created' == request.POST['expect']:
                 async = False
                 success_status = status.HTTP_201_CREATED
-            build = Build.build(node, base_image, async=False)
+            build = Build.build(node, base_image, async=async)
             serializer = self.serializer_class(build, data=request.DATA)
             return Response(serializer.data, status=success_status)
         raise exceptions.ParseError(detail='This endpoint only accepts null data')

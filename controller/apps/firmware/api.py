@@ -29,7 +29,7 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
             base_image = config.get_images(node).order_by('default')[0]
             async = True
             success_status = status.HTTP_202_ACCEPTED
-            if 'expect' in request.POST and '201-created' == request.POST['expect']:
+            if '201-created' == request.META.get('HTTP_EXPECT', None):
                 async = False
                 success_status = status.HTTP_201_CREATED
             build = Build.build(node, base_image, async=async)

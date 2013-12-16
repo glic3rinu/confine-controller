@@ -5,7 +5,7 @@
 
 {% block content %}
 <div id="d3wrapper">
-    <h1>{% block accounts_title %}Slices status in the testbed{% endblock %}</h1>
+    <h1>{% block accounts_title %}Slices Status in the Testbed{% endblock %}</h1>
 
     <form id="d3form">
       <input type="radio" name="mode" value="size" checked> <label>Size</label>
@@ -15,7 +15,7 @@
     <div id="d3graph"></div>
 
     <ul id="d3legend">
-        <li>Current slices with any sliver allocation in the testbed per group. Updated every 15 minutes.</li>
+        <li>Current slices with any sliver allocation in the testbed per group.</li>
         <li>A treemap recursively subdivides area into rectangles; the area of any node in the tree corresponds to its value in number of slivers.</li>
         <li>A tooltip on the mouse pointer shows details of each slice (number of slivers) and the borders show the sum of slices and slivers per group and total.</li>
         <li>A click to a box opens a new browser window showing the API details for that slice.</li>

@@ -1,5 +1,5 @@
-<!-- TODO distribute locally to allow httpS connection -->
-<script src="http://d3js.org/d3.v3.min.js"></script>
+{% load staticfiles %}
+<script src="{% static "state/js/d3.v3.min.js" %}"></script>
 <script>
 var margin = {top: 15, right: 0, bottom: 0, left: 0},
     width = 850 - margin.left - margin.right,

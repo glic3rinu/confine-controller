@@ -15,8 +15,10 @@ class CnHostSerializer(serializers.ModelSerializer):
         exclude = ['id', 'content_type', 'object_id']
 
 
-api.aggregate(Node, CnHostSerializer, name='cn')
-api.aggregate(Server, CnHostSerializer, name='cn')
+# TODO: POST/PUT this resource fails. Related info:
+# https://groups.google.com/forum/#!topic/django-rest-framework/2iEat5mCbvY/discussion
+api.aggregate(Node, CnHostSerializer, name='cn', required=False)
+api.aggregate(Server, CnHostSerializer, name='cn', required=False)
 
 
 

@@ -31,3 +31,8 @@
 .login .register-links {
     text-align: right
 }
+
+.required label, label.required {
+    font-weight: bold !important;
+    color: #333 !important;
+}

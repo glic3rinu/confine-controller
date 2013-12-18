@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from registration.backends.default.views import ActivationView, RegistrationView
 
 from .utils import get_backend
-from .views import ActivationRestrictedView, RegistrationClosedView
+from .views import ActivationRestrictedView, RegistrationOpenView, RegistrationClosedView
 
 
 class BackendFactory(object):
@@ -39,7 +39,7 @@ class OpenBackend(object):
         return ActivationView 
     
     def get_registration_view(self):
-        return RegistrationView
+        return RegistrationOpenView
 
 
 class RestrictedBackend(OpenBackend):

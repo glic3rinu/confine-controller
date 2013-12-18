@@ -208,7 +208,7 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
             if user.is_superuser or 'allow_%s' % resource in readonly_fields:
                 form.base_fields.pop('request_%s' % resource)
             else:
-                form.base_fields.pop('allow_%s' % resource)
+                form.base_fields.pop('allow_%s' % resource, None)
         # Hook request for sending emails on form.save
         form.__request__ = request
         return form

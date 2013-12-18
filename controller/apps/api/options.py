@@ -27,6 +27,7 @@ class ApiRoot(APIView):
     -H "Accept: application/json; indent=4"`
     """
     def get(base_view, request, format=None):
+        print request.META.get('HTTP_ACCEPT')
         relations = [
             ('base', 'http://confine-project.eu/rel/server/base'),
             ('api-token-auth', 'http://confine-project.eu/rel/controller/do-get-auth-token')

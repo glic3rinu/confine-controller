@@ -90,7 +90,7 @@ class TicketForm(forms.ModelForm):
             user_choices = UsersIterator()
         else:
             description = markdown(ticket.description)
-            # some heuristics for better line breaking
+            # some hacks for better line breaking
             description = description.replace('>\n', '#Ha9G9-?8')
             description = description.replace('\n', '<br>')
             description = description.replace('#Ha9G9-?8', '>\n')
@@ -98,7 +98,8 @@ class TicketForm(forms.ModelForm):
             widget = ReadOnlyWidget(description, description)
             self.fields['display_description'].widget = widget
             user_choices = UsersIterator(ticket=ticket)
-        self.fields['owner'].choices = user_choices
+        if 'owner' in self.fields:
+            self.fields['owner'].choices = user_choices
     
     def clean_description(self):
         """  clean HTML tags """

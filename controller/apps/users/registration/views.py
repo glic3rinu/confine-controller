@@ -3,15 +3,17 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import validate_email
 from django.contrib.sites.models import RequestSite, Site
 
-from controller.utils import send_email_template
 from registration import signals
 from registration.backends.default.views import ActivationView, RegistrationView
 
+from controller.utils import send_email_template
 from .models import RegistrationProfile
+
 
 class RegistrationOpenView(RegistrationView):
     """
     Regitration open, everyone can register as user.
+    
     """
     def register(self, request, **cleaned_data):
         """ Initialize custom user data model """
@@ -29,17 +31,21 @@ class RegistrationOpenView(RegistrationView):
                                      request=request)
         return new_user
 
+
 class RegistrationClosedView(RegistrationView):
     """
     Registration disabled. Only the admins can create new users.
+    
     """
     def registration_allowed(self, request):
         return False
+
 
 class ActivationRestrictedView(ActivationView):
     """
     The user registration needs be approved by the administrators
     after the account confirmation
+    
     """
     def activate(self, request, activation_key):
         """

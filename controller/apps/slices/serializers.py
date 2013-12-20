@@ -43,7 +43,7 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
 
 
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
-    id = serializers.Field()
+    id = serializers.Field(source='api_id')
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField(required=False)
     exp_data_uri = FakeFileField(field='exp_data', required=False)

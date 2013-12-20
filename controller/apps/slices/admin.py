@@ -26,6 +26,9 @@ from .helpers import wrap_action, remove_slice_id
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
+# List of ifaces displayed in SliverInline (and subclasses)
+SLIVER_IFACES = ['public6', 'public4', 'management', 'isolated', 'debug']
+
 STATE_COLORS = {
     Slice.REGISTER: 'grey',
     Slice.DEPLOY: 'darkorange',
@@ -370,11 +373,11 @@ class SliverInline(PermissionTabularInline):
     """ Show slivers in read only fashion """
     model = Sliver
     max_num = 0
-    fields = ['sliver_link', 'node_link', computed_sliver_set_state]
+    fields = ['sliver_link', 'node_link', computed_sliver_set_state] + SLIVER_IFACES
     readonly_fields = [
         'sliver_link', 'node_link', computed_sliver_set_state, 'sliver_note1',
         'sliver_note2'
-    ]
+    ] + SLIVER_IFACES
     
     class Media:
         css = {
@@ -382,21 +385,21 @@ class SliverInline(PermissionTabularInline):
                 'controller/css/hide-inline-id.css',)
         }
     
-    def __init__(self, *args, **kwargs):
-        """
-        For each sliver iface type show number of requested ifaces
-        """
-        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
-             """ Hook registered ifaces """
-             if not iface_type in self.readonly_fields and not iface_object.AUTO_CREATE:
-                def display_ifaces(instance, iface_type=iface_type):
-                    return instance.interfaces.filter(type=iface_type).count()
-                display_ifaces.short_description = iface_type.capitalize()
-                display_ifaces.boolean = iface_object.UNIQUE
-                setattr(self, iface_type, display_ifaces)
-                self.fields.append(iface_type)
-                self.readonly_fields.append(iface_type)
-        super(SliverInline, self).__init__(*args, **kwargs)
+    def public6(self, instance):
+        return instance.interfaces.filter(type='public6').count()
+    
+    def public4(self, instance):
+        return instance.interfaces.filter(type='public4').count()
+    
+    def management(self, instance):
+        return instance.interfaces.filter(type='management').count()
+    management.boolean = True
+    
+    def isolated(self, instance):
+        return instance.interfaces.filter(type='isolated').count()
+    
+    def debug(self, instance):
+        return instance.interfaces.filter(type='debug').count()
     
     def sliver_note1(self, instance):
         """
@@ -445,8 +448,8 @@ class SliverInline(PermissionTabularInline):
 
 
 class SliverNodeInline(SliverInline):
-    fields = ['sliver_link', 'slice_link', computed_sliver_set_state]
-    readonly_fields = ['sliver_link', 'slice_link', computed_sliver_set_state]
+    fields = ['sliver_link', 'slice_link', computed_sliver_set_state] + SLIVER_IFACES
+    readonly_fields = ['sliver_link', 'slice_link', computed_sliver_set_state] + SLIVER_IFACES
     
     class Media:
         js = ('slices/js/collapsed_sliver_inline.js',)

@@ -400,6 +400,11 @@ class Sliver(models.Model):
     def mgmt_iface(self):
         iface = self.interfaces.filter(type='management')
         return iface.get() if iface else None
+
+    @property
+    def api_id(self):
+        """ The unique ID of this sliver (REST-API) """
+        return "%i@%i" % (self.slice.id, self.node.id)
     
     def update(self):
         self.instance_sn += 1

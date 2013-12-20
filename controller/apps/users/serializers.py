@@ -29,6 +29,7 @@ class AuthTokenField(serializers.WritableField):
 
 
 class UserSerializer(serializers.UriHyperlinkedModelSerializer):
+    id = serializers.Field()
     group_roles = GroupRolesSerializer(source='roles', required=False)
     auth_tokens = AuthTokenField(required=False)
     is_active = serializers.BooleanField(read_only=True)
@@ -38,10 +39,11 @@ class UserSerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = User
-        exclude = ['password', 'groups', 'username']
+        exclude = ['password', 'groups', 'username', 'email']
 
 
 class GroupSerializer(serializers.UriHyperlinkedModelSerializer):
+    id = serializers.Field()
     user_roles = UserRolesSerializer(source='roles', required=False, many=True)
     allow_nodes = serializers.BooleanField(read_only=True)
     allow_slices = serializers.BooleanField(read_only=True)

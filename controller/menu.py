@@ -54,9 +54,17 @@ class CustomMenu(Menu):
                 reverse('admin:slices_slice_changelist'),
                 children=[
                     items.MenuItem('Slices',
-                        reverse('admin:slices_slice_changelist')),
+                        reverse('admin:slices_slice_changelist'),
+                        children=[
+                            items.MenuItem('Status Overview',
+                            reverse('admin:state_slices')),
+                    ]),
                     items.MenuItem('Slivers',
-                        reverse('admin:slices_sliver_changelist')),
+                        reverse('admin:slices_sliver_changelist'),
+                        children=[
+                            items.MenuItem('Status Overview',
+                                reverse('admin:state_slivers')),
+                    ]),
                     items.MenuItem('Templates',
                         reverse('admin:slices_template_changelist')),
                 ]))

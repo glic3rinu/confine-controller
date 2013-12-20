@@ -139,7 +139,10 @@ class CnHost(models.Model):
 # Hook Community Network support for related models
 @property
 def cn(self):
-    return self.cn_generic.get()
+    try:
+        return self.cn_generic.get()
+    except CnHost.DoesNotExist:
+        return None
 
 for model in related_models:
     model.add_to_class('cn_generic', generic.GenericRelation('communitynetworks.CnHost'))

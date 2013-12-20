@@ -1,0 +1,28 @@
+{% extends iframe|yesno:"admin/state/state/iframe_layout.html,admin/index.html" %}
+{% load i18n admin_static staticfiles %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "state/css/report.css" %}" />{% endblock %}
+
+{% block content %}
+<div id="d3wrapper">
+    <h1>{% block accounts_title %}Slices Status in the Testbed{% endblock %}</h1>
+
+    <form id="d3form">
+      <input type="radio" name="mode" value="size" checked> <label>Size</label>
+      <input type="radio" name="mode" value="count"> <label>Count</label>
+    </form>
+
+    <div id="d3graph"></div>
+
+    <ul id="d3legend">
+        <li>Current slices with any sliver allocation in the testbed per group.</li>
+        <li>A treemap recursively subdivides area into rectangles; the area of any node in the tree corresponds to its value in number of slivers.</li>
+        <li>A tooltip on the mouse pointer shows details of each slice (number of slivers) and the borders show the sum of slices and slivers per group and total.</li>
+        <li>A click to a box opens a new browser window showing the API details for that slice.</li>
+        <li>Select by "Count" to show all the slices, including those with no allocated slivers.</li>
+        <a href="{% url 'admin:state_slivers' %}">A similar view per node allocation</a>.
+    </ul>
+
+    {% include "admin/state/state/d3script.html" with data_url="admin:state_slices_data" %}
+</div>
+{% endblock %}

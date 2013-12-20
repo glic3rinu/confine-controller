@@ -47,3 +47,49 @@
     vertical-align: middle;
 }
 
+/** slivers and slices d3js.org graphs styles **/
+#d3wrapper {
+/*  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+  margin: auto;
+  position: relative;
+  width: 960px;
+}
+
+#d3form {
+    position: absolute;
+    top: 5px;
+    text-align: right;
+    width: 850px;
+}
+
+#d3graph {
+    margin-bottom: 1em;
+}
+
+#d3legend {
+    margin: 0;
+    padding-right: 0;
+    padding-left: 15px;
+    width: 835px; /* 850 - padding */
+}
+
+#d3legend li { list-style: square; }
+
+.node {
+  border: solid 1px white;
+  font: 10px sans-serif;
+  line-height: 12px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+  z-index: 10;
+}
+
+.tooltip {
+  position: absolute;
+  border:1px solid;
+  margin:8px;
+  padding: 4px;
+  opacity: 0.8;
+  z-index: 1000;
+}

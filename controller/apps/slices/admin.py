@@ -26,6 +26,9 @@ from .helpers import wrap_action, remove_slice_id
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
+# List of ifaces displayed in SliverInline (and subclasses)
+SLIVER_IFACES = ['public6', 'public4', 'management', 'isolated', 'debug']
+
 STATE_COLORS = {
     Slice.REGISTER: 'grey',
     Slice.DEPLOY: 'darkorange',
@@ -370,17 +373,33 @@ class SliverInline(PermissionTabularInline):
     """ Show slivers in read only fashion """
     model = Sliver
     max_num = 0
-    fields = ['sliver_link', 'node_link', computed_sliver_set_state]
+    fields = ['sliver_link', 'node_link', computed_sliver_set_state] + SLIVER_IFACES
     readonly_fields = [
         'sliver_link', 'node_link', computed_sliver_set_state, 'sliver_note1',
         'sliver_note2'
-    ]
+    ] + SLIVER_IFACES
     
     class Media:
         css = {
              'all': (
                 'controller/css/hide-inline-id.css',)
         }
+    
+    def public6(self, instance):
+        return instance.interfaces.filter(type='public6').count()
+    
+    def public4(self, instance):
+        return instance.interfaces.filter(type='public4').count()
+    
+    def management(self, instance):
+        return instance.interfaces.filter(type='management').count()
+    management.boolean = True
+    
+    def isolated(self, instance):
+        return instance.interfaces.filter(type='isolated').count()
+    
+    def debug(self, instance):
+        return instance.interfaces.filter(type='debug').count()
     
     def sliver_note1(self, instance):
         """
@@ -429,8 +448,8 @@ class SliverInline(PermissionTabularInline):
 
 
 class SliverNodeInline(SliverInline):
-    fields = ['sliver_link', 'slice_link', computed_sliver_set_state]
-    readonly_fields = ['sliver_link', 'slice_link', computed_sliver_set_state]
+    fields = ['sliver_link', 'slice_link', computed_sliver_set_state] + SLIVER_IFACES
+    readonly_fields = ['sliver_link', 'slice_link', computed_sliver_set_state] + SLIVER_IFACES
     
     class Media:
         js = ('slices/js/collapsed_sliver_inline.js',)
@@ -438,6 +457,13 @@ class SliverNodeInline(SliverInline):
     def get_fieldsets(self, request, obj=None):
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
+    def has_delete_permission(self, request, obj=None):
+        """
+        Disallow deleting slivers from node change_view:
+        Why a node admin can be able of doing that?
+        """
+        return False
+
     def slice_link(self, instance):
         return get_admin_link(instance.slice)
     slice_link.short_description = 'Slice'

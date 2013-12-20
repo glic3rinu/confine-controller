@@ -37,7 +37,7 @@ def autodiscover(module):
 def is_installed(app):
     """ returns True if app is installed """
     from .apps import is_installed
-    warnings.warn("Deprecated: use controller.utils.apps.add_app", DeprecationWarning)
+    warnings.warn("Deprecated: use controller.utils.apps.is_installed", DeprecationWarning)
     is_installed(app)
 
 

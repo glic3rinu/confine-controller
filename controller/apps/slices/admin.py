@@ -382,6 +382,22 @@ class SliverInline(PermissionTabularInline):
                 'controller/css/hide-inline-id.css',)
         }
     
+    def __init__(self, *args, **kwargs):
+        """
+        For each sliver iface type show number of requested ifaces
+        """
+        for iface_type, iface_object in Sliver.get_registered_ifaces().items():
+             """ Hook registered ifaces """
+             if not iface_type in self.readonly_fields and not iface_object.AUTO_CREATE:
+                def display_ifaces(instance, iface_type=iface_type):
+                    return instance.interfaces.filter(type=iface_type).count()
+                display_ifaces.short_description = iface_type.capitalize()
+                display_ifaces.boolean = iface_object.UNIQUE
+                setattr(self, iface_type, display_ifaces)
+                self.fields.append(iface_type)
+                self.readonly_fields.append(iface_type)
+        super(SliverInline, self).__init__(*args, **kwargs)
+    
     def sliver_note1(self, instance):
         """
         <p>This slice must be saved before creating slivers.
@@ -438,6 +454,13 @@ class SliverNodeInline(SliverInline):
     def get_fieldsets(self, request, obj=None):
         return super(SliverInline, self).get_fieldsets(request, obj=obj)
     
+    def has_delete_permission(self, request, obj=None):
+        """
+        Disallow deleting slivers from node change_view:
+        Why a node admin can be able of doing that?
+        """
+        return False
+
     def slice_link(self, instance):
         return get_admin_link(instance.slice)
     slice_link.short_description = 'Slice'

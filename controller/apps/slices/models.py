@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from controller.models.fields import MultiSelectField, NullableCharField
 from controller.utils import autodiscover
 from controller.core.validators import (validate_net_iface_name, validate_prop_name,
-        validate_sha256, validate_file_extensions)
+        validate_sha256, validate_file_extensions, validate_name)
 from nodes.models import Node
 from nodes.settings import NODES_NODE_ARCHS
 
@@ -79,8 +79,7 @@ class Template(models.Model):
             help_text='The unique name of this template. A single line of free-form '
                       'text with no whitespace surrounding it, it can include '
                       'version numbers and other information.',
-            validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
-                       'Enter a valid name.', 'invalid')])
+            validators=[validate_name])
     description = models.TextField(blank=True,
             help_text='An optional free-form textual description of this template.')
     type = models.CharField(max_length=32, choices=settings.SLICES_TEMPLATE_TYPES,
@@ -138,8 +137,7 @@ class Slice(models.Model):
     name = models.CharField(max_length=64, unique=True,
             help_text='A unique name of this slice. A single non-empty line of free-form '
                       'text with no whitespace surrounding it.',
-            validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
-                       'Enter a valid name.', 'invalid')])
+            validators=[validate_name])
     description = models.TextField(blank=True,
             help_text='An optional free-form textual description of this slice.')
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,

@@ -10,7 +10,7 @@ from controller import settings as controller_settings
 from controller.models.fields import RSAPublicKeyField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.ip import split_len, int_to_hex_str
-from controller.core.validators import validate_host_name, OrValidator
+from controller.core.validators import validate_host_name, validate_name, OrValidator
 from nodes.models import Server, Node
 from pki import Bob
 
@@ -185,8 +185,7 @@ class Island(models.Model):
     name = models.CharField(max_length=32, unique=True,
             help_text='The unique name of this island. A single line of free-form '
                       'text with no whitespace surrounding it.',
-            validators=[validators.RegexValidator('^[\w.@+-]+$',
-                        'Enter a valid name.', 'invalid')])
+            validators=[validate_name])
     description = models.TextField(blank=True,
             help_text='Optional free-form textual description of this island.')
     

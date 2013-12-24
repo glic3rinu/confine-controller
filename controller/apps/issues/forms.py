@@ -57,18 +57,18 @@ class UsersIterator(forms.models.ModelChoiceIterator):
 
     def __iter__(self):
         yield ('', '---------')
-        users = User.objects.all().order_by('username')
+        users = User.objects.exclude(is_active=False).order_by('name')
         superusers = users.filter(is_superuser=True)
         if superusers:
-            yield ('Operators', list(superusers.values_list('pk', 'username')))
+            yield ('Operators', list(superusers.values_list('pk', 'name')))
             users = users.exclude(is_superuser=True)
         if self.ticket and self.ticket.group:
             group = users.filter(groups=self.ticket.group)
             if group:
-                yield ('Group', list(group.values_list('pk', 'username')))
+                yield ('Group', list(group.values_list('pk', 'name')))
                 users = users.exclude(groups=self.ticket.group)
         if users:
-            yield ('Other', list(users.values_list('pk', 'username')))
+            yield ('Other', list(users.values_list('pk', 'name')))
 
 
 class TicketForm(forms.ModelForm):

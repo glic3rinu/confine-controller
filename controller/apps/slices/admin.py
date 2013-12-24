@@ -21,8 +21,9 @@ from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
-from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet, SliceSliversForm
-from .helpers import wrap_action, remove_slice_id
+from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
+    SliverIfaceInlineFormSet, SliceSliversForm)
+from .helpers import wrap_action, remove_slice_id, state_value
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
@@ -116,6 +117,13 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     change_view_actions = [update_selected]
     default_changelist_filters = (('my_slivers', 'True'),)
     change_form_template = "admin/controller/change_form.html"
+    form = SliverAdminForm
+    
+    class Media:
+        css = {
+             'all': (
+                'slices/css/warning-form.css',)
+        }
     
     def __init__(self, *args, **kwargs):
         """ 
@@ -191,6 +199,13 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'header_title': 'Change sliver'
         }
         context.update(extra_context or {})
+        # warn user when sliver.set_state > slice.set_state
+        sliver_state = sliver.set_state
+        slice_state = sliver.slice.set_state
+        if state_value(sliver_state) > state_value(slice_state):
+            msg = "Note: the slice's set state %s overrides the sliver's \
+                   current set state %s."
+            messages.warning(request, msg % (sliver_state, slice_state))
         return super(SliverAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
 

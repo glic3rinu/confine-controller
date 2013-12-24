@@ -28,3 +28,12 @@ def save_files_with_pk_value(obj, fields, *args, **kwargs):
             setattr(obj, field, None)
             super(type(obj), obj).save(*args, **kwargs)
             setattr(obj, field, field_value)
+
+
+def state_value(state):
+    """ Return a numeric value for Slice.STATES (comparation purposes) """
+    from .models import Slice # avoid circular imports
+    STATE_VALUES = dict((state[0], index) for index, state in enumerate(Slice.STATES))
+    if state is None:
+        return -1
+    return STATE_VALUES.get(state)

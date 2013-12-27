@@ -27,21 +27,22 @@ def change_ticket_state_factory(action, final_state):
                     changes = {'state': (ticket.state, final_state)}
                     is_read = ticket.is_read_by(request.user)
                     getattr(ticket, action)()
-                    modeladmin.log_change(request, ticket, "Marked as %s" % action)
+                    modeladmin.log_change(request, ticket, "Marked as %s" % final_state.lower())
                     content = markdown_formated_changes(changes)
                     content += reason
                     ticket.messages.create(content=content, author=request.user)
                     if is_read and not ticket.is_read_by(request.user):
                         ticket.mark_as_read_by(request.user)
-            msg = "%s selected tickets are now %s" % (queryset.count(), action)
+            msg = "%s selected tickets are now %s." % (queryset.count(), final_state.lower())
             modeladmin.message_user(request, msg)
         else:
             context['form'] = form
             # action_with_confirmation must display form validation errors
             return True
     change_ticket_state.url_name = action
+    change_ticket_state.verbose_name = u'%s\u2026' % action
     change_ticket_state.short_description = '%s selected tickets' % action.capitalize()
-    change_ticket_state.description = 'Mark ticket as %s' % final_state.lower()
+    change_ticket_state.description = 'Mark ticket as %s.' % final_state.lower()
     change_ticket_state.__name__ = action
     return change_ticket_state
 
@@ -71,11 +72,11 @@ def take_tickets(modeladmin, request, queryset):
             ticket.messages.create(content=content, author=request.user)
             if is_read and not ticket.is_read_by(request.user):
                 ticket.mark_as_read_by(request.user)
-    msg = "%s selected tickets are now owned by %s" % (queryset.count(), request.user)
+    msg = "%s selected tickets are now owned by %s." % (queryset.count(), request.user)
     modeladmin.message_user(request, msg)
 take_tickets.url_name = 'take'
 take_tickets.short_description = 'Take selected tickets'
-take_tickets.description = 'Make yourself owner of the ticket'
+take_tickets.description = 'Make yourself owner of the ticket.'
 
 
 @transaction.atomic
@@ -83,7 +84,7 @@ def mark_as_unread(modeladmin, request, queryset):
     """ Mark a tickets as unread """
     for ticket in queryset:
         ticket.mark_as_unread_by(request.user)
-    msg = "%s selected tickets has been marked as unread" % queryset.count()
+    msg = "%s selected tickets have been marked as unread." % queryset.count()
     modeladmin.message_user(request, msg)
 
 
@@ -92,7 +93,7 @@ def mark_as_read(modeladmin, request, queryset):
     """ Mark a tickets as unread """
     for ticket in queryset:
         ticket.mark_as_read_by(request.user)
-    msg = "%s selected tickets has been marked as read" % queryset.count()
+    msg = "%s selected tickets have been marked as read." % queryset.count()
     modeladmin.message_user(request, msg)
 
 
@@ -107,5 +108,5 @@ def set_default_queue(modeladmin, request, queryset):
     queue = queryset.get()
     queue.default = True
     queue.save()
-    modeladmin.log_change(request, queue, "Choosed as default.")
-    messages.info(request, "Choosed '%s' as default queue." % queue)
+    modeladmin.log_change(request, queue, "Chosen as default.")
+    messages.info(request, "Chosen '%s' as default queue." % queue)

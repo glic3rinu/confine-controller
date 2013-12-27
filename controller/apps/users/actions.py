@@ -141,4 +141,4 @@ def send_email(modeladmin, request, queryset):
     return TemplateResponse(request, 'admin/users/user/send_email.html', context, 
             current_app=modeladmin.admin_site.name)
 send_email.url_name = 'send-email'
-send_email.verbose_name = 'Send Email'
+send_email.verbose_name = 'Send email'

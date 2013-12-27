@@ -34,7 +34,8 @@ def reboot_selected(modeladmin, request, queryset):
     
 reboot_selected.short_description = ugettext_lazy("Reboot selected %(verbose_name_plural)s")
 reboot_selected.url_name = 'reboot'
-reboot_selected.description = mark_safe('Restart this node to apply configuration changes&#8230;')
+reboot_selected.verbose_name = u'Reboot\u2026'
+reboot_selected.description = mark_safe('Restart this node to apply configuration changes.')
 
 
 @transaction.atomic
@@ -79,6 +80,6 @@ def request_cert(modeladmin, request, queryset):
     return TemplateResponse(request, 'admin/nodes/node/request_certificate.html', context, 
         current_app=modeladmin.admin_site.name)
 request_cert.url_name = 'request-cert'
-request_cert.verbose_name = 'Request Certificate'
+request_cert.verbose_name = u'Request certificate\u2026'
 request_cert.description = mark_safe('Upload a node CSR to be signed by the '
-                                     'testbed certificate authority (CA)&#8230;')
+                                     'testbed certificate authority (CA).')

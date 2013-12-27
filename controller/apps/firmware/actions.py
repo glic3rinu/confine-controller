@@ -135,9 +135,9 @@ def get_firmware(modeladmin, request, queryset):
     return TemplateResponse(request, template, context, current_app=modeladmin.admin_site.name)
 get_firmware.short_description = ugettext_lazy("Get firmware for selected %(verbose_name)s")
 get_firmware.url_name = 'firmware'
-get_firmware.verbose_name = 'Download Firmware'
+get_firmware.verbose_name = u'Download firmware\u2026'
 get_firmware.css_class = 'viewsitelink'
-get_firmware.description = mark_safe('Build and download a customized firmware for this node&#8230;')
+get_firmware.description = mark_safe('Build and download a customized firmware for this node.')
 
 
 sync_plugins = sync_plugins_action('firmwareplugins')

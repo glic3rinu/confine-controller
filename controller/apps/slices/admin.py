@@ -217,7 +217,7 @@ class NodeListAdmin(NodeAdmin):
         url = reverse('admin:slices_slice_add_sliver', kwargs=kwargs)
         return '<a href="%s">%s<a>' % (url, instance.name)
     add_sliver_link.allow_tags = True
-    add_sliver_link.short_description = 'Add on Node'
+    add_sliver_link.short_description = 'Add on node'
     
     def display_sliver_pub_ipv4_range(self, instance):
         """ Show sliver_pub_ipv4_range on changeliste """
@@ -409,7 +409,7 @@ class SliverInline(PermissionTabularInline):
     sliver_note1.short_description = mark_safe(sliver_note1.__doc__)
     
     def sliver_note2(self, instance):
-        """ <a href="add_sliver" class="addlink"> Add Slivers </a> """
+        """ <a href="add_sliver" class="addlink">Add slivers</a> """
     sliver_note2.short_description = mark_safe(sliver_note2.__doc__)
     
     def get_fieldsets(self, request, obj=None):
@@ -418,7 +418,7 @@ class SliverInline(PermissionTabularInline):
             return [(None, {'fields': ['sliver_note1']})]
         # The slices is registred: display add button in the inline header
         if self.has_change_permission(request, obj, view=False):
-            add_button = 'Slivers <a href="add_sliver">(Add another Sliver)</a>'
+            add_button = 'Slivers <a href="add_sliver">(Add another sliver)</a>'
             self.verbose_name_plural = mark_safe(add_button)
         if not obj.slivers.exists():
             return [(None, {'fields': ['sliver_note2']})]

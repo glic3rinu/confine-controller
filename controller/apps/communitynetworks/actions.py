@@ -66,5 +66,5 @@ def cache_node_db(modeladmin, request, queryset):
     return TemplateResponse(request, 'admin/controller/generic_confirmation.html',
         context, current_app=modeladmin.admin_site.name)
 cache_node_db.url_name = 'do-cache-cndb'
-cache_node_db.verbose_name = 'Cache CNDB'
-cache_node_db.description = mark_safe('Caches node information stored on CNDB&#8230;')
+cache_node_db.verbose_name = u'Cache CNDB\u2026'
+cache_node_db.description = mark_safe('Update this node with configuration stored on CNDB.')

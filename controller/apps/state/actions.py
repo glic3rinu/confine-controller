@@ -23,12 +23,12 @@ def refresh(modeladmin, request, queryset):
         # Block until finish
         result.get()
     except OperationLocked:
-        msg = 'This operation is currently being executed by another process'
+        msg = 'This operation is currently being executed by another process.'
         messages.error(request, msg)
     else:
-        msg = 'The state of %d %ss has been updated' % (queryset.count(), opts.object_name)
+        msg = 'The state of %d %ss has been updated.' % (queryset.count(), opts.object_name)
         modeladmin.message_user(request, msg)
-refresh.description = "Retrieve the current state of the related object"
+refresh.description = "Retrieve the current state of the related object."
 refresh.always_display = True
 
 
@@ -45,10 +45,10 @@ def refresh_state(modeladmin, request, queryset):
         result = get_state.delay(module, ids=list(ids), lock=False)
         result.get()
     except OperationLocked:
-        msg = 'This operation is currently being executed by another process'
+        msg = 'This operation is currently being executed by another process.'
         messages.error(request, msg)
     else:
-        msg = 'The state of %d %ss has been updated' % (queryset.count(), opts.object_name)
+        msg = 'The state of %d %ss has been updated.' % (queryset.count(), opts.object_name)
         modeladmin.message_user(request, msg)
 
 
@@ -61,5 +61,5 @@ def show_state(modeladmin, request, queryset):
     state = obj.state
     return redirect('admin:state_state_change', state.pk)
 show_state.url_name = 'state'
-show_state.description = "Show the current state of this object"
+show_state.description = "Show the current state of this object."
 show_state.always_display = True

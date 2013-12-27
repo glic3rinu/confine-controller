@@ -17,7 +17,7 @@ from djcelery.models import TaskState
 from privatefiles import PrivateFileField
 
 from controller import settings as controller_settings
-from controller.core.validators import validate_file_extensions
+from controller.core.validators import validate_file_extensions, validate_name
 from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
@@ -296,8 +296,7 @@ class BaseImage(models.Model):
     name = models.CharField(max_length=256, unique=True,
             help_text='Unique name for this base image.A single non-empty line of '
                       'free-form text with no whitespace surrounding it. ',
-            validators=[validators.RegexValidator('^\w[\s\w.@+-]+\w$',
-                        'Enter a valid name.', 'invalid')])
+            validators=[validate_name])
     config = models.ForeignKey(Config, related_name='images')
     architectures = MultiSelectField(max_length=250, choices=NODES_NODE_ARCHS)
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,

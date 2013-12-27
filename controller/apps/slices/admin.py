@@ -203,9 +203,9 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         sliver_state = sliver.set_state
         slice_state = sliver.slice.set_state
         if state_value(sliver_state) > state_value(slice_state):
-            msg = "Note: the slice's set state %s overrides the sliver's \
-                   current set state %s."
-            messages.warning(request, msg % (sliver_state, slice_state))
+            msg = "Note: the slice's set state \"%s\" overrides the sliver's \
+                   current set state \"%s\"."
+            messages.warning(request, msg % (slice_state, sliver_state))
         return super(SliverAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
 

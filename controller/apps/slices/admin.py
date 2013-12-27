@@ -58,7 +58,7 @@ def computed_sliver_set_state(sliver):
     state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
     title = ''
     if effective:
-        title = 'Set state from slice, sliver set state is "%s"' % sliver_state
+        title = 'Set state from slice, sliver set state is &quot;%s&quot;' % sliver_state
         state += '*'
     return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
 computed_sliver_set_state.short_description = 'Set state'

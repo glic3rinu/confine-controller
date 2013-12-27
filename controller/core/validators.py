@@ -76,7 +76,7 @@ def validate_name(value):
         A single non-empty line of free-form text with no whitespace
         surrounding it.
     """
-    validators.RegexValidator('^\w[\s\w.@+-]+\w$',
+    validators.RegexValidator('^\S.*\S$',
             'Enter a valid name.', 'invalid')(value)
 
 

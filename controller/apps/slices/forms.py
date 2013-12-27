@@ -49,7 +49,7 @@ class SliceAdminForm(forms.ModelForm):
 
 class SliverAdminForm(forms.ModelForm):
     """ Improve user interface: form style and empty labels """
-    EMPTY_LABEL = "(from sliver defaults)"
+    EMPTY_LABEL = "(from slice)"
     blank_choice = (('', EMPTY_LABEL),)
     set_state = forms.ChoiceField(choices=blank_choice + Slice.STATES, required=False)
     def __init__(self, *args, **kwargs):

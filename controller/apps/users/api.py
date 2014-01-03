@@ -15,12 +15,38 @@ from .models import User, Group
 from .serializers import UserSerializer, GroupSerializer
 
 
+class ChangeAuth(APIView):
+    """
+    **Relation type:** [`http://confine-project.eu/rel/controller/do-change-auth`](
+        http://confine-project.eu/rel/controller/do-change-auth)
+    
+    Endpoint containing the function URI used to change the user auth.
+    
+    POST data: `New user username and password`
+    """
+    url_name = 'change-auth'
+    rel = 'http://confine-project.eu/rel/controller/do-change-auth'
+    
+    def post(self, request, *args, **kwargs):
+        username = request.DATA.get('username', None)
+        password = request.DATA.get('password', None)
+        if username and password:
+            user = get_object_or_404(User, pk=kwargs.get('pk'))
+            self.check_object_permissions(self.request, user)
+            user.username = username
+            user.set_password(password)
+            user.save()
+            response_data = {'detail': 'User username and password changed successfully'}
+            return Response(response_data, status=status.HTTP_200_OK)
+        raise exceptions.ParseError(detail='Username or password value not provided')
+
 class ChangePassword(APIView):
     """
+    ### DEPRECATED --> use instead `change-auth` function ###
     **Relation type:** [`http://confine-project.eu/rel/controller/do-change-password`](
         http://confine-project.eu/rel/controller/do-change-password)
     
-    Endpoint containing the function URI used to reboot this node.
+    Endpoint containing the function URI used to change the user password.
     
     POST data: `New user password`
     """
@@ -28,15 +54,9 @@ class ChangePassword(APIView):
     rel = 'http://confine-project.eu/rel/controller/do-change-password'
     
     def post(self, request, *args, **kwargs):
-        password = request.DATA
-        if password:
-            user = get_object_or_404(User, pk=kwargs.get('pk'))
-            self.check_object_permissions(self.request, user)
-            user.set_password(password)
-            user.save()
-            response_data = {'detail': 'User password changed successfully'}
-            return Response(response_data, status=status.HTTP_200_OK)
-        raise exceptions.ParseError(detail='Password value not provided')
+        response_data = {'error_detail': 'Use do-change-auth instead of '\
+            'deprecated and obsolete do-change-password.'}
+        return Response(response_data, status=status.HTTP_410_GONE)
 
 
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -52,12 +72,6 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     serializer_class = UserSerializer
 #    filter_fields = ('username',)
 
-    def pre_save(self, obj):
-        """ Initialize username value """
-        super(UserList, self).pre_save(obj)
-        if not obj.username:
-            obj.username = obj.name
-
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -68,7 +82,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = User
     serializer_class = UserSerializer
-    ctl = [ChangePassword]
+    ctl = [ChangeAuth, ChangePassword]
 
 
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):

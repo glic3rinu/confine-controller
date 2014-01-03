@@ -48,13 +48,10 @@ class SliceAdminForm(forms.ModelForm):
         return self.initial["vlan_nr"]
 
 class SliverAdminForm(forms.ModelForm):
-    """ Improve user interface: form style and empty labels """
-    EMPTY_LABEL = "(from slice)"
-    blank_choice = (('', EMPTY_LABEL),)
-    set_state = forms.ChoiceField(choices=blank_choice + Slice.STATES, required=False)
     def __init__(self, *args, **kwargs):
-        super(SliverAdminForm, self).__init__( *args, **kwargs)
-        self.fields['template'].empty_label = self.EMPTY_LABEL
+        """ Improve user interface: form style and empty labels """
+        # FIXME: Works but is NOT called: see SliverAdmin at admin.py
+        super(SliverAdminForm, self).__init__(*args, **kwargs)
         if self.instance:
             sliver_state = state_value(self.instance.set_state)
             slice_state = state_value(self.instance.slice.set_state)

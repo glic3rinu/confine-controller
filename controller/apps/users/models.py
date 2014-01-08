@@ -142,14 +142,16 @@ class User(auth_models.AbstractBaseUser):
     The implementation is based on auth.models.AbstractBaseUser, more:
     https://docs.djangoproject.com/en/dev/topics/auth/#customizing-the-user-model
     """
-    username = NullableCharField(max_length=30, null=True, blank=True,  ## models.CharField
+    username = NullableCharField(max_length=30, null=True, blank=True,
             unique=True, db_index=True,
-            help_text='Rquired. A unique user alias for authentication. '
+            help_text='Optional. A unique user alias for authentication. '
                       '30 characters or fewer. '
-                      'Letters, numbers and @/./+/-/_ characters',
+                      'Letters, numbers and @/./+/-/_ characters.',
             validators=[validators.RegexValidator('^[\w.@+-]+$', 
                         'Enter a valid username.', 'invalid')])
-    email = models.EmailField('Email Address', max_length=255, unique=True)
+    email = models.EmailField('Email Address', max_length=255, unique=True,
+            help_text='A unique email for the user. '
+                      'May be used for authentication.')
     description = models.TextField(blank=True, 
             help_text='An optional free-form textual description of this user, it '
                       'can include URLs and other information.')

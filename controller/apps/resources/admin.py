@@ -11,7 +11,7 @@ from .models import Resource, ResourceReq
 
 
 class ResourceAdminInline(PermissionGenericTabularInline):
-    fields = ['name', 'max_req', 'dflt_req', 'unit']
+    fields = ['name', 'max_sliver', 'dflt_sliver', 'unit']
     readonly_fields = ['unit']
     model = Resource
     formset = ResourceInlineFormSet

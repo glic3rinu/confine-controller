@@ -53,14 +53,15 @@ class BaseResource(models.Model):
 
 
 class Resource(BaseResource):
-    max_req = models.PositiveIntegerField(null=True, blank=True)
-    dflt_req = models.PositiveIntegerField("Default sliver")
+    max_sliver = models.PositiveIntegerField(null=True, blank=True)
+    dflt_sliver = models.PositiveIntegerField("Default sliver")
     
     def clean(self):
         super(Resource, self).clean()
         self.instance.clean(self)
 
 
+# TODO rename name to res_name
 class ResourceReq(BaseResource):
     req = models.PositiveIntegerField(null=True, blank=True)
     

@@ -12,9 +12,10 @@ class ResourceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Resource
-        fields = ['name', 'max_req', 'dflt_req', 'unit']
+        fields = ['name', 'max_sliver', 'dflt_sliver', 'unit']
 
 
+# TODO rename name to res_name
 class ResourceReqSerializer(serializers.ModelSerializer):
     unit = serializers.CharField(read_only=True)
     

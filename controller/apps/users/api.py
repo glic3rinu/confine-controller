@@ -22,7 +22,7 @@ class ChangeAuth(APIView):
     
     Endpoint containing the function URI used to change the user auth.
     
-    POST data: `New user username and password`
+    POST data: `New user username (optional) and password (required)`
     """
     url_name = 'change-auth'
     rel = 'http://confine-project.eu/rel/controller/do-change-auth'
@@ -30,15 +30,22 @@ class ChangeAuth(APIView):
     def post(self, request, *args, **kwargs):
         username = request.DATA.get('username', None)
         password = request.DATA.get('password', None)
-        if username and password:
+        if password:
+            fields_updated = 'password'
             user = get_object_or_404(User, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, user)
-            user.username = username
+            if username is not None:
+                user.username = username
+                try:
+                    user.clean_fields()
+                except ValidationError as e:
+                    raise exceptions.ParseError(detail='; '.join(e.messages))
+                fields_updated = 'username and password'
             user.set_password(password)
             user.save()
-            response_data = {'detail': 'User username and password changed successfully'}
+            response_data = {'detail': 'User %s changed successfully' % fields_updated}
             return Response(response_data, status=status.HTTP_200_OK)
-        raise exceptions.ParseError(detail='Username or password value not provided')
+        raise exceptions.ParseError(detail='Password value not provided')
 
 class ChangePassword(APIView):
     """

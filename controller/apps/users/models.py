@@ -146,8 +146,9 @@ class User(auth_models.AbstractBaseUser):
             unique=True, db_index=True,
             help_text='Optional. A unique user alias for authentication. '
                       '30 characters or fewer. '
-                      'Letters, numbers and @/./+/-/_ characters.',
-            validators=[validators.RegexValidator('^[\w.@+-]+$', 
+                      'Letters, numbers and ./+/-/_ characters.',
+            # disallow '@' for avoiding foo_user.username == fake_user.email
+            validators=[validators.RegexValidator('^[\w.+-]+$',
                         'Enter a valid username.', 'invalid')])
     email = models.EmailField('Email Address', max_length=255, unique=True,
             help_text='A unique email for the user. '
@@ -173,10 +174,10 @@ class User(auth_models.AbstractBaseUser):
     objects = UserManager()
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = ['email', 'name']
     
-    class Mate:
-        ordering = ['username']
+    class Meta:
+        ordering = ['name']
     
     def __unicode__(self):
         return self.name

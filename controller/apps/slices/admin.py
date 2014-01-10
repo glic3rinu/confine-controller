@@ -21,8 +21,9 @@ from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
-from .forms import SliceAdminForm, SliverIfaceInlineForm, SliverIfaceInlineFormSet, SliceSliversForm
-from .helpers import wrap_action, remove_slice_id
+from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
+    SliverIfaceInlineFormSet, SliceSliversForm)
+from .helpers import wrap_action, remove_slice_id, state_value
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
@@ -57,7 +58,7 @@ def computed_sliver_set_state(sliver):
     state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
     title = ''
     if effective:
-        title = 'Set state from slice, the sliver state is %s' % sliver_state
+        title = 'Set state from slice, sliver set state is &quot;%s&quot;' % sliver_state
         state += '*'
     return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
 computed_sliver_set_state.short_description = 'Set state'
@@ -94,6 +95,7 @@ class SliverIfaceInline(PermissionTabularInline):
         return super(SliverIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
+SLIVER_EMPTY_LABEL = "(from slice)"
 class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
         '__unicode__', admin_link('node'), admin_link('slice'), computed_sliver_set_state
@@ -116,6 +118,13 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     change_view_actions = [update_selected]
     default_changelist_filters = (('my_slivers', 'True'),)
     change_form_template = "admin/controller/change_form.html"
+    form = SliverAdminForm # FIXME: ignored but don't know why! Check inheritance
+    
+    class Media:
+        css = {
+             'all': (
+                'slices/css/warning-form.css',)
+        }
     
     def __init__(self, *args, **kwargs):
         """ 
@@ -172,14 +181,23 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         super(SliverAdmin, self).log_addition(request, object)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
-        """ Make description input widget smaller """
+        """ Make description input widget smaller and update empty label """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
-        if db_field.name == 'template':
+        elif db_field.name == 'template':
+            kwargs['empty_label'] = SLIVER_EMPTY_LABEL
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                     db_field.rel, self.admin_site)
         return super(SliverAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        """ Update empty label """
+        if db_field.name == 'set_state':
+            blank_choice = (('', SLIVER_EMPTY_LABEL),)
+            kwargs['choices'] = blank_choice + Slice.STATES
+        # TODO update empty_label for exp_data and overlay (FileField)
+        return super(SliverAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Linked title """
@@ -191,6 +209,15 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'header_title': 'Change sliver'
         }
         context.update(extra_context or {})
+        # warn user when sliver.set_state > slice.set_state
+        # Only check on GET (for avoid false/duplicated warnings on POSTing)
+        sliver_state = sliver.set_state
+        slice_state = sliver.slice.set_state
+        if (request.method == 'GET' and
+                state_value(sliver_state) > state_value(slice_state)):
+            msg = "Note: the slice's set state \"%s\" overrides the sliver's \
+                   current set state \"%s\"."% (slice_state, sliver_state)
+            messages.warning(request, msg)
         return super(SliverAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
 

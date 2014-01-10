@@ -4,6 +4,7 @@ from django.contrib.admin.templatetags.admin_list import _boolean_icon
 from controller.forms.widgets import ShowText
 from nodes.models import Node
 
+from .helpers import state_value
 from .models import Slice, Sliver
 
 
@@ -45,6 +46,17 @@ class SliceAdminForm(forms.ModelForm):
             return None if not vlan_nr else -1
         # ! Register state: return the old value
         return self.initial["vlan_nr"]
+
+class SliverAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        """ Improve user interface: form style and empty labels """
+        # FIXME: Works but is NOT called: see SliverAdmin at admin.py
+        super(SliverAdminForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            sliver_state = state_value(self.instance.set_state)
+            slice_state = state_value(self.instance.slice.set_state)
+            if sliver_state > slice_state:
+                self.fields['set_state'].widget.attrs = {'class': 'warning'}
 
 
 class SliceSliversForm(forms.ModelForm):

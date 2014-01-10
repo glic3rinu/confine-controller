@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from django.utils.crypto import get_random_string
 from rest_framework import status, exceptions
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -22,28 +23,39 @@ class ChangeAuth(APIView):
     
     Endpoint containing the function URI used to change the user auth.
     
-    POST data: `New user username (optional) and password (required)`
+    POST data: `New user authentication data:
+        - email (optional)
+        - username (optional)
+        - password (required)`
     """
     url_name = 'change-auth'
     rel = 'http://confine-project.eu/rel/controller/do-change-auth'
     
     def post(self, request, *args, **kwargs):
+        email = request.DATA.get('email', None)
         username = request.DATA.get('username', None)
         password = request.DATA.get('password', None)
         if password:
-            fields_updated = 'password'
+            fields_updated = ['password']
+            exclude = ['username', 'email']
             user = get_object_or_404(User, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, user)
-            if username is not None:
-                user.username = username
-                try:
-                    user.clean_fields()
-                except ValidationError as e:
-                    raise exceptions.ParseError(detail='; '.join(e.messages))
-                fields_updated = 'username and password'
             user.set_password(password)
+            # set optional fields
+            for opt_field in ['username', 'email']:
+                if eval(opt_field):
+                    setattr(user, opt_field, eval(opt_field))
+                    fields_updated.append(opt_field)
+                    exclude.remove(opt_field)
+            # validate data
+            try:
+                user.clean_fields(exclude=exclude)
+            except ValidationError as e:
+                raise exceptions.ParseError(detail='; '.join(e.messages))
             user.save()
-            response_data = {'detail': 'User %s changed successfully' % fields_updated}
+            response_data = {
+                'detail': 'User %s changed successfully' % ', '.join(fields_updated)
+            }
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='Password value not provided')
 
@@ -78,6 +90,11 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = User
     serializer_class = UserSerializer
 #    filter_fields = ('username',)
+
+    def pre_save(self, obj):
+        super(UserList, self).pre_save(obj)
+        if not obj.email:
+            obj.email = "NOT_USABLE_EMAIL!%s" % get_random_string(100)
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):

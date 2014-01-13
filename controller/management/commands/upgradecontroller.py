@@ -64,9 +64,9 @@ class Command(BaseCommand):
             eggs = eggs.stdout.splitlines()
             try:
                 if desired_version:
-                    if desired_version == 'dev':
-                        r('pip install -e git+http://git.confine-project.eu/confine/controller.git@master#egg=confine-controller')
-                    else:
+                    # if desired_version == 'dev':
+                    #     r('pip install -e git+http://git.confine-project.eu/confine/controller.git@master#egg=confine-controller')
+                    # else:
                         r('pip install confine-controller==%s' % desired_version)
                 else:
                     # Did I mentioned how I hate PIP?

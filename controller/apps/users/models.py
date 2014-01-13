@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from controller.utils import send_email_template
 from controller.core.validators import validate_ascii, validate_name
+from controller.models.fields import NullableCharField, TrimmedCharField
 
 
 class Group(models.Model):
@@ -109,19 +110,17 @@ class UserManager(auth_models.BaseUserManager):
         Creates and saves a User with the given username, email and password.
         """
         now = timezone.now()
-        if not username:
-            raise ValueError('The given username must be set')
+        if not 'name' in extra_fields:
+            raise ValueError("The 'name' field must be set for a new User")
         email = UserManager.normalize_email(email)
         user = self.model(username=username, email=email, is_active=True,
                 is_superuser=False, last_login=now, date_joined=now, **extra_fields)
-        user.name = username # fill mandatory field
         user.set_password(password)
         user.save(using=self._db)
         return user
     
     def create_superuser(self, username, email, password, **extra_fields):
         user = self.create_user(username, email, password, **extra_fields)
-        user.name = username # fill mandatory field
         user.is_active = True
         user.is_superuser = True
         user.save(using=self._db)
@@ -143,20 +142,25 @@ class User(auth_models.AbstractBaseUser):
     The implementation is based on auth.models.AbstractBaseUser, more:
     https://docs.djangoproject.com/en/dev/topics/auth/#customizing-the-user-model
     """
-    username = models.CharField(max_length=30, unique=True, db_index=True,
-            help_text='Required. 30 characters or fewer. Letters, numbers and '
-                      '@/./+/-/_ characters',
-            validators=[validators.RegexValidator('^[\w.@+-]+$', 
+    username = NullableCharField(max_length=30, null=True, blank=True,
+            unique=True, db_index=True,
+            help_text='Optional. A unique user alias for authentication. '
+                      '30 characters or fewer. '
+                      'Letters, numbers and ./+/-/_ characters.',
+            # disallow '@' for avoiding foo_user.username == fake_user.email
+            validators=[validators.RegexValidator('^[\w.+-]+$',
                         'Enter a valid username.', 'invalid')])
-    email = models.EmailField('Email Address', max_length=255, unique=True)
+    email = models.EmailField('Email Address', max_length=255, unique=True,
+            help_text='A unique email for the user. '
+                      'May be used for authentication.')
     description = models.TextField(blank=True, 
             help_text='An optional free-form textual description of this user, it '
                       'can include URLs and other information.')
     first_name = '' # fluent dashboard compatibility
     last_name = ''
-    name = models.CharField(max_length=60, unique=True, db_index=True,
-            help_text='A unique name for this user. A single non-empty line of '
-                      'free-form text with no whitespace surrounding it.',
+    name = TrimmedCharField(max_length=60, unique=True, db_index=True,
+            help_text='Required. A unique name for this user. A single non-empty '
+                      'line of free-form text with no whitespace surrounding it.',
             validators=[validate_name])
     is_active = models.BooleanField(default=True,
             help_text='Designates whether this user should be treated as '
@@ -170,10 +174,10 @@ class User(auth_models.AbstractBaseUser):
     objects = UserManager()
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = ['email', 'name']
     
-    class Mate:
-        ordering = ['username']
+    class Meta:
+        ordering = ['name']
     
     def __unicode__(self):
         return self.name

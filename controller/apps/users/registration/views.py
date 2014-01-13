@@ -1,22 +1,51 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import validate_email
-from django.contrib.sites.models import RequestSite
+from django.contrib.sites.models import RequestSite, Site
+
+from registration import signals
+from registration.backends.default.views import ActivationView, RegistrationView
 
 from controller.utils import send_email_template
-from registration.backends.default.views import ActivationView, RegistrationView
+from .models import RegistrationProfile
+
+
+class RegistrationOpenView(RegistrationView):
+    """
+    Regitration open, everyone can register as user.
+    
+    """
+    def register(self, request, **cleaned_data):
+        """ Initialize custom user data model """
+        username, name, email, password = (cleaned_data['username'],
+            cleaned_data['name'], cleaned_data['email'], cleaned_data['password1'])
+        if Site._meta.installed:
+            site = Site.objects.get_current()
+        else:
+            site = RequestSite(request)
+        
+        new_user = RegistrationProfile.extra_manager.create_inactive_user(
+                        username, name, email, password, site)
+        signals.user_registered.send(sender=self.__class__,
+                                     user=new_user,
+                                     request=request)
+        return new_user
+
 
 class RegistrationClosedView(RegistrationView):
     """
     Registration disabled. Only the admins can create new users.
+    
     """
     def registration_allowed(self, request):
         return False
+
 
 class ActivationRestrictedView(ActivationView):
     """
     The user registration needs be approved by the administrators
     after the account confirmation
+    
     """
     def activate(self, request, activation_key):
         """

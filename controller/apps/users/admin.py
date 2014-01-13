@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.core.urlresolvers import reverse, resolve
 from django.db import models
 from django.utils.safestring import mark_safe
@@ -127,7 +127,7 @@ class JoinRequestInline(PermissionTabularInline):
         return super(JoinRequestInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class UserAdmin(UserAdmin, PermissionModelAdmin):
+class UserAdmin(AuthUserAdmin, PermissionModelAdmin):
     list_display = (
         'name', 'email', 'group_links', 'is_superuser', 'is_active'
     )
@@ -145,12 +145,12 @@ class UserAdmin(UserAdmin, PermissionModelAdmin):
         }),
     )
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'email')}
-        ),)
+        (None, {'fields': ('username', 'password1', 'password2',), 'classes': ('wide',)}),
+        ('Personal info', {'fields': ('name', 'email',), 'classes': ('wide',)}),
+    )
     
     search_fields = ('username', 'email', 'name')
+    ordering = ('name',)
     inlines = [AuthTokenInline, UserRolesInline]
     actions = [enable_account, send_email]
     sudo_actions = ['delete_selected', 'enable_account', 'send_email']

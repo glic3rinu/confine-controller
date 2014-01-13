@@ -94,7 +94,7 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     def pre_save(self, obj):
         super(UserList, self).pre_save(obj)
         if not obj.email:
-            obj.email = "NOT_USABLE_EMAIL!%s" % get_random_string(100)
+            obj.email = "API_GENERATED_%s" % get_random_string(30)
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):

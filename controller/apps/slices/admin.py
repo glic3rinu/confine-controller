@@ -392,6 +392,13 @@ class SliceSliversAdmin(SliverAdmin):
         self.node_id = sliver.node_id
         context = { 'slice': slice }
         context.update(extra_context or {})
+        # warn user on missconfiguration
+        if request.method == 'GET':
+            if not slice.template.is_active or \
+                sliver.template and not sliver.template.is_active:
+                msg = "The template chosen for this sliver is NOT active. "\
+                    "Please check its configuration."
+                messages.warning(request, msg)
         return super(SliceSliversAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
 
@@ -597,11 +604,18 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        """ Warn user when the slice's group cannot manage slices """
+        """ Warn user on missconfigured slice:
+            - when the slice's group cannot manage slices
+            - when slice template is inactive
+        """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if obj and not obj.group.allow_slices:
                 msg = "The slice group does not have permissions to manage slices"
+                messages.warning(request, msg)
+            if not obj.template.is_active:
+                msg = "The template chosen for this slice is NOT active. "\
+                    "Please check its configuration."
                 messages.warning(request, msg)
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)

@@ -198,7 +198,7 @@ class Slice(models.Model):
                       'See <a href="https://wiki.confine-project.eu/arch:'
                       'slice-sliver-states">slice and sliver states</a> for the full '
                       'description of set states and possible transitions.')
-    template = models.ForeignKey(Template,
+    template = models.ForeignKey(Template, limit_choices_to={'is_active':True},
             help_text='The template to be used by the slivers of this slice (if they '
                       'do not explicitly indicate one).')
     group = models.ForeignKey('users.Group', related_name='slices')
@@ -351,6 +351,7 @@ class Sliver(models.Model):
                       'slice-sliver-states">slice and sliver states</a> for the full '
                       'description of set states and possible transitions.', null=True)
     template = models.ForeignKey(Template, null=True, blank=True,
+            limit_choices_to={'is_active':True},
             help_text='If present, the template to be used by this sliver, instead '
                       'of the one specified by the slice.')
     

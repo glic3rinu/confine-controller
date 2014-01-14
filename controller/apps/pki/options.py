@@ -2,6 +2,7 @@ import time
 import random
 import sys
 import os
+import pwd
 from base64 import b64encode
 
 from M2Crypto import RSA, X509, EVP, ASN1, BIO
@@ -129,7 +130,10 @@ class Bob(object):
     def get_pub_key(self, format='X.501'):
         if format == 'OpenSSH':
             b64key = b64encode('\x00\x00\x00\x07ssh-rsa%s%s' % (self.key.e, self.key.n))
-            username = os.getlogin()
+            username = pwd.getpwuid(os.getuid())[0] 
+            # used to be os.getlogin(), not a good idea 
+            # also see http://docs.python.org/2/library/os.html#os.getlogin
+            
             hostname = os.uname()[1]
             return 'ssh-rsa %s %s@%s' % (b64key, username, hostname)
         if format == 'X.501':

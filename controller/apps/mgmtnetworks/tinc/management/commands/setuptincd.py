@@ -88,7 +88,7 @@ class Command(BaseCommand):
                 try:
                     prompt_username = pwd.getpwnam(value).pw_name
                 except KeyError, e:
-                    self.stderr.write("Error: %s" % '; '.join(e.messages))
+                    self.stderr.write("Error: %s" % e)
                     prompt_username = None
                     continue
         

@@ -30,11 +30,12 @@ class CacheCNDB(APIView):
         if not request.DATA:
             node = get_object_or_404(Node, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, node)
-            node.cn.cache_node_db()
+            node.cn.cache_cndb()
             response_data = {'detail': 'Node description updated according to CNDB description'}
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='This endpoint does not accept data')
 
 
 # Monkey patching
-insert_ctl(NodeDetail, CacheCNDB)
+### do-cache-cndb removed from server API (issue #266) ###
+#insert_ctl(NodeDetail, CacheCNDB)

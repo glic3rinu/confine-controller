@@ -12,7 +12,7 @@ from .models import CnHost
 class CnHostSerializer(serializers.ModelSerializer):
     class Meta:
         model = CnHost
-        exclude = ['id', 'content_type', 'object_id']
+        exclude = ['id', 'content_type', 'object_id', 'cndb_cached_on']
 
 
 # TODO: POST/PUT this resource fails. Related info:

@@ -120,6 +120,7 @@ function install_requirements () {
     DEVELOPMENT_APT="python-pip \
                      python-m2crypto \
                      python-psycopg2 \
+                     python-dateutil \
                      postgresql \
                      rabbitmq-server \
                      python-dev gcc"

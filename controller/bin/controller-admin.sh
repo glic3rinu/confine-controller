@@ -133,7 +133,7 @@ function install_requirements () {
     DEVELOPMENT_PIP="Django==1.6.1 \
                      django-celery-email==1.0.3 \
                      django-fluent-dashboard==0.3.5 \
-                     South==0.8.1 \
+                     South==0.8.4 \
                      IPy==0.81 \
                      django-extensions==1.1.1 \
                      django-transaction-signals==1.0.0 \

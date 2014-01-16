@@ -61,7 +61,6 @@ class Resource(BaseResource):
         self.instance.clean(self)
 
 
-# TODO rename name to res_name
 class ResourceReq(BaseResource):
     req = models.PositiveIntegerField(null=True, blank=True)
     
@@ -73,6 +72,13 @@ class ResourceReq(BaseResource):
         super(ResourceReq, self).clean()
         self.instance.clean_req(self)
 
+    @property
+    def res_name(self):
+        return self.name
+
+    @res_name.setter
+    def res_name(self, value):
+        self.name = value
 
 autodiscover('resources')
 

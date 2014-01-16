@@ -6,7 +6,7 @@ from controller.forms.widgets import ShowText
 from permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin
-from .forms import ResourceInlineFormSet, VerboseNameShowTextWidget, ResourceReqInlineFormSet
+from .forms import ResourceInlineFormSet, VerboseNameShowTextWidget, ResourceReqInlineFormSet, ResourceReqForm
 from .models import Resource, ResourceReq
 
 
@@ -35,6 +35,7 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
     readonly_fields = ['unit']
     model = ResourceReq
     max_num = 0
+    form = ResourceReqForm
     formset = ResourceReqInlineFormSet
     can_delete = False
     

@@ -6,7 +6,7 @@ from django.utils.encoding import force_text
 from controller.forms.widgets import ShowText
 
 from . import ResourcePlugin
-from .models import Resource
+from .models import Resource, ResourceReq
 
 
 class VerboseNameShowTextWidget(forms.Widget):
@@ -89,3 +89,9 @@ class ResourceReqInlineFormSet(generic.BaseGenericInlineFormSet):
             return instance
         return super(ResourceReqInlineFormSet, self).save_existing(form, instance, commit=commit)
 
+class ResourceReqForm(forms.ModelForm):
+    """ Readonly name field and label override """
+    name = forms.CharField(label = 'Resource name', widget=VerboseNameShowTextWidget)
+
+    class Meta:
+        model = ResourceReq

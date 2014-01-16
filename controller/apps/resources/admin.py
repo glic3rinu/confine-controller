@@ -6,7 +6,7 @@ from controller.forms.widgets import ShowText
 from permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin
-from .forms import ResourceInlineFormSet, VerboseNameShowTextWidget, ResourceReqInlineFormSet
+from .forms import ResourceInlineFormSet, VerboseNameShowTextWidget, ResourceReqInlineFormSet, ResourceReqForm
 from .models import Resource, ResourceReq
 
 
@@ -35,17 +35,12 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
     readonly_fields = ['unit']
     model = ResourceReq
     max_num = 0
+    form = ResourceReqForm
     formset = ResourceReqInlineFormSet
     can_delete = False
     
     class Media:
         js = ('resources/js/collapsed_resource_requests.js',)
-    
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        """ Readonly resource name but form intput still hidden """
-        if db_field.name == 'name':
-            kwargs['widget'] = VerboseNameShowTextWidget()
-        return super(ResourceReqAdminInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 for producer_model in ResourcePlugin.get_producers_models():

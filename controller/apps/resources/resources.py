@@ -9,7 +9,6 @@ class VlanRes(ResourcePlugin):
     unit = 'tags'
     max_sliver = 1
     dflt_sliver = 0
-    producers = [None]
     consumers = ['slices.Slice']
     
     def clean_req(self, resource):

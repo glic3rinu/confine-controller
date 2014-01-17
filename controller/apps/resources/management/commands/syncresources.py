@@ -1,7 +1,4 @@
-# TODO: create a management command that fills the default resources
-# and invocate it on postupgradecontroller in order to fill i.e.
-# nodes with their default disk space.
-# http://redmine.confine-project.eu/issues/46#note-42
+from optparse import make_option
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
@@ -11,13 +8,18 @@ from resources.models import Resource
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list
-    help = 'Fills the default resources.'
+    help = 'Sync existing resources with the database.'
     
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
-        self.option_list = BaseCommand.option_list
+        self.option_list = BaseCommand.option_list + (
+            make_option('--override', action='store_true', dest='override', default=False,
+                help='Override current resources max_sliver and dflt_sliver'),)
     
     def handle(self, *args, **options):
+        self.stdout.write("== Sync existing resource plugins ==")
+        existing_pks = []
+        override = options.get('override')
         for resource in ResourcePlugin.plugins:
             for producer in resource.producers:
                 # get productor contentype
@@ -25,26 +27,33 @@ class Command(BaseCommand):
                 content_type = ContentType.objects.get(app_label=app, model=model)
                 model_class = content_type.model_class()
                 
-                # create resource for objects of this class
-                # excluding ones with resource alreday defined!
-                exclude = Resource.objects.filter(
-                            name=resource.name,
-                            content_type=content_type
-                        ).values_list('object_id', flat=True)
-                objects = model_class.objects.exclude(id__in=exclude)
+                # create (or override) resource for objects of this class
+                skipped = updated = 0
+                for obj in model_class.objects.all():
+                    instance, created = Resource.objects.get_or_create(
+                                            name=resource.name,
+                                            content_type=content_type,
+                                            object_id=obj.id,
+                                            defaults={
+                                                'max_sliver': resource.max_sliver,
+                                                'dflt_sliver': resource.dflt_sliver
+                                            }
+                                        )
+                    if override:
+                        instance.max_sliver = resource.max_sliver
+                        instance.dflt_sliver = resource.dflt_sliver
+                    if created or override:
+                        instance.save()
+                        updated +=1
+                    else:
+                        skipped += 1
+                    existing_pks.append(instance.pk)
                 
-                # insert into database
-                resources = Resource.objects.bulk_create([
-                    Resource(
-                        name=resource.name, content_object=obj,
-                        max_sliver=resource.max_sliver,
-                        dflt_sliver=resource.dflt_sliver
-                    )
-                    for obj in objects
-                ])
-                
-                self.stdout.write("%s %s -- Excluded: %i, Created: %i" %
-                    (resource.name, producer, len(exclude), len(resources)))
-
-                # TODO purge old resources
+                self.stdout.write("\t%s > %s -- skipped: %i, updated: %i" %
+                    (resource.name, producer, skipped, updated))
+        
+        # Purge old resource plugins
+        old_resources = Resource.objects.exclude(pk__in=existing_pks)
+        self.stdout.write("\tPurged resources: %i" % old_resources.count())
+        old_resources.delete()
 

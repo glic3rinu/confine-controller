@@ -118,6 +118,8 @@ class Command(BaseCommand):
                 run("python manage.py syncfirmwareplugins")
             if is_installed('notifications'):
                 run("python manage.py syncnotifications")
+            if is_installed('resources'):
+                run("python manage.py syncresources")
             if options.get('restart'):
                 run("python manage.py restartservices")
         

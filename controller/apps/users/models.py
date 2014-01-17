@@ -151,7 +151,7 @@ class User(auth_models.AbstractBaseUser):
             validators=[validators.RegexValidator('^[\w.+-]+$',
                         'Enter a valid username.', 'invalid')])
     email = models.EmailField('Email Address', max_length=255, unique=True,
-            help_text='A unique email for the user. '
+            help_text='Required. A unique email for the user. '
                       'May be used for authentication.')
     description = models.TextField(blank=True, 
             help_text='An optional free-form textual description of this user, it '

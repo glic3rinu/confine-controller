@@ -14,7 +14,7 @@ class Command(BaseCommand):
                 help='Override current notifications subject and messages'),)
     
     option_list = BaseCommand.option_list
-    help = 'Sync existing notifiactions with the database'
+    help = 'Sync existing notifications with the database.'
     
     def handle(self, *args, **options):
         existing_pks = []

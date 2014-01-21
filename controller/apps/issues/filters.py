@@ -29,7 +29,7 @@ class TicketStateListFilter(MySimpleListFilter):
             (Ticket.NEW, "New"),
             (Ticket.IN_PROGRESS, "In Progress"),
             (Ticket.RESOLVED, "Resolved"),
-            (Ticket.FEEDBACK, "Resolved"),
+            (Ticket.FEEDBACK, "Feedback"),
             (Ticket.REJECTED, "Rejected"),
             (Ticket.CLOSED, "Closed"),
             ('False', 'All'),
@@ -37,7 +37,7 @@ class TicketStateListFilter(MySimpleListFilter):
     
     def queryset(self, request, queryset):
         if self.value() == 'OPEN':
-            return queryset.exclude(state=Ticket.CLOSED)
+            return queryset.exclude(state__in=[Ticket.CLOSED, Ticket.REJECTED])
         elif self.value() == 'False':
             return queryset
         return queryset.filter(state=self.value())

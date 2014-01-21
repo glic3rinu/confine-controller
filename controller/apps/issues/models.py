@@ -171,6 +171,10 @@ class Ticket(models.Model):
     def is_read_by(self, user):
         return TicketTracker.objects.filter(ticket=self, user=user).exists()
     
+    def reject(self):
+        self.state = Ticket.REJECTED
+        self.save()
+    
     def resolve(self):
         self.state = Ticket.RESOLVED
         self.save()

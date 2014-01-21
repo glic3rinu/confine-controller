@@ -59,24 +59,6 @@ class ChangeAuth(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='Password value not provided')
 
-class ChangePassword(APIView):
-    """
-    ### DEPRECATED --> use instead `change-auth` function ###
-    **Relation type:** [`http://confine-project.eu/rel/controller/do-change-password`](
-        http://confine-project.eu/rel/controller/do-change-password)
-    
-    Endpoint containing the function URI used to change the user password.
-    
-    POST data: `New user password`
-    """
-    url_name = 'change-password'
-    rel = 'http://confine-project.eu/rel/controller/do-change-password'
-    
-    def post(self, request, *args, **kwargs):
-        response_data = {'error_detail': 'Use do-change-auth instead of '\
-            'deprecated and obsolete do-change-password.'}
-        return Response(response_data, status=status.HTTP_410_GONE)
-
 
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
@@ -106,7 +88,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = User
     serializer_class = UserSerializer
-    ctl = [ChangeAuth, ChangePassword]
+    ctl = [ChangeAuth]
 
 
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):

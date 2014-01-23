@@ -5,6 +5,7 @@ import six
 
 from api import serializers, exceptions
 
+from . import settings
 from .models import Server, Node, DirectIface
 
 
@@ -34,14 +35,52 @@ class DirectIfaceSerializer(serializers.ModelSerializer):
             return data
 
 
-class NodeSerializer(serializers.UriHyperlinkedModelSerializer):
+class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    properties = serializers.PropertyField(required=False)
+    properties = serializers.PropertyField(required=True, blank=True)
+    arch = serializers.ChoiceField(choices=settings.NODES_NODE_ARCHS, required=True)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     direct_ifaces = DirectIfaceSerializer(required=False, many=True, allow_add_remove=True)
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)
     
+    # FIXME #239 Remove firmware configuration cruft from data model
+    # talk before with Axel and coordinate with Node firmware
+    local_iface = serializers.CharField(required=True)
+    sliver_pub_ipv6 = serializers.ChoiceField(choices=Node.IPV6_METHODS, required=True)
+    sliver_pub_ipv4 = serializers.ChoiceField(choices=Node.IPV4_METHODS, required=True)
+    sliver_pub_ipv4_range = serializers.CharField(required=True)
+    
     class Meta:
         model = Node
+        exclude = ('set_state',)
+    
+    def get_fields(self, *args, **kwargs):
+        """
+        Filter groups: the user creating this node must be an
+        administrator or technician of this group, and the group
+        must have node creation allowed (/allow_nodes=true).
+        
+        """
+        fields = super(NodeCreateSerializer, self).get_fields(*args, **kwargs)
+        user = self.context['view'].request.user
+        queryset = fields['group'].queryset
+        if not user.is_superuser:
+            msg = " Check if you have administrator or technician roles at the provided group."
+            fields['group'].error_messages['does_not_exist'] += msg
+            fields['group'].queryset = queryset.filter(allow_nodes=True,
+                                        roles__user=user, roles__is_admin=True)
+        return fields
+    
+    # TODO better approach for checking required fields???
+    def validate_properties(self, attrs, source):
+        value = attrs.get(source, None)
+        if value is None:
+            raise serializers.ValidationError("This field is required.")
+        return attrs
+
+class NodeSerializer(NodeCreateSerializer):
+    class Meta:
+        model = Node
+        read_only_fields = ('group',)

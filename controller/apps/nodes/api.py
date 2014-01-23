@@ -9,7 +9,7 @@ from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Node, Server
-from .serializers import ServerSerializer, NodeSerializer
+from .serializers import ServerSerializer, NodeSerializer, NodeCreateSerializer
 from .settings import NODES_NODE_API_NODE_BASE_URL
 from .validators import validate_csr
 
@@ -72,8 +72,10 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     navigate to them.
     """
     model = Node
+    add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
+#    post_exclude = ('set_state',)
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

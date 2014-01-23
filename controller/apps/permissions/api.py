@@ -1,8 +1,8 @@
 from rest_framework import exceptions
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import DjangoObjectPermissions
 
 
-class TestbedPermissionBackend(DjangoModelPermissions):
+class TestbedPermissionBackend(DjangoObjectPermissions):
     """
     Read only permissions for unauthenticated users,
     Write permissions according to each user.

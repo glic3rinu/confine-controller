@@ -8,6 +8,15 @@ from .utils import link_header
 
 
 class URIListCreateAPIView(ListCreateAPIView):
+    """
+    Used for read-write endpotins to represent a collection of
+    model instances. Provides get and post method handlers and
+    has link to API base.
+    `add_serializer_class` allows to use a different serializer
+    on object creation (POST).
+    
+    """
+    add_serializer_class = None # Serializer used on object creation
     def get_serializer_class(self):
         # TODO until the partial response is not implemented we'll serve full resources
 #        if self.request.method == 'GET' and not hasattr(self, 'response'):
@@ -16,6 +25,8 @@ class URIListCreateAPIView(ListCreateAPIView):
 #                    model = self.model
 #                    fields = ['uri']
 #            return DefaultSerializer
+        if self.request.method == 'POST' and self.add_serializer_class:
+            return self.add_serializer_class
         return super(URIListCreateAPIView, self).get_serializer_class()
     
     def get(self, request, *args, **kwargs):
@@ -34,6 +45,16 @@ class URIListCreateAPIView(ListCreateAPIView):
 
 
 class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Used for read-write-delete endpoints to represent a single model instance.
+    Provides get, put, patch and delete method handlers.
+    Adds links to the API base and controller API endpoints.
+    `fields_superuser` allows defining fields that only can be updated
+    by a superuser (mark they as readonly otherwise).
+    
+    """
+    fields_superuser = [] # Fields that only superusers can update
+    
     def get(self, request, *args, **kwargs):
         """ Add link header """
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
@@ -49,3 +70,16 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
             links.append((resource, endpoint.rel, object_id))
         response['Link'] = link_header(links, request)
         return response
+    
+    def get_serializer(self, instance=None, data=None,
+                       files=None, many=False, partial=False):
+        """ Mark as readonly fields that only can be updated by superusers """
+        if (self.request.method in ['PUT' or 'PATCH'] and
+            not self.request.user.is_superuser and self.fields_superuser):
+            serializer_class = self.get_serializer_class()
+            return serializer_class(instance=instance, data=data, files=files,
+                    many=many, read_only_fields=self.fields_superuser)
+        
+        return super(RetrieveUpdateDestroyAPIView, self).get_serializer(
+            instance=instance, data=data, files=files, many=many, partial=partial)
+

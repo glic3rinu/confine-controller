@@ -131,3 +131,18 @@ class MultiSelectField(ChoiceField):
             if not valid:
                 return False
         return True
+
+
+class DynamicReadonlyFieldsModelSerializer(UriHyperlinkedModelSerializer):
+    """
+    Provides simple field level permissions, marking as readonly some
+    fields defined on read_only_fields parameter.
+    `read_only_fields` list or tuple of fields to be marked as readonly
+    
+    """
+    def __init__(self, *args, **kwargs):
+        ro_fields = kwargs.pop('read_only_fields', [])
+        super(DynamicReadonlyFieldsModelSerializer, self).__init__(*args, **kwargs)
+        for field_name in ro_fields:
+            self.fields[field_name].read_only = True
+ 

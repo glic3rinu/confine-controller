@@ -4,6 +4,7 @@ from rest_framework.generics import *
 
 from controller.models.utils import is_singleton
 
+from .serializers import DynamicReadonlyFieldsModelSerializer
 from .utils import link_header
 
 
@@ -51,6 +52,7 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     Adds links to the API base and controller API endpoints.
     `fields_superuser` allows defining fields that only can be updated
     by a superuser (mark they as readonly otherwise).
+    NOTE: Serializer should be a subclass of DynamicReadonlyFieldsModelSerializer
     
     """
     fields_superuser = [] # Fields that only superusers can update
@@ -77,6 +79,9 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         if (self.request.method in ['PUT' or 'PATCH'] and
             not self.request.user.is_superuser and self.fields_superuser):
             serializer_class = self.get_serializer_class()
+            assert issubclass(serializer_class, DynamicReadonlyFieldsModelSerializer),\
+                "Serializer %s should be a subclass of %s" % (serializer_class,
+                DynamicReadonlyFieldsModelSerializer)
             return serializer_class(instance=instance, data=data, files=files,
                     many=many, read_only_fields=self.fields_superuser)
         

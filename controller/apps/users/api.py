@@ -12,8 +12,9 @@ from api import api, generics
 from controller.core.validators import validate_name
 from permissions.api import ApiPermissionsMixin
 
-from .models import User, Group
-from .serializers import UserSerializer, GroupSerializer
+from .models import User, Group, Roles
+from .serializers import (GroupSerializer, GroupCreateSerializer,
+    UserSerializer, UserCreateSerializer)
 
 
 class ChangeAuth(APIView):
@@ -70,8 +71,10 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     to them.
     """
     model = User
+    add_serializer_class = UserCreateSerializer
     serializer_class = UserSerializer
 #    filter_fields = ('username',)
+#    post_exclude = ('is_active', 'is_superuser', 'group_roles')
 
     def pre_save(self, obj):
         super(UserList, self).pre_save(obj)
@@ -89,6 +92,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     model = User
     serializer_class = UserSerializer
     ctl = [ChangeAuth]
+    fields_superuser = ['is_active', 'is_superuser']
 
 
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -99,26 +103,14 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     This resource describes a group of users using the testbed.
     """
     model = Group
+    add_serializer_class = GroupCreateSerializer
     serializer_class = GroupSerializer
 #    filter_fields = ('username',)
+#    post_exclude = ('allow_nodes', 'allow_slices', 'user_roles')
     
-    def post(self, request, *args, **kwargs):
-        """ adds current request.user as default group admin """
-        # check if POST only has accepted data
-        for key in request.DATA.keys():
-            if key not in ['name', 'description', 'sfa']:
-                raise exceptions.ParseError(detail='Invalid extra data provided %s' % key)
-        # check if POST has required data
-        if 'name' not in request.DATA:
-            raise exceptions.ParseError(detail='Field "name" required')
-        # add the group creator as group admin
-        request.DATA['user_roles'] = [{
-            'user': {
-                'uri': reverse('user-detail', args=[request.user.pk], request=request)
-            },
-            'is_admin': True
-        }]
-        return super(GroupList, self).post(request, *args, **kwargs)
+    def post_save(self, obj, created=False):
+        """ user that creates a group becomes its admin """
+        Roles.objects.get_or_create(user=self.request.user, group=obj, is_admin=True)
 
 
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -130,6 +122,7 @@ class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Group
     serializer_class = GroupSerializer
+    fields_superuser = ['allow_nodes', 'allow_slices']
 
 
 api.register(UserList, UserDetail)

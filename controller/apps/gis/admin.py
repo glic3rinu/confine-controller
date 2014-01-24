@@ -22,6 +22,9 @@ class GisInline(admin.TabularInline):
     }
     verbose_name_plural = 'Geolocation'
     can_delete = False
+    
+    class Media:
+        js = ('gis/js/collapsed_geolocation.js',)
 
 
 class NodeGisInline(GisInline):
@@ -30,4 +33,4 @@ class NodeGisInline(GisInline):
 
 
 # Monkey-Patching Section
-#insertattr(Node, 'inlines', NodeGisInline)  # disabled: admin iface more clean
+insertattr(Node, 'inlines', NodeGisInline, weight=9)

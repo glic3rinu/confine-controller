@@ -91,7 +91,8 @@ class ResourceReqInlineFormSet(generic.BaseGenericInlineFormSet):
 
 class ResourceReqForm(forms.ModelForm):
     """ Readonly name field and label override """
-    name = forms.CharField(label = 'Resource name', widget=VerboseNameShowTextWidget)
+    name = forms.CharField(label='Resource name', widget=VerboseNameShowTextWidget)
+    unit = forms.CharField() # force unit field initialization
 
     class Meta:
         model = ResourceReq

@@ -107,20 +107,21 @@ class Ticket(models.Model):
     def get_notification_emails(self):
         """ Get emails of the users related to the ticket """
         emails = list(settings.ISSUES_SUPPORT_EMAILS)
-        if settings.ISSUES_NOTIFY_SUPERUSERS:
-            superusers = User.objects.filter(is_superuser=True)
-            emails += superusers.values_list('email', flat=True)
         emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)
-        elif self.group:
-            roles = [Roles.ADMIN]
-            if self.queue: # check if other roles must be notified
-                if self.queue.notify_technicians:
-                    roles.append(Roles.TECHNICIAN)
-                if self.queue.notify_researchers:
-                    roles.append(Roles.RESEARCHER)
-            emails += self.group.get_emails(roles=roles)
+        else: # No ticket owner, so lets notify staff
+            if settings.ISSUES_NOTIFY_SUPERUSERS:
+                superusers = User.objects.filter(is_superuser=True)
+                emails += superusers.values_list('email', flat=True)
+            if self.group:
+                roles = [Roles.ADMIN]
+                if self.queue: # check if other roles must be notified
+                    if self.queue.notify_technicians:
+                        roles.append(Roles.TECHNICIAN)
+                    if self.queue.notify_researchers:
+                        roles.append(Roles.RESEARCHER)
+                emails += self.group.get_emails(roles=roles)
         for message in self.messages.distinct('author'):
             author = message.author
             if self.is_visible_by(author):

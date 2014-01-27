@@ -71,6 +71,14 @@ class ResourceReq(BaseResource):
     def clean(self):
         super(ResourceReq, self).clean()
         self.instance.clean_req(self)
+    
+    def save(self, *args, **kwargs):
+        super(ResourceReq, self).save(*args, **kwargs)
+        self.instance.save(self)
+    
+    def delete(self, using=None):
+        self.instance.delete(self)
+        super(ResourceReq, self).delete(using=using)
 
     @property
     def res_name(self):

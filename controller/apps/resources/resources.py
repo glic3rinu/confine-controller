@@ -14,6 +14,21 @@ class VlanRes(ResourcePlugin):
     def clean_req(self, resource):
         if resource.req > 1:
             raise ValidationError("Vlan resource request must be <= 1")
+    
+    def save(self, resource):
+        obj = resource.content_object
+        if resource.req == 0: # Never happens, is cleaned before saving
+            obj.vlan_nr = None
+        elif resource.req == 1:
+            obj.vlan_nr = -1
+        else:
+            assert "Vlan resource request must be <= 1"
+        obj.update_set_state()
+    
+    def delete(self, resource):
+        obj = resource.content_object
+        obj.vlan_nr = None
+        obj.update_set_state()
 
 
 class DiskRes(ResourcePlugin):

@@ -4,6 +4,7 @@ import json
 import six
 
 from api import serializers, exceptions
+from api.validators import validate_properties
 
 from . import settings
 from .models import Server, Node, DirectIface
@@ -37,7 +38,7 @@ class DirectIfaceSerializer(serializers.ModelSerializer):
 
 class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    properties = serializers.PropertyField(required=True, blank=True)
+    properties = serializers.PropertyField(required=False)
     arch = serializers.ChoiceField(choices=settings.NODES_NODE_ARCHS, required=True)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
@@ -64,7 +65,10 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
         
         """
         fields = super(NodeCreateSerializer, self).get_fields(*args, **kwargs)
-        user = self.context['view'].request.user
+        try:
+            user = self.context['view'].request.user
+        except KeyError: # avoid error when used out of Rest API
+            return fields
         queryset = fields['group'].queryset
         if not user.is_superuser:
             msg = " Check if you have administrator or technician roles at the provided group."
@@ -73,14 +77,30 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
                                         roles__user=user, roles__is_admin=True)
         return fields
     
-    # TODO better approach for checking required fields???
     def validate_properties(self, attrs, source):
-        value = attrs.get(source, None)
-        if value is None:
-            raise serializers.ValidationError("This field is required.")
-        return attrs
+        return validate_properties(self, attrs, source)
 
 class NodeSerializer(NodeCreateSerializer):
     class Meta:
         model = Node
         read_only_fields = ('group',)
+
+    def get_fields(self, *args, **kwargs):
+        """ Filter states based on accepted transitions """
+        fields = super(NodeSerializer, self).get_fields(*args, **kwargs)
+        set_state = fields['set_state']
+        try:
+            state = self.object.set_state
+        except AttributeError:
+            # Is a querySet, readonly doesn't require filtering
+            return fields
+        # debug is an automatic state so doesnt accept changes
+        if state == Node.DEBUG:
+            set_state.read_only = True
+        elif state == Node.FAILURE:
+            set_state.choices = [(Node.SAFE, 'SAFE')]
+        else: # SAFE or PRODUCTION
+            is_debug = set_state.choices.pop(0)[0] == Node.DEBUG
+            assert is_debug, "Problem removing DEBUG from set_state"
+        return fields
+

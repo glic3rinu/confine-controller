@@ -3,28 +3,14 @@ from __future__ import absolute_import
 import json
 import six
 
-from django.core.exceptions import ValidationError
 from rest_framework.compat import smart_text
 
 from api import serializers, exceptions
-from controller.core.validators import validate_prop_name
+from api.validators import validate_properties
 from nodes.settings import NODES_NODE_ARCHS
 
 from .models import Slice, Sliver, Template, SliverIface
 
-def validate_properties(obj, attrs, source):
-    """ Check if first interface is of type private """
-    properties = attrs.get(source, None)
-    if properties is None:
-       raise exceptions.ParseError(detail='Properties is a mandatory field.')
-    else:
-        # check properties name matchs regular expresion!
-        for prop in properties:
-            try:
-                validate_prop_name(prop.name)
-            except ValidationError as e:
-                raise exceptions.ParseError(detail='; '.join(e.messages))
-    return attrs
 
 class FakeFileField(serializers.CharField):
     """ workaround for displaying related files in a file_uri field """
@@ -95,34 +81,49 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         return validate_properties(self, attrs, source)
 
 
-class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
+class SliverDetailSerializer(SliverSerializer):
+    class Meta:
+        model = Sliver
+        read_only_fields = ('node', 'slice')
+
+
+class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
-        view_name='sliver-detail')
+    expires_on = serializers.DateTimeField(read_only=True)
+    instance_sn = serializers.IntegerField(read_only=True)
+    new_sliver_instance_sn = serializers.IntegerField(read_only=True)
+    vlan_nr = serializers.IntegerField(read_only=True)
     properties = serializers.PropertyField(required=False)
     exp_data_uri = FakeFileField(field='exp_data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
-    instance_sn = serializers.IntegerField(read_only=True)
-    new_sliver_instance_sn = serializers.IntegerField(read_only=True)
-    expires_on = serializers.DateTimeField(read_only=True)
+    slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
+        view_name='sliver-detail')
     
     class Meta:
         model = Slice
-        exclude = ('exp_data', 'overlay')
+        exclude = ('set_state', 'exp_data', 'overlay')
     
     def to_native(self, obj):
         """ hack for implementing dynamic file_uri's on FakeFile """
         self.__object__ = obj
-        return super(SliceSerializer, self).to_native(obj)
+        return super(SliceCreateSerializer, self).to_native(obj)
 
     def validate_properties(self, attrs, source):
         return validate_properties(self, attrs, source)
+
+
+class SliceSerializer(SliceCreateSerializer):
+    class Meta:
+        model = Slice
+        exclude = ('exp_data', 'overlay')
+        read_only_fields = ('group',)
 
 
 class TemplateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     image_uri = FakeFileField(field='image')
     node_archs = serializers.MultiSelectField(choices=NODES_NODE_ARCHS)
+    is_active = serializers.BooleanField()
     
     class Meta:
         model = Template

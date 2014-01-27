@@ -6,12 +6,13 @@ from controller.forms.widgets import ShowText
 from permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin
-from .forms import ResourceInlineFormSet, VerboseNameShowTextWidget, ResourceReqInlineFormSet, ResourceReqForm
+from .forms import (ResourceInlineFormSet, ResourceReqInlineFormSet,
+    ResourceReqForm, VerboseNameShowTextWidget)
 from .models import Resource, ResourceReq
 
 
 class ResourceAdminInline(PermissionGenericTabularInline):
-    fields = ['name', 'max_sliver', 'dflt_sliver', 'unit']
+    fields = ['name', 'unit', 'dflt_sliver', 'max_sliver']
     readonly_fields = ['unit']
     model = Resource
     formset = ResourceInlineFormSet
@@ -31,7 +32,7 @@ class ResourceAdminInline(PermissionGenericTabularInline):
 
 
 class ResourceReqAdminInline(PermissionGenericTabularInline):
-    fields = ['name', 'req', 'unit']
+    fields = ['name', 'unit', 'req']
     readonly_fields = ['unit']
     model = ResourceReq
     max_num = 0

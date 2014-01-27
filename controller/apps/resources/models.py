@@ -53,8 +53,8 @@ class BaseResource(models.Model):
 
 
 class Resource(BaseResource):
-    max_sliver = models.PositiveIntegerField(null=True, blank=True)
-    dflt_sliver = models.PositiveIntegerField("Default sliver")
+    max_sliver = models.PositiveIntegerField("Max per sliver", null=True, blank=True)
+    dflt_sliver = models.PositiveIntegerField("Sliver default")
     
     def clean(self):
         super(Resource, self).clean()
@@ -62,7 +62,7 @@ class Resource(BaseResource):
 
 
 class ResourceReq(BaseResource):
-    req = models.PositiveIntegerField(null=True, blank=True)
+    req = models.PositiveIntegerField("Amount", null=True, blank=True)
     
     class Meta:
         verbose_name = "Resource request"

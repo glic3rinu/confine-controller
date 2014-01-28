@@ -613,7 +613,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             if obj and not obj.group.allow_slices:
                 msg = "The slice group does not have permissions to manage slices"
                 messages.warning(request, msg)
-            if not obj.template.is_active:
+            if obj and not obj.template.is_active:
                 msg = "The template chosen for this slice is NOT active. "\
                     "Please check its configuration."
                 messages.warning(request, msg)

@@ -41,6 +41,9 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
     can_delete = False
     
     class Media:
+        css = {
+            "all": ("resources/css/resource-admin.css",)
+        }
         js = ('resources/js/collapsed_resource_requests.js',)
     
     def formfield_for_dbfield(self, db_field, **kwargs):

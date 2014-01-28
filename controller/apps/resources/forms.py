@@ -75,6 +75,19 @@ class ResourceReqInlineFormSet(generic.BaseGenericInlineFormSet):
                 kwargs['data'] = initial_data
             initial_data[prefix+'-INITIAL_FORMS'] = unicode(len(existings))
         super(ResourceReqInlineFormSet, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """ Check undesired changes on resource name (form overrides) """
+        if any(self.errors):
+             # Don't bother validating the formset unless each form is valid on its own
+             return
+        # FIXME: check if this validation is really working
+        resources = ResourcePlugin.get_resources_for_consumer(type(self.instance))
+        resource_names = [resource.name for resource in resources]
+        for form in self.forms:
+            name = form.cleaned_data['name']
+            if name not in resource_names:
+                raise forms.ValidationError("Uknown resource name '%s' provided." % name)
     
     def save_new(self, form, commit=True):
         """ Do not save empty objects """
@@ -91,8 +104,11 @@ class ResourceReqInlineFormSet(generic.BaseGenericInlineFormSet):
 
 class ResourceReqForm(forms.ModelForm):
     """ Readonly name field and label override """
-    name = forms.CharField(label='Resource name', widget=VerboseNameShowTextWidget)
-    #unit = forms.CharField() # FIXME force unit field initialization: when defined throws non field error!!!?
+    name = forms.CharField(label='Resource name')
 
     class Meta:
         model = ResourceReq
+
+    def __init__(self, *args, **kwargs):
+        super(ResourceReqForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs['readonly'] = True

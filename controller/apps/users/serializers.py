@@ -28,25 +28,39 @@ class AuthTokenField(serializers.WritableField):
         return [ token.data for token in value.all() ]
 
 
-class UserSerializer(serializers.UriHyperlinkedModelSerializer):
+class UserCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    group_roles = GroupRolesSerializer(source='roles', required=False)
     auth_tokens = AuthTokenField(required=False)
-    is_active = serializers.BooleanField(read_only=True)
-    is_superuser = serializers.BooleanField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True)
+    
+    class Meta:
+        model = User
+        exclude = ['password', 'groups', 'username', 'email', 'is_active', 'is_superuser']
+
+
+class UserSerializer(UserCreateSerializer, serializers.DynamicReadonlyFieldsModelSerializer):
+    group_roles = GroupRolesSerializer(source='roles', required=False)
+    is_active = serializers.BooleanField()
+    is_superuser = serializers.BooleanField()
     
     class Meta:
         model = User
         exclude = ['password', 'groups', 'username', 'email']
 
 
-class GroupSerializer(serializers.UriHyperlinkedModelSerializer):
+class GroupCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
+    
+    class Meta:
+        model = Group
+        exclude = ('allow_nodes', 'allow_slices', 'user_roles')
+
+
+class GroupSerializer(GroupCreateSerializer, serializers.DynamicReadonlyFieldsModelSerializer):
     user_roles = UserRolesSerializer(source='roles', required=False, many=True)
-    allow_nodes = serializers.BooleanField(read_only=True)
-    allow_slices = serializers.BooleanField(read_only=True)
+    allow_nodes = serializers.BooleanField()
+    allow_slices = serializers.BooleanField()
     slices = serializers.RelHyperlinkedRelatedField(many=True, source='slices',
         read_only=True, view_name='slice-detail')
     nodes = serializers.RelHyperlinkedRelatedField(many=True, source='nodes',

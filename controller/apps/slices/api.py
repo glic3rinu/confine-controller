@@ -10,7 +10,8 @@ from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
-from .serializers import SliceSerializer, SliverSerializer, TemplateSerializer
+from .serializers import (SliceSerializer, SliceCreateSerializer,
+    SliverSerializer, SliverDetailSerializer, TemplateSerializer)
 
 
 class Renew(APIView):
@@ -138,8 +139,10 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     navigate to them.
     """
     model = Slice
+    add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
     filter_fields = ('set_state', )
+#    post_exclude = ('set_state',)
 
 
 class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -170,7 +173,6 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
-    filter_fields = ['slice__name', 'slice__set_state', 'node', 'node__id']
     filter_fields = ('node', 'slice')
 
 
@@ -185,7 +187,7 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     &#node_at_server) it is intended to run on.
     """
     model = Sliver
-    serializer_class = SliverSerializer
+    serializer_class = SliverDetailSerializer
     ctl = [
         Update, make_upload_file(Sliver, 'exp_data', 'exp-data'),
         make_upload_file(Sliver, 'overlay', 'overlay'),

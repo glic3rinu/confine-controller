@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from permissions import ReadOnlyPermission
 
-from .models import State
+from .models import State, StateHistory
 
 
 class StatePermission(ReadOnlyPermission):
@@ -14,3 +14,4 @@ class StatePermission(ReadOnlyPermission):
 
 
 State.has_permission = StatePermission()
+StateHistory.has_permission = StatePermission()

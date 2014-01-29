@@ -95,7 +95,7 @@ def display_current(instance):
     return '<span style="color:%s;" title="%s">%s</span>' % (color, title, state)
 
 
-class StateHistoryAdmin(admin.ModelAdmin):
+class StateHistoryAdmin(PermissionModelAdmin):
     list_display = [
         'state', 'display_value', 'display_start_date', 'display_end_date', 'duration'
     ]

@@ -73,8 +73,9 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
         if not user.is_superuser:
             msg = " Check if you have administrator or technician roles at the provided group."
             fields['group'].error_messages['does_not_exist'] += msg
+            # bug #321: filter by user.id (None for Anonymous users)
             fields['group'].queryset = queryset.filter(allow_nodes=True,
-                                        roles__user=user, roles__is_admin=True)
+                                        roles__user=user.id, roles__is_admin=True)
         return fields
     
     def validate_properties(self, attrs, source):

@@ -1,15 +1,24 @@
-{% extends "admin/permissions_change_form.html" %}
-{% load i18n %}
-{% load groups %}
+{% extends "admin/controller/change_form.html" %}
+{% load i18n admin_modify groups %}
+
+{# Append join requests links (not object-tools for popups) #}
 {% block object-tools %}
 {% if change %}{% if not is_popup %}
   <ul class="object-tools">
+    {% block object-tools-items %}
     {% if original|has_join_request:user %}
-    <li><a href="#" class="historylink">You have a pending join request</a></li>
+        <li><a href="#" class="historylink">You have a pending join request</a></li>
     {% elif not original|is_member:user %}
         <li><a href="join-request/" class="addlink">Join Request</a></li>
     {% endif%}
-    <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+        <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+    {% endblock %}
   </ul>
 {% endif %}{% endif %}
+{% endblock %}
+
+{# Fix #310 Submit row empty when adding object using popup #}
+{% block submit_buttons_bottom %}
+    {% if is_popup and not change %}{% submit_row %}
+    {% else %}{{ block.super }}{% endif %}
 {% endblock %}

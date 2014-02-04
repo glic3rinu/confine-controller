@@ -1,5 +1,5 @@
 {% extends "admin/controller/change_form.html" %}
-{% load i18n %}
+{% load i18n admin_modify %}
 
 {% block object-tools-items %}
 {% for item in object_tools_items %}
@@ -12,3 +12,8 @@
 {% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
 {% endblock %}
 
+{# Fix #310 Submit row empty when adding object using popup #}
+{% block submit_buttons_bottom %}
+    {% if is_popup and not change %}{% submit_row %}
+    {% else %}{{ block.super }}{% endif %}
+{% endblock %}

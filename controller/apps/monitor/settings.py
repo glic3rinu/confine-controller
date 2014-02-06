@@ -9,6 +9,11 @@ MONITOR_ALERT_LOCK = getattr(settings, 'MONITOR_ALERT_LOCK', '/dev/shm/.controll
 
 MONITOR_EXPIRE_SECONDS = getattr(settings, 'MONITOR_EXPIRE_SECONDS', 300)
 
+# ~1GB (rabbitmq default disk free limit)
+MONITOR_DISK_FREE_LIMIT = getattr(settings, 'MONITOR_DISK_FREE_LIMIT', 1000000)
+
+# warn margin ratio (allow admins prevent problem)
+MONITOR_DISK_WARN_RATIO = getattr(settings, 'MONITOR_DISK_WARN_RATIO', 1.2)
 
 # name, ps cmd regex, min, max
 TINC = ('tinc', '.*tincd', 1, 1)
@@ -52,4 +57,5 @@ MONITOR_MONITORS = getattr(settings, 'MONITOR_MONITORS', (
     ('monitor.monitors.ProcessesMemoryMonitor', {
             'processes': (TINC, CELERY_W1, CELERY_W2, POSTGRESQL),
         }),
+    ('monitor.monitors.DiskFreeMonitor',),
 ))

@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from controller.utils.system import run
 
-from . import settings
+from .settings import MONITOR_DISK_FREE_LIMIT, MONITOR_DISK_WARN_RATIO
 from .models import TimeSerie
 from .utils import PsTree
 
@@ -301,3 +301,33 @@ class ProcessesCPUMonitor(ProcessesMemoryMonitor):
                 pstree.insert(pid, ppid, worked, waited)
             ticks[name] = pstree.total_ticks()
         return ticks, []
+
+
+class DiskFreeMonitor(Monitor):
+    """
+        Show the disk usage and warn when free is near to the limit
+        defined by rabbitmq (#326, #337)
+    """
+
+    type = 'diskfree'
+    verbose_name = 'Disk free space'
+    average_fields = ['total', 'used', 'free', 'use_per_cent']
+    cmd = (
+        'DATA=$(df | grep -E "^rootfs"); '
+        'echo $DATA | awk {\'print "{'
+        ' \\"total\\": "$2",'
+        ' \\"used\\": "$3",'
+        ' \\"free\\": "$4",'
+        ' \\"use_per_cent\\": "$3/$2*100"'
+        '}"\'}'
+    )
+
+    def execute(self):
+        problems = []
+        value = json.loads(run(self.cmd).stdout)
+        limit = MONITOR_DISK_FREE_LIMIT * MONITOR_DISK_WARN_RATIO
+        if value['free'] < limit:
+            msg = 'Low disk space left (%i), potential Rabbitiqm alarm that '\
+                'will block the producer! (more info on issue report #326)'
+            problems.append(msg % value['free'])
+        return value, problems

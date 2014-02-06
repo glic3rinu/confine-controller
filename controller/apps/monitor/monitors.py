@@ -221,7 +221,7 @@ class CommandTimeMonitor(Monitor):
     )
 
 
-class NumPocessesMonitor(Monitor):
+class NumProcessesMonitor(Monitor):
     type = 'numprocesses'
     verbose_name = 'Processes'
     num_processes = True

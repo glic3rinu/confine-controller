@@ -45,7 +45,7 @@ class TimeSerie(models.Model):
         self.monitor.apply_relativity(self, previous)
 
 
-# Register monitor signletons
+# Register monitor singletons
 monitors = []
 for monitor in settings.MONITOR_MONITORS:
     kwargs = {}

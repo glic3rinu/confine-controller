@@ -18,8 +18,8 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--email-report', action='store_true', dest='email', default=False,
-                help='Wheter you want the probelms reported on stdout or email'),
+            make_option('--email', action='store_true', dest='email', default=False,
+                help='Wheter you want the problems reported on stdout or email'),
             make_option('--quiet', action='store_true', dest='quiet', default=False,
                 help='Do not output anything'),
             )

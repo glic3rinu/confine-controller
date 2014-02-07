@@ -116,8 +116,10 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             query = Q( is_admin | is_technician )
             query = Q( query & Q(allow_nodes=True) )
             form = filter_group_queryset(form, obj, request.user, query)
-        if obj is not None and obj.set_state == obj.FAILURE:
-            # removing production choice if in failure state
+        if (obj is not None and obj.set_state == obj.FAILURE and
+            'set_state' in form.base_fields):
+            # removing production choice if in failure state, only for users
+            # with change permissions
             is_production = form.base_fields['set_state'].choices.pop(1)[0] == Node.PRODUCTION
             assert is_production, "Problem removing PRODUCTION from set_state"
         return form

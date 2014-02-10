@@ -38,7 +38,9 @@ def get_deleted_objects(objs, opts, user, admin_site, using):
             if not user.has_perm(p):
                 perms_needed.add(opts.verbose_name)
             # Display a link to the admin page.
-            return format_html('{0}: <a href="{1}">{2}</a>',
+            # NOTE: Define as unicode for avoid errors when obj
+            # representation contains non-ascii chars
+            return format_html(u'{0}: <a href="{1}">{2}</a>',
                                capfirst(opts.verbose_name),
                                admin_url,
                                obj)

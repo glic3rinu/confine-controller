@@ -59,7 +59,7 @@ class Command(BaseCommand):
             # Represent version as two digits per number: 1.2.2 -> 10202
             version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
             
-            # Pre version specific upgrade operations
+            # Pre-upgrade operations (version specific)
             if version < 835:
                 # prevent schema migrations from failing
                 if is_installed('firmware'):
@@ -72,6 +72,31 @@ class Command(BaseCommand):
                     migrated = MigrationHistory.objects.filter(app_name='maintenance').exists()
                     if not migrated:
                         run('python manage.py migrate maintenance 0001 --fake')
+            if version <= 1002:
+                # Update monitor settings (fix typo and add DiskFreeMonitor)
+                context = {
+                    'settings': run("find . -type f -name 'settings.py'|grep -v 'vct/'")
+                }
+                # Try automaticate update (making a backup)
+                if context['settings']:
+                    run("cp %(settings)s %(settings)s.upgrade.bak" % context)
+                    # fix NumProcessesMonitor typo
+                    run("sed -i 's/NumPocessesMonitor/NumProcessesMonitor/g' "
+                        "%(settings)s" % context)
+                    # append disk monitor (if needed)
+                    # this is a rude check (but runned in a conservative way)
+                    if 'DiskFreeMonitor' not in open(context['settings']).read():
+                        run("sed -i '/MONITOR_MONITORS = ($/ a\ "
+                            "   (\"monitor.monitors.DiskFreeMonitor\",),' "
+                            "%(settings)s" % context)
+                # warn the user about settings changes
+                autoupdate_status = 'OK' if context['settings'] else 'FAIL'
+                upgrade_notes.append('The monitor application has changed and .'
+                    'some settings updates are required:\n'
+                    ' - Fix typo on NumProcessesMonitor (missing "r")\n'
+                    ' - Enable disk monitor\n'
+                    ' Please read the monitor app doc (MONITOR_MONITORS setting)\n'
+                    'AUTOUPDATE: %s' % autoupdate_status)
         
         if not options.get('specifics_only'):
             # Common stuff
@@ -101,7 +126,7 @@ class Command(BaseCommand):
                               'in order to run version specific upgrade operations\n')
             return
         
-        # Post version specific operations
+        # Post-upgrade operations (version specific)
         if version <= 629:
             # Clean existing sessions because of change on auth backend
             run('echo "delete from django_session;" | python manage.py dbshell')
@@ -177,36 +202,6 @@ class Command(BaseCommand):
                 "Just add:\n"
                 "   'ATOMIC_REQUESTS': True,\n"
                 "into DATABASES setting within <project_name>/<project_name>/settings.py")
-        if version <= 1002:
-            context = {
-                'settings': run("find . -type f -name 'settings.py'")
-            }
-            # Try automaticate update (making a backup)
-            if context['settings']:
-                run("cp %(settings)s %(settings)s.upgrade.bak" % context)
-                # fix NumProcessesMonitor typo
-                run("sed -i 's/NumPocessesMonitor/NumProcessesMonitor/g' "
-                    "%(settings)s" % context)
-                # append disk monitor (if needed)
-                # this is a rude check (but runned in a conservative way)
-                if 'DiskFreeMonitor' not in open(context['settings']).read():
-                    run("sed -i '/MONITOR_MONITORS = ($/ a\ "
-                        "   (\"monitor.monitors.DiskFreeMonitor\",),' "
-                        "%(settings)s" % context)
-                # Warn the user about the automatic update
-                upgrade_notes.append('Updated monitor application.\n'
-                    'We have updated your settings: \n'
-                    ' - Fix typo on NumProcessesMonitor (missing a R)\n'
-                    ' - Enable disk monitor\n'
-                    'By the way, please check if your settings has been '
-                    'updated properly.')
-            else:
-                upgrade_notes.append('The monitor application has changed.'
-                    'But we cannot apply required settings updates '
-                    'automatically.\n Please, fix it manually:\n'
-                    ' - Fix typo on NumProcessesMonitor (missing a R)\n'
-                    ' - Enable disk monitor (append this to MONITOR_MONITORS)\n'
-                    '("monitor.monitors.DiskFreeMonitor",),')
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

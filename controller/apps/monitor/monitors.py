@@ -319,12 +319,12 @@ class DiskFreeMonitor(Monitor):
     verbose_name = 'Disk free space'
     average_fields = ['total', 'used', 'free', 'use_per_cent']
     cmd = (
-        'DATA=$(df / | tail -n 1); '
+        'DATA=$(df -k / | tail -n 1 | sed "s/%//"); '
         'echo $DATA | awk {\'print "{'
         ' \\"total\\": "$2",'
         ' \\"used\\": "$3",'
         ' \\"free\\": "$4",'
-        ' \\"use_per_cent\\": "$3/$2*100"'
+        ' \\"use_per_cent\\": "$5"'
         '}"\'}'
     )
 

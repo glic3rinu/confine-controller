@@ -72,7 +72,7 @@ class Command(BaseCommand):
                     migrated = MigrationHistory.objects.filter(app_name='maintenance').exists()
                     if not migrated:
                         run('python manage.py migrate maintenance 0001 --fake')
-            if version <= 1002:
+            if version < 1002:
                 # Update monitor settings (fix typo and add DiskFreeMonitor)
                 context = {
                     'settings': run("find . -type f -name 'settings.py'|grep -v 'vct/'")

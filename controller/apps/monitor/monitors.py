@@ -313,7 +313,7 @@ class DiskFreeMonitor(Monitor):
     verbose_name = 'Disk free space'
     average_fields = ['total', 'used', 'free', 'use_per_cent']
     cmd = (
-        'DATA=$(df | grep -E "^rootfs"); '
+        'DATA=$(df / | tail -n 1); '
         'echo $DATA | awk {\'print "{'
         ' \\"total\\": "$2",'
         ' \\"used\\": "$3",'

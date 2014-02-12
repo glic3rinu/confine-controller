@@ -258,6 +258,12 @@ class NumProcessesMonitor(Monitor):
         return value, problems
 
 
+class NumPocessesMonitor(NumProcessesMonitor):
+    """ Typo renaming workaround (#343) """
+    # FIXME: remove when confine-dist testing is merged into master
+    pass
+
+
 class ProcessesMemoryMonitor(Monitor):
     type = 'processesmemory'
     verbose_name = 'Memory consumption per process'

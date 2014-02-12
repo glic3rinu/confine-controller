@@ -177,6 +177,36 @@ class Command(BaseCommand):
                 "Just add:\n"
                 "   'ATOMIC_REQUESTS': True,\n"
                 "into DATABASES setting within <project_name>/<project_name>/settings.py")
+        if version <= 1002:
+            context = {
+                'settings': run("find . -type f -name 'settings.py'")
+            }
+            # Try automaticate update (making a backup)
+            if context['settings']:
+                run("cp %(settings)s %(settings)s.upgrade.bak" % context)
+                # fix NumProcessesMonitor typo
+                run("sed -i 's/NumPocessesMonitor/NumProcessesMonitor/g' "
+                    "%(settings)s" % context)
+                # append disk monitor (if needed)
+                # this is a rude check (but runned in a conservative way)
+                if 'DiskFreeMonitor' not in open(context['settings']).read():
+                    run("sed -i '/MONITOR_MONITORS = ($/ a\ "
+                        "   (\"monitor.monitors.DiskFreeMonitor\",),' "
+                        "%(settings)s" % context)
+                # Warn the user about the automatic update
+                upgrade_notes.append('Updated monitor application.\n'
+                    'We have updated your settings: \n'
+                    ' - Fix typo on NumProcessesMonitor (missing a R)\n'
+                    ' - Enable disk monitor\n'
+                    'By the way, please check if your settings has been '
+                    'updated properly.')
+            else:
+                upgrade_notes.append('The monitor application has changed.'
+                    'But we cannot apply required settings updates '
+                    'automatically.\n Please, fix it manually:\n'
+                    ' - Fix typo on NumProcessesMonitor (missing a R)\n'
+                    ' - Enable disk monitor (append this to MONITOR_MONITORS)\n'
+                    '("monitor.monitors.DiskFreeMonitor",),')
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

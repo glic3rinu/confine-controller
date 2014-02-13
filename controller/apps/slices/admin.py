@@ -535,7 +535,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         ('Advanced', {
             'classes': ('collapse',),
             'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
-                       'instance_sn', 'new_sliver_instance_sn',
+                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
             )
         }),
     )

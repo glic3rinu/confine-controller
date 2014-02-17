@@ -151,6 +151,10 @@ class ReadPermInlineModelAdminMixin(ReadPermModelAdminMixin):
         return super(ReadPermInlineModelAdminMixin, self).has_add_permission(request, obj=obj)
 
 
+class PermissionStackedInline(ReadPermInlineModelAdminMixin, admin.StackedInline):
+    """ Base class for supporting permissions on StackedInlines """
+
+
 class PermissionTabularInline(ReadPermInlineModelAdminMixin, admin.TabularInline):
     """ Base class for supporting permissions on TabularInlines """
 

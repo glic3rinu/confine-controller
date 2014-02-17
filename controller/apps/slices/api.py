@@ -123,7 +123,7 @@ class Update(APIView):
         if request.DATA is None:
             sliver = get_object_or_404(Sliver, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, sliver)
-            slice.update()
+            sliver.update()
             response_data = {'detail': 'Sliver instructed to update'}
             return Response(response_data, status=status.HTTP_202_ACCEPTED)
         raise exceptions.ParseError(detail='This endpoint only accepts null data')

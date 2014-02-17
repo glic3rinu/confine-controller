@@ -154,11 +154,6 @@ class Slice(models.Model):
                       '(instance sequence number). Automatically incremented by the '
                       'reset function.',
             verbose_name='instance sequence number')
-    new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
-            help_text='The instance sequence number that newly created slivers will '
-                      'get. Automatically incremented whenever a sliver of this slice '
-                      'is instructed to be updated.',
-            verbose_name='New sliver instance sequence number')
     vlan_nr = models.IntegerField('VLAN number', null=True, blank=True,
             help_text='VLAN number allocated to this slice. The only values that can '
                       'be set are null which means that no VLAN is wanted for the '
@@ -166,47 +161,13 @@ class Slice(models.Model):
                       'a new VLAN number (100 <= vlan_nr < 0xFFF) while the slice is '
                       'instantiated (or active). It cannot be changed on an '
                       'instantiated slice with slivers having isolated interfaces.')
-    exp_data = models.FileField(blank=True, verbose_name='experiment data',
-            upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
-                                     settings.SLICES_SLICE_EXP_DATA_NAME,),
-            help_text='File containing experiment data for slivers (if they do not '
-                      'explicitly indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
-    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
-            help_text='The URI of a file containing experiment data for slivers (if '
-                      'they do not explicitly indicate one). Its format and contents '
-                      'depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
-                      'Compulsory when a file has been specified.',
-            validators=[validate_sha256])
-    overlay = models.FileField(blank=True,
-            upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
-                                     settings.SLICES_SLICE_OVERLAY_NAME,),
-            help_text='File containing overlay for slivers (if they do not explicitly '
-                      'indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLICE_OVERLAY_EXTENSIONS)])
-    overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
-            help_text='The URI of a file containing an overlay for slivers (if they '
-                      'do not explicitly indicate one). The file must be an archive '
-                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
-                      'and will be applied on top of the used template. This member '
-                      'may be set directly or through the do-upload-overlay function.')
-    overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'This member may be set directly or through the do-upload-overlay '
-                      'function. Compulsory when a file has been specified.',
-            validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
             help_text='The state set on this slice (set state) and its slivers '
                       '(if they do not explicitly indicate a lower one). '
-                      'Possible values: register (initial), &lt; deploy &lt; start. '
+                      'Possible values: register (initial) &lt; deploy &lt; start. '
                       'See <a href="https://wiki.confine-project.eu/arch:'
                       'slice-sliver-states">slice and sliver states</a> for the full '
                       'description of set states and possible transitions.')
-    template = models.ForeignKey(Template, limit_choices_to={'is_active':True},
-            help_text='The template to be used by the slivers of this slice (if they '
-                      'do not explicitly indicate one).')
     group = models.ForeignKey('users.Group', related_name='slices')
     
     def __unicode__(self):
@@ -230,13 +191,10 @@ class Slice(models.Model):
         self.update_set_state(commit=False)
         if not self.pk:
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
-            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
-        set_sha256(self, ('exp_data', 'overlay'))
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):
         super(Slice, self).clean()
-        clean_sha256(self, ('exp_data', 'overlay'))
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
@@ -304,6 +262,71 @@ class SliceProp(models.Model):
     def __unicode__(self):
         return self.name
 
+
+class SliverDefaults(models.Model):
+    """
+    Represents the attributes and relations that act as defaults for the
+    slivers of a slice.
+    """
+    slice = models.OneToOneField(Slice, related_name='sliver_defaults')
+    instance_sn = models.PositiveIntegerField(default=0, blank=True,
+            help_text='The instance sequence number that newly created slivers will '
+                      'get. Automatically incremented whenever a sliver of this slice '
+                      'is instructed to be updated.',
+            verbose_name='New sliver instance sequence number')
+    overlay = models.FileField(blank=True,
+            upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
+                                     settings.SLICES_SLICE_OVERLAY_NAME,),
+            help_text='File containing overlay for slivers (if they do not explicitly '
+                      'indicate one)',
+            validators=[validate_file_extensions(settings.SLICES_SLICE_OVERLAY_EXTENSIONS)])
+    overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
+            help_text='The URI of a file containing an overlay for slivers (if they '
+                      'do not explicitly indicate one). The file must be an archive '
+                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
+                      'and will be applied on top of the used template. This member '
+                      'may be set directly or through the do-upload-overlay function.')
+    overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the previous file, used to check its integrity. '
+                      'This member may be set directly or through the do-upload-overlay '
+                      'function. Compulsory when a file has been specified.',
+            validators=[validate_sha256])
+    exp_data = models.FileField(blank=True, verbose_name='experiment data',
+            upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
+                                     settings.SLICES_SLICE_EXP_DATA_NAME,),
+            help_text='File containing experiment data for slivers (if they do not '
+                      'explicitly indicate one)',
+            validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
+    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
+            help_text='The URI of a file containing experiment data for slivers (if '
+                      'they do not explicitly indicate one). Its format and contents '
+                      'depend on the type of the template to be used.')
+    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
+                      'Compulsory when a file has been specified.',
+            validators=[validate_sha256])
+    set_state = models.CharField(max_length=16, choices=Slice.STATES, default=Slice.START,
+            help_text='The state set by default on its slivers (set state). '
+                      'Possible values: register &lt; deploy &lt; start (default). '
+                      'See <a href="https://wiki.confine-project.eu/arch:'
+                      'slice-sliver-states">slice and sliver states</a> for the full '
+                      'description of set states and possible transitions.')
+    template = models.ForeignKey(Template, limit_choices_to={'is_active':True},
+            help_text='The template to be used by the slivers of this slice (if they '
+                      'do not explicitly indicate one).')
+    
+    class Meta:
+        verbose_name_plural = 'sliver defaults'
+    
+    def clean(self):
+        super(SliverDefaults, self).clean()
+        clean_sha256(self, ('exp_data', 'overlay'))
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('exp_data', 'overlay'))
+        super(SliverDefaults, self).save(*args, **kwargs)
 
 class Sliver(models.Model):
     """
@@ -383,7 +406,7 @@ class Sliver(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.instance_sn = self.slice.new_sliver_instance_sn
+            self.instance_sn = self.slice.sliver_defaults.instance_sn
             save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('exp_data', 'overlay'))
         super(Sliver, self).save(*args, **kwargs)

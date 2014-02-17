@@ -9,7 +9,7 @@ from api import serializers, exceptions
 from api.validators import validate_properties
 from nodes.settings import NODES_NODE_ARCHS
 
-from .models import Slice, Sliver, Template, SliverIface
+from .models import Slice, Sliver, SliverDefaults, SliverIface, Template
 
 
 class FakeFileField(serializers.CharField):
@@ -88,26 +88,35 @@ class SliverDetailSerializer(SliverSerializer):
         read_only_fields = ('node', 'slice')
 
 
+class SliverDefaultsSerializer(serializers.ModelSerializer):
+    instance_sn = serializers.IntegerField(read_only=True)
+    exp_data_uri = FakeFileField(field='exp_data', required=False)
+    overlay_uri = FakeFileField(field='overlay', required=False)
+    template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
+    
+    class Meta:
+        model = SliverDefaults
+        exclude = ('id', 'slice', 'exp_data', 'overlay')
+    
+    def to_native(self, obj):
+        """ hack for implementing dynamic file_uri's on FakeFile """
+        self.__object__ = obj
+        return super(SliverDefaultsSerializer, self).to_native(obj)
+
+
 class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     expires_on = serializers.DateTimeField(read_only=True)
     instance_sn = serializers.IntegerField(read_only=True)
-    new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     vlan_nr = serializers.IntegerField(read_only=True)
     properties = serializers.PropertyField(default={})
-    exp_data_uri = FakeFileField(field='exp_data', required=False)
-    overlay_uri = FakeFileField(field='overlay', required=False)
+    sliver_defaults = SliverDefaultsSerializer()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     
     class Meta:
         model = Slice
-        exclude = ('set_state', 'exp_data', 'overlay')
-    
-    def to_native(self, obj):
-        """ hack for implementing dynamic file_uri's on FakeFile """
-        self.__object__ = obj
-        return super(SliceCreateSerializer, self).to_native(obj)
+        exclude = ('set_state',)
 
     def validate_properties(self, attrs, source):
         return validate_properties(self, attrs, source)

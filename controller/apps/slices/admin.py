@@ -16,7 +16,8 @@ from controller.admin.utils import (colored, admin_link, link, get_admin_link,
 from controller.admin.widgets import LinkedRelatedFieldWidgetWrapper
 from nodes.admin import NodeAdmin
 from nodes.models import Node
-from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from permissions.admin import (PermissionModelAdmin, PermissionStackedInline,
+    PermissionTabularInline)
 from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
@@ -24,7 +25,8 @@ from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateList
 from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
 from .helpers import wrap_action, remove_slice_id, state_value
-from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
+from .models import (Slice, SliceProp, Sliver, SliverDefaults, SliverProp,
+    SliverIface, Template)
 
 
 # List of ifaces displayed in SliverInline (and subclasses)
@@ -51,6 +53,7 @@ num_slivers.admin_order_field = 'slivers__count'
 
 
 def computed_sliver_set_state(sliver):
+    # TODO update the code according to #234
     sliver_state = sliver.set_state
     state = sliver.effective_set_state
     effective = state != sliver_state
@@ -512,38 +515,51 @@ class SlicePropInline(PermissionTabularInline):
         js = ('slices/js/collapsed_properties.js',)
 
 
+class SliverDefaultsInline(PermissionStackedInline):
+    model = SliverDefaults
+    fields = ['template', 'set_state','exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256', 'instance_sn']
+    readonly_fields = ['instance_sn', 'exp_data_sha256', 'overlay_sha256']
+    can_delete = False
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'template':
+            formfield = self.formfield_for_foreignkey(db_field, **kwargs)
+            kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
+                db_field.rel, self.admin_site)
+        return super(SliverDefaultsInline, self).formfield_for_dbfield(db_field, **kwargs)
+
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
-        'name', 'id', 'vlan_nr', colored_set_state, num_slivers, admin_link('template'),
+        'name', 'id', 'vlan_nr', colored_set_state, num_slivers, 'template',
         'expires_on', admin_link('group')
     ]
     list_display_links = ('name', 'id')
-    list_filter = [MySlicesListFilter, 'set_state', 'template']
-    readonly_fields = [
-        'instance_sn', 'new_sliver_instance_sn', 'expires_on', 'exp_data_sha256',
-        'overlay_sha256'
-    ]
+    list_filter = [MySlicesListFilter, 'set_state']
+    readonly_fields = ['instance_sn', 'expires_on']
     date_hierarchy = 'expires_on'
     search_fields = ['name']
-    inlines = [SlicePropInline, SliverInline]
+    inlines = [SlicePropInline, SliverDefaultsInline, SliverInline]
     actions = [reset_selected, renew_selected_slices]
     form = SliceAdminForm
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'template', 'set_state','expires_on', 'group'),
+            'fields': ('name', 'description', 'set_state', 'expires_on', 'group'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
-                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
-            )
+            'fields': ('vlan_nr', 'instance_sn')
         }),
     )
     change_form_template = "admin/slices/slice/change_form.html"
     save_and_continue = True
     change_view_actions = [renew_selected_slices, reset_selected]
     default_changelist_filters = (('my_slices', 'True'),)
-    
+
+    class Media:
+        css = {
+            "all" : ("slices/css/hide_admin_obj_name.css",)
+        }
+
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
         qs = super(SliceAdmin, self).queryset(request)
@@ -597,10 +613,6 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         """ Make description input widget smaller """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
-        if db_field.name == 'template':
-            formfield = self.formfield_for_foreignkey(db_field, **kwargs)
-            kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
-                db_field.rel, self.admin_site)
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -613,12 +625,16 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             if obj and not obj.group.allow_slices:
                 msg = "The slice group does not have permissions to manage slices"
                 messages.warning(request, msg)
-            if obj and not obj.template.is_active:
+            if obj and not obj.sliver_defaults.template.is_active:
                 msg = "The template chosen for this slice is NOT active. "\
                     "Please check its configuration."
                 messages.warning(request, msg)
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
+    
+    def template(self, obj):
+        """ Show SliverDefaults template on Slice changelist"""
+        return get_admin_link(obj.sliver_defaults.template)
 
 
 class TemplateAdmin(PermissionModelAdmin):

@@ -91,8 +91,16 @@ def make_upload_file(model, field, field_url):
             else:
                 msg = "Only multipart/form-data is supported"
                 raise exceptions.ParseError(detail=msg)
+            # Slice refactor: exp_data & overlay moved to SliverDefaults (#234)
+            # FIXME: better approach for differences template vs exp_data|overlay?
+            try:
+                obj = obj.sliver_defaults
+            except AttributeError: # template use case
+                dst_model = model
+            else:
+                dst_model = type(obj)
             # TODO move this validation logic elsewhere
-            for validator in model._meta.get_field_by_name(field)[0].validators:
+            for validator in dst_model._meta.get_field_by_name(field)[0].validators:
                 try:
                     validator(uploaded_file)
                 except ValidationError as e:

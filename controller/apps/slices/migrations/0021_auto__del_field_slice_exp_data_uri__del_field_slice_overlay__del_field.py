@@ -135,9 +135,9 @@ class Migration(SchemaMigration):
         },
         u'slices.sliverdefaults': {
             'Meta': {'object_name': 'SliverDefaults'},
-            'exp_data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'exp_data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'exp_data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
+            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
+            'data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
+            'data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'overlay': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),

@@ -291,18 +291,18 @@ class SliverDefaults(models.Model):
                       'This member may be set directly or through the do-upload-overlay '
                       'function. Compulsory when a file has been specified.',
             validators=[validate_sha256])
-    exp_data = models.FileField(blank=True, verbose_name='experiment data',
-            upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
+    data = models.FileField(blank=True, verbose_name='sliver data',
+            upload_to=make_upload_to('data', settings.SLICES_SLICE_EXP_DATA_DIR,
                                      settings.SLICES_SLICE_EXP_DATA_NAME,),
             help_text='File containing experiment data for slivers (if they do not '
                       'explicitly indicate one)',
             validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
-    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
-            help_text='The URI of a file containing experiment data for slivers (if '
+    data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
+            help_text='The URI of a file containing sliver data for slivers (if '
                       'they do not explicitly indicate one). Its format and contents '
                       'depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
+    data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=Slice.STATES, default=Slice.START,
@@ -320,12 +320,12 @@ class SliverDefaults(models.Model):
     
     def clean(self):
         super(SliverDefaults, self).clean()
-        clean_sha256(self, ('exp_data', 'overlay'))
+        clean_sha256(self, ('data', 'overlay'))
     
     def save(self, *args, **kwargs):
         if not self.pk:
-            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
-        set_sha256(self, ('exp_data', 'overlay'))
+            save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('data', 'overlay'))
         super(SliverDefaults, self).save(*args, **kwargs)
 
 class Sliver(models.Model):
@@ -341,17 +341,17 @@ class Sliver(models.Model):
             help_text='The number of times this sliver has been instructed to be '
                       'updated (instance sequence number).',
             verbose_name='instance sequence number')
-    exp_data = models.FileField(blank=True, verbose_name='experiment data',
-            upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
+    data = models.FileField(blank=True, verbose_name='sliver data',
+            upload_to=make_upload_to('data', settings.SLICES_SLIVER_EXP_DATA_DIR,
                                      settings.SLICES_SLIVER_EXP_DATA_NAME),
             help_text='File containing experiment data for this sliver.',
             validators=[validate_file_extensions(settings.SLICES_SLIVER_EXP_DATA_EXTENSIONS)])
-    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
+    data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
             help_text='If present, the URI of a file containing experiment data for '
                       'this sliver, instead of the one specified by the slice. Its '
                       'format and contents depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the exp data file, used to check its integrity. '
+    data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the sliver data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
     overlay = models.FileField(blank=True,
@@ -394,7 +394,7 @@ class Sliver(models.Model):
     
     def clean(self):
         super(Sliver, self).clean()
-        clean_sha256(self, ('exp_data', 'overlay'))
+        clean_sha256(self, ('data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice
@@ -407,8 +407,8 @@ class Sliver(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             self.instance_sn = self.slice.sliver_defaults.instance_sn
-            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
-        set_sha256(self, ('exp_data', 'overlay'))
+            save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('data', 'overlay'))
         super(Sliver, self).save(*args, **kwargs)
     
     @property

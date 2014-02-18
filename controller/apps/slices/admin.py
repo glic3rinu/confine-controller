@@ -110,11 +110,11 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
+            'fields': ('data', 'data_sha256', 'overlay', 'overlay_sha256',
                        'new_instance_sn')
         }),
     )
-    readonly_fields = ['new_instance_sn', 'exp_data_sha256', 'overlay_sha256']
+    readonly_fields = ['new_instance_sn', 'data_sha256', 'overlay_sha256']
     search_fields = ['description', 'node__description', 'node__name', 'slice__name']
     inlines = [SliverPropInline, SliverIfaceInline]
     actions = [update_selected]
@@ -199,7 +199,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         if db_field.name == 'set_state':
             blank_choice = (('', SLIVER_EMPTY_LABEL),)
             kwargs['choices'] = blank_choice + Slice.STATES
-        # TODO update empty_label for exp_data and overlay (FileField)
+        # TODO update empty_label for data and overlay (FileField)
         return super(SliverAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -517,8 +517,8 @@ class SlicePropInline(PermissionTabularInline):
 
 class SliverDefaultsInline(PermissionStackedInline):
     model = SliverDefaults
-    fields = ['template', 'set_state','exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256', 'instance_sn']
-    readonly_fields = ['instance_sn', 'exp_data_sha256', 'overlay_sha256']
+    fields = ['template', 'set_state','data', 'data_sha256', 'overlay', 'overlay_sha256', 'instance_sn']
+    readonly_fields = ['instance_sn', 'data_sha256', 'overlay_sha256']
     can_delete = False
 
     def formfield_for_dbfield(self, db_field, **kwargs):

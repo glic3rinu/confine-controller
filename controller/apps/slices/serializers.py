@@ -47,13 +47,13 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field(source='api_id')
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField(required=False)
-    exp_data_uri = FakeFileField(field='exp_data', required=False)
+    data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Sliver
-        exclude = ('exp_data', 'overlay')
+        exclude = ('data', 'overlay')
     
     def to_native(self, obj):
         """ hack for implementing dynamic file_uri's on FakeFile """
@@ -89,13 +89,13 @@ class SliverDetailSerializer(SliverSerializer):
 
 class SliverDefaultsSerializer(serializers.ModelSerializer):
     instance_sn = serializers.IntegerField(read_only=True)
-    exp_data_uri = FakeFileField(field='exp_data', required=False)
+    data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
     
     class Meta:
         model = SliverDefaults
-        exclude = ('id', 'slice', 'exp_data', 'overlay')
+        exclude = ('id', 'slice', 'data', 'overlay')
     
     def to_native(self, obj):
         """ hack for implementing dynamic file_uri's on FakeFile """
@@ -124,7 +124,6 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
 class SliceSerializer(SliceCreateSerializer):
     class Meta:
         model = Slice
-        exclude = ('exp_data', 'overlay')
         read_only_fields = ('group',)
 
 

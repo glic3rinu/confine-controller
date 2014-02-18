@@ -6,33 +6,17 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
+    """ Rename Sliver.exp_data* to Sliver.data* (#246) """
 
     def forwards(self, orm):
-        # Adding model 'SliverDefaults'
-        db.create_table(u'slices_sliverdefaults', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('slice', self.gf('django.db.models.fields.related.OneToOneField')(related_name='sliver_defaults', unique=True, to=orm['slices.Slice'])),
-            ('instance_sn', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('overlay', self.gf('django.db.models.fields.files.FileField')(max_length=100, blank=True)),
-            ('overlay_uri', self.gf('django.db.models.fields.CharField')(max_length=256, blank=True)),
-            ('overlay_sha256', self.gf('django.db.models.fields.CharField')(max_length=64, blank=True)),
-            ('data', self.gf('django.db.models.fields.files.FileField')(max_length=100, blank=True)),
-            ('data_uri', self.gf('django.db.models.fields.CharField')(max_length=256, blank=True)),
-            ('data_sha256', self.gf('django.db.models.fields.CharField')(max_length=64, blank=True)),
-            ('set_state', self.gf('django.db.models.fields.CharField')(default='start', max_length=16)),
-            ('template', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['slices.Template'])),
-        ))
-        db.send_create_signal(u'slices', ['SliverDefaults'])
-
+        db.rename_column('slices_sliver', 'exp_data', 'data')
+        db.rename_column('slices_sliver', 'exp_data_uri', 'data_uri')
+        db.rename_column('slices_sliver', 'exp_data_sha256', 'data_sha256')
 
     def backwards(self, orm):
-        # Deleting model 'SliverDefaults'
-        db.delete_table(u'slices_sliverdefaults')
-        # Mark Slice template attribute as NOT null
-        db.alter_column(u'slices_slice', 'template',
-                        self.gf('django.db.models.fields.related.ForeignKey')(to=orm['slices.Template'], null=False),
-                        explicit_name=False)
-
+        db.rename_column('slices_sliver', 'data', 'exp_data')
+        db.rename_column('slices_sliver', 'data_uri', 'exp_data_uri')
+        db.rename_column('slices_sliver', 'data_sha256', 'exp_data_sha256')
 
     models = {
         u'nodes.directiface': {
@@ -61,20 +45,12 @@ class Migration(SchemaMigration):
         u'slices.slice': {
             'Meta': {'object_name': 'Slice'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'exp_data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'exp_data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'exp_data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'expires_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2014, 3, 16, 0, 0)', 'null': 'True', 'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'slices'", 'to': u"orm['users.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '64'}),
-            'new_sliver_instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
-            'overlay': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'overlay_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'overlay_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'set_state': ('django.db.models.fields.CharField', [], {'default': "'register'", 'max_length': '16'}),
-            'template': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['slices.Template']"}),
             'vlan_nr': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         u'slices.sliceprop': {
@@ -86,10 +62,10 @@ class Migration(SchemaMigration):
         },
         u'slices.sliver': {
             'Meta': {'unique_together': "(('slice', 'node'),)", 'object_name': 'Sliver'},
+            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
+            'data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
+            'data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'exp_data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'exp_data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'exp_data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'slivers'", 'to': u"orm['nodes.Node']"}),

@@ -15,9 +15,9 @@ class Migration(DataMigration):
             orm.SliverDefaults.objects.create(
                 slice=slice,
                 instance_sn=slice.new_sliver_instance_sn,
-                exp_data=slice.exp_data,
-                exp_data_uri=slice.exp_data_uri,
-                exp_data_sha256=slice.exp_data_sha256,
+                data=slice.exp_data,
+                data_uri=slice.exp_data_uri,
+                data_sha256=slice.exp_data_sha256,
                 overlay=slice.overlay,
                 overlay_uri=slice.overlay_uri,
                 overlay_sha256=slice.overlay_sha256,
@@ -29,9 +29,9 @@ class Migration(DataMigration):
         for slv_def in orm.SliverDefaults.objects.all():
             slice = slv_def.slice
             slice.new_sliver_instance_sn = slv_def.instance_sn
-            slice.exp_data = slv_def.exp_data
-            slice.exp_data_uri = slv_def.exp_data_uri
-            slice.exp_data_sha256 = slv_def.exp_data_sha256
+            slice.exp_data = slv_def.data
+            slice.exp_data_uri = slv_def.data_uri
+            slice.exp_data_sha256 = slv_def.data_sha256
             slice.overlay = slv_def.overlay
             slice.overlay_uri = slv_def.overlay_uri
             slice.overlay_sha256 = slv_def.overlay_sha256
@@ -107,9 +107,9 @@ class Migration(DataMigration):
         },
         u'slices.sliverdefaults': {
             'Meta': {'object_name': 'SliverDefaults'},
-            'exp_data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'exp_data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'exp_data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
+            'data': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
+            'data_sha256': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
+            'data_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_sn': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'overlay': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),

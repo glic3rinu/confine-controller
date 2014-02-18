@@ -29,6 +29,18 @@ class FakeFileField(serializers.CharField):
         return value
 
 
+class FileURLField(serializers.CharField):
+    """ Readonly Absolute URL field used for backwards compatibility """
+    def __init__(self, *args, **kwargs):
+        kwargs.update({'read_only': True})
+        super(FileURLField, self).__init__(*args, **kwargs)
+    def to_native(self, value):
+        if value:
+            request = self.context.get('request', None)
+            return request.build_absolute_uri(value)
+        return value
+
+
 class SliverIfaceSerializer(serializers.ModelSerializer):
     parent_name = serializers.Field(source='parent')
     
@@ -50,6 +62,10 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
+    
+    # backwards compatibility (readonly)
+    exp_data_uri = FileURLField(source='data_uri')
+    exp_data_sha256 = serializers.Field(source='data_sha256')
     
     class Meta:
         model = Sliver
@@ -112,6 +128,15 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     sliver_defaults = SliverDefaultsSerializer()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
+    
+    # backwards compatibility (readonly)
+    new_sliver_instance_sn = serializers.Field(source='sliver_defaults.instance_sn')
+    exp_data_uri = FileURLField(source='sliver_defaults.data_uri')
+    exp_data_sha256 = serializers.Field(source='sliver_defaults.data_sha256')
+    overlay_uri = FileURLField(source='sliver_defaults.overlay_uri')
+    overlay_sha256 = serializers.Field(source='sliver_defaults.overlay_sha256')
+    template = serializers.RelHyperlinkedRelatedField(source='sliver_defaults.template',
+        read_only=True, view_name='template-detail')
     
     class Meta:
         model = Slice

@@ -106,6 +106,9 @@ class SliceSerializer(serializers.UriHyperlinkedModelSerializer):
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     expires_on = serializers.DateTimeField(read_only=True)
     
+    # backwards-compatibility (#46 note-64)
+    vlan_nr = serializers.Field()
+
     class Meta:
         model = Slice
         exclude = ('exp_data', 'overlay')

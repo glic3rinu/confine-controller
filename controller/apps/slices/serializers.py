@@ -109,9 +109,6 @@ class SliverDefaultsSerializer(serializers.ModelSerializer):
     data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
-    
-    # backwards-compatibility (#46 note-64)
-    vlan_nr = serializers.Field()
 
     class Meta:
         model = SliverDefaults
@@ -127,8 +124,8 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     expires_on = serializers.DateTimeField(read_only=True)
     instance_sn = serializers.IntegerField(read_only=True)
-    vlan_nr = serializers.IntegerField(read_only=True)
     properties = serializers.PropertyField(default={})
+    isolated_vlan_tag = serializers.IntegerField(read_only=True)
     sliver_defaults = SliverDefaultsSerializer()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
@@ -141,6 +138,7 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     overlay_sha256 = serializers.Field(source='sliver_defaults.overlay_sha256')
     template = serializers.RelHyperlinkedRelatedField(source='sliver_defaults.template',
         read_only=True, view_name='template-detail')
+    vlan_nr = serializers.Field()
     
     class Meta:
         model = Slice

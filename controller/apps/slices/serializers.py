@@ -109,6 +109,9 @@ class SliverDefaultsSerializer(serializers.ModelSerializer):
     overlay_uri = FakeFileField(field='overlay', required=False)
     template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
     
+    # backwards-compatibility (#46 note-64)
+    vlan_nr = serializers.Field()
+
     class Meta:
         model = SliverDefaults
         exclude = ('id', 'slice', 'data', 'overlay')

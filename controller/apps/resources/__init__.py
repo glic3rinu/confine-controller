@@ -22,6 +22,12 @@ class ResourcePlugin(object):
     def clean_req(self, resource):
         pass
     
+    def save(self, resource):
+        pass
+    
+    def delete(self, resource):
+        pass
+    
     @classmethod
     def get_producers_models(cls):
         return cls._get_related_models('producers')

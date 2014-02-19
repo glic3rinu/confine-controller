@@ -148,11 +148,18 @@ class Slice(models.Model):
                       '(instance sequence number). Automatically incremented by the '
                       'reset function.',
             verbose_name='instance sequence number')
-    vlan_nr = models.IntegerField('VLAN number', null=True, blank=True,
-            help_text='VLAN number allocated to this slice. The only values that can '
+    allow_isolated = models.BooleanField(default=False,
+            help_text='Whether to request a VLAN tag for isolated sliver interfaces '
+                      '(see node architecture) at slice deployment time. If the '
+                      'allocation is successful, the tag is stored in the '
+                      '/isolated_vlan_tag member. Otherwise, the deployment of the '
+                      'slice fails',
+            verbose_name='Request isolated VLAN tag')
+    isolated_vlan_tag = models.IntegerField('Isolated VLAN tag', null=True, blank=True,
+            help_text='VLAN tag allocated to this slice. The only values that can '
                       'be set are null which means that no VLAN is wanted for the '
                       'slice, and -1 which asks the server to allocate for the slice '
-                      'a new VLAN number (100 <= vlan_nr < 0xFFF) while the slice is '
+                      'a new VLAN tag (100 <= vlan_tag < 0xFFF) while the slice is '
                       'instantiated (or active). It cannot be changed on an '
                       'instantiated slice with slivers having isolated interfaces.')
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
@@ -168,15 +175,15 @@ class Slice(models.Model):
         return self.name
     
     def update_set_state(self, commit=True):
-        if self.vlan_nr == -1:
-            if self.set_state in [self.DEPLOY, self.START]:
+        if self.set_state in [self.DEPLOY, self.START]:
+            if self.isolated_vlan_tag is None and self.allow_isolated:
                 try:
-                    self.vlan_nr = self._get_vlan_nr()
+                    self.isolated_vlan_tag = self._get_vlan_tag()
                 except VlanAllocationError:
                     self.set_state = self.REGISTER
-        elif self.vlan_nr > 0 and self.set_state == self.REGISTER:
+        elif self.isolated_vlan_tag > 0: # REGISTER state
             # transition to a register state, deallocating...
-            self.vlan_nr = -1
+            self.isolated_vlan_tag = None
         if commit:
             self.save()
     
@@ -193,11 +200,11 @@ class Slice(models.Model):
         if not self.pk:
             if self.set_state != Slice.REGISTER:
                 raise ValidationError("Initial state must be Register")
+        # clean allow_isolated
         else:
             old = Slice.objects.get(pk=self.pk)
-            is_register = old.set_state != self.REGISTER
-            vlan_requested = self.vlan_nr == '-1'
-            if self.vlan_nr != old.vlan_nr and is_register and vlan_requested:
+            has_changed = self.allow_isolated != old.allow_isolated
+            if has_changed and old.set_state != self.REGISTER:
                 raise ValidationError("Vlan can not be requested in state != register")
     
     def renew(self):
@@ -216,9 +223,17 @@ class Slice(models.Model):
     def min_vlan_nr(self):
         return int('100', 16)
     
-    def _get_vlan_nr(self):
-        qset = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')
-        last_nr = qset.first().vlan_nr if qset else 0
+    @property
+    def vlan_nr(self):
+        # backwards-compatibility (#46 note-64)
+        if self.set_state != Slice.REGISTER:
+            return self.isolated_vlan_tag
+        else:
+            return -1 if self.allow_isolated else None
+
+    def _get_vlan_tag(self):
+        qset = Slice.objects.exclude(isolated_vlan_tag=None).order_by('-isolated_vlan_tag')
+        last_nr = qset.first().isolated_vlan_tag if qset else 0
         if last_nr < self.min_vlan_nr:
             return self.min_vlan_nr
         if last_nr >= self.max_vlan_nr:
@@ -504,8 +519,8 @@ class SliverIface(models.Model):
     parent = models.ForeignKey('nodes.DirectIface', null=True, blank=True,
             help_text="The name of a direct interface in the research device to use "
                       "for this interface's traffic (VLAN-tagged); the slice must "
-                      "have a non-null vlan_nr. Only meaningful (and mandatory) for "
-                      "isolated interfaces.")
+                      "have a non-null isolated_vlan_tag. Only meaningful (and "
+                      "mandatory) for isolated interfaces.")
     
     class Meta:
         unique_together = ('sliver', 'name')
@@ -568,7 +583,7 @@ class SliverIface(models.Model):
         if last_nr >= self.max_nr:
             # try to recycle old values
             for new_nr in range(1, self.max_nr):
-                if not Slice.objects.filter(sliver=self.sliver, vlan_nr=new_nr).exists():
+                if not Slice.objects.filter(sliver=self.sliver, isolated_vlan_tag=new_nr).exists():
                     return new_nr
             raise IfaceAllocationError("No Iface NR space left.")
         return last_nr + 1

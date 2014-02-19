@@ -53,17 +53,16 @@ class BaseResource(models.Model):
 
 
 class Resource(BaseResource):
-    max_sliver = models.PositiveIntegerField(null=True, blank=True)
-    dflt_sliver = models.PositiveIntegerField("Default sliver")
+    max_sliver = models.PositiveIntegerField("Max per sliver", null=True, blank=True)
+    dflt_sliver = models.PositiveIntegerField("Sliver default")
     
     def clean(self):
         super(Resource, self).clean()
         self.instance.clean(self)
 
 
-# TODO rename name to res_name
 class ResourceReq(BaseResource):
-    req = models.PositiveIntegerField(null=True, blank=True)
+    req = models.PositiveIntegerField("Amount", null=True, blank=True)
     
     class Meta:
         verbose_name = "Resource request"
@@ -72,7 +71,22 @@ class ResourceReq(BaseResource):
     def clean(self):
         super(ResourceReq, self).clean()
         self.instance.clean_req(self)
+    
+    def save(self, *args, **kwargs):
+        super(ResourceReq, self).save(*args, **kwargs)
+        self.instance.save(self)
+    
+    def delete(self, using=None):
+        self.instance.delete(self)
+        super(ResourceReq, self).delete(using=using)
 
+    @property
+    def res_name(self):
+        return self.name
+
+    @res_name.setter
+    def res_name(self, value):
+        self.name = value
 
 autodiscover('resources')
 

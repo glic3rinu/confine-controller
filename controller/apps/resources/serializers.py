@@ -15,13 +15,13 @@ class ResourceSerializer(serializers.ModelSerializer):
         fields = ['name', 'max_sliver', 'dflt_sliver', 'unit']
 
 
-# TODO rename name to res_name
 class ResourceReqSerializer(serializers.ModelSerializer):
+    res_name = serializers.CharField(source='name')
     unit = serializers.CharField(read_only=True)
     
     class Meta:
         model = ResourceReq
-        fields = ['name', 'req', 'unit']
+        fields = ['res_name', 'req', 'unit']
 
 
 for producer_model in ResourcePlugin.get_producers_models():

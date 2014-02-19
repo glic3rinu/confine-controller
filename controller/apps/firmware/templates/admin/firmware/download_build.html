@@ -22,13 +22,18 @@
         <p></p>
         <p>Optionally the firmware can be dowloaded using curl or wget:</p>
         {% code 'bash' %}curl --user {{ user.get_username }} \
-    http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }}
+    http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }} > \
+    {{ build.image_name }}
 
 wget --user {{ user.get_username }} --ask-password --auth-no-challenge --no-check-certificate \
     http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }}
 {% endcode %}
-        <p>The following command can be used for flashing this image (remember to change the destination device):</p>
-        {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sda bs=1M; sync{% endcode %}
+        <p style="margin-top:1em">The following command can be used for flashing this image (remember
+            to change the <strong>destination device</strong>):</p>
+        {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync
+
+# Run this command for upgrade your node:
+confine.sysupgrade -n {{ build.image_name }}{% endcode %}
     </fieldset>
     </div>
     </ul>

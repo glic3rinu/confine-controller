@@ -530,12 +530,12 @@ class SliverDefaultsInline(PermissionStackedInline):
 
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
-        'name', 'id', 'vlan_nr', colored_set_state, num_slivers, 'template',
+        'name', 'id', 'isolated_vlan_tag', colored_set_state, num_slivers, 'template',
         'expires_on', admin_link('group')
     ]
     list_display_links = ('name', 'id')
-    list_filter = [MySlicesListFilter, 'set_state']
-    readonly_fields = ['instance_sn', 'expires_on']
+    list_filter = [MySlicesListFilter, 'set_state', 'sliver_defaults__template']
+    readonly_fields = ['instance_sn', 'expires_on', 'isolated_vlan_tag']
     date_hierarchy = 'expires_on'
     search_fields = ['name']
     inlines = [SlicePropInline, SliverDefaultsInline, SliverInline]
@@ -547,7 +547,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('vlan_nr', 'instance_sn')
+            'fields': ('allow_isolated', 'isolated_vlan_tag', 'instance_sn')
         }),
     )
     change_form_template = "admin/slices/slice/change_form.html"
@@ -603,10 +603,14 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         return form
     
     def get_readonly_fields(self, request, obj=None):
-        """ Disable set_state transitions when slice is registered """
+        """ Disable set_state transitions on slice creation.
+            allow_isolated can be only updated on REGISTER state
+        """
         readonly_fields = super(SliceAdmin, self).get_readonly_fields(request, obj=obj)
         if 'set_state' not in readonly_fields and obj is None:
             return readonly_fields + ['set_state']
+        if obj is not None and obj.set_state != Slice.REGISTER:
+            return readonly_fields + ['allow_isolated']
         return readonly_fields
     
     def formfield_for_dbfield(self, db_field, **kwargs):

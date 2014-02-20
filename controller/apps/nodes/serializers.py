@@ -43,6 +43,9 @@ class IslandSerializer(serializers.UriHyperlinkedModelSerializer):
         model = Island
 
 
+#239 Remove firmware configuration cruft from data model
+FW_CONFIG_FIELDS = ('local_iface', 'priv_ipv4_prefix', 'sliver_pub_ipv6',
+    'sliver_pub_ipv4', 'sliver_pub_ipv4_range')
 class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     properties = serializers.PropertyField(default={})
@@ -53,17 +56,10 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     cert = serializers.Field()
     boot_sn = serializers.IntegerField(read_only=True)
     
-    # FIXME #239 Remove firmware configuration cruft from data model
-    # talk before with Axel and coordinate with Node firmware
-    local_iface = serializers.CharField(required=False)#True)
-    sliver_pub_ipv6 = serializers.ChoiceField(choices=Node.IPV6_METHODS, required=False)
-    sliver_pub_ipv4 = serializers.ChoiceField(choices=Node.IPV4_METHODS, required=False)
-    sliver_pub_ipv4_range = serializers.CharField(required=False)
-    
     class Meta:
         model = Node
-        exclude = ('set_state',)
-    
+        exclude = ('set_state',) + FW_CONFIG_FIELDS
+
     def get_fields(self, *args, **kwargs):
         """
         Filter groups: the user creating this node must be a
@@ -91,4 +87,5 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
 class NodeSerializer(NodeCreateSerializer):
     class Meta:
         model = Node
+        exclude = FW_CONFIG_FIELDS
         read_only_fields = ('group',)

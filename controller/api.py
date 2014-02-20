@@ -26,8 +26,9 @@ class Base(ApiRoot):
         response = super(Base, self).get(request, *args, **kwargs)
         
         testbed_params = {
-            "priv_ipv4_prefix_dflt": settings.PRIV_IPV4_PREFIX_DFLT,
-            "sliver_mac_prefix_dflt": settings.SLIVER_MAC_PREFIX_DFLT,
+            #239 Remove firmware configuration cruft from data model
+            #"priv_ipv4_prefix_dflt": settings.PRIV_IPV4_PREFIX_DFLT,
+            #"sliver_mac_prefix_dflt": settings.SLIVER_MAC_PREFIX_DFLT,
             "mgmt_ipv6_prefix": settings.MGMT_IPV6_PREFIX,
         }
         confine_params = {

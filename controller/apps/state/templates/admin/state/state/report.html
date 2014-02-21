@@ -7,7 +7,7 @@
 {% block extrahead %}
   {{ block.super }}
   <script src='/static/admin_tools/js/jquery/jquery.min.js' type="text/javascript"></script>
-  <script src="{% static "state/js/report.js" %}"></script>
+  <script src="{% static "state/js/report.js" %}" type="text/javascript"></script>
 {% endblock %}
 
 {% block content_title %}
@@ -19,7 +19,7 @@
 {% block content %}
 <div id="content-main">
     <div class="results">
-        <table id="result_list">
+        <table class="result_list">
           <thead>
             <tr>
                 <th rowspan="2" class="expanded">Group</th>
@@ -42,6 +42,21 @@
                 <th>total</th>
             </tr>
           </thead>
+          <tfoot>
+            <tr>
+              <th>TOTAL</th>
+              <td class="online">{{ data.totals.nodes.online|default:0 }}</td>
+              <td class="offline">{{ data.totals.nodes.offline|default:0 }}</td>
+              <td class="unknown">{{ data.totals.nodes.unknown|default:0 }}</td>
+              <td>{{ data.totals.nodes.total|default:0 }}</td>
+              <td>{{ data.totals.slices.total|default:0 }}</td>
+              <td class="registered">{{ data.totals.slivers.registered|default:0 }}</td>
+              <td class="deployed">{{ data.totals.slivers.deployed|default:0 }}</td>
+              <td class="started">{{ data.totals.slivers.started|default:0 }}</td>
+              <td class="offline">{{ data.totals.slivers.offline|default:0 }}</td>
+              <td>{{ data.totals.slivers.total|default:0 }}</td>
+            </tr>
+          </tfoot>
           <tbody>
               {% for group, states in data.groups.iteritems %}
                 <tr class="{% cycle 'row1' 'row2' %}">
@@ -59,21 +74,36 @@
                 </tr>
               {% endfor %}
           </tbody>
-          <tfoot>
-            <tr>
-              <th>TOTAL</th>
-              <td class="online">{{ data.totals.nodes.online|default:0 }}</td>
-              <td class="offline">{{ data.totals.nodes.offline|default:0 }}</td>
-              <td class="unknown">{{ data.totals.nodes.unknown|default:0 }}</td>
-              <td>{{ data.totals.nodes.total|default:0 }}</td>
-              <td>{{ data.totals.slices.total|default:0 }}</td>
-              <td class="registered">{{ data.totals.slivers.registered|default:0 }}</td>
-              <td class="deployed">{{ data.totals.slivers.deployed|default:0 }}</td>
-              <td class="started">{{ data.totals.slivers.started|default:0 }}</td>
-              <td class="offline">{{ data.totals.slivers.offline|default:0 }}</td>
-              <td>{{ data.totals.slivers.total|default:0 }}</td>
-            </tr>
-          </tfoot>
+        </table>
+
+        <h3>Node software version report</h3>
+        <table class="result_list">
+            <thead>
+                <tr>
+                  <th>Group</th>
+                  {% for name, value in node_sw.totals.iteritems %}
+                  <th><a class="version_link" href="{{ value.url }}">{{ name }}</a></th>
+                  {% endfor %}
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                  <th>TOTAL</th>
+                  {% for name, value in node_sw.totals.iteritems %}
+                    <td>{{ value.count }}</td>
+                  {% endfor %}
+                </tr>
+            </tfoot>
+            <tbody>
+            {% for group, versions in node_sw.groups.iteritems %}
+              <tr class="{% cycle 'row1' 'row2' %}">
+                <th><a href="{% url 'admin:users_group_change' group.id %}">{{ group.name }}</a></th>
+                {% for v in versions %}
+                <td>{{ v.count }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+            </tbody>
         </table>
     </div>    
 </div>

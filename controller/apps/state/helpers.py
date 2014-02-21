@@ -6,8 +6,10 @@ from django.utils import timezone
 
 from nodes.models import Node
 from slices.models import Slice, Sliver
-from state.models import State
 from users.models import Group
+
+from .models import State, NodeSoftwareVersion
+from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
 
 def break_headers(header):
@@ -111,4 +113,47 @@ def get_report_data():
             groups[group][relation]['total'] = total
             totals[relation].setdefault('total', 0)
             totals[relation]['total'] += total
+    return { 'groups': groups, 'totals': totals }
+
+
+def get_node_version_data():
+    """ Get stats about software version of nodes by groups
+        NOTE: only the most recent, old versions will be grouped.
+    """
+    versions = NodeSoftwareVersion.objects.distinct('value').extra(
+        select={'date': "SUBSTRING(value from '-r........')"}).values('date', 'value')
+    versions = sorted(versions, key=lambda k: k['date'], reverse=True)[:4]
+    
+    totals = OrderedDict()
+    groups = OrderedDict()
+    for group in Group.objects.all():
+        nodes = Node.objects.filter(group=group)
+        sw_data = []
+        version_count = 0
+        for version in versions:
+            count = nodes.filter(soft_version__value=version['value']).count()
+            name = STATE_NODE_SOFT_VERSION_NAME(version['value'])
+            url = STATE_NODE_SOFT_VERSION_URL(version['value'])
+            sw_data.append({
+                'name': name,
+                'url': url,
+                'count': count
+            })
+            totals.setdefault(name, {'url': url, 'count':0})
+            totals[name]['count'] += count
+            version_count += count
+        
+        # aggregate old firmware versions
+        others_count = nodes.count() - version_count
+        sw_data.append({
+            'name': 'Other',
+            'url': '#',
+            'count': others_count
+        })
+        
+        # store aggregated data
+        groups[group] = sw_data
+        totals.setdefault('Other', {'url': '#', 'count':0})
+        totals['Other']['count'] += others_count
+    
     return { 'groups': groups, 'totals': totals }

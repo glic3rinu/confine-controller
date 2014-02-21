@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from users.models import Group
-from .helpers import get_report_data
+from .helpers import get_report_data, get_node_version_data
 
 def report_view(request):
     """ Testbed report status view """
@@ -14,6 +14,7 @@ def report_view(request):
     iframe = request.GET.get("iframe", False)
     opt = {
         'data': get_report_data(),
+        'node_sw': get_node_version_data(),
         'iframe': iframe,
     }
     context = RequestContext(request)

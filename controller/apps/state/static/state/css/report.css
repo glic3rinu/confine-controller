@@ -2,42 +2,42 @@
     height: 75px; /* Reserve space to nav bar */
 }
 
-#result_list { 
+.result_list {
     border: 1px solid #CCC;
     margin: 10px;
     width: 98%;
 
 }
 
-#result_list tr th,
-#result_list tr td {
+.result_list tr th,
+.result_list tr td {
     text-align: center;
 }
 
-#result_list td.highlight { font-weight: bold; }
-#result_list td.highlight.online, #result_list tfoot td.online { color: green; }
-#result_list td.highlight.offline, #result_list tfoot td.offline { color: red; }
-#result_list td.highlight.unknown, #result_list tfoot td.unknown { color: orange; }
-#result_list td.highlight.registered, #result_list tfoot td.registered { color: grey; }
-#result_list td.highlight.deployed, #result_list tfoot td.deployed { color: orange; }
-#result_list td.highlight.started, #result_list tfoot td.started { color: green; }
+.result_list td.highlight { font-weight: bold; }
+.result_list td.highlight.online, .result_list tfoot td.online { color: green; }
+.result_list td.highlight.offline, .result_list tfoot td.offline { color: red; }
+.result_list td.highlight.unknown, .result_list tfoot td.unknown { color: orange; }
+.result_list td.highlight.registered, .result_list tfoot td.registered { color: grey; }
+.result_list td.highlight.deployed, .result_list tfoot td.deployed { color: orange; }
+.result_list td.highlight.started, .result_list tfoot td.started { color: green; }
 
-#result_list thead tr th.expanded,
-#result_list thead tr:last-child th {
+.result_list thead tr th.expanded,
+.result_list thead tr:last-child th {
     background: white;
     border-bottom: 2px solid black;
     vertical-align: middle;
 }
 
-#result_list tbody tr th,
-#result_list tbody tr td,
-#result_list tfoot tr th,
-#result_list tfoot tr td {
+.result_list tbody tr th,
+.result_list tbody tr td,
+.result_list tfoot tr th,
+.result_list tfoot tr td {
     padding: 7px 0;
 }
 
-#result_list tfoot tr th,
-#result_list tfoot tr td {
+.result_list tfoot tr th,
+.result_list tfoot tr td {
     background: #fff;
     color: black;
     font-weight: bold;
@@ -45,6 +45,10 @@
     border-bottom: 0;
     border-left: 0;
     vertical-align: middle;
+}
+
+.result_list .version_link {
+    color:#5b80b2;
 }
 
 /** slivers and slices d3js.org graphs styles **/

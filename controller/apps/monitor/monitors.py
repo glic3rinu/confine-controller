@@ -242,12 +242,11 @@ class NumProcessesMonitor(Monitor):
         return self.value_with_configuration
     
     def execute(self):
-        ps = run('ps -A -o pid,cmd')
         problems = []
         value = {}
         for name,regex,min_procs,max_procs in self.processes:
-            processes = re.findall('\n\s*[0-9]* '+regex, ps.stdout)
-            num = len(processes)
+            ps = run('ps -A -o pid,cmd | grep -E "%s" | grep -v "grep" | wc -l' % regex )
+            num = int(ps.stdout)
             if min_procs and num < min_procs:
                 msg = 'Process %s has less than %i running instances (%i)'
                 problems.append(msg % (name, min_procs, num))

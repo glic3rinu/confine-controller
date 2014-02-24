@@ -1,3 +1,6 @@
+from rest_framework.exceptions import APIException
+
+
 class ConcurrencyError(Exception):
     """
     Exception related to building images concurrently (not supported)
@@ -5,11 +8,12 @@ class ConcurrencyError(Exception):
     pass
 
 
-class BaseImageNotAvailable(Exception):
+class BaseImageNotAvailable(APIException):
     """
     Raised when there is no available base image for a given node architecture
     """
-    pass
+    status_code = 404
+    detail = "No base image compatible with the architecture of this node."
 
 
 class UnexpectedImageFormat(Exception):

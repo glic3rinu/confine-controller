@@ -11,6 +11,7 @@ from api.utils import insert_ctl
 from nodes.api import NodeDetail
 from nodes.models import Node
 
+from .exceptions import BaseImageNotAvailable
 from .models import Build, Config
 from .serializers import FirmwareSerializer
 
@@ -26,7 +27,9 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
         node = get_object_or_404(Node, pk=pk)
         if not request.DATA:
             config = get_object_or_404(Config)
-            base_image = config.get_images(node).order_by('default')[0]
+            base_image = config.get_images(node).order_by('-default').first()
+            if base_image is None:
+                raise BaseImageNotAvailable
             async = True
             success_status = status.HTTP_202_ACCEPTED
             if '201-created' == request.META.get('HTTP_EXPECT', None):

@@ -82,9 +82,9 @@ def get_report_data():
         'online': [Node.PRODUCTION],
         'offline': [State.OFFLINE, State.CRASHED, Node.DEBUG, Node.SAFE, State.FAILURE, 
                     'fail_alloc', 'fail_deploy', 'fail_start'],
-        'registered': [Slice.REGISTER],
-        'deployed': [Slice.DEPLOY],
-        'started': [Slice.START],
+        'registered': 'registered',
+        'deployed': 'deployed',
+        'started': 'started',
         'unknown': [State.UNKNOWN, State.NODATA],
     }
     

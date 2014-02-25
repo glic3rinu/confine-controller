@@ -68,9 +68,17 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('arch', 'sliver_pub_ipv4', 'sliver_pub_ipv4_range',
-                       'local_iface', 'display_cert', 'priv_ipv4_prefix',
-                       'sliver_mac_prefix', 'sliver_pub_ipv6', 'boot_sn')
+            'fields': ('arch', 'display_cert', 'boot_sn')
+        }),
+        ('UCI Configuration', {
+            'classes': ('collapse', 'warning'),
+            'description': '<strong>WARNING:</strong> Applying some changes may '\
+                           'be dificult, especially if it has deployed slivers. '\
+                           'Node may choose ignore those changes until it is '\
+                           'rebooted. As side effect, those changes may also '\
+                           'cause some slivers to be undeployed.',
+            'fields': ('sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'local_iface',
+                       'priv_ipv4_prefix','sliver_mac_prefix', 'sliver_pub_ipv6')
         }),
     )
     actions = [request_cert, reboot_selected]
@@ -78,6 +86,9 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     change_form_template = "admin/controller/change_form.html"
     
     class Media:
+        css = {
+             'all': ('nodes/css/nodes-admin.css',)
+        }
         js = ("nodes/js/nodes-admin.js",)
     
     def display_set_state(self, node):

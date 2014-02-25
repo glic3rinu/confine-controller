@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils import timezone
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from pygments import highlight
 from pygments.lexers import JsonLexer
@@ -76,11 +77,13 @@ display_data.short_description = 'data'
 
 def display_current(instance):
     try:
-        title = json.loads(instance.data).get('errors', '')
+        # Include error messages (if any) as tooltip
+        errors = json.loads(instance.data).get('errors', [])
     except ValueError:
         title = ''
     else:
-        title = str(title)[2:-2].replace("u'", "'")
+        title = '\n'.join([error.get('message', '') for error in errors])
+        title = escape(title).replace('\n', '&#10;')
     state = instance.current
     color = STATES_COLORS.get(state, "black")
     state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]

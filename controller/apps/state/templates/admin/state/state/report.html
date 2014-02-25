@@ -82,7 +82,8 @@
                 <tr>
                   <th>Group</th>
                   {% for name, value in node_sw.totals.iteritems %}
-                  <th><a class="version_link" href="{{ value.url }}">{{ name }}</a></th>
+                  <th>{% if value.url %}<a class="version_link" href="{{ value.url }}">{{ name }}</a>
+                  {% else %}<span title="{{ value.title }}">{{ name }}</span>{% endif %}</th>
                   {% endfor %}
                 </tr>
             </thead>

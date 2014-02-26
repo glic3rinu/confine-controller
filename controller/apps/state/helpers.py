@@ -126,7 +126,9 @@ def get_node_version_data():
     
     totals = OrderedDict()
     groups = OrderedDict()
-    for group in Group.objects.all():
+    qs_groups = Group.objects.filter(id__in=Node.objects.values_list('group',
+        flat=True).distinct('group'))
+    for group in qs_groups:
         nodes = Node.objects.filter(group=group)
         sw_data = []
         version_count = 0

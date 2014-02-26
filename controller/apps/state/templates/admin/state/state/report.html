@@ -6,7 +6,7 @@
 
 {% block extrahead %}
   {{ block.super }}
-  <script src='/static/admin_tools/js/jquery/jquery.min.js' type="text/javascript"></script>
+  <script src="{% static "admin_tools/js/jquery/jquery.min.js" %}" type="text/javascript"></script>
   <script src="{% static "state/js/report.js" %}" type="text/javascript"></script>
 {% endblock %}
 
@@ -79,13 +79,17 @@
         <h3>Node software version report</h3>
         <table class="result_list">
             <thead>
-                <tr>
-                  <th>Group</th>
-                  {% for name, value in node_sw.totals.iteritems %}
-                  <th>{% if value.url %}<a class="version_link" href="{{ value.url }}">{{ name }}</a>
-                  {% else %}<span title="{{ value.title }}">{{ name }}</span>{% endif %}</th>
-                  {% endfor %}
-                </tr>
+              <tr>
+                <th>Group <img src="{% static 'admin/img/icon-unknown.gif' %}"
+                    class="help help-tooltip" alt="(only groups with nodes)"
+                    title="(only groups with nodes)"></th>
+                {% for name, value in node_sw.totals.iteritems %}
+                <th>{% if value.url %}<a class="version_link" title="detail of '{{ name }}' in the repository"
+                        href="{{ value.url }}">{{ name }}</a>
+                    {% else %}{{ name }} <img src="{% static 'admin/img/icon-unknown.gif' %}" class="help help-tooltip"
+                        alt="{{ value.title }}" title="{{ value.title }}">{% endif %}</th>
+                {% endfor %}
+              </tr>
             </thead>
             <tfoot>
                 <tr>

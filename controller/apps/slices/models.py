@@ -433,10 +433,13 @@ class Sliver(models.Model):
     @property
     def effective_set_state(self):
         slice = self.slice
-        if slice.set_state == slice.DEPLOY and self.set_state == slice.REGISTER:
-            return self.set_state
-        elif slice.set_state == slice.START and self.set_state in [slice.REGISTER, slice.DEPLOY]:
-            return self.set_state
+        # sliver set_state overrides sliver_defaults
+        set_state = self.set_state or slice.sliver_defaults.set_state
+        # effective set_state <= slice.set_state
+        if slice.set_state == slice.DEPLOY and set_state == slice.REGISTER:
+            return set_state
+        elif slice.set_state == slice.START and set_state in [slice.REGISTER, slice.DEPLOY]:
+            return set_state
         return slice.set_state
     
     @property

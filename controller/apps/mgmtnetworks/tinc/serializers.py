@@ -29,12 +29,11 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 class TincClientSerializer(serializers.ModelSerializer):
     name = serializers.CharField(read_only=True)
-    island = serializers.RelHyperlinkedRelatedField(view_name='island-detail', required=False)
     pubkey = serializers.CharField(required=True)
     
     class Meta:
         model = TincClient
-        fields = ('name', 'island', 'pubkey')
+        fields = ('name', 'pubkey')
 
 
 class TincServerSerializer(serializers.ModelSerializer):

@@ -5,7 +5,8 @@ from django.contrib import admin, messages
 from django.template.response import TemplateResponse
 
 from controller.admin import ChangeListDefaultFilter
-from controller.admin.utils import insertattr, admin_link, wrap_admin_view
+from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
+    wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
 from nodes.models import Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
@@ -18,7 +19,7 @@ from . import settings
 
 
 class TincHostInline(PermissionGenericTabularInline):
-    fields = ['island', 'pubkey', 'clear_pubkey', 'tinc_compatible_address']
+    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address']
     readonly_fields = ['tinc_compatible_address']
     model = TincClient
     max_num = 1
@@ -99,7 +100,7 @@ class GatewayAdmin(PermissionModelAdmin):
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('owner'), 'address']
+    list_display = ['description', 'id', admin_link('owner'), 'address', 'island']
     inlines = [TincClientInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
@@ -163,3 +164,7 @@ admin.site.register(Gateway, GatewayAdmin)
 
 insertattr(Node, 'inlines', TincClientInline, weight=-5)
 insertattr(Server, 'inlines', TincServerInline)
+
+# insert island attribute to NodeAdmin
+NodeAdmin = get_modeladmin(Node)
+NodeAdmin.fieldsets[0][1]['fields'] += ('island',)

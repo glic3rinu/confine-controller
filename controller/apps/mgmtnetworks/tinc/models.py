@@ -27,6 +27,8 @@ class Host(models.Model):
             help_text='Free-form textual description of this host.')
     owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
             help_text='The user who administrates this host (its creator by default)')
+    island = models.ForeignKey('tinc.Island', null=True, blank=True,
+            help_text='An optional island used to hint where this tinc client reaches to.')
     related_tincclient = generic.GenericRelation('tinc.TincClient')
     
     def __unicode__(self):
@@ -231,8 +233,6 @@ class TincClient(TincHost):
     Describes a Tinc Client in the testbed. A tinc client can be a testbed node
     or a host.
     """
-    island = models.ForeignKey(Island, null=True, blank=True,
-            help_text='An optional island used to hint where this tinc client reaches to.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -321,3 +321,7 @@ def tinc(self):
 
 Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
 Server.add_to_class('tinc', tinc)
+
+# Hook Island to Node
+Node.add_to_class('island', models.ForeignKey('tinc.Island', null=True, blank=True,
+            help_text='An optional island used to hint where this tinc client reaches to.'))

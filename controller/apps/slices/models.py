@@ -312,11 +312,11 @@ class SliverDefaults(models.Model):
             help_text='File containing experiment data for slivers (if they do not '
                       'explicitly indicate one)',
             validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
-    data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
+    data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
             help_text='The URI of a file containing sliver data for slivers (if '
                       'they do not explicitly indicate one). Its format and contents '
                       'depend on the type of the template to be used.')
-    data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
+    data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
@@ -359,10 +359,10 @@ class Sliver(models.Model):
     data = models.FileField(blank=True, verbose_name='sliver data',
             upload_to=make_upload_to('data', settings.SLICES_SLIVER_EXP_DATA_DIR,
                                      settings.SLICES_SLIVER_EXP_DATA_NAME),
-            help_text='File containing experiment data for this sliver.',
+            help_text='File containing data for this sliver.',
             validators=[validate_file_extensions(settings.SLICES_SLIVER_EXP_DATA_EXTENSIONS)])
     data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
-            help_text='If present, the URI of a file containing experiment data for '
+            help_text='If present, the URI of a file containing data for '
                       'this sliver, instead of the one specified by the slice. Its '
                       'format and contents depend on the type of the template to be used.')
     data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,

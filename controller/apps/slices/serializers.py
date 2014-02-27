@@ -102,6 +102,7 @@ class SliverDetailSerializer(SliverSerializer):
     class Meta:
         model = Sliver
         read_only_fields = ('node', 'slice')
+        exclude = ('data', 'overlay')
 
 
 class SliverDefaultsSerializer(serializers.ModelSerializer):

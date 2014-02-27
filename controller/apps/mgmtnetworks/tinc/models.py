@@ -284,8 +284,9 @@ class TincClient(TincHost):
         config = ["Name = %s" % self.name]
         for server in self.connect_to.all():
             line = "ConnectTo = %s" % server.name
-            has_island = server.addresses.filter(island=self.island).exists()
-            if self.island and has_island:
+            tinc_island = self.content_object.island
+            has_island = server.addresses.filter(island=tinc_island).exists()
+            if tinc_island and has_island:
                 config.insert(0, line)
             else:
                 config.append(line)

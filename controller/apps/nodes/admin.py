@@ -175,8 +175,9 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                 msg = "The node group does not have permissions to manage nodes"
                 messages.warning(request, msg)
             # Show node name in page title (#362)
-            extra_context = extra_context or {}
-            extra_context.update({'title': 'Change node "%s"' % obj.name})
+            if obj:
+                extra_context = extra_context or {}
+                extra_context.update({'title': 'Change node "%s"' % obj.name})
         return super(NodeAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
 

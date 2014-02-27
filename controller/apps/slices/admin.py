@@ -53,7 +53,6 @@ num_slivers.admin_order_field = 'slivers__count'
 
 
 def computed_sliver_set_state(sliver):
-    # TODO update the code according to #234
     sliver_state = sliver.set_state
     state = sliver.effective_set_state
     effective = state != sliver_state
@@ -61,7 +60,7 @@ def computed_sliver_set_state(sliver):
     state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
     title = ''
     if effective:
-        title = 'Set state from slice, sliver set state is &quot;%s&quot;' % sliver_state
+        title = 'Set state overrided, sliver set state is &quot;%s&quot;' % sliver_state
         state += '*'
     return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
 computed_sliver_set_state.short_description = 'Set state'
@@ -98,7 +97,7 @@ class SliverIfaceInline(PermissionTabularInline):
         return super(SliverIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-SLIVER_EMPTY_LABEL = "(from slice)"
+SLIVER_EMPTY_LABEL = "(from slice's sliver defaults)"
 class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
         '__unicode__', admin_link('node'), admin_link('slice'), computed_sliver_set_state
@@ -397,7 +396,7 @@ class SliceSliversAdmin(SliverAdmin):
         context.update(extra_context or {})
         # warn user on missconfiguration
         if request.method == 'GET':
-            if not slice.template.is_active or \
+            if not slice.sliver_defaults.template.is_active or \
                 sliver.template and not sliver.template.is_active:
                 msg = "The template chosen for this sliver is NOT active. "\
                     "Please check its configuration."
@@ -622,7 +621,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Warn user on missconfigured slice:
             - when the slice's group cannot manage slices
-            - when slice template is inactive
+            - when slice's sliver defaults template is inactive
         """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)

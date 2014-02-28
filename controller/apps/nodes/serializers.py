@@ -45,7 +45,7 @@ class IslandSerializer(serializers.UriHyperlinkedModelSerializer):
 
 #239 Remove firmware configuration cruft from data model
 FW_CONFIG_FIELDS = ('local_iface', 'priv_ipv4_prefix', 'sliver_pub_ipv6',
-    'sliver_pub_ipv4', 'sliver_pub_ipv4_range')
+    'sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'sliver_mac_prefix')
 class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     properties = serializers.PropertyField(default={})

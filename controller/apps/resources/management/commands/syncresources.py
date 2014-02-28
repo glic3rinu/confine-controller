@@ -30,6 +30,7 @@ class Command(BaseCommand):
                 # create (or override) resource for objects of this class
                 skipped = updated = 0
                 for obj in model_class.objects.all():
+                    #FIXME use update_or_create ??
                     instance, created = Resource.objects.get_or_create(
                                             name=resource.name,
                                             content_type=content_type,

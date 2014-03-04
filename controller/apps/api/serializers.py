@@ -61,8 +61,22 @@ class HyperlinkedFileField(FileField):
             request = self.context.get('request')
             return request.build_absolute_uri(value.url)
 
+class FieldWithDefault(WritableField):
+    def __init__(self, default, *args, **kwargs):
+        if default is None:
+            raise TypeError("'default' is a mandatory argument")
+        kwargs['required'] = False
+        self.default = default
+        super(FieldWithDefault, self).__init__(*args, **kwargs)
+    
+    def field_to_native(self, obj, field_name):
+        value = super(FieldWithDefault, self).field_to_native(obj, field_name)
+        if value is None:
+            return self.default
+        return value
 
-class PropertyField(WritableField):
+
+class PropertyField(FieldWithDefault):
     """
     Dict-like representation of a Property Model
     A bit hacky, objects get deleted on from_native method and Serializer will

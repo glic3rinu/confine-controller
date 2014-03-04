@@ -38,7 +38,7 @@ class DirectIfaceSerializer(serializers.ModelSerializer):
 
 class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    properties = serializers.PropertyField(required=False)
+    properties = serializers.PropertyField(default={})
     arch = serializers.ChoiceField(choices=settings.NODES_NODE_ARCHS, required=True)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
@@ -48,10 +48,10 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     
     # FIXME #239 Remove firmware configuration cruft from data model
     # talk before with Axel and coordinate with Node firmware
-    local_iface = serializers.CharField(required=True)
-    sliver_pub_ipv6 = serializers.ChoiceField(choices=Node.IPV6_METHODS, required=True)
-    sliver_pub_ipv4 = serializers.ChoiceField(choices=Node.IPV4_METHODS, required=True)
-    sliver_pub_ipv4_range = serializers.CharField(required=True)
+    local_iface = serializers.CharField(required=False)#True)
+    sliver_pub_ipv6 = serializers.ChoiceField(choices=Node.IPV6_METHODS, required=False)
+    sliver_pub_ipv4 = serializers.ChoiceField(choices=Node.IPV4_METHODS, required=False)
+    sliver_pub_ipv4_range = serializers.CharField(required=False)
     
     class Meta:
         model = Node

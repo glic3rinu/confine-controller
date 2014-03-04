@@ -46,7 +46,7 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field(source='api_id')
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
-    properties = serializers.PropertyField(required=False)
+    properties = serializers.PropertyField(default={})
     exp_data_uri = FakeFileField(field='exp_data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
@@ -93,7 +93,7 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     vlan_nr = serializers.IntegerField(read_only=True)
-    properties = serializers.PropertyField(required=False)
+    properties = serializers.PropertyField(default={})
     exp_data_uri = FakeFileField(field='exp_data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,

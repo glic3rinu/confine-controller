@@ -16,24 +16,39 @@
             <li>SHA256: {{ build.image_sha256 }}</li>
             <li>Base Image: {{ base_image }}</li>
         </ul>
+    </ul>
     <div style="margin-bottom:20px; margin-top:30px;">
     <fieldset class="module aligned">
         <h2>Instructions</h2>
-        <p></p>
-        <p>Optionally the firmware can be dowloaded using curl or wget:</p>
+        <h4>Fetch the firmware image</h4>
+        <p>The firmware can be dowloaded using curl or wget. It is recommended to access the node using ssh and download the firmware into the /tmp directory</p>
+        {% code 'bash' %}ssh root@{{ node.mgmt_net.addr }}
+cd /tmp{% endcode %}
+        
+        <p>Then use one of the next commands:</p>
         {% code 'bash' %}curl --user {{ user.get_username }} \
     http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }} > \
     {{ build.image_name }}
 
+# OR
+
 wget --user {{ user.get_username }} --ask-password --auth-no-challenge --no-check-certificate \
     http{% if request.is_secure %}s{% endif %}://{{request.META.HTTP_HOST}}{{ build.image.url }}
 {% endcode %}
-        <p style="margin-top:1em">The following command can be used for flashing this image (remember
-            to change the <strong>destination device</strong>):</p>
-        {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync
-
-# Run this command for upgrade your node:
-confine.sysupgrade -n {{ build.image_name }}{% endcode %}
+        
+        <h4>Install the firmware image</h4>
+        <p style="margin-top:1em">The following command can be used for flashing
+        this image (remember to change the <strong>destination device</strong>). <br/>
+        <strong>WARNING!</strong> Be sure you execute these commands 
+        <strong>INSIDE</strong> the node, not in your own computer!</p>
+        
+        <ol type="A">
+            <li>If the current operating system of the node is not CONFINE execute:
+            {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}<br/></li>
+            <li>If the current operating system running in the node is CONFINE execute:
+            {% code 'bash' %}# This command will upgrade your node:
+confine.sysupgrade -n {{ build.image_name }}{% endcode %}</li>
+        </ol>
     </fieldset>
     </div>
     </ul>

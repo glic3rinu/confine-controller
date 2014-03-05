@@ -242,6 +242,19 @@ class NodeProp(models.Model):
         return self.name
 
 
+class ConfigUCI(models.Model):
+    node = models.ForeignKey(Node, related_name='config_uci')
+    option = models.CharField(max_length=32, help_text='UCI option statement')
+    value = models.TextField(max_length=255, help_text='UCI option value (constant)')
+    
+    class Meta:
+        verbose_name_plural = "UCI Configuration Options"
+        unique_together = ['node', 'option']
+    
+    def __unicode__(self):
+        return self.option
+
+
 class DirectIface(models.Model):
     """
     Interfaces used as direct interfaces.

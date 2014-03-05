@@ -19,7 +19,7 @@ from users.helpers import filter_group_queryset
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
-from .models import Island, DirectIface, Node, NodeProp, Server
+from .models import DirectIface, Island, Node, NodeProp, Server
 from .utils import get_mgmt_backend_class
 
 
@@ -40,6 +40,13 @@ class NodePropInline(PermissionTabularInline):
         js = ('nodes/js/collapsed_node_properties.js',)
 
 
+class ConfigUCIInline(admin.TabularInline):
+    model = ConfigUCI
+    extra = 0
+    formfield_overrides = {
+        models.TextField: {'widget': forms.TextInput(attrs={'size': 100})},
+    }
+
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
     extra = 1
@@ -56,10 +63,11 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [DirectIfaceInline, NodePropInline]
+    inlines = [DirectIfaceInline, NodePropInline, ConfigUCIInline]
     weights = {
         'inlines': {
-            NodePropInline: 2
+            NodePropInline: 2,
+            ConfigUCIInline: -10,
         }
     }
     fieldsets = (
@@ -70,8 +78,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             'classes': ('collapse',),
             'fields': ('arch', 'display_cert', 'boot_sn')
         }),
-        ('UCI Configuration', {
-            'classes': ('collapse', 'warning'),
+        ('Firmware Configuration', {
+            'classes': ('collapse', 'warning', 'firmware-config'),
             'description': '<strong>WARNING:</strong> Applying some changes may '\
                            'be dificult, especially if it has deployed slivers. '\
                            'Node may choose ignore those changes until it is '\

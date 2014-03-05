@@ -43,7 +43,7 @@ class State(models.Model):
         ('registered', 'REGISTERED'),
         ('fail_start', 'FAIL_START'),
         ('fail_deploy', 'FAIL_DEPLOY'),
-        ('fail_alloc', 'FAIL_ALLOC'),
+        ('fail_allocate', 'FAIL_ALLOCATE'),
     )
     STATES = tuple(set(BASE_STATES+NODE_STATES+SLIVER_STATES))
     

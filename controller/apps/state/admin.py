@@ -50,7 +50,7 @@ STATES_COLORS.update({
     'registered': SLIVER_STATES_COLORS[Slice.REGISTER],
     'deployed': SLIVER_STATES_COLORS[Slice.DEPLOY],
     'started': SLIVER_STATES_COLORS[Slice.START],
-    'fail_alloc': 'red',
+    'fail_allocate': 'red',
     'fail_deploy': 'red',
     'fail_start': 'red',
 })

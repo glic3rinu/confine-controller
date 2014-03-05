@@ -264,9 +264,16 @@ class Config(SingletonModel):
     
     def render_uci(self, node, sections=None):
         """ Renders UCI file """
-        uci = template.loader.get_template('firmware/uci')
-        context = Context({'uci': self.eval_uci(node, sections=sections)})
-        return uci.render(context)
+        uci_template = template.loader.get_template('firmware/uci')
+        uci_config = self.eval_uci(node, sections=sections)
+        for uci_entry in node.config_uci.all():
+            uci_config.append({
+                'section': 'node node',
+                'option': uci_entry.option,
+                'value': uci_entry.value
+            })
+        context = Context({'uci': uci_config})
+        return uci_template.render(context)
     
     def get_images(self, node):
         """ 

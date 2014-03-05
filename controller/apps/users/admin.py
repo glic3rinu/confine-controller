@@ -4,6 +4,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group as AuthGroup
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, resolve
 from django.db import models
 from django.utils.safestring import mark_safe
@@ -184,6 +185,11 @@ class UserAdmin(AuthUserAdmin, PermissionModelAdmin):
             # Remove roles inline
             return inlines[:1]
         return inlines
+
+    def user_change_password(self, request, id, form_url=''):
+        if not request.user.is_superuser:
+            raise PermissionDenied
+        return super(UserAdmin, self).user_change_password(request, id, form_url=form_url)
 
 
 class GroupAdmin(ChangeViewActions, PermissionModelAdmin):

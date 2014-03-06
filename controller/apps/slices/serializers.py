@@ -35,6 +35,7 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = SliverIface
         fields = ('nr', 'name', 'type', 'parent_name')
+        read_only_fields = ('nr',)
     
     def get_identity(self, data):
         try:

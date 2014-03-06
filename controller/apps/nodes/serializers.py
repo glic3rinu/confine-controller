@@ -85,23 +85,3 @@ class NodeSerializer(NodeCreateSerializer):
     class Meta:
         model = Node
         read_only_fields = ('group',)
-
-    def get_fields(self, *args, **kwargs):
-        """ Filter states based on accepted transitions """
-        fields = super(NodeSerializer, self).get_fields(*args, **kwargs)
-        set_state = fields['set_state']
-        try:
-            state = self.object.set_state
-        except AttributeError:
-            # Is a querySet, readonly doesn't require filtering
-            return fields
-        # debug is an automatic state so doesnt accept changes
-        if state == Node.DEBUG:
-            set_state.read_only = True
-        elif state == Node.FAILURE:
-            set_state.choices = [(Node.SAFE, 'SAFE')]
-        else: # SAFE or PRODUCTION
-            is_debug = set_state.choices.pop(0)[0] == Node.DEBUG
-            assert is_debug, "Problem removing DEBUG from set_state"
-        return fields
-

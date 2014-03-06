@@ -18,7 +18,8 @@ class Migration(DataMigration):
             try:
                 content_object = ct.get_object_for_this_type(id=tclient.object_id)
             except ObjectDoesNotExist:
-                print tclient.pk, ct, tclient.object_id
+                # FIXME: cleanup orphan objects pointed by tclient?
+                #print tclient.pk, ct, tclient.object_id
                 continue
             content_object.island_id = tclient.island_id
             content_object.save()
@@ -31,7 +32,8 @@ class Migration(DataMigration):
             try:
                 content_object = ct.get_object_for_this_type(id=tclient.object_id)
             except ObjectDoesNotExist:
-                print tclient.pk, ct, tclient.object_id
+                # FIXME: cleanup orphan objects pointed by tclient?
+                #print tclient.pk, ct, tclient.object_id
                 continue
             tclient.island_id = content_object.island_id
             tclient.save()

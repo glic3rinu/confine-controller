@@ -133,7 +133,7 @@ class TincServer(TincHost):
     def __unicode__(self):
         if self.content_type.model == 'server':
             return 'server'
-        return "%s_%s" % (self.content_type.model, self.object_id)
+        return u'%s_%s' % (self.content_type.model, self.object_id)
     
     def clean(self):
         # TODO prevent changes when is_active = true, but take into account that 
@@ -242,7 +242,7 @@ class TincClient(TincHost):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        return "%s_%s" % (self.content_type.model, self.object_id)
+        return u'%s_%s' % (self.content_type.model, self.object_id)
     
     @property
     def address(self):

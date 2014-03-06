@@ -29,7 +29,7 @@ class SfaObject(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        return str(self.content_object)
+        return unicode(self.content_object)
 
 
 # Hook SfaObject support for related models

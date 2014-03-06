@@ -39,7 +39,7 @@ class CnHost(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        return str(self.pk)
+        return unicode(self.pk)
     
     def save(self, *args, **kwargs):
         """ Setting cndb_uri resets cndb_cached_on to null. """

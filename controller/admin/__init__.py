@@ -47,7 +47,7 @@ def get_deleted_objects(objs, opts, user, admin_site, using):
         else:
             # Don't display link to edit, because it either has no
             # admin or is edited inline.
-            return '%s: %s' % (capfirst(opts.verbose_name),
+            return u'%s: %s' % (capfirst(opts.verbose_name),
                                 force_text(obj))
     to_delete = collector.nested(format_callback)
     to_delete = clean_empty(to_delete)

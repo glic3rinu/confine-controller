@@ -57,7 +57,7 @@ class GroupRegistration(models.Model):
         verbose_name_plural = 'group registrations'
 
     def __unicode__(self):
-        return "%s by %s at %s" % (self.group, self.user, self.date)
+        return u"%s by %s at %s" % (self.group, self.user, self.date)
 
     @classmethod
     def is_group_approved(cls, group):

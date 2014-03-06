@@ -102,7 +102,7 @@ class Ticket(models.Model):
         ordering = ["-last_modified_on"]
     
     def __unicode__(self):
-        return str(self.id)
+        return unicode(self.pk)
     
     def get_notification_emails(self):
         """ Get emails of the users related to the ticket """
@@ -197,7 +197,7 @@ class Message(models.Model):
     
     def __unicode__(self):
         num = self.ticket.messages.filter(id__lte=self.id).count()
-        return "#%i" % num
+        return u"#%i" % num
     
     def save(self, *args, **kwargs):
         """ notify stakeholders of ticket update """

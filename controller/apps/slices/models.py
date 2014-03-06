@@ -111,7 +111,7 @@ class Template(models.Model):
             validators=[validate_sha256])
     
     def __unicode__(self):
-        return "%s (%s)" % (self.name, self.type)
+        return u'%s (%s)' % (self.name, self.type)
     
     def clean(self):
         super(Template, self).clean()
@@ -361,7 +361,7 @@ class Sliver(models.Model):
         unique_together = ('slice', 'node')
     
     def __unicode__(self):
-        return "%s@%s" % (self.slice.name, self.node.name)
+        return u'%s@%s' % (self.slice.name, self.node.name)
     
     def clean(self):
         super(Sliver, self).clean()

@@ -98,7 +98,7 @@ class Roles(models.Model):
         unique_together = ('user', 'group')
     
     def __unicode__(self):
-        return str(self.group)
+        return unicode(self.group)
     
     def has_role(self, role):
         return getattr(self, 'is_%s' % role)
@@ -287,7 +287,7 @@ class AuthToken(models.Model):
         verbose_name_plural = 'authentication tokens'
     
     def __unicode__(self):
-        return str(self.pk)
+        return unicode(self.pk)
     
     def clean(self):
         super(AuthToken, self).clean()

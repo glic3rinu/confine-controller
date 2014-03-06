@@ -56,7 +56,7 @@ class Delivered(models.Model):
     content_object = generic.GenericForeignKey()
     
     def __unicode__(self):
-        return str(self.content_object)
+        return unicode(self.content_object)
 
 
 try:

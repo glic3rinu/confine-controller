@@ -80,7 +80,7 @@ class Build(models.Model):
         ordering = ['-date']
     
     def __unicode__(self):
-        return str(self.node)
+        return unicode(self.node)
     
     def delete(self, *args, **kwargs):
         """ Deletes the build and also the image file stored on the file system """
@@ -237,7 +237,7 @@ class Config(SingletonModel):
         verbose_name_plural = "Firmware config"
     
     def __unicode__(self):
-        return 'Current Firmware Config'
+        return u'Current Firmware Config'
     
     def get_uci(self):
         return self.configuci_set.all().order_by('section')
@@ -310,7 +310,7 @@ class BaseImage(models.Model):
     objects = generate_chainer_manager(BaseImageQuerySet)
     
     def __unicode__(self):
-        return "%s (%s)" % (self.name, self.filename)
+        return u"%s (%s)" % (self.name, self.filename)
     
     @property
     def filename(self):
@@ -337,7 +337,7 @@ class ConfigUCI(models.Model):
         ordering = ['section', 'option']
     
     def __unicode__(self):
-        return "%s.%s" % (self.section, self.option)
+        return u"%s.%s" % (self.section, self.option)
     
     def eval_value(self, node):
         """ Evaluates 'value' as python code """
@@ -418,7 +418,7 @@ class ConfigFileHelpText(models.Model):
     help_text = models.TextField()
     
     def __unicode__(self):
-        return str(self.help_text)
+        return unicode(self.help_text)
 
 
 class ConfigPlugin(PluginModel):

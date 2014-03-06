@@ -58,7 +58,7 @@ class Execution(models.Model):
     
     def __unicode__(self):
         num = self.operation.executions.filter(pk__lte=self.pk).count()
-        return "%s#%i" % (self.operation.identifier, num)
+        return u"%s#%i" % (self.operation.identifier, num)
     
     def revoke(self):
         for instance in self.instances:
@@ -136,7 +136,7 @@ class Instance(models.Model):
         ordering = ['-last_try']
     
     def __unicode__(self):
-        return "%s@%s" % (self.execution.operation.identifier, self.node)
+        return u"%s@%s" % (self.execution.operation.identifier, self.node)
     
     @classmethod
     def create(cls, execution, node):

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from permissions import Permission, ReadOnlyPermission, RelatedPermission
 
-from .models import Node, NodeProp, DirectIface, Server
+from .models import DirectIface, Island, Node, NodeProp, Server
 
 
 class NodePermission(Permission):
@@ -35,3 +35,4 @@ Node.has_permission = NodePermission()
 NodeProp.has_permission = RelatedPermission('node')
 DirectIface.has_permission = RelatedPermission('node')
 Server.has_permission = ReadOnlyPermission()
+Island.has_permission = ReadOnlyPermission()

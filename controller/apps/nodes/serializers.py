@@ -7,7 +7,7 @@ from api import serializers, exceptions
 from api.validators import validate_properties
 
 from . import settings
-from .models import Server, Node, DirectIface
+from .models import DirectIface, Island, Node, Server
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
@@ -34,6 +34,13 @@ class DirectIfaceSerializer(serializers.ModelSerializer):
             return data.get('name', None)
         except AttributeError:
             return data
+
+
+class IslandSerializer(serializers.UriHyperlinkedModelSerializer):
+    id = serializers.Field()
+    
+    class Meta:
+        model = Island
 
 
 class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):

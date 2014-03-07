@@ -8,6 +8,10 @@ from django.db import models
 
 class Migration(DataMigration):
 
+    depends_on = (
+        ("nodes", "0006_auto__add_field_node_island"),
+    )
+
     def forwards(self, orm):
         """ Copy TincClient island to Node and Host. """
         # Note: Don't use "from appname.models import ModelName".

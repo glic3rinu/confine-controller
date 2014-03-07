@@ -7,16 +7,23 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ("nodes", "0009_auto__chg_field_node_island"),
+    )
+
     def forwards(self, orm):
-        # Adding field 'Host.island'
-        db.add_column(u'tinc_host', 'island',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tinc.Island'], null=True, blank=True),
-                      keep_default=False)
+        # Deleting model 'Island'
+        db.delete_table(u'tinc_island')
 
 
     def backwards(self, orm):
-        # Deleting field 'Host.island'
-        db.delete_column(u'tinc_host', 'island_id')
+        # Adding model 'Island'
+        db.create_table(u'tinc_island', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=32, unique=True)),
+            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
+        ))
+        db.send_create_signal(u'tinc', ['Island'])
 
 
     models = {
@@ -27,6 +34,12 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'nodes.island': {
+            'Meta': {'object_name': 'Island'},
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'})
+        },
         u'tinc.gateway': {
             'Meta': {'object_name': 'Gateway'},
             'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
@@ -36,20 +49,14 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Host'},
             'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tinc.Island']", 'null': 'True', 'blank': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'blank': 'True'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tinc_hosts'", 'to': u"orm['users.User']"})
-        },
-        u'tinc.island': {
-            'Meta': {'object_name': 'Island'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'})
         },
         u'tinc.tincaddress': {
             'Meta': {'object_name': 'TincAddress'},
             'addr': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tinc.Island']", 'null': 'True', 'blank': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'blank': 'True'}),
             'port': ('django.db.models.fields.SmallIntegerField', [], {'default': "'655'"}),
             'server': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'addresses'", 'to': u"orm['tinc.TincServer']"})
         },
@@ -57,7 +64,6 @@ class Migration(SchemaMigration):
             'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincClient'},
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tinc.Island']", 'null': 'True', 'blank': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
             'pubkey': ('controller.models.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
         },

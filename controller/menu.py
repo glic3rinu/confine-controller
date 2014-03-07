@@ -38,6 +38,8 @@ class CustomMenu(Menu):
                     reverse('admin:nodes_node_changelist')),
                 items.MenuItem('Server',
                     reverse('admin:nodes_server_changelist')),
+                items.MenuItem('Islands',
+                    reverse('admin:nodes_island_changelist')),
                 items.MenuItem('Summary',
                     reverse('admin:state_report')),
             ]
@@ -78,8 +80,6 @@ class CustomMenu(Menu):
                     children=[
                         items.MenuItem('Gateways',
                             reverse('admin:tinc_gateway_changelist')),
-                        items.MenuItem('Islands',
-                            reverse('admin:tinc_island_changelist')),
                         items.MenuItem('TincAddresses',
                             reverse('admin:tinc_tincaddress_changelist')),
                         items.MenuItem('Hosts',

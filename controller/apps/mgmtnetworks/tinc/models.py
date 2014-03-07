@@ -27,7 +27,7 @@ class Host(models.Model):
             help_text='Free-form textual description of this host.')
     owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
             help_text='The user who administrates this host (its creator by default)')
-    island = models.ForeignKey('tinc.Island', null=True, blank=True,
+    island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='An optional island used to hint where this tinc client reaches to.')
     related_tincclient = generic.GenericRelation('tinc.TincClient')
     
@@ -177,24 +177,6 @@ class TincServer(TincHost):
         return '\n'.join(host)
 
 
-class Island(models.Model):
-    """
-    Describes a network island (i.e. a disconnected part of a community network)
-    where the testbed is reachable from. A testbed is reachable from an island
-    when there is a gateway that gives access to the testbed server (possibly
-    through other gateways), or when the server itself is in that island.
-    """
-    name = models.CharField(max_length=32, unique=True,
-            help_text='The unique name of this island. A single line of free-form '
-                      'text with no whitespace surrounding it.',
-            validators=[validate_name])
-    description = models.TextField(blank=True,
-            help_text='Optional free-form textual description of this island.')
-    
-    def __unicode__(self):
-        return self.name
-
-
 class TincAddress(models.Model):
     """
     Describes an IP Address of a Tinc Server.
@@ -204,7 +186,7 @@ class TincAddress(models.Model):
             validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
     port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT,
             help_text='TCP/UDP port of this tinc address.')
-    island = models.ForeignKey(Island, null=True, blank=True,
+    island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
                       'at_server">Island</a> this tinc address is reachable from.')
     server = models.ForeignKey(TincServer, related_name='addresses')
@@ -322,7 +304,3 @@ def tinc(self):
 
 Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
 Server.add_to_class('tinc', tinc)
-
-# Hook Island to Node
-Node.add_to_class('island', models.ForeignKey('tinc.Island', null=True, blank=True,
-            help_text='An optional island used to hint where this tinc client reaches to.'))

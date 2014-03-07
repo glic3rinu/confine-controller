@@ -7,16 +7,20 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ("tinc", "0009_auto__add_field_host_island"),
+    )
+
     def forwards(self, orm):
-        # Adding field 'Host.island'
-        db.add_column(u'tinc_host', 'island',
+        # Adding field 'Node.island'
+        db.add_column(u'nodes_node', 'island',
                       self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tinc.Island'], null=True, blank=True),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Host.island'
-        db.delete_column(u'tinc_host', 'island_id')
+        # Deleting field 'Node.island'
+        db.delete_column(u'nodes_node', 'island_id')
 
 
     models = {
@@ -26,6 +30,42 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+        },
+        u'nodes.directiface': {
+            'Meta': {'unique_together': "(['name', 'node'],)", 'object_name': 'DirectIface'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
+            'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'direct_ifaces'", 'to': u"orm['nodes.Node']"})
+        },
+        u'nodes.node': {
+            'Meta': {'object_name': 'Node'},
+            'arch': ('django.db.models.fields.CharField', [], {'default': "'i686'", 'max_length': '16'}),
+            'boot_sn': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
+            'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'nodes'", 'to': u"orm['users.Group']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tinc.Island']", 'null': 'True', 'blank': 'True'}),
+            'local_iface': ('django.db.models.fields.CharField', [], {'default': "'eth0'", 'max_length': '16'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'}),
+            'priv_ipv4_prefix': ('controller.models.fields.NullableCharField', [], {'max_length': '19', 'null': 'True', 'blank': 'True'}),
+            'set_state': ('django.db.models.fields.CharField', [], {'default': "'debug'", 'max_length': '16'}),
+            'sliver_mac_prefix': ('controller.models.fields.NullableCharField', [], {'max_length': '5', 'null': 'True', 'blank': 'True'}),
+            'sliver_pub_ipv4': ('django.db.models.fields.CharField', [], {'default': "'dhcp'", 'max_length': '8'}),
+            'sliver_pub_ipv4_range': ('controller.models.fields.NullableCharField', [], {'default': "'#8'", 'max_length': '256', 'null': 'True', 'blank': 'True'}),
+            'sliver_pub_ipv6': ('django.db.models.fields.CharField', [], {'default': "'none'", 'max_length': '8'})
+        },
+        u'nodes.nodeprop': {
+            'Meta': {'unique_together': "(('node', 'name'),)", 'object_name': 'NodeProp'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
+            'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'properties'", 'to': u"orm['nodes.Node']"}),
+            'value': ('django.db.models.fields.CharField', [], {'max_length': '256'})
+        },
+        u'nodes.server': {
+            'Meta': {'object_name': 'Server'},
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         u'tinc.gateway': {
             'Meta': {'object_name': 'Gateway'},
@@ -102,4 +142,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['tinc']
+    complete_apps = ['nodes', 'tinc']

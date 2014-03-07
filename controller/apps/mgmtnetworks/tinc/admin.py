@@ -8,13 +8,13 @@ from controller.admin import ChangeListDefaultFilter
 from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
     wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
-from nodes.models import Node, Server
+from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
 from .forms import TincClientInlineForm, TincServerInlineForm
-from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
+from .models import Host, TincClient, TincAddress, TincServer, Gateway
 from . import settings
 
 
@@ -87,12 +87,6 @@ class TincAddressAdmin(PermissionModelAdmin):
     search_fields = ['addr', 'island__name', 'island__description', 'server__tinc_name']
 
 
-class IslandAdmin(PermissionModelAdmin):
-    list_display = ['name', 'id', 'description']
-    search_fields = ['name', 'description']
-    inlines = [ReadOnlyTincAddressInline]
-
-
 class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
@@ -156,7 +150,6 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
 
 admin.site.register(Host, HostAdmin)
 admin.site.register(TincAddress, TincAddressAdmin)
-admin.site.register(Island, IslandAdmin)
 admin.site.register(Gateway, GatewayAdmin)
 
 
@@ -164,7 +157,4 @@ admin.site.register(Gateway, GatewayAdmin)
 
 insertattr(Node, 'inlines', TincClientInline, weight=-5)
 insertattr(Server, 'inlines', TincServerInline)
-
-# insert island attribute to NodeAdmin
-NodeAdmin = get_modeladmin(Node)
-NodeAdmin.fieldsets[0][1]['fields'] += ('island',)
+insertattr(Island, 'inlines', ReadOnlyTincAddressInline)

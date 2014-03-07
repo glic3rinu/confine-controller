@@ -3,20 +3,13 @@ from __future__ import absolute_import
 from api import api, serializers
 from nodes.models import Server, Node
 
-from .models import (Island, TincAddress, TincHost, TincClient, TincServer,
+from .models import (TincAddress, TincHost, TincClient, TincServer,
     Gateway, Host)
 
 
 class TincHostSerializer(serializers.ModelSerializer):
     class Meta:
         model = TincHost
-
-
-class IslandSerializer(serializers.UriHyperlinkedModelSerializer):
-    id = serializers.Field()
-    
-    class Meta:
-        model = Island
 
 
 class TincAddressSerializer(serializers.ModelSerializer):

@@ -36,6 +36,8 @@ class CustomMenu(Menu):
             node_items = [
                 items.MenuItem('Nodes',
                     reverse('admin:nodes_node_changelist')),
+                items.MenuItem('Server',
+                    reverse('admin:nodes_server_changelist')),
                 items.MenuItem('Summary',
                     reverse('admin:state_report')),
             ]

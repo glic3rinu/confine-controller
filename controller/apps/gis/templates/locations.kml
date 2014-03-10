@@ -31,7 +31,7 @@
             <span class="label">#slices:</span> {{ location.slices|length }}
             <span class="label">#slivers:</span> {{ location.slices__slivers|length }}<br/>
         ]]></description>
-        <styleUrl>#state_{{ location.state.value }}</styleUrl>
+        <styleUrl>#state_{{ location.state.value|default:"nodata" }}</styleUrl>
         <Point>
             <coordinates>{{location.gis.lon}},{{location.gis.lat}},0.000000</coordinates>
         </Point> 

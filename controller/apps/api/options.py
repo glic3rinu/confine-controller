@@ -94,13 +94,13 @@ class RestApi(object):
         """ Dynamically add new fields to an existing serializer """
         # TODO provide support for hooking with nested serializers
         if model in self._registry:
-            # get all the model serializers
             model_serializers = []
             for api_view in self._registry[model]:
                 model_serializers.append(api_view.serializer_class)
                 # include serializers used on object creation
-                if hasattr(api_view, 'add_serializer_class'):
+                if getattr(api_view, 'add_serializer_class', None):
                     model_serializers.append(api_view.add_serializer_class)
+            
             # hook new attribute to each serializer
             for serializer in model_serializers:
                 serializer.base_fields.update({name: field(**kwargs)})

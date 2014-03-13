@@ -118,6 +118,9 @@ class Node(models.Model):
                       'group must have node creation allowed (/allow_nodes=true). '
                       'Administrators and technicians in this group are able to '
                       'manage this node.')
+    island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            help_text='An optional island used to hint where the node is located '
+                      'network-wise.')
     
     def __unicode__(self):
         return self.name
@@ -277,3 +280,21 @@ class Server(SingletonModel):
     @cached
     def mgmt_net(self):
         return get_mgmt_backend_class()(self)
+
+
+class Island(models.Model):
+    """
+    Describes a network island (i.e. a disconnected part of a community network)
+    where the testbed is reachable from. A testbed is reachable from an island
+    when there is a gateway that gives access to the testbed server (possibly
+    through other gateways), or when the server itself is in that island.
+    """
+    name = models.CharField(max_length=32, unique=True,
+            help_text='The unique name of this island. A single line of free-form '
+                      'text with no whitespace surrounding it.',
+            validators=[validate_name])
+    description = models.TextField(blank=True,
+            help_text='Optional free-form textual description of this island.')
+    
+    def __unicode__(self):
+        return self.name

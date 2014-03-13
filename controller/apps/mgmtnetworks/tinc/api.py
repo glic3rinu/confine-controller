@@ -9,8 +9,8 @@ from rest_framework.views import APIView
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
-from .models import Island, Host, Gateway
-from .serializers import IslandSerializer, HostSerializer, GatewaySerializer
+from .models import Host, Gateway
+from .serializers import HostSerializer, GatewaySerializer
 
 
 class UploadPubkey(APIView):
@@ -31,35 +31,6 @@ class UploadPubkey(APIView):
             response_data = {'detail': 'host pubkey changed successfully'}
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='pubkey value not provided')
-
-
-class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
-    """
-    **Media type:** [`application/vnd.confine.server.Island.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
-    
-    This resource lists the network [islands](http://wiki.confine-project.eu/
-    arch:rest-api?&#island_at_server) supported by the testbed and provides
-    API URIs to navigate to them.
-    """
-    model = Island
-    serializer_class = IslandSerializer
-
-
-class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    **Media type:** [`application/vnd.confine.server.Island.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
-    
-    This resource describes a network island (i.e. a disconnected part of a
-    community network) where the testbed is reachable from. A testbed is reachable
-    from an island when there is a [gateway](http://wiki.confine-project.eu/arch
-    :rest-api?&#gateway_at_server) that gives access to the testbed server
-    (possibly through other gateways), or when the [server](https://wiki.confine
-    -project.eu/arch:rest-api?&#server_at_server) itself is in that island.
-    """
-    model = Island
-    serializer_class = IslandSerializer
 
 
 class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -123,6 +94,5 @@ class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = GatewaySerializer
 
 
-api.register(IslandList, IslandDetail)
 api.register(HostList, HostDetail)
 api.register(GatewayList, GatewayDetail)

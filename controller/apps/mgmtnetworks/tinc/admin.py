@@ -5,20 +5,21 @@ from django.contrib import admin, messages
 from django.template.response import TemplateResponse
 
 from controller.admin import ChangeListDefaultFilter
-from controller.admin.utils import insertattr, admin_link, wrap_admin_view
+from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
+    wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
-from nodes.models import Node, Server
+from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
 from .forms import TincClientInlineForm, TincServerInlineForm
-from .models import Host, TincClient, TincAddress, TincServer, Island, Gateway
+from .models import Host, TincClient, TincAddress, TincServer, Gateway
 from . import settings
 
 
 class TincHostInline(PermissionGenericTabularInline):
-    fields = ['island', 'pubkey', 'clear_pubkey', 'tinc_compatible_address']
+    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address']
     readonly_fields = ['tinc_compatible_address']
     model = TincClient
     max_num = 1
@@ -86,12 +87,6 @@ class TincAddressAdmin(PermissionModelAdmin):
     search_fields = ['addr', 'island__name', 'island__description', 'server__tinc_name']
 
 
-class IslandAdmin(PermissionModelAdmin):
-    list_display = ['name', 'id', 'description']
-    search_fields = ['name', 'description']
-    inlines = [ReadOnlyTincAddressInline]
-
-
 class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
@@ -99,7 +94,7 @@ class GatewayAdmin(PermissionModelAdmin):
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('owner'), 'address']
+    list_display = ['description', 'id', admin_link('owner'), 'address', 'island']
     inlines = [TincClientInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
@@ -155,7 +150,6 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
 
 admin.site.register(Host, HostAdmin)
 admin.site.register(TincAddress, TincAddressAdmin)
-admin.site.register(Island, IslandAdmin)
 admin.site.register(Gateway, GatewayAdmin)
 
 
@@ -163,3 +157,4 @@ admin.site.register(Gateway, GatewayAdmin)
 
 insertattr(Node, 'inlines', TincClientInline, weight=-5)
 insertattr(Server, 'inlines', TincServerInline)
+insertattr(Island, 'inlines', ReadOnlyTincAddressInline)

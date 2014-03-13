@@ -19,7 +19,7 @@ from users.helpers import filter_group_queryset
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
-from .models import Node, NodeProp, Server, DirectIface
+from .models import Island, DirectIface, Node, NodeProp, Server
 from .utils import get_mgmt_backend_class
 
 
@@ -48,7 +48,8 @@ class DirectIfaceInline(PermissionTabularInline):
 
 class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
-        'name', 'id', 'arch', 'display_set_state', admin_link('group'), 'num_ifaces'
+        'name', 'id', 'arch', 'display_set_state', admin_link('group'),
+        'num_ifaces', admin_link('island')
     ]
     list_display_links = ['name', 'id']
     list_filter = [MyNodesListFilter, 'arch', 'set_state', 'group']
@@ -63,7 +64,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     }
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'group', 'set_state'),
+            'fields': ('name', 'description', 'group', 'set_state', 'island'),
         }),
         ('Advanced', {
             'classes': ('collapse',),
@@ -190,5 +191,11 @@ class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
         return False
 
 
+class IslandAdmin(PermissionModelAdmin):
+    list_display = ['name', 'id', 'description']
+    search_fields = ['name', 'description']
+
+
 admin.site.register(Node, NodeAdmin)
 admin.site.register(Server, ServerAdmin)
+admin.site.register(Island, IslandAdmin)

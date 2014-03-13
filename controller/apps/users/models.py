@@ -96,6 +96,7 @@ class Roles(models.Model):
     
     class Meta:
         unique_together = ('user', 'group')
+        verbose_name_plural = 'roles'
     
     def __unicode__(self):
         return unicode(self.group)

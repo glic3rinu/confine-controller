@@ -8,8 +8,9 @@ from rest_framework.views import APIView
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
-from .models import Node, Server
-from .serializers import ServerSerializer, NodeSerializer, NodeCreateSerializer
+from .models import Island, Node, Server
+from .serializers import (IslandSerializer, NodeSerializer, NodeCreateSerializer,
+    ServerSerializer)
 from .settings import NODES_NODE_API_NODE_BASE_URL
 from .validators import validate_csr
 
@@ -115,5 +116,35 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(Server)
 
 
+class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
+    """
+    **Media type:** [`application/vnd.confine.server.Island.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
+    
+    This resource lists the network [islands](http://wiki.confine-project.eu/
+    arch:rest-api?&#island_at_server) supported by the testbed and provides
+    API URIs to navigate to them.
+    """
+    model = Island
+    serializer_class = IslandSerializer
+
+
+class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    **Media type:** [`application/vnd.confine.server.Island.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
+    
+    This resource describes a network island (i.e. a disconnected part of a
+    community network) where the testbed is reachable from. A testbed is reachable
+    from an island when there is a [gateway](http://wiki.confine-project.eu/arch
+    :rest-api?&#gateway_at_server) that gives access to the testbed server
+    (possibly through other gateways), or when the [server](https://wiki.confine
+    -project.eu/arch:rest-api?&#server_at_server) itself is in that island.
+    """
+    model = Island
+    serializer_class = IslandSerializer
+
+
 api.register(NodeList, NodeDetail)
 api.register(ServerDetail, ServerDetail)
+api.register(IslandList, IslandDetail)

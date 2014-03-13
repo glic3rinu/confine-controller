@@ -366,7 +366,7 @@ class ResourceRequest(models.Model):
     
     def send_creation_email(self, site):
         context = { 'request': self, 'site': site }
-        to = settings.SERVER_EMAIL
+        to = User.objects.filter(is_superuser=True).values_list('email', flat=True)
         template = 'users/created_resource_request.email'
         send_email_template(template=template, context=context, to=to)
     

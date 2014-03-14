@@ -202,6 +202,8 @@ class Command(BaseCommand):
                 "Just add:\n"
                 "   'ATOMIC_REQUESTS': True,\n"
                 "into DATABASES setting within <project_name>/<project_name>/settings.py")
+        if version <= 1003:
+            run('python manage.py loaddata firmwareconfig')
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

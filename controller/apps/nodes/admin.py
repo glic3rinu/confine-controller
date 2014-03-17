@@ -40,14 +40,6 @@ class NodePropInline(PermissionTabularInline):
         js = ('nodes/js/collapsed_node_properties.js',)
 
 
-class ConfigUCIInline(admin.TabularInline):
-    model = ConfigUCI
-    extra = 0
-    formfield_overrides = {
-        models.TextField: {'widget': forms.TextInput(attrs={'size': 100})},
-    }
-
-
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
     extra = 1
@@ -64,11 +56,10 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [DirectIfaceInline, NodePropInline, ConfigUCIInline]
+    inlines = [DirectIfaceInline, NodePropInline]
     weights = {
         'inlines': {
-            NodePropInline: 2,
-            ConfigUCIInline: -10,
+            NodePropInline: 2
         }
     }
     fieldsets = (
@@ -80,7 +71,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             'fields': ('arch', 'display_cert', 'boot_sn')
         }),
         ('Firmware configuration', {
-            'classes': ('collapse', 'warning', 'firmware-config'),
+            'classes': ('collapse', 'warning'),
             'description': '<strong>WARNING:</strong> Applying some changes may '\
                            'be dificult, especially if it has deployed slivers. '\
                            'Node may choose ignore those changes until it is '\

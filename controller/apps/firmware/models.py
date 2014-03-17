@@ -264,16 +264,9 @@ class Config(SingletonModel):
     
     def render_uci(self, node, sections=None):
         """ Renders UCI file """
-        uci_template = template.loader.get_template('firmware/uci')
-        uci_config = self.eval_uci(node, sections=sections)
-        for uci_entry in node.config_uci.all():
-            uci_config.append({
-                'section': 'node node',
-                'option': uci_entry.option,
-                'value': uci_entry.value
-            })
-        context = Context({'uci': uci_config})
-        return uci_template.render(context)
+        uci = template.loader.get_template('firmware/uci')
+        context = Context({'uci': self.eval_uci(node, sections=sections)})
+        return uci.render(context)
     
     def get_images(self, node):
         """ 
@@ -335,7 +328,7 @@ class ConfigUCI(models.Model):
             help_text='UCI config statement')
     option = models.CharField(max_length=32, help_text='UCI option statement')
     value = models.TextField(max_length=255,
-            help_text='Python code that will be evaluated for obtaining the value '
+            help_text='Python code that will be evaluated for obtining the value '
                       'from the node. I.e. node.properties[\'ip\']')
     
     class Meta:

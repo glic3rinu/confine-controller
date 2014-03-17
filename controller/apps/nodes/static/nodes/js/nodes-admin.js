@@ -1,7 +1,5 @@
 (function($) {
     $(document).ready(function($) {        
-        // nest configUCI inline into Firmware Config fieldset
-        $('#config_uci-group').appendTo('fieldset.firmware-config');
         // warn twice user when set_state is set to failure
         $('#id_set_state').on("change", function() {
             if(warn_failure_chosen() == false) {

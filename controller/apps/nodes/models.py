@@ -248,7 +248,8 @@ class ConfigUCI(models.Model):
     value = models.TextField(max_length=255, help_text='UCI option value (constant)')
     
     class Meta:
-        verbose_name_plural = "UCI Configuration Options"
+        verbose_name = "UCI option"
+        verbose_name_plural = "UCI configuration options"
         unique_together = ['node', 'option']
     
     def __unicode__(self):

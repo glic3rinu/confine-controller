@@ -47,6 +47,7 @@ class ConfigUCIInline(admin.TabularInline):
         models.TextField: {'widget': forms.TextInput(attrs={'size': 100})},
     }
 
+
 class DirectIfaceInline(PermissionTabularInline):
     model = DirectIface
     extra = 1
@@ -78,7 +79,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             'classes': ('collapse',),
             'fields': ('arch', 'display_cert', 'boot_sn')
         }),
-        ('Firmware Configuration', {
+        ('Firmware configuration', {
             'classes': ('collapse', 'warning', 'firmware-config'),
             'description': '<strong>WARNING:</strong> Applying some changes may '\
                            'be dificult, especially if it has deployed slivers. '\

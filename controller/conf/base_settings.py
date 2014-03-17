@@ -128,7 +128,6 @@ INSTALLED_APPS = (
 #    'sfa',
     'communitynetworks',
     'firmware',
-#    'groupregistration',
     'gis',
     'users',
     'pki',

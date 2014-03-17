@@ -30,7 +30,7 @@ STATES_COLORS = {
 class PingAdmin(PermissionModelAdmin):
     list_display = (
         'content_object', 'packet_loss_percentage', 'min', 'avg', 'max', 'mdev',
-        'samples', 'date_since'
+        'date', 'date_since'
     )
     list_display_links = ('content_object',)
     fields = list_display
@@ -41,9 +41,11 @@ class PingAdmin(PermissionModelAdmin):
     deletable_objects_excluded = True
     
     def packet_loss_percentage(self, instance):
-        return str(instance.packet_loss) + '%'
+        return "<span title='%s samples'>%s%%</span>" % (instance.samples,
+            instance.packet_loss)
     packet_loss_percentage.short_description = 'Packet loss'
     packet_loss_percentage.admin_order_field = 'packet_loss'
+    packet_loss_percentage.allow_tags = True
     
     def date_since(self, instance):
         return display_timesince(instance.date)

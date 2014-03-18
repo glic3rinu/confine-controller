@@ -86,7 +86,14 @@ def display_current(instance):
         title = escape(title).replace('\n', '&#10;')
     state = instance.current
     color = STATES_COLORS.get(state, "black")
-    state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
+    try:
+        # check if the current state match with the defined ones
+        state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
+    except IndexError:
+        # This situation can happen on State renames like on #385 and no data
+        # migration is applied to existing objects (we add a note but keep the
+        # app working because is not a big issue)
+        title = 'Invalid or legacy state'
     start = timezone.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
     changes = instance.history.filter(start__gt=start).count()
     if changes >= STATE_FLAPPING_CHANGES:

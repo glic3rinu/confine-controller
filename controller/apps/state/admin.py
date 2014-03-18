@@ -182,10 +182,10 @@ class StateHistoryAdmin(PermissionModelAdmin):
         return False
     
     def data_view(self, request, object_id):
-        history = get_object_or_404(State, pk=object_id)
+        history = get_object_or_404(StateHistory, pk=object_id)
         data = {
-            'metadata': display_metadata(history),
-            'data': display_data(history)
+            'metadata': display_metadata(history) or "(None)",
+            'data': display_data(history) or "(None)"
         }
         return HttpResponse(json.dumps(data), content_type="application/json")
     

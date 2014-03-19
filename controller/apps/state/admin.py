@@ -68,7 +68,10 @@ def display_data(instance):
     if not instance.data:
         return ''
     style = '<style>code,pre {font-size:1.13em;}</style><p></p>'
-    data = json.dumps(json.loads(instance.data), indent=4, ensure_ascii=False)
+    try:
+        data = json.dumps(json.loads(instance.data), indent=4, ensure_ascii=False)
+    except ValueError: # data is not a valid json string
+        data = instance.data
     data = break_lines(data)
     data = highlight(data, JsonLexer(), HtmlFormatter())
     return mark_safe(style + urlize(data))

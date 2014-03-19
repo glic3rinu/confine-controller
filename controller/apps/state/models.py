@@ -68,6 +68,12 @@ class State(models.Model):
     def __unicode__(self):
         return self.value
     
+    def save(self, *args, **kwargs):
+        # backwards compatibility (#385)
+        if self.value == 'fail_alloc':
+            self.value = 'fail_allocate'
+        super(State, self).save(*args, **kwargs)
+    
     @property
     @cached
     def last_change_on(self):

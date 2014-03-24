@@ -68,7 +68,6 @@ document.getElementById('id_username').focus()
   <div class="register-links">
     <a href="{% url 'password_reset' %}">Forgot password?</a> &nbsp;
     {% if 'registration'|isinstalled %}<a href="{% url 'registration_register' %}">Create an account</a>{% endif %}
-    {% if 'groupregistration'|isinstalled %}<a href="{% url 'registration_group_register' %}">Register a new group</a>{% endif %}
   </div>
  </div>{% endblock %}
 

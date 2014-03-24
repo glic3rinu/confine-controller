@@ -13,7 +13,6 @@ from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
 from mgmtnetworks.models import MgmtNetConf, get_mgmt_net
 from nodes.models import Server, Node
-from pki import Bob
 
 from . import settings
 from .tasks import update_tincd
@@ -72,7 +71,7 @@ class TincHost(models.Model):
     non empty array of addresses.
 
     """
-    pubkey = RSAPublicKeyField('public Key', unique=True,
+    pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()

@@ -90,6 +90,7 @@ class MgmtNetConf(models.Model):
     def native(self):
         return None
 
+
 # Monkey-Patching Section
 
 mgmt_net = property(get_mgmt_net)

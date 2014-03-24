@@ -22,7 +22,6 @@ from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
 from .models import DirectIface, Island, Node, NodeProp, Server, ServerProp
-from .utils import get_mgmt_backend_class
 
 
 STATES_COLORS = {

@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     'issues',
     'state',
     'pings',
+    'mgmtnetworks',
     'mgmtnetworks.tinc',
 #    'sfa',
     'communitynetworks',

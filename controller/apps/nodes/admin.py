@@ -13,6 +13,7 @@ from controller.core.exceptions import InvalidMgmtAddress
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
+from mgmtnetworks.utils import reverse as mgmt_reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
@@ -150,9 +151,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         search = request.GET.get('q', False)
         if search:
             for query in search.split(' '):
-                mgmt_backend = get_mgmt_backend_class()
                 try:
-                    node = mgmt_backend.reverse(query)
+                    node = mgmt_reverse(query)
                 except InvalidMgmtAddress:
                     pass
                 else:

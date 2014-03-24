@@ -14,17 +14,22 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincClientInlineForm, TincServerInlineForm
-from .models import Host, TincClient, TincAddress, TincServer, Gateway
+from .forms import TincHostInlineForm
+from .models import Host, TincHost, TincAddress, Gateway
 from . import settings
 
 
 class TincHostInline(PermissionGenericTabularInline):
-    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address']
+    # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
+    # TODO warn user when it tries to modify a tinchost with depends on more than 
+    #      one client without alternative path
+    fields = ['pubkey', 'clear_pubkey']
     readonly_fields = ['tinc_compatible_address']
-    model = TincClient
+    model = TincHost
+    form = TincHostInlineForm
     max_num = 1
     can_delete = False
+    verbose_name_plural = 'tinc host'
     
     class Media:
         css = {
@@ -53,22 +58,6 @@ class TincHostInline(PermissionGenericTabularInline):
         return super(TincHostInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-class TincClientInline(TincHostInline):
-    model = TincClient
-    verbose_name_plural = 'tinc client'
-    form = TincClientInlineForm
-
-
-class TincServerInline(TincHostInline):
-    # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
-    # TODO warn user when it tries to modify a tincserver with depends on more than 
-    #      one client without alternative path
-    fields = ['pubkey', 'clear_pubkey', 'tinc_compatible_address', 'is_active']
-    model = TincServer
-    verbose_name_plural = 'tinc server'
-    form = TincServerInlineForm
-
-
 class TincAddressInline(PermissionTabularInline):
     model = TincAddress
     max_num = 1
@@ -83,20 +72,20 @@ class ReadOnlyTincAddressInline(PermissionTabularInline):
 
 
 class TincAddressAdmin(PermissionModelAdmin):
-    list_display = ['addr', 'port', 'island', 'server']
-    list_filter = ['island__name', 'port', 'server']
-    search_fields = ['addr', 'island__name', 'island__description', 'server__tinc_name']
+    list_display = ['addr', 'port', 'island', 'host']
+    list_filter = ['island__name', 'port', 'host']
+    search_fields = ['addr', 'island__name', 'island__description', 'host__tinc_name']
 
 
 class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
-    inlines = [TincServerInline]
+    inlines = [TincHostInline]
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['description', 'id', admin_link('owner'), 'address', 'island']
-    inlines = [TincClientInline]
+    inlines = [TincHostInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
     save_and_continue = True
@@ -156,6 +145,6 @@ admin.site.register(Gateway, GatewayAdmin)
 
 # Monkey-Patching Section
 
-insertattr(Node, 'inlines', TincClientInline, weight=-5)
-insertattr(Server, 'inlines', TincServerInline)
+insertattr(Node, 'inlines', TincHostInline, weight=-5)
+insertattr(Server, 'inlines', TincHostInline)
 insertattr(Island, 'inlines', ReadOnlyTincAddressInline)

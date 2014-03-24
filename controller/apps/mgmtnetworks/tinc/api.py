@@ -25,9 +25,9 @@ class UploadPubkey(APIView):
         if pubkey:
             host = get_object_or_404(Host, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, host)
-            tincclient = host.related_tincclient.all()[0]
-            tincclient.pubkey=pubkey
-            tincclient.save()
+            tinchost = host.related_tinchost.first()
+            tinchost.pubkey = pubkey
+            tinchost.save()
             response_data = {'detail': 'host pubkey changed successfully'}
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='pubkey value not provided')

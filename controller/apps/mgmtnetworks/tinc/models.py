@@ -12,9 +12,8 @@ from controller.models.utils import generate_chainer_manager
 from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
 from nodes.models import Server, Node
-from pki import Bob
 
-from . import settings, backend
+from . import settings
 from .tasks import update_tincd
 
 
@@ -29,7 +28,7 @@ class Host(models.Model):
             help_text='The user who administrates this host (its creator by default)')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='An optional island used to hint where this tinc client reaches to.')
-    related_tincclient = generic.GenericRelation('tinc.TincClient')
+    related_tinchost = generic.GenericRelation('tinc.TincHost')
     
     def __unicode__(self):
         return self.description
@@ -37,12 +36,18 @@ class Host(models.Model):
     @property
     def tinc(self):
         ct = ContentType.objects.get_for_model(self)
-        obj, __ = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
+        obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
-    
-    @property
-    def mgmt_net(self):
-        return backend(self)
+
+
+class TincHostQuerySet(models.query.QuerySet):
+    def hosts(self, *args, **kwargs):
+        server_ct = ContentType.objects.get_for_model(Server)
+        return self.filter(content_type=server_ct).filter(*args, **kwargs)
+        
+    def gateways(self, *args, **kwargs):
+        gateway_ct = ContentType.objects.get_for_model(Gateway)
+        return self.filter(content_type=gateway_ct).filter(*args, **kwargs)
 
 
 class TincHost(models.Model):
@@ -50,11 +55,25 @@ class TincHost(models.Model):
     Base class that describes the basic attributs of a Tinc Host.
     A Tinc Host could be a Server or a Client.
     """
+    """
+    Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
+    the testbed server itself.
+    """
     pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    
+    content_object = generic.GenericForeignKey()
+    objects = generate_chainer_manager(TincHostQuerySet)
     
     class Meta:
-        abstract = True
+        unique_together = ('content_type', 'object_id')
+    
+    def __unicode__(self):
+        if self.content_type.model == 'server':
+            return 'server'
+        return u'%s_%s' % (self.content_type.model, self.object_id)
     
     @property
     def name(self):
@@ -67,7 +86,60 @@ class TincHost(models.Model):
     def delete(self, *args, **kwargs):
         super(TincHost, self).delete(*args, **kwargs)
         defer(update_tincd.delay)
+
+    @property
+    def subnet(self):
+        if self.obj.content_type.model == 'node':
+            return self.address.make_net(64)
+        else: #self.obj.content_type.model == [host|server|gateway]
+            return self.address
+
+    @property
+    def connect_to(self):
+        """ Returns all active TincHosts to use on tincd ConnectTo """
+        ## TODO: filter Server or Gateway?? NOT SURE IF THAT IS VALID
+        return self.objects.filter(addresses__isnull=False)
     
+    def get_host(self, island=None): # FIXME Refactor according #264?
+        ct_model = self.content_type.model
+        if ct_model == 'node' or ct_model == 'host':
+            # Returns tincd hosts file content
+            host = "Subnet = %s" % self.subnet.strNormal()
+            if self.pubkey:
+                host += "\n\n%s" % self.pubkey
+            return host
+        elif ct_model == 'server' or ct_model == 'gateway':
+            # Returns tincd host file
+            host = []
+            for addr in self.addresses.all():
+                line = "Address = %s %d" % (addr.addr, addr.port)
+                if island and addr.island == island:
+                    # Give preference to addresses of the island, if required
+                    host.insert(0, line)
+                else:
+                    host.append(line)
+            host.append("Subnet = %s\n" % self.subnet.strNormal())
+            if self.pubkey:
+                host.append("%s" % self.pubkey)
+            return '\n'.join(host)
+    
+    def get_config(self):
+        """
+        Returns client tinc.conf file content, prioritizing island related gateways
+        """
+        if self.content_type.model in ['server', 'gateway']:
+            raise TypeError("Cannot get_config from a server or gateway")
+        config = ["Name = %s" % self.name]
+        for server in self.connect_to.all():
+            line = "ConnectTo = %s" % server.name
+            tinc_island = self.content_object.island
+            has_island = server.addresses.filter(island=tinc_island).exists()
+            if tinc_island and has_island:
+                config.insert(0, line)
+            else:
+                config.append(line)
+        return '\n'.join(config)
+
     def get_tinc_up(self):
         """ Returns tinc-up file content """
         ip = "%s/%s" % (self.address, controller_settings.MGMT_IPV6_PREFIX.split('/')[1])
@@ -82,9 +154,15 @@ class TincHost(models.Model):
                 'ip -6 addr del %s dev "$INTERFACE"\n'
                 'ip -6 link set "$INTERFACE" down\n' % ip)
     
-    @property
-    def address(self):
-        raise NotImplementedError('Child classes must implement this method')
+    def generate_key(self, commit=False):
+        if self.content_type.model in ['server', 'gateway']:
+            raise TypeError("Cannot generate_key from a server or gateway")
+        bob = Bob()
+        bob.gen_key()
+        if commit:
+            self.pubkey = bob.get_pub_key(format='X.501')
+            self.save()
+        return bob.get_key(format='X.501')
 
 
 class Gateway(models.Model):
@@ -94,87 +172,15 @@ class Gateway(models.Model):
     different parts of a management network located at different islands over 
     some link external to them (e.g. the Internet).
     """
-    related_tincserver = generic.GenericRelation('tinc.TincServer')
+    related_tinchost = generic.GenericRelation('tinc.TincHost')
     description = models.CharField(max_length=256,
             help_text='Free-form textual description of this gateway.')
     
     @property
     def tinc(self):
         ct = ContentType.objects.get_for_model(self)
-        obj, __ = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
+        obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
-    
-    def mgmt_net(self):
-        return backend(self)
-
-
-class TincServerQuerySet(models.query.QuerySet):
-    def gateways(self, *args, **kwargs):
-        server_ct = ContentType.objects.get_for_model(Server)
-        return self.exclude(content_type=server_ct).filter(*args, **kwargs)
-
-
-class TincServer(TincHost):
-    """
-    Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
-    the testbed server itself.
-    """
-    is_active = models.BooleanField(default=True,
-            help_text="Whether this tinc server is active. It should only be made "
-                      "false if there are other tinc servers with addresses in the "
-                      "same islands of the addresses provided by this server.")
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    
-    content_object = generic.GenericForeignKey()
-    objects = generate_chainer_manager(TincServerQuerySet)
-    
-    class Meta:
-        unique_together = ('content_type', 'object_id')
-    
-    def __unicode__(self):
-        if self.content_type.model == 'server':
-            return 'server'
-        return u'%s_%s' % (self.content_type.model, self.object_id)
-    
-    def clean(self):
-        # TODO prevent changes when is_active = true, but take into account that 
-        #       change is_active to true is also a change, so this can be  a bit triky.
-#        if self.is_active:
-#            raise ValidationError("Changes on tinc servers are not allowed when is active.")
-        super(TincServer, self).clean()
-    
-    @property
-    def address(self):
-        """ IPV6 management address """
-        ipv6_words = controller_settings.MGMT_IPV6_PREFIX.split(':')[:3]
-        if self.content_type.model == 'server':
-            # MGMT_IPV6_PREFIX:0:0000::2/128
-            return IP(':'.join(ipv6_words) + '::2')
-        elif self.content_type.model == 'gateway':
-            # MGMT_IPV6_PREFIX:0:0001:gggg:gggg:gggg/128
-            ipv6_words.extend(['0', '0001'])
-            ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return IP(':'.join(ipv6_words))
-    
-    @property
-    def subnet(self):
-        return self.address
-    
-    def get_host(self, island=None):
-        """ Returns tincd host file """
-        host = []
-        for addr in self.addresses.all():
-            line = "Address = %s %d" % (addr.addr, addr.port)
-            if island and addr.island == island:
-                # Give preference to addresses of the island, if required
-                host.insert(0, line)
-            else:
-                host.append(line)
-        host.append("Subnet = %s\n" % self.subnet.strNormal())
-        if self.pubkey:
-            host.append("%s" % self.pubkey)
-        return '\n'.join(host)
 
 
 class TincAddress(models.Model):
@@ -189,7 +195,7 @@ class TincAddress(models.Model):
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
                       'at_server">Island</a> this tinc address is reachable from.')
-    server = models.ForeignKey(TincServer, related_name='addresses')
+    host = models.ForeignKey(TincHost, related_name='addresses')
     
     class Meta:
         verbose_name_plural = 'tinc addresses'
@@ -210,97 +216,18 @@ class TincAddress(models.Model):
         return self.server.name
 
 
-class TincClient(TincHost):
-    """
-    Describes a Tinc Client in the testbed. A tinc client can be a testbed node
-    or a host.
-    """
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    
-    content_object = generic.GenericForeignKey()
-    
-    class Meta:
-        unique_together = ('content_type', 'object_id')
-    
-    def __unicode__(self):
-        return u'%s_%s' % (self.content_type.model, self.object_id)
-    
-    @property
-    def address(self):
-        """ Calculates IPV6 management address """
-        ipv6_words = controller_settings.MGMT_IPV6_PREFIX.split(':')[:3]
-        if self.content_type.model == 'node':
-            # MGMT_IPV6_PREFIX:N:0000::2/64 i
-            ipv6_words.append(int_to_hex_str(self.object_id, 4))
-            return IP(':'.join(ipv6_words) + '::2')
-        elif self.content_type.model == 'host':
-            # MGMT_IPV6_PREFIX:0:2000:hhhh:hhhh:hhhh/128
-            ipv6_words.extend(['0', '2000'])
-            ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return IP(':'.join(ipv6_words))
-    
-    @property
-    def subnet(self):
-        if self.content_type.model == 'node':
-            return self.address.make_net(64)
-        elif self.content_type.model == 'host':
-            return self.address
-    
-    @property
-    def connect_to(self):
-        """ Returns all active TincServers to use on tincd ConnectTo """
-        return TincServer.objects.filter(is_active=True)
-    
-    def get_host(self):
-        """ Returns tincd hosts file content """
-        host = "Subnet = %s" % self.subnet.strNormal()
-        if self.pubkey:
-            host += "\n\n%s" % self.pubkey
-        return host
-    
-    def get_config(self):
-        """
-        Returns client tinc.conf file content, prioritizing island related gateways
-        """
-        config = ["Name = %s" % self.name]
-        for server in self.connect_to.all():
-            line = "ConnectTo = %s" % server.name
-            tinc_island = self.content_object.island
-            has_island = server.addresses.filter(island=tinc_island).exists()
-            if tinc_island and has_island:
-                config.insert(0, line)
-            else:
-                config.append(line)
-        return '\n'.join(config)
-    
-    def generate_key(self, commit=False):
-        bob = Bob()
-        bob.gen_key()
-        if commit:
-            self.pubkey = bob.get_pub_key(format='X.501')
-            self.save()
-        return bob.get_key(format='X.501')
-
-
 # Monkey-Patching Section
 
-# Hook TincClient support to Node
+# Hook TincHost support to Node
 @property
 def tinc(self):
     ct = ContentType.objects.get_for_model(self)
-    obj, __ = TincClient.objects.get_or_create(object_id=self.pk, content_type=ct)
+    obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
-Node.add_to_class('related_tincclient', generic.GenericRelation('tinc.TincClient'))
+Node.add_to_class('related_tinchost', generic.GenericRelation('tinc.TincHost'))
 Node.add_to_class('tinc', tinc)
 
-# Hook TincServer support to Server
-@property
-def tinc(self):
-    ct = ContentType.objects.get_for_model(self)
-    obj, __ = TincServer.objects.get_or_create(object_id=self.pk, content_type=ct)
-    return obj
-
-Server.add_to_class('related_tincserver', generic.GenericRelation('tinc.TincServer'))
+# Hook TincHost support to Server
+Server.add_to_class('related_tinchost', generic.GenericRelation('tinc.TincHost'))
 Server.add_to_class('tinc', tinc)

@@ -59,7 +59,7 @@ class Command(BaseCommand):
     @transaction.atomic
     @check_root
     def handle(self, *args, **options):
-        from mgmtnetworks.tinc.models import TincServer, TincAddress
+        from mgmtnetworks.tinc.models import TincHost, TincAddress
         interactive = options.get('interactive')
         username = options.get('username')
         
@@ -98,7 +98,7 @@ class Command(BaseCommand):
             server.save()
         
         server_ct = ContentType.objects.get_for_model(Server)
-        tinc_server, __ = TincServer.objects.get_or_create(object_id=1,
+        tinc_server, __ = TincHost.objects.get_or_create(object_id=1,
             content_type=server_ct)
         
         tinc_port = options.get('default_port')

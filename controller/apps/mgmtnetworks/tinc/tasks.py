@@ -14,7 +14,7 @@ def update_tincd():
     """
     Generates all local tinc/hosts/* and reloads tincd
     """
-    from .models import TincClient, TincServer
+    from .models import TincHost
     
     hosts_path = '%s/hosts/' % os.path.join(TINC_TINCD_ROOT, TINC_NET_NAME)
     
@@ -25,9 +25,10 @@ def update_tincd():
     
     # File-based lock mechanism to prevent concurrency problems
     with LockFile(hosts_path+'.lock', expire=60):
-        clients = TincClient.objects.all()
-        gateways = TincServer.objects.gateways()
-        hosts = list(clients) + list(gateways)
+        ## TODO FIXME which files we need to generate???
+        #clients = TincClient.objects.all()
+        #gateways = TincHost.objects.gateways()
+        hosts = TincHost.objects.hosts()#list(clients) + list(gateways)
         # Batch processing of tinc clients for efficiency/max_arg_length tradeoff
         scripts = []
         total = len(hosts)

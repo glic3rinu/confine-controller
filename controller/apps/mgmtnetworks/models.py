@@ -6,7 +6,6 @@ from IPy import IP
 from controller import settings as controller_settings
 from controller.utils.ip import split_len, int_to_hex_str
 from nodes.models import Node, Server
-from tinc.models import Gateway, Host
 
 
 class MgmtNetConf(models.Model):
@@ -89,6 +88,6 @@ def mgmt_net(self):
     obj, __ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
-for model in [Node, Server, Gateway, Host]:
-    model.add_to_class('related_mgmt_net', generic.GenericRelation('mgmtnetworks.MgmtNetConf'))
+for model in [Node, Server]:
+    model.add_to_class('related_mgmtnet', generic.GenericRelation('mgmtnetworks.MgmtNetConf'))
     model.add_to_class('mgmt_net', mgmt_net)

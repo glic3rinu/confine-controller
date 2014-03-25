@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from api import api, serializers
 from nodes.models import Server, Node
+from mgmtnetworks.serializers import MgmtNetConfSerializer
 
 from .models import TincAddress, TincHost, Gateway, Host
 
@@ -26,6 +27,7 @@ class TincHostSerializer(serializers.ModelSerializer):
 
 class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
+    mgmt_net = MgmtNetConfSerializer()
     tinc = TincHostSerializer()
     
     class Meta:
@@ -34,6 +36,7 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
 
 class HostSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
+    mgmt_net = MgmtNetConfSerializer()
     tinc = TincHostSerializer()
     
     class Meta:

@@ -15,8 +15,8 @@ from . import settings
 # Hook Community Network support for related models
 # This must be at the begining in order to avoid wired import problems
 related_models = [Node, Server]
-if is_installed('mgmtnetworks.tinc'):
-    from mgmtnetworks.tinc.models import Gateway
+if is_installed('tinc'):
+    from tinc.models import Gateway
     related_models.append(Gateway)
 
 

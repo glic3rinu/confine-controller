@@ -11,6 +11,7 @@ from controller.models.fields import RSAPublicKeyField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
+from mgmtnetworks.models import MgmtNetConf
 from nodes.models import Server, Node
 
 from . import settings
@@ -29,6 +30,7 @@ class Host(models.Model):
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='An optional island used to hint where this tinc client reaches to.')
     related_tinchost = generic.GenericRelation('tinc.TincHost')
+    related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
     
     def __unicode__(self):
         return self.description
@@ -37,6 +39,12 @@ class Host(models.Model):
     def tinc(self):
         ct = ContentType.objects.get_for_model(self)
         obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
+        return obj
+    
+    @property
+    def mgmt_net(self):
+        ct = ContentType.objects.get_for_model(self)
+        obj, __ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
 
 
@@ -173,6 +181,7 @@ class Gateway(models.Model):
     some link external to them (e.g. the Internet).
     """
     related_tinchost = generic.GenericRelation('tinc.TincHost')
+    related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
     description = models.CharField(max_length=256,
             help_text='Free-form textual description of this gateway.')
     
@@ -180,6 +189,12 @@ class Gateway(models.Model):
     def tinc(self):
         ct = ContentType.objects.get_for_model(self)
         obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
+        return obj
+    
+    @property
+    def mgmt_net(self):
+        ct = ContentType.objects.get_for_model(self)
+        obj, __ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
         return obj
 
 

@@ -35,7 +35,7 @@ insert_change_view_action(Node, cache_node_db)
 insertattr(Node, 'inlines', CnHostInline)
 insertattr(Server, 'inlines', CnHostInline)
 
-if is_installed('mgmtnetworks.tinc'):
-    from mgmtnetworks.tinc.models import Gateway
+if is_installed('tinc'):
+    from tinc.models import Gateway
     insertattr(Gateway, 'inlines', CnHostInline)
     insertattr(Gateway, 'list_display', app_url_link)

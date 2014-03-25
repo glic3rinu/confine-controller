@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 from api import api, serializers
 from nodes.models import Server, Node
-from mgmtnetworks.tinc.models import Gateway, Host
 
 from .models import MgmtNetConf
 
@@ -22,5 +21,5 @@ class MgmtNetConfSerializer(serializers.ModelSerializer):
 
 
 # Aggregate mgmt_network to the API
-for model in [Server, Node, Gateway, Host]:
+for model in [Server, Node]:
     api.aggregate(model, MgmtNetConfSerializer, name='mgmt_net')

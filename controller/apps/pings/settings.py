@@ -28,11 +28,16 @@ PING_DEFAULT_INSTANCE = getattr(settings, 'PING_DEFAULT_INSTANCE', (
 
 PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
     {
+       'model': 'mgmtnetworks.MgmtNetConf',
+       'app': 'mgmtnetworks',
+       'admin_classes': (
+            ('MgmtNetConfInline', 'address', '', 'content_object'),
+       ),
+   }, {
         'model': 'tinc.TincHost',
-        'app': 'mgmtnetworks.tinc',
+        'app': 'tinc',
         'admin_classes': (
-            ('TincHostInline', 'tinc_compatible_address', '', 'content_object'),
-            ('HostAdmin', 'address', 'tinc', ''),
+            ('HostAdmin', 'addr', '', 'mgmt_net'),
         ),
     }, {
         'model': 'slices.SliverIface',

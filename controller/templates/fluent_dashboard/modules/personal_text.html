@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block tinchosts %}
-{% if 'mgmtnetworks.tinc'|isinstalled %}
+{% if 'tinc'|isinstalled %}
     {% if not user.tinc_hosts.exists %}
         <p>You may want to <a href="{% url 'admin:tinc_host_add' %}">create a tinc host</a>
         for accessing the management network.</p>

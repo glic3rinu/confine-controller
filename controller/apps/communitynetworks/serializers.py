@@ -22,6 +22,6 @@ api.aggregate(Server, CnHostSerializer, name='cn', required=False)
 
 
 
-if is_installed('mgmtnetworks.tinc'):
-    from mgmtnetworks.tinc.models import Gateway
+if is_installed('tinc'):
+    from tinc.models import Gateway
     api.aggregate(Gateway, CnHostSerializer, name='cn')

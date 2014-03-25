@@ -9,6 +9,7 @@ from controller.admin import ChangeListDefaultFilter
 from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
     wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
+from mgmtnetworks.admin import MgmtNetConfInline
 from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
@@ -24,12 +25,11 @@ class TincHostInline(PermissionGenericTabularInline):
     # TODO warn user when it tries to modify a tinchost with depends on more than 
     #      one client without alternative path
     fields = ['pubkey', 'clear_pubkey']
-    readonly_fields = ['tinc_compatible_address']
     model = TincHost
     form = TincHostInlineForm
     max_num = 1
     can_delete = False
-    verbose_name_plural = 'tinc host'
+    verbose_name_plural = 'tinc'
     
     class Media:
         css = {
@@ -38,16 +38,11 @@ class TincHostInline(PermissionGenericTabularInline):
                 'controller/css/hide-inline-id.css')
         }
     
-    def tinc_compatible_address(self, instance):
-        """ return instance.address in a format compatible with tinc daemon """
-        return instance.address.strNormal()
-    tinc_compatible_address.short_description = 'Address'
-    
     def get_readonly_fields(self, request, obj=None):
         """ pubkey as readonly if exists """
         readonly_fields = super(TincHostInline, self).get_readonly_fields(request, obj=obj)
         if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
-            return ['pubkey'] + readonly_fields
+            return ('pubkey',) + readonly_fields
         return readonly_fields
     
     def get_formset(self, request, obj=None, **kwargs):
@@ -80,19 +75,19 @@ class TincAddressAdmin(PermissionModelAdmin):
 class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
-    inlines = [TincHostInline]
+    inlines = [MgmtNetConfInline, TincHostInline]
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = ['description', 'id', admin_link('owner'), 'address', 'island']
-    inlines = [TincHostInline]
+    inlines = [MgmtNetConfInline, TincHostInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
     save_and_continue = True
     default_changelist_filters = (('my_hosts', 'True'),)
     
     def address(self, instance):
-        return instance.tinc.address if instance.tinc else ''
+        return instance.mgmt_net.addr
     address.admin_order_field = 'id'
     
     def get_urls(self):

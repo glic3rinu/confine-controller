@@ -15,7 +15,7 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincHostInlineForm
+from .forms import TincHostInlineFormSet, TincHostInlineForm
 from .models import Host, TincHost, TincAddress, Gateway
 from . import settings
 
@@ -24,8 +24,9 @@ class TincHostInline(PermissionGenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     # TODO warn user when it tries to modify a tinchost with depends on more than 
     #      one client without alternative path
-    fields = ['pubkey', 'clear_pubkey']
+    fields = ['pubkey']
     model = TincHost
+    formset = TincHostInlineFormSet
     form = TincHostInlineForm
     max_num = 1
     can_delete = False

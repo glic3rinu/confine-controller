@@ -37,10 +37,6 @@ class Migration(DataMigration):
         for thost in orm.TincHost.objects.filter(
                 Q(content_type=ct_node) | Q(content_type=ct_host)
             ).values():
-            # exclude pk, we want that database handles autoid because otherwise
-            # doesn't increment counter and creates future collisions
-            # e.g. we create object pk==1, next auto_pk will be pk==1 --> PK_ERROR
-            thost.pop('id')
             orm.TincClient.objects.create(**thost)
 
         # migrate tinc_servers
@@ -49,12 +45,9 @@ class Migration(DataMigration):
         for thost in orm.TincHost.objects.filter(
                 Q(content_type=ct_server) | Q(content_type=ct_gateway)
             ).values():
-            # exclude pk, we want that database handles autoid (see previous note)
-            host_id = thost.pop('id')
             server = orm.TincServer.objects.create(**thost)
-
             # update addresses to point created TincHost
-            orm.TincAddress.objects.filter(host=host_id).update(server=server)
+            orm.TincAddress.objects.filter(host=thost.get('id')).update(server=server)
 
     models = {
         u'contenttypes.contenttype': {

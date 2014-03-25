@@ -6,6 +6,7 @@ from controller.core.exceptions import InvalidMgmtAddress
 
 
 def reverse(ip):
+    from tinc.models import TincHost
     """ Reverse IP resolution """
     if type(ip) in [str, unicode]:
         try:

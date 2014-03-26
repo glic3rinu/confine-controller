@@ -28,7 +28,10 @@ class FirmwareSerializer(serializers.ModelSerializer):
         if self.object:
             task = self.object.task
             result = task.result or {}
-            return result.get(info, None)
+            try:
+                return result.get(info, None)
+            except AttributeError: # result is an error or exception
+                return result
         return None
     
     def get_progress(self, instance):
@@ -44,7 +47,10 @@ class FirmwareSerializer(serializers.ModelSerializer):
             result = task.result or {}
             if self.get_progress(instance) == 100:
                 return "Building process finished"
-            return "%s ..." % result.get('description', 'Waiting for your building task to begin.')
+            try:
+                return "%s ..." % result.get('description', 'Waiting for your building task to begin.')
+            except AttributeError: # result is an error or exception
+                return result
         return ""
     
     def get_content_message(self, instance):

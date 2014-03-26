@@ -581,7 +581,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         form = super(SliceAdmin, self).get_form(request, obj=obj, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
-            query = Q( Q(users__roles__is_admin=True) | Q(users__roles__is_researcher=True) )
+            query = Q( Q(users__roles__is_group_admin=True) | Q(users__roles__is_slice_admin=True) )
             query = Q( query & Q(allow_slices=True) )
             form = filter_group_queryset(form, obj, request.user, query)
         return form

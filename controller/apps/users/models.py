@@ -49,8 +49,8 @@ class Group(models.Model):
                 set_state=Node.PRODUCTION).update(set_state=Node.SAFE)
     @property
     def admins(self):
-        """ returns user queryset containing all admins """
-        return User.objects.filter_by_role(role=Roles.ADMIN, roles__group=self)
+        """ returns user queryset containing all group admins """
+        return User.objects.filter_by_role(role=Roles.GROUP_ADMIN, roles__group=self)
     
     def is_member(self, user):
         return self.roles.filter(user=user).exists()
@@ -77,22 +77,22 @@ class Group(models.Model):
 
 class Roles(models.Model):
     SUPERUSER = 'superuser'
-    ADMIN = 'admin'
-    TECHNICIAN = 'technician'
-    RESEARCHER = 'researcher'
+    GROUP_ADMIN = 'group_admin'
+    NODE_ADMIN = 'node_admin'
+    SLICE_ADMIN = 'slice_admin'
     
     user = models.ForeignKey('users.User', related_name='roles')
     group = models.ForeignKey(Group, related_name='roles')
-    is_admin = models.BooleanField(default=False,
+    is_group_admin = models.BooleanField('group admin', default=False,
             help_text='Whether that user is an administrator in this group. An '
                       'administrator can manage slices and nodes belonging to the group'
                       ', members in the group and their roles, and the group itself.')
-    is_technician = models.BooleanField(default=False,
-            help_text='Whether that user is a technician in this group. A technician '
-                      'can manage nodes belonging to the group.')
-    is_researcher = models.BooleanField(default=False,
-            help_text='Whether that user is a researcher in this group. A researcher '
-                      'can manage slices belonging to the group.')
+    is_node_admin = models.BooleanField('node admin (technician)', default=False,
+            help_text='Whether that user is a node administrator in this group. '
+                      'A node administrator can manage nodes belonging to the group.')
+    is_slice_admin = models.BooleanField('slice admin (researcher)', default=False,
+            help_text='Whether that user is a slice administrator in this group. '
+                      'A slice administrator can manage slices belonging to the group.')
     
     class Meta:
         unique_together = ('user', 'group')
@@ -237,12 +237,12 @@ class User(auth_models.AbstractBaseUser):
     def role_set(self):
         roles = set()
         for role in Roles.objects.filter(user=self):
-            if role.is_admin:
-                roles.update([Roles.ADMIN])
-            if role.is_technician:
-                roles.update([Roles.TECHNICIAN])
-            if role.is_researcher:
-                roles.update([Roles.RESEARCHER])
+            if role.is_group_admin:
+                roles.update([Roles.GROUP_ADMIN])
+            if role.is_node_admin:
+                roles.update([Roles.NODE_ADMIN])
+            if role.is_slice_admin:
+                roles.update([Roles.SLICE_ADMIN])
             if len(roles) > 3:
                 break
         if self.is_superuser:
@@ -318,7 +318,7 @@ class JoinRequest(models.Model):
     
     def send_creation_email(self, site):
         context = { 'request': self, 'site': site }
-        to = self.group.get_emails(role=Roles.ADMIN)
+        to = self.group.get_emails(role=Roles.GROUP_ADMIN)
         template = 'users/created_join_request.email'
         send_email_template(template=template, context=context, to=to)
     
@@ -374,7 +374,7 @@ class ResourceRequest(models.Model):
     def send_acceptation_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_resource_request.email'
-        to = self.group.get_emails(role=Roles.ADMIN)
+        to = self.group.get_emails(role=Roles.GROUP_ADMIN)
         send_email_template(template=template, context=context, to=to)
     
     def accept(self):

@@ -4,10 +4,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": true, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Web Interface", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -15,10 +15,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": true, 
-        "notify_researchers": false, 
+        "notify_node_admins": true,
+        "notify_slice_admins": false,
         "name": "Nodes", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -26,10 +26,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Support", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -37,10 +37,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Legal", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -48,10 +48,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Administration", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -59,10 +59,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Community Networks", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -70,10 +70,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Other", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 },
 {
@@ -81,10 +81,10 @@
     "model": "issues.queue", 
     "fields": {
         "default": false, 
-        "notify_technicians": false, 
-        "notify_researchers": false, 
+        "notify_node_admins": false,
+        "notify_slice_admins": false,
         "name": "Documentation", 
-        "notify_admins": true
+        "notify_group_admins": true
     }
 }
 ]

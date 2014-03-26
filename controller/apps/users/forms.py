@@ -56,7 +56,7 @@ class GroupRolesFormSet(forms.models.BaseInlineFormSet):
         # Only checking in change forms
         if self.group is not None:
             for form in self.forms:
-                if form.cleaned_data.get('is_admin'):
+                if form.cleaned_data.get('is_group_admin'):
                     return
             raise ValidationError('The group must have at least one admin')
 
@@ -74,13 +74,13 @@ class UserRolesForm(forms.ModelForm):
     
     def clean(self):
         """ prevent groups without no admins """
-        if not self.cleaned_data.get('is_admin'):
+        if not self.cleaned_data.get('is_group_admin'):
             group = self.cleaned_data.get('group')
             role = self.instance
             # Adding roles is harmless and avoid to display this validation error
             # when there is no group selected
             if group and role.pk:
-                admins = Roles.objects.filter(group=group, is_admin=True).exclude(pk=role.pk)
+                admins = Roles.objects.filter(group=group, is_group_admin=True).exclude(pk=role.pk)
                 if not admins.exists():
                     raise ValidationError('The group must have at least one admin')
         return super(UserRolesForm, self).clean()
@@ -161,9 +161,9 @@ class JoinRequestForm(forms.ModelForm):
         ('reject', 'Reject'),
         ('ignore', 'Ignore'))
     ROLES = (
-        ('admin', 'Admin'),
-        ('technician', 'Technician'),
-        ('researcher', 'Researcher'))
+        ('group_admin', 'Group admin'),
+        ('node_admin', 'Node admin (Technician)'),
+        ('slice_admin', 'Slice admin (Researcher)'))
     
     action = forms.ChoiceField(label='Action', choices=ACTIONS, required=False,
             widget=forms.RadioSelect)

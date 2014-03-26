@@ -9,7 +9,7 @@ from .models import Build
 class FirmwarePermission(Permission):
     def getfirmware(self, obj, cls, user):
         if obj is not None:
-            return obj.group.has_roles(user, roles=['admin', 'technician'])
+            return obj.group.has_roles(user, roles=['group_admin', 'node_admin'])
         return False
 
 
@@ -22,7 +22,7 @@ class BuildPermission(Permission):
             # if not user.has_perm(p): perms_needed.add(opts.verbose_name)
             # Maybe we can open a ticket and fix this shit
             # https://github.com/django/django/blob/master/django/contrib/admin/util.py
-            return obj.node.group.has_roles(user, roles=['admin', 'technician'])
+            return obj.node.group.has_roles(user, roles=['group_admin', 'node_admin'])
         return True
 
 

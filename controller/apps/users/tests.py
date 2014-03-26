@@ -161,7 +161,7 @@ class GroupFormTestCase(BaseTestCase):
         user = User.objects.get(pk=self.client.session['_auth_user_id'])
 
         ## add admin role to the user
-        r = Roles(group=group, user=user, is_admin=True)
+        r = Roles(group=group, user=user, is_group_admin=True)
         r.save()
 
         url = reverse('admin:users_group_change', args=[group.id])
@@ -257,7 +257,7 @@ class GroupJoinTestCase(BaseTestCase):
             "roles-TOTAL_FORMS": 1,
             "roles-0-id": 8,
             "roles-0-group": 1,
-            "roles-0-is_admin": "on",
+            "roles-0-is_group_admin": "on",
             "roles-INITIAL_FORMS": 1,
             "roles-MAX_NUM_FORMS": 1000,
             #joinrequest formset
@@ -283,12 +283,12 @@ class GroupJoinTestCase(BaseTestCase):
     def test_join_request_accept(self):
         uid = 3
         gid = 1
-        self._do_action_join_request(action='accept', roles=['researcher'])
+        self._do_action_join_request(action='accept', roles=['slice_admin'])
 
         # has been created a role to user at the group
         roles_qs = Roles.objects.filter(user=uid, group=gid)
         self.assertTrue(roles_qs.exists())
-        self.assertTrue(roles_qs.get().is_researcher)
+        self.assertTrue(roles_qs.get().is_slice_admin)
 
     def test_join_request_reject(self):
         uid = 3

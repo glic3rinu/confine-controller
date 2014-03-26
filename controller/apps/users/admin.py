@@ -67,8 +67,8 @@ class GroupRolesInline(PermissionTabularInline, SortableTabularInline):
 
 
 class UserRolesInline(PermissionTabularInline):
-    fields = ['group_link', 'group', 'is_admin', 'is_technician', 'is_researcher']
-    readonly_fields = ['group_link', 'group', 'is_admin', 'is_technician', 'is_researcher']
+    fields = ['group_link', 'group', 'is_group_admin', 'is_node_admin', 'is_slice_admin']
+    readonly_fields = ['group_link', 'group', 'is_group_admin', 'is_node_admin', 'is_slice_admin']
     model = Roles
     extra = 0
     form = UserRolesForm
@@ -133,8 +133,8 @@ class UserAdmin(AuthUserAdmin, PermissionModelAdmin):
         'name', 'email', 'group_links', 'is_superuser', 'is_active'
     )
     list_filter = (
-        'is_active', 'is_superuser', 'roles__is_admin', 'roles__is_researcher',
-        'roles__is_technician', 'groups'
+        'is_active', 'is_superuser', 'roles__is_group_admin', 'roles__is_slice_admin',
+        'roles__is_node_admin', 'groups'
     )
     fieldsets = (
         (None, {'fields': ('username', )}),
@@ -269,7 +269,7 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
         """ user that creates a group becomes its admin """
         super(GroupAdmin, self).save_model(request, obj, form, change)
         if not change:
-            Roles.objects.get_or_create(user=request.user, group=obj, is_admin=True)
+            Roles.objects.get_or_create(user=request.user, group=obj, is_group_admin=True)
     
     def queryset(self, request):
         """ Annotate number of users on the slice for sorting on changelist """
@@ -280,10 +280,10 @@ class GroupAdmin(ChangeViewActions, PermissionModelAdmin):
 
 class RolesAdmin(admin.ModelAdmin):
     list_display = [
-        'user_query_string', 'group_link', 'is_admin', 'is_technician', 'is_researcher'
+        'user_query_string', 'group_link', 'is_group_admin', 'is_node_admin', 'is_slice_admin'
     ]
-    list_editable = ['is_admin', 'is_technician', 'is_researcher']
-    list_filter = ['is_admin', 'is_technician', 'is_researcher', 'group']
+    list_editable = ['is_group_admin', 'is_node_admin', 'is_slice_admin']
+    list_filter = ['is_group_admin', 'is_node_admin', 'is_slice_admin', 'group']
     
     def group_link(self, instance):
         """ Link to related Group """

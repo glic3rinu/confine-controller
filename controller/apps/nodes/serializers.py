@@ -66,8 +66,8 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     
     def get_fields(self, *args, **kwargs):
         """
-        Filter groups: the user creating this node must be an
-        administrator or technician of this group, and the group
+        Filter groups: the user creating this node must be a
+        group or node administrator of this group, and the group
         must have node creation allowed (/allow_nodes=true).
         
         """
@@ -78,11 +78,11 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
             return fields
         queryset = fields['group'].queryset
         if not user.is_superuser:
-            msg = " Check if you have administrator or technician roles at the provided group."
+            msg = " Check if you have group or node administrator roles at the provided group."
             fields['group'].error_messages['does_not_exist'] += msg
             # bug #321: filter by user.id (None for Anonymous users)
             fields['group'].queryset = queryset.filter(allow_nodes=True,
-                                        roles__user=user.id, roles__is_admin=True)
+                                        roles__user=user.id, roles__is_group_admin=True)
         return fields
     
     def validate_properties(self, attrs, source):

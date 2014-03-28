@@ -73,7 +73,6 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = User
     add_serializer_class = UserCreateSerializer
     serializer_class = UserSerializer
-#    filter_fields = ('username',)
 #    post_exclude = ('is_active', 'is_superuser', 'group_roles')
 
     def pre_save(self, obj):
@@ -105,12 +104,11 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Group
     add_serializer_class = GroupCreateSerializer
     serializer_class = GroupSerializer
-#    filter_fields = ('username',)
 #    post_exclude = ('allow_nodes', 'allow_slices', 'user_roles')
     
     def post_save(self, obj, created=False):
         """ user that creates a group becomes its admin """
-        Roles.objects.get_or_create(user=self.request.user, group=obj, is_admin=True)
+        Roles.objects.get_or_create(user=self.request.user, group=obj, is_group_admin=True)
 
 
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):

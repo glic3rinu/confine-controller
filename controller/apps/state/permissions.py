@@ -9,8 +9,8 @@ class StatePermission(ReadOnlyPermission):
     """ Allow delete because this is a node related object """
     def delete(self, obj, cls, user):
         if obj is None:
-            return user.has_roles(('admin', 'technician'))
-        return obj.node.group.has_roles(user, roles=['admin', 'technician'])
+            return user.has_roles(('group_admin', 'node_admin'))
+        return obj.node.group.has_roles(user, roles=['group_admin', 'node_admin'])
 
 
 State.has_permission = StatePermission()

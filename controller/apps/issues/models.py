@@ -17,9 +17,9 @@ class QueueQuerySet(models.query.QuerySet):
 class Queue(models.Model):
     name = models.CharField(max_length=128, unique=True)
     default = models.BooleanField(default=False)
-    notify_admins = models.BooleanField(default=True)
-    notify_technicians = models.BooleanField(default=False)
-    notify_researchers = models.BooleanField(default=False)
+    notify_group_admins = models.BooleanField(default=True)
+    notify_node_admins = models.BooleanField(default=False)
+    notify_slice_admins = models.BooleanField(default=False)
     
     objects = generate_chainer_manager(QueueQuerySet)
     
@@ -115,12 +115,12 @@ class Ticket(models.Model):
                 superusers = User.objects.filter(is_superuser=True)
                 emails += superusers.values_list('email', flat=True)
             if self.group:
-                roles = [Roles.ADMIN]
+                roles = [Roles.GROUP_ADMIN]
                 if self.queue: # check if other roles must be notified
-                    if self.queue.notify_technicians:
-                        roles.append(Roles.TECHNICIAN)
-                    if self.queue.notify_researchers:
-                        roles.append(Roles.RESEARCHER)
+                    if self.queue.notify_node_admins:
+                        roles.append(Roles.NODE_ADMIN)
+                    if self.queue.notify_slice_admins:
+                        roles.append(Roles.SLICE_ADMIN)
                 emails += self.group.get_emails(roles=roles)
         for message in self.messages.distinct('author'):
             author = message.author

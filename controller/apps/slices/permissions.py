@@ -6,7 +6,7 @@ from .models import Slice, Sliver, SliceProp, SliverProp, Template, SliverIface
 
 
 class SlicePermission(Permission):
-    admins = ('admin', 'researcher')
+    admins = ('group_admin', 'slice_admin')
     
     def view(self, obj, cls, user):
         return True

@@ -339,10 +339,10 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
 
 class QueueAdmin(PermissionModelAdmin):
     list_display = [
-        'name', 'default', 'notify_admins', 'notify_technicians',
-        'notify_researchers', 'num_tickets'
+        'name', 'default', 'notify_group_admins', 'notify_node_admins',
+        'notify_slice_admins', 'num_tickets'
     ]
-    list_editable = ('notify_admins', 'notify_technicians', 'notify_researchers')
+    list_editable = ('notify_group_admins', 'notify_node_admins', 'notify_slice_admins')
     actions = [set_default_queue]
     inlines = [TicketInline]
     ordering = ['name']

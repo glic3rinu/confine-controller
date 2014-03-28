@@ -112,9 +112,9 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         form = super(NodeAdmin, self).get_form(request, obj=obj, *args, **kwargs)
         if 'group' in form.base_fields:
             # ronly forms doesn't have initial nor queryset
-            is_admin = Q(users__roles__is_admin=True)
-            is_technician = Q(users__roles__is_technician=True)
-            query = Q( is_admin | is_technician )
+            is_group_admin = Q(users__roles__is_group_admin=True)
+            is_node_admin = Q(users__roles__is_node_admin=True)
+            query = Q( is_group_admin | is_node_admin )
             query = Q( query & Q(allow_nodes=True) )
             form = filter_group_queryset(form, obj, request.user, query)
         if (obj is not None and obj.set_state == obj.FAILURE and

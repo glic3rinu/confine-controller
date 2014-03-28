@@ -114,9 +114,9 @@ class Node(models.Model):
                       'for the full description of set states and possible transitions.')
     group = models.ForeignKey('users.Group', related_name='nodes',
             help_text='The group this node belongs to. The user creating this node '
-                      'must be an administrator or technician of this group, and the '
+                      'must be a group or node administrator of this group, and the '
                       'group must have node creation allowed (/allow_nodes=true). '
-                      'Administrators and technicians in this group are able to '
+                      'Node and group administrators in this group are able to '
                       'manage this node.')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='An optional island used to hint where the node is located '

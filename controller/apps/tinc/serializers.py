@@ -28,7 +28,7 @@ class TincHostSerializer(serializers.ModelSerializer):
 class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfSerializer()
-    tinc = TincHostSerializer()
+    tinc = TincHostSerializer(required=False)
     
     class Meta:
         model = Gateway
@@ -37,12 +37,12 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
 class HostSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfSerializer()
-    tinc = TincHostSerializer()
+    tinc = TincHostSerializer(required=False)
     
     class Meta:
         model = Host
 
 
 # Aggregate tinc to the Server and Node API
-api.aggregate(Server, TincHostSerializer, name='tinc')
-api.aggregate(Node, TincHostSerializer, name='tinc')
+api.aggregate(Server, TincHostSerializer, name='tinc', required=False)
+api.aggregate(Node, TincHostSerializer, name='tinc', required=False)

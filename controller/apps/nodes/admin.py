@@ -126,9 +126,15 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         return form
     
     def queryset(self, request):
-        """ Annotate direct iface counter to allow ordering on change list """
+        """
+        Annotate direct iface and slivers counter to allow ordering
+        on change list. Intercept search query to allow search nodes
+        by management network IP
+        """
         qs = super(NodeAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('direct_ifaces', distinct=True))
+        # FIXME: try to move to slices to avoid coupling nodes with slices app
+        qs = qs.annotate(models.Count('slivers', distinct=True))
         # HACK for searching nodes by IP
         search = request.GET.get('q', False)
         if search:

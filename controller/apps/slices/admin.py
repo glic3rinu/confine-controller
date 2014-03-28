@@ -652,16 +652,5 @@ admin.site.register(Template, TemplateAdmin)
 
 # Monkey-Patching Section
 
-node_modeladmin = get_modeladmin(Node)
-old_queryset = node_modeladmin.queryset
-
-def queryset(request):
-    """ Annotate number of slivers for sorting on node changelist """
-    qs = old_queryset(request)
-    qs = qs.annotate(models.Count('slivers', distinct=True))
-    return qs
-
-node_modeladmin.queryset = queryset
-
 insertattr(Node, 'list_display', num_slivers)
 insertattr(Node, 'inlines', SliverNodeInline, weight=5)

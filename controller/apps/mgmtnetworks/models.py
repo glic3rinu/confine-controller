@@ -30,7 +30,7 @@ class MgmtNetConf(models.Model):
     
     def __unicode__(self):
         return u'%s_%s' % (self.content_type.model, self.object_id)
-
+    
     @classmethod
     def reverse(cls, ip_addr):
         from .utils import reverse
@@ -57,7 +57,14 @@ class MgmtNetConf(models.Model):
             ipv6_words.extend(['0', '2000'])
             ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
             return IP(':'.join(ipv6_words))
-
+    
+    def is_configured(self):
+        # FIXME: update code on refactor tinc: pubkey is MANDATORY!
+        if self.backend == MgmtNetConf.TINC:
+            return bool(self.content_object.tinc.pubkey)
+        else: # native
+            return True
+    
     ## backwards compatibility #157
     def tinc_client(self):
         if self.content_type.model in ['server', 'gateway']:
@@ -70,22 +77,17 @@ class MgmtNetConf(models.Model):
         return self.tinc()
 
     def tinc(self):
-        ## TODO: include TincAddresses on tinc_server
-        return {
-            'name': self.content_object.tinc.name,
-            'pubkey': self.content_object.tinc.pubkey
-        }
+        return self.content_object.tinc
 
     def native(self):
         return None
-
 
 # Monkey-Patching Section
 
 @property
 def mgmt_net(self):
     ct = ContentType.objects.get_for_model(self)
-    obj, __ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
+    obj = MgmtNetConf.objects.get(object_id=self.pk, content_type=ct)
     return obj
 
 for model in [Node, Server]:

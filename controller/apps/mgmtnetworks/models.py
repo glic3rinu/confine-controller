@@ -69,7 +69,7 @@ class MgmtNetConf(models.Model):
     
     def is_configured(self):
         if self.backend == MgmtNetConf.TINC:
-            return bool(self.content_object.tinc)
+            return bool(self.content_object.tinc.pubkey)
         else: # native
             return True
     
@@ -89,7 +89,6 @@ class MgmtNetConf(models.Model):
 
     def native(self):
         return None
-
 
 # Monkey-Patching Section
 

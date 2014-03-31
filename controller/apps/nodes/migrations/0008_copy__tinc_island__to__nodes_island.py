@@ -19,10 +19,16 @@ class Migration(DataMigration):
         for island in orm['tinc.Island'].objects.all().values():
             orm['nodes.Island'].objects.create(**island)
 
+        # Update auto id sequence
+        db.execute("SELECT setval('nodes_island_id_seq', (SELECT MAX(id) FROM nodes_island))")
+
     def backwards(self, orm):
         # Copy nodes.Island objects to tinc.Island
         for island in orm['nodes.Island'].objects.all().values():
             orm['tinc.Island'].objects.create(**island)
+
+        # Update auto id sequence
+        db.execute("SELECT setval('tinc_island_id_seq', (SELECT MAX(id) FROM tinc_island))")
 
 
     models = {

@@ -13,6 +13,7 @@ from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
 from mgmtnetworks.models import MgmtNetConf, get_mgmt_net
 from nodes.models import Server, Node
+from pki import Bob
 
 from . import settings
 from .tasks import update_tincd

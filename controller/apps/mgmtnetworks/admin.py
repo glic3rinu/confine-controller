@@ -7,18 +7,13 @@ from permissions.admin import PermissionGenericTabularInline
 from .models import MgmtNetConf
 
 class MgmtNetConfInline(PermissionGenericTabularInline):
-    fields = ['backend', 'addr']
-    readonly_fields = ('addr',)
+    fields = ['backend', 'address']
+    readonly_fields = ('address',)
     model = MgmtNetConf
     max_num = 1
     can_delete = False
     verbose_name_plural = 'management network'
 
     def address(self, obj):
-        return obj.addr
+        return obj.addr.strNormal()
 
-
-# Monkey-Patching Section
-
-for model in [Node, Server]:
-    insertattr(model, 'inlines', MgmtNetConfInline, weight=-5)

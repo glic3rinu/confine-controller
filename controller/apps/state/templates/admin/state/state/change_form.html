@@ -6,7 +6,7 @@
     {% if item.always_display or has_change_permission %}
     {% if 'pings'|isinstalled %}
         {% if obj_opts.app_label == 'nodes' %}
-            <li><a href="{% url 'admin:pings_ping_ping' original.content_object.tinc|content_type original.content_object.tinc.pk %}">Pings</a></li>
+            <li><a href="{% url 'admin:pings_ping_ping' original.content_object.mgmt_net|content_type original.content_object.mgmt_net.pk %}">Pings</a></li>
         {% elif obj_opts.app_label == 'slices' and original.content_object.mgmt_iface %}
             <li><a href="{% url 'admin:pings_ping_ping' original.content_object.mgmt_iface|content_type original.content_object.mgmt_iface.pk %}">Pings</a></li>
         {% endif %}

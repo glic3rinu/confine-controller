@@ -13,6 +13,7 @@ from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
 from mgmtnetworks.models import MgmtNetConf
 from nodes.models import Server, Node
+from pki import Bob
 
 from . import settings
 from .tasks import update_tincd
@@ -51,21 +52,25 @@ class Host(models.Model):
 class TincHostQuerySet(models.query.QuerySet):
     def hosts(self, *args, **kwargs):
         server_ct = ContentType.objects.get_for_model(Server)
-        return self.filter(content_type=server_ct).filter(*args, **kwargs)
+        return self.exclude(content_type=server_ct).filter(*args, **kwargs)
         
     def gateways(self, *args, **kwargs):
         gateway_ct = ContentType.objects.get_for_model(Gateway)
         return self.filter(content_type=gateway_ct).filter(*args, **kwargs)
 
+    def servers(self, *args, **kwargs):
+        server_ct = ContentType.objects.get_for_model(Server)
+        return self.filter(content_type=server_ct).filter(*args, **kwargs)
+
 
 class TincHost(models.Model):
     """
-    Base class that describes the basic attributs of a Tinc Host.
-    A Tinc Host could be a Server or a Client.
-    """
-    """
-    Describes a Tinc Server in the testbed. A Tinc Server can be a Gateway or 
-    the testbed server itself.
+    Describes a Tinc Host in the testbed. Includes the tinc backend
+    configuration data for this host. Unlike previous versions, there
+    aren't separate classes for tinc clients and tinc servers. Now the
+    unique difference is that the tinc hosts acting as servers have a
+    non empty array of addresses.
+
     """
     pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
@@ -96,19 +101,28 @@ class TincHost(models.Model):
         defer(update_tincd.delay)
 
     @property
+    def address(self):
+        return self.content_object.mgmt_net.addr
+    
+    @property
     def subnet(self):
-        if self.obj.content_type.model == 'node':
+        if self.content_type.model == 'node':
             return self.address.make_net(64)
-        else: #self.obj.content_type.model == [host|server|gateway]
+        else: #self.content_type.model == [host|server|gateway]
             return self.address
 
     @property
     def connect_to(self):
-        """ Returns all active TincHosts to use on tincd ConnectTo """
-        ## TODO: filter Server or Gateway?? NOT SURE IF THAT IS VALID
-        return self.objects.filter(addresses__isnull=False)
+        """
+        Returns all active TincHosts to use on tincd ConnectTo.
+        Only instances with addresses can be act as servers.
+        """
+        # XXX trust testbed nodes that want to act as tinc servers?
+        # XXX decouple tinc arch from testbed arch
+        #return TincHost.objects.filter(addresses__isnull=False).distinct()
+        return TincHost.objects.servers()
     
-    def get_host(self, island=None): # FIXME Refactor according #264?
+    def get_host(self, island=None):
         ct_model = self.content_type.model
         if ct_model == 'node' or ct_model == 'host':
             # Returns tincd hosts file content
@@ -135,6 +149,9 @@ class TincHost(models.Model):
         """
         Returns client tinc.conf file content, prioritizing island related gateways
         """
+        # FIXME: refactor according to #157 (separate tinc client/server
+        # from testbed nodes/servers). E.g. a testbed client (node) can act
+        # as tinc server and a testbed server as tinc client.
         if self.content_type.model in ['server', 'gateway']:
             raise TypeError("Cannot get_config from a server or gateway")
         config = ["Name = %s" % self.name]

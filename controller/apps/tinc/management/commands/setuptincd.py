@@ -142,7 +142,7 @@ class Command(BaseCommand):
         r("chmod +x %(net_root)s/tinc-up" % context)
         r("chmod +x %(net_root)s/tinc-down" % context)
         
-        TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address,
+        TincAddress.objects.get_or_create(host=tinc_server, addr=tinc_address,
                 port=tinc_port)
         
         priv_key = os.path.join(TINC_TINCD_ROOT, tinc_net_name, 'rsa_key.priv')

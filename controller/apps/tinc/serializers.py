@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from api import api, serializers
 from nodes.models import Server, Node
-from mgmtnetworks.serializers import MgmtNetConfSerializer
+from mgmtnetworks.serializers import MgmtNetConfRelatedField
 
 from .models import TincAddress, TincHost, Gateway, Host
 
@@ -16,6 +16,7 @@ class TincAddressSerializer(serializers.ModelSerializer):
 
 
 class TincHostSerializer(serializers.ModelSerializer):
+    """ TincHost readonly serializer """
     name = serializers.CharField(read_only=True)
     pubkey = serializers.CharField(required=True)
     addresses = TincAddressSerializer()
@@ -25,10 +26,33 @@ class TincHostSerializer(serializers.ModelSerializer):
         exclude = ('object_id', 'content_type', 'id')
 
 
+class TincHostRelatedField(serializers.RelatedField):
+    """ TincHost writable serializer """
+    read_only = False
+    
+    def to_native(self, value):
+        """ Convert to serialized fields """
+        try:
+            # GenericRelation
+            tinc = value.first()
+        except AttributeError:
+            # MgmtNetConf object
+            tinc = value
+        if tinc is None:
+            return {}
+        return TincHostSerializer(tinc).to_native(tinc)
+    
+    def from_native(self, data):
+        """ Return a list of management network objects """
+        tinc_host = TincHost(pubkey=data.get('pubkey'))
+        tinc_host.full_clean(exclude=['content_type', 'object_id'])
+        return [tinc_host]
+
+
 class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    mgmt_net = MgmtNetConfSerializer()
-    tinc = TincHostSerializer(required=False)
+    mgmt_net = MgmtNetConfRelatedField(source='related_mgmtnet')
+    tinc = TincHostRelatedField(source='related_tinc', required=False)
     
     class Meta:
         model = Gateway
@@ -36,13 +60,13 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
 
 class HostSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    mgmt_net = MgmtNetConfSerializer()
-    tinc = TincHostSerializer(required=False)
+    mgmt_net = MgmtNetConfRelatedField(source='related_mgmtnet')
+    tinc = TincHostRelatedField(source='related_tinc', required=False)
     
     class Meta:
         model = Host
 
 
 # Aggregate tinc to the Server and Node API
-api.aggregate(Server, TincHostSerializer, name='tinc', required=False)
-api.aggregate(Node, TincHostSerializer, name='tinc', required=False)
+api.aggregate(Server, TincHostRelatedField, name='tinc', source='related_tinc', required=False)
+api.aggregate(Node, TincHostRelatedField, name='tinc', source='related_tinc', required=False)

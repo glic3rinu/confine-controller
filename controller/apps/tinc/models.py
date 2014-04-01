@@ -30,7 +30,7 @@ class Host(models.Model):
             help_text='The user who administrates this host (its creator by default)')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             help_text='An optional island used to hint where this tinc client reaches to.')
-    related_tinchost = generic.GenericRelation('tinc.TincHost')
+    related_tinc = generic.GenericRelation('tinc.TincHost')
     related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
     
     def __unicode__(self):
@@ -197,7 +197,7 @@ class Gateway(models.Model):
     different parts of a management network located at different islands over 
     some link external to them (e.g. the Internet).
     """
-    related_tinchost = generic.GenericRelation('tinc.TincHost')
+    related_tinc = generic.GenericRelation('tinc.TincHost')
     related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
     description = models.CharField(max_length=256,
             help_text='Free-form textual description of this gateway.')
@@ -257,9 +257,9 @@ def tinc(self):
     obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
-Node.add_to_class('related_tinchost', generic.GenericRelation('tinc.TincHost'))
+Node.add_to_class('related_tinc', generic.GenericRelation('tinc.TincHost'))
 Node.add_to_class('tinc', tinc)
 
 # Hook TincHost support to Server
-Server.add_to_class('related_tinchost', generic.GenericRelation('tinc.TincHost'))
+Server.add_to_class('related_tinc', generic.GenericRelation('tinc.TincHost'))
 Server.add_to_class('tinc', tinc)

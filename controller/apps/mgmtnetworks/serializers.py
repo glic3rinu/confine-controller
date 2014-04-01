@@ -71,20 +71,9 @@ class MgmtNetConfRelatedField(serializers.RelatedField):
     
     def from_native(self, data):
         """ Return a list of management network objects """
-        data = self.validate(data)
-        return [MgmtNetConf(backend=data.get('backend'))]
-    
-    def validate(self, data):
-        value = data.get('backend', None)
-        
-        # FIXME remove this hack for compatibility with not yet updated tests
-        if value in ['tinc_client', 'tinc_server']:
-            value = 'tinc'
-        # XXX end hack
-        
-        if value not in [backend[0] for backend in MgmtNetConf.BACKENDS]:
-            raise serializers.ValidationError("Invalid value provided as backend '%s'." % value)
-        return data
+        mgmt_net = MgmtNetConf(backend=data.get('backend'))
+        mgmt_net.full_clean(exclude=['content_type', 'object_id'])
+        return [mgmt_net]
 
 
 # Aggregate mgmt_network to the API

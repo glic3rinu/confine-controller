@@ -72,7 +72,7 @@ class TincHost(models.Model):
     non empty array of addresses.
 
     """
-    pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
+    pubkey = RSAPublicKeyField('public Key', unique=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()

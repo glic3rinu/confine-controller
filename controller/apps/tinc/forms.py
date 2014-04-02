@@ -1,40 +1,38 @@
 from django import forms
-from django.core.urlresolvers import reverse
-from django.utils.safestring import mark_safe
-
-from controller.forms.widgets import ShowText
+from django.contrib.contenttypes.generic import BaseGenericInlineFormSet
+from django.core.exceptions import ValidationError
 
 from .models import TincHost
 
+class TincHostInlineFormSet(BaseGenericInlineFormSet):
+    def clean(self):
+        cleaned_data = super(TincHostInlineFormSet, self).clean()
+        
+        is_blank = len(self.forms) == 0 or self.forms[0].cleaned_data == {}
+        
+        # Check if tinc configuration is provided if necessary
+        # but allow create an instance missconfigured
+        # FIXME: doesn't work if mgmt_net.backend changed from 'native' to 'tinc'
+        # because hasn't be saved yet
+        if (self.instance.pk and
+            self.instance.mgmt_net.backend == 'tinc' and
+            is_blank):
+            raise ValidationError("Please provide tinc backend configuration. "
+                                  "Required because 'tinc' is choosed as "
+                                  "management network backend.")
+        return cleaned_data
 
 class TincHostInlineForm(forms.ModelForm):
-    clear_pubkey = forms.BooleanField(label='Clear pubkey', required=False,
-        help_text="Select if you want to delete the current public key for adding "
-                  "a new one")
-
     class Meta:
         model = TincHost
-    
-    def save(self, commit=True):
-        if self.cleaned_data['clear_pubkey']:
-            self.instance.pubkey = None
-        super(TincHostInlineForm, self).save(commit=commit)
 
+    def clean(self):
+        cleaned_data = super(TincHostInlineForm, self).clean()
 
-class HostInlineAdminForm(forms.ModelForm):
-    host = forms.CharField(label="Host", widget=ShowText(bold=True))
-    pk = forms.CharField(label="ID", widget=ShowText(bold=True))
-    tinc_name = forms.CharField(label="Tinc Name", widget=ShowText())
-    
-    class Meta:
-        fields = []
-    
-    def __init__(self, *args, **kwargs):
-        super(HostInlineAdminForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
-            instance = kwargs['instance']
-            host_change = reverse('admin:tinc_host_change', args=(instance.pk,))
-            self.initial['host'] = mark_safe("""<a href='%s' id='add_id_user' 
-                onclick='return showAddAnotherPopup(this);'>%s </a>""" % (host_change, instance))
-            self.initial['pk'] = instance.pk
-            self.initial['tinc_name'] = instance.tinc.name
+        # check if tinc configuration can be deleted
+        if (cleaned_data.get('DELETE', None) and
+            self.instance.content_object.mgmt_net.backend == 'tinc'):
+            raise ValidationError("Please provide tinc backend configuration. "
+                                  "Required because 'tinc' is choosed as "
+                                  "management network backend.")
+        return cleaned_data

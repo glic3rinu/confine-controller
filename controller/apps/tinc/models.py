@@ -11,12 +11,21 @@ from controller.models.fields import RSAPublicKeyField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
-from mgmtnetworks.models import MgmtNetConf
+from mgmtnetworks.models import MgmtNetConf, get_mgmt_net
 from nodes.models import Server, Node
 from pki import Bob
 
 from . import settings
 from .tasks import update_tincd
+
+def get_tinc(self):
+    """ Get tinc object if exists or None otherwise """
+    ct = ContentType.objects.get_for_model(self)
+    try:
+        obj = TincHost.objects.get(object_id=self.pk, content_type=ct)
+    except TincHost.DoesNotExist:
+        obj = None
+    return obj
 
 
 class Host(models.Model):
@@ -32,21 +41,12 @@ class Host(models.Model):
             help_text='An optional island used to hint where this tinc client reaches to.')
     related_tinc = generic.GenericRelation('tinc.TincHost')
     related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
+
+    tinc = property(get_tinc)
+    mgmt_net = property(get_mgmt_net)
     
     def __unicode__(self):
         return self.description
-    
-    @property
-    def tinc(self):
-        ct = ContentType.objects.get_for_model(self)
-        obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
-        return obj
-    
-    @property
-    def mgmt_net(self):
-        ct = ContentType.objects.get_for_model(self)
-        obj, __ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
-        return obj
 
 
 class TincHostQuerySet(models.query.QuerySet):
@@ -72,7 +72,7 @@ class TincHost(models.Model):
     non empty array of addresses.
 
     """
-    pubkey = RSAPublicKeyField('public Key', blank=True, null=True, unique=True,
+    pubkey = RSAPublicKeyField('public Key', unique=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
@@ -201,18 +201,9 @@ class Gateway(models.Model):
     related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
     description = models.CharField(max_length=256,
             help_text='Free-form textual description of this gateway.')
-    
-    @property
-    def tinc(self):
-        ct = ContentType.objects.get_for_model(self)
-        obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
-        return obj
-    
-    @property
-    def mgmt_net(self):
-        ct = ContentType.objects.get_for_model(self)
-        obj, __ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
-        return obj
+
+    tinc = property(get_tinc)
+    mgmt_net = property(get_mgmt_net)
 
 
 class TincAddress(models.Model):
@@ -249,13 +240,9 @@ class TincAddress(models.Model):
 
 
 # Monkey-Patching Section
+tinc = property(get_tinc)
 
 # Hook TincHost support to Node
-@property
-def tinc(self):
-    ct = ContentType.objects.get_for_model(self)
-    obj, __ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
-    return obj
 
 Node.add_to_class('related_tinc', generic.GenericRelation('tinc.TincHost'))
 Node.add_to_class('tinc', tinc)

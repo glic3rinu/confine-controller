@@ -8,6 +8,13 @@ from controller.utils.ip import split_len, int_to_hex_str
 from nodes.models import Node, Server
 
 
+def get_mgmt_net(self):
+    """ Getter for management network generic relation """
+    ct = ContentType.objects.get_for_model(self)
+    obj = MgmtNetConf.objects.get(object_id=self.pk, content_type=ct)
+    return obj
+
+
 class MgmtNetConf(models.Model):
     TINC = 'tinc'
     NATIVE = 'native'
@@ -84,11 +91,7 @@ class MgmtNetConf(models.Model):
 
 # Monkey-Patching Section
 
-@property
-def mgmt_net(self):
-    ct = ContentType.objects.get_for_model(self)
-    obj = MgmtNetConf.objects.get(object_id=self.pk, content_type=ct)
-    return obj
+mgmt_net = property(get_mgmt_net)
 
 for model in [Node, Server]:
     model.add_to_class('related_mgmtnet', generic.GenericRelation('mgmtnetworks.MgmtNetConf'))

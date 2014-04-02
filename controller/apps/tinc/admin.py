@@ -15,7 +15,7 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincHostInlineForm
+from .forms import TincHostInlineFormSet, TincHostInlineForm
 from .models import Host, TincHost, TincAddress, Gateway
 from . import settings
 
@@ -24,12 +24,15 @@ class TincHostInline(PermissionGenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     # TODO warn user when it tries to modify a tinchost with depends on more than 
     #      one client without alternative path
-    fields = ['pubkey', 'clear_pubkey']
+    fields = ['pubkey']
     model = TincHost
+    formset = TincHostInlineFormSet
     form = TincHostInlineForm
+    extra = 0
     max_num = 1
-    can_delete = False
-    verbose_name_plural = 'tinc'
+    can_delete = True
+    verbose_name = 'tinc configuration'
+    verbose_name_plural = 'tinc configuration'
     
     class Media:
         css = {
@@ -38,16 +41,10 @@ class TincHostInline(PermissionGenericTabularInline):
                 'controller/css/hide-inline-id.css')
         }
     
-    def get_readonly_fields(self, request, obj=None):
-        """ pubkey as readonly if exists """
-        readonly_fields = super(TincHostInline, self).get_readonly_fields(request, obj=obj)
-        if obj and obj.tinc.pubkey and 'pubkey' not in readonly_fields:
-            return ('pubkey',) + readonly_fields
-        return readonly_fields
-    
     def get_formset(self, request, obj=None, **kwargs):
         """ Warning user if the tinc host is not fully configured """
-        if obj and not obj.tinc.pubkey and request.method == 'GET':
+        if (obj and obj.mgmt_net.backend == 'tinc' and obj.tinc is None and
+            request.method == 'GET'):
             msg = 'This %s misses a tinc public key.' % obj._meta.verbose_name
             messages.warning(request, msg)
         return super(TincHostInline, self).get_formset(request, obj=obj, **kwargs)

@@ -1,4 +1,4 @@
-{% if subject %}New resource request for group{{ request.group.name }}{% endif %}
+{% if subject %}New resource request for group {{ request.group.name }}{% endif %}
 {% if message %}Dear operator,
 group {{ request.group.name }} has requested {{ request.resource }} resources.
 
@@ -6,5 +6,5 @@ The following URL allows you to process this request:
 https://{{ site }}{% url 'admin:users_group_change' request.group.pk %}
 
 Have a nice day,
-Controller server.
+OPs team.
 {% endif %}

@@ -19,6 +19,22 @@
     </ul>
     <div style="margin-bottom:20px; margin-top:30px;">
     <fieldset class="module aligned">
+    {% if build.kwargs_dict.usb_image %}{# usb plug-in #}
+        <h2>USB-installer instructions</h2>
+        <h4>Write the image to a USB drive</h4>
+        <ol>
+            <li>Plug a USB stick in your computer.</li>
+            <li>Write the image into the USB (Warning: <strong>change sdX for
+                the USB device</strong> (something like sdb):
+            {% code 'bash'%}gunzip <image.bin.gz> -c | dd of=/dev/sdX bs=4M ; sync{% endcode %}
+            </li>
+        </ol>
+        <h4>Install the firmware image</h4>
+        <ol>
+            <li>Plug the USB stick in the research device</li>
+            <li>Boot the RD (the installation will start automatically)</li>
+        </ol>
+    {% else %}{# standar instrucctions #}
         <h2>Instructions</h2>
         <h4>Upload the firmware image</h4>
         <p>The firmware can be dowloaded from this page into your computer. Then upload the firmware to the node, for instance by using <code>scp</code> to copy the image into the node's temporary directory:</p>
@@ -43,6 +59,7 @@ confine.sysupgrade -n {{ build.image_name }}{% endcode %}</li>
         </ol>
 
         <p>The CONFINE wiki contains more information on <a href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a>.</p>
+    {% endif %}{# end instructions #}
     </fieldset>
     </div>
     </ul>

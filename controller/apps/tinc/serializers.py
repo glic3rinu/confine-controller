@@ -28,6 +28,7 @@ class TincHostSerializer(serializers.ModelSerializer):
 
 class TincHostRelatedField(serializers.RelatedField):
     """ TincHost writable serializer """
+    default = [] # override default when field no provided
     read_only = False
     
     def to_native(self, value):
@@ -36,17 +37,19 @@ class TincHostRelatedField(serializers.RelatedField):
             # GenericRelation
             tinc = value.first()
         except AttributeError:
-            # MgmtNetConf object
+            # TincHost object
             tinc = value
         if tinc is None:
             return {}
         return TincHostSerializer(tinc).to_native(tinc)
     
     def from_native(self, data):
-        """ Return a list of management network objects """
-        tinc_host = TincHost(pubkey=data.get('pubkey'))
-        tinc_host.full_clean(exclude=['content_type', 'object_id'])
-        return [tinc_host]
+        """ Return a list of tinc configuration objects """
+        if data:
+            tinc_host = TincHost(pubkey=data.get('pubkey'))
+            tinc_host.full_clean(exclude=['content_type', 'object_id'])
+            return [tinc_host]
+        return []
 
 
 class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
@@ -58,11 +61,17 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
         model = Gateway
 
 
-class HostSerializer(serializers.UriHyperlinkedModelSerializer):
+class HostCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfRelatedField(source='related_mgmtnet')
     tinc = TincHostRelatedField(source='related_tinc', required=False)
     
+    class Meta:
+        model = Host
+        exclude = ('owner',)
+
+
+class HostSerializer(HostCreateSerializer):
     class Meta:
         model = Host
 

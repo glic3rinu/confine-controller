@@ -76,7 +76,8 @@ class GatewayAdmin(PermissionModelAdmin):
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('owner'), 'address', 'island']
+    list_display = ['description', 'id', admin_link('owner'), 'address',
+        admin_link('island')]
     inlines = [MgmtNetConfInline, TincHostInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"

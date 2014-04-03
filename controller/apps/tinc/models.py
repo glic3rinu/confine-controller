@@ -33,8 +33,8 @@ class Host(models.Model):
     Describes an odd host computer connected to the testbed (through the 
     management network) with a known administrator.
     """
-    description = models.CharField(max_length=256,
-            help_text='Free-form textual description of this host.')
+    description = models.CharField(max_length=256, null=True, blank=True,
+            help_text='An optional free-form textual description of this host.')
     owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
             help_text='The user who administrates this host (its creator by default)')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,

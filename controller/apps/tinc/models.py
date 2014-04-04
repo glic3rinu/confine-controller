@@ -84,7 +84,9 @@ class TincHost(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        if self.content_type.model == 'server':
+        if not hasattr(self, 'content_type'):
+            return u'tinc_%s' % self.object_id
+        if self.content_type.model == 'server': # FIXME on #236 multi-server
             return 'server'
         return u'%s_%s' % (self.content_type.model, self.object_id)
     

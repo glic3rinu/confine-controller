@@ -52,7 +52,8 @@ class TincHostRelatedField(serializers.RelatedField):
         return []
 
 
-class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
+class GatewaySerializer(serializers.UriHyperlinkedModelSerializer,
+                        serializers.MgmtNetComponentModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfRelatedField(source='related_mgmtnet')
     tinc = TincHostRelatedField(source='related_tinc', required=False)
@@ -61,7 +62,8 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
         model = Gateway
 
 
-class HostCreateSerializer(serializers.UriHyperlinkedModelSerializer):
+class HostCreateSerializer(serializers.UriHyperlinkedModelSerializer,
+                           serializers.MgmtNetComponentModelSerializer):
     id = serializers.Field()
     mgmt_net = MgmtNetConfRelatedField(source='related_mgmtnet')
     tinc = TincHostRelatedField(source='related_tinc', required=False)

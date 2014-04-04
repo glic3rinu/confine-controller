@@ -36,7 +36,9 @@ class MgmtNetConf(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        return u'%s_%s' % (self.content_type.model, self.object_id)
+        if hasattr(self, 'content_type'):
+            return u'%s_%s' % (self.content_type.model, self.object_id)
+        return u'mgmtnet_%s' % self.backend
     
     @classmethod
     def reverse(cls, ip_addr):

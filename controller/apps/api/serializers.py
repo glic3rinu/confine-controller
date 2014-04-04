@@ -160,3 +160,22 @@ class DynamicReadonlyFieldsModelSerializer(UriHyperlinkedModelSerializer):
         for field_name in ro_fields:
             self.fields[field_name].read_only = True
  
+class MgmtNetComponentModelSerializer(ModelSerializer):
+    """
+    Provides generic validation for components (nodes, servers, hosts)
+    connected to the management network. Checking if a tinc configuration
+    is provided when tinc is the backend.
+
+    """
+    def validate(self, attrs):
+        """
+        Check that tinc configuration is provided when tinc is
+        provided as management network backend.
+
+        """
+        mgmt_net = attrs.get('related_mgmtnet')[0]
+        related_tinc = attrs.get('related_tinc', [])
+        if mgmt_net.backend == 'tinc' and len(related_tinc) == 0:
+            error_msg = "This field is required if you choose 'tinc' as management network backend!"
+            raise ValidationError({"tinc": [error_msg]})
+        return attrs

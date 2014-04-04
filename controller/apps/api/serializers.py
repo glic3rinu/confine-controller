@@ -173,6 +173,9 @@ class MgmtNetComponentModelSerializer(ModelSerializer):
         provided as management network backend.
 
         """
+        # PATCH requests may not include mandatory fields
+        if 'related_mgmtnet' not in attrs:
+            return attrs
         mgmt_net = attrs.get('related_mgmtnet')[0]
         related_tinc = attrs.get('related_tinc', [])
         if mgmt_net.backend == 'tinc' and len(related_tinc) == 0:

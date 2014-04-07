@@ -57,7 +57,18 @@ class Execution(models.Model):
         ordering = ['-created_on']
     
     def __unicode__(self):
-        num = self.operation.executions.filter(pk__lte=self.pk).count()
+        """
+        Unicode execution representation. Show the instance ordinal
+        number relative to the existent executions for this operation.
+        
+        """
+        if self.pk:
+            num = self.operation.executions.filter(pk__lte=self.pk).count()
+        else:
+            try:
+                num = self.operation.executions.count()
+            except Operation.DoesNotExist:
+                return u""
         return u"%s#%i" % (self.operation.identifier, num)
     
     def revoke(self):

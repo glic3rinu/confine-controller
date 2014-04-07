@@ -31,15 +31,14 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
         'model': 'mgmtnetworks.MgmtNetConf',
         'app': 'mgmtnetworks',
         'admin_classes': (
-             ('MgmtNetConfInline', 'address', '', 'content_object'),
+            ('MgmtNetConfInline', 'address', '', 'content_object'),
         ),
         'get_addr': lambda obj: getattr(obj, 'addr'),
-   }, {
-        # XXX FIXME address appears as None!?!
+    }, {
         'model': 'tinc.Host',
         'app': 'tinc',
         'admin_classes': (
-             ('HostAdmin', 'address', '', 'mgmt_net'),
+             ('HostAdmin', 'address', 'mgmt_net', ''),
         ),
         'get_addr': lambda obj: getattr(obj, 'addr'),
     }, {

@@ -7,7 +7,7 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        """ Nothing to do because username becames optional """
+        """ Nothing to do because username became optional """
         pass
 
     def backwards(self, orm):

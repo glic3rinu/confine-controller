@@ -245,7 +245,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     display_owner.admin_order_field = 'owner'
     
     def unbold_id(self, ticket):
-        """ Unbold id if thicket is readed """
+        """ Unbold id if ticket is read """
         if ticket.is_read_by(self.user):
             return '<span style="font-weight:normal;font-size:11px;">%s</span>' % ticket.pk
         return ticket.pk

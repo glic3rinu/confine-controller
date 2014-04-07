@@ -215,11 +215,11 @@ class BuildFile(models.Model):
     
     @property
     def name(self):
-        """ File-like attribute (dutck-typing) """
+        """ File-like attribute (duck-typing) """
         return self.path
     
     def read(self):
-        """ File-like method (dutck-typing) """
+        """ File-like method (duck-typing) """
         return self.content
 
 

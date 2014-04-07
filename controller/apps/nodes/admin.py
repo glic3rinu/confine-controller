@@ -97,7 +97,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     display_cert.help_text = get_help_text(Node, 'cert')
     
     def num_ifaces(self, node):
-        """ Diplay number of direct ifaces, used on changelist """
+        """ Display number of direct ifaces, used on changelist """
         return node.direct_ifaces.count()
     num_ifaces.short_description = 'Ifaces'
     num_ifaces.admin_order_field = 'direct_ifaces__count'

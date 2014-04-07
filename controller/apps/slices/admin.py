@@ -166,7 +166,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
     def queryset(self, request):
-        """ Annotate number of ifaces for future ordering on the changellist """
+        """ Annotate number of ifaces for future ordering on the changelist """
         qs = super(SliverAdmin, self).queryset(request)
         qs = qs.annotate(models.Count('interfaces', distinct=True))
         return qs
@@ -247,7 +247,7 @@ class NodeListAdmin(NodeAdmin):
     add_sliver_link.short_description = 'Add on node'
     
     def display_sliver_pub_ipv4_range(self, instance):
-        """ Show sliver_pub_ipv4_range on changeliste """
+        """ Show sliver_pub_ipv4_range on changelist """
         return instance.sliver_pub_ipv4_range
     display_sliver_pub_ipv4_range.short_description = 'IPv4 Range'
     display_sliver_pub_ipv4_range.admin_order_field = 'sliver_pub_ipv4_range'
@@ -323,7 +323,7 @@ class SliceSliversAdmin(SliverAdmin):
         return form
     
     def save_model(self, request, obj, *args, **kwargs):
-        """ Provde node and slice attributes to obj sliver """
+        """ Provide node and slice attributes to obj sliver """
         obj.node = get_object_or_404(Node, pk=self.node_id)
         slice = get_object_or_404(Slice, pk=self.slice_id)
         obj.slice = slice
@@ -450,7 +450,7 @@ class SliverInline(PermissionTabularInline):
         """ HACK display message using the field name of the inline form """
         if obj is None:
             return [(None, {'fields': ['sliver_note1']})]
-        # The slices is registred: display add button in the inline header
+        # The slices is registered: display add button in the inline header
         if self.has_change_permission(request, obj, view=False):
             add_button = 'Slivers <a href="add_sliver">(Add another sliver)</a>'
             self.verbose_name_plural = mark_safe(add_button)

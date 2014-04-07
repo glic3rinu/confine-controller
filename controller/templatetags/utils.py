@@ -35,7 +35,7 @@ def get(array, index):
 
 @register.simple_tag(name="admin_url", takes_context=True)
 def rest_to_admin_url(context):
-    """ returns the admin equivelent url of the current REST API view """
+    """ returns the admin equivalent url of the current REST API view """
     view = context['view']
     model = getattr(view, 'model', None)
     url = 'admin:index'

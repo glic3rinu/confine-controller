@@ -136,7 +136,7 @@ class BuildAdmin(admin.ModelAdmin):
     task_link.short_description = "Task"
     
     def image_link(self, build):
-        """ Display image url if exsists """
+        """ Display image url if exists """
         try:
             return '<a href=%s>%s</a>' % (build.image.url, build.image_name)
         except:

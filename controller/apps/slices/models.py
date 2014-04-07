@@ -43,7 +43,7 @@ def set_sha256(self, fields):
 
 
 def make_upload_to(field_name, base_path, file_name):
-    """ dynamically generate file names with randomnes for upload_to args """
+    """ dynamically generate file names with randomness for upload_to args """
     def upload_path(instance, filename, base_path=base_path, file_name=file_name,
                     field_name=field_name):
         if not file_name or instance is None:

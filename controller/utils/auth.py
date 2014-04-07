@@ -6,7 +6,7 @@ from controller.utils.apps import is_installed
 
 
 def any_auth_method(condition):
-    """ Enables basic auth autentication in django-private-files conditions """
+    """ Enables basic auth authentication in django-private-files conditions """
     def wrapper(request, obj):
         if request.user.is_anonymous() and 'HTTP_AUTHORIZATION' in request.META:
             auth = request.META['HTTP_AUTHORIZATION'].split()

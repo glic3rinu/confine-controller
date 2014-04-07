@@ -14,7 +14,7 @@ from controller.utils.time import timesince, timeuntil
 
 
 def get_modeladmin(model, import_module=True):
-    """ returns the modeladmin registred for model """
+    """ returns the modeladmin registered for model """
     for k,v in admin.site._registry.iteritems():
         if k is model:
             if v is None and import_module:

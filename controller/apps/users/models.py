@@ -226,7 +226,7 @@ class User(auth_models.AbstractBaseUser):
         return auth_models._user_has_module_perms(self, app_label)
     
     def is_staff(self):
-        """ All users can loggin to the admin interface """
+        """ All users can log in to the admin interface """
         return True
     
     def email_user(self, subject, message, from_email=None):

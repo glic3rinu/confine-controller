@@ -23,7 +23,7 @@ class ResourceAdminInline(PermissionGenericTabularInline):
         js = ('resources/js/collapsed_resources.js',)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
-        """ Readonly resource name but form intput still hidden """
+        """ Readonly resource name but form input still hidden """
         if db_field.name == 'name':
             kwargs['widget'] = VerboseNameShowTextWidget()
         return super(ResourceAdminInline, self).formfield_for_dbfield(db_field, **kwargs)
@@ -42,7 +42,7 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
         js = ('resources/js/collapsed_resource_requests.js',)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
-        """ Readonly resource name but form intput still hidden """
+        """ Readonly resource name but form input still hidden """
         if db_field.name == 'name':
             kwargs['widget'] = VerboseNameShowTextWidget()
         return super(ResourceReqAdminInline, self).formfield_for_dbfield(db_field, **kwargs)

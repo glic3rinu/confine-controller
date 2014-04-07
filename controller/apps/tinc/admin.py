@@ -10,12 +10,12 @@ from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
     wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
 from mgmtnetworks.admin import MgmtNetConfInline
+from mgmtnetworks.forms import MgmtNetDeviceModelForm
 from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincHostInlineFormSet, TincHostInlineForm
 from .models import Host, TincHost, TincAddress, Gateway
 from . import settings
 
@@ -26,7 +26,6 @@ class TincHostInline(PermissionGenericTabularInline):
     #      one client without alternative path
     fields = ['pubkey']
     model = TincHost
-    formset = TincHostInlineFormSet
     form = TincHostInlineForm
     max_num = 1
     can_delete = False
@@ -72,6 +71,7 @@ class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
     inlines = [MgmtNetConfInline, TincHostInline]
+    form = MgmtNetDeviceModelForm
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
@@ -80,6 +80,7 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     inlines = [MgmtNetConfInline, TincHostInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
+    form = MgmtNetDeviceModelForm
     save_and_continue = True
     default_changelist_filters = (('my_hosts', 'True'),)
     

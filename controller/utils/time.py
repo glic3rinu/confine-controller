@@ -8,7 +8,7 @@ from django.utils.timezone import is_aware, utc
 
 
 def timesince(d, now=None, reversed=False):
-    """ Hack to provide second precission under 2 minutes """
+    """ Hack to provide second precision under 2 minutes """
     if not now:
         now = datetime.now(utc if is_aware(d) else None)
     

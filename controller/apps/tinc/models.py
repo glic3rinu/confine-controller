@@ -46,7 +46,7 @@ class Host(models.Model):
     mgmt_net = property(get_mgmt_net)
     
     def __unicode__(self):
-        return self.description
+        return unicode(self.description or self.pk)
 
 
 class TincHostQuerySet(models.query.QuerySet):

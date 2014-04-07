@@ -10,12 +10,12 @@ from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
     wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
 from mgmtnetworks.admin import MgmtNetConfInline
+from mgmtnetworks.forms import MgmtNetDeviceModelForm
 from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter
-from .forms import TincHostInlineFormSet, TincHostInlineForm
 from .models import Host, TincHost, TincAddress, Gateway
 from . import settings
 
@@ -26,8 +26,6 @@ class TincHostInline(PermissionGenericTabularInline):
     #      one client without alternative path
     fields = ['pubkey']
     model = TincHost
-    formset = TincHostInlineFormSet
-    form = TincHostInlineForm
     extra = 0
     max_num = 1
     can_delete = True
@@ -73,20 +71,27 @@ class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
     inlines = [MgmtNetConfInline, TincHostInline]
+    form = MgmtNetDeviceModelForm
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = ['description', 'id', admin_link('owner'), 'address',
+    list_display = ['display_description', 'id', admin_link('owner'), 'address',
         admin_link('island')]
     inlines = [MgmtNetConfInline, TincHostInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
+    form = MgmtNetDeviceModelForm
     save_and_continue = True
     default_changelist_filters = (('my_hosts', 'True'),)
     
     def address(self, instance):
         return instance.mgmt_net.addr
     address.admin_order_field = 'id'
+
+    def display_description(self, instance):
+        return instance.description or None
+    display_description.verbose_name = 'description'
+    display_description.admin_order_field = 'description'
     
     def get_urls(self):
         urls = super(HostAdmin, self).get_urls()

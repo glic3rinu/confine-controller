@@ -159,11 +159,14 @@ def downsample(model):
 
 
 for instance in PING_INSTANCES:
+    # get instance settings based on defaults
+    settings = Ping.get_instance_settings(instance.get('model'))
+    
     # Create periodic tasks
     hour = 2
-    if is_installed(instance.get('app')):
+    if is_installed(instance.get('app')) and settings.get('schedule') > 0:
         name = "pings.%s_ping" % instance.get('app')
-        run_every = instance.get('schedule')
+        run_every = settings.get('schedule')
         
         @periodic_task(name=name, run_every=run_every, expires=run_every)
         def ping_instance(model=instance.get('model')):

@@ -40,7 +40,8 @@ PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
         'admin_classes': (
              ('HostAdmin', 'address', 'mgmt_net', ''),
         ),
-        'get_addr': lambda obj: getattr(obj, 'addr'),
+        'get_addr': lambda obj: getattr(obj.mgmt_net, 'addr'),
+        'schedule': 0, # disabled (handled by mgmtnetworks)
     }, {
         'model': 'slices.SliverIface',
         'app': 'slices',

@@ -28,7 +28,12 @@ class AuthKeysPlugin(FirmwarePlugin):
             
             def __init__(self, *args, **kwargs):
                 super(AuthKeysForm, self).__init__(*args, **kwargs)
-                if keys_path:
+                # load stored authentication keys (#383)
+                if self.node.keys.ssh_auth:
+                    self.fields['auth_keys'].initial = self.node.keys.ssh_auth
+                    self.fields['auth_keys'].help_text += (' <span style="color:red">'
+                        'Loaded stored keys as initial value.</span>')
+                elif keys_path:
                     self.fields['auth_keys'].initial = open(keys_path).read()
             
             def clean_auth_keys(self):
@@ -36,6 +41,9 @@ class AuthKeysPlugin(FirmwarePlugin):
                 for ssh_pubkey in auth_keys.splitlines():
                     if not ssh_pubkey.lstrip().startswith('#'): # ignore comments
                         validate_ssh_pubkey(ssh_pubkey)
+                # store new authentication keys (#383)
+                self.node.keys.ssh_auth = auth_keys
+                self.node.keys.save()
                 return auth_keys
         
         return AuthKeysForm

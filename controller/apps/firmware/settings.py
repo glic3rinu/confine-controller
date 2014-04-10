@@ -24,8 +24,11 @@ FIRMWARE_PLUGINS_USB_IMAGE = getattr(settings, 'FIRMWARE_PLUGINS_USB_IMAGE',
     '%(site_root)s/confine-install.img.gz')
 
 
-FIRMWARE_PLUGINS_PASSWORD_DEFAULT = getattr(settings, 'FIRMWARE_PLUGINS_PASSWORD_DEFAULT',
-    'confine')
+# FIRMWARE DEFAULT PASSWORD REMOVED
+if hasattr(settings, 'FIRMWARE_PLUGINS_PASSWORD_DEFAULT'):
+    import warnings
+    warnings.warn("FIRMWARE_PLUGINS_PASSWORD_DEFAULT setting has been deprecated "
+                  "and is currently unused. You can safely remove it.")
 
 
 auth_keys_path = ''

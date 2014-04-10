@@ -40,6 +40,11 @@ def get_firmware(modeladmin, request, queryset):
     
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
+
+    # Initialize plugin instances and hook node
+    plugins = config.plugins.active()
+    for plugin in plugins:
+        setattr(plugin.instance.form, 'node', node)
     
     context = {
         "title": "Download firmware for your research device %s" % node,
@@ -53,7 +58,7 @@ def get_firmware(modeladmin, request, queryset):
         'node': node,
         'img_form': BaseImageForm(arch=node.arch),
         'opt_form': OptionalFilesForm(prefix='opt'),
-        'plugins': config.plugins.active(),
+        'plugins': plugins,
     }
     
     # No architecture support

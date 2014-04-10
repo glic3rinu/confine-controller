@@ -40,6 +40,7 @@
     {% if plugin.instance.form %}
     <fieldset class="module aligned ">
       <h2>{{ plugin.instance.verbose_name }}</h2>
+        {{ plugin.instance.form.non_field_errors }}
         {% for field in plugin.instance.form %}
         <div class="form-row ">
             <div >

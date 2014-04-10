@@ -10,6 +10,7 @@ from django import template
 from django.conf import settings as project_settings
 from django.core import validators
 from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
 from django.template import Context
 from django.utils.functional import cached_property
@@ -23,7 +24,7 @@ from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
 from controller.utils.functional import cached
-from nodes.models import Server
+from nodes.models import Node, Server
 from nodes.settings import NODES_NODE_ARCHS
 from controller.utils.plugins.models import PluginModel
 from controller.utils.singletons.models import SingletonModel
@@ -431,6 +432,59 @@ class ConfigFileHelpText(models.Model):
 
 class ConfigPlugin(PluginModel):
     config = models.ForeignKey(Config, related_name='plugins')
+
+
+class NodeKeys(models.Model):
+    """ Stores node firmware root password and accepted SSH keys. """
+    ssh_auth = models.TextField('SSH authorized keys', blank=True, null=True,
+            help_text='PEM-encoded RSA public keys allowed for ssh access as root.')
+
+    # MD5SUM hashed password in OpenWRT shadow format
+    ssh_pass = models.CharField(max_length=128, blank=True, null=True)
+
+    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='keys')
+
+    def __unicode__(self):
+        return unicode(self.node)
+    
+    @property
+    def form(self):
+        from django import forms
+        class NodeKeysForm(forms.Form):
+            generate_api = forms.BooleanField(label='Generate API Key', required=False)
+            generate_tinc = forms.BooleanField(label='Generate TINC Key', required=False)
+
+        return NodeKeysForm
+
+
+class NodeBuildFile(models.Model):
+    """
+    Describes a persistent file of a builded image.
+    Allows reusing BuildFiles between firmware builds.
+    """
+    nodekeys = models.ForeignKey('NodeKeys', related_name='files')
+    path = models.CharField(max_length=256)
+    content = models.TextField()
+
+    @property
+    def node(self):
+        return self.nodekeys.node
+
+    ## TODO store and load private keys
+    # /etc/tinc/confine/rsa_key.priv
+    # /etc/uhttpd.crt.pem
+    # /etc/uhttpd.key.pem
+    # api = RSAPrivateKeyField('public Key', blank=True, null=True, unique=True,
+    #         help_text='PEM-encoded RSA private key used on API requests.')
+    # tinc = RSAPrivateKeyField('public Key', blank=True, null=True, unique=True,
+    #         help_text='PEM-encoded RSA private key used on tinc management network.')
+
+
+# Create OneToOne NodeKeys instance on node creation
+@receiver(post_save, sender=Node)
+def create_favorites(sender, instance, created, **kwargs):
+    if created:
+        NodeKeys.objects.create(node=instance)
 
 
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])

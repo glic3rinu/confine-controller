@@ -9,6 +9,7 @@ from django.utils.encoding import force_text
 
 from controller.admin.utils import get_admin_link, get_modeladmin
 
+from .exceptions import ConcurrencyError
 from .forms import ExecutionForm
 from .models import Operation, Instance
 
@@ -86,7 +87,10 @@ kill_instance.verbose_name = 'kill'
 @transaction.atomic
 def run_instance(modeladmin, request, queryset):
     for instance in queryset:
-        instance.run()
+        try:
+            instance.run()
+        except ConcurrencyError:
+            messages.error(request, "Instance '%s' is alreday running." % instance)
 run_instance.url_name = 'run'
 run_instance.verbose_name = 'run'
 

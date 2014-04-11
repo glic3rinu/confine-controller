@@ -264,11 +264,32 @@ class Config(SingletonModel):
                 'value': config_uci.eval_value(node)})
         return uci
     
-    def eval_files(self, node, exclude=[], **kwargs):
+    def eval_files(self, node, generate_keys=True, exclude=[], **kwargs):
         """ Evaluates all ConfigFiles python expressions """
         files = []
+        
+        # handle special case of #383 files
+        key_files = ['/etc/tinc/confine/rsa_key.priv', '/etc/uhttpd.crt.pem', '/etc/uhttpd.key.pem']
+        if not generate_keys:
+            for path in key_files:
+                try:
+                    nb_file = node.files.get(path=path)
+                except node.files.model.DoesNotExist:
+                    pass # not exists a previous value so cannot be restored
+                else:
+                    ## restore and exclude of generation
+                    config = ConfigFile.objects.get(path=path)
+                    exclude.append(config.pk)
+                    files.append(BuildFile(path=nb_file.path, content=nb_file.content, config=config))
+
         for config_file in self.files.active().exclude(pk__in=exclude):
-            files.extend(config_file.get_files(node, files=files, **kwargs))
+            new_files = config_file.get_files(node, files=files, **kwargs)
+            files.extend(new_files)
+            # create or update stored key files
+            if config_file.path in key_files:
+                node_file, _ = node.files.get_or_create(path=config_file.path)
+                node_file.content = new_files[0].content
+                node_file.save()
         return files
     
     def render_uci(self, node, sections=None):
@@ -438,23 +459,12 @@ class NodeKeys(models.Model):
     """ Stores node firmware root password and accepted SSH keys. """
     ssh_auth = models.TextField('SSH authorized keys', blank=True, null=True,
             help_text='PEM-encoded RSA public keys allowed for ssh access as root.')
-
     # MD5SUM hashed password in OpenWRT shadow format
     ssh_pass = models.CharField(max_length=128, blank=True, null=True)
-
     node = models.OneToOneField('nodes.Node', primary_key=True, related_name='keys')
-
+    
     def __unicode__(self):
         return unicode(self.node)
-    
-    @property
-    def form(self):
-        from django import forms
-        class NodeKeysForm(forms.Form):
-            generate_api = forms.BooleanField(label='Generate API Key', required=False)
-            generate_tinc = forms.BooleanField(label='Generate TINC Key', required=False)
-
-        return NodeKeysForm
 
 
 class NodeBuildFile(models.Model):
@@ -462,23 +472,13 @@ class NodeBuildFile(models.Model):
     Describes a persistent file of a builded image.
     Allows reusing BuildFiles between firmware builds.
     """
-    nodekeys = models.ForeignKey('NodeKeys', related_name='files')
-    path = models.CharField(max_length=256)
+    node = models.ForeignKey('nodes.Node', related_name='files')
+    path = models.CharField(max_length=256, unique=True)
     content = models.TextField()
-
-    @property
-    def node(self):
-        return self.nodekeys.node
-
-    ## TODO store and load private keys
-    # /etc/tinc/confine/rsa_key.priv
-    # /etc/uhttpd.crt.pem
-    # /etc/uhttpd.key.pem
-    # api = RSAPrivateKeyField('public Key', blank=True, null=True, unique=True,
-    #         help_text='PEM-encoded RSA private key used on API requests.')
-    # tinc = RSAPrivateKeyField('public Key', blank=True, null=True, unique=True,
-    #         help_text='PEM-encoded RSA private key used on tinc management network.')
-
+    
+    def __unicode__(self):
+        return self.path
+    
 
 # Create OneToOne NodeKeys instance on node creation
 @receiver(post_save, sender=Node)

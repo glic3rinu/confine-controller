@@ -31,3 +31,13 @@ class BaseImageForm(forms.Form):
         qs = BaseImage.objects.filter_by_arch(arch).order_by('-default')
         self.fields['base_image'].queryset = qs
         self.fields['base_image'].initial = qs[0] if qs.exists() else None
+
+
+class NodeKeysForm(forms.Form):
+    generate_keys = forms.BooleanField(label='Regenerate API and TINC Keys',
+                    required=False,
+                    help_text='If you check this option old keys will be discarded '
+                              'and your node may lose connectivity to the management '
+                              'network until the new image is installed. <span '
+                              'style="color:red">Depends on RSA keys (see optional '
+                              'fields).</span>')

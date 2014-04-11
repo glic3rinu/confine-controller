@@ -11,8 +11,8 @@ class Migration(SchemaMigration):
         # Adding model 'NodeBuildFile'
         db.create_table(u'firmware_nodebuildfile', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('nodekeys', self.gf('django.db.models.fields.related.ForeignKey')(related_name='files', to=orm['firmware.NodeKeys'])),
-            ('path', self.gf('django.db.models.fields.CharField')(max_length=256)),
+            ('node', self.gf('django.db.models.fields.related.ForeignKey')(related_name='files', to=orm['nodes.Node'])),
+            ('path', self.gf('django.db.models.fields.CharField')(unique=True, max_length=256)),
             ('content', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal(u'firmware', ['NodeBuildFile'])
@@ -107,8 +107,8 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'NodeBuildFile'},
             'content': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'nodekeys': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': u"orm['firmware.NodeKeys']"}),
-            'path': ('django.db.models.fields.CharField', [], {'max_length': '256'})
+            'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': u"orm['nodes.Node']"}),
+            'path': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'})
         },
         u'firmware.nodekeys': {
             'Meta': {'object_name': 'NodeKeys'},

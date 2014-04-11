@@ -92,8 +92,8 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'NodeBuildFile'},
             'content': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'nodekeys': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': u"orm['firmware.NodeKeys']"}),
-            'path': ('django.db.models.fields.CharField', [], {'max_length': '256'})
+            'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': u"orm['nodes.Node']"}),
+            'path': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'})
         },
         u'firmware.nodekeys': {
             'Meta': {'object_name': 'NodeKeys'},

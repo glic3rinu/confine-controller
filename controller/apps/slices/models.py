@@ -36,8 +36,14 @@ def set_sha256(self, fields):
     for field_name in fields:
         field = getattr(self, field_name)
         if field and field.file:
-            # TODO chunked for saving some memory?
-            sha256 = hashlib.sha256(field.file.read()).hexdigest()
+            # chunked for avoid memory leak (#428)
+            sha256 = hashlib.sha256()
+            while True:
+                block = field.file.read(2**20) # 1MiB
+                if not block:
+                    break
+                sha256.update(block)
+            sha256 = sha256.hexdigest()
             field.file.seek(0)
             setattr(self, field_name+'_sha256', sha256)
 

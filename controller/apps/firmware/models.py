@@ -473,11 +473,14 @@ class NodeBuildFile(models.Model):
     Allows reusing BuildFiles between firmware builds.
     """
     node = models.ForeignKey('nodes.Node', related_name='files')
-    path = models.CharField(max_length=256, unique=True)
+    path = models.CharField(max_length=256)
     content = models.TextField()
     
     def __unicode__(self):
         return self.path
+
+    class Meta:
+        unique_together = ('node', 'path')
     
 
 # Create OneToOne NodeKeys instance on node creation

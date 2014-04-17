@@ -89,11 +89,11 @@ class Migration(DataMigration):
             'value': ('django.db.models.fields.TextField', [], {'max_length': '255'})
         },
         u'firmware.nodebuildfile': {
-            'Meta': {'object_name': 'NodeBuildFile'},
+            'Meta': {'unique_together': "(('node', 'path'),)", 'object_name': 'NodeBuildFile'},
             'content': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': u"orm['nodes.Node']"}),
-            'path': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'})
+            'path': ('django.db.models.fields.CharField', [], {'max_length': '256'})
         },
         u'firmware.nodekeys': {
             'Meta': {'object_name': 'NodeKeys'},

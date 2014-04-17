@@ -12,10 +12,13 @@ class Migration(SchemaMigration):
         db.create_table(u'firmware_nodebuildfile', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('node', self.gf('django.db.models.fields.related.ForeignKey')(related_name='files', to=orm['nodes.Node'])),
-            ('path', self.gf('django.db.models.fields.CharField')(unique=True, max_length=256)),
+            ('path', self.gf('django.db.models.fields.CharField')(max_length=256)),
             ('content', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal(u'firmware', ['NodeBuildFile'])
+
+        # Adding unique constraint on 'NodeBuildFile', fields ['node', 'path']
+        db.create_unique(u'firmware_nodebuildfile', ['node_id', 'path'])
 
         # Adding model 'NodeKeys'
         db.create_table(u'firmware_nodekeys', (
@@ -27,6 +30,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Removing unique constraint on 'NodeBuildFile', fields ['node', 'path']
+        db.delete_unique(u'firmware_nodebuildfile', ['node_id', 'path'])
+
         # Deleting model 'NodeBuildFile'
         db.delete_table(u'firmware_nodebuildfile')
 
@@ -104,11 +110,11 @@ class Migration(SchemaMigration):
             'value': ('django.db.models.fields.TextField', [], {'max_length': '255'})
         },
         u'firmware.nodebuildfile': {
-            'Meta': {'object_name': 'NodeBuildFile'},
+            'Meta': {'unique_together': "(('node', 'path'),)", 'object_name': 'NodeBuildFile'},
             'content': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': u"orm['nodes.Node']"}),
-            'path': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'})
+            'path': ('django.db.models.fields.CharField', [], {'max_length': '256'})
         },
         u'firmware.nodekeys': {
             'Meta': {'object_name': 'NodeKeys'},

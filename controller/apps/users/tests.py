@@ -8,7 +8,7 @@ from users.models import Group, Roles, User, ResourceRequest, JoinRequest
 
 SERVER_URL = 'http://testserver'
 
-def test_reverse(viewname, urlconf=None, args=None, kwargs=None):
+def reverse_test(viewname, urlconf=None, args=None, kwargs=None):
     return SERVER_URL + reverse(viewname, urlconf, args, kwargs)
 
 """
@@ -42,11 +42,11 @@ class BaseTestCase(TestCase):
         """ Login a user to the system """
         self.client.logout()
         if superuser:
-            user='super'
+            user = 'super'
         elif admin:
-            user='admin'
+            user = 'admin'
         elif tech:
-            user='tech'
+            user = 'tech'
         else:
             user='user'
         pwd = "%spass" % user
@@ -93,7 +93,7 @@ class GroupFormTestCase(BaseTestCase):
             'join_requests-MAX_NUM_FORMS': 0,
         }
         resp = self.client.post(url, post)
-        url_complete = test_reverse('admin:users_group_changelist')
+        url_complete = reverse_test('admin:users_group_changelist')
 
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_complete)
@@ -133,7 +133,7 @@ class GroupFormTestCase(BaseTestCase):
             'join_requests-MAX_NUM_FORMS': 0,
         }
         resp = self.client.post(url, post)
-        url_complete = test_reverse('admin:users_group_changelist')
+        url_complete = reverse_test('admin:users_group_changelist')
 
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_complete)
@@ -161,8 +161,7 @@ class GroupFormTestCase(BaseTestCase):
         user = User.objects.get(pk=self.client.session['_auth_user_id'])
 
         ## add admin role to the user
-        r = Roles(group=group, user=user, is_group_admin=True)
-        r.save()
+        Roles.objects.create(group=group, user=user, is_group_admin=True)
 
         url = reverse('admin:users_group_change', args=[group.id])
         post = {
@@ -188,14 +187,15 @@ class GroupFormTestCase(BaseTestCase):
 
     def test_accept_resource_request(self):
         """ Test if the operator can accept a resource requests """
-        self.test_resource_request_group() #create the requests
+        # create the request
         group = Group.objects.get(pk=1)
+        ResourceRequest.objects.create(group=group, resource='slices')
 
         # The group has a resource requests
         qs_req  = ResourceRequest.objects.filter(group=group, resource='slices')
-        self.assertTrue(qs_req.exists())
+        self.assertTrue(qs_req.exists(), "Group doesn't have resource requests.")
 
-        self._login(superuser=True) #only operator can change resources allowed
+        self._login(superuser=True) # only operator can change resources allowed
         url = reverse('admin:users_group_change', args=[group.id])
         post = {
             'name': group.name,
@@ -232,7 +232,7 @@ class GroupJoinTestCase(BaseTestCase):
             '_selected_action': 1,
         }
         resp = self.client.post(url, post)
-        url_complete = test_reverse('admin:users_group_change', args=[gid])
+        url_complete = reverse_test('admin:users_group_change', args=[gid])
     
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_complete)
@@ -271,7 +271,7 @@ class GroupJoinTestCase(BaseTestCase):
             "_save": "Save" #admin submit action
         }
         resp = self.client.post(url, post)
-        url_complete = test_reverse('admin:users_group_changelist')
+        url_complete = reverse_test('admin:users_group_changelist')
         
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp['Location'], url_complete)

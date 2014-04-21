@@ -6,33 +6,23 @@ These will pass when you run "manage.py test".
 from django.db import IntegrityError
 from django.test import TestCase
 
+from users.models import Group
 from slices.models import Slice, Sliver, Template
 
 
 class SliceTestCase(TestCase):
-#    fixtures = ['slices', 'nodes',]
+    fixtures = ['groups', 'slices', 'templates',]
     def setUp(self):
-        'Populate test database with model instances'
-        template = Template(name="template0", image="image.tar.gz")
-        template.save()
-
-        self.slice0 = Slice(name="slice0", template=template)
-        self.slice1 = Slice(name="slice1", template=template)
-        self.slice0.save()
-        self.slice1.save()
-
-#        node = Node.objects.get()
-#        slv = Sliver()
+        pass
 
     def tearDown(self):
-        for model in [Slice, Sliver, Template]:
-            for obj in model.objects.all():
-                obj.delete()
+        pass
 
     def test_unic_names(self):
-        self.slice0.name = "slice1"
-        self.assertRaises(IntegrityError, self.slice0.save)
-#        pass
+        slice0 = Slice.objects.get(pk=1)
+        slice1 = Slice.objects.get(pk=2)
+        slice0.name = slice1.name
+        self.assertRaises(IntegrityError, slice0.save)
 
 class SlicesViewsTestCase(TestCase):
     def test_index(self):

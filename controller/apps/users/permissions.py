@@ -28,7 +28,7 @@ class RolesPermission(Permission):
     def add(self, obj, cls, user):
         if obj is None:
             return True
-        return obj.group.has_role(user, 'admin')
+        return obj.group.has_role(user, 'group_admin')
     
     def change(self, obj, cls, user):
         return self.add(obj, cls, user)
@@ -47,19 +47,19 @@ class GroupPermission(Permission):
     def change(self, obj, cls, user):
         if obj is None:
             return True
-        return obj.has_role(user, 'admin')
+        return obj.has_role(user, 'group_admin')
     
     def delete(self, obj, cls, user):
         if obj is None:
             return True
-        return obj.has_role(user, 'admin')
+        return obj.has_role(user, 'group_admin')
 
 
 class JoinRequestPermission(Permission):
     def view(self, obj, cls, user):
         if obj is None:
-            return user.has_role('admin')
-        return obj.group.has_role(user, 'admin')
+            return user.has_role('group_admin')
+        return obj.group.has_role(user, 'group_admin')
     
     def add(self, obj, cls, user):
         return False
@@ -67,7 +67,7 @@ class JoinRequestPermission(Permission):
     def change(self, obj, cls, user):
         if obj is None:
             return True
-        return obj.group.has_role(user, 'admin')
+        return obj.group.has_role(user, 'group_admin')
     
     def delete(self, obj, cls, user):
         return False

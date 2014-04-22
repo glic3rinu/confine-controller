@@ -1,4 +1,5 @@
 from sys import stderr
+from urlparse import urlparse
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -6,10 +7,8 @@ from django.test import TestCase
 from users.models import Group, Roles, User, ResourceRequest, JoinRequest
 
 
-SERVER_URL = 'http://testserver'
-
-def reverse_test(viewname, urlconf=None, args=None, kwargs=None):
-    return SERVER_URL + reverse(viewname, urlconf, args, kwargs)
+def url_path(url):
+    return urlparse(url).path
 
 """
 Tests:
@@ -93,10 +92,10 @@ class GroupFormTestCase(BaseTestCase):
             'join_requests-MAX_NUM_FORMS': 0,
         }
         resp = self.client.post(url, post)
-        url_complete = reverse_test('admin:users_group_changelist')
+        url_relative = reverse('admin:users_group_changelist')
 
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], url_complete)
+        self.assertEqual(url_path(resp['Location']), url_relative)
 
         # test if the objects has been created succesfully
         # and the group properly init
@@ -133,10 +132,10 @@ class GroupFormTestCase(BaseTestCase):
             'join_requests-MAX_NUM_FORMS': 0,
         }
         resp = self.client.post(url, post)
-        url_complete = reverse_test('admin:users_group_changelist')
+        url_relative = reverse('admin:users_group_changelist')
 
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], url_complete)
+        self.assertEqual(url_path(resp['Location']), url_relative)
 
         # test if the objects has been created succesfully
         # and the group properly init
@@ -232,10 +231,10 @@ class GroupJoinTestCase(BaseTestCase):
             '_selected_action': 1,
         }
         resp = self.client.post(url, post)
-        url_complete = reverse_test('admin:users_group_change', args=[gid])
+        url_relative = reverse('admin:users_group_change', args=[gid])
     
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], url_complete)
+        self.assertEqual(url_path(resp['Location']), url_relative)
 
         self.assertTrue(JoinRequest.objects.filter(user=uid, group=gid).exists())
 
@@ -271,10 +270,10 @@ class GroupJoinTestCase(BaseTestCase):
             "_save": "Save" #admin submit action
         }
         resp = self.client.post(url, post)
-        url_complete = reverse_test('admin:users_group_changelist')
+        url_relative = reverse('admin:users_group_changelist')
         
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp['Location'], url_complete)
+        self.assertEqual(url_path(resp['Location']), url_relative)
 
         # join requests not exists 
         self.assertFalse(JoinRequest.objects.filter(user=uid, group=gid).exists())

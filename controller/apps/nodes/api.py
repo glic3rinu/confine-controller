@@ -76,7 +76,6 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
-#    post_exclude = ('set_state',)
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

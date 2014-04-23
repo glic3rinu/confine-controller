@@ -142,7 +142,6 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
     filter_fields = ('set_state', )
-#    post_exclude = ('set_state',)
 
 
 class SliceDetail(generics.RetrieveUpdateDestroyAPIView):

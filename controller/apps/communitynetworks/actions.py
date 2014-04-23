@@ -30,11 +30,11 @@ def cache_node_db(modeladmin, request, queryset):
         if queryset:
             #FIXME Ask user which fields want to update?
             for node in queryset:
+                if node.cn is None:
+                    continue
                 try:
                     # TODO fields_to_update: arch, sliver_pub_{ipv6,ipv4,ipv4_range}
                     node.cn.cache_cndb('gis')
-                except CnHost.DoesNotExist:
-                    pass
                 except CnHost.CNDBFetchError as e:
                     errors += 1
                     modeladmin.log_change(request, node, "Error updating CNDB Cache: %s" % e)

@@ -130,29 +130,27 @@ function install_requirements () {
     
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
     
-    DEVELOPMENT_PIP="Django==1.6.1 \
-                     django-celery-email==1.0.3 \
-                     django-fluent-dashboard==0.3.5 \
+    DEVELOPMENT_PIP="Django==1.6.3 \
+                     django-celery-email==1.0.4 \
+                     django-fluent-dashboard==0.3.6 \
                      South==0.8.4 \
                      IPy==0.81 \
-                     django-extensions==1.1.1 \
+                     django-extensions==1.3.3 \
                      django-transaction-signals==1.0.0 \
                      django-celery==3.0.23 \
                      celery==3.0.24 \
                      kombu==2.5.14 \
-                     jsonfield==0.9.19 \
-                     Markdown==2.3.1 \
-                     django-filter==0.6 \
+                     jsonfield==0.9.20 \
+                     Markdown==2.4 \
                      django-admin-tools==0.5.1 \
-                     djangorestframework==2.3.9"
-    LOCAL_PIP="paramiko==1.11.0 \
+                     djangorestframework==2.3.13"
+    LOCAL_PIP="paramiko==1.13.0 \
                Pygments==1.6 \
-               requests==1.2.0 \
-               gevent==0.13.8 \
-               simplejson" # TODO remove
-    PRODUCTION_PIP="django-simple-captcha==0.4.0 \
+               requests==2.2.1 \
+               gevent==0.13.8"
+    PRODUCTION_PIP="django-simple-captcha==0.4.2 \
                     django-registration==1.0 \
-                    django-google-maps==0.2.2"
+                    django-google-maps==0.2.3"
     
     # Make sure locales are in place before installing postgres
     if [[ $({ perl --help > /dev/null; } 2>&1|grep 'locale failed') ]]; then

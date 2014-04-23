@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import simplejson
+import json
 import time
 
 from django.contrib import admin
@@ -135,7 +135,7 @@ class PingAdmin(PermissionModelAdmin):
         pings = pings.order_by('date').extra(select={'date': "EXTRACT(EPOCH FROM date)"})
         series = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
         data = [ [int(str(d).split('.')[0] + '000'),w,x,y,z] for d,w,x,y,z in series ]
-        return HttpResponse(simplejson.dumps(data), content_type="application/json")
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 admin.site.register(Ping, PingAdmin)

@@ -6,6 +6,7 @@ import time
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.conf.urls import patterns, url
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
@@ -135,7 +136,8 @@ class PingAdmin(PermissionModelAdmin):
         pings = pings.order_by('date').extra(select={'date': "EXTRACT(EPOCH FROM date)"})
         series = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
         data = [ [int(str(d).split('.')[0] + '000'),w,x,y,z] for d,w,x,y,z in series ]
-        return HttpResponse(json.dumps(data), content_type="application/json")
+        # DjangoJSONEncoder handles Decimal data
+        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type="application/json")
 
 
 admin.site.register(Ping, PingAdmin)

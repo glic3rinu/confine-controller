@@ -107,18 +107,19 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
+            'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256',
+                       'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
         }),
     )
-    readonly_fields = ['new_instance_sn', 'exp_data_sha256', 'overlay_sha256']
+    readonly_fields = ['new_instance_sn']
     search_fields = ['description', 'node__description', 'node__name', 'slice__name']
     inlines = [SliverPropInline, SliverIfaceInline]
     actions = [update_selected]
     change_view_actions = [update_selected]
     default_changelist_filters = (('my_slivers', 'True'),)
     change_form_template = "admin/controller/change_form.html"
-    form = SliverAdminForm # FIXME: ignored but don't know why! Check inheritance
+    form = SliverAdminForm
     
     class Media:
         css = {
@@ -189,6 +190,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                     db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliverAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -519,10 +522,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     ]
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
-    readonly_fields = [
-        'instance_sn', 'new_sliver_instance_sn', 'expires_on', 'exp_data_sha256',
-        'overlay_sha256'
-    ]
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
     date_hierarchy = 'expires_on'
     search_fields = ['name']
     inlines = [SlicePropInline, SliverInline]
@@ -534,8 +534,9 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
-                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
+            'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256', 'overlay',
+                       'overlay_uri', 'overlay_sha256', 'vlan_nr', 'instance_sn',
+                       'new_sliver_instance_sn'
             )
         }),
     )
@@ -597,10 +598,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         """ Make description input widget smaller """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
-        if db_field.name == 'template':
+        elif db_field.name == 'template':
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                 db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):

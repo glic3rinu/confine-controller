@@ -7,6 +7,16 @@ from nodes.models import Node
 from .helpers import state_value
 from .models import Slice, Sliver
 
+def clean_uri_sha256(cleaned_data):
+    """ Reset _uri and _sha256 fields if file to upload defined """
+    for field_name in ['exp_data', 'overlay']:
+        if cleaned_data[field_name]:
+            cleaned_data[field_name + '_uri'] = ''
+        elif not cleaned_data[field_name + '_uri']:
+            # reset sha256 because there is no file
+            cleaned_data[field_name + '_sha256'] = ''
+    return cleaned_data
+
 
 class SliceAdminForm(forms.ModelForm):
     """ 
@@ -37,7 +47,7 @@ class SliceAdminForm(forms.ModelForm):
                 else:
                     self.fields['vlan_nr'].widget = ShowText()
                     self.fields['vlan_nr'].widget.attrs['readonly'] = True
-        
+    
     def clean_vlan_nr(self):
         """ Return -1 if user requests vlan_nr """
         vlan_nr = self.cleaned_data['vlan_nr']
@@ -46,24 +56,50 @@ class SliceAdminForm(forms.ModelForm):
             return None if not vlan_nr else -1
         # ! Register state: return the old value
         return self.initial["vlan_nr"]
+    
+    def clean(self):
+        cleaned_data = super(SliceAdminForm, self).clean()
+        return clean_uri_sha256(cleaned_data)
+
 
 class SliverAdminForm(forms.ModelForm):
+    """
+    Used when sliver showed directly (slice independent)
+    e.g. /admin/sliver/1
+    """
     def __init__(self, *args, **kwargs):
-        """ Improve user interface: form style and empty labels """
-        # FIXME: Works but is NOT called: see SliverAdmin at admin.py
         super(SliverAdminForm, self).__init__(*args, **kwargs)
+        # warn visually on sliver state override by slice state
         if self.instance:
             sliver_state = state_value(self.instance.set_state)
             slice_state = state_value(self.instance.slice.set_state)
             if sliver_state > slice_state:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
+    
+    def clean(self):
+        cleaned_data = super(SliverAdminForm, self).clean()
+        return clean_uri_sha256(cleaned_data)
 
 
 class SliceSliversForm(forms.ModelForm):
+    """
+    Used when sliver showed via its slice (url nested)
+    e.g. /admin/slice/1/sliver/1
+    """
     def __init__(self, *args, **kwargs):
         super(SliceSliversForm, self).__init__(*args, **kwargs)
         self.instance.node = self.node
         self.instance.slice = self.slice
+        # warn visually on sliver state override by slice state
+        if self.instance:
+            sliver_state = state_value(self.instance.set_state)
+            slice_state = state_value(self.instance.slice.set_state)
+            if sliver_state > slice_state:
+                self.fields['set_state'].widget.attrs = {'class': 'warning'}
+    
+    def clean(self):
+        cleaned_data = super(SliceSliversForm, self).clean()
+        return clean_uri_sha256(cleaned_data)
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):

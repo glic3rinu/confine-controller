@@ -27,12 +27,17 @@ def get_expires_on():
 
 
 def clean_sha256(self, fields):
+    """
+    Check that sha256 has manually provided for an external
+    file (specified by uri)
+    """
     for field_name in fields:
         if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
             raise ValidationError('Missing %s_sha256.' % field_name)
 
 
 def set_sha256(self, fields):
+    """ Generate sha256 for an uploaded file """
     for field_name in fields:
         field = getattr(self, field_name)
         if field and field.file:
@@ -177,7 +182,8 @@ class Slice(models.Model):
                       'depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
-                      'Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     overlay = models.FileField(blank=True,
             upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
@@ -193,8 +199,8 @@ class Slice(models.Model):
                       'may be set directly or through the do-upload-overlay function.')
     overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'This member may be set directly or through the do-upload-overlay '
-                      'function. Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
             help_text='The state set on this slice (set state) and its slivers '
@@ -332,7 +338,8 @@ class Sliver(models.Model):
                       'format and contents depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the exp data file, used to check its integrity. '
-                      'Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     overlay = models.FileField(blank=True,
             upload_to=make_upload_to('overlay', settings.SLICES_SLIVER_OVERLAY_DIR,
@@ -348,8 +355,8 @@ class Sliver(models.Model):
                       'do-upload-overlay function.')
     overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'This member may be set directly or through the do-upload-overlay '
-                      'function. Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
             help_text='If present, the state set on this sliver (set state), '

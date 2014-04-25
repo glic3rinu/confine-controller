@@ -148,7 +148,7 @@ function install_requirements () {
     LOCAL_PIP="paramiko==1.13.0 \
                Pygments==1.6 \
                requests==2.2.1 \
-               gevent==0.13.8"
+               gevent==1.0"
     PRODUCTION_PIP="django-simple-captcha==0.4.2 \
                     django-registration==1.0 \
                     django-google-maps==0.2.3"

@@ -142,6 +142,7 @@ function install_requirements () {
                      kombu==2.5.14 \
                      jsonfield==0.9.20 \
                      Markdown==2.4 \
+                     django-filter==0.7 \
                      django-admin-tools==0.5.1 \
                      djangorestframework==2.3.13"
     LOCAL_PIP="paramiko==1.13.0 \

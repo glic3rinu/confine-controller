@@ -242,9 +242,10 @@ class GroupJoinTestCase(BaseTestCase):
         self.test_create_join_request() #create a JoinRequest
         uid = 3
         gid = 1
+        jid = JoinRequest.objects.get(user=uid, group=gid).pk
+        
         self._login(admin=True)
         url = reverse('admin:users_group_change', args=[gid])
-
         resp = self.client.get(url)
         group_form = resp.context['adminform'].form
         post = {
@@ -263,7 +264,7 @@ class GroupJoinTestCase(BaseTestCase):
             "join_requests-TOTAL_FORMS": 1,
             "join_requests-INITIAL_FORMS": 1, 
             "join_requests-MAX_NUM_FORMS": 0,
-            "join_requests-0-id": 1,
+            "join_requests-0-id": jid,
             "join_requests-0-group": gid,
             "join_requests-0-roles": roles,
             "join_requests-0-action": action, 
@@ -272,6 +273,7 @@ class GroupJoinTestCase(BaseTestCase):
         resp = self.client.post(url, post)
         url_relative = reverse('admin:users_group_changelist')
         
+        # redirect after posting
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(url_path(resp['Location']), url_relative)
 

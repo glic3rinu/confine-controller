@@ -3,6 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.utils import timezone
 
 
 class Migration(SchemaMigration):
@@ -10,7 +11,8 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'Ping.date'
-        db.alter_column(u'pings_ping', 'date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2013, 10, 23, 0, 0)))
+        db.alter_column(u'pings_ping', 'date', self.gf('django.db.models.fields.DateTimeField')(
+            default=datetime.datetime(2013, 10, 23, 0, 0, tzinfo=timezone.get_default_timezone())))
 
     def backwards(self, orm):
 

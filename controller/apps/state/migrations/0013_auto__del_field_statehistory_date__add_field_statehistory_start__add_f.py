@@ -3,6 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.utils import timezone
 
 
 class Migration(SchemaMigration):
@@ -13,12 +14,14 @@ class Migration(SchemaMigration):
 
         # Adding field 'StateHistory.start'
         db.add_column(u'state_statehistory', 'start',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 9, 15, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True,
+                        default=datetime.datetime(2013, 9, 15, 0, 0, tzinfo=timezone.get_default_timezone()), blank=True),
                       keep_default=False)
 
         # Adding field 'StateHistory.end'
         db.add_column(u'state_statehistory', 'end',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 9, 15, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True,
+                        default=datetime.datetime(2013, 9, 15, 0, 0, tzinfo=timezone.get_default_timezone()), blank=True),
                       keep_default=False)
 
 

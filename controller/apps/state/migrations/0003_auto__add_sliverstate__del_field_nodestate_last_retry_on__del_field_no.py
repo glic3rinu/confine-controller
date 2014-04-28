@@ -3,6 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.utils import timezone
 
 
 class Migration(SchemaMigration):
@@ -37,7 +38,8 @@ class Migration(SchemaMigration):
 
         # Adding field 'NodeState.last_try_on'
         db.add_column(u'state_nodestate', 'last_try_on',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now=True, default=datetime.datetime(2013, 3, 18, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now=True,
+                        default=datetime.datetime(2013, 3, 18, 0, 0, tzinfo=timezone.get_default_timezone()), blank=True),
                       keep_default=False)
 
 
@@ -47,7 +49,8 @@ class Migration(SchemaMigration):
 
         # Adding field 'NodeState.last_retry_on'
         db.add_column(u'state_nodestate', 'last_retry_on',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now=True, default=datetime.datetime(2013, 3, 18, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now=True,
+                        default=datetime.datetime(2013, 3, 18, 0, 0, tzinfo=timezone.get_default_timezone()), blank=True),
                       keep_default=False)
 
         # Adding field 'NodeState.last_success_on'

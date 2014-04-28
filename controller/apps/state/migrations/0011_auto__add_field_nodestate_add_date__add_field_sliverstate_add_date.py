@@ -3,6 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.utils import timezone
 
 
 class Migration(SchemaMigration):
@@ -10,12 +11,14 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'NodeState.add_date'
         db.add_column(u'state_nodestate', 'add_date',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 7, 4, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True,
+                        default=datetime.datetime(2013, 7, 4, 0, 0, tzinfo=timezone.get_default_timezone()), blank=True),
                       keep_default=False)
 
         # Adding field 'SliverState.add_date'
         db.add_column(u'state_sliverstate', 'add_date',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 7, 4, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True,
+                        default=datetime.datetime(2013, 7, 4, 0, 0, tzinfo=timezone.get_default_timezone()), blank=True),
                       keep_default=False)
 
 

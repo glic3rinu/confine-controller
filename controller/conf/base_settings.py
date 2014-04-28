@@ -124,9 +124,9 @@ INSTALLED_APPS = (
     'issues',
     'state',
     'mgmtnetworks',
-    'tinc',
     'communitynetworks',
     'pings',
+    'tinc', # after pings to avoid cannot import name Host
 #    'sfa',
     'firmware',
     'gis',

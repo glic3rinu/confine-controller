@@ -14,7 +14,6 @@ from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
 from mgmtnetworks.admin import MgmtNetConfInline
-from mgmtnetworks.forms import MgmtNetDeviceModelForm
 from mgmtnetworks.utils import reverse as mgmt_reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
@@ -86,7 +85,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     actions = [request_cert, reboot_selected]
     change_view_actions = [reboot_selected, request_cert]
     change_form_template = "admin/controller/change_form.html"
-    form = MgmtNetDeviceModelForm
     
     class Media:
         css = {

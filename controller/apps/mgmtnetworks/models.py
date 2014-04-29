@@ -69,7 +69,7 @@ class MgmtNetConf(models.Model):
     
     def is_configured(self):
         if self.backend == MgmtNetConf.TINC:
-            return bool(self.content_object.tinc.pubkey)
+            return bool(self.content_object.tinc)
         else: # native
             return True
     

@@ -10,7 +10,6 @@ from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
     wrap_admin_view)
 from controller.forms.widgets import ReadOnlyWidget
 from mgmtnetworks.admin import MgmtNetConfInline
-from mgmtnetworks.forms import MgmtNetDeviceModelForm
 from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
@@ -71,7 +70,6 @@ class GatewayAdmin(PermissionModelAdmin):
     list_display = ['id', 'description']
     list_display_links = ['id', 'description']
     inlines = [MgmtNetConfInline, TincHostInline]
-    form = MgmtNetDeviceModelForm
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
@@ -80,7 +78,6 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
     inlines = [MgmtNetConfInline, TincHostInline]
     list_filter = [MyHostsListFilter]
     change_form_template = "admin/tinc/host/change_form.html"
-    form = MgmtNetDeviceModelForm
     save_and_continue = True
     default_changelist_filters = (('my_hosts', 'True'),)
     

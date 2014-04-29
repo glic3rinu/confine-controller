@@ -1,5 +1,6 @@
-from django import forms
+from __future__ import absolute_import
 
+from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.core.urlresolvers import reverse

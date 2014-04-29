@@ -8,6 +8,9 @@ from django.contrib.contenttypes.models import ContentType
 
 
 class Migration(DataMigration):
+    depends_on = (
+        ("tinc", "0013_auto__del_island"),
+    )
 
     def forwards(self, orm):
         "Generate MgmtNetConf objects for existing Nodes, Servers, Hosts and Gateways"

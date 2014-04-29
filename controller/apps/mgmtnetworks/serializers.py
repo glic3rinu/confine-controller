@@ -71,9 +71,15 @@ class MgmtNetConfRelatedField(serializers.RelatedField):
     
     def from_native(self, data):
         """ Return a list of management network objects """
+        data = self.validate(data)
         mgmt_net = MgmtNetConf(backend=data.get('backend'))
         mgmt_net.full_clean(exclude=['content_type', 'object_id'])
         return [mgmt_net]
+
+    def validate(self, attrs):
+        if 'backend' not in attrs:
+            raise serializers.ValidationError('backend field must be provided.')
+        return attrs
 
 
 # Aggregate mgmt_network to the API

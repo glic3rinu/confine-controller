@@ -68,9 +68,8 @@ class MgmtNetConf(models.Model):
             return IP(':'.join(ipv6_words))
     
     def is_configured(self):
-        # FIXME: update code on refactor tinc: pubkey is MANDATORY!
         if self.backend == MgmtNetConf.TINC:
-            return bool(self.content_object.tinc.pubkey)
+            return bool(self.content_object.tinc)
         else: # native
             return True
     

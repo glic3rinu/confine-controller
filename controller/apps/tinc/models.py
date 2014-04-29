@@ -96,10 +96,16 @@ class TincHost(models.Model):
     
     def save(self, *args, **kwargs):
         super(TincHost, self).save(*args, **kwargs)
+        # update the node set_state FIXME use signals?
+        if hasattr(self.content_object, 'update_set_state'):
+            self.content_object.update_set_state()
         defer(update_tincd.delay)
     
     def delete(self, *args, **kwargs):
         super(TincHost, self).delete(*args, **kwargs)
+        # update the node set_state FIXME use signals?
+        if hasattr(self.content_object, 'update_set_state'):
+            self.content_object.update_set_state()
         defer(update_tincd.delay)
 
     @property

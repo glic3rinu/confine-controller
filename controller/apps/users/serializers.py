@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from django.core.exceptions import ValidationError
-
 from api import serializers
 
 from .models import AuthToken, User, Group, Roles
@@ -111,5 +109,5 @@ class GroupSerializer(GroupCreateSerializer, serializers.DynamicReadonlyFieldsMo
         for role in attrs.get(name, []):
             if role.is_group_admin:
                 return attrs
-        raise ValidationError('The group must have at least one admin')
+        raise serializers.ValidationError('The group must have at least one admin')
 

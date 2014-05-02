@@ -51,6 +51,12 @@ class MgmtNetConfSerializer(serializers.ModelSerializer):
     class Meta:
         model = MgmtNetConf
         exclude = ('id', 'content_type', 'object_id')
+    
+    ## backwards compatibility #157.note-36 ##
+    def transform_backend(self, obj, value):
+        if value == 'tinc':
+            value = 'tinc_client' if obj.tinc_server() is None else 'tinc_server'
+        return value
 
 
 class MgmtNetConfRelatedField(serializers.RelatedField):
@@ -79,6 +85,10 @@ class MgmtNetConfRelatedField(serializers.RelatedField):
     def validate(self, attrs):
         if 'backend' not in attrs:
             raise serializers.ValidationError('backend field must be provided.')
+        ## backwards compatibility #157.note-36 ##
+        ## keep tinc_{client|server} until all nodes are compatible ##
+        if attrs['backend'] in ['tinc_client', 'tinc_server']:
+            attrs['backend'] = MgmtNetConf.TINC
         return attrs
 
 

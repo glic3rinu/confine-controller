@@ -1,0 +1,7 @@
+fieldset.warning .description {
+    background: #ffc url(../img/icon_alert.gif) 5px .3em no-repeat;
+    border-bottom: 1px solid #ddd;
+    color: #666;
+    margin: 0 0 3px 0;
+    padding: 4px 5px 4px 25px;
+}

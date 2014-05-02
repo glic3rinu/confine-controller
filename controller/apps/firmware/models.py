@@ -328,7 +328,7 @@ class ConfigUCI(models.Model):
             help_text='UCI config statement')
     option = models.CharField(max_length=32, help_text='UCI option statement')
     value = models.TextField(max_length=255,
-            help_text='Python code that will be evaluated for obtaining the value '
+            help_text='Python code that will be evaluated for obtining the value '
                       'from the node. I.e. node.properties[\'ip\']')
     
     class Meta:

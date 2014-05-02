@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 
 from controller.admin import ChangeListDefaultFilter
@@ -115,7 +116,7 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
         return extra_urls + urls
     
     def help_view(self, request, host_id):
-        host = self.get_object(request, host_id)
+        host = get_object_or_404(Host, pk=host_id)
         opts = self.model._meta
         context = {
             'host': host,

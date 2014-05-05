@@ -19,12 +19,9 @@ from . import settings
 from .tasks import update_tincd
 
 def get_tinc(self):
-    """ Get tinc object if exists or None otherwise """
+    """ Get or create (without pubkey) the related tinc object """
     ct = ContentType.objects.get_for_model(self)
-    try:
-        obj = TincHost.objects.get(object_id=self.pk, content_type=ct)
-    except TincHost.DoesNotExist:
-        obj = None
+    obj, _ = TincHost.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
 
@@ -72,7 +69,7 @@ class TincHost(models.Model):
     non empty array of addresses.
 
     """
-    pubkey = RSAPublicKeyField('public Key', unique=True,
+    pubkey = RSAPublicKeyField('public Key', unique=True, null=True, blank=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()

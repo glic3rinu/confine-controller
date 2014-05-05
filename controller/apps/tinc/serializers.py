@@ -24,6 +24,12 @@ class TincHostSerializer(serializers.ModelSerializer):
     class Meta:
         model = TincHost
         exclude = ('object_id', 'content_type', 'id')
+    
+    def to_native(self, obj):
+        """ Keep API clean. A tinc without pubkey is equivalent to None {} """
+        if obj.pubkey is None:
+            return {}
+        return super(TincHostSerializer, self).to_native(obj)
 
 
 class TincHostRelatedField(serializers.RelatedField):

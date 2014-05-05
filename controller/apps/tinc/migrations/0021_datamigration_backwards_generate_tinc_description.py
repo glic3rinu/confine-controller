@@ -61,7 +61,7 @@ class Migration(DataMigration):
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'pubkey': ('controller.models.fields.RSAPublicKeyField', [], {'unique': 'True'})
+            'pubkey': ('controller.models.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         u'users.group': {
             'Meta': {'ordering': "['name']", 'object_name': 'Group'},

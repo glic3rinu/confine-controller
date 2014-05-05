@@ -29,11 +29,15 @@ class _TincClientSerializer(serializers.ModelSerializer):
 
 class _TincServerSerializer(_TincClientSerializer):
     addresses = _TincAddressSerializer()
+    is_active = serializers.SerializerMethodField('fake_is_active')
     
     class Meta:
         from tinc.models import TincHost
         model = TincHost
-        fields = ('name', 'pubkey', 'addresses')
+        fields = ('name', 'pubkey', 'addresses', 'is_active')
+    
+    def fake_is_active(self, obj):
+        return True
 
 ## end of backwards compatibility #157 ##
 

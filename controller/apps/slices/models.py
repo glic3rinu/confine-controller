@@ -35,6 +35,24 @@ def clean_sha256(self, fields):
         if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
             raise ValidationError('Missing %s_sha256.' % field_name)
 
+def clean_uploaded_file(self, fields):
+    """
+    Check if user has provided an uri to override current
+    uploaded file and delete the stored one (if any).
+    """
+    for field_name in fields:
+        field = getattr(self, field_name)
+        field_uri = getattr(self, field_name + '_uri')
+        if field:
+            if field_uri == '':
+                # As we set the value, we should warn the user to
+                # clean this field if wants to upload a new file
+                # because if not we will delete the stored file
+                # but not upload the new one.
+                setattr(self, field_name + '_uri', field.url)
+            elif field.url != field_uri:
+                field.delete()
+
 
 def set_sha256(self, fields):
     """ Generate sha256 for an uploaded file """
@@ -50,7 +68,7 @@ def set_sha256(self, fields):
                 sha256.update(block)
             sha256 = sha256.hexdigest()
             field.file.seek(0)
-            setattr(self, field_name+'_sha256', sha256)
+            setattr(self, field_name + '_sha256', sha256)
 
 
 def make_upload_to(field_name, base_path, file_name):
@@ -242,6 +260,7 @@ class Slice(models.Model):
     def clean(self):
         super(Slice, self).clean()
         clean_sha256(self, ('exp_data', 'overlay'))
+        clean_uploaded_file(self, ('exp_data', 'overlay'))
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
@@ -382,6 +401,7 @@ class Sliver(models.Model):
     def clean(self):
         super(Sliver, self).clean()
         clean_sha256(self, ('exp_data', 'overlay'))
+        clean_uploaded_file(self, ('exp_data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice

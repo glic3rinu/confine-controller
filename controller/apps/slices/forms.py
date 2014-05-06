@@ -10,7 +10,7 @@ from .models import Slice, Sliver
 def clean_uri_sha256(cleaned_data):
     """ Reset _uri and _sha256 fields if file to upload defined """
     for field_name in ['exp_data', 'overlay']:
-        if cleaned_data[field_name]:
+        if cleaned_data[field_name] and not cleaned_data[field_name + '_uri']:
             cleaned_data[field_name + '_uri'] = ''
         elif not cleaned_data[field_name + '_uri']:
             # reset sha256 because there is no file

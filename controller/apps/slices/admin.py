@@ -106,7 +106,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'fields': ('description', 'template', 'set_state')
         }),
         ('Advanced', {
-            'classes': ('collapse',),
+            'classes': ('collapse', 'warning'),
+            'description': 'Please, if you want to upload a file remember cleaning its URI field.',
             'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256',
                        'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
@@ -533,7 +534,8 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             'fields': ('name', 'description', 'template', 'set_state','expires_on', 'group'),
         }),
         ('Advanced', {
-            'classes': ('collapse',),
+            'classes': ('collapse', 'warning'),
+            'description': 'Please, if you want to upload a file remember cleaning its URI field.',
             'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256', 'overlay',
                        'overlay_uri', 'overlay_sha256', 'vlan_nr', 'instance_sn',
                        'new_sliver_instance_sn'
@@ -545,6 +547,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     change_view_actions = [renew_selected_slices, reset_selected]
     default_changelist_filters = (('my_slices', 'True'),)
     
+    class Media:
+        css = {
+             'all': (
+                'slices/css/warning-form.css',)
+        }
+
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
         qs = super(SliceAdmin, self).queryset(request)

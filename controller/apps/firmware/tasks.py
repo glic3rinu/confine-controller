@@ -20,7 +20,6 @@ def build(build_id, *args, **kwargs):
     from firmware.models import Build, Config
     
     exclude = kwargs.get('exclude', [])
-    generate_keys = kwargs.get('generate_keys')
     
     # retrieve the existing build instance, used for user feedback
     update_state(build, 1, 4, 'Build started')
@@ -42,7 +41,7 @@ def build(build_id, *args, **kwargs):
         update_state(build, 15, 29, 'Preparing image file system')
         image.mount()
         
-        files = config.eval_files(node, generate_keys=generate_keys, exclude=exclude, image=image)
+        files = config.eval_files(node, exclude=exclude, image=image)
         total = len(files)
         for num, build_file in enumerate(files):
             current = 30 + num/total*25

@@ -25,6 +25,19 @@
         {% endfor %}
     </fieldset>
     <fieldset class="module aligned">
+        <h2>Optional files</h2>
+        {{ opt_form.non_field_errors }}
+        {% for field in opt_form %}
+        <div class="form-row ">
+            <div>
+            {{ field.errors }}
+            {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
+            <p class="help">{{ field.help_text|safe }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </fieldset>
+    <fieldset class="module aligned">
         <h2>Node private keys</h2>
         {{ key_form.non_field_errors }}
         {% for field in key_form %}
@@ -41,20 +54,6 @@
         </div>
         {% endfor %}
     </fieldset>
-    <fieldset class="module aligned">
-        <h2>Optional files</h2>
-        {{ opt_form.non_field_errors }}
-        {% for field in opt_form %}
-        <div class="form-row ">
-            <div>
-            {{ field.errors }}
-            {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
-            <p class="help">{{ field.help_text|safe }}</p>
-            </div>
-        </div>
-        {% endfor %}
-    </fieldset>
-    
     {% for plugin in plugins %}
     {% if plugin.instance.form %}
     <fieldset class="module aligned ">

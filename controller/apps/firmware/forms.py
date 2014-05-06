@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.safestring import mark_safe
 
+from controller.utils.html import MONOSPACE_FONTS
+
 from .models import BaseImage, Config
 
 
@@ -34,10 +36,33 @@ class BaseImageForm(forms.Form):
 
 
 class NodeKeysForm(forms.Form):
-    generate_keys = forms.BooleanField(label='Regenerate API and TINC Keys',
-                    required=False,
-                    help_text='If you check this option old keys will be discarded '
-                              'and your node may lose connectivity to the management '
-                              'network until the new image is installed. <span '
-                              'style="color:red">Depends on RSA keys (see optional '
-                              'fields).</span>')
+    """
+    Provide a form to retrieve or provide node private keys
+    allowing keeping them between firmware generations.
+    """
+    cert = forms.CharField(label='API certificate private key', required=False,
+        widget=forms.Textarea(attrs={
+            'cols': 70, 'rows': 10,
+            'style': 'font-family:%s' % MONOSPACE_FONTS
+        }))
+    private = forms.CharField(label='API node private key', required=False,
+        widget=forms.Textarea(attrs={
+            'cols': 70, 'rows': 10,
+            'style': 'font-family:%s' % MONOSPACE_FONTS
+        }))
+    tinc = forms.CharField(label='tinc private key', required=False,
+        widget=forms.Textarea(attrs={
+            'cols': 70, 'rows': 10,
+            'style': 'font-family:%s' % MONOSPACE_FONTS
+        }))
+
+    def __init__(self, *args, **kwargs):
+        self.node = kwargs.pop('node', None)
+        readonly = kwargs.pop('readonly', False)
+        super(NodeKeysForm, self).__init__(*args, **kwargs)
+        assert hasattr(self.node, 'keys'), "The node doesn't have keys, have you runned firmware migrations?"
+        for field_name in ['cert', 'private', 'tinc']:
+            self.fields[field_name].initial = getattr(self.node.keys, field_name)
+            if readonly:
+                self.fields[field_name].widget.attrs['readonly'] = True
+                self.fields[field_name].widget.attrs['disabled'] = True

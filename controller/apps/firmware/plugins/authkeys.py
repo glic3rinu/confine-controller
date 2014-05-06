@@ -29,6 +29,7 @@ class AuthKeysPlugin(FirmwarePlugin):
             def __init__(self, *args, **kwargs):
                 super(AuthKeysForm, self).__init__(*args, **kwargs)
                 # load stored authentication keys (#383)
+                assert hasattr(self.node, 'keys'), "The node doesn't have keys, have you runned firmware migrations?"
                 if self.node.keys.ssh_auth:
                     self.fields['auth_keys'].initial = self.node.keys.ssh_auth
                     self.fields['auth_keys'].help_text += (' <span style="color:red">'

@@ -126,7 +126,6 @@ class Build(models.Model):
             except IOError:
                 return self.DELETED
             else: 
-                config = Config.objects.get()
                 if self.match_config:
                     return self.AVAILABLE
                 else:
@@ -201,7 +200,7 @@ class Build(models.Model):
         base_images = [ image.image for image in config.get_images(self.node) ]
         if not self.base_image or self.base_image not in base_images:
             return False
-        exclude = config.files.optional().values_list('pk', flat=True)
+        exclude = list(config.files.optional().values_list('pk', flat=True))
         old_files = self.files.exclude(config__is_optional=True)
         old_files = set( (f.path,f.content) for f in old_files )
         new_files = config.eval_files(self.node, exclude=exclude)
@@ -264,29 +263,29 @@ class Config(SingletonModel):
                 'value': config_uci.eval_value(node)})
         return uci
     
-    def eval_files(self, node, generate_keys=True, exclude=[], **kwargs):
+    def eval_files(self, node, exclude=[], **kwargs):
         """ Evaluates all ConfigFiles python expressions """
         files = []
         
         # handle special case of #383 files
-        key_files = ['/etc/tinc/confine/rsa_key.priv', '/etc/uhttpd.crt.pem', '/etc/uhttpd.key.pem']
-        if not generate_keys:
-            for path in key_files:
-                try:
-                    nb_file = node.files.get(path=path)
-                except node.files.model.DoesNotExist:
-                    pass # not exists a previous value so cannot be restored
-                else:
-                    ## restore and exclude of generation
-                    config = ConfigFile.objects.get(path=path)
-                    exclude.append(config.pk)
-                    files.append(BuildFile(path=nb_file.path, content=nb_file.content, config=config))
+        for path in NodeKeys.KEY_FILES:
+            try:
+                nb_file = node.files.get(path=path)
+            except node.files.model.DoesNotExist:
+                pass # not exists a previous value so cannot be restored
+            else:
+                ## restore and exclude of generation
+                config = ConfigFile.objects.get(path=path)
+                if config.pk in exclude:
+                    continue
+                exclude.append(config.pk)
+                files.append(BuildFile(path=nb_file.path, content=nb_file.content, config=config))
 
         for config_file in self.files.active().exclude(pk__in=exclude):
             new_files = config_file.get_files(node, files=files, **kwargs)
             files.extend(new_files)
             # create or update stored key files
-            if config_file.path in key_files:
+            if config_file.path in NodeKeys.KEY_FILES:
                 node_file, _ = node.files.get_or_create(path=config_file.path)
                 node_file.content = new_files[0].content
                 node_file.save()
@@ -457,6 +456,11 @@ class ConfigPlugin(PluginModel):
 
 class NodeKeys(models.Model):
     """ Stores node firmware root password and accepted SSH keys. """
+    TINC = '/etc/tinc/confine/rsa_key.priv'
+    CERT = '/etc/uhttpd.crt.pem'
+    PRIVATE = '/etc/uhttpd.key.pem'
+    KEY_FILES = [TINC, CERT, PRIVATE]
+    
     ssh_auth = models.TextField('SSH authorized keys', blank=True, null=True,
             help_text='PEM-encoded RSA public keys allowed for ssh access as root.')
     # MD5SUM hashed password in OpenWRT shadow format
@@ -465,6 +469,25 @@ class NodeKeys(models.Model):
     
     def __unicode__(self):
         return unicode(self.node)
+    
+    def get_content(self, path):
+        try:
+            nb_file = self.node.files.get(path=path)
+        except NodeBuildFile.DoesNotExist:
+            return None
+        return nb_file.content
+    
+    @property
+    def tinc(self):
+        return self.get_content(NodeKeys.TINC)
+    
+    @property
+    def cert(self):
+        return self.get_content(NodeKeys.CERT)
+    
+    @property
+    def private(self):
+        return self.get_content(NodeKeys.PRIVATE)
 
 
 class NodeBuildFile(models.Model):

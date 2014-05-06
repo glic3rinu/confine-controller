@@ -56,7 +56,7 @@ def get_firmware(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
-        'key_form': NodeKeysForm(),
+        'key_form': NodeKeysForm(node=node),
         'img_form': BaseImageForm(arch=node.arch),
         'opt_form': OptionalFilesForm(prefix='opt'),
         'plugins': plugins,
@@ -83,7 +83,7 @@ def get_firmware(modeladmin, request, queryset):
                 else:
                     all_valid = False
         # base image and optional files forms
-        key_form = NodeKeysForm(request.POST)
+        key_form = NodeKeysForm(data=request.POST, node=node)
         img_form = BaseImageForm(data=request.POST, arch=node.arch)
         opt_form = OptionalFilesForm(request.POST, prefix='opt')
         # validate the two forms to get possible errors
@@ -94,8 +94,7 @@ def get_firmware(modeladmin, request, queryset):
             base_image = img_form.cleaned_data['base_image']
             optional_fields = opt_form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
-            generate_keys = key_form.cleaned_data['generate_keys']
-            build = Build.build(node, base_image, async=True, exclude=exclude, generate_keys=generate_keys, **kwargs)
+            build = Build.build(node, base_image, async=True, exclude=exclude, **kwargs)
             modeladmin.log_change(request, node, "Build firmware")
         else:
             # Display form validation errors

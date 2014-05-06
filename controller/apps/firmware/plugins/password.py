@@ -31,6 +31,7 @@ class PasswordPlugin(FirmwarePlugin):
             def __init__(self, *args, **kwargs):
                 """ Show a message if the password has previously set. """
                 super(PasswordForm, self).__init__(*args, **kwargs)
+                assert hasattr(self.node, 'keys'), "The node doesn't have keys, have you runned firmware migrations?"
                 if self.node.keys.ssh_pass:
                     self.fields['password1'].help_text += ('<span style="color:red">'
                         'If empty the previous password will be used.</span>')

@@ -20,7 +20,9 @@ class AuthKeysPlugin(FirmwarePlugin):
             auth_keys = forms.CharField(required=False, help_text='Enter the SSH '
                 'keys allowed to log in as root (in "authorized_keys" format). '
                 'You may leave the default keys to allow centralized management '
-                'of your node.',
+                'of your node. '
+                'Please note that this may expose your node to an attack '
+                'if the testbed registry is compromised.',
             widget=forms.Textarea(
                 attrs={'cols': 125, 'rows': 10, 'style': 'font-family:%s' % MONOSPACE_FONTS}))
             

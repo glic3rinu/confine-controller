@@ -8,37 +8,20 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Resource.dflt_req'
-        db.delete_column(u'resources_resource', 'dflt_req')
+        # Renaming 'Resource.dflt_req' to 'dflt_sliver'
+        db.rename_column(u'resources_resource', 'dflt_req', 'dflt_sliver')
 
-        # Deleting field 'Resource.max_req'
-        db.delete_column(u'resources_resource', 'max_req')
-
-        # Adding field 'Resource.max_sliver'
-        db.add_column(u'resources_resource', 'max_sliver',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True),
-                      keep_default=False)
-
-        # Adding field 'Resource.dflt_sliver'
-        db.add_column(u'resources_resource', 'dflt_sliver',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
-                      keep_default=False)
+        # Renaming 'Resource.max_req' to 'max_sliver'
+        db.rename_column(u'resources_resource', 'max_req', 'max_sliver')
 
 
     def backwards(self, orm):
+        # Renaming 'Resource.dflt_req' to 'dflt_sliver'
+        db.rename_column(u'resources_resource', 'dflt_sliver', 'dflt_req')
 
-        # User chose to not deal with backwards NULL issues for 'Resource.dflt_req'
-        raise RuntimeError("Cannot reverse this migration. 'Resource.dflt_req' and its values cannot be restored.")
-        # Adding field 'Resource.max_req'
-        db.add_column(u'resources_resource', 'max_req',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True),
-                      keep_default=False)
+        # Renaming 'Resource.max_req' to 'max_sliver'
+        db.rename_column(u'resources_resource', 'max_sliver', 'max_req')
 
-        # Deleting field 'Resource.max_sliver'
-        db.delete_column(u'resources_resource', 'max_sliver')
-
-        # Deleting field 'Resource.dflt_sliver'
-        db.delete_column(u'resources_resource', 'dflt_sliver')
 
 
     models = {

@@ -34,8 +34,8 @@ class ResourceInlineFormSet(generic.BaseGenericInlineFormSet):
             }
             for num, resource in enumerate(resources):
                 initial_data[prefix+'-%d-name' % num] = resource.name
-                initial_data[prefix+'-%d-max_sliver' % num] = resource.max_sliver
-                initial_data[prefix+'-%d-dflt_sliver' % num] = resource.dflt_sliver
+                initial_data[prefix+'-%d-max_sliver' % num] = resource.max_req
+                initial_data[prefix+'-%d-dflt_sliver' % num] = resource.dflt_req
             kwargs['data'] = initial_data
         super(ResourceInlineFormSet, self).__init__(*args, **kwargs)
 

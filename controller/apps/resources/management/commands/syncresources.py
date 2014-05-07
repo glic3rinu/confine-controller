@@ -14,7 +14,7 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
             make_option('--override', action='store_true', dest='override', default=False,
-                help='Override current resources max_sliver and dflt_sliver'),)
+                help='Override current resources max_req and dflt_req'),)
     
     def handle(self, *args, **options):
         self.stdout.write("== Sync existing resource plugins ==")
@@ -30,19 +30,20 @@ class Command(BaseCommand):
                 # create (or override) resource for objects of this class
                 skipped = updated = 0
                 for obj in model_class.objects.all():
-                    #FIXME use update_or_create ??
+                    #FIXME use update_or_create when upgrading to django 1.7
+                    # https://docs.djangoproject.com/en/1.7/ref/models/querysets/#update-or-create
                     instance, created = Resource.objects.get_or_create(
                                             name=resource.name,
                                             content_type=content_type,
                                             object_id=obj.id,
                                             defaults={
-                                                'max_sliver': resource.max_sliver,
-                                                'dflt_sliver': resource.dflt_sliver
+                                                'max_req': resource.max_req,
+                                                'dflt_req': resource.dflt_req
                                             }
                                         )
                     if override:
-                        instance.max_sliver = resource.max_sliver
-                        instance.dflt_sliver = resource.dflt_sliver
+                        instance.max_req = resource.max_req
+                        instance.dflt_req = resource.dflt_req
                     if created or override:
                         instance.save()
                         updated +=1

@@ -6,6 +6,11 @@ from mgmtnetworks.serializers import MgmtNetConfRelatedField
 
 from .models import TincAddress, TincHost, Gateway, Host
 
+def validate_tinc(self, attrs, source):
+    """ transform /tinc null into [] because will match with related_tinc """
+    if attrs[source] is None:
+        attrs[source] = []
+    return attrs
 
 class TincAddressSerializer(serializers.ModelSerializer):
     island = serializers.RelHyperlinkedRelatedField(view_name='island-detail')
@@ -28,7 +33,7 @@ class TincHostSerializer(serializers.ModelSerializer):
     def to_native(self, obj):
         """ Keep API clean. A tinc without pubkey is equivalent to None {} """
         if obj.pubkey is None:
-            return {}
+            return None
         return super(TincHostSerializer, self).to_native(obj)
 
 
@@ -46,7 +51,7 @@ class TincHostRelatedField(serializers.RelatedField):
             # TincHost object
             tinc = value
         if tinc is None:
-            return {}
+            return None
         return TincHostSerializer(tinc).to_native(tinc)
     
     def from_native(self, data):
@@ -65,6 +70,9 @@ class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = Gateway
+    
+    def validate_tinc(self, attrs, source):
+        return validate_tinc(self, attrs, source)
 
 
 class HostCreateSerializer(serializers.UriHyperlinkedModelSerializer):
@@ -75,6 +83,9 @@ class HostCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Host
         exclude = ('owner',)
+    
+    def validate_tinc(self, attrs, source):
+        return validate_tinc(self, attrs, source)
 
 
 class HostSerializer(HostCreateSerializer):

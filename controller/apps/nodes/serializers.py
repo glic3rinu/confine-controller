@@ -16,6 +16,10 @@ class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = Server
+    
+    def validate_tinc(self, attrs, source):
+        from tinc.serializers import validate_tinc
+        return validate_tinc(self, attrs, source)
 
 
 class DirectIfaceSerializer(serializers.ModelSerializer):
@@ -84,6 +88,11 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
                 Q(roles__is_group_admin=True) | Q(roles__is_node_admin=True),
                 allow_nodes=True, roles__user=user.id)
         return fields
+    
+    def validate_tinc(self, attrs, source):
+        from tinc.serializers import validate_tinc
+        return validate_tinc(self, attrs, source)
+
 
 class NodeSerializer(NodeCreateSerializer):
     class Meta:

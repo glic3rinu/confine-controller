@@ -16,12 +16,11 @@ class ResourceSerializer(serializers.ModelSerializer):
 
 
 class ResourceReqSerializer(serializers.ModelSerializer):
-    res_name = serializers.CharField(source='name')
     unit = serializers.CharField(read_only=True)
     
     class Meta:
         model = ResourceReq
-        fields = ['res_name', 'req', 'unit']
+        fields = ['name', 'req', 'unit']
 
 
 for producer_model in ResourcePlugin.get_producers_models():

@@ -80,13 +80,6 @@ class ResourceReq(BaseResource):
         self.instance.delete(self)
         super(ResourceReq, self).delete(using=using)
 
-    @property
-    def res_name(self):
-        return self.name
-
-    @res_name.setter
-    def res_name(self, value):
-        self.name = value
 
 autodiscover('resources')
 

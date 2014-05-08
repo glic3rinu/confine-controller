@@ -16,7 +16,6 @@ class VlanRes(ResourcePlugin):
     #consumers = ['slices.Slice']
     
     def clean_req(self, resource):
-        print 'hola'
         if resource.req > 1:
             raise ValidationError("Vlan resource request must be <= 1")
     

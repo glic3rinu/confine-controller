@@ -24,8 +24,8 @@ class ResourceReqSerializer(serializers.ModelSerializer):
 
 
 for producer_model in ResourcePlugin.get_producers_models():
-    api.aggregate(producer_model, ResourceSerializer, name='resources', required=False)
+    api.aggregate(producer_model, ResourceSerializer, name='resources', many=True, required=False)
 
 
 for consumer_model in ResourcePlugin.get_consumers_models():
-    api.aggregate(consumer_model, ResourceReqSerializer, name='resources', required=False)
+    api.aggregate(consumer_model, ResourceReqSerializer, name='resources', many=True, required=False)

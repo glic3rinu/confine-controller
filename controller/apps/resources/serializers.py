@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 from api import api, serializers
+from controller.models import Testbed
+from controller.api import TestbedSerializer
 from nodes.models import Node
 
 from . import ResourcePlugin
@@ -24,6 +26,10 @@ class ResourceReqSerializer(serializers.ModelSerializer):
 
 
 for producer_model in ResourcePlugin.get_producers_models():
+    if producer_model == Testbed:
+        TestbedSerializer.base_fields.update({'testbed_resources':
+            ResourceSerializer(source='resources', many=True, required=False)})
+        continue
     api.aggregate(producer_model, ResourceSerializer, name='resources', many=True, required=False)
 
 

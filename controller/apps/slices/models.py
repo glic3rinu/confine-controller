@@ -133,6 +133,8 @@ class Slice(models.Model):
     Describes a slice in the testbed. An slice is a set of resources spread over
     several nodes in a testbed which allows researchers to run experiments over it.
     """
+    MIN_VLAN_TAG = 0x100
+    MAX_VLAN_TAG = 0xfff
     REGISTER = 'register'
     DEPLOY = 'deploy'
     START = 'start'
@@ -184,7 +186,7 @@ class Slice(models.Model):
         if self.set_state in [self.DEPLOY, self.START]:
             if self.isolated_vlan_tag is None and self.allow_isolated:
                 try:
-                    self.isolated_vlan_tag = self._get_vlan_tag()
+                    self.isolated_vlan_tag = Slice._get_vlan_tag()
                 except VlanAllocationError:
                     self.set_state = self.REGISTER
         elif self.isolated_vlan_tag > 0: # REGISTER state
@@ -223,11 +225,11 @@ class Slice(models.Model):
     
     @property
     def max_vlan_nr(self):
-        return int('fff', 16)
+        return Slice.MAX_VLAN_TAG
     
     @property
     def min_vlan_nr(self):
-        return int('100', 16)
+        return Slice.MIN_VLAN_TAG
     
     @property
     def vlan_nr(self):
@@ -237,15 +239,16 @@ class Slice(models.Model):
         else:
             return -1 if self.allow_isolated else None
 
-    def _get_vlan_tag(self):
-        qset = Slice.objects.exclude(isolated_vlan_tag=None).order_by('-isolated_vlan_tag')
+    @classmethod
+    def _get_vlan_tag(cls):
+        qset = cls.objects.exclude(isolated_vlan_tag=None).order_by('-isolated_vlan_tag')
         last_nr = qset.first().isolated_vlan_tag if qset else 0
-        if last_nr < self.min_vlan_nr:
-            return self.min_vlan_nr
-        if last_nr >= self.max_vlan_nr:
+        if last_nr < cls.MIN_VLAN_TAG:
+            return cls.MIN_VLAN_TAG
+        if last_nr >= cls.MAX_VLAN_TAG:
             # Try to recycle old values ( very, very ineficient )
-            for new_nr in range(self.min_vlan_nr, self.max_vlan_nr):
-                if not Slice.objects.filter(vlan_nr=new_nr).exists():
+            for new_nr in range(cls.MIN_VLAN_TAG, cls.MAX_VLAN_TAG):
+                if not cls.objects.filter(vlan_nr=new_nr).exists():
                     return new_nr
             raise VlanAllocationError("No VLAN address space left.")
         return last_nr + 1
@@ -342,6 +345,7 @@ class SliverDefaults(models.Model):
             save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('data', 'overlay'))
         super(SliverDefaults, self).save(*args, **kwargs)
+
 
 class Sliver(models.Model):
     """

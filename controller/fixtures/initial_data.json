@@ -1,0 +1,12 @@
+[
+    {
+        "model": "controller.testbed",
+        "pk": 1,
+        "fields": {}
+    },
+    {
+        "model": "controller.testbedparams",
+        "pk": 1,
+        "fields": {}
+    }
+]

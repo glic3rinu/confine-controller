@@ -67,3 +67,22 @@ def __init__(self, form, field, is_first, model_admin=None):
         method = getattr(model_admin, field, None)
         self.field['help_text'] = getattr(method, 'help_text', '')
 AdminReadonlyField.__init__ = __init__
+
+
+# Testbed admin class
+from controller.models import Testbed, TestbedParams
+from controller.utils.singletons.admin import SingletonModelAdmin
+from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+
+class TestbedParamsInline(PermissionTabularInline):
+    model = TestbedParams
+
+class TestbedAdmin(SingletonModelAdmin, PermissionModelAdmin):
+    model = Testbed
+    inlines = [TestbedParamsInline]
+
+    def has_delete_permission(self, *args, **kwargs):
+        """ It doesn't make sense to delete the testbed """
+        return False
+
+admin.site.register(Testbed, TestbedAdmin)

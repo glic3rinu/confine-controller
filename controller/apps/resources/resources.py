@@ -9,7 +9,7 @@ class VlanRes(ResourcePlugin):
     unit = 'tags'
     max_req = 1
     dflt_req = 0
-    producers = [] #TODO: implement testbed resources
+    producers = ['controller.Testbed']
     # Disabling VLAN consumers because this resource is managed directly
     # on Slice class. In future a generic management will be used but now
     # is fully implemented. See feature #46 note-56 for more information.

@@ -345,6 +345,15 @@ class SliverDefaults(models.Model):
             save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('data', 'overlay'))
         super(SliverDefaults, self).save(*args, **kwargs)
+    
+    # FIXME can be removed when api.aggregate supports nested serializers
+    @property
+    def slice_resources(self):
+        return self.slice.resources
+    
+    @slice_resources.setter
+    def slice_resources(self, value):
+        self.slice.resources = value
 
 
 class Sliver(models.Model):

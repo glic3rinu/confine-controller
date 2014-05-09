@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import json
 import six
 
+from controller.utils.apps import is_installed
 from rest_framework.compat import smart_text
 
 from api import serializers, exceptions
@@ -110,6 +111,10 @@ class SliverDefaultsSerializer(serializers.ModelSerializer):
     data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
+    # FIXME refactor move to resources app when api.aggregate supports nested serializers
+    if is_installed('resources'):
+        from resources.serializers import ResourceReqSerializer
+        resources = ResourceReqSerializer(source='slice_resources', many=True, required=False)
 
     class Meta:
         model = SliverDefaults

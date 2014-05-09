@@ -10,11 +10,12 @@ from .models import Resource, ResourceReq
 
 
 class ResourceSerializer(serializers.ModelSerializer):
+    avail = serializers.Field()
     unit = serializers.CharField(read_only=True)
     
     class Meta:
         model = Resource
-        fields = ['name', 'max_req', 'dflt_req', 'unit']
+        fields = ['name', 'max_req', 'dflt_req', 'unit', 'avail']
 
 
 class ResourceReqSerializer(serializers.ModelSerializer):

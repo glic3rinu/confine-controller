@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 
+from slices.models import Slice
 from . import ResourcePlugin, settings
 
 
@@ -33,6 +34,11 @@ class VlanRes(ResourcePlugin):
         obj = resource.content_object
         obj.vlan_nr = None
         obj.update_set_state()
+    
+    def available(self, resource):
+        total = Slice.MAX_VLAN_TAG - Slice.MIN_VLAN_TAG
+        assigned = Slice.objects.exclude(isolated_vlan_tag=None).count()
+        return total - assigned
 
 
 class DiskRes(ResourcePlugin):

@@ -28,6 +28,10 @@ class ResourcePlugin(object):
     def delete(self, resource):
         pass
     
+    def available(self, resource):
+        """ Get the number of unused resources. """
+        return None
+    
     @classmethod
     def get_producers_models(cls):
         return cls._get_related_models('producers')

@@ -59,6 +59,18 @@ class Resource(BaseResource):
     def clean(self):
         super(Resource, self).clean()
         self.instance.clean(self)
+    
+    @property
+    def avail(self):
+        """
+        The currently unused amount of units of this resource
+        available in the testbed to be allocated to slices (may
+        be null if unknown).
+        """
+        # avoid calling this property for a non instantiated resource
+        if self.name:
+            return self.instance.available(self)
+        return None
 
 
 class ResourceReq(BaseResource):

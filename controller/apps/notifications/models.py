@@ -30,8 +30,10 @@ class Notification(PluginModel):
         email_from = None
         email_to = self.instance.get_recipients(obj)
         context = Context(self.instance.get_context(obj))
-        subject = Template(self.instance.default_subject).render(context)
-        message = Template(self.instance.default_message).render(context)
+        raw_subject = self.subject or self.instance.default_subject
+        raw_message = self.message or self.instance.default_message
+        subject = Template(raw_subject).render(context)
+        message = Template(raw_message).render(context)
         send_mail(subject, message, email_from, email_to)
         self.delivered.create(content_object=obj)
     

@@ -15,17 +15,17 @@ run_notifications.verbose_name = 'Run'
 run_notifications.description = 'Execute this notifications and send alerts if needed.'
 
 
-def upgrade_notifications(modeladmin, request, queryset):
+def restore_notifications(modeladmin, request, queryset):
     for num, notification in enumerate(queryset):
         notification.subject = notification.instance.default_subject
         notification.message = notification.instance.default_message
         notification.save()
-    msg = '%i notifications have been upgraded.' % (num+1)
+    msg = '%i notifications have been restored.' % (num+1)
     modeladmin.message_user(request, msg)
-upgrade_notifications.short_description = 'Upgrade subject and message'
-upgrade_notifications.url_name = 'upgrade'
-upgrade_notifications.verbose_name = 'Upgrade message'
-upgrade_notifications.description = ('Override current subject and message for '
+restore_notifications.short_description = 'Restore subject and message'
+restore_notifications.url_name = 'restore'
+restore_notifications.verbose_name = 'Restore default message'
+restore_notifications.description = ('Override current subject and message for '
     'the one provided by default.')
 
 

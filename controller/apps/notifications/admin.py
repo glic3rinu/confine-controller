@@ -10,7 +10,7 @@ from controller.admin.utils import wrap_admin_view
 from controller.utils.plugins.actions import sync_plugins_action
 
 from .actions import (enable_selected, disable_selected, run_notifications,
-    upgrade_notifications)
+    restore_notifications)
 from .models import Notification, Delivered
 
 
@@ -38,8 +38,8 @@ class NotificationAdmin(ChangeViewActions):
     readonly_fields = ('label', 'module', 'description')
     list_filter = ('is_active',)
     inlines = [DeliveredInline]
-    actions = [enable_selected, disable_selected, run_notifications, upgrade_notifications]
-    change_view_actions = [run_notifications, upgrade_notifications]
+    actions = [enable_selected, disable_selected, run_notifications, restore_notifications]
+    change_view_actions = [run_notifications, restore_notifications]
     
     class Media:
         css = {

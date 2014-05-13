@@ -11,10 +11,11 @@
     <ul>
         <li><b>Download:</b> <a href={{ build.image.url }}>{{ build.image_name }}</a> </li>
         <ul>
+            <li>Build State: <span style="font-weight: bold; color:{{ state_color}}">{{ build.state }}</span></li>
             <li>Build Date: {{ build.date }}</li>
             <li>Version: {{ build.version }}</li>
             <li>SHA256: {{ build.image_sha256 }}</li>
-            <li>Base Image: {{ base_image }}</li>
+            <li>Base Image: <a href="{{ base_image.image.url|default:'#' }}">{{ base_image.name }}</a></li>
         </ul>
     </ul>
     <div style="margin-bottom:20px; margin-top:30px;">

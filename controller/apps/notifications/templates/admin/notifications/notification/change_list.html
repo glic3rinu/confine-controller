@@ -2,10 +2,15 @@
 {% load admin_urls %}
 
 
-{% block object-tools-items %}
-<li>
-  <a href="{% url 'admin:notifications_notification_sync_plugins' %}" class="historylink">Sync notifications</a>
-</li>
+{% block object-tools %}
+  <ul class="object-tools">
+    {# Always show object-tools independently of has_add_permissions #}
+    {% block object-tools-items %}
+      <li>
+        <a href="{% url 'admin:notifications_notification_sync_plugins' %}" class="historylink">Sync notifications</a>
+      </li>
+    {% endblock %}
+  </ul>
 {% endblock %}
 
 

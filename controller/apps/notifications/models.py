@@ -69,4 +69,11 @@ except:
 else:
     if Notification._meta.db_table in connection.introspection.get_table_list(cursor):
         for notification in Notification.objects.all():
-            notification.hook_delivered_generic_relation()
+            try:
+                instance = notification.instance
+            except AttributeError:
+                # Catch and purge notification that exists in DB
+                # but not in code (doesn't have plugin)
+                notification.delete()
+            else:
+                notification.hook_delivered_generic_relation()

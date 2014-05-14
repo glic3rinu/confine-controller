@@ -63,6 +63,10 @@ class NotificationAdmin(ChangeViewActions):
             kwargs['widget'] = forms.TextInput(attrs={'size':'118'})
         return super(NotificationAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
+    def has_add_permission(self, request):
+        """Notifications should be defined as plugins."""
+        return False
+    
     def sync_plugins_view(self, request):
         sync_plugins_action('notifications')(self, request, None)
         return redirect('admin:notifications_notification_changelist')

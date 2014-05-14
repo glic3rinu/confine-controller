@@ -104,7 +104,7 @@ class ConfigPluginInline(admin.TabularInline):
 
 class BuildAdmin(admin.ModelAdmin):
     list_display = [
-        'pk', 'node', 'version', colored('state', STATE_COLORS), 'task_link',
+        'pk', 'node', 'version', 'colored_state', 'task_link',
         'image_link', 'date'
     ]
     list_display_links = ['pk', 'node']
@@ -120,6 +120,10 @@ class BuildAdmin(admin.ModelAdmin):
         'build_date', 'task_link', 'task_id', 'base_image'
     ]
     inlines = [BuildFileInline]
+    
+    def colored_state(self, build):
+        return colored('state', STATE_COLORS)(build)
+    colored_state.short_description = "State"
     
     def build_date(self, build):
         return build.date.strftime("%Y-%m-%d %H:%M:%S")

@@ -3,8 +3,9 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <script src="{% static "admin/js/jquery.js" %}" type="text/javascript"></script>
     <link rel="stylesheet" href="{% static "controller/css/jquery-ui.css" %}" />
+    <link rel="stylesheet" href="{% static "firmware/css/firmware-build.css" %}" />
+    <script src="{% static "admin/js/jquery.js" %}" type="text/javascript"></script>
     <script src="{% static "controller/js/jquery-ui.js" %}" type="text/javascript"></script>
     <script src="{% static "firmware/progress_bar.js" %}" type="text/javascript"></script>
     <script>
@@ -14,8 +15,12 @@
 
 {% block content %}
     {{ block.super }}
-    <p></p>
     <div id="description"></div>
     <div id="progressbar"></div>
+    <div id="firmware-warning">
+        It's your firmware build taking too long?
+        <a href="{% url "admin:nodes_node_firmware_delete" node.pk %}">Delete it!</a>
+        and try again.
+    </div>
 {% endblock %}
 

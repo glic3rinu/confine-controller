@@ -249,8 +249,13 @@ class Slice(models.Model):
                 raise ValidationError("Vlan can not be requested in state != register")
     
     def renew(self):
-        self.expires_on = get_expires_on()
+        """Renew expires_on date, except has alreday reached the maximum"""
+        new_expires_on = get_expires_on()
+        if self.expires_on == new_expires_on.date():
+            return False
+        self.expires_on = new_expires_on
         self.save()
+        return True
     
     def reset(self):
         self.instance_sn += 1

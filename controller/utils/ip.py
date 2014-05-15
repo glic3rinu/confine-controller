@@ -1,13 +1,3 @@
-def lsb(u16):
-    """ Less significant bits """
-    return '%.2x' % (u16 & 0xff)
-
-
-def msb(u16):
-    """ More significant bits """
-    return '%.2x' % (u16 >> 8)
-
-
 def int_to_hex_str(number, digits):
     """ Convert an integer number to a HEX string of length digits """
     hex_str = ('%.' + str(digits) + 'x') % number

@@ -5,8 +5,7 @@ import six
 
 from rest_framework.compat import smart_text
 
-from api import serializers, exceptions
-from api.validators import validate_properties
+from api import serializers
 from nodes.settings import NODES_NODE_ARCHS
 
 from .models import Slice, Sliver, Template, SliverIface
@@ -47,7 +46,7 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field(source='api_id')
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
-    properties = serializers.PropertyField(default={})
+    properties = serializers.PropertyField()
     exp_data_uri = FakeFileField(field='exp_data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
@@ -75,11 +74,8 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         """ Check if first interface is of type private """
         interfaces = attrs.get(source, [])
         if 'private' not in [iface.type for iface in interfaces]:
-           raise exceptions.ParseError(detail='At least one private interface is required.')
+           raise serializers.ValidationError('At least one private interface is required.')
         return attrs
-
-    def validate_properties(self, attrs, source):
-        return validate_properties(self, attrs, source)
 
 
 class SliverDetailSerializer(SliverSerializer):
@@ -94,7 +90,7 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     instance_sn = serializers.IntegerField(read_only=True)
     new_sliver_instance_sn = serializers.IntegerField(read_only=True)
     vlan_nr = serializers.IntegerField(read_only=True)
-    properties = serializers.PropertyField(default={})
+    properties = serializers.PropertyField()
     exp_data_uri = FakeFileField(field='exp_data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
@@ -108,9 +104,6 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
         """ hack for implementing dynamic file_uri's on FakeFile """
         self.__object__ = obj
         return super(SliceCreateSerializer, self).to_native(obj)
-
-    def validate_properties(self, attrs, source):
-        return validate_properties(self, attrs, source)
 
 
 class SliceSerializer(SliceCreateSerializer):

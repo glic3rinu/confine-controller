@@ -19,7 +19,7 @@ from users.helpers import filter_group_queryset
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
-from .models import DirectIface, Island, Node, NodeProp, Server
+from .models import DirectIface, Island, Node, NodeProp, Server, ServerProp
 from .utils import get_mgmt_backend_class
 
 
@@ -200,8 +200,18 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                 form_url=form_url, extra_context=extra_context)
 
 
+class ServerPropInline(PermissionTabularInline):
+    model = ServerProp
+    extra = 1
+    verbose_name_plural = mark_safe('Server properties %s' % docstring_as_help_tip(ServerProp))
+    
+    class Media:
+        js = ('nodes/js/collapsed_node_properties.js',)
+
+
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
+    inlines = [ServerPropInline]
     
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete the server """

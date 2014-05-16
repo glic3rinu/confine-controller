@@ -143,7 +143,7 @@ def wrap_admin_view(modeladmin, view):
 
 def docstring_as_help_tip(cls):
     """ return cls docstring as html help tip for use in admin """
-    docstring = cls.__doc__.strip()
+    docstring = ' '.join([line.strip() for line in cls.__doc__.splitlines()])
     img = ('<img src="/static/admin/img/icon-unknown.gif" class="help help-tooltip" '
            'width="10" height="10" alt="(%s)" title="%s"/>')
     return mark_safe(img % (docstring, docstring))

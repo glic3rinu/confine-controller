@@ -10,6 +10,8 @@ from .models import DirectIface, Island, Node, Server
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
+    properties = serializers.PropertyField()
+    
     class Meta:
         model = Server
 

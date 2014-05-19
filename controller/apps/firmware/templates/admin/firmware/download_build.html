@@ -19,30 +19,57 @@
     </ul>
     <div style="margin-bottom:20px; margin-top:30px;">
     <fieldset class="module aligned">
+    {% if build.kwargs_dict.usb_image %}{# usb plug-in #}
+        <h2>USB-installer instructions</h2>
+        <h4>Write the image to a USB drive</h4>
+        <ol>
+            <li>Plug a USB stick in your computer.</li>
+            <li>Write the image into the USB (Warning: <strong>change sdX for
+                the USB device</strong> (something like sdb):
+            {% code 'bash'%}gunzip <image.bin.gz> -c | dd of=/dev/sdX bs=4M ; sync{% endcode %}
+            </li>
+        </ol>
+        <h4>Install the firmware image</h4>
+        <ol>
+            <li>Plug the USB stick in the research device</li>
+            <li>Boot the RD (the installation will start automatically)</li>
+        </ol>
+    {% else %}{# standard instrucctions #}
         <h2>Instructions</h2>
         <h4>Upload the firmware image</h4>
-        <p>The firmware can be dowloaded from this page into your computer. Then upload the firmware to the node, for instance by using <code>scp</code> to copy the image into the node's temporary directory:</p>
+        <p>The firmware can be downloaded from this page into your computer. Then upload the firmware to the node, for instance by using <code>scp</code> to copy the image into the node's temporary directory:</p>
+        {% code 'bash' %}scp {{ build.image_name }} root@NODE_ADDRESS:/tmp{% endcode %}
+
+        <p>Yoy may use whatever <code>NODE_ADDRESS</code> reachable from your computer. If the node is running the CONFINE node system software and both the node and your computer are on the testbed management network but at different locations, you may use the node's management address:</p>
         {% code 'bash' %}scp {{ build.image_name }} root@[{{ node.mgmt_net.addr }}]:/tmp{% endcode %}
-        
+
+        <p>If the node is running the CONFINE node system software and it is connected to the same local link as your computer, you may use the node's recovery address by first adding your computer to that network:</p>
+        {% code 'bash' %}# Whatever address after "...2000:" works.
+ip addr add fdbd:e804:6aa9:1:2000::1234/64 dev eth0
+scp {{ build.image_name }} root@[fdbd:e804:6aa9:1::2]:/tmp{% endcode %}
+
+        <p>See <a href="https://wiki.confine-project.eu/arch:addressing">Addressing in CONFINE</a> for other addresses available in CONFINE nodes.</p>
+
         <h4>Install the firmware image</h4>
         <p style="margin-top:1em">You can use <code>ssh</code> to access the node and enter its temporary directory:</p>
-        {% code 'bash' %}ssh root@{{ node.mgmt_net.addr }}
+        {% code 'bash' %}ssh root@NODE_ADDRESS
 cd /tmp{% endcode %}
 
         <p style="margin-top:1em">The following command can be used for flashing
         this image (remember to change the <strong>destination device</strong>). <br/>
         <strong>WARNING!</strong> Be sure you execute these commands 
         <strong>INSIDE</strong> the node, not in your own computer!</p>
-        
+
         <ol type="A">
-            <li>If the current operating system of the node is not CONFINE execute:
-            {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}<br/></li>
-            <li>If the current operating system running in the node is CONFINE execute:
+            <li>If the node is already running the CONFINE node system software, using <code>confine.sysupgrade</code> is highly recommended:
             {% code 'bash' %}# This command will upgrade your node:
 confine.sysupgrade -n {{ build.image_name }}{% endcode %}</li>
+            <li>Otherwise executing the following command may work for you:
+            {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}<br/></li>
         </ol>
 
         <p>The CONFINE wiki contains more information on <a href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a>.</p>
+    {% endif %}{# end instructions #}
     </fieldset>
     </div>
     </ul>

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import ast
 import os
 import re
 from hashlib import sha256
@@ -93,7 +94,12 @@ class Build(models.Model):
     @property
     def image_name(self):
         return self.image.name.split('/')[-1]
-    
+
+    @property
+    def kwargs_dict(self):
+        """ Return stored kwargs as a python dictionary """
+        return ast.literal_eval(self.kwargs)
+
     @property
     @cached
     def db_task(self):

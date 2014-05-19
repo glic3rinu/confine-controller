@@ -146,7 +146,9 @@ class Build(models.Model):
             Build.BUILDING: "Your task is now being processed, this can take a while.",
             Build.AVAILABLE: "Firmware available for download.",
             Build.DELETED: "The firmware is no longer available. Do you want to build a new one?",
-            Build.OUTDATED: "The existing firmware is out-dated. You can build a new one.",
+            Build.OUTDATED: "The existing firmware is out-dated. Although is "
+                            "available to download, maybe you want to delete it "
+                            "and build an updated one.",
             Build.FAILED: "The last build has failed. The error logs are monitored "
                           "and this issue will be fixed. But you can try again anyway.",
         }

@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy
 from controller.utils.plugins.actions import sync_plugins_action
 
 from .forms import BaseImageForm, OptionalFilesForm
-from .models import Build, Config
+from .models import BaseImage, Build, Config
 
 
 @transaction.atomic
@@ -103,7 +103,7 @@ def get_firmware(modeladmin, request, queryset):
         state = build.state
     
     # Build a new firmware
-    if not state or state in [Build.DELETED, Build.OUTDATED, Build.FAILED]:
+    if not state or state in [Build.DELETED, Build.FAILED]:
         title = "Generate firmware for research device %s" % node_link
         if state == Build.FAILED:
             msg = ("<b>The last build for this research device has failed</b>. "
@@ -123,8 +123,14 @@ def get_firmware(modeladmin, request, queryset):
         "build": build, })
     
     # Available for download
-    if state in [Build.AVAILABLE]:
-        context['base_image'] = base_images.get(image=build.base_image)
+    if state in [Build.AVAILABLE, Build.OUTDATED]:
+        # avoid circular imports
+        from .admin import STATE_COLORS
+        context['state_color'] = STATE_COLORS[state]
+        try:
+            context['base_image'] = base_images.get(image=build.base_image)
+        except BaseImage.DoesNotExist:
+            context['base_image'] = build.base_image
         template = 'admin/firmware/download_build.html'
         return TemplateResponse(request, template, context, current_app=site_name)
     

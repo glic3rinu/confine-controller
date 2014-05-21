@@ -26,29 +26,18 @@
     </fieldset>
     <fieldset class="module aligned">
         <h2>Optional files</h2>
+        {% if node.files.exists %}
+        <div class="help">You can manage the stored values on
+            <a href="{% url "admin:nodes_node_change" node.id %}">node change view</a>.
+            Unmark the files that you want to handle manually.
+        </div>
+        {% endif %}
         {{ opt_form.non_field_errors }}
         {% for field in opt_form %}
         <div class="form-row ">
             <div>
             {{ field.errors }}
             {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
-            <p class="help">{{ field.help_text|safe }}</p>
-            </div>
-        </div>
-        {% endfor %}
-    </fieldset>
-    <fieldset class="module aligned">
-        <h2>Node private keys</h2>
-        {{ key_form.non_field_errors }}
-        {% for field in key_form %}
-        <div class="form-row ">
-            <div >
-            {{ field.errors }}
-            {% if field|is_checkbox %}
-                {{ field }} <label for="{{ field.id_for_label }}" class="vCheckboxLabel">{{ field.label }}</label>
-            {% else %}
-                {{ field.label_tag }} {{ field }}
-            {% endif %}
             <p class="help">{{ field.help_text|safe }}</p>
             </div>
         </div>

@@ -56,7 +56,6 @@ def get_firmware(modeladmin, request, queryset):
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         'node': node,
-        'key_form': NodeKeysForm(node=node),
         'img_form': BaseImageForm(arch=node.arch),
         'opt_form': OptionalFilesForm(prefix='opt'),
         'plugins': plugins,
@@ -83,11 +82,9 @@ def get_firmware(modeladmin, request, queryset):
                 else:
                     all_valid = False
         # base image and optional files forms
-        key_form = NodeKeysForm(data=request.POST, node=node)
         img_form = BaseImageForm(data=request.POST, arch=node.arch)
         opt_form = OptionalFilesForm(request.POST, prefix='opt')
         # validate the two forms to get possible errors
-        all_valid &= key_form.is_valid()
         img_form_valid = img_form.is_valid() 
         opt_form_valid = opt_form.is_valid()
         if all_valid and img_form_valid and opt_form_valid:

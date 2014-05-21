@@ -4,10 +4,6 @@
 {% block extrahead %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" media="screen" href="{% static "controller/css/default.css" %}"/>
-    <script type="text/javascript" src="/admin/jsi18n/"></script>
-    <script type="text/javascript" src="{% static "admin/js/jquery.js" %}"></script>
-    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
-    <script type="text/javascript" src="{% static "admin/js/collapse.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -21,11 +17,15 @@
             <li>SHA256: {{ build.image_sha256 }}</li>
             <li>Base Image: <a href="{{ base_image.image.url|default:'#' }}">{{ base_image.name }}</a></li>
         </ul>
+        {% if node.files.exists %}
+        <li>
+            <div class="help">You can manage the stored values on
+                <a href="{% url "admin:nodes_node_change" node.id %}">node change view</a>.
+                Unmark the files that you want to handle manually.
+            </div>
+        </li>
+        {% endif %}
     </ul>
-    <fieldset class="module aligned  collapse">
-        <h2>Stored node keys</h2>
-        {{ key_form }}
-    </fieldset>
     <div style="margin-bottom:20px; margin-top:30px;">
     <fieldset class="module aligned">
     {% if build.kwargs_dict.usb_image %}{# usb plug-in #}

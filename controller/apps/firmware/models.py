@@ -266,29 +266,21 @@ class Config(SingletonModel):
     def eval_files(self, node, exclude=[], **kwargs):
         """ Evaluates all ConfigFiles python expressions """
         files = []
-        
         # handle special case of #383 files
-        for path in NodeKeys.KEY_FILES:
-            try:
-                nb_file = node.files.get(path=path)
-            except node.files.model.DoesNotExist:
-                pass # not exists a previous value so cannot be restored
-            else:
-                ## restore and exclude of generation
-                config = ConfigFile.objects.get(path=path)
-                if config.pk in exclude:
-                    continue
-                exclude.append(config.pk)
-                files.append(BuildFile(path=nb_file.path, content=nb_file.content, config=config))
-
         for config_file in self.files.active().exclude(pk__in=exclude):
-            new_files = config_file.get_files(node, files=files, **kwargs)
+            try:
+                nb_file = node.files.get(path=config_file.path)
+            except node.files.model.DoesNotExist:
+                # not exists a previous value so cannot be restored
+                new_files = config_file.get_files(node, files=files, **kwargs)
+                # create or update stored key files
+                if config_file.path in NodeKeys.KEY_FILES:
+                    node_file, _ = node.files.get_or_create(path=config_file.path)
+                    node_file.content = new_files[0].content
+                    node_file.save()
+            else:
+                new_files = [BuildFile(path=nb_file.path, content=nb_file.content, config=config_file)]
             files.extend(new_files)
-            # create or update stored key files
-            if config_file.path in NodeKeys.KEY_FILES:
-                node_file, _ = node.files.get_or_create(path=config_file.path)
-                node_file.content = new_files[0].content
-                node_file.save()
         return files
     
     def render_uci(self, node, sections=None):
@@ -496,7 +488,7 @@ class NodeBuildFile(models.Model):
     Allows reusing BuildFiles between firmware builds.
     """
     node = models.ForeignKey('nodes.Node', related_name='files')
-    path = models.CharField(max_length=256)
+    path = models.CharField(max_length=256) #XXX replace with ConfigFile.id (foreign key)?
     content = models.TextField()
     
     def __unicode__(self):

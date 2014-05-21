@@ -10,10 +10,11 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
 from nodes.models import Node
+from permissions.admin import PermissionTabularInline
 
 from .actions import get_firmware, sync_plugins
 from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile, ConfigPlugin,
-    ConfigFileHelpText, BuildFile)
+    ConfigFileHelpText, BuildFile, NodeBuildFile)
 from .views import build_info_view, delete_build_view
 
 
@@ -188,18 +189,45 @@ class ConfigAdmin(ChangeViewActions, SingletonModelAdmin):
                 extra_context=extra_context)
 
 
+class NodeBuildFileInline(PermissionTabularInline):
+    """
+    Provide a form to retrieve or provide node private keys
+    allowing keeping them between firmware generations.
+    """
+    model = NodeBuildFile
+    extra = 0
+    fields = ('path', 'content')
+    readonly_fields = ('path',)
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def get_queryset(self, request):
+        """
+        Hide objects when user has no enought rights.
+        Only superusers or node admins can view sensible data.
+        """
+        qs = super(NodeBuildFileInline, self).get_queryset(request)
+        node = qs.first().node if qs.first() else None
+        if (request.user.is_superuser or node and
+            node.group.has_roles(request.user, roles=['group_admin', 'node_admin'])):
+            return qs
+        return qs.none()
+
+
+
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Build, BuildAdmin)
 
 
 # Monkey-Patching Section
 
+insertattr(Node, 'inlines', NodeBuildFileInline)
 insertattr(Node, 'actions', get_firmware)
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action(get_firmware)
 
 old_get_urls = node_modeladmin.get_urls
-
 def get_urls(self):
     extra_urls = patterns("", 
         url("^(?P<node_id>\d+)/firmware/info/$",

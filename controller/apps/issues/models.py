@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from controller.models.utils import generate_chainer_manager
 from controller.utils import send_email_template
@@ -82,7 +84,9 @@ class Ticket(models.Model):
         (PRIVATE, 'Private'),
     )
     
-    created_by = models.ForeignKey(get_user_model(), related_name='created_tickets')
+    created_by = models.ForeignKey(get_user_model(), null=True, blank=True,
+            related_name='created_tickets', on_delete=models.SET_NULL)
+    created_by_name = models.CharField(max_length=60)
     group = models.ForeignKey(Group, null=True, blank=True, related_name='assigned_tickets')
     owner = models.ForeignKey(get_user_model(), null=True, blank=True,
             related_name='owned_tickets', verbose_name='assigned to')
@@ -191,7 +195,9 @@ class Ticket(models.Model):
 
 class Message(models.Model):
     ticket = models.ForeignKey('issues.Ticket', related_name='messages')
-    author = models.ForeignKey(get_user_model())
+    author = models.ForeignKey(get_user_model(), null=True, blank=True,
+             on_delete=models.SET_NULL)
+    author_name = models.CharField(max_length=60)
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
     
@@ -214,3 +220,17 @@ class TicketTracker(models.Model):
     
     class Meta:
         unique_together = (('ticket', 'user'),)
+
+
+@receiver(pre_delete, sender=get_user_model())
+def update_author_data(sender, instance, **kwargs):
+    """save author info for using when user is deleted (#289)"""
+    # update tickets
+    for ticket in instance.created_tickets.all():
+        ticket.created_by_name = ticket.created_by.name
+        ticket.save()
+    
+    # update messages
+    for msg in instance.message_set.all():
+        msg.author_name = msg.author.name
+        msg.save()

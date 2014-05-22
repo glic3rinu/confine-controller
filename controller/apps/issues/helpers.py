@@ -1,3 +1,5 @@
+from controller.admin.utils import get_admin_link
+
 def filter_actions(modeladmin, ticket, request):
     if not hasattr(modeladmin, 'change_view_actions_backup'):
         modeladmin.change_view_actions_backup = list(modeladmin.change_view_actions)
@@ -34,3 +36,11 @@ def get_ticket_changes(modeladmin, request, ticket):
             if old_value != new_value:
                 changes[attr] = (old_value, new_value)
     return changes
+
+
+def display_author(obj, field_name, href_name=''):
+    """Get link or stored name if user doesn't exists (#289)"""
+    author = getattr(obj, field_name)
+    if author is None:
+        return '<span class="author">%s</span>' % getattr(obj, field_name + '_name')
+    return get_admin_link(author)

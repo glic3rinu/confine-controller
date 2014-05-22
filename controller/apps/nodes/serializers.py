@@ -3,14 +3,15 @@ from __future__ import absolute_import
 import json
 import six
 
-from api import serializers, exceptions
-from api.validators import validate_properties
+from api import serializers
 
 from . import settings
 from .models import DirectIface, Island, Node, Server
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
+    properties = serializers.PropertyField()
+    
     class Meta:
         model = Server
 
@@ -48,7 +49,7 @@ FW_CONFIG_FIELDS = ('local_iface', 'priv_ipv4_prefix', 'sliver_pub_ipv6',
     'sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'sliver_mac_prefix')
 class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
-    properties = serializers.PropertyField(default={})
+    properties = serializers.PropertyField()
     arch = serializers.ChoiceField(choices=settings.NODES_NODE_ARCHS, required=True)
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
@@ -80,9 +81,6 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
             fields['group'].queryset = queryset.filter(allow_nodes=True,
                                         roles__user=user.id, roles__is_group_admin=True)
         return fields
-    
-    def validate_properties(self, attrs, source):
-        return validate_properties(self, attrs, source)
 
 class NodeSerializer(NodeCreateSerializer):
     class Meta:

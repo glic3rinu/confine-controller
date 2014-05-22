@@ -221,12 +221,8 @@ class Node(models.Model):
         self.save()
 
 
-class NodeProp(models.Model):
-    """ 
-    A mapping of (non-empty) arbitrary node property names to their (string) 
-    values.
-    """
-    node = models.ForeignKey(Node, related_name='properties')
+class BaseProp(models.Model):
+    """Base model for node and sever properties"""
     name = models.CharField(max_length=32,
             help_text='Per node unique single line of free-form text with no '
                       'whitespace surrounding it.',
@@ -234,12 +230,23 @@ class NodeProp(models.Model):
     value = models.CharField(max_length=256)
     
     class Meta:
-        unique_together = ('node', 'name')
-        verbose_name = 'node property'
-        verbose_name_plural = 'node properties'
+        abstract = True
     
     def __unicode__(self):
         return self.name
+
+
+class NodeProp(BaseProp):
+    """
+    A mapping of (non-empty) arbitrary node property names to their (string)
+    values.
+    """
+    node = models.ForeignKey(Node, related_name='properties')
+    
+    class Meta:
+        unique_together = ('node', 'name')
+        verbose_name = 'node property'
+        verbose_name_plural = 'node properties'
 
 
 class DirectIface(models.Model):
@@ -280,6 +287,19 @@ class Server(SingletonModel):
     @cached
     def mgmt_net(self):
         return get_mgmt_backend_class()(self)
+
+
+class ServerProp(BaseProp):
+    """
+    A mapping of (non-empty) arbitrary server property names to their (string)
+    values.
+    """
+    server = models.ForeignKey(Server, related_name='properties')
+    
+    class Meta:
+        unique_together = ('server', 'name')
+        verbose_name = 'server property'
+        verbose_name_plural = 'server properties'
 
 
 class Island(models.Model):

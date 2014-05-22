@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.utils import timezone
 
 from notifications import Notification
+from users.models import Roles
 
 from .models import Slice
 from .settings import SLICES_SLICE_EXP_WARN
@@ -27,7 +28,7 @@ class SliceExpiration(Notification):
         return obj.expires_on <= threshold
     
     def get_recipients(self, obj):
-        return obj.group.get_emails(role='admin')
+        return obj.group.get_emails(roles=[Roles.GROUP_ADMIN, Roles.SLICE_ADMIN])
     
     def get_context(self, obj):
         context = super(SliceExpiration, self).get_context(obj)

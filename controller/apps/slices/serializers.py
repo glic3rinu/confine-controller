@@ -6,8 +6,7 @@ import six
 from controller.utils.apps import is_installed
 from rest_framework.compat import smart_text
 
-from api import serializers, exceptions
-from api.validators import validate_properties
+from api import serializers
 from nodes.settings import NODES_NODE_ARCHS
 
 from .models import Slice, Sliver, SliverDefaults, SliverIface, Template
@@ -60,7 +59,7 @@ class SliverIfaceSerializer(serializers.ModelSerializer):
 class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field(source='api_id')
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
-    properties = serializers.PropertyField(default={})
+    properties = serializers.PropertyField()
     data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
@@ -92,11 +91,8 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         """ Check if first interface is of type private """
         interfaces = attrs.get(source, [])
         if 'private' not in [iface.type for iface in interfaces]:
-           raise exceptions.ParseError(detail='At least one private interface is required.')
+           raise serializers.ValidationError('At least one private interface is required.')
         return attrs
-
-    def validate_properties(self, attrs, source):
-        return validate_properties(self, attrs, source)
 
 
 class SliverDetailSerializer(SliverSerializer):
@@ -130,7 +126,7 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     expires_on = serializers.DateTimeField(read_only=True)
     instance_sn = serializers.IntegerField(read_only=True)
-    properties = serializers.PropertyField(default={})
+    properties = serializers.PropertyField()
     isolated_vlan_tag = serializers.IntegerField(read_only=True)
     sliver_defaults = SliverDefaultsSerializer()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
@@ -149,9 +145,6 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     class Meta:
         model = Slice
         exclude = ('set_state',)
-
-    def validate_properties(self, attrs, source):
-        return validate_properties(self, attrs, source)
 
 
 class SliceSerializer(SliceCreateSerializer):

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import ast
 import os
 import re
 from hashlib import sha256
@@ -9,6 +10,7 @@ from django import template
 from django.conf import settings as project_settings
 from django.core import validators
 from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
 from django.template import Context
 from django.utils.functional import cached_property
@@ -22,7 +24,7 @@ from controller.models.fields import MultiSelectField
 from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
 from controller.utils.functional import cached
-from nodes.models import Server
+from nodes.models import Node, Server
 from nodes.settings import NODES_NODE_ARCHS
 from controller.utils.plugins.models import PluginModel
 from controller.utils.singletons.models import SingletonModel
@@ -93,7 +95,12 @@ class Build(models.Model):
     @property
     def image_name(self):
         return self.image.name.split('/')[-1]
-    
+
+    @property
+    def kwargs_dict(self):
+        """ Return stored kwargs as a python dictionary """
+        return ast.literal_eval(self.kwargs)
+
     @property
     @cached
     def db_task(self):
@@ -119,7 +126,6 @@ class Build(models.Model):
             except IOError:
                 return self.DELETED
             else: 
-                config = Config.objects.get()
                 if self.match_config:
                     return self.AVAILABLE
                 else:
@@ -140,7 +146,9 @@ class Build(models.Model):
             Build.BUILDING: "Your task is now being processed, this can take a while.",
             Build.AVAILABLE: "Firmware available for download.",
             Build.DELETED: "The firmware is no longer available. Do you want to build a new one?",
-            Build.OUTDATED: "The existing firmware is out-dated. You can build a new one.",
+            Build.OUTDATED: "The existing firmware is out-dated. Although is "
+                            "available to download, maybe you want to delete it "
+                            "and build an updated one.",
             Build.FAILED: "The last build has failed. The error logs are monitored "
                           "and this issue will be fixed. But you can try again anyway.",
         }
@@ -192,7 +200,7 @@ class Build(models.Model):
         base_images = [ image.image for image in config.get_images(self.node) ]
         if not self.base_image or self.base_image not in base_images:
             return False
-        exclude = config.files.optional().values_list('pk', flat=True)
+        exclude = list(config.files.optional().values_list('pk', flat=True))
         old_files = self.files.exclude(config__is_optional=True)
         old_files = set( (f.path,f.content) for f in old_files )
         new_files = config.eval_files(self.node, exclude=exclude)
@@ -258,8 +266,21 @@ class Config(SingletonModel):
     def eval_files(self, node, exclude=[], **kwargs):
         """ Evaluates all ConfigFiles python expressions """
         files = []
+        # handle special case of #383 files
         for config_file in self.files.active().exclude(pk__in=exclude):
-            files.extend(config_file.get_files(node, files=files, **kwargs))
+            try:
+                nb_file = node.files.get(path=config_file.path)
+            except node.files.model.DoesNotExist:
+                # not exists a previous value so cannot be restored
+                new_files = config_file.get_files(node, files=files, **kwargs)
+                # create or update stored key files
+                if config_file.path in NodeKeys.KEY_FILES:
+                    node_file, _ = node.files.get_or_create(path=config_file.path)
+                    node_file.content = new_files[0].content
+                    node_file.save()
+            else:
+                new_files = [BuildFile(path=nb_file.path, content=nb_file.content, config=config_file)]
+            files.extend(new_files)
         return files
     
     def render_uci(self, node, sections=None):
@@ -423,6 +444,65 @@ class ConfigFileHelpText(models.Model):
 
 class ConfigPlugin(PluginModel):
     config = models.ForeignKey(Config, related_name='plugins')
+
+
+class NodeKeys(models.Model):
+    """ Stores node firmware root password and accepted SSH keys. """
+    TINC = '/etc/tinc/confine/rsa_key.priv'
+    CERT = '/etc/uhttpd.crt.pem'
+    PRIVATE = '/etc/uhttpd.key.pem'
+    KEY_FILES = [TINC, CERT, PRIVATE]
+    
+    ssh_auth = models.TextField('SSH authorized keys', blank=True, null=True,
+            help_text='PEM-encoded RSA public keys allowed for ssh access as root.')
+    # MD5SUM hashed password in OpenWRT shadow format
+    ssh_pass = models.CharField(max_length=128, blank=True, null=True)
+    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='keys')
+    
+    def __unicode__(self):
+        return unicode(self.node)
+    
+    def get_content(self, path):
+        try:
+            nb_file = self.node.files.get(path=path)
+        except NodeBuildFile.DoesNotExist:
+            return None
+        return nb_file.content
+    
+    @property
+    def tinc(self):
+        return self.get_content(NodeKeys.TINC)
+    
+    @property
+    def cert(self):
+        return self.get_content(NodeKeys.CERT)
+    
+    @property
+    def private(self):
+        return self.get_content(NodeKeys.PRIVATE)
+
+
+class NodeBuildFile(models.Model):
+    """
+    Describes a persistent file of a builded image.
+    Allows reusing BuildFiles between firmware builds.
+    """
+    node = models.ForeignKey('nodes.Node', related_name='files')
+    path = models.CharField(max_length=256) #XXX replace with ConfigFile.id (foreign key)?
+    content = models.TextField()
+    
+    def __unicode__(self):
+        return self.path
+
+    class Meta:
+        unique_together = ('node', 'path')
+    
+
+# Create OneToOne NodeKeys instance on node creation
+@receiver(post_save, sender=Node)
+def create_favorites(sender, instance, created, **kwargs):
+    if created:
+        NodeKeys.objects.create(node=instance)
 
 
 construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])

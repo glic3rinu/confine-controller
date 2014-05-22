@@ -10,7 +10,7 @@ from controller.admin.utils import wrap_admin_view
 from controller.utils.plugins.actions import sync_plugins_action
 
 from .actions import (enable_selected, disable_selected, run_notifications,
-    upgrade_notifications)
+    restore_notifications)
 from .models import Notification, Delivered
 
 
@@ -38,8 +38,8 @@ class NotificationAdmin(ChangeViewActions):
     readonly_fields = ('label', 'module', 'description')
     list_filter = ('is_active',)
     inlines = [DeliveredInline]
-    actions = [enable_selected, disable_selected, run_notifications, upgrade_notifications]
-    change_view_actions = [run_notifications, upgrade_notifications]
+    actions = [enable_selected, disable_selected, run_notifications, restore_notifications]
+    change_view_actions = [run_notifications, restore_notifications]
     
     class Media:
         css = {
@@ -62,6 +62,10 @@ class NotificationAdmin(ChangeViewActions):
         if db_field.name == 'subject':
             kwargs['widget'] = forms.TextInput(attrs={'size':'118'})
         return super(NotificationAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def has_add_permission(self, request):
+        """Notifications should be defined as plugins."""
+        return False
     
     def sync_plugins_view(self, request):
         sync_plugins_action('notifications')(self, request, None)

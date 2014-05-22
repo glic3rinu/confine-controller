@@ -5,6 +5,8 @@ from django.forms import widgets
 from rest_framework import exceptions
 from rest_framework.serializers import *
 
+from controller.core.validators import validate_prop_name
+
 # CONFINE compatibility layer for DRF
 
 
@@ -61,27 +63,14 @@ class HyperlinkedFileField(FileField):
             request = self.context.get('request')
             return request.build_absolute_uri(value.url)
 
-class FieldWithDefault(WritableField):
-    def __init__(self, default, *args, **kwargs):
-        if default is None:
-            raise TypeError("'default' is a mandatory argument")
-        kwargs['required'] = False
-        self.default = default
-        super(FieldWithDefault, self).__init__(*args, **kwargs)
-    
-    def field_to_native(self, obj, field_name):
-        value = super(FieldWithDefault, self).field_to_native(obj, field_name)
-        if value is None:
-            return self.default
-        return value
 
-
-class PropertyField(FieldWithDefault):
+class PropertyField(WritableField):
     """
     Dict-like representation of a Property Model
     A bit hacky, objects get deleted on from_native method and Serializer will
     need a custom override of restore_object method.
     """
+    default = {}
     def to_native(self, value):
         """ dict-like representation of a Property Model"""
         return dict((prop.name, prop.value) for prop in value.all())
@@ -91,6 +80,7 @@ class PropertyField(FieldWithDefault):
         parent = self.parent
         related_manager = getattr(parent.object, self.source or 'properties', False)
         properties = []
+        to_save = []
         if value:
             model = getattr(parent.opts.model, self.source or 'properties').related.model
             if isinstance(value, basestring):
@@ -102,7 +92,6 @@ class PropertyField(FieldWithDefault):
                 # POST (new parent object)
                 return [ model(name=n, value=v) for n,v in value.iteritems() ]
             # PUT
-            to_save = []
             for (name, value) in value.iteritems():
                 try:
                     # Update existing property
@@ -122,6 +111,17 @@ class PropertyField(FieldWithDefault):
                     # TODO do it in serializer.save() self.object._deleted ?
                     obj.delete()
         return properties
+    
+    def validate(self, attrs):
+        """ Check if properties has been provided and all has valid names. """
+        assert attrs is not None, 'Properties has a default value.'
+        # check properties name matchs regular expresion!
+        for prop in attrs:
+            try:
+                validate_prop_name(prop.name)
+            except ValidationError as e:
+                raise exceptions.ParseError(detail='; '.join(e.messages))
+        return attrs
 
 
 class MultiSelectField(ChoiceField):

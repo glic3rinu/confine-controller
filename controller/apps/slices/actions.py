@@ -1,4 +1,5 @@
 from django.contrib.admin import helpers
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import redirect, get_object_or_404
@@ -16,15 +17,24 @@ from .settings import SLICES_SLICE_EXP_INTERVAL
 @transaction.atomic
 def renew_selected_slices(modeladmin, request, queryset):
     # TODO queryset.renew() ?
+    not_renewed = 0
     for obj in queryset:
         if not modeladmin.has_change_permission(request, obj=obj):
             raise PermissionDenied
-        obj.renew()
-        msg = "Renewed for %s" % SLICES_SLICE_EXP_INTERVAL
-        modeladmin.log_change(request, obj, msg)
-    msg = ("%s selected slices have been renewed for %s on" % (queryset.count(),
-        SLICES_SLICE_EXP_INTERVAL))
-    modeladmin.message_user(request, msg)
+        if obj.renew():
+            msg = "Renewed for %s" % SLICES_SLICE_EXP_INTERVAL
+            modeladmin.log_change(request, obj, msg)
+        else:
+            not_renewed += 1
+    renewed = queryset.count() - not_renewed
+    if renewed > 0:
+        msg = ("%s selected slices have been renewed (expiration date extended "
+               "by %s days from now)."  % (renewed, SLICES_SLICE_EXP_INTERVAL.days))
+        modeladmin.message_user(request, msg)
+    if not_renewed > 0:
+        msg = ("%s selected slices have NOT been renewed (alreday have maximum "
+               "expiration date)." % not_renewed)
+        modeladmin.message_user(request, msg, messages.WARNING)
 renew_selected_slices.url_name = 'renew'
 renew_selected_slices.description = 'Delay the slice expiration date for %s days.' % SLICES_SLICE_EXP_INTERVAL.days
 

@@ -19,7 +19,8 @@ from .actions import (reject_tickets, resolve_tickets, take_tickets,close_ticket
     mark_as_unread, mark_as_read, set_default_queue)
 from .filters import MyTicketsListFilter, TicketStateListFilter
 from .forms import MessageInlineForm, TicketForm
-from .helpers import get_ticket_changes, markdown_formated_changes, filter_actions
+from .helpers import (display_author, filter_actions, get_ticket_changes,
+    markdown_formated_changes)
 from .models import Ticket, Queue, Message
 
 
@@ -49,9 +50,9 @@ class MessageReadOnlyInline(admin.TabularInline):
     
     def content_html(self, obj):
         time = display_timesince(obj.created_on)
-        author_link = get_admin_link(obj.author)
+        author_link = display_author(obj, 'author')
         summary = 'Updated by %s about %s' % (author_link, time)
-        header = '<strong style="color:#666;">%s</strong><hr />' % summary
+        header = '<span class="header">%s</span><hr />' % summary
         content = markdown(obj.content)
         content = content.replace('>\n', '>')
         return header + content
@@ -102,7 +103,7 @@ class TicketInline(PermissionTabularInline):
     ticket_id.short_description = '#'
     
     def created_by_link(self, instance):
-        return get_admin_link(instance.created_by)
+        return display_author(instance, 'created_by')
     created_by_link.short_description = 'Created by'
     
     def owner_link(self, instance):
@@ -190,7 +191,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         )
     
     def display_summary(self, ticket):
-        author_url = get_admin_link(ticket.created_by)
+        author_link = display_author(ticket, 'created_by')
         created = display_timesince(ticket.created_on)
         messages = ticket.messages.order_by('-created_on')
         updated = ''
@@ -198,12 +199,12 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             updated_on = display_timesince(messages[0].created_on)
             updated_by = get_admin_link(messages[0].author)
             updated = '. Updated by %s about %s' % (updated_by, updated_on)
-        msg = '<h4>Added by %s about %s%s</h4>' % (author_url, created, updated)
+        msg = '<h4>Added by %s about %s%s</h4>' % (author_link, created, updated)
         return mark_safe(msg)
     display_summary.short_description = 'Summary'
     
     def display_created_by(self, ticket):
-        return get_admin_link(ticket.created_by)
+        return mark_safe(display_author(ticket, 'created_by'))
     display_created_by.short_description = 'Author'
     
     def display_queue(self, ticket):

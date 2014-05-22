@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 
 from nodes.models import Node
-from permissions import Permission
+from permissions import Permission, RelatedPermission
 
-from .models import Build
+from .models import Build, NodeBuildFile
+
 
 
 class FirmwarePermission(Permission):
@@ -28,3 +29,5 @@ class BuildPermission(Permission):
 
 Node.has_permission._aggregate(FirmwarePermission())
 Build.has_permission = BuildPermission()
+# See admin.NodeBuildFileInline to check view permissions
+NodeBuildFile.has_permission = RelatedPermission('node')

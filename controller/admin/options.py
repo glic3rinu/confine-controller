@@ -56,7 +56,7 @@ class ChangeViewActions(admin.options.ModelAdmin):
         new_urls = patterns("")
         for action in self.change_view_actions:
             singleton = SingletonModelAdmin in type(self).__mro__
-            pattern = '^%s/$' if singleton else '^(.+)/%s/$'
+            pattern = '^%s/$' if singleton else '^(\d+)/%s/$'
             new_urls += patterns("",
                 url(pattern % action.url_name,
                     admin_site.admin_view(action),

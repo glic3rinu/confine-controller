@@ -27,7 +27,7 @@ class Command(BaseCommand):
             make_option('--local', action='store_true', dest='local', default=False,
                 help='Only install local requirements'),
             make_option('--no-restart', action='store_false', dest='restart', default=True,
-                help='Only install local requirements'),
+                help='Do not restart services'),
             make_option('--specifics', action='store_true', dest='specifics_only',
                 default=False, help='Only run version specific operations'),
             make_option('--no-upgrade-notes', action='store_false', default=True,
@@ -205,7 +205,18 @@ class Command(BaseCommand):
                 "   'ATOMIC_REQUESTS': True,\n"
                 "into DATABASES setting within <project_name>/<project_name>/settings.py")
         if version <= 1003:
-            run('python manage.py loaddata firmwareconfig')
+            # Update firmware configuration after Island refactor (#264)
+            from firmware.models import ConfigFile
+            try:
+                cfg_file = ConfigFile.objects.get(path__contains="node.tinc.connect_to")
+            except (ConfigFile.DoesNotExist, ConfigFile.MultipleObjectsReturned):
+                # Warn the user that needs to perform manual update
+                msg = "Firmware configuration update has failed. "
+            else:
+                cfg_file.content = cfg_file.content.replace("node.tinc.island", "node.island")
+                msg = "Firmware configuration updated successfully. Updated ConfigFile ID: %i." % cfg_file.pk
+            upgrade_notes.append("%s\nPlease check version 0.10.4 release notes:\n"
+                "https://wiki.confine-project.eu/soft:server-release-notes#section0104" % msg)
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

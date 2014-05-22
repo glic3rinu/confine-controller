@@ -35,3 +35,4 @@ STATE_NODE_SOFT_VERSION_NAME = getattr(settings, 'STATE_NODE_SOFT_VERSION_NAME',
 
 STATE_NODE_OFFLINE_WARNING = getattr(settings, 'STATE_NODE_OFFLINE_WARNING', timedelta(days=1))
 
+STATE_NODE_SAFE_WARNING = getattr(settings, 'STATE_NODE_SAFE_WARNING', timedelta(days=3))

@@ -27,7 +27,7 @@ class Command(BaseCommand):
             make_option('--local', action='store_true', dest='local', default=False,
                 help='Only install local requirements'),
             make_option('--no-restart', action='store_false', dest='restart', default=True,
-                help='Only install local requirements'),
+                help='Do not restart services'),
             make_option('--specifics', action='store_true', dest='specifics_only',
                 default=False, help='Only run version specific operations'),
             make_option('--no-upgrade-notes', action='store_false', default=True,

@@ -123,7 +123,8 @@ class State(models.Model):
                     state._store_soft_version()
             metadata.update({
                 'url': response.url,
-                'headers': response.headers,
+                # CaseInsensitiveDict not JSON serializable (#468)
+                'headers': dict(response.headers),
                 'status_code': response.status_code
             })
             state._compute_current()

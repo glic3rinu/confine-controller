@@ -13,6 +13,7 @@
     <div style="margin:20px;">
     <fieldset class="module aligned">
         <h2>Base Image</h2>
+        {{ img_form.non_field_errors }}
         {% for field in img_form %}
         <div class="form-row">
             <div>
@@ -25,6 +26,13 @@
     </fieldset>
     <fieldset class="module aligned">
         <h2>Optional files</h2>
+        {% if node.files.exists %}
+        <div class="help">You can manage the stored values on
+            <a href="{% url "admin:nodes_node_change" node.id %}">node change view</a>.
+            Unmark the files that you want to handle manually.
+        </div>
+        {% endif %}
+        {{ opt_form.non_field_errors }}
         {% for field in opt_form %}
         <div class="form-row ">
             <div>
@@ -35,11 +43,11 @@
         </div>
         {% endfor %}
     </fieldset>
-    
     {% for plugin in plugins %}
     {% if plugin.instance.form %}
     <fieldset class="module aligned ">
       <h2>{{ plugin.instance.verbose_name }}</h2>
+        {{ plugin.instance.form.non_field_errors }}
         {% for field in plugin.instance.form %}
         <div class="form-row ">
             <div >

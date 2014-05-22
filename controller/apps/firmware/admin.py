@@ -3,10 +3,11 @@ from __future__ import absolute_import
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
-    colored, wrap_admin_view)
+    colored, wrap_admin_view, docstring_as_help_tip)
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
 from nodes.models import Node
@@ -198,6 +199,8 @@ class NodeBuildFileInline(PermissionTabularInline):
     extra = 0
     fields = ('path', 'content')
     readonly_fields = ('path',)
+    verbose_name = 'node key'
+    verbose_name_plural = mark_safe('node keys %s' % docstring_as_help_tip(NodeBuildFile))
     
     def has_add_permission(self, request):
         return False

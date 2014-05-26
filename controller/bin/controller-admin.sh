@@ -79,9 +79,6 @@ function print_install_requirements_help () {
 		    ${bold}-d, --development${normal}
 		        Installs minimal controller requirements using apt-get and pip
 		    
-		    ${bold}-l, --local${normal}
-		        Installs controller requirements for local deployments, i.e. VCT
-		    
 		    ${bold}-p, --production${normal}
 		        Installs all controller requirements using apt-get and pip (default)
 		    
@@ -93,18 +90,16 @@ function print_install_requirements_help () {
 
 
 function install_requirements () {
-    opts=$(getopt -o dlph -l development,local,production,help -- "$@") || exit 1
+    opts=$(getopt -o dph -l development,production,help -- "$@") || exit 1
     set -- $opts
     development=false
-    local=false
     production=true
     
     while [ $# -gt 0 ]; do
         case $1 in
             -d|--development) development=true; production=false; shift ;;
-            -l|--local) local=true; production=false; shift ;;
             -p|--production) production=true; shift ;;
-            -h|--help) print_deploy_help; exit 0 ;;
+            -h|--help) print_install_requirements_help; exit 0 ;;
             (--) shift; break;;
             (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
             (*) break;;
@@ -123,10 +118,10 @@ function install_requirements () {
                      python-dateutil \
                      postgresql \
                      rabbitmq-server \
-                     python-dev gcc"
-    LOCAL_APT="fuseext2 file \
-               tinc \
-               libevent-dev"
+                     python-dev gcc \
+                     fuseext2 file \
+                     tinc \
+                     libevent-dev"
     
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
     
@@ -144,11 +139,11 @@ function install_requirements () {
                      Markdown==2.4 \
                      django-filter==0.7 \
                      django-admin-tools==0.5.1 \
-                     djangorestframework==2.3.13"
-    LOCAL_PIP="paramiko==1.13.0 \
-               Pygments==1.6 \
-               requests==2.2.1 \
-               gevent==1.0"
+                     djangorestframework==2.3.13 \
+                     paramiko==1.13.0 \
+                     Pygments==1.6 \
+                     requests==2.2.1 \
+                     gevent==1.0"
     PRODUCTION_PIP="django-simple-captcha==0.4.2 \
                     django-registration==1.0 \
                     django-google-maps==0.2.3"
@@ -169,10 +164,6 @@ function install_requirements () {
     sed -i "s/# Default-Stop:.*/# Default-Stop:      0 1 6/" /etc/init.d/rabbitmq-server
     run update-rc.d rabbitmq-server defaults
     
-    if ! $development; then
-        run apt-get install -y $LOCAL_APT
-        run pip install $LOCAL_PIP
-    fi
     if $production; then
         run apt-get install -y $PRODUCTION_APT
         # PIL has some mental problems with library paths
@@ -221,13 +212,13 @@ print_clone_help () {
 
 
 function clone () {
+    [ "$#" -lt 2 ] && echo "Err. - project name not provided." && exit 1
     local SKELETONE=false
-    local PROJECT_NAME="$2"; shift
+    local PROJECT_NAME="${2}"; shift
     
     opts=$(getopt -o s:h -l skeletone:,help -- "$@") || exit 1
     set -- $opts
     
-    set -- $opts
     while [ $# -gt 0 ]; do
         case $1 in
             -s|--skeletone) local SKELETONE="${2:1:${#2}-2}"; shift ;;
@@ -265,5 +256,12 @@ function clone () {
 export -f clone
 
 
-[ $# -lt 1 ] && print_help
-$1 "${@}"
+# check provided parameters
+if [ $# -lt 1 ]; then
+    print_help
+else
+    case $1 in
+        clone|install_requirements) $1 "${@}";;
+        *) print_help;;
+    esac
+fi

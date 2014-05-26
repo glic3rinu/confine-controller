@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'maintenance',
     'notifications',
     'monitor',
+    'resources',
     
     # Third-party apps
     'south',

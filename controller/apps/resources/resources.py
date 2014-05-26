@@ -54,8 +54,8 @@ class DiskRes(ResourcePlugin):
 
 
 class Pub4Res(ResourcePlugin):
-    name = 'pub_ipv6'
-    verbose_name = 'Public IPv6 addresses'
+    name = 'pub_ipv4'
+    verbose_name = 'Public IPv4 addresses'
     unit = 'addrs'
     max_req = settings.RESOURCES_DEFAULT_PUB4_MAX_REQ
     dflt_req = settings.RESOURCES_DEFAULT_PUB4_DFLT_REQ
@@ -63,8 +63,8 @@ class Pub4Res(ResourcePlugin):
 
 
 class Pub6Res(ResourcePlugin):
-    name = 'pub_ipv4'
-    verbose_name = 'Public IPv4 addresses'
+    name = 'pub_ipv6'
+    verbose_name = 'Public IPv6 addresses'
     unit = 'addrs'
     max_req = settings.RESOURCES_DEFAULT_PUB6_MAX_REQ
     dflt_req = settings.RESOURCES_DEFAULT_PUB6_DFLT_REQ

@@ -152,7 +152,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def new_instance_sn(self, instance):
         if instance.pk:
             return instance.instance_sn
-        return instance.slice.new_sliver_instance_sn
+        return instance.slice.sliver_defaults.instance_sn
     new_instance_sn.short_description ='Instance sequence number'
     
     def has_add_permission(self, *args, **kwargs):

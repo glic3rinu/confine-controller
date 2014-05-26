@@ -473,8 +473,8 @@ class Sliver(models.Model):
     def update(self):
         self.instance_sn += 1
         self.save()
-        self.slice.new_sliver_instance_sn += 1
-        self.slice.save()
+        self.slice.sliver_defaults.instance_sn += 1
+        self.slice.sliver_defaults.save()
     
     def force_update(self, async=False):
         if async:

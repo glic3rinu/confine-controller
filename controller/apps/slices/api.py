@@ -27,7 +27,7 @@ class Renew(APIView):
     rel = 'http://confine-project.eu/rel/server/do-renew'
     
     def post(self, request, *args, **kwargs):
-        if request.DATA is None:
+        if not request.DATA:
             slice = get_object_or_404(Slice, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, slice)
             slice.renew()
@@ -49,7 +49,7 @@ class Reset(APIView):
     rel = 'http://confine-project.eu/rel/server/do-reset'
     
     def post(self, request, *args, **kwargs):
-        if request.DATA is None:
+        if not request.DATA:
             slice = get_object_or_404(Slice, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, slice)
             slice.reset()
@@ -128,7 +128,7 @@ class Update(APIView):
     rel = 'http://confine-project.eu/rel/server/do-update'
     
     def post(self, request, *args, **kwargs):
-        if request.DATA is None:
+        if not request.DATA:
             sliver = get_object_or_404(Sliver, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, sliver)
             sliver.update()

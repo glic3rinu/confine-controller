@@ -63,6 +63,13 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
+    # FIXME remove when api.aggregate supports nested serializers
+    # is only required because SliverDefaultsSerializer imports resources
+    # serializers, and breaks api.aggregate functionality based on
+    # api._registry (see class SliverDefaultsSerializer)
+    if is_installed('resources'):
+        from resources.serializers import ResourceReqSerializer
+        resources = ResourceReqSerializer(many=True, required=False)
     
     # backwards compatibility (readonly)
     exp_data_uri = FileURLField(source='data_uri')

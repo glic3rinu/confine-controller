@@ -121,7 +121,8 @@ function install_requirements () {
                      python-dev gcc \
                      fuseext2 file \
                      tinc \
-                     libevent-dev"
+                     libevent-dev \
+                     ntp"
     
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
     

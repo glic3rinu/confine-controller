@@ -7,16 +7,6 @@ from nodes.models import Node
 from .helpers import state_value
 from .models import Slice, Sliver
 
-def clean_uri_sha256(cleaned_data):
-    """ Reset _uri and _sha256 fields if file to upload defined """
-    for field_name in ['exp_data', 'overlay']:
-        if cleaned_data[field_name] and not cleaned_data[field_name + '_uri']:
-            cleaned_data[field_name + '_uri'] = ''
-        elif not cleaned_data[field_name + '_uri']:
-            # reset sha256 because there is no file
-            cleaned_data[field_name + '_sha256'] = ''
-    return cleaned_data
-
 
 class SliceAdminForm(forms.ModelForm):
     """ 
@@ -56,10 +46,6 @@ class SliceAdminForm(forms.ModelForm):
             return None if not vlan_nr else -1
         # ! Register state: return the old value
         return self.initial["vlan_nr"]
-    
-    def clean(self):
-        cleaned_data = super(SliceAdminForm, self).clean()
-        return clean_uri_sha256(cleaned_data)
 
 
 class SliverAdminForm(forms.ModelForm):
@@ -75,10 +61,6 @@ class SliverAdminForm(forms.ModelForm):
             slice_state = state_value(self.instance.slice.set_state)
             if sliver_state > slice_state:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
-    
-    def clean(self):
-        cleaned_data = super(SliverAdminForm, self).clean()
-        return clean_uri_sha256(cleaned_data)
 
 
 class SliceSliversForm(forms.ModelForm):
@@ -96,10 +78,6 @@ class SliceSliversForm(forms.ModelForm):
             slice_state = state_value(self.instance.slice.set_state)
             if sliver_state > slice_state:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
-    
-    def clean(self):
-        cleaned_data = super(SliceSliversForm, self).clean()
-        return clean_uri_sha256(cleaned_data)
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):

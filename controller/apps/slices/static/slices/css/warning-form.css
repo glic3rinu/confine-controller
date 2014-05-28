@@ -3,10 +3,11 @@
     border: 2px solid orange;
 }
 
-fieldset.warning .description {
-    background: #ffc url(/static/admin/img/icon_alert.gif) 5px .3em no-repeat;
+fieldset.info .description {
+    background: #EDF3FE url(/static/admin/img/icon-unknown.gif) 5px .3em no-repeat;
+    border-bottom: 1px solid #eee;
     color: #666;
-    border-bottom: 1px solid orange;
+    cursor: help;
     font-size: 11px;
     margin-bottom: 0.5em;
     padding: 4px 5px 4px 25px;

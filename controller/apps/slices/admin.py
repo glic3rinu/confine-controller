@@ -23,7 +23,7 @@ from .actions import renew_selected_slices, reset_selected, update_selected, cre
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
 from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
-from .helpers import wrap_action, remove_slice_id, state_value
+from .helpers import wrap_action, remove_slice_id, state_value, get_readonly_file_fields
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
@@ -38,7 +38,6 @@ STATE_COLORS = {
 
 
 colored_set_state = colored('set_state', STATE_COLORS, verbose=True, bold=False)
-
 
 def num_slivers(instance):
     """ return num slivers as a link to slivers changelist view """
@@ -106,8 +105,9 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'fields': ('description', 'template', 'set_state')
         }),
         ('Advanced', {
-            'classes': ('collapse', 'warning'),
-            'description': 'Please, if you want to upload a file remember cleaning its URI field.',
+            'classes': ('collapse', 'info'),
+            'description': 'If you want to define a URI, you should remove '
+                           'previously the uploaded file.',
             'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256',
                        'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
@@ -166,6 +166,10 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         request._node_ = obj.node
         request._slice_ = obj.slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
+    
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(SliverAdmin, self).get_readonly_fields(request, obj=obj)
+        return readonly_fields + get_readonly_file_fields(obj)
     
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changelist """
@@ -534,8 +538,9 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             'fields': ('name', 'description', 'template', 'set_state','expires_on', 'group'),
         }),
         ('Advanced', {
-            'classes': ('collapse', 'warning'),
-            'description': 'Please, if you want to upload a file remember cleaning its URI field.',
+            'classes': ('collapse', 'info'),
+            'description': 'If you want to define a URI, you should remove '
+                           'previously the uploaded file.',
             'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256', 'overlay',
                        'overlay_uri', 'overlay_sha256', 'vlan_nr', 'instance_sn',
                        'new_sliver_instance_sn'
@@ -600,7 +605,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         readonly_fields = super(SliceAdmin, self).get_readonly_fields(request, obj=obj)
         if 'set_state' not in readonly_fields and obj is None:
             return readonly_fields + ['set_state']
-        return readonly_fields
+        return readonly_fields + get_readonly_file_fields(obj)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make description input widget smaller """

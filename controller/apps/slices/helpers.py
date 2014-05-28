@@ -37,3 +37,12 @@ def state_value(state):
     if state is None:
         return -1
     return STATE_VALUES.get(state)
+
+
+def get_readonly_file_fields(obj):
+    """Mark as readonly if exists file for exp_data and overlay"""
+    readonly_fields = []
+    for field in ['exp_data', 'overlay']:
+        if bool(getattr(obj, field, False)): # False when obj is None
+            readonly_fields += [field+'_uri', field+'_sha256']
+    return readonly_fields

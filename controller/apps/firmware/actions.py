@@ -44,7 +44,8 @@ def get_firmware(modeladmin, request, queryset):
     # Initialize plugin instances and hook node
     plugins = config.plugins.active()
     for plugin in plugins:
-        setattr(plugin.instance.form, 'node', node)
+        if plugin.instance.form is not None:
+            setattr(plugin.instance.form, 'node', node)
     
     context = {
         "title": "Download firmware for your research device %s" % node,

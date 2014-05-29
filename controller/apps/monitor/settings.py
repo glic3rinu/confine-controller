@@ -17,7 +17,8 @@ MONITOR_DISK_WARN_RATIO = getattr(settings, 'MONITOR_DISK_WARN_RATIO', 1.2)
 
 # name, ps cmd regex, min, max
 TINC = ('tinc', '.*tincd', 1, 1)
-CELERY_W1 = ('celery_w1', '.*python.*celery.*-n w1\.', 8, None)
+# By default celery_w1 has 5 processes + 1 coordinator = 6
+CELERY_W1 = ('celery_w1', '.*python.*celery.*-n w1\.', 6, None)
 CELERY_W2 = ('celery_w2', '.*python.*celery.*-n w2\.', 1, 1)
 CELERYEV = ('celeryev', '.*python .*celeryev', 1, 1)
 CELERYBEAT = ('celerybeat', '.*python .*celerybeat', 1, 1)

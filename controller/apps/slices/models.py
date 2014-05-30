@@ -36,6 +36,19 @@ def clean_sha256(self, fields):
             raise ValidationError('Missing %s_sha256.' % field_name)
 
 
+def clean_uri(self, fields):
+    """
+    Check if user has provided an uri to override current
+    uploaded file and delete the stored one (if any).
+    """
+    for field_name in fields:
+        field = getattr(self, field_name)
+        field_uri = getattr(self, field_name + '_uri')
+        # allow the API to override uploaded file
+        if field and field_uri and field.url != field_uri:
+            field.delete()
+
+
 def set_sha256(self, fields):
     """ Generate sha256 for an uploaded file """
     for field_name in fields:
@@ -56,6 +69,7 @@ def set_sha256(self, fields):
 
 
 def set_uri(self, fields):
+    """Reset _uri when a file is uploaded"""
     for field_name in fields:
         field = getattr(self, field_name)
         if field and field.file:
@@ -253,6 +267,7 @@ class Slice(models.Model):
     def clean(self):
         super(Slice, self).clean()
         clean_sha256(self, ('exp_data', 'overlay'))
+        clean_uri(self, ('exp_data', 'overlay'))
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
@@ -393,6 +408,7 @@ class Sliver(models.Model):
     def clean(self):
         super(Sliver, self).clean()
         clean_sha256(self, ('exp_data', 'overlay'))
+        clean_uri(self, ('exp_data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice

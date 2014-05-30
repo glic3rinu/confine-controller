@@ -46,6 +46,14 @@ class SliceAdminForm(forms.ModelForm):
             return None if not vlan_nr else -1
         # ! Register state: return the old value
         return self.initial["vlan_nr"]
+    
+    def clean(self):
+        """Clean _uri when uploading a file"""
+        cleaned_data = super(SliceAdminForm, self).clean()
+        for field_name in ('exp_data', 'overlay'):
+            if cleaned_data.get(field_name):
+                cleaned_data[field_name + "_uri"] = ''
+        return cleaned_data
 
 
 class SliverAdminForm(forms.ModelForm):
@@ -61,6 +69,14 @@ class SliverAdminForm(forms.ModelForm):
             slice_state = state_value(self.instance.slice.set_state)
             if sliver_state > slice_state:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
+    
+    def clean(self):
+        """Clean _uri when uploading a file"""
+        cleaned_data = super(SliverAdminForm, self).clean()
+        for field_name in ('exp_data', 'overlay'):
+            if cleaned_data.get(field_name):
+                cleaned_data[field_name + "_uri"] = ''
+        return cleaned_data
 
 
 class SliceSliversForm(forms.ModelForm):
@@ -78,6 +94,14 @@ class SliceSliversForm(forms.ModelForm):
             slice_state = state_value(self.instance.slice.set_state)
             if sliver_state > slice_state:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
+    
+    def clean(self):
+        """Clean _uri when uploading a file"""
+        cleaned_data = super(SliceSliversForm, self).clean()
+        for field_name in ('exp_data', 'overlay'):
+            if cleaned_data.get(field_name):
+                cleaned_data[field_name + "_uri"] = ''
+        return cleaned_data
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):

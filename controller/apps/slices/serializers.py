@@ -82,6 +82,7 @@ class SliverDetailSerializer(SliverSerializer):
     class Meta:
         model = Sliver
         read_only_fields = ('node', 'slice')
+        exclude = ('exp_data', 'overlay')
 
 
 class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):

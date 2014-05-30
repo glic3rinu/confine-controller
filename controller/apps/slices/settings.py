@@ -48,7 +48,7 @@ SLICES_SLIVER_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overl
 SLICES_SLIVER_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
         'slice-%(pk)d-%(original)s')
 
-SLICES_SLIVER_OVERLAY_EXTENSIONS = getattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS',
+SLICES_SLIVER_OVERLAY_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_OVERLAY_EXTENSIONS',
         ('.tar.gz', '.tgz'))
 
 

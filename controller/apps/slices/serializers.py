@@ -17,6 +17,7 @@ class FakeFileField(serializers.CharField):
         self.field_name = kwargs.pop('field')
         super(FakeFileField, self).__init__(*args, **kwargs)
     
+#   TODO validate _uri value when setted directly (i.e. valid file extensions)
 #   TODO remove file object._delete
 #    def from_native(self, value):
     def to_native(self, value):

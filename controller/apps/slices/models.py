@@ -170,8 +170,7 @@ class Slice(models.Model):
             upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
                                      settings.SLICES_SLICE_EXP_DATA_NAME,),
             help_text='File containing experiment data for slivers (if they do not '
-                      'explicitly indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
+                      'explicitly indicate one)')
     exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
             help_text='The URI of a file containing experiment data for slivers (if '
                       'they do not explicitly indicate one). Its format and contents '
@@ -326,8 +325,7 @@ class Sliver(models.Model):
     exp_data = models.FileField(blank=True, verbose_name='experiment data',
             upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
                                      settings.SLICES_SLIVER_EXP_DATA_NAME),
-            help_text='File containing experiment data for this sliver.',
-            validators=[validate_file_extensions(settings.SLICES_SLIVER_EXP_DATA_EXTENSIONS)])
+            help_text='File containing experiment data for this sliver.')
     exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
             help_text='If present, the URI of a file containing experiment data for '
                       'this sliver, instead of the one specified by the slice. Its '

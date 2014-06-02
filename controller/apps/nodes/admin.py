@@ -19,7 +19,8 @@ from users.helpers import filter_group_queryset
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
-from .models import DirectIface, Island, Node, NodeProp, Server, ServerProp
+from .models import (DirectIface, Island, Node, NodeApi, NodeProp, Server,
+    ServerApi, ServerProp)
 from .utils import get_mgmt_backend_class
 
 
@@ -29,6 +30,11 @@ STATES_COLORS = {
     Node.SAFE: 'blue',
     Node.PRODUCTION: 'green',
 }
+
+
+class NodeApiInline(PermissionTabularInline):
+    model = NodeApi
+    extra = 0
 
 
 class NodePropInline(PermissionTabularInline):
@@ -56,7 +62,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [DirectIfaceInline, NodePropInline]
+    inlines = [DirectIfaceInline, NodeApiInline, NodePropInline]
     weights = {
         'inlines': {
             NodePropInline: 2
@@ -200,6 +206,11 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                 form_url=form_url, extra_context=extra_context)
 
 
+class ServerApiInline(PermissionTabularInline):
+    model = ServerApi
+    extra = 1
+
+
 class ServerPropInline(PermissionTabularInline):
     model = ServerProp
     extra = 1
@@ -211,7 +222,7 @@ class ServerPropInline(PermissionTabularInline):
 
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
-    inlines = [ServerPropInline]
+    inlines = [ServerApiInline, ServerPropInline]
     
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete the server """

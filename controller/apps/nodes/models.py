@@ -15,6 +15,62 @@ from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
         validate_dhcp_range, validate_priv_ipv4_prefix)
 
 
+class Api(models.Model):
+    base_uri = models.CharField('base URI', max_length=256, blank=True,
+            help_text='The base URI of the API endpoint, if available.')
+    cert = NullableTextField('Certificate', unique=True, null=True, blank=True,
+            help_text='X.509 PEM-encoded certificate for this RD. The certificate '
+                      'may be signed by a CA recognised in the testbed and required '
+                      'by clients and services accessing the node API.')
+    
+    class Meta:
+        abstract = True
+
+class NodeApi(Api):
+    """
+    Data on the endpoint that can be used to access this node's REST API.
+    Please note that the API may be offered by another host (e.g. a caching
+    proxy), which doesn't preclude the node from running the API itself as
+    well (e.g. on its management network address).
+
+    """
+    NODE = 'node'
+    TYPES = ((NODE, 'Node'),)
+    
+    type = models.CharField(max_length=16, choices=TYPES, default=NODE)
+    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='api')
+    
+    class Meta:
+        verbose_name = 'node API'
+        verbose_name_plural = 'node API'
+
+
+class ServerApi(Api):
+    """
+    Data on the endpoints that can be used to access this server's REST API.
+    Please note that the API may be offered by another host (e.g. a caching
+    proxy), which doesn't preclude the server from running the API itself as
+    well (e.g. on its management network address).
+    """
+    REGISTRY = 'registry'
+    CONTROLLER = 'controller'
+    TYPES = (
+        (REGISTRY, 'Registry'),
+        (CONTROLLER, 'Controller'),
+    )
+    
+    type = models.CharField(max_length=16, choices=TYPES)
+    server = models.ForeignKey('nodes.Server', related_name='api')
+    island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            help_text='An optional island used to hint where this API endpoint '
+                      'is reachable from. An API endpoint reachable from the '
+                      'management network may omit this member.')
+    
+    class Meta:
+        verbose_name = 'server API'
+        verbose_name_plural = 'server APIs'
+
+
 class Node(models.Model):
     """
     Describes a node in the testbed.

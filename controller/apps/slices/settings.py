@@ -1,3 +1,4 @@
+import warnings
 from datetime import timedelta
 
 from django.conf import settings
@@ -30,6 +31,11 @@ SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_
 SLICES_SLICE_EXP_DATA_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
         'slice-%(pk)d-%(original)s')
 
+# TODO: SLICES_SLICE_EXP_DATA_EXTENSION will be removed on 0.10.8
+if hasattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS'):
+    warnings.warn("Deprecated: SLICES_SLICE_EXP_DATA_EXTENSIONS is unused (see #446).", DeprecationWarning)
+SLICES_SLICE_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS', None)
+
 SLICES_SLICE_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
 
 SLICES_SLICE_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_OVERLAY_NAME',
@@ -42,6 +48,11 @@ SLICES_SLIVER_EXP_DATA_DIR = getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'ex
 
 SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME',
         'sliver-%(pk)d-%(original)s')
+
+# TODO: SLICES_SLIVER_EXP_DATA_EXTENSION will be removed on 0.10.8
+if hasattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS'):
+    warnings.warn("Deprecated: SLICES_SLIVER_EXP_DATA_EXTENSIONS is unused (see #446).", DeprecationWarning)
+SLICES_SLIVER_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS', None)
 
 SLICES_SLIVER_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
 

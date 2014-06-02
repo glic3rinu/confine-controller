@@ -61,7 +61,7 @@ class Reset(APIView):
 def make_upload_file(model, field, field_url):
     # Just for the browsabe API
     attrs = {field: serializers.FileField()}
-    UploadFlieSerializer = type(field+'Serializer', (serializers.Serializer,), attrs)
+    UploadFileSerializer = type(field+'Serializer', (serializers.Serializer,), attrs)
     
     # TODO ApiPermissionsMixin
     class UploadFile(generics.CreateAPIView):
@@ -79,7 +79,7 @@ def make_upload_file(model, field, field_url):
         """ % {'field': field, 'field_url': field_url}
         url_name = 'upload-%s' % field_url
         rel = 'http://confine-project.eu/rel/controller/do-%s' % url_name
-        serializer_class = UploadFlieSerializer
+        serializer_class = UploadFileSerializer
         
         def post(self, request, *args, **kwargs):
             obj = get_object_or_404(model, pk=kwargs.get('pk'))

@@ -23,7 +23,7 @@ from .actions import renew_selected_slices, reset_selected, update_selected, cre
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
 from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
-from .helpers import wrap_action, remove_slice_id, state_value
+from .helpers import wrap_action, remove_slice_id, state_value, get_readonly_file_fields
 from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
 
 
@@ -38,7 +38,6 @@ STATE_COLORS = {
 
 
 colored_set_state = colored('set_state', STATE_COLORS, verbose=True, bold=False)
-
 
 def num_slivers(instance):
     """ return num slivers as a link to slivers changelist view """
@@ -106,19 +105,22 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'fields': ('description', 'template', 'set_state')
         }),
         ('Advanced', {
-            'classes': ('collapse',),
-            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
+            'classes': ('collapse', 'info'),
+            'description': 'If you want to define a URI, you should remove '
+                           'previously the uploaded file.',
+            'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256',
+                       'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
         }),
     )
-    readonly_fields = ['new_instance_sn', 'exp_data_sha256', 'overlay_sha256']
+    readonly_fields = ['new_instance_sn']
     search_fields = ['description', 'node__description', 'node__name', 'slice__name']
     inlines = [SliverPropInline, SliverIfaceInline]
     actions = [update_selected]
     change_view_actions = [update_selected]
     default_changelist_filters = (('my_slivers', 'True'),)
     change_form_template = "admin/controller/change_form.html"
-    form = SliverAdminForm # FIXME: ignored but don't know why! Check inheritance
+    form = SliverAdminForm
     
     class Media:
         css = {
@@ -165,6 +167,10 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         request._slice_ = obj.slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(SliverAdmin, self).get_readonly_fields(request, obj=obj)
+        return readonly_fields + get_readonly_file_fields(obj)
+    
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changelist """
         qs = super(SliverAdmin, self).queryset(request)
@@ -189,6 +195,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                     db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliverAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -519,10 +527,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     ]
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'template']
-    readonly_fields = [
-        'instance_sn', 'new_sliver_instance_sn', 'expires_on', 'exp_data_sha256',
-        'overlay_sha256'
-    ]
+    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
     date_hierarchy = 'expires_on'
     search_fields = ['name']
     inlines = [SlicePropInline, SliverInline]
@@ -533,9 +538,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             'fields': ('name', 'description', 'template', 'set_state','expires_on', 'group'),
         }),
         ('Advanced', {
-            'classes': ('collapse',),
-            'fields': ('exp_data', 'exp_data_sha256', 'overlay', 'overlay_sha256',
-                       'vlan_nr', 'instance_sn', 'new_sliver_instance_sn',
+            'classes': ('collapse', 'info'),
+            'description': 'If you want to define a URI, you should remove '
+                           'previously the uploaded file.',
+            'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256', 'overlay',
+                       'overlay_uri', 'overlay_sha256', 'vlan_nr', 'instance_sn',
+                       'new_sliver_instance_sn'
             )
         }),
     )
@@ -544,6 +552,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     change_view_actions = [renew_selected_slices, reset_selected]
     default_changelist_filters = (('my_slices', 'True'),)
     
+    class Media:
+        css = {
+             'all': (
+                'slices/css/warning-form.css',)
+        }
+
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
         qs = super(SliceAdmin, self).queryset(request)
@@ -591,16 +605,18 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         readonly_fields = super(SliceAdmin, self).get_readonly_fields(request, obj=obj)
         if 'set_state' not in readonly_fields and obj is None:
             return readonly_fields + ['set_state']
-        return readonly_fields
+        return readonly_fields + get_readonly_file_fields(obj)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make description input widget smaller """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
-        if db_field.name == 'template':
+        elif db_field.name == 'template':
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                 db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):

@@ -27,12 +27,30 @@ def get_expires_on():
 
 
 def clean_sha256(self, fields):
+    """
+    Check that sha256 has manually provided for an external
+    file (specified by uri)
+    """
     for field_name in fields:
         if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
             raise ValidationError('Missing %s_sha256.' % field_name)
 
 
+def clean_uri(self, fields):
+    """
+    Check if user has provided an uri to override current
+    uploaded file and delete the stored one (if any).
+    """
+    for field_name in fields:
+        field = getattr(self, field_name)
+        field_uri = getattr(self, field_name + '_uri')
+        # allow the API to override uploaded file
+        if field and field_uri and field.url != field_uri:
+            field.delete()
+
+
 def set_sha256(self, fields):
+    """ Generate sha256 for an uploaded file """
     for field_name in fields:
         field = getattr(self, field_name)
         if field and field.file:
@@ -45,7 +63,17 @@ def set_sha256(self, fields):
                 sha256.update(block)
             sha256 = sha256.hexdigest()
             field.file.seek(0)
-            setattr(self, field_name+'_sha256', sha256)
+            setattr(self, field_name + '_sha256', sha256)
+        elif not getattr(self, field_name + '_uri'):
+            setattr(self, field_name + '_sha256', '')
+
+
+def set_uri(self, fields):
+    """Reset _uri when a file is uploaded"""
+    for field_name in fields:
+        field = getattr(self, field_name)
+        if field and field.file:
+            setattr(self, field_name + '_uri', '')
 
 
 def make_upload_to(field_name, base_path, file_name):
@@ -125,6 +153,7 @@ class Template(models.Model):
     
     def save(self, *args, **kwargs):
         set_sha256(self, ('image',))
+        set_uri(self, ('image',))
         super(Template, self).save(*args, **kwargs)
 
 
@@ -177,7 +206,8 @@ class Slice(models.Model):
                       'depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
-                      'Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     overlay = models.FileField(blank=True,
             upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
@@ -193,8 +223,8 @@ class Slice(models.Model):
                       'may be set directly or through the do-upload-overlay function.')
     overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'This member may be set directly or through the do-upload-overlay '
-                      'function. Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
             help_text='The state set on this slice (set state) and its slivers '
@@ -231,11 +261,13 @@ class Slice(models.Model):
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
             save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('exp_data', 'overlay'))
+        set_uri(self, ('exp_data', 'overlay'))
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):
         super(Slice, self).clean()
         clean_sha256(self, ('exp_data', 'overlay'))
+        clean_uri(self, ('exp_data', 'overlay'))
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
@@ -332,7 +364,8 @@ class Sliver(models.Model):
                       'format and contents depend on the type of the template to be used.')
     exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the exp data file, used to check its integrity. '
-                      'Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     overlay = models.FileField(blank=True,
             upload_to=make_upload_to('overlay', settings.SLICES_SLIVER_OVERLAY_DIR,
@@ -348,8 +381,8 @@ class Sliver(models.Model):
                       'do-upload-overlay function.')
     overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'This member may be set directly or through the do-upload-overlay '
-                      'function. Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
             help_text='If present, the state set on this sliver (set state), '
@@ -375,6 +408,7 @@ class Sliver(models.Model):
     def clean(self):
         super(Sliver, self).clean()
         clean_sha256(self, ('exp_data', 'overlay'))
+        clean_uri(self, ('exp_data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice
@@ -389,6 +423,7 @@ class Sliver(models.Model):
             self.instance_sn = self.slice.new_sliver_instance_sn
             save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('exp_data', 'overlay'))
+        set_uri(self, ('exp_data', 'overlay'))
         super(Sliver, self).save(*args, **kwargs)
     
     @property

@@ -184,7 +184,7 @@ class Slice(models.Model):
                                      settings.SLICES_SLICE_OVERLAY_NAME,),
             help_text='File containing overlay for slivers (if they do not explicitly '
                       'indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLICE_OVERLAY_EXTENSIONS)])
+            validators=[validate_file_extensions(settings.SLICES_SLIVER_OVERLAY_EXTENSIONS)])
     overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
             help_text='The URI of a file containing an overlay for slivers (if they '
                       'do not explicitly indicate one). The file must be an archive '

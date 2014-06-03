@@ -1,0 +1,38 @@
+[
+{
+    "pk": 1,
+    "model": "slices.sliver",
+    "fields": {
+        "node": 1,
+        "slice": 1,
+        "description": "",
+        "overlay": "",
+        "instance_sn": 0,
+        "exp_data": "",
+        "exp_data_sha256": "",
+        "exp_data_uri": "",
+        "set_state": null,
+        "template": null,
+        "overlay_sha256": "",
+        "overlay_uri": ""
+    }
+},
+{
+    "pk": 2,
+    "model": "slices.sliver",
+    "fields": {
+        "node": 2,
+        "slice": 1,
+        "description": "",
+        "overlay": "",
+        "instance_sn": 4,
+        "exp_data": "",
+        "exp_data_sha256": "",
+        "exp_data_uri": "",
+        "set_state": null,
+        "template": null,
+        "overlay_sha256": "",
+        "overlay_uri": ""
+    }
+}
+]

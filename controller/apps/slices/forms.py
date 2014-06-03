@@ -67,7 +67,7 @@ class SliverAdminForm(forms.ModelForm):
         if self.instance:
             sliver_state = state_value(self.instance.set_state)
             slice_state = state_value(self.instance.slice.set_state)
-            if sliver_state > slice_state:
+            if sliver_state > slice_state and 'set_state' in self.fields:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
     
     def clean(self):
@@ -92,7 +92,7 @@ class SliceSliversForm(forms.ModelForm):
         if self.instance:
             sliver_state = state_value(self.instance.set_state)
             slice_state = state_value(self.instance.slice.set_state)
-            if sliver_state > slice_state:
+            if sliver_state > slice_state and 'set_state' in self.fields:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
     
     def clean(self):

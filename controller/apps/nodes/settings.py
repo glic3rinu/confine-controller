@@ -25,8 +25,9 @@ NODES_CERT_EXP_DAYS = getattr(settings, 'NODES_CERT_EXP_DAYS', 60*60*24*365*4)
 # Management backend, needed for management network IP
 NODES_MGMT_BACKEND = getattr(settings, 'NODES_MGMT_BACKEND', 'mgmtnetworks.tinc.backend')
 
-NODES_NODE_API_NODE_BASE_URL = getattr(settings, 'NODES_NODE_API_NODE_BASE_URL',
+
+NODES_NODE_API_BASE_URI_DEFAULT = getattr(settings, 'NODES_NODE_API_BASE_URI_DEFAULT',
     'http://[%(mgmt_addr)s]/confine/api')
 
-NODES_SERVER_API_SERVER_BASE_URL = getattr(settings, 'NODES_SERVER_API_SERVER_BASE_URL',
+NODES_SERVER_API_BASE_URI_DEFAULT = getattr(settings, 'NODES_SERVER_API_BASE_URI_DEFAULT',
     'https://[%(mgmt_addr)s]/api')

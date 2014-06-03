@@ -11,7 +11,7 @@ from permissions.api import ApiPermissionsMixin
 from .models import Island, Node, Server
 from .serializers import (IslandSerializer, NodeSerializer, NodeCreateSerializer,
     ServerSerializer)
-from .settings import NODES_NODE_API_NODE_BASE_URL
+from .settings import NODES_NODE_API_BASE_URI_DEFAULT
 from .validators import validate_csr
 
 
@@ -95,7 +95,7 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
         """ Add node-base relation to link header """
         response = super(NodeDetail, self).get(request, *args, **kwargs)
         node = self.get_object()
-        url = NODES_NODE_API_NODE_BASE_URL % {'mgmt_addr': node.mgmt_net.addr}
+        url = NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': node.mgmt_net.addr}
         rel = 'http://confine-project.eu/rel/server/node-base'
         response['Link'] += ', <%s>; rel="%s"' % (url, rel)
         return response

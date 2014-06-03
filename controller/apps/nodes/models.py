@@ -38,7 +38,7 @@ class NodeApi(Api):
     TYPES = ((NODE, 'Node'),)
     
     type = models.CharField(max_length=16, choices=TYPES, default=NODE)
-    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='api')
+    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='_api')
     
     class Meta:
         verbose_name = 'node API'
@@ -224,6 +224,17 @@ class Node(models.Model):
     def save(self, *args, **kwargs):
         self.update_set_state(commit=False)
         super(Node, self).save(*args, **kwargs)
+    
+    @property
+    def api(self):
+        try:
+            return self._api
+        except NodeApi.DoesNotExist:
+            return None
+    
+    @api.setter
+    def api(self, value):
+        self._api = value
     
     @property
     @cached

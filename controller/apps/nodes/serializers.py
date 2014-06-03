@@ -67,7 +67,7 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     direct_ifaces = DirectIfaceSerializer(required=False, many=True, allow_add_remove=True)
-    cert = serializers.Field()
+    cert = serializers.Field(source='api.cert')
     boot_sn = serializers.IntegerField(read_only=True)
     api = NodeApiSerializer()
     

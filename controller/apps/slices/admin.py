@@ -502,9 +502,16 @@ class SliverNodeInline(SliverInline):
     def has_delete_permission(self, request, obj=None):
         """
         Disallow deleting slivers from node change_view:
-        Why a node admin can be able of doing that?
+        Why a node admin will be able to do that?
         """
         return False
+    
+    def has_change_permission(self, request, obj=None, view=False):
+        # HACK for allow node_admins change a node with slivers
+        # As this Inline is readonly and doesn't allow to introduce
+        # changes, this workaround shouldn't have side effects
+        # See #476
+        return True
 
     def slice_link(self, instance):
         return get_admin_link(instance.slice)

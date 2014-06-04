@@ -38,6 +38,8 @@ RegistrationProfile.extra_manager = CustomRegistrationManager()
 @receiver(pre_save, sender=User)
 def notify_user_enabled(sender, instance, *args, **kwargs):
     """Notify by email user and operators when an account is enabled."""
+    if kwargs.get('raw', False):
+        return # avoid conflicts when loading fixtures
     if instance.pk and instance.is_active:
         old = User.objects.get(pk=instance.pk)
         if not old.is_active:

@@ -57,9 +57,6 @@ def enable_account(modeladmin, request, queryset):
             continue
         user.is_active = True
         user.save()
-        # notify the user its account is enabled
-        site = RequestSite(request)
-        send_email_template('registration/account_approved.email', {'site': site}, user.email)
         modeladmin.message_user(request, "The user has been enabled (%s)" % user)
 enable_account.short_description = "Enable selected users"
 

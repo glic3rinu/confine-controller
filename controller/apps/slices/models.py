@@ -127,7 +127,7 @@ class Template(models.Model):
             help_text='The node architectures accepted by this template (as reported '
                       'by uname -m, non-empty). Slivers using this template should '
                       'run on nodes whose architecture is listed here.',
-            default='i586,')
+            default=settings.SLICES_TEMPLATE_ARCH_DFLT)
     is_active = models.BooleanField(default=True)
     image = models.FileField(help_text="Template's image file.",
             upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,

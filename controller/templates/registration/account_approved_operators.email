@@ -1,0 +1,9 @@
+{% if subject %}New user registration (approved){% endif %}
+{% if message %}Dear operator,
+A new user ({{ user }}) account has been enabled by an operator.
+If you want more information check the user history at
+http://{{ site.domain }}{% url 'admin:users_user_history' user.pk %}
+
+Have a nice day,
+Testbed management team.
+{% endif %}

@@ -1,3 +1,4 @@
+import warnings
 from datetime import timedelta
 
 from django.conf import settings
@@ -8,7 +9,7 @@ SLICES_TEMPLATE_TYPES = getattr(settings, 'SLICES_TEMPLATE_TYPES', (
         ('openwrt', 'OpenWRT'),
 ))
 
-SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', 'debian6')
+SLICES_TEMPLATE_TYPE_DFLT = getattr(settings, 'SLICES_TEMPLATE_TYPE_DFLT', '')
 
 
 SLICES_TEMPLATE_ARCHS = getattr(settings, 'SLICES_TEMPLATE_ARCHS', (
@@ -16,7 +17,7 @@ SLICES_TEMPLATE_ARCHS = getattr(settings, 'SLICES_TEMPLATE_ARCHS', (
         ('x86', 'x86'),
 ))
 
-SLICES_TEMPLATE_ARCH_DFLT = getattr(settings, 'SLICES_TEMPLATE_ARCH_DFLT', 'x86')
+SLICES_TEMPLATE_ARCH_DFLT = getattr(settings, 'SLICES_TEMPLATE_ARCH_DFLT', '')
 
 SLICES_TEMPLATE_IMAGE_DIR = getattr(settings, 'SLICES_TEMPLATE_IMAGE_DIR', 'templates')
 
@@ -30,31 +31,32 @@ SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_
 SLICES_SLICE_EXP_DATA_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
         'slice-%(pk)d-%(original)s')
 
-SLICES_SLICE_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS',
-        ('.tar.gz', '.tgz'))
+# TODO: SLICES_SLICE_EXP_DATA_EXTENSION will be removed on 0.10.8
+if hasattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS'):
+    warnings.warn("Deprecated: SLICES_SLICE_EXP_DATA_EXTENSIONS is unused (see #446).", DeprecationWarning)
+SLICES_SLICE_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS', None)
 
 SLICES_SLICE_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
 
 SLICES_SLICE_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_OVERLAY_NAME',
         'slice-%(pk)d-%(original)s')
 
-SLICES_SLICE_OVERLAY_EXTENSIONS = getattr(settings, 'SLICES_SLICE_OVERLAY_EXTENSIONS',
-        ('.tar.gz', '.tgz'))
-
 SLICES_SLIVER_EXP_DATA_DIR = getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data')
 
 SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME',
         'sliver-%(pk)d-%(original)s')
 
-SLICES_SLIVER_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS',
-        ('.tar.gz', '.tgz'))
+# TODO: SLICES_SLIVER_EXP_DATA_EXTENSION will be removed on 0.10.8
+if hasattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS'):
+    warnings.warn("Deprecated: SLICES_SLIVER_EXP_DATA_EXTENSIONS is unused (see #446).", DeprecationWarning)
+SLICES_SLIVER_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS', None)
 
 SLICES_SLIVER_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
 
 SLICES_SLIVER_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
-        'slice-%(pk)d-%(original)s')
+        'sliver-%(pk)d-%(original)s')
 
-SLICES_SLIVER_OVERLAY_EXTENSIONS = getattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS',
+SLICES_SLIVER_OVERLAY_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_OVERLAY_EXTENSIONS',
         ('.tar.gz', '.tgz'))
 
 

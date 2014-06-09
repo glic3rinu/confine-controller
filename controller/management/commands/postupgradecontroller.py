@@ -24,8 +24,6 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--development', action='store_true', dest='development', default=False,
                 help='Only install development requirements'),
-            make_option('--local', action='store_true', dest='local', default=False,
-                help='Only install local requirements'),
             make_option('--no-restart', action='store_false', dest='restart', default=True,
                 help='Do not restart services'),
             make_option('--specifics', action='store_true', dest='specifics_only',
@@ -101,16 +99,13 @@ class Command(BaseCommand):
         if not options.get('specifics_only'):
             # Common stuff
             development = options.get('development')
-            local = options.get('local')
             controller_admin = os.path.join(os.path.dirname(__file__), '../../bin/')
             controller_admin = os.path.join(controller_admin, 'controller-admin.sh')
             run('chmod +x %s' % controller_admin)
-            if local:
-                run("%s install_requirements --local" % controller_admin)
-            else:
-                extra = '--development' if development else ''
-                run("%s install_requirements " % controller_admin + extra)
-                run("python manage.py collectstatic --noinput")
+            
+            extra = '--development' if development else ''
+            run("%s install_requirements " % controller_admin + extra)
+            run("python manage.py collectstatic --noinput")
             
             run("python manage.py syncdb --noinput")
             run("python manage.py migrate --noinput")

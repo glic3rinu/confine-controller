@@ -5,31 +5,68 @@ from controller.forms.widgets import ShowText
 from nodes.models import Node
 
 from .helpers import state_value
-from .models import Slice, Sliver
+from .models import SliverDefaults, Sliver
 
 
-class SliceAdminForm(forms.ModelForm):
+class SliverDefaultsInlineForm(forms.ModelForm):
     class Meta:
-        model = Slice
+        model = SliverDefaults
+    
+    def clean(self):
+        """Clean _uri when uploading a file"""
+        cleaned_data = super(SliverDefaultsInlineForm, self).clean()
+        for field_name in ('data', 'overlay'):
+            if cleaned_data.get(field_name):
+                cleaned_data[field_name + "_uri"] = ''
+        return cleaned_data
 
 
 class SliverAdminForm(forms.ModelForm):
+    """
+    Used when sliver showed directly (slice independent)
+    e.g. /admin/sliver/1
+    """
     def __init__(self, *args, **kwargs):
-        """ Improve user interface: form style and empty labels """
-        # FIXME: Works but is NOT called: see SliverAdmin at admin.py
         super(SliverAdminForm, self).__init__(*args, **kwargs)
+        # warn visually on sliver state override by slice state
         if self.instance:
             sliver_state = state_value(self.instance.set_state)
             slice_state = state_value(self.instance.slice.set_state)
-            if sliver_state > slice_state:
+            if sliver_state > slice_state and 'set_state' in self.fields:
                 self.fields['set_state'].widget.attrs = {'class': 'warning'}
+    
+    def clean(self):
+        """Clean _uri when uploading a file"""
+        cleaned_data = super(SliverAdminForm, self).clean()
+        for field_name in ('data', 'overlay'):
+            if cleaned_data.get(field_name):
+                cleaned_data[field_name + "_uri"] = ''
+        return cleaned_data
 
 
 class SliceSliversForm(forms.ModelForm):
+    """
+    Used when sliver showed via its slice (url nested)
+    e.g. /admin/slice/1/sliver/1
+    """
     def __init__(self, *args, **kwargs):
         super(SliceSliversForm, self).__init__(*args, **kwargs)
         self.instance.node = self.node
         self.instance.slice = self.slice
+        # warn visually on sliver state override by slice state
+        if self.instance:
+            sliver_state = state_value(self.instance.set_state)
+            slice_state = state_value(self.instance.slice.set_state)
+            if sliver_state > slice_state and 'set_state' in self.fields:
+                self.fields['set_state'].widget.attrs = {'class': 'warning'}
+    
+    def clean(self):
+        """Clean _uri when uploading a file"""
+        cleaned_data = super(SliceSliversForm, self).clean()
+        for field_name in ('data', 'overlay'):
+            if cleaned_data.get(field_name):
+                cleaned_data[field_name + "_uri"] = ''
+        return cleaned_data
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):

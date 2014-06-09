@@ -1,13 +1,19 @@
 from django.conf import settings
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import validate_email
 from django.contrib.sites.models import RequestSite, Site
+from django.db.models.signals import pre_save
 
 from registration import signals
 from registration.backends.default.views import ActivationView, RegistrationView
 
 from controller.utils import send_email_template
-from .models import RegistrationProfile
+from .models import notify_user_enabled, RegistrationProfile
 
 
 class RegistrationOpenView(RegistrationView):
@@ -53,6 +59,10 @@ class ActivationRestrictedView(ActivationView):
         the administrators asking their approval.
         """
         activated = super(ActivationRestrictedView, self).activate(request, activation_key)
+        
+        # connect pre_save signal to notify on account enable
+        pre_save.connect(notify_user_enabled, sender=User)
+        
         if activated:
             # email confirmed but user still remains disabled
             activated.is_active = False

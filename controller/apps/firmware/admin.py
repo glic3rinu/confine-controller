@@ -201,6 +201,9 @@ class NodeBuildFileInline(PermissionTabularInline):
     readonly_fields = ('path',)
     verbose_name = 'node key'
     verbose_name_plural = mark_safe('node keys %s' % docstring_as_help_tip(NodeBuildFile))
+
+    class Media:
+        js = ('firmware/collapsed_nodekeys.js',)
     
     def has_add_permission(self, request):
         return False
@@ -225,7 +228,7 @@ admin.site.register(Build, BuildAdmin)
 
 # Monkey-Patching Section
 
-insertattr(Node, 'inlines', NodeBuildFileInline)
+insertattr(Node, 'inlines', NodeBuildFileInline, weight=4)
 insertattr(Node, 'actions', get_firmware)
 node_modeladmin = get_modeladmin(Node)
 node_modeladmin.set_change_view_action(get_firmware)

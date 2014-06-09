@@ -42,6 +42,11 @@ class MultiSelectField(models.Field):
         elif isinstance(value, list):
             return ",".join(value)
     
+    def get_default(self):
+        """Return default string to array"""
+        value = super(MultiSelectField, self).get_default()
+        return [x.strip() for x in value.split(',')] if value else value
+    
     def to_python(self, value):
         if value is not None:
             return value if isinstance(value, list) else value.split(',')

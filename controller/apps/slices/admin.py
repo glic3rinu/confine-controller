@@ -22,9 +22,9 @@ from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
-from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
+from .forms import (SliverDefaultsInlineForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
-from .helpers import wrap_action, remove_slice_id, state_value
+from .helpers import wrap_action, remove_slice_id, state_value, get_readonly_file_fields
 from .models import (Slice, SliceProp, Sliver, SliverDefaults, SliverProp,
     SliverIface, Template)
 
@@ -40,7 +40,6 @@ STATE_COLORS = {
 
 
 colored_set_state = colored('set_state', STATE_COLORS, verbose=True, bold=False)
-
 
 def num_slivers(instance):
     """ return num slivers as a link to slivers changelist view """
@@ -108,19 +107,22 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'fields': ('description', 'template', 'set_state')
         }),
         ('Advanced', {
-            'classes': ('collapse',),
-            'fields': ('data', 'data_sha256', 'overlay', 'overlay_sha256',
+            'classes': ('collapse', 'info'),
+            'description': 'If you want to define a URI, you should remove '
+                           'previously the uploaded file.',
+            'fields': ('data', 'data_uri', 'data_sha256',
+                       'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
         }),
     )
-    readonly_fields = ['new_instance_sn', 'data_sha256', 'overlay_sha256']
+    readonly_fields = ['new_instance_sn']
     search_fields = ['description', 'node__description', 'node__name', 'slice__name']
     inlines = [SliverPropInline, SliverIfaceInline]
     actions = [update_selected]
     change_view_actions = [update_selected]
     default_changelist_filters = (('my_slivers', 'True'),)
     change_form_template = "admin/controller/change_form.html"
-    form = SliverAdminForm # FIXME: ignored but don't know why! Check inheritance
+    form = SliverAdminForm
     
     class Media:
         css = {
@@ -167,6 +169,11 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         request._slice_ = obj.slice
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
+    def get_readonly_fields(self, request, obj=None):
+        """Mark as readonly if exists file for data and overlay"""
+        readonly_fields = super(SliverAdmin, self).get_readonly_fields(request, obj=obj)
+        return readonly_fields + get_readonly_file_fields(obj)
+    
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changelist """
         qs = super(SliverAdmin, self).queryset(request)
@@ -191,6 +198,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                     db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliverAdmin, self).formfield_for_dbfield(db_field, **kwargs)
     
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -496,9 +505,16 @@ class SliverNodeInline(SliverInline):
     def has_delete_permission(self, request, obj=None):
         """
         Disallow deleting slivers from node change_view:
-        Why a node admin can be able of doing that?
+        Why a node admin will be able to do that?
         """
         return False
+    
+    def has_change_permission(self, request, obj=None, view=False):
+        # HACK for allow node_admins change a node with slivers
+        # As this Inline is readonly and doesn't allow to introduce
+        # changes, this workaround shouldn't have side effects
+        # See #476
+        return True
 
     def slice_link(self, instance):
         return get_admin_link(instance.slice)
@@ -516,16 +532,38 @@ class SlicePropInline(PermissionTabularInline):
 
 class SliverDefaultsInline(PermissionStackedInline):
     model = SliverDefaults
-    fields = ['template', 'set_state','data', 'data_sha256', 'overlay', 'overlay_sha256', 'instance_sn']
-    readonly_fields = ['instance_sn', 'data_sha256', 'overlay_sha256']
+    fieldsets = (
+        (None, {
+            'classes': ('info',),
+            'description': 'If you want to define a URI, you should remove '
+                           'previously the uploaded file.',
+            'fields': ('template', 'set_state','data', 'data_uri', 'data_sha256',
+                       'overlay', 'overlay_uri', 'overlay_sha256', 'instance_sn')
+        }),
+    )
+    readonly_fields = ['instance_sn']
+    form = SliverDefaultsInlineForm
     can_delete = False
+    
+    class Media:
+        css = {
+             'all': (
+                'slices/css/warning-form.css',)
+        }
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'template':
             formfield = self.formfield_for_foreignkey(db_field, **kwargs)
             kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
                 db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliverDefaultsInline, self).formfield_for_dbfield(db_field, **kwargs)
+
+    def get_readonly_fields(self, request, obj=None):
+        """Mark as readonly if exists file for data and overlay"""
+        readonly_fields = super(SliverDefaultsInline, self).get_readonly_fields(request, obj=obj)
+        return readonly_fields + get_readonly_file_fields(obj.sliver_defaults)
 
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
@@ -539,7 +577,6 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
     search_fields = ['name']
     inlines = [SlicePropInline, SliverDefaultsInline, SliverInline]
     actions = [reset_selected, renew_selected_slices]
-    form = SliceAdminForm
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'set_state', 'expires_on', 'group'),
@@ -558,6 +595,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         css = {
             "all" : ("slices/css/hide_admin_obj_name.css",)
         }
+    
 
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """

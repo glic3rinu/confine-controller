@@ -27,12 +27,30 @@ def get_expires_on():
 
 
 def clean_sha256(self, fields):
+    """
+    Check that sha256 has manually provided for an external
+    file (specified by uri)
+    """
     for field_name in fields:
         if getattr(self, field_name+'_uri') and not getattr(self, field_name+'_sha256'):
             raise ValidationError('Missing %s_sha256.' % field_name)
 
 
+def clean_uri(self, fields):
+    """
+    Check if user has provided an uri to override current
+    uploaded file and delete the stored one (if any).
+    """
+    for field_name in fields:
+        field = getattr(self, field_name)
+        field_uri = getattr(self, field_name + '_uri')
+        # allow the API to override uploaded file
+        if field and field_uri and field.url != field_uri:
+            field.delete()
+
+
 def set_sha256(self, fields):
+    """ Generate sha256 for an uploaded file """
     for field_name in fields:
         field = getattr(self, field_name)
         if field and field.file:
@@ -45,7 +63,17 @@ def set_sha256(self, fields):
                 sha256.update(block)
             sha256 = sha256.hexdigest()
             field.file.seek(0)
-            setattr(self, field_name+'_sha256', sha256)
+            setattr(self, field_name + '_sha256', sha256)
+        elif not getattr(self, field_name + '_uri'):
+            setattr(self, field_name + '_sha256', '')
+
+
+def set_uri(self, fields):
+    """Reset _uri when a file is uploaded"""
+    for field_name in fields:
+        field = getattr(self, field_name)
+        if field and field.file:
+            setattr(self, field_name + '_uri', '')
 
 
 def make_upload_to(field_name, base_path, file_name):
@@ -99,7 +127,7 @@ class Template(models.Model):
             help_text='The node architectures accepted by this template (as reported '
                       'by uname -m, non-empty). Slivers using this template should '
                       'run on nodes whose architecture is listed here.',
-            default='i586,')
+            default=settings.SLICES_TEMPLATE_ARCH_DFLT)
     is_active = models.BooleanField(default=True)
     image = models.FileField(help_text="Template's image file.",
             upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
@@ -125,6 +153,7 @@ class Template(models.Model):
     
     def save(self, *args, **kwargs):
         set_sha256(self, ('image',))
+        set_uri(self, ('image',))
         super(Template, self).save(*args, **kwargs)
 
 
@@ -302,7 +331,7 @@ class SliverDefaults(models.Model):
                                      settings.SLICES_SLICE_OVERLAY_NAME,),
             help_text='File containing overlay for slivers (if they do not explicitly '
                       'indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLICE_OVERLAY_EXTENSIONS)])
+            validators=[validate_file_extensions(settings.SLICES_SLIVER_OVERLAY_EXTENSIONS)])
     overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
             help_text='The URI of a file containing an overlay for slivers (if they '
                       'do not explicitly indicate one). The file must be an archive '
@@ -318,8 +347,7 @@ class SliverDefaults(models.Model):
             upload_to=make_upload_to('data', settings.SLICES_SLICE_EXP_DATA_DIR,
                                      settings.SLICES_SLICE_EXP_DATA_NAME,),
             help_text='File containing experiment data for slivers (if they do not '
-                      'explicitly indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLICE_EXP_DATA_EXTENSIONS)])
+                      'explicitly indicate one)')
     data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
             help_text='The URI of a file containing sliver data for slivers (if '
                       'they do not explicitly indicate one). Its format and contents '
@@ -344,11 +372,13 @@ class SliverDefaults(models.Model):
     def clean(self):
         super(SliverDefaults, self).clean()
         clean_sha256(self, ('data', 'overlay'))
+        clean_uri(self, ('data', 'overlay'))
     
     def save(self, *args, **kwargs):
         if not self.pk:
             save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('data', 'overlay'))
+        set_uri(self, ('data', 'overlay'))
         super(SliverDefaults, self).save(*args, **kwargs)
     
     # FIXME can be removed when api.aggregate supports nested serializers
@@ -377,8 +407,7 @@ class Sliver(models.Model):
     data = models.FileField(blank=True, verbose_name='sliver data',
             upload_to=make_upload_to('data', settings.SLICES_SLIVER_EXP_DATA_DIR,
                                      settings.SLICES_SLIVER_EXP_DATA_NAME),
-            help_text='File containing data for this sliver.',
-            validators=[validate_file_extensions(settings.SLICES_SLIVER_EXP_DATA_EXTENSIONS)])
+            help_text='File containing data for this sliver.')
     data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
             help_text='If present, the URI of a file containing data for '
                       'this sliver, instead of the one specified by the slice. Its '
@@ -401,8 +430,8 @@ class Sliver(models.Model):
                       'do-upload-overlay function.')
     overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
             help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'This member may be set directly or through the do-upload-overlay '
-                      'function. Compulsory when a file has been specified.',
+                      'Automatically setted on file upload but compulsory when file URI '
+                      'has been specified.',
             validators=[validate_sha256])
     set_state = NullableCharField(max_length=16, choices=Slice.STATES, blank=True,
             help_text='If present, the state set on this sliver (set state), '
@@ -428,6 +457,7 @@ class Sliver(models.Model):
     def clean(self):
         super(Sliver, self).clean()
         clean_sha256(self, ('data', 'overlay'))
+        clean_uri(self, ('data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice
@@ -442,6 +472,7 @@ class Sliver(models.Model):
             self.instance_sn = self.slice.sliver_defaults.instance_sn
             save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
         set_sha256(self, ('data', 'overlay'))
+        set_uri(self, ('data', 'overlay'))
         super(Sliver, self).save(*args, **kwargs)
     
     @property

@@ -152,7 +152,7 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     change_view_actions = [
         resolve_tickets, close_tickets, reject_tickets, take_tickets
     ]
-    change_form_template = "admin/controller/change_form.html"
+    change_form_template = "admin/issues/ticket/change_form.html"
     form = TicketForm
     readonly_fields = (
         'display_summary', 'display_queue', 'display_group', 'display_owner',
@@ -321,7 +321,10 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                 content += request.POST[u'messages-2-0-content']
                 request.POST[u'messages-2-0-content'] = content
         ticket.mark_as_read_by(request.user)
-        context = {'title': "Issue #%i - %s" % (ticket.id, ticket.subject)}
+        context = {
+            'title': "Issue #%i - %s" % (ticket.id, ticket.subject),
+            'short_title': "Issue #%i" % ticket.id
+        }
         context.update(extra_context or {})
         return super(TicketAdmin, self).change_view(
             request, object_id, form_url, extra_context=context)

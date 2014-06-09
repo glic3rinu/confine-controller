@@ -1,9 +1,15 @@
-from sys import stderr
-from urlparse import urlparse
+import re
+import time
+import unittest
 
+from django.conf import settings
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.utils import override_settings
+from urlparse import urlparse
 
+from controller.utils.apps import is_installed, remove_app
 from users.models import Group, Roles, User, ResourceRequest, JoinRequest
 
 
@@ -65,9 +71,6 @@ class GroupFormTestCase(BaseTestCase):
         Test if the new group form is generated successfully
 
         """
-        
-        #print >> stderr, self.client.login(username='super', password='superpass')
-        
         url = reverse('admin:users_group_add')
         resp = self.client.get(url)
 
@@ -300,3 +303,63 @@ class GroupJoinTestCase(BaseTestCase):
         uid = 3
         gid = 1
         self._do_action_join_request('ignore')
+
+
+@unittest.skipUnless(is_installed('registration'), "django-registration is required")
+@unittest.skipIf(is_installed('captcha'), "remove 'captcha' from INSTALLED_APPS for properly run this test.")
+class RegistrationTestCase(BaseTestCase):
+    
+    @override_settings(USERS_REGISTRATION_MODE = 'RESTRICTED',
+        MAIL_REGISTRATION_APPROVE = 'vct@localhost')
+        # Removing captcha doesn't seems to work
+        #INSTALLED_APPS = remove_app(settings.INSTALLED_APPS, 'captcha'))
+    def test_notify_operators(self):
+        self.client.logout()
+        self.assertFalse(is_installed('captcha'))
+        name = "user" + str(int(round(time.time() * 1000)))
+        password = "foopass"
+        data = {
+            "name": name,
+            "username": name,
+            "email": name + "@localhost",
+            "password1": password,
+            "password2": password,
+        }
+        response = self.client.post(reverse('registration_register'), data=data)
+        self.assertRedirects(response, reverse('registration_complete'))
+        
+        # registration successful sends an email with confirmation URL
+        self.assertEquals(len(mail.outbox), 1)
+        URL_REGEX = 'http[s]?://\w+/accounts/activate/\w+'
+        urls = re.findall(URL_REGEX, mail.outbox[0].body)
+        self.assertEquals(len(urls), 1)
+        mail.outbox = []
+        
+        # Confirm user email
+        response = self.client.get(urls[0], follow=True)
+        self.assertRedirects(response, reverse('registration_activation_complete'), status_code=301)
+        
+        # One email to operators should be sent requesting approvation
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertTrue(settings.MAIL_REGISTRATION_APPROVE, mail.outbox[0].to)
+        
+        # The email contains the user URL
+        URL_REGEX = 'http[s]?://\w+/admin/users/user/\d+/'
+        urls = re.findall(URL_REGEX, mail.outbox[0].body)
+        self.assertEquals(len(urls), 1)
+        mail.outbox = []
+        
+        # Mark user as active
+        user = User.objects.get(name=name)
+        user.is_active = True
+        user.save()
+        
+        # Two emails should be sent: one to user and another to operators
+        self.assertEquals(len(mail.outbox), 2)
+        self.assertTrue(user.email in mail.outbox[0].to)
+        self.assertTrue(settings.MAIL_REGISTRATION_APPROVE, mail.outbox[1].to)
+        
+        # Registered user should be able to login
+        self.client.login(username=name, password=password)
+        response = self.client.get(reverse('admin:index'))
+        self.assertEquals(response.status_code, 200)

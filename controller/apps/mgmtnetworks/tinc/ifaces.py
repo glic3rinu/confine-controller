@@ -13,7 +13,7 @@ class MgmtIface(BaseIface):
     whatever other networks are routed by testbed gateways in the management network.
     """
     DEFAULT_NAME = 'mgmt0'
-    UNIQUE = True
+    UNIQUE = False
     CREATE_BY_DEFAULT = True
     
     def ipv6_addr(self, iface):

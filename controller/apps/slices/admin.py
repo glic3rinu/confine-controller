@@ -434,7 +434,7 @@ class SliverInline(PermissionTabularInline):
         return instance.interfaces.filter(type='public4').count()
     
     def management(self, instance):
-        return instance.interfaces.filter(type='management').count()
+        return instance.interfaces.filter(type='management').exists()
     management.boolean = True
     
     def isolated(self, instance):

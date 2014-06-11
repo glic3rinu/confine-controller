@@ -442,7 +442,7 @@ class Sliver(models.Model):
     @property
     def mgmt_iface(self):
         iface = self.interfaces.filter(type='management')
-        return iface.get() if iface else None
+        return iface.first() if iface else None
 
     @property
     def api_id(self):

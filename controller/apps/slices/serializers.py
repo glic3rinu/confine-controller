@@ -72,10 +72,16 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         return attrs
 
     def validate_interfaces(self, attrs, source):
-        """ Check if first interface is of type private """
+        """Check that one interface of type private has been defined."""
         interfaces = attrs.get(source, [])
-        if 'private' not in [iface.type for iface in interfaces]:
-           raise serializers.ValidationError('At least one private interface is required.')
+        priv_ifaces = 0
+        for iface in interfaces:
+            if iface.type == 'private':
+                priv_ifaces += 1
+            if priv_ifaces > 1:
+                raise serializers.ValidationError('There can only be one interface of type private.')
+        if priv_ifaces == 0:
+            raise serializers.ValidationError('There must exist one interface of type private.')
         return attrs
 
 

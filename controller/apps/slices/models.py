@@ -443,6 +443,17 @@ class Sliver(models.Model):
     def mgmt_iface(self):
         iface = self.interfaces.filter(type='management')
         return iface.first() if iface else None
+    
+    @property
+    def mgmt_net(self):
+        if self.mgmt_iface is None:
+            return None
+        # FIXME when #157 is merged, replace with a MgmtNetConf instance
+        #       and also use its readonly serializer
+        return {
+            "backend":"native",
+            "address": self.mgmt_iface.ipv6_addr
+        }
 
     @property
     def api_id(self):

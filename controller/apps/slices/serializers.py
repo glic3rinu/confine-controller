@@ -51,6 +51,7 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     exp_data_uri = FakeFileField(field='exp_data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
+    mgmt_net = serializers.Field()
     
     class Meta:
         model = Sliver

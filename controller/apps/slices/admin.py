@@ -395,7 +395,7 @@ class SliceSliversAdmin(SliverAdmin):
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
         slice = get_object_or_404(Slice, pk=slice_id)
-        sliver = get_object_or_404(Sliver, pk=object_id)
+        sliver = get_object_or_404(Sliver, pk=object_id, slice=slice)
         self.slice_id = slice_id
         self.node_id = sliver.node_id
         context = { 'slice': slice }

@@ -209,6 +209,11 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Linked title """
+        # Check object_id is a valid pk (simplification of ModelAdmin.get_object)
+        try:
+            int(object_id)
+        except ValueError:
+            object_id = None
         sliver = get_object_or_404(Sliver, pk=object_id)
         slice_link = get_admin_link(sliver.slice)
         node_link = get_admin_link(sliver.node)

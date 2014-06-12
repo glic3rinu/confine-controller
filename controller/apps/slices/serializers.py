@@ -164,6 +164,12 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
 
 
 class SliceSerializer(SliceCreateSerializer):
+    # Hack to show explicit handled resource (Vlan) - #46-note87
+    # FIXME: can be removed when monkey-patch works in resources.serializers
+    if is_installed('resources'):
+        from resources.serializers import VlanResourceReqSerializer
+        resources = VlanResourceReqSerializer(source='*', read_only=True, required=False)
+    
     class Meta:
         model = Slice
         read_only_fields = ('group',)

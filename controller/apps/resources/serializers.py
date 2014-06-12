@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from api import api, serializers
 from controller.models import Testbed
 from controller.api import TestbedSerializer
-from nodes.models import Node
 
 from . import ResourcePlugin
 from .models import Resource, ResourceReq
+from .resources import VlanRes
 
 
 class ResourceSerializer(serializers.ModelSerializer):
@@ -36,3 +36,32 @@ for producer_model in ResourcePlugin.get_producers_models():
 
 for consumer_model in ResourcePlugin.get_consumers_models():
     api.aggregate(consumer_model, ResourceReqSerializer, name='resources', many=True, required=False)
+
+
+# Hack to show explicit handled resource (Vlan) - #46-note87
+class VlanResourceReqSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField('get_vlan_name')
+    unit = serializers.SerializerMethodField('get_vlan_unit')
+    req = serializers.SerializerMethodField('get_vlan_req')
+    
+    class Meta:
+        model = Slice
+        fields = ['name', 'req', 'unit']
+    
+    def get_vlan_name(self, obj):
+        return VlanRes.name
+    
+    def get_vlan_req(self, obj):
+        return int(obj.allow_isolated)
+    
+    def get_vlan_unit(self, obj):
+        return VlanRes.unit
+    
+    def to_native(self, value):
+        # hack to show as a list of resources
+        value = super(VlanResourceReqSerializer, self).to_native(value)
+        return [value]
+
+
+# FIXME wont work until api.aggregate supports nested serializers
+#api.aggregate(Slice, VlanResourceReqSerializer, source='*', name='resources', required=False)

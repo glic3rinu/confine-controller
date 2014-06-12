@@ -1,0 +1,5 @@
+/** FIXME: Workaround of #390 remove this file after complete fix **/
+.form-row.field-traceback p {
+    font-family: monospace;
+    white-space: pre;
+}

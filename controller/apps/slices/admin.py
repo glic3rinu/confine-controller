@@ -563,6 +563,8 @@ class SliverDefaultsInline(PermissionStackedInline):
     def get_readonly_fields(self, request, obj=None):
         """Mark as readonly if exists file for data and overlay"""
         readonly_fields = super(SliverDefaultsInline, self).get_readonly_fields(request, obj=obj)
+        if obj is None:
+            return readonly_fields
         return readonly_fields + get_readonly_file_fields(obj.sliver_defaults)
 
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):

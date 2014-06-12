@@ -44,10 +44,11 @@ class VlanResourceReqSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField('get_vlan_name')
     unit = serializers.SerializerMethodField('get_vlan_unit')
     req = serializers.SerializerMethodField('get_vlan_req')
+    alloc = serializers.SerializerMethodField('get_vlan_alloc')
     
     class Meta:
         model = Slice
-        fields = ['name', 'req', 'unit']
+        fields = ['name', 'req', 'unit', 'alloc']
     
     def get_vlan_name(self, obj):
         return VlanRes.name
@@ -57,6 +58,13 @@ class VlanResourceReqSerializer(serializers.ModelSerializer):
     
     def get_vlan_unit(self, obj):
         return VlanRes.unit
+    
+    def get_vlan_alloc(self, obj):
+        if obj.set_state == Slice.REGISTER:
+            return None
+        if obj.allow_isolated:
+            return 1
+        return 0
     
     def to_native(self, value):
         # hack to show as a list of resources

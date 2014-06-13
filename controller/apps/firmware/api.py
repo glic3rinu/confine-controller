@@ -24,6 +24,7 @@ class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    controller_view = True
     # TODO customize rest_to_admin_url --> admin:firmware_config_change
 
 
@@ -34,6 +35,7 @@ class BaseImageDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    controller_view = True
 
 
 class Firmware(generics.RetrieveUpdateDestroyAPIView):
@@ -63,8 +65,4 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
 
 
 insert_ctl(NodeDetail, Firmware)
-
-# hack for customize baseimage url (avoid spaces)
-BaseImage._meta.verbose_name = u'baseimage'
-BaseImage._meta.verbose_name_plural = u'baseimages'
 api.register(BaseImageList, BaseImageDetail)

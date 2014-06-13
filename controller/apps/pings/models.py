@@ -47,7 +47,7 @@ class Ping(models.Model):
     def get_state(cls, obj):
         try:
             last = obj.pings.all().latest()
-        except IndexError:
+        except Ping.DoesNotExist:
             return cls.NODATA
         settings = cls.get_instance_settings(obj)
         kwargs = {

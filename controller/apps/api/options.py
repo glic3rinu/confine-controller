@@ -115,6 +115,8 @@ class ControllerRestApi(RestApi):
     
     def get_urls(self):
         urlpatterns = super(ControllerRestApi, self).get_urls()
+        urlpatterns += patterns('',
+            url(r'^$', self.base(), name='base_controller'),)
         return urlpatterns + get_registry_urls(self._registry_controller)
 
 # singleton

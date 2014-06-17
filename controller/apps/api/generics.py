@@ -47,8 +47,11 @@ class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         """ Add link header """
         response = super(URIListCreateAPIView, self).get(request, *args, **kwargs)
-        base_link = ('base', self._rel_prefix + 'base')
-        response['Link'] = link_header([base_link], request)
+        base_link = [
+            ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+            ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
+        ]
+        response['Link'] = link_header(base_link, request)
         return response
     
     def get_success_headers(self, data):
@@ -75,7 +78,10 @@ class RetrieveUpdateDestroyAPIView(ControllerBase, generics.RetrieveUpdateDestro
         """ Add link header """
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
         name = model_name_urlize(self.model)
-        links = [('base', self._rel_prefix + 'base')]
+        links = [
+            ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+            ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
+        ]
         if not is_singleton(self.model) and getattr(self, 'list', True):
             resource = '%s-list' % name
             link = (resource, self._rel_prefix + resource)

@@ -10,7 +10,7 @@ from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Host, Gateway
-from .serializers import HostSerializer, GatewaySerializer
+from .serializers import HostCreateSerializer, HostSerializer, GatewaySerializer
 
 
 class UploadPubkey(APIView):
@@ -25,9 +25,9 @@ class UploadPubkey(APIView):
         if pubkey:
             host = get_object_or_404(Host, pk=kwargs.get('pk'))
             self.check_object_permissions(self.request, host)
-            tincclient = host.related_tincclient.all()[0]
-            tincclient.pubkey=pubkey
-            tincclient.save()
+            tinchost = host.related_tinchost.first()
+            tinchost.pubkey = pubkey
+            tinchost.save()
             response_data = {'detail': 'host pubkey changed successfully'}
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='pubkey value not provided')
@@ -43,14 +43,12 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     network) and provides API URIs to navigate to them.
     """
     model = Host
+    add_serializer_class = HostCreateSerializer
     serializer_class = HostSerializer
     
-    def post(self, request, *args, **kwargs):
-        """ adds current request.user as default host owner """
-        request.DATA['owner'] = {
-            'uri': reverse('user-detail', args=[request.user.pk], request=request)
-        }
-        return super(HostList, self).post(request, *args, **kwargs)
+    def pre_save(self, obj):
+        """ Set the object's owner, based on the incoming request. """
+        obj.owner = self.request.user
 
 
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):

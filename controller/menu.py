@@ -73,7 +73,7 @@ class CustomMenu(Menu):
                         reverse('admin:slices_template_changelist')),
                 ]))
         
-        if is_installed('mgmtnetworks.tinc'):
+        if is_installed('tinc'):
             if user.is_superuser:
                 self.children.append(items.MenuItem('Tinc',
                     reverse('admin:app_list', args=['tinc']),

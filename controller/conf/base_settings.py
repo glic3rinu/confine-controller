@@ -123,10 +123,11 @@ INSTALLED_APPS = (
     'slices',
     'issues',
     'state',
-    'pings',
-    'mgmtnetworks.tinc',
-#    'sfa',
+    'mgmtnetworks',
     'communitynetworks',
+    'pings',
+    'tinc', # after pings to avoid cannot import name Host
+#    'sfa',
     'firmware',
     'gis',
     'users',
@@ -218,7 +219,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('Tinc', {
         'models': (
-            'mgmtnetworks.tinc.*',
+            'tinc.*',
         ),
         'collapsible': True,
     }),

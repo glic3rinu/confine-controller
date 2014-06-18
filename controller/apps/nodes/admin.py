@@ -13,6 +13,8 @@ from controller.core.exceptions import InvalidMgmtAddress
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
+from mgmtnetworks.admin import MgmtNetConfInline
+from mgmtnetworks.utils import reverse as mgmt_reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
@@ -20,7 +22,6 @@ from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
 from .models import DirectIface, Island, Node, NodeProp, Server, ServerProp
-from .utils import get_mgmt_backend_class
 
 
 STATES_COLORS = {
@@ -56,7 +57,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [DirectIfaceInline, NodePropInline]
+    inlines = [MgmtNetConfInline, DirectIfaceInline, NodePropInline]
     weights = {
         'inlines': {
             NodePropInline: 2
@@ -150,9 +151,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         search = request.GET.get('q', False)
         if search:
             for query in search.split(' '):
-                mgmt_backend = get_mgmt_backend_class()
                 try:
-                    node = mgmt_backend.reverse(query)
+                    node = mgmt_reverse(query)
                 except InvalidMgmtAddress:
                     pass
                 else:
@@ -211,7 +211,7 @@ class ServerPropInline(PermissionTabularInline):
 
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
-    inlines = [ServerPropInline]
+    inlines = [MgmtNetConfInline, ServerPropInline]
     
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete the server """

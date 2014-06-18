@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block tinchosts %}
-{% if 'mgmtnetworks.tinc'|isinstalled %}
+{% if 'tinc'|isinstalled %}
     {% if not user.tinc_hosts.exists %}
         <p>You may want to <a href="{% url 'admin:tinc_host_add' %}">create a tinc host</a>
         for accessing the management network.</p>
@@ -31,7 +31,7 @@
           connectivity to the management network:
           <ol style="list-style-type: circle">
             {% for host in user.tinc_hosts.all %}
-              <li><b>{{ host }}</b>: {{ host.tinc|ping_status }}</li>
+              <li><b>{{ host }}</b>: {{ host.mgmt_net|ping_status }}</li>
             {% endfor %}
           </ol>
         </p>

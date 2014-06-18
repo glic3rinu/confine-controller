@@ -14,7 +14,7 @@ from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
 from nodes.models import Server
 
-from mgmtnetworks.tinc.settings import (TINC_NET_NAME, TINC_PORT_DFLT,
+from tinc.settings import (TINC_NET_NAME, TINC_PORT_DFLT,
     TINC_TINCD_ROOT, TINC_TINCD_BIN, TINC_TINCD_SEND_HUP)
 
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
     @transaction.atomic
     @check_root
     def handle(self, *args, **options):
-        from mgmtnetworks.tinc.models import TincServer, TincAddress
+        from tinc.models import TincHost, TincAddress
         interactive = options.get('interactive')
         username = options.get('username')
         
@@ -98,7 +98,7 @@ class Command(BaseCommand):
             server.save()
         
         server_ct = ContentType.objects.get_for_model(Server)
-        tinc_server, __ = TincServer.objects.get_or_create(object_id=1,
+        tinc_server, __ = TincHost.objects.get_or_create(object_id=1,
             content_type=server_ct)
         
         tinc_port = options.get('default_port')
@@ -142,7 +142,7 @@ class Command(BaseCommand):
         r("chmod +x %(net_root)s/tinc-up" % context)
         r("chmod +x %(net_root)s/tinc-down" % context)
         
-        TincAddress.objects.get_or_create(server=tinc_server, addr=tinc_address,
+        TincAddress.objects.get_or_create(host=tinc_server, addr=tinc_address,
                 port=tinc_port)
         
         priv_key = os.path.join(TINC_TINCD_ROOT, tinc_net_name, 'rsa_key.priv')

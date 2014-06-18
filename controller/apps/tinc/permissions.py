@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from permissions import Permission, ReadOnlyPermission, AllowAllPermission
 
-from .models import TincClient, TincServer, Host, Gateway, TincAddress
+from .models import TincHost, Host, Gateway, TincAddress
 
 
 class HostPermission(Permission):
@@ -27,8 +27,7 @@ class HostPermission(Permission):
 
 # Since it uses generic relations we must relay that permissions will be 
 # handled by the parent object
-TincClient.has_permission = AllowAllPermission()
-TincServer.has_permission = ReadOnlyPermission()
+TincHost.has_permission = AllowAllPermission()
 Host.has_permission = HostPermission()
 Gateway.has_permission = ReadOnlyPermission()
 TincAddress.has_permission = ReadOnlyPermission()

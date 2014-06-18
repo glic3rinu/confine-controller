@@ -17,8 +17,5 @@ NODES_NODE_SLIVER_PUB_IPV4_RANGE_DFLT = getattr(settings, 'NODES_NODE_SLIVER_PUB
 
 NODES_NODE_DIRECT_IFACES_DFLT = getattr(settings, 'NODES_NODE_DIRECT_IFACES_DFLT', [])
 
-# Management backend, needed for management network IP
-NODES_MGMT_BACKEND = getattr(settings, 'NODES_MGMT_BACKEND', 'mgmtnetworks.tinc.backend')
-
 NODES_NODE_API_NODE_BASE_URL = getattr(settings, 'NODES_NODE_API_NODE_BASE',
     'http://[%(mgmt_addr)s]/confine/api')

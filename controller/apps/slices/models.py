@@ -458,7 +458,7 @@ class Sliver(models.Model):
     @property
     def api_id(self):
         """ The unique ID of this sliver (REST-API) """
-        return "%i@%i" % (self.slice.id, self.node.id)
+        return "%i@%i" % (self.slice_id, self.node_id)
     
     def update(self):
         self.instance_sn += 1

@@ -11,7 +11,7 @@ from nodes.models import Node, Server
 def get_mgmt_net(self):
     """ Getter for management network generic relation """
     ct = ContentType.objects.get_for_model(self)
-    obj = MgmtNetConf.objects.get(object_id=self.pk, content_type=ct)
+    obj = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
 
 

@@ -118,6 +118,7 @@ class Node(models.Model):
                       'Node and group administrators in this group are able to '
                       'manage this node.')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            on_delete=models.SET_NULL,
             help_text='An optional island used to hint where the node is located '
                       'network-wise.')
     

@@ -35,6 +35,7 @@ class Host(models.Model):
     owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
             help_text='The user who administrates this host (its creator by default)')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            on_delete=models.SET_NULL,
             help_text='An optional island used to hint where this tinc client reaches to.')
     related_tinc = generic.GenericRelation('tinc.TincHost')
     related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
@@ -221,6 +222,7 @@ class TincAddress(models.Model):
     port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT,
             help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            on_delete=models.SET_NULL,
             help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
                       'at_server">Island</a> this tinc address is reachable from.')
     host = models.ForeignKey(TincHost, related_name='addresses')

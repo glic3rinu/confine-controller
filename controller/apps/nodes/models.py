@@ -62,6 +62,7 @@ class ServerApi(Api):
     type = models.CharField(max_length=16, choices=TYPES)
     server = models.ForeignKey('nodes.Server', related_name='api')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            on_delete=models.SET_NULL,
             help_text='An optional island used to hint where this API endpoint '
                       'is reachable from. An API endpoint reachable from the '
                       'management network may omit this member.')

@@ -53,7 +53,11 @@ def set_sha256(self, fields):
     """ Generate sha256 for an uploaded file """
     for field_name in fields:
         field = getattr(self, field_name)
-        if field and field.file:
+        if field:
+            try:
+                field.file
+            except IOError: # file doesn't exists
+                return
             # chunked for avoid memory leak (#428)
             sha256 = hashlib.sha256()
             while True:
@@ -72,7 +76,11 @@ def set_uri(self, fields):
     """Reset _uri when a file is uploaded"""
     for field_name in fields:
         field = getattr(self, field_name)
-        if field and field.file:
+        if field:
+            try:
+                field.file
+            except IOError: # file doesn't exists
+                return
             setattr(self, field_name + '_uri', '')
 
 

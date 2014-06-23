@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import json
 import six
 
+from urlparse import urlparse
 from rest_framework.compat import smart_text
 
 from api import serializers
@@ -17,9 +18,16 @@ class FakeFileField(serializers.CharField):
         self.field_name = kwargs.pop('field')
         super(FakeFileField, self).__init__(*args, **kwargs)
     
-#   TODO validate _uri value when setted directly (i.e. valid file extensions)
-#   TODO remove file object._delete
-#    def from_native(self, value):
+    def from_native(self, value):
+        request = self.context.get('request', None)
+        if request and value:
+            request_host = request.get_host().split(':')[0]
+            file_url = urlparse(value)
+            # check if file_uri matchs with file stored in controller (#494)
+            if request_host == file_url.hostname:
+                return file_url.path
+        return super(FakeFileField, self).from_native(value)
+    
     def to_native(self, value):
         object_file = getattr(self.parent.__object__, self.field_name)
         if object_file:

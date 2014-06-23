@@ -90,7 +90,7 @@ class MgmtNetConf(models.Model):
         return self.tinc()
 
     def tinc(self):
-        return self.content_object.tinc
+        return getattr(self.content_object, 'tinc', None)
 
     def native(self):
         return None

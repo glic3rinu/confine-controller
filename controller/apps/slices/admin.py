@@ -173,7 +173,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changelist """
-        qs = super(SliverAdmin, self).queryset(request)
+        related = ('node', 'slice')
+        qs = super(SliverAdmin, self).queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('interfaces', distinct=True))
         return qs
     
@@ -572,7 +573,8 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
 
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
-        qs = super(SliceAdmin, self).queryset(request)
+        related = ('group', 'template')
+        qs = super(SliceAdmin, self).queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('slivers', distinct=True))
         return qs
     

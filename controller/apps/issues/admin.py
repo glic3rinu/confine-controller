@@ -269,7 +269,8 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def queryset(self, request):
         """ Filter tickets according to their visibility preference """
-        qs = super(TicketAdmin, self).queryset(request)
+        related = ('created_by', 'group', 'queue')
+        qs = super(TicketAdmin, self).queryset(request).select_related(*related)
         return qs.visible_by(request.user)
     
     def get_fieldsets(self, request, obj=None):

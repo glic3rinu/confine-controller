@@ -143,7 +143,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         on change list. Intercept search query to allow search nodes
         by management network IP
         """
-        qs = super(NodeAdmin, self).queryset(request)
+        related = ('group', 'island')
+        qs = super(NodeAdmin, self).queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('direct_ifaces', distinct=True))
         # FIXME: try to move to slices to avoid coupling nodes with slices app
         qs = qs.annotate(models.Count('slivers', distinct=True))

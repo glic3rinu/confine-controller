@@ -189,7 +189,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if obj and not obj.cert:
-                messages.warning(request, 'This node lacks a valid certificate.')
+                messages.warning(request, 'This node lacks a valid certificate '
+                '(will be automatically generated during firmware build).')
             if obj and not obj.group.allow_nodes:
                 msg = "The node group does not have permissions to manage nodes"
                 messages.warning(request, msg)

@@ -50,7 +50,9 @@ class TincHostInline(PermissionGenericTabularInline):
         """ Warning user if the tinc host is not fully configured """
         if (obj and obj.mgmt_net.backend == 'tinc' and obj.tinc.pubkey is None and
             request.method == 'GET'):
-            msg = 'This %s misses a tinc public key.' % obj._meta.verbose_name
+            msg = 'This %s misses a tinc public key ' % obj._meta.verbose_name
+            if obj._meta.verbose_name == 'node':
+                msg += '(will be automatically generated during firmware build).'
             messages.warning(request, msg)
         return super(TincHostInline, self).get_formset(request, obj=obj, **kwargs)
 

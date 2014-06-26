@@ -94,16 +94,10 @@ class TincHost(models.Model):
     
     def save(self, *args, **kwargs):
         super(TincHost, self).save(*args, **kwargs)
-        # update the node set_state FIXME use signals?
-        if hasattr(self.content_object, 'update_set_state'):
-            self.content_object.update_set_state()
         defer(update_tincd.delay)
     
     def delete(self, *args, **kwargs):
         super(TincHost, self).delete(*args, **kwargs)
-        # update the node set_state FIXME use signals?
-        if hasattr(self.content_object, 'update_set_state'):
-            self.content_object.update_set_state()
         defer(update_tincd.delay)
 
     @property
@@ -121,11 +115,8 @@ class TincHost(models.Model):
     def connect_to(self):
         """
         Returns all active TincHosts to use on tincd ConnectTo.
-        Only instances with addresses can be act as servers.
+        Only trusted instances can act as servers.
         """
-        # XXX trust testbed nodes that want to act as tinc servers?
-        # XXX decouple tinc arch from testbed arch
-        #return TincHost.objects.filter(addresses__isnull=False).distinct()
         return TincHost.objects.servers()
     
     def get_host(self, island=None):
@@ -155,13 +146,10 @@ class TincHost(models.Model):
         """
         Returns client tinc.conf file content, prioritizing island related gateways
         """
-        # FIXME: refactor according to #157 (separate tinc client/server
-        # from testbed nodes/servers). E.g. a testbed client (node) can act
-        # as tinc server and a testbed server as tinc client.
         if self.content_type.model in ['server', 'gateway']:
             raise TypeError("Cannot get_config from a server or gateway")
         config = ["Name = %s" % self.name]
-        for server in self.connect_to.all():
+        for server in self.connect_to:
             line = "ConnectTo = %s" % server.name
             tinc_island = self.content_object.island
             has_island = server.addresses.filter(island=tinc_island).exists()
@@ -244,6 +232,17 @@ class TincAddress(models.Model):
     @property
     def name(self):
         return self.server.name
+
+
+# Signals
+def tinchost_changed(sender, instance, **kwargs):
+    if instance.content_type == ContentType.objects.get_for_model(Node):
+        instance.content_object.update_set_state()
+
+from django.db.models.signals import post_save, post_delete
+# update the node set_state depending on tinc configuration
+post_save.connect(tinchost_changed, sender=TincHost)
+post_delete.connect(tinchost_changed, sender=TincHost)
 
 
 # Monkey-Patching Section

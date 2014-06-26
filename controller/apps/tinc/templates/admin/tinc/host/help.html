@@ -59,7 +59,7 @@ Host address {{ host.tinc.subnet.strNormal }}/48
 # hosts/{{ host.tinc.name }}
 Subnet = {{ host.tinc.subnet.strNormal }}
 
-{% for gw in host.tinc.connect_to.all %}# hosts/{{ gw }}
+{% for gw in host.tinc.connect_to %}# hosts/{{ gw }}
 {% for addr in gw.addresses.all %}Address = {{ addr }} {{ addr.port }}
 {% endfor %}Subnet = {{ gw.subnet.strNormal }}
 

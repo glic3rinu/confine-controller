@@ -56,8 +56,8 @@ class RequestCert(APIView):
         self.check_object_permissions(self.request, node)
         try:
             validate_csr(csr, node)
-        except:
-            raise exceptions.ParseError(detail='Malformed CSR')
+        except Exception as e:
+            raise exceptions.ParseError(detail='Malformed CSR: %s' % e.message)
         node.sign_cert_request(csr.strip())
         response_data = {'detail': 'Sign certificate request accepted'}
         return Response(response_data, status=status.HTTP_202_ACCEPTED)

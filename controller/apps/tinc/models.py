@@ -93,6 +93,15 @@ class TincHost(models.Model):
         return str(self)
     
     def save(self, *args, **kwargs):
+        if not self.pk:
+            # Try to restore object to allow update in nested serialization
+            try:
+                obj = TincHost.objects.get(content_type_id=self.content_type_id,
+                                           object_id=self.object_id)
+            except TincHost.DoesNotExist:
+                pass
+            else:
+                self.pk = obj.pk
         super(TincHost, self).save(*args, **kwargs)
         defer(update_tincd.delay)
     

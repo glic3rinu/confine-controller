@@ -245,7 +245,7 @@ class TincAddress(models.Model):
 
 # Signals
 def tinchost_changed(sender, instance, **kwargs):
-    if instance.content_type == ContentType.objects.get_for_model(Node):
+    if hasattr(instance.content_object, 'update_set_state'): # is a node
         instance.content_object.update_set_state()
 
 from django.db.models.signals import post_save, post_delete

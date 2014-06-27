@@ -129,6 +129,9 @@ class TincHost(models.Model):
         return TincHost.objects.servers()
     
     def get_host(self, island=None):
+        # Ignore orphan TincHost objects that prevent proper update_tincd!
+        if self.content_object is None:
+            return ''
         ct_model = self.content_type.model
         if ct_model == 'node' or ct_model == 'host':
             # Returns tincd hosts file content

@@ -65,7 +65,7 @@ class TincAddressInline(PermissionTabularInline):
 
 class ReadOnlyTincAddressInline(PermissionTabularInline):
     model = TincAddress
-    readonly_fields = ['addr', 'port', 'server']
+    readonly_fields = ['addr', 'port', 'host']
     can_delete = False
     max_num = 0
 

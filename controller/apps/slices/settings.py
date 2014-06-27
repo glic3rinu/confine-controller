@@ -26,30 +26,22 @@ SLICES_TEMPLATE_IMAGE_NAME = getattr(settings, 'SLICES_TEMPLATE_IMAGE_NAME', '')
 SLICES_TEMPLATE_IMAGE_EXTENSIONS = getattr(settings, 'SLICES_TEMPLATE_IMAGE_EXTENSIONS',
         ('.tar.gz', '.tgz'))
 
-SLICES_SLICE_EXP_DATA_DIR = getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data')
+SLICES_SLICE_DATA_DIR = getattr(settings, 'SLICES_SLICE_DATA_DIR',
+        getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data'))
 
-SLICES_SLICE_EXP_DATA_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
-        'slice-%(pk)d-%(original)s')
-
-# TODO: SLICES_SLICE_EXP_DATA_EXTENSION will be removed on 0.10.8
-if hasattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS'):
-    warnings.warn("Deprecated: SLICES_SLICE_EXP_DATA_EXTENSIONS is unused (see #446).", DeprecationWarning)
-SLICES_SLICE_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLICE_EXP_DATA_EXTENSIONS', None)
+SLICES_SLICE_DATA_NAME = getattr(settings, 'SLICES_SLICE_DATA_NAME',
+        getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME', 'slice-%(pk)d-%(original)s'))
 
 SLICES_SLICE_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
 
 SLICES_SLICE_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_OVERLAY_NAME',
         'slice-%(pk)d-%(original)s')
 
-SLICES_SLIVER_EXP_DATA_DIR = getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data')
+SLICES_SLIVER_DATA_DIR = getattr(settings, 'SLICES_SLIVER_DATA_DIR',
+        getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data'))
 
-SLICES_SLIVER_EXP_DATA_NAME = getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME',
-        'sliver-%(pk)d-%(original)s')
-
-# TODO: SLICES_SLIVER_EXP_DATA_EXTENSION will be removed on 0.10.8
-if hasattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS'):
-    warnings.warn("Deprecated: SLICES_SLIVER_EXP_DATA_EXTENSIONS is unused (see #446).", DeprecationWarning)
-SLICES_SLIVER_EXP_DATA_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_EXP_DATA_EXTENSIONS', None)
+SLICES_SLIVER_DATA_NAME = getattr(settings, 'SLICES_SLIVER_DATA_NAME',
+        getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME', 'sliver-%(pk)d-%(original)s'))
 
 SLICES_SLIVER_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
 
@@ -67,3 +59,12 @@ SLICES_SLICE_EXP_WARN = getattr(settings, 'SLICES_SLICE_EXP_WARN', timedelta(day
 
 # List of disabled sliver ifaces. i.e. ['management', 'public4']
 SLICES_DISABLED_SLIVER_IFACES = getattr(settings, 'SLICES_DISABLED_SLIVER_IFACES', [])
+
+# Warn user of settings rename on #234
+# TODO: *_EXP_DATA_* settings will be removed on 0.11.1 (not backwards compatibility)
+for value in ['SLICES_SLICE_EXP_DATA_DIR', 'SLICES_SLICE_EXP_DATA_NAME',
+    'SLICES_SLIVER_EXP_DATA_NAME', 'SLICES_SLIVER_EXP_DATA_DIR']:
+    if hasattr(settings, value):
+        new_value = value.replace('EXP_DATA', 'DATA')
+        warnings.warn("'%s' setting has been renamed to '%s' (see #234)." %
+            (value, new_value), DeprecationWarning)

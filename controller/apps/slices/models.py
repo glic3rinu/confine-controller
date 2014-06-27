@@ -352,8 +352,8 @@ class SliverDefaults(models.Model):
                       'function. Compulsory when a file has been specified.',
             validators=[validate_sha256])
     data = models.FileField(blank=True, verbose_name='sliver data',
-            upload_to=make_upload_to('data', settings.SLICES_SLICE_EXP_DATA_DIR,
-                                     settings.SLICES_SLICE_EXP_DATA_NAME,),
+            upload_to=make_upload_to('data', settings.SLICES_SLICE_DATA_DIR,
+                                     settings.SLICES_SLICE_DATA_NAME,),
             help_text='File containing experiment data for slivers (if they do not '
                       'explicitly indicate one)')
     data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
@@ -413,8 +413,8 @@ class Sliver(models.Model):
                       'updated (instance sequence number).',
             verbose_name='instance sequence number')
     data = models.FileField(blank=True, verbose_name='sliver data',
-            upload_to=make_upload_to('data', settings.SLICES_SLIVER_EXP_DATA_DIR,
-                                     settings.SLICES_SLIVER_EXP_DATA_NAME),
+            upload_to=make_upload_to('data', settings.SLICES_SLIVER_DATA_DIR,
+                                     settings.SLICES_SLIVER_DATA_NAME),
             help_text='File containing data for this sliver.')
     data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
             help_text='If present, the URI of a file containing data for '

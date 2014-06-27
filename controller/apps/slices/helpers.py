@@ -23,7 +23,7 @@ def remove_slice_id(view):
 def save_files_with_pk_value(obj, fields, *args, **kwargs):
     for field in fields:
         if getattr(obj, field):
-            # Dirty hack in order to allow pk values on data filename
+            # Dirty hack in order to allow pk values on sliver data filename
             field_value = getattr(obj, field)
             setattr(obj, field, None)
             super(type(obj), obj).save(*args, **kwargs)

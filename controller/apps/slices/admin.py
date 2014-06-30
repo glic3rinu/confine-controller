@@ -565,7 +565,7 @@ class SliverDefaultsInline(PermissionStackedInline):
         elif  '_sha256' in db_field.name or '_uri' in db_field.name:
             kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliverDefaultsInline, self).formfield_for_dbfield(db_field, **kwargs)
-
+    
     def get_readonly_fields(self, request, obj=None):
         """Mark as readonly if exists file for data and overlay"""
         readonly_fields = super(SliverDefaultsInline, self).get_readonly_fields(request, obj=obj)
@@ -573,10 +573,11 @@ class SliverDefaultsInline(PermissionStackedInline):
             return readonly_fields
         return readonly_fields + get_readonly_file_fields(obj.sliver_defaults)
 
+
 class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
-        'name', 'id', 'isolated_vlan_tag', colored_set_state, num_slivers, 'template',
-        'expires_on', admin_link('group')
+        'name', 'id', 'isolated_vlan_tag', colored_set_state, num_slivers,
+        'display_template', 'expires_on', admin_link('group')
     ]
     list_display_links = ('name', 'id')
     list_filter = [MySlicesListFilter, 'set_state', 'sliver_defaults__template']
@@ -604,7 +605,6 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             "all" : ("slices/css/hide_admin_obj_name.css",)
         }
     
-
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
         related = ('group', 'template')
@@ -653,9 +653,10 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             allow_isolated can be only updated on REGISTER state
         """
         readonly_fields = super(SliceAdmin, self).get_readonly_fields(request, obj=obj)
-        if 'set_state' not in readonly_fields and obj is None:
-            return readonly_fields + ['set_state']
-        if obj is not None and obj.set_state != Slice.REGISTER:
+        if obj is None:
+            if 'set_state' not in readonly_fields:
+                return readonly_fields + ['set_state']
+        elif obj.set_state != Slice.REGISTER:
             return readonly_fields + ['allow_isolated']
         return readonly_fields
     
@@ -682,9 +683,10 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
     
-    def template(self, obj):
+    def display_template(self, obj):
         """ Show SliverDefaults template on Slice changelist"""
         return get_admin_link(obj.sliver_defaults.template)
+    display_template.short_description = 'template'
 
 
 class TemplateAdmin(PermissionModelAdmin):

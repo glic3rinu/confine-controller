@@ -209,6 +209,7 @@ class Command(BaseCommand):
                 msg = "Firmware configuration update has failed. "
             else:
                 cfg_file.content = cfg_file.content.replace("node.tinc.island", "node.island")
+                cfg_file.save()
                 msg = "Firmware configuration updated successfully. Updated ConfigFile ID: %i." % cfg_file.pk
             upgrade_notes.append("%s\nPlease check version 0.10.4 release notes:\n"
                 "https://wiki.confine-project.eu/soft:server-release-notes#section0104" % msg)

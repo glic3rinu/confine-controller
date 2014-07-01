@@ -43,6 +43,12 @@ class SliceViewsTestCase(TestCase):
         changelist_url = reverse('admin:slices_sliver_changelist')
         response = self.client.get(changelist_url)
         self.assertEqual(response.status_code, 200)
+
+    def test_sliver_changelist_all(self):
+        # Show in changelist a sliver with multiple management interfaces
+        changelist_url = reverse('admin:slices_sliver_changelist')
+        response = self.client.get(changelist_url + '?my_slivers=False')
+        self.assertEqual(response.status_code, 200)
     
     def test_sliver_changeview(self):
         # get sliver and its slice

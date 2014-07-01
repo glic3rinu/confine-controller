@@ -260,6 +260,10 @@ class ExecutionAdmin(ChangeViewActions):
     def has_add_permission(self, request):
         """ Avoid add execution directly, must be added via an operation """
         return False
+    
+    def queryset(self, request):
+        related = ('operation',)
+        return super(ExecutionAdmin, self).queryset(request).select_related(*related)
 
 
 class InstanceAdmin(ChangeViewActions):
@@ -340,6 +344,10 @@ class InstanceAdmin(ChangeViewActions):
                 break
         context.update(extra_context or {})
         return super(InstanceAdmin, self).changelist_view(request, extra_context=context)
+    
+    def queryset(self, request):
+        related = ('execution', 'node')
+        return super(InstanceAdmin, self).queryset(request).select_related(*related)
 
 
 admin.site.register(Operation, OperationAdmin)

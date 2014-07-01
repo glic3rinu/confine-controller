@@ -1,14 +1,28 @@
-from django.utils.encoding import force_unicode
 from rest_framework import generics
 from rest_framework.generics import *
 
 from controller.models.utils import is_singleton
 
+from . import ApiRoot
+from .helpers import model_name_urlize
 from .serializers import DynamicReadonlyFieldsModelSerializer
 from .utils import link_header
 
 
-class URIListCreateAPIView(ListCreateAPIView):
+class ControllerBase(object):
+    """
+    Controller base class for all other generic views.
+    """
+    controller_view = False # registry or controller view
+    
+    @property
+    def _rel_prefix(self):
+        if self.controller_view:
+            return ApiRoot.CONTROLLER_REL_PREFIX
+        return ApiRoot.REGISTRY_REL_PREFIX
+
+
+class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
     """
     Used for read-write endpotins to represent a collection of
     model instances. Provides get and post method handlers and
@@ -33,8 +47,11 @@ class URIListCreateAPIView(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         """ Add link header """
         response = super(URIListCreateAPIView, self).get(request, *args, **kwargs)
-        base_link = ('base', 'http://confine-project.eu/rel/server/base')
-        response['Link'] = link_header([base_link], request)
+        base_link = [
+            ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+            ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
+        ]
+        response['Link'] = link_header(base_link, request)
         return response
     
     def get_success_headers(self, data):
@@ -45,7 +62,7 @@ class URIListCreateAPIView(ListCreateAPIView):
 
 
 
-class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+class RetrieveUpdateDestroyAPIView(ControllerBase, generics.RetrieveUpdateDestroyAPIView):
     """
     Used for read-write-delete endpoints to represent a single model instance.
     Provides get, put, patch and delete method handlers.
@@ -60,11 +77,14 @@ class RetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, *args, **kwargs):
         """ Add link header """
         response = super(RetrieveUpdateDestroyAPIView, self).get(request, *args, **kwargs)
-        name = force_unicode(self.model._meta.verbose_name)
-        links = [('base', 'http://confine-project.eu/rel/server/base')]
+        name = model_name_urlize(self.model)
+        links = [
+            ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+            ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
+        ]
         if not is_singleton(self.model) and getattr(self, 'list', True):
             resource = '%s-list' % name
-            link = (resource, 'http://confine-project.eu/rel/server/%s' % resource)
+            link = (resource, self._rel_prefix + resource)
             links.append(link)
         object_id = kwargs.get('pk')
         for endpoint in getattr(self, 'ctl', []):

@@ -9,7 +9,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from controller.utils.options import send_email_template
-from registration.models import RegistrationManager, RegistrationProfile
+from registration.models import RegistrationManager, RegistrationProfile, SHA1_RE
 
 
 class CustomRegistrationManager(models.Manager):
@@ -19,6 +19,10 @@ class CustomRegistrationManager(models.Manager):
     https://docs.djangoproject.com/en/1.6/topics/db/managers/#custom-managers-and-model-inheritance
     
     """
+    def __init__(self, *args, **kwargs):
+        super(CustomRegistrationManager, self).__init__(*args, **kwargs)
+        self.model = RegistrationProfile
+    
     def create_inactive_user(self, username, name, email, password,
                              site, send_email=True):
         """ Override default manager for initialize User.name """
@@ -32,14 +36,33 @@ class CustomRegistrationManager(models.Manager):
             registration_profile.send_activation_email(site)
 
         return new_user
+    
+    def activate_user(self, activation_key, enable=True):
+        """
+        Override default manager to have extra parameter 'enable'
+        that allows adding an extra step to have a user active
+        (as happens on RESTRICTED mode)
+        """
+        if SHA1_RE.search(activation_key):
+            try:
+                profile = self.get(activation_key=activation_key)
+            except self.model.DoesNotExist:
+                return False
+            if not profile.activation_key_expired():
+                user = profile.user
+                if enable:
+                    user.is_active = True
+                    user.save()
+                profile.activation_key = self.model.ACTIVATED
+                profile.save()
+                return user
+        return False
+
 
 RegistrationProfile.extra_manager = CustomRegistrationManager()
 
 
-
-# Don't hardcode this function using @receiver(pre_save, sender=User)
-# Only should be enabled by RESTRICTED backend because otherwise is
-# going to be executed twice (see #449 note-3)
+@receiver(pre_save, sender=User)
 def notify_user_enabled(sender, instance, *args, **kwargs):
     """
     Notify by email user and operators when an account
@@ -47,6 +70,8 @@ def notify_user_enabled(sender, instance, *args, **kwargs):
     """
     if kwargs.get('raw', False):
         return # avoid conflicts when loading fixtures
+    if settings.USERS_REGISTRATION_MODE != 'RESTRICTED':
+        return
     
     # Only notify if user has been created via registration
     reg_profile = instance.registrationprofile_set.first()

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.admin.templatetags.admin_list import _boolean_icon
+from django.core.exceptions import ValidationError
 
 from controller.forms.widgets import ShowText
 from nodes.models import Node
@@ -87,6 +88,18 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
                 initial_data['interfaces-%d-type' % num] = iface_type
             kwargs['data'] = initial_data
         super(SliverIfaceInlineFormSet, self).__init__(*args, **kwargs)
+    
+    def clean(self):
+        """Check that one interface of type private has been defined."""
+        super(SliverIfaceInlineFormSet, self).clean()
+        priv_ifaces = 0
+        for form in self.forms:
+            if form.cleaned_data.get('type', '') == 'private' and not form.cleaned_data.get('DELETE', False):
+                priv_ifaces += 1
+            if priv_ifaces > 1:
+                raise ValidationError('There can only be one interface of type private.')
+        if priv_ifaces == 0:
+            raise ValidationError('There must exist one interface of type private.')
 
 
 class SliverIfaceInlineForm(forms.ModelForm):

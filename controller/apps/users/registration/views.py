@@ -58,19 +58,13 @@ class ActivationRestrictedView(ActivationView):
         Mark the account as email confirmed and send an email to
         the administrators asking their approval.
         """
-        activated = super(ActivationRestrictedView, self).activate(request, activation_key)
+        activated_user = RegistrationProfile.extra_manager.activate_user(activation_key, enable=False)
         
-        # connect pre_save signal to notify on account enable
-        pre_save.connect(notify_user_enabled, sender=User)
-        
-        if activated:
+        if activated_user:
             # email confirmed but user still remains disabled
-            activated.is_active = False
-            activated.save()
-
             # send mail admin requesting enable the account
             site = RequestSite(request)
-            context = { 'request': request, 'site': site, 'user': activated }
+            context = { 'request': request, 'site': site, 'user': activated_user }
             template = 'registration/account_approve_request.email'
             to = settings.EMAIL_REGISTRATION_APPROVE
             # check if is a valid email
@@ -81,5 +75,5 @@ class ActivationRestrictedView(ActivationView):
                     "be a valid email address (current value '%s' is not)." % to)
             send_email_template(template=template, context=context, to=to)
 
-        return activated
+        return activated_user
 

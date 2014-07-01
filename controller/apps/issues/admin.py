@@ -269,7 +269,8 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def queryset(self, request):
         """ Filter tickets according to their visibility preference """
-        qs = super(TicketAdmin, self).queryset(request)
+        related = ('created_by', 'group', 'queue')
+        qs = super(TicketAdmin, self).queryset(request).select_related(*related)
         return qs.visible_by(request.user)
     
     def get_fieldsets(self, request, obj=None):
@@ -307,6 +308,11 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Change view actions based on ticket state """
+        # Check object_id is a valid pk (simplification of ModelAdmin.get_object)
+        try:
+            int(object_id)
+        except ValueError:
+            object_id = None
         ticket = get_object_or_404(Ticket, pk=object_id)
         # Change view actions based on ticket state
         self.change_view_actions = filter_actions(self, ticket, request)

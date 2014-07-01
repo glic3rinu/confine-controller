@@ -57,5 +57,5 @@ def validate_csr(csr, node):
         msg = "Subject Common Name (CN) '%s' is not a valid IP address"
         raise ValidationError(msg % subject.CN)
     if node.mgmt_net.addr != cnip:
-        msg = "Common Name (CN) must be equeal to node management address: '%s' != '%s'"
+        msg = "Common Name (CN) must be equal to node management address: '%s' != '%s'"
         raise ValidationError(msg % (subject.CN, node.mgmt_net.addr))

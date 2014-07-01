@@ -2,7 +2,7 @@ import re
 
 from django import template
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.forms import CheckboxInput
 from django.utils.safestring import mark_safe
 
@@ -48,7 +48,10 @@ def rest_to_admin_url(context):
             args = [pk]
         else:
             url += '_changelist'
-    return reverse(url, args=args)
+    try:
+        return reverse(url, args=args)
+    except NoReverseMatch:
+        return reverse('admin:index')
 
 
 @register.filter(name='is_checkbox')

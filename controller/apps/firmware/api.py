@@ -6,14 +6,36 @@ from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 
-from api import generics
+from api import api, generics
 from api.utils import insert_ctl
 from nodes.api import NodeDetail
 from nodes.models import Node
+from permissions.api import ApiPermissionsMixin
 
 from .exceptions import BaseImageNotAvailable
-from .models import Build, Config
-from .serializers import FirmwareSerializer
+from .models import BaseImage, Build, Config
+from .serializers import BaseImageSerializer, FirmwareSerializer
+
+
+class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
+    """
+    **Media type:** [`application/vnd.confine.controller.BaseImage.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api#baseimage_at_server)
+    """
+    model = BaseImage
+    serializer_class = BaseImageSerializer
+    controller_view = True
+    # TODO customize rest_to_admin_url --> admin:firmware_config_change
+
+
+class BaseImageDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    **Media type:** [`application/vnd.confine.controller.BaseImage.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api#baseimage_at_server)
+    """
+    model = BaseImage
+    serializer_class = BaseImageSerializer
+    controller_view = True
 
 
 class Firmware(generics.RetrieveUpdateDestroyAPIView):
@@ -27,6 +49,7 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
         node = get_object_or_404(Node, pk=pk)
         if not request.DATA:
             config = get_object_or_404(Config)
+            # TODO allow choose base image??
             base_image = config.get_images(node).order_by('-default').first()
             if base_image is None:
                 raise BaseImageNotAvailable
@@ -42,3 +65,4 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
 
 
 insert_ctl(NodeDetail, Firmware)
+api.register(BaseImageList, BaseImageDetail)

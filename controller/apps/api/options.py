@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.conf.urls import patterns, url
 from django.utils import six
-from django.utils.encoding import force_unicode
 from django.utils.importlib import import_module
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +10,7 @@ from rest_framework.response import Response
 from controller.models.utils import is_singleton
 from controller.utils import autodiscover
 
+from .helpers import get_registry_urls, model_name_urlize
 from .utils import link_header
 
 
@@ -26,17 +26,29 @@ class ApiRoot(APIView):
     For example: `curl -X GET https://your_domain.net/api/ 
     -H "Accept: application/json; indent=4"`
     """
+    CONFINE_REL_PREFIX = 'http://confine-project.eu/rel/'
+    REGISTRY_REL_PREFIX = CONFINE_REL_PREFIX + 'server/'
+    CONTROLLER_REL_PREFIX = CONFINE_REL_PREFIX + 'controller/'
+    
     def get(base_view, request, format=None):
         relations = [
-            ('base', 'http://confine-project.eu/rel/server/base'),
-            ('api-token-auth', 'http://confine-project.eu/rel/controller/do-get-auth-token')
+            ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+            ('api-token-auth', ApiRoot.CONTROLLER_REL_PREFIX + 'do-get-auth-token')
         ]
         # http://confine-project.eu/rel/server like resources
         for model in api._registry:
-            name = force_unicode(model._meta.verbose_name)
+            name = model_name_urlize(model)
             name = name if is_singleton(model) else '%s-list' % name
-            rel = 'http://confine-project.eu/rel/server/%s' % name
+            rel = ApiRoot.REGISTRY_REL_PREFIX + name
             relations.append((name, rel))
+        
+        # http://confine-project.eu/rel/controller like resources
+        for model in api._registry_controller:
+            name = model_name_urlize(model)
+            name = name if is_singleton(model) else '%s-list' % name
+            rel = ApiRoot.CONTROLLER_REL_PREFIX + name
+            relations.append((name, rel))
+        
         headers = {'Link': link_header(relations, request)}
         return Response({}, headers=headers)
 
@@ -64,26 +76,7 @@ class RestApi(object):
         urlpatterns = patterns('',
             url(r'^$', self.base(), name='base'),)
         
-        for model, resource in six.iteritems(self._registry):
-            name = force_unicode(model._meta.verbose_name)
-            name_plural = force_unicode(model._meta.verbose_name_plural)
-            list_view, detail_view = resource
-            for endpoint in getattr(detail_view, 'ctl', []):
-                urlpatterns += patterns('',
-                    url(r'^%s/(?P<pk>[0-9]+)/ctl/%s/$' % (name_plural, endpoint.url_name),
-                        endpoint.as_view(),
-                        name="%s-ctl-%s" % (name, endpoint.url_name)),
-                )
-            urlpatterns += patterns('',
-                url(r'^%s/$' % name_plural,
-                    list_view.as_view(),
-                    name=name if is_singleton(model) else '%s-list' % name),
-                url(r'^%s/(?P<pk>[0-9]+)$' % name_plural,
-                    detail_view.as_view(),
-                    name="%s-detail" % name),
-            )
-
-        return urlpatterns
+        return urlpatterns + get_registry_urls(self._registry)
     
     def autodiscover(self):
         """ Auto-discover api.py and serializers.py modules """
@@ -110,6 +103,26 @@ class RestApi(object):
 
 
 
+class ControllerRestApi(RestApi):
+    """Provide controller functionallities to RestApi"""
+    def __init__(self):
+        super(ControllerRestApi, self).__init__()
+        self._registry_controller = {}
+    
+    def register(self, *args):
+        controller_view = args[0].controller_view
+        if controller_view:
+            model = args[0].model
+            self._registry_controller.update({model: args})
+        else:
+            super(ControllerRestApi, self).register(*args)
+    
+    def get_urls(self):
+        urlpatterns = super(ControllerRestApi, self).get_urls()
+        urlpatterns += patterns('',
+            url(r'^$', self.base(), name='base_controller'),)
+        return urlpatterns + get_registry_urls(self._registry_controller)
+
 # singleton
-api = RestApi()
+api = ControllerRestApi()
 

@@ -4,7 +4,7 @@ import json
 import six
 
 from controller.utils.apps import is_installed
-from rest_framework.compat import smart_text
+from urlparse import urlparse
 
 from api import serializers
 from nodes.settings import NODES_NODE_ARCHS
@@ -18,9 +18,16 @@ class FakeFileField(serializers.CharField):
         self.field_name = kwargs.pop('field')
         super(FakeFileField, self).__init__(*args, **kwargs)
     
-#   TODO validate _uri value when setted directly (i.e. valid file extensions)
-#   TODO remove file object._delete
-#    def from_native(self, value):
+    def from_native(self, value):
+        request = self.context.get('request', None)
+        if request and value:
+            request_host = request.get_host().split(':')[0]
+            file_url = urlparse(value)
+            # check if file_uri matchs with file stored in controller (#494)
+            if request_host == file_url.hostname:
+                return file_url.path
+        return super(FakeFileField, self).from_native(value)
+    
     def to_native(self, value):
         object_file = getattr(self.parent.__object__, self.field_name)
         if object_file:
@@ -72,6 +79,8 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
+    mgmt_net = serializers.Field()
+    
     # FIXME remove when api.aggregate supports nested serializers
     # is only required because SliverDefaultsSerializer imports resources
     # serializers, and breaks api.aggregate functionality based on
@@ -104,10 +113,16 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         return attrs
 
     def validate_interfaces(self, attrs, source):
-        """ Check if first interface is of type private """
+        """Check that one interface of type private has been defined."""
         interfaces = attrs.get(source, [])
-        if 'private' not in [iface.type for iface in interfaces]:
-           raise serializers.ValidationError('At least one private interface is required.')
+        priv_ifaces = 0
+        for iface in interfaces:
+            if iface.type == 'private':
+                priv_ifaces += 1
+            if priv_ifaces > 1:
+                raise serializers.ValidationError('There can only be one interface of type private.')
+        if priv_ifaces == 0:
+            raise serializers.ValidationError('There must exist one interface of type private.')
         return attrs
 
 

@@ -176,7 +176,8 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changelist """
-        qs = super(SliverAdmin, self).queryset(request)
+        related = ('node', 'slice')
+        qs = super(SliverAdmin, self).queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('interfaces', distinct=True))
         return qs
     
@@ -212,6 +213,11 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Linked title """
+        # Check object_id is a valid pk (simplification of ModelAdmin.get_object)
+        try:
+            int(object_id)
+        except ValueError:
+            object_id = None
         sliver = get_object_or_404(Sliver, pk=object_id)
         slice_link = get_admin_link(sliver.slice)
         node_link = get_admin_link(sliver.node)
@@ -398,7 +404,7 @@ class SliceSliversAdmin(SliverAdmin):
     def change_view(self, request, object_id, slice_id, form_url='', extra_context=None):
         """ Customizations needed for being nested to slices """
         slice = get_object_or_404(Slice, pk=slice_id)
-        sliver = get_object_or_404(Sliver, pk=object_id)
+        sliver = get_object_or_404(Sliver, pk=object_id, slice=slice)
         self.slice_id = slice_id
         self.node_id = sliver.node_id
         context = { 'slice': slice }
@@ -437,7 +443,7 @@ class SliverInline(PermissionTabularInline):
         return instance.interfaces.filter(type='public4').count()
     
     def management(self, instance):
-        return instance.interfaces.filter(type='management').count()
+        return instance.interfaces.filter(type='management').exists()
     management.boolean = True
     
     def isolated(self, instance):
@@ -601,7 +607,8 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
 
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
-        qs = super(SliceAdmin, self).queryset(request)
+        related = ('group', 'template')
+        qs = super(SliceAdmin, self).queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('slivers', distinct=True))
         return qs
     

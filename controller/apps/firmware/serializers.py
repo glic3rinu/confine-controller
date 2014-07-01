@@ -1,8 +1,22 @@
 from __future__ import absolute_import
 
 from api import serializers
+from nodes.settings import NODES_NODE_ARCHS
 
-from .models import Config, Build
+from .models import BaseImage, Build, Config
+
+
+class BaseImageSerializer(serializers.UriHyperlinkedModelSerializer):
+    architectures = serializers.MultiSelectField(choices=NODES_NODE_ARCHS)
+    
+    class Meta:
+        model = BaseImage
+        exclude = ('config',)
+    
+    def validate(self, attrs):
+        # Initialize config with singleton value
+        attrs['config'] = Config.objects.get()
+        return attrs
 
 
 class FirmwareSerializer(serializers.ModelSerializer):

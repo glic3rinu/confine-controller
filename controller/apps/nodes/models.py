@@ -10,7 +10,6 @@ from controller.utils.singletons.models import SingletonModel
 from pki import ca, Bob
 
 from . import settings
-from .utils import get_mgmt_backend_class
 from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
         validate_dhcp_range, validate_priv_ipv4_prefix)
 
@@ -34,6 +33,7 @@ class Node(models.Model):
     NONE = 'none'
     DHCP = 'dhcp'
     AUTO = 'auto'
+    RANGE = 'range'
     IPV6_METHODS = (
         (NONE, 'None'),
         (DHCP, 'DHCP'),
@@ -42,7 +42,7 @@ class Node(models.Model):
     IPV4_METHODS = (
         (NONE, 'None'),
         (DHCP, 'DHCP'),
-        (AUTO, 'Auto'),
+        (RANGE, 'Range'),
     )
     
     name = models.CharField(max_length=256, unique=True,
@@ -119,6 +119,7 @@ class Node(models.Model):
                       'Node and group administrators in this group are able to '
                       'manage this node.')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            on_delete=models.SET_NULL,
             help_text='An optional island used to hint where the node is located '
                       'network-wise.')
     
@@ -140,13 +141,13 @@ class Node(models.Model):
         elif self.set_state != Node.DEBUG:
             raise ValidationError("Initial state must be Debug")
         # clean sliver_pub_ipv4 and _range
-        if self.sliver_pub_ipv4 == 'none':
+        if self.sliver_pub_ipv4 == Node.NONE:
             if self.sliver_pub_ipv4_range:
                 msg = "Sliver pub IPv4 range must be empty when sliver pub IPv4 is none"
                 raise ValidationError(msg)
-        elif self.sliver_pub_ipv4 == 'dhcp':
+        elif self.sliver_pub_ipv4 == Node.DHCP:
             validate_dhcp_range(self.sliver_pub_ipv4_range)
-        elif self.sliver_pub_ipv4 == 'range':
+        elif self.sliver_pub_ipv4 == Node.RANGE:
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         super(Node, self).clean()
     
@@ -168,11 +169,6 @@ class Node(models.Model):
     def save(self, *args, **kwargs):
         self.update_set_state(commit=False)
         super(Node, self).save(*args, **kwargs)
-    
-    @property
-    @cached
-    def mgmt_net(self):
-        return get_mgmt_backend_class()(self)
     
     def reboot(self):
         self.boot_sn += 1
@@ -282,11 +278,6 @@ class Server(SingletonModel):
     
     def __unicode__(self):
         return 'Server'
-    
-    @property
-    @cached
-    def mgmt_net(self):
-        return get_mgmt_backend_class()(self)
 
 
 class ServerProp(BaseProp):

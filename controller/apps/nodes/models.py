@@ -33,6 +33,7 @@ class Node(models.Model):
     NONE = 'none'
     DHCP = 'dhcp'
     AUTO = 'auto'
+    RANGE = 'range'
     IPV6_METHODS = (
         (NONE, 'None'),
         (DHCP, 'DHCP'),
@@ -41,7 +42,7 @@ class Node(models.Model):
     IPV4_METHODS = (
         (NONE, 'None'),
         (DHCP, 'DHCP'),
-        (AUTO, 'Auto'),
+        (RANGE, 'Range'),
     )
     
     name = models.CharField(max_length=256, unique=True,
@@ -140,13 +141,13 @@ class Node(models.Model):
         elif self.set_state != Node.DEBUG:
             raise ValidationError("Initial state must be Debug")
         # clean sliver_pub_ipv4 and _range
-        if self.sliver_pub_ipv4 == 'none':
+        if self.sliver_pub_ipv4 == Node.NONE:
             if self.sliver_pub_ipv4_range:
                 msg = "Sliver pub IPv4 range must be empty when sliver pub IPv4 is none"
                 raise ValidationError(msg)
-        elif self.sliver_pub_ipv4 == 'dhcp':
+        elif self.sliver_pub_ipv4 == Node.DHCP:
             validate_dhcp_range(self.sliver_pub_ipv4_range)
-        elif self.sliver_pub_ipv4 == 'range':
+        elif self.sliver_pub_ipv4 == Node.RANGE:
             validate_ipv4_range(self.sliver_pub_ipv4_range)
         super(Node, self).clean()
     

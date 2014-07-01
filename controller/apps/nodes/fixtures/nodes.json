@@ -1,0 +1,42 @@
+[
+{
+    "pk": 1, 
+    "model": "nodes.node", 
+    "fields": {
+        "sliver_pub_ipv6": "none", 
+        "sliver_pub_ipv4": "dhcp", 
+        "set_state": "safe", 
+        "sliver_mac_prefix": null, 
+        "name": "Test1", 
+        "island": null, 
+        "priv_ipv4_prefix": null, 
+        "group": 1, 
+        "cert": "-----BEGIN CERTIFICATE-----\nMIIC6DCCAdCgAwIBAwIEawdDrzANBgkqhkiG9w0BAQsFADAqMRowGAYDVQQDExFm\nZDY1OmZjNDE6YzUwZjo6MjEMMAoGA1UEChMDVkNUMB4XDTE0MDIwMzEyMTU1MVoX\nDTE4MDIwMjEyMTU1MVowQjEiMCAGCSqGSIb3DQEJARYTdmN0K2FkbWluQGxvY2Fs\naG9zdDEcMBoGA1UEAxMTZmQ2NTpmYzQxOmM1MGY6MTo6MjCCASIwDQYJKoZIhvcN\nAQEBBQADggEPADCCAQoCggEBAMG8gnVXNmvkvJ5OI2LKTXAJfrDKu/jQs8zSCS26\nziiHq7JsT2Vfx5N8dkPCJWwL3+DFG97nzaUDACMOK1fC6wL6bbIf6B9nBRAGawn3\nxCUTR6gfy+bW3bepztIO8lWtABioXl7iVvIXujEvoorT1e5XpBt6WwCIRnPl4Wr7\nRbqUw62iy0LNcjBn0ECVbLGuu3D5idPNyF817p3MZhqiVrJ4zDYdW288Wh20d6zt\nbCmiwJARhzWEv7ev6XIJBIWFgGDsadIy+zFj47HpMOhKt59zhTMNK2NOC/c1xgCK\njny7Fn9R8QMF0UbpISxR3TgGNiBDsl2RiRzElDxN+TW8gpsCAwEAATANBgkqhkiG\n9w0BAQsFAAOCAQEAN0Hj+RdHeb35L5D/8F0fVbtLqhogDCZXfizkb7EPPadXoXMM\n2KuBZTTC+2rMsMwhRwy9Qegl3XWb/HFMmf+MTuA2WnnhuD+soE0cZeJ6Ty9mfP/5\nhFkP8jRXCBCQEIOfqxaFEI95aWJ9k7BzDaGntjDE2U683xdJyq/+cgAdjwAj9dHt\nBmY62f/+wlAGiiEircnDmm+88hyj+LNHrTSfm6KIEaz2Mi+/vsVAbnJghOhmlIzX\n1j9PJBXIztTLJmZcwfnv7MMSaiG04mppea44G47ynGVevJ0PVAirSEKZ3X27SWOQ\n7wY9WICel7Y5fsD17m37hsEUJy9E8spOKvl9gg==\n-----END CERTIFICATE-----", 
+        "local_iface": "eth0", 
+        "sliver_pub_ipv4_range": "#8", 
+        "boot_sn": 1, 
+        "arch": "x86", 
+        "description": ""
+    }
+},
+{
+    "pk": 2, 
+    "model": "nodes.node", 
+    "fields": {
+        "sliver_pub_ipv6": "none", 
+        "sliver_pub_ipv4": "dhcp", 
+        "set_state": "production", 
+        "sliver_mac_prefix": null, 
+        "name": "Test2", 
+        "island": null, 
+        "priv_ipv4_prefix": null, 
+        "group": 1, 
+        "cert": "-----BEGIN CERTIFICATE-----\nMIIC2jCCAcKgAwIBAwIEOVpwgTANBgkqhkiG9w0BAQsFADAcMRowGAYDVQQDExFm\nZDY1OmZjNDE6YzUwZjo6MjAeFw0xNDA0MTEwNzEwMThaFw0xODA0MTAwNzEwMTha\nMEIxIjAgBgkqhkiG9w0BCQEWE3ZjdCthZG1pbkBsb2NhbGhvc3QxHDAaBgNVBAMT\nE2ZkNjU6ZmM0MTpjNTBmOjI6OjIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQC+Pe9Qi5laCRGEUHdDSFzP+ummNkDAO1nRMcStC+WYeDWtgIa111oiFV0N\n5a/CzD4qcTw0Ez3simfx2L41ov6nk6C7bffDeTQAn/h/a3pL2aKMSw0PwaOOnlBT\nZKQ4k6MW/BJN5ZRtWmXx5pziBlyiVFuJSl5qXatSmgT+56wKvhSXOYok2SFSkwg+\nxXPsjcCwQjqzK74brZOIj5Syj0JG3RsRo64CJZtM+nHX5sbzDP1koCBqNhyrOeJS\nIiGGxrH/8MGm3SzuQdN8tTI7t/IFkGqQIIJm9RMSvO/FQCsO2FselBG02OXaNH/d\npzW0RZP1hvS39TGv3r/ri+Rel3xhAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAIac\nif2dYiY6N1W5wFi7ZV+SbPVjObDejyn3ZYVDaFE8immLALdwpLcbDkreAE5YZLhL\nRfwo7Mn3PaBV2TU7wkDf0vwUQgcc9AZtNuc1hq72g7lzWvKyK7OgpQCk+1h0Otcq\nbsbEo5JPukIPZlu5eIgwgYkyjsWT9Jobx1t2lDwfhNDogU/5bmWajMpI1fe99EKv\nC4xNMTZXxx/qWEGB9tGMuVFmrT6u5MZQy4c80HoyTbDTQ5NImQqaEboMCazSnjnq\naFGn4UVUNzA7G0CWIqJc7rxe2x9eswgl1ytdaVzlTv95+rM4Bc16UxZj7uv8M58X\nmKbbFoluMtLXl+z62nY=\n-----END CERTIFICATE-----", 
+        "local_iface": "eth0", 
+        "sliver_pub_ipv4_range": "#8", 
+        "boot_sn": 0, 
+        "arch": "i686", 
+        "description": ""
+    }
+}
+]

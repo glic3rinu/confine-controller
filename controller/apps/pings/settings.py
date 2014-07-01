@@ -28,12 +28,20 @@ PING_DEFAULT_INSTANCE = getattr(settings, 'PING_DEFAULT_INSTANCE', (
 
 PING_INSTANCES = getattr(settings, 'PING_INSTANCES', (
     {
-        'model': 'tinc.TincClient',
-        'app': 'mgmtnetworks.tinc',
+        'model': 'mgmtnetworks.MgmtNetConf',
+        'app': 'mgmtnetworks',
         'admin_classes': (
-            ('TincClientInline', 'tinc_compatible_address', '', 'content_object'),
-            ('HostAdmin', 'address', 'tinc', ''),
+            ('MgmtNetConfInline', 'address', '', 'content_object'),
         ),
+        'get_addr': lambda obj: getattr(obj, 'addr'),
+    }, {
+        'model': 'tinc.Host',
+        'app': 'tinc',
+        'admin_classes': (
+             ('HostAdmin', 'address', 'mgmt_net', ''),
+        ),
+        'get_addr': lambda obj: getattr(obj.mgmt_net, 'addr'),
+        'schedule': 0, # disabled (handled by mgmtnetworks)
     }, {
         'model': 'slices.SliverIface',
         'app': 'slices',

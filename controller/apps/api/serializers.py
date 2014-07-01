@@ -12,17 +12,20 @@ from controller.core.validators import validate_prop_name
 
 class RelHyperlinkedRelatedField(HyperlinkedRelatedField):
     """ 
-    HyperlinkedRelatedField field providing a relation object rather than flat URL 
+    HyperlinkedRelatedField field providing a relation object
+    and its ID rather than flat URL.
     """
     def to_native(self, obj):
         """ 
         CONFINE specs to DRF compat
-        converts from "http//example.org" to { "uri": "http://example.org" }
+        converts from "http//example.org" to { "uri": "http://example.org",
+        "id": ID }
         """
         url = super(RelHyperlinkedRelatedField, self).to_native(obj)
         if url is None:
              return None
-        return { 'uri': url }
+        # Include object id handling special Sliver.id (composite)
+        return { 'uri': url, 'id': getattr(obj, 'api_id', obj.pk) }
     
     def from_native(self, value):
         """ 

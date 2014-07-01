@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import json
 import six
 
+from django.db.models import Q
+
 from api import serializers
 
 from . import settings
@@ -21,6 +23,10 @@ class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = Server
+    
+    def validate_tinc(self, attrs, source):
+        from tinc.serializers import validate_tinc
+        return validate_tinc(self, attrs, source)
 
 
 class DirectIfaceSerializer(serializers.ModelSerializer):
@@ -92,9 +98,15 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
             msg = " Check if you have group or node administrator roles at the provided group."
             fields['group'].error_messages['does_not_exist'] += msg
             # bug #321: filter by user.id (None for Anonymous users)
-            fields['group'].queryset = queryset.filter(allow_nodes=True,
-                                        roles__user=user.id, roles__is_group_admin=True)
+            fields['group'].queryset = queryset.filter(
+                Q(roles__is_group_admin=True) | Q(roles__is_node_admin=True),
+                allow_nodes=True, roles__user=user.id)
         return fields
+    
+    def validate_tinc(self, attrs, source):
+        from tinc.serializers import validate_tinc
+        return validate_tinc(self, attrs, source)
+
 
 class NodeSerializer(NodeCreateSerializer):
     class Meta:

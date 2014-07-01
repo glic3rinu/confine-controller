@@ -12,6 +12,8 @@ from .tasks import get_state
 @transaction.atomic
 def refresh(modeladmin, request, queryset):
     """ get_state from State queryset synchronously """
+    if not queryset.exists():
+        return # 404
     opts = queryset[0].content_object._meta
     module = '%s.%s' % (opts.app_label, opts.object_name)
     ids = queryset.values_list('object_id', flat=True)

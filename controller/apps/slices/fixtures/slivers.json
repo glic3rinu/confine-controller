@@ -1,0 +1,82 @@
+[
+{
+    "pk": 1,
+    "model": "slices.sliver",
+    "fields": {
+        "node": 1,
+        "slice": 1,
+        "description": "",
+        "overlay": "",
+        "instance_sn": 0,
+        "exp_data": "",
+        "exp_data_sha256": "",
+        "exp_data_uri": "",
+        "set_state": null,
+        "template": null,
+        "overlay_sha256": "",
+        "overlay_uri": ""
+    }
+},
+{
+    "pk": 2,
+    "model": "slices.sliver",
+    "fields": {
+        "node": 2,
+        "slice": 1,
+        "description": "",
+        "overlay": "",
+        "instance_sn": 4,
+        "exp_data": "",
+        "exp_data_sha256": "",
+        "exp_data_uri": "",
+        "set_state": null,
+        "template": null,
+        "overlay_sha256": "",
+        "overlay_uri": ""
+    }
+},
+{
+    "pk": 1,
+    "model": "slices.sliveriface",
+    "fields": {
+        "nr": 1,
+        "type": "private",
+        "name": "priv",
+        "parent": null,
+        "sliver": 1
+    }
+},
+{
+    "pk": 2,
+    "model": "slices.sliveriface",
+    "fields": {
+        "nr": 1,
+        "type": "private",
+        "name": "priv",
+        "parent": null,
+        "sliver": 2
+    }
+},
+{
+    "pk": 3,
+    "model": "slices.sliveriface",
+    "fields": {
+        "nr": 1,
+        "type": "management",
+        "name": "mgmt0",
+        "parent": null,
+        "sliver": 2
+    }
+},
+{
+    "pk": 4,
+    "model": "slices.sliveriface",
+    "fields": {
+        "nr": 2,
+        "type": "management",
+        "name": "mgmt1",
+        "parent": null,
+        "sliver": 2
+    }
+}
+]

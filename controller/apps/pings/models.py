@@ -47,7 +47,7 @@ class Ping(models.Model):
     def get_state(cls, obj):
         try:
             last = obj.pings.all().latest()
-        except IndexError:
+        except Ping.DoesNotExist:
             return cls.NODATA
         settings = cls.get_instance_settings(obj)
         kwargs = {
@@ -70,3 +70,16 @@ class Ping(models.Model):
                 if setting:
                     return settings.get(setting)
                 return settings
+
+
+# workaround django issue #22594 and controller #448
+# https://code.djangoproject.com/ticket/22594
+# http://redmine.confine-project.eu/issues/448
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+
+@receiver(pre_delete)
+def pre_delete_receiver(sender, instance,**kwargs):
+    pings = getattr(instance, 'pings', False)
+    if pings:
+        pings.all().delete()

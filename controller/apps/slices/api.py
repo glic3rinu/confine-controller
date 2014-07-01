@@ -159,6 +159,23 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
         Renew, Reset, make_upload_file(Slice, 'exp_data', 'exp-data'),
         make_upload_file(Slice, 'overlay', 'overlay'),
     ]
+    def put(self, request, *args, **kwargs):
+        """
+        Check that set_state has not changed because has
+        side effects and breaks idempotence (#490)
+        """
+        pk = kwargs.get('pk', None)
+        try:
+            slice = Slice.objects.get(pk=pk)
+        except Slice.DoesNotExist:
+            pass
+        else:
+            new_set_state = request.DATA.get('set_state', None)
+            if new_set_state and slice.set_state != new_set_state:
+                msg = {'set_state': ["Not allowed to change using a PUT operation. "
+                                     "PATCH should be used instead."]}
+                return Response(data=msg, status=400)
+        return super(SliceDetail, self).put(request, *args, **kwargs)
 
 
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):

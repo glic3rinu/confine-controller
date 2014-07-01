@@ -309,6 +309,10 @@ class RolesAdmin(admin.ModelAdmin):
         response._headers['location'] = (location[0], location[1]+query_string)
         return response
     
+    def queryset(self, request):
+        related = ('user', 'group')
+        return super(RolesAdmin, self).queryset(request).select_related(*related)
+    
     def response_add(self, request, *args, **kwargs):
         response = super(RolesAdmin, self).response_add(request, *args, **kwargs)
         return self._preserve_query_string(request, response)

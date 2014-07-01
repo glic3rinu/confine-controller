@@ -7,21 +7,21 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.shortcuts import redirect
 from django.utils.html import escape
+from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
 
 from controller.models.utils import get_field_value
 from controller.utils.time import timesince, timeuntil
 
 
-def get_modeladmin(model, import_module=True):
+def get_modeladmin(model, run_import_module=True):
     """ returns the modeladmin registered for model """
-    for k,v in admin.site._registry.iteritems():
-        if k is model:
-            if v is None and import_module:
-                # Sometimes the admin module is not yet imported
-                import_module('%s.%s' % (model._meta.app_label, 'admin'))
-                get_modeladmin(model, import_module=False)
-            return v
+    model_admin = admin.site._registry.get(model, None)
+    if model_admin is None and run_import_module:
+        # Sometimes the admin module is not yet imported
+        import_module(model.__module__.replace('.models', '.admin'))
+        model_admin = admin.site._registry.get(model, None)
+    return model_admin
 
 
 def insertattr(model, name, value, weight=0):

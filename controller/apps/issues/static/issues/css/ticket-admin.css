@@ -6,6 +6,10 @@ fieldset .field-box {
 
 hr { background-color: #B6B6B6; }
 
+h3 { max-width: 710px }
+
+h3:first-letter { text-transform: capitalize; }
+
 h4 { color: #666; }
 
 h4 span { font-style: italic; }

@@ -1,13 +1,19 @@
 from django.conf import settings
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import validate_email
 from django.contrib.sites.models import RequestSite, Site
+from django.db.models.signals import pre_save
 
 from registration import signals
 from registration.backends.default.views import ActivationView, RegistrationView
 
 from controller.utils import send_email_template
-from .models import RegistrationProfile
+from .models import notify_user_enabled, RegistrationProfile
 
 
 class RegistrationOpenView(RegistrationView):
@@ -52,15 +58,13 @@ class ActivationRestrictedView(ActivationView):
         Mark the account as email confirmed and send an email to
         the administrators asking their approval.
         """
-        activated = super(ActivationRestrictedView, self).activate(request, activation_key)
-        if activated:
+        activated_user = RegistrationProfile.extra_manager.activate_user(activation_key, enable=False)
+        
+        if activated_user:
             # email confirmed but user still remains disabled
-            activated.is_active = False
-            activated.save()
-
             # send mail admin requesting enable the account
             site = RequestSite(request)
-            context = { 'request': request, 'site': site, 'user': activated }
+            context = { 'request': request, 'site': site, 'user': activated_user }
             template = 'registration/account_approve_request.email'
             to = settings.EMAIL_REGISTRATION_APPROVE
             # check if is a valid email
@@ -71,5 +75,5 @@ class ActivationRestrictedView(ActivationView):
                     "be a valid email address (current value '%s' is not)." % to)
             send_email_template(template=template, context=context, to=to)
 
-        return activated
+        return activated_user
 

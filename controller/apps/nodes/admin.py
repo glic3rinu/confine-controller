@@ -13,6 +13,8 @@ from controller.core.exceptions import InvalidMgmtAddress
 from controller.models.utils import get_help_text
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
+from mgmtnetworks.admin import MgmtNetConfInline
+from mgmtnetworks.utils import reverse as mgmt_reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
@@ -21,7 +23,6 @@ from .filters import MyNodesListFilter
 from .forms import DirectIfaceInlineFormSet
 from .models import (DirectIface, Island, Node, NodeApi, NodeProp, Server,
     ServerApi, ServerProp)
-from .utils import get_mgmt_backend_class
 
 
 STATES_COLORS = {
@@ -62,7 +63,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [DirectIfaceInline, NodeApiInline, NodePropInline]
+    inlines = [MgmtNetConfInline, DirectIfaceInline, NodeApiInline, NodePropInline]
     weights = {
         'inlines': {
             NodePropInline: 2
@@ -148,7 +149,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         on change list. Intercept search query to allow search nodes
         by management network IP
         """
-        qs = super(NodeAdmin, self).queryset(request)
+        related = ('group', 'island')
+        qs = super(NodeAdmin, self).queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('direct_ifaces', distinct=True))
         # FIXME: try to move to slices to avoid coupling nodes with slices app
         qs = qs.annotate(models.Count('slivers', distinct=True))
@@ -156,9 +158,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         search = request.GET.get('q', False)
         if search:
             for query in search.split(' '):
-                mgmt_backend = get_mgmt_backend_class()
                 try:
-                    node = mgmt_backend.reverse(query)
+                    node = mgmt_reverse(query)
                 except InvalidMgmtAddress:
                     pass
                 else:
@@ -194,7 +195,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if obj and not obj.cert:
-                messages.warning(request, 'This node lacks a valid certificate.')
+                messages.warning(request, 'This node lacks a valid certificate '
+                '(will be automatically generated during firmware build).')
             if obj and not obj.group.allow_nodes:
                 msg = "The node group does not have permissions to manage nodes"
                 messages.warning(request, msg)
@@ -222,7 +224,7 @@ class ServerPropInline(PermissionTabularInline):
 
 class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
     change_form_template = 'admin/nodes/server/change_form.html'
-    inlines = [ServerApiInline, ServerPropInline]
+    inlines = [MgmtNetConfInline, ServerApiInline, ServerPropInline]
     
     def has_delete_permission(self, *args, **kwargs):
         """ It doesn't make sense to delete the server """

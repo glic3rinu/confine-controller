@@ -53,7 +53,11 @@ def set_sha256(self, fields):
     """ Generate sha256 for an uploaded file """
     for field_name in fields:
         field = getattr(self, field_name)
-        if field and field.file:
+        if field:
+            try:
+                field.file
+            except IOError: # file doesn't exists
+                return
             # chunked for avoid memory leak (#428)
             sha256 = hashlib.sha256()
             while True:
@@ -72,7 +76,11 @@ def set_uri(self, fields):
     """Reset _uri when a file is uploaded"""
     for field_name in fields:
         field = getattr(self, field_name)
-        if field and field.file:
+        if field:
+            try:
+                field.file
+            except IOError: # file doesn't exists
+                return
             setattr(self, field_name + '_uri', '')
 
 
@@ -127,7 +135,7 @@ class Template(models.Model):
             help_text='The node architectures accepted by this template (as reported '
                       'by uname -m, non-empty). Slivers using this template should '
                       'run on nodes whose architecture is listed here.',
-            default='i586,')
+            default=settings.SLICES_TEMPLATE_ARCH_DFLT)
     is_active = models.BooleanField(default=True)
     image = models.FileField(help_text="Template's image file.",
             upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
@@ -442,12 +450,23 @@ class Sliver(models.Model):
     @property
     def mgmt_iface(self):
         iface = self.interfaces.filter(type='management')
-        return iface.get() if iface else None
+        return iface.first() if iface else None
+    
+    @property
+    def mgmt_net(self):
+        if self.mgmt_iface is None:
+            return None
+        # FIXME when #157 is merged, replace with a MgmtNetConf instance
+        #       and also use its readonly serializer
+        return {
+            "backend":"native",
+            "address": self.mgmt_iface.ipv6_addr
+        }
 
     @property
     def api_id(self):
         """ The unique ID of this sliver (REST-API) """
-        return "%i@%i" % (self.slice.id, self.node.id)
+        return "%i@%i" % (self.slice_id, self.node_id)
     
     def update(self):
         self.instance_sn += 1

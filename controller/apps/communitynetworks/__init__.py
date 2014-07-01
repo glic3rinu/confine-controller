@@ -1,1 +1,1 @@
-REQUIRED_APPS = ['mgmtnetworks.tinc', 'issues']
+REQUIRED_APPS = ['tinc', 'issues']

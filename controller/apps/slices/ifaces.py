@@ -22,12 +22,6 @@ class BaseIface(object):
         """ additional logic to be executed during model.clean() """
         if iface.parent:
             raise ValidationError("parent not allowed for this type of iface")
-        if self.UNIQUE and iface.sliver_id:
-            private_qs = type(iface).objects.filter(sliver=iface.sliver, type=iface.type)
-            if iface.pk:
-                private_qs = private_qs.exclude(pk=iface.pk)
-            if private_qs.exists():
-                raise ValidationError('There can only be one interface of type private')
     
     def ipv6_addr(self, iface):
         return None

@@ -1,0 +1,124 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load url from future %}
+{% load admin_urls %}
+{% load code %}
+
+{% block extrahead %}
+{{ block.super }}
+<!-- Code highlighting style -->
+<link rel="stylesheet" type="text/css" media="screen" href="/static/controller/css/default.css" />
+<style> code,pre {font-size:1.13em; } </style>
+<!-- Collapse function -->
+<script language="JavaScript" type="text/javascript">
+if (document.getElementById) {
+document.writeln('<style type="text/css"><!--')
+document.writeln('.texter {display:none} @media print {.texter {display:block;}}')
+document.writeln('//--></style>') }
+
+function openClose(theID) {
+if (document.getElementById(theID).style.display == "block") {
+    document.getElementById(theID).style.display = "none"
+} else { document.getElementById(theID).style.display = "block" } }
+</script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a>
+&rsaquo; Help
+</div>
+{% endblock %}
+
+{% block content_title %}<h1>Tinc client installation help</h1>{% endblock %}
+
+{% block content %}
+
+
+<p>The following instructions detail the process of configuring a <a href="http://www.tinc-vpn.org/">Tinc</a> <a href="http://en.wikipedia.org/wiki/Vpn">VPN</a> daemon in order to connect to the {{ net_name }} <a href="http://wiki.confine-project.eu/arch:ipv6-overlay">management network</a>.</p>
+<p>These instructions are specific for a Debian-like Linux distribution (i.e. Ubuntu). Instructions for other systems can be found on Internet.</p>
+
+<div style="margin-left:20px; width:600px;">
+<fieldset class="module aligned collapse">
+
+
+<div onClick="openClose('config')" style="cursor:hand; cursor:pointer">
+<h2>Show the basic configuration parameters</h2></div>
+<div id="config" class="texter">
+{% code 'bash' %}
+# tinc.conf
+Name = {{ host.tinc.name }}
+{% for gw in host.tinc.connect_to %}ConnectTo = {{ gw }}
+{% endfor %}
+# tinc-up and tinc-down
+Host address {{ host.tinc.subnet.strNormal }}/48
+
+# hosts/{{ host.tinc.name }}
+Subnet = {{ host.tinc.subnet.strNormal }}
+
+{% for gw in host.tinc.connect_to %}# hosts/{{ gw }}
+{% for addr in gw.addresses.all %}Address = {{ addr }} {{ addr.port }}
+{% endfor %}Subnet = {{ gw.subnet.strNormal }}
+
+{{ gw.pubkey }}{% endfor %}
+{% endcode %}
+</div>
+
+
+<h2>1. Install dependencies</h2>
+{% code 'bash' %}
+apt-get install tinc iproute
+{% endcode %}
+
+
+<h2>2. Create and configure the tinc network</h2>
+{% code 'bash' %}
+# Create and configure the {{ net_name }} network
+mkdir /etc/tinc/{{ net_name }}
+
+echo '{{ host.tinc.get_config|safe }}' > /etc/tinc/{{ net_name }}/tinc.conf
+
+mkdir /etc/tinc/{{ net_name }}/hosts
+
+echo '{{ host.tinc.get_host|safe }}' > /etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
+{% for gw in host.tinc.connect_to %}
+echo '{{ gw.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ gw }}
+{% endfor %}
+# Create scripts for setting up and down the network interface
+echo '{{ host.tinc.get_tinc_up|safe }}' > /etc/tinc/{{ net_name }}/tinc-up
+
+echo '{{ host.tinc.get_tinc_down|safe }}' > /etc/tinc/{{ net_name }}/tinc-down
+
+# Make the scripts executable
+chmod a+rx /etc/tinc/{{ net_name }}/tinc-{up,down}
+{% endcode %}
+
+
+<h2>3. Generate and upload the key to the server</h2>
+{% code 'bash' %}
+# Generate the RSA key pair for your host
+tincd -n {{ net_name }} -K
+{% endcode %}
+<p>Now you have to upload your public key on your <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a> host page. </p>
+<p>You can found the key at the end of <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}</span> file.</p>
+
+
+<h2>4. Start tinc daemon</h2>
+{% code 'bash' %}
+# Enable {{ net_name }} network to automatically start on boot
+echo {{ net_name }} >> /etc/tinc/nets.boot
+
+# Restart the tinc service in order to apply the new configuration
+/etc/init.d/tinc restart
+
+# Try if your connection is working by ping the server
+ping6 {{ server.tinc.address }}
+{% endcode %}
+
+
+</div>
+{% endblock %}
+

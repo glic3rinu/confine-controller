@@ -18,7 +18,7 @@ class ServerApiSerializer(serializers.ModelSerializer):
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
-    api = ServerApiSerializer(many=True)
+    api = ServerApiSerializer(many=True, allow_add_remove=True)
     properties = serializers.PropertyField()
     
     class Meta:
@@ -75,7 +75,7 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     direct_ifaces = DirectIfaceSerializer(required=False, many=True, allow_add_remove=True)
     cert = serializers.Field(source='api.cert')
     boot_sn = serializers.IntegerField(read_only=True)
-    api = NodeApiSerializer()
+    api = NodeApiSerializer(required=False)
     
     class Meta:
         model = Node

@@ -236,6 +236,11 @@ class Node(models.Model):
     
     @api.setter
     def api(self, value):
+        if value is None:
+            try:
+                self._api.delete()
+            except NodeApi.DoesNotExist:
+                return  # is alreday None
         self._api = value
     
     def reboot(self):

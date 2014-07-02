@@ -25,6 +25,14 @@ class Api(models.Model):
     class Meta:
         abstract = True
 
+
+class NodeApiManager(models.Manager):
+    def create_default(self, node, cert=None):
+        mgmt_addr = node.mgmt_net.addr
+        base_uri = settings.NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
+        return self.create(node=node, base_uri=base_uri, cert=cert)
+
+
 class NodeApi(Api):
     """
     Data on the endpoint that can be used to access this node's REST API.
@@ -39,9 +47,18 @@ class NodeApi(Api):
     type = models.CharField(max_length=16, choices=TYPES, default=NODE)
     node = models.OneToOneField('nodes.Node', primary_key=True, related_name='_api')
     
+    objects = NodeApiManager()
+    
     class Meta:
         verbose_name = 'node API'
         verbose_name_plural = 'node API'
+
+
+class ServerApiManager(models.Manager):
+    def create_default(self, server, type, cert=None):
+        mgmt_addr = self.server.mgmt_net.addr
+        base_uri = settings.NODES_SERVER_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
+        return self.create(server=server, type=type, base_uri=base_uri, cert=cert)
 
 
 class ServerApi(Api):
@@ -65,6 +82,8 @@ class ServerApi(Api):
             help_text='An optional island used to hint where this API endpoint '
                       'is reachable from. An API endpoint reachable from the '
                       'management network may omit this member.')
+    
+    objects = ServerApiManager()
     
     class Meta:
         verbose_name = 'server API'
@@ -280,7 +299,7 @@ class Node(models.Model):
         signed_cert = self.mgmt_net.sign_cert_request(scr)
         if commit:
             if self.api is None:
-                self.api = NodeApi(node=self)
+                self.api = NodeApi.objects.create_default(node=self)
             self.api.cert = signed_cert
             self.api.save()
         return signed_cert

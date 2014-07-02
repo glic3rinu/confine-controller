@@ -125,10 +125,6 @@ class Node(models.Model):
             help_text='A unique name for this node. A single non-empty line of '
                       'free-form text with no whitespace surrounding it.',
             validators=[validate_name])
-    cert = NullableTextField('Certificate', unique=True, null=True, blank=True,
-            help_text='X.509 PEM-encoded certificate for this RD. The certificate '
-                      'may be signed by a CA recognised in the testbed and required '
-                      'by clients and services accessing the node API.')
     description = models.TextField(blank=True,
             help_text='Free-form textual description of this host/device.')
     arch = models.CharField('Architecture', max_length=16,

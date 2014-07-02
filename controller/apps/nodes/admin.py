@@ -10,8 +10,6 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import colored, admin_link, docstring_as_help_tip
 from controller.core.exceptions import InvalidMgmtAddress
-from controller.models.utils import get_help_text
-from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
 from mgmtnetworks.admin import MgmtNetConfInline
 from mgmtnetworks.utils import reverse as mgmt_reverse
@@ -62,7 +60,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     list_filter = [MyNodesListFilter, 'arch', 'set_state', 'group']
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
-    readonly_fields = ['boot_sn', 'display_cert']
+    readonly_fields = ['boot_sn']
     inlines = [MgmtNetConfInline, DirectIfaceInline, NodeApiInline, NodePropInline]
     weights = {
         'inlines': {
@@ -75,7 +73,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         }),
         ('Advanced', {
             'classes': ('collapse',),
-            'fields': ('arch', 'display_cert', 'boot_sn')
+            'fields': ('arch', 'boot_sn')
         }),
         ('Firmware configuration', {
             'classes': ('collapse', 'warning'),
@@ -102,17 +100,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         return colored('set_state', STATES_COLORS, verbose=True, bold=False)(node)
     display_set_state.short_description = 'Set state'
     display_set_state.admin_order_field = 'set_state'
-    
-    def display_cert(self, node):
-        """ Display certificate with some contextual help if cert is not present """
-        if not node.pk:
-            return "Certificates can be requested once the node is saved for the first time."
-        if not node.cert:
-            req_url = reverse('admin:nodes_node_request-cert', args=[node.pk])
-            return mark_safe("<a href='%s'>Request certificate</a>" % req_url)
-        return monospace_format(node.cert)
-    display_cert.short_description = 'Certificate'
-    display_cert.help_text = get_help_text(Node, 'cert')
     
     def num_ifaces(self, node):
         """ Display number of direct ifaces, used on changelist """
@@ -194,7 +181,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         """ Warning user if the node is not fully configured """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
-            if obj and not obj.cert:
+            if obj and obj.api and not obj.api.cert:
                 messages.warning(request, 'This node lacks a valid certificate '
                 '(will be automatically generated during firmware build).')
             if obj and not obj.group.allow_nodes:

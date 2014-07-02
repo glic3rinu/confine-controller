@@ -1,63 +1,23 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-from IPy import IP
 
-from controller.settings import MGMT_IPV6_PREFIX
-from controller.utils.ip import int_to_hex_str
-from nodes.settings import NODES_NODE_API_BASE_URI_DEFAULT, NODES_SERVER_API_BASE_URI_DEFAULT
-
-from nodes.models import ServerApi
-
-# We need to copy here that because only model attributes stored
-# in the database are accessible via south orm
-def node_mgmt_address(node):
-    ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
-    # MGMT_IPV6_PREFIX:N:0000::2/64
-    ipv6_words.append(int_to_hex_str(node.id, 4))
-    return IP(':'.join(ipv6_words) + '::2')
-
-def server_mgmt_address(server):
-    ipv6_words = MGMT_IPV6_PREFIX.split(':')[:3]
-    # MGMT_IPV6_PREFIX:0:0000::2/128
-    return IP(':'.join(ipv6_words) + '::2')
-
-
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        """Create default NodeApi and ServerApi for existing objects."""
-        # Note: Don't use "from appname.models import ModelName".
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-
-        # Create default NodeApi
-        for node in orm.Node.objects.all():
-            mgmt_addr = node_mgmt_address(node)
-            url = NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
-            orm.NodeApi.objects.create(node=node, base_uri=url, cert=node.cert)
-
-        # Create two ServerApi for server (one for REGISTRY and another for CONTROLLER)
-        for server in orm.Server.objects.all():
-            mgmt_addr = server_mgmt_address(server)
-            url = NODES_SERVER_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
-            orm.ServerApi.objects.create(server=server, base_uri=url, type=ServerApi.REGISTRY)
-            orm.ServerApi.objects.create(server=server, base_uri=url, type=ServerApi.CONTROLLER)
+        # Deleting field 'Node.cert'
+        db.delete_column(u'nodes_node', 'cert')
 
 
     def backwards(self, orm):
-        """Remove all the NodeApi and ServerApi objects."""
-        # Try to restore node.cert
-        for node in orm.Node.objects.all():
-            if node.api and node.api.cert:
-                node.cert = node.api.cert
-                node.save()
-        
-        orm.NodeApi.objects.all().delete()
-        orm.ServerApi.objects.all().delete()
+        # Adding field 'Node.cert'
+        db.add_column(u'nodes_node', 'cert',
+                      self.gf('controller.models.fields.NullableTextField')(unique=True, null=True, blank=True),
+                      keep_default=False)
+
 
     models = {
         u'nodes.directiface': {
@@ -76,11 +36,10 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'Node'},
             'arch': ('django.db.models.fields.CharField', [], {'default': "'i686'", 'max_length': '16'}),
             'boot_sn': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
-            'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'nodes'", 'to': u"orm['users.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'blank': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'local_iface': ('django.db.models.fields.CharField', [], {'default': "'eth0'", 'max_length': '16'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'}),
             'priv_ipv4_prefix': ('controller.models.fields.NullableCharField', [], {'max_length': '19', 'null': 'True', 'blank': 'True'}),
@@ -94,7 +53,7 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'NodeApi'},
             'base_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'node': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'api'", 'unique': 'True', 'primary_key': 'True', 'to': u"orm['nodes.Node']"}),
+            'node': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'_api'", 'unique': 'True', 'primary_key': 'True', 'to': u"orm['nodes.Node']"}),
             'type': ('django.db.models.fields.CharField', [], {'default': "'node'", 'max_length': '16'})
         },
         u'nodes.nodeprop': {
@@ -114,7 +73,7 @@ class Migration(DataMigration):
             'base_uri': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'blank': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'server': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'api'", 'to': u"orm['nodes.Server']"}),
             'type': ('django.db.models.fields.CharField', [], {'max_length': '16'})
         },
@@ -136,4 +95,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['nodes']
-    symmetrical = True

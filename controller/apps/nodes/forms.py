@@ -4,9 +4,9 @@ from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
 from controller.forms.widgets import ShowText
+from mgmtnetworks.validators import validate_csr
 
 from .settings import NODES_NODE_DIRECT_IFACES_DFLT
-from .validators import validate_csr
 
 
 class NodeInlineAdminForm(forms.ModelForm):
@@ -35,7 +35,7 @@ class RequestCertificateForm(forms.Form):
     
     def clean_csr(self):
         csr = self.cleaned_data['csr']
-        validate_csr(csr, self.node)
+        validate_csr(csr, self.node.mgmt_net.addr)
         return csr.strip()
 
 

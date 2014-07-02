@@ -12,7 +12,6 @@ from .models import Island, Node, Server
 from .serializers import (IslandSerializer, NodeSerializer, NodeCreateSerializer,
     ServerSerializer)
 from .settings import NODES_NODE_API_BASE_URI_DEFAULT
-from .validators import validate_csr
 
 
 class Reboot(APIView):
@@ -35,32 +34,6 @@ class Reboot(APIView):
             response_data = {'detail': 'Node instructed to reboot'}
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='This endpoint do not accept data')
-
-
-class RequestCert(APIView):
-    """
-    **Relation type:** [`http://confine-project.eu/rel/controller/do-request-cert`](
-        http://confine-project.eu/rel/controller/do-request-cert)
-    
-    Contains the function URI used to upload this node's certificate request to 
-    be signed by the testbed CA and set as the node's certificate.
-    
-    POST data: `ASCII-armored PEM representation of the CSR as a string.`
-    """
-    url_name = 'request-cert'
-    rel = 'http://confine-project.eu/rel/controller/do-request-api-cert'
-    
-    def post(self, request, *args, **kwargs):
-        csr = request.DATA
-        node = get_object_or_404(Node, pk=kwargs.get('pk'))
-        self.check_object_permissions(self.request, node)
-        try:
-            validate_csr(csr, node)
-        except Exception as e:
-            raise exceptions.ParseError(detail='Malformed CSR: %s' % e.message)
-        node.sign_cert_request(csr.strip())
-        response_data = {'detail': 'Sign certificate request accepted'}
-        return Response(response_data, status=status.HTTP_202_ACCEPTED)
 
 
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -89,7 +62,7 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
-    ctl = [Reboot, RequestCert]
+    ctl = [Reboot]
     
     def get(self, request, *args, **kwargs):
         """ Add node-base relation to link header """

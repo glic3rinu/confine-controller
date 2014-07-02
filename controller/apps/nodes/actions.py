@@ -49,18 +49,6 @@ def request_cert(modeladmin, request, queryset):
         raise PermissionDenied
     
     form = RequestCertificateForm()
-    
-    # User has provided a CSR
-    if request.POST.get('post'):
-        form = RequestCertificateForm(request.POST)
-        # form.node is needed in form.clean()
-        form.node = node
-        if form.is_valid():
-            csr = form.cleaned_data['csr']
-            node.sign_cert_request(csr)
-            modeladmin.log_change(request, node, "Certificate requested")
-            return
-    
     node_url = reverse("admin:nodes_node_change", args=[node.pk])
     node_link = '<a href="%s">%s</a>' % (node_url, node)
     opts = modeladmin.model._meta
@@ -76,6 +64,19 @@ def request_cert(modeladmin, request, queryset):
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
         "form": form,
     }
+    
+    # User has provided a CSR
+    if request.POST.get('post'):
+        form = RequestCertificateForm(request.POST)
+        # form.node is needed in form.clean()
+        form.node = node
+        if form.is_valid():
+            csr = form.cleaned_data['csr']
+            signed_cert = node.mgmt_net.sign_cert_request(csr)
+            context.update({'cert': signed_cert})
+            return TemplateResponse(request, 'admin/nodes/node/show_certificate.html', context,
+                current_app=modeladmin.admin_site.name)
+    
     # Display the confirmation page
     return TemplateResponse(request, 'admin/nodes/node/request_certificate.html', context, 
         current_app=modeladmin.admin_site.name)

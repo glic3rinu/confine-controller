@@ -7,7 +7,7 @@ from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_
 from controller.core.validators import validate_name, validate_prop_name, validate_net_iface_name
 from controller.utils.functional import cached
 from controller.utils.singletons.models import SingletonModel
-from pki import ca, Bob
+from pki import Bob
 
 from . import settings
 from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
@@ -209,7 +209,7 @@ class Node(models.Model):
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
-        if not self.cert or not self.mgmt_net.is_configured():
+        if not self.related_mgmtnet.exists() or not self.mgmt_net.is_configured():
             # bad_conf
             self.set_state = Node.DEBUG
         else:
@@ -265,12 +265,6 @@ class Node(models.Model):
             return int(self.sliver_pub_ipv4_range.split('#')[1])
         return 0
     
-    def sign_cert_request(self, scr, commit=True):
-        self.cert = ca.sign_request(scr).as_pem().strip()
-        if commit:
-            self.save()
-        return self.cert
-    
     def generate_certificate(self, key, commit=False, user=None):
         if user is None:
             # We pick one pseudo-random admin
@@ -278,11 +272,13 @@ class Node(models.Model):
         addr = str(self.mgmt_net.addr)
         bob = Bob(key=key)
         scr = bob.create_request(Email=user.email, CN=addr)
-        return self.sign_cert_request(scr, commit=commit)
-    
-    def revoke_certificate(self):
-        self.cert = None
-        self.save()
+        signed_cert = self.mgmt_net.sign_cert_request(scr)
+        if commit:
+            if self.api is None:
+                self.api = NodeApi(node=self)
+            self.api.cert = signed_cert
+            self.api.save()
+        return signed_cert
 
 
 class BaseProp(models.Model):

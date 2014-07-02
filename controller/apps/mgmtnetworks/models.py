@@ -6,6 +6,7 @@ from IPy import IP
 from controller import settings as controller_settings
 from controller.utils.ip import split_len, int_to_hex_str
 from nodes.models import Node, Server
+from pki import ca
 
 
 def get_mgmt_net(self):
@@ -78,6 +79,10 @@ class MgmtNetConf(models.Model):
             return bool(tinc and tinc.pubkey)
         else: # native
             return True
+    
+    def sign_cert_request(self, scr):
+        """Sign a certificate request for a management network host."""
+        return ca.sign_request(scr).as_pem().strip()
     
     ## backwards compatibility #157
     def tinc_client(self):

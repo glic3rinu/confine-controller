@@ -71,11 +71,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     }
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'group', 'set_state', 'island'),
-        }),
-        ('Advanced', {
-            'classes': ('collapse',),
-            'fields': ('arch', 'boot_sn')
+            'fields': ('name', 'description', 'group', 'set_state', 'island',
+                       'arch', 'boot_sn'),
         }),
         ('Firmware configuration', {
             'classes': ('collapse', 'warning'),

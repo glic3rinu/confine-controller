@@ -52,6 +52,12 @@ class NodeApi(Api):
     class Meta:
         verbose_name = 'node API'
         verbose_name_plural = 'node API'
+    
+    @property
+    def is_configured(self):
+        if self.base_uri.startswith('https') and not self.cert:
+            return False
+        return True
 
 
 class ServerApiManager(models.Manager):
@@ -224,7 +230,9 @@ class Node(models.Model):
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
-        if not self.related_mgmtnet.exists() or not self.mgmt_net.is_configured():
+        mgmtnet_conf = getattr(self.mgmt_net, 'is_configured', False)
+        api_conf = getattr(self.api, 'is_configured', False)
+        if not mgmtnet_conf or not api_conf:
             # bad_conf
             self.set_state = Node.DEBUG
         else:
@@ -236,11 +244,14 @@ class Node(models.Model):
                 #     self.set_state = Node.SAFE
                 pass
         if commit:
-            self.save()
+            self.save(updated_set_state=True)
     
     def save(self, *args, **kwargs):
-        self.update_set_state(commit=False)
+        updated_set_state = kwargs.pop('updated_set_state', False)
         super(Node, self).save(*args, **kwargs)
+        # Call after save to be able to access related objects
+        if not updated_set_state:
+            self.update_set_state()
     
     @property
     def api(self):

@@ -11,6 +11,9 @@ from pki import ca
 
 def get_mgmt_net(self):
     """ Getter for management network generic relation """
+    if not self.pk:
+        # cannot get/create mgmt_net for unsaved object
+        return None
     ct = ContentType.objects.get_for_model(self)
     obj, _ = MgmtNetConf.objects.get_or_create(object_id=self.pk, content_type=ct)
     return obj
@@ -73,6 +76,7 @@ class MgmtNetConf(models.Model):
         """Alias of addr used by generic apps like pings."""
         return self.addr
     
+    @property
     def is_configured(self):
         if self.backend == MgmtNetConf.TINC:
             tinc = self.content_object.tinc

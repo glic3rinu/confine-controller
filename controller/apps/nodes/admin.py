@@ -18,7 +18,7 @@ from users.helpers import filter_group_queryset
 
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
-from .forms import DirectIfaceInlineFormSet
+from .forms import DirectIfaceInlineFormSet, NodeApiInlineForm, NodeApiInlineFormset
 from .models import (DirectIface, Island, Node, NodeApi, NodeProp, Server,
     ServerApi, ServerProp)
 
@@ -34,6 +34,8 @@ STATES_COLORS = {
 class NodeApiInline(PermissionTabularInline):
     model = NodeApi
     extra = 0
+    formset = NodeApiInlineFormset
+    form = NodeApiInlineForm
 
 
 class NodePropInline(PermissionTabularInline):

@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from controller.forms.widgets import ShowText
 from mgmtnetworks.validators import validate_csr
 
+from .models import NodeApi
 from .settings import NODES_NODE_DIRECT_IFACES_DFLT
 
 
@@ -52,3 +53,26 @@ class DirectIfaceInlineFormSet(BaseInlineFormSet):
                 initial_data['direct_ifaces-%d-name' % num] = name
             kwargs['data'] = initial_data
         super(DirectIfaceInlineFormSet, self).__init__(*args, **kwargs)
+
+
+class NodeApiInlineFormset(BaseInlineFormSet):
+    @property
+    def empty_form(self):
+        """Override empty form to pass node as extra parameter."""
+        form = self.form(
+            auto_id=self.auto_id,
+            prefix=self.add_prefix('__prefix__'),
+            empty_permitted=True,
+            node = self.instance,
+        )
+        self.add_fields(form, None)
+        return form
+
+
+class NodeApiInlineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        """Initialize base_uri as default initial data."""
+        node = kwargs.pop('node', None)
+        super(NodeApiInlineForm, self).__init__(*args, **kwargs)
+        if 'instance' not in kwargs and node and node.pk:
+            self.initial['base_uri'] = NodeApi.default_base_uri(node)

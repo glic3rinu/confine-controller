@@ -28,8 +28,7 @@ class Api(models.Model):
 
 class NodeApiManager(models.Manager):
     def create_default(self, node, cert=None):
-        mgmt_addr = node.mgmt_net.addr
-        base_uri = settings.NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
+        base_uri = NodeApi.default_base_uri(node)
         return self.create(node=node, base_uri=base_uri, cert=cert)
 
 
@@ -58,6 +57,13 @@ class NodeApi(Api):
         if self.base_uri.startswith('https') and not self.cert:
             return False
         return True
+    
+    @classmethod
+    def default_base_uri(cls, node):
+        if node.mgmt_net is None:
+            return ''
+        mgmt_addr = node.mgmt_net.addr
+        return settings.NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
 
 
 class ServerApiManager(models.Manager):

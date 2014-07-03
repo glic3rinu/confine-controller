@@ -8,6 +8,7 @@ import string
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
+from controller.core.exceptions import OperationLocked
 from users.models import Group
 from nodes.models import Node
 
@@ -38,7 +39,10 @@ class PingTests(TestCase):
         typed_pings = Ping.objects.filter(content_type=ctype)
 
         # run task for pings generation
-        ping_task('mgmtnetworks.mgmtnetconf', ids=[mgmt_net.pk])
+        try:
+            ping_task('mgmtnetworks.mgmtnetconf', ids=[mgmt_net.pk])
+        except OperationLocked:
+            pass # task is alreday being executed
 
         # related objects should exist
         self.assertTrue(typed_pings.filter(object_id=mgmt_net.pk).exists(),

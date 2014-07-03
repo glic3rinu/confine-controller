@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import ast
 import os
 import re
+import warnings
 from hashlib import sha256
 
 from celery import states as celery_states
@@ -125,6 +126,12 @@ class Build(models.Model):
                 self.image.file
             except IOError:
                 return self.DELETED
+            except ValueError:
+                warnings.warn("There is some issue accessing build image file. "
+                    "Check that image.name path is inside image.storage.location, "
+                    "otherwise 'SuspiciousFileOperation' will be raised!",
+                    RuntimeWarning)
+                return 'ACCESS DENIED'
             else: 
                 if self.match_config:
                     return self.AVAILABLE

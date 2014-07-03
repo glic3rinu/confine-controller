@@ -1,15 +1,16 @@
 from __future__ import absolute_import
 
 import ast
+import logging
 import os
 import re
-import warnings
 from hashlib import sha256
 
 from celery import states as celery_states
 from django import template
 from django.conf import settings as project_settings
 from django.core import validators
+from django.core.exceptions import SuspiciousFileOperation
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
@@ -126,11 +127,10 @@ class Build(models.Model):
                 self.image.file
             except IOError:
                 return self.DELETED
-            except ValueError:
-                warnings.warn("There is some issue accessing build image file. "
-                    "Check that image.name path is inside image.storage.location, "
-                    "otherwise 'SuspiciousFileOperation' will be raised!",
-                    RuntimeWarning)
+            except SuspiciousFileOperation:
+                msg = ("There is some issue accessing build image file. Check "
+                       "that image.name path is inside image.storage.location.")
+                logging.exception(msg)
                 return 'ACCESS DENIED'
             else: 
                 if self.match_config:

@@ -5,3 +5,8 @@ fieldset.warning .description {
     margin: 0 0 3px 0;
     padding: 4px 5px 4px 25px;
 }
+
+span.help-text {
+    background: url(/static/admin/img/icon-unknown.gif) no-repeat right;
+    cursor: help;
+}

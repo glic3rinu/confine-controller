@@ -6,6 +6,7 @@ from django.test import LiveServerTestCase
 from nodes.models import Node
 from users.models import Group
 
+from .helpers import sizeof_fmt
 from .models import State
 
 class StateTest(LiveServerTestCase):
@@ -23,3 +24,12 @@ class StateTest(LiveServerTestCase):
             State.store_glet(self.node, glet)
         except TypeError as e:
             self.fail('State.store_glet() raised TypeError: %s' % e)
+    
+    def test_helper_sizeof_fmt(self):
+        # Test helper used by disk_available (#339)
+        self.assertIn('MB', sizeof_fmt(0))
+        self.assertIn('GB', sizeof_fmt(-1 * 2**10))
+        self.assertIn('GB', sizeof_fmt(2**10))
+        self.assertIn('TB', sizeof_fmt(2**20))
+        self.assertIn('TB', sizeof_fmt(2**50))
+        self.assertEquals('N/A', sizeof_fmt('N/A'))

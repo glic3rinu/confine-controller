@@ -506,8 +506,9 @@ class NodeBuildFile(models.Model):
     
 
 # Create OneToOne NodeKeys instance on node creation
-@receiver(post_save, sender=Node)
-def create_favorites(sender, instance, created, **kwargs):
+# define a dispatch UID for avoid duplicate signals (#505)
+@receiver(post_save, sender=Node, dispatch_uid="node_keys")
+def create_nodekeys(sender, instance, created, **kwargs):
     if created:
         NodeKeys.objects.create(node=instance)
 

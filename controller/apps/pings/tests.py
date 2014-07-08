@@ -4,6 +4,7 @@ These will pass when you run "manage.py test".
 """
 import random
 import string
+import time
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
@@ -38,15 +39,17 @@ class PingTests(TestCase):
         ctype = ContentType.objects.get_for_model(mgmt_net)
         typed_pings = Ping.objects.filter(content_type=ctype)
 
-        # run task for pings generation
-        try:
-            ping_task('mgmtnetworks.mgmtnetconf', ids=[mgmt_net.pk])
-        except OperationLocked:
-            pass # task is alreday being executed
-
-        # related objects should exist
-        self.assertTrue(typed_pings.filter(object_id=mgmt_net.pk).exists(),
-            "Wait until pings are created.")
+        # Wait until pings are created
+        timeout = 0
+        while not typed_pings.filter(object_id=mgmt_net.pk).exists():
+            try:
+                # run task manually to force pings generation
+                ping_task('mgmtnetworks.mgmtnetconf', ids=[mgmt_net.pk])
+            except OperationLocked:
+                pass # task is alreday being executed
+            time.sleep(1)
+            self.assertTrue(timeout < 60)
+            timeout +=1
 
         # remove the node
         node.delete()

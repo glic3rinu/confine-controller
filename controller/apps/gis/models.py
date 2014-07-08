@@ -42,4 +42,4 @@ class Geolocation(models.Model):
 
 class NodeGeolocation(Geolocation):
     """ Class for append geolocation information to a Node """
-    node = models.OneToOneField(Node, related_name='gis')
+    node = models.OneToOneField(Node, primary_key=True, related_name='gis')

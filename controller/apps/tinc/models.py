@@ -70,6 +70,9 @@ class TincHost(models.Model):
     non empty array of addresses.
 
     """
+    name = models.CharField(max_length=32, unique=True,
+            help_text='The name given to this host in the tinc network, '
+                      'usually TYPE_ID (e.g. server_4).')
     pubkey = RSAPublicKeyField('public Key', unique=True, null=True, blank=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
     content_type = models.ForeignKey(ContentType)
@@ -84,16 +87,18 @@ class TincHost(models.Model):
     def __unicode__(self):
         if not hasattr(self, 'content_type'):
             return u'tinc_%s' % self.object_id
+        return self._name
+    
+    @property
+    def _name(self):
         if self.content_type.model == 'server': # FIXME on #236 multi-server
             return 'server'
         return u'%s_%s' % (self.content_type.model, self.object_id)
     
-    @property
-    def name(self):
-        return str(self)
-    
     def save(self, *args, **kwargs):
         if not self.pk:
+            # generate and initialize name
+            self.name = self._name
             # Try to restore object to allow update in nested serialization
             try:
                 obj = TincHost.objects.get(content_type_id=self.content_type_id,

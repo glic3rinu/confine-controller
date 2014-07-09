@@ -54,8 +54,10 @@ class MgmtNetConf(models.Model):
         """ IPV6 management address """
         ipv6_words = controller_settings.MGMT_IPV6_PREFIX.split(':')[:3]
         if self.content_type.model == 'server':
-            # MGMT_IPV6_PREFIX:0:0000::2/128
-            return IP(':'.join(ipv6_words) + '::2')
+            # MGMT_IPV6_PREFIX:0:0000:rrrr:rrrr:rrrr/128
+            ipv6_words.extend(['0', '0000'])
+            ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
+            return IP(':'.join(ipv6_words))
         elif self.content_type.model == 'gateway':
             # MGMT_IPV6_PREFIX:0:0001:gggg:gggg:gggg/128
             ipv6_words.extend(['0', '0001'])

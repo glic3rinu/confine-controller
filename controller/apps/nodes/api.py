@@ -74,6 +74,19 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
         return response
 
 
+class ServerList(ApiPermissionsMixin, generics.URIListCreateAPIView):
+    """
+    **Media type:** [`application/vnd.confine.server.Server.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+    
+    This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
+    api?&#server_at_server) available in the testbed and provides API URIs to
+    navigate to them.
+    """
+    model = Server
+    serializer_class = ServerSerializer
+
+
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """ 
     **Media type:** [`application/vnd.confine.server.Server.v0+json`](
@@ -83,9 +96,6 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Server
     serializer_class = ServerSerializer
-    
-    def get_object(self, *args, **kwargs):
-        return get_object_or_404(Server)
 
 
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -118,5 +128,5 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 api.register(NodeList, NodeDetail)
-api.register(ServerDetail, ServerDetail)
+api.register(ServerList, ServerDetail)
 api.register(IslandList, IslandDetail)

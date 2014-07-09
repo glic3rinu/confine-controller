@@ -6,7 +6,6 @@ from controller.models.fields import NullableCharField, NullableTextField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_name, validate_prop_name, validate_net_iface_name
 from controller.utils.functional import cached
-from controller.utils.singletons.models import SingletonModel
 from pki import Bob
 
 from . import settings
@@ -367,18 +366,18 @@ class DirectIface(models.Model):
         return self.name
 
 
-class Server(SingletonModel):
+class Server(models.Model):
     """
     Describes the testbed server (controller).
     """
     description = models.CharField(max_length=256,
             help_text='Free-form textual description of the server.')
     
-    class Meta:
-        verbose_name_plural = "server"
-    
     def __unicode__(self):
-        return 'Server'
+        return 'server_%s' % self.pk
+    
+    class Meta:
+        ordering = ['pk']
 
 
 class ServerProp(BaseProp):

@@ -91,8 +91,6 @@ class TincHost(models.Model):
     
     @property
     def _name(self):
-        if self.content_type.model == 'server': # FIXME on #236 multi-server
-            return 'server'
         return u'%s_%s' % (self.content_type.model, self.object_id)
     
     def save(self, *args, **kwargs):

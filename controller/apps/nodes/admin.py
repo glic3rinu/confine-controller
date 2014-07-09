@@ -10,7 +10,6 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import colored, admin_link, docstring_as_help_tip
 from controller.core.exceptions import InvalidMgmtAddress
-from controller.utils.singletons.admin import SingletonModelAdmin
 from mgmtnetworks.admin import MgmtNetConfInline
 from mgmtnetworks.utils import reverse as mgmt_reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -208,7 +207,8 @@ class ServerPropInline(PermissionTabularInline):
         js = ('nodes/js/collapsed_node_properties.js',)
 
 
-class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
+class ServerAdmin(ChangeViewActions, PermissionModelAdmin):
+    list_display = ('__unicode__', 'description')
     change_form_template = 'admin/nodes/server/change_form.html'
     inlines = [MgmtNetConfInline, ServerApiInline, ServerPropInline]
     

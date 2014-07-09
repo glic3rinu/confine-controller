@@ -1,5 +1,6 @@
 from django.contrib.admin import SimpleListFilter
 
+from .helpers import extract_node_software_version
 from .models import State
 from .settings import STATE_NODE_SOFT_VERSION_NAME
 
@@ -28,7 +29,7 @@ class FirmwareVersionListFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         values = model_admin.model.objects.values_list('soft_version__value', flat=True)
         values = values.exclude(soft_version__value__isnull=True).distinct()
-        values = [ (value, STATE_NODE_SOFT_VERSION_NAME(value)) for value in values ]
+        values = [ (value, STATE_NODE_SOFT_VERSION_NAME(extract_node_software_version(value))) for value in values ]
         values.sort(key=lambda a: 'x'+a[1] if a[1].startswith('m') else a[1], reverse=True)
         values.append(('None', 'No data'))
         return values

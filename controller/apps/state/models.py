@@ -16,6 +16,7 @@ from nodes.models import Node
 from slices.models import Sliver
 
 from . import settings
+from .helpers import extract_node_software_version
 from .tasks import get_state
 
 
@@ -250,7 +251,11 @@ class NodeSoftwareVersion(models.Model):
     
     def __unicode__(self):
         return self.value
-
+    
+    @property
+    def version(self):
+        """Return structured version data."""
+        return extract_node_software_version(self.value)
 
 node_heartbeat = Signal(providing_args=["instance", "node"])
 

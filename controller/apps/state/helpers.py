@@ -8,7 +8,6 @@ from nodes.models import Node
 from slices.models import Slice, Sliver
 from users.models import Group
 
-from .models import State, NodeSoftwareVersion
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
 
@@ -78,6 +77,7 @@ def get_changes_data(state):
 
 
 def get_report_data():
+    from .models import State
     REPORT_STATES = {
         'online': [Node.PRODUCTION],
         'offline': [State.OFFLINE, State.CRASHED, Node.DEBUG, Node.SAFE, State.FAILURE, 
@@ -120,6 +120,7 @@ def get_node_version_data():
     """ Get stats about software version of nodes by groups
         NOTE: only the most recent, old versions will be grouped.
     """
+    from .models import NodeSoftwareVersion
     versions = NodeSoftwareVersion.objects.distinct('value').extra(
         select={'date': "SUBSTRING(value from '-r........')"}).values('date', 'value')
     versions = sorted(versions, key=lambda k: k['date'], reverse=True)[:4]
@@ -134,8 +135,9 @@ def get_node_version_data():
         version_count = 0
         for version in versions:
             count = nodes.filter(soft_version__value=version['value']).count()
-            name = STATE_NODE_SOFT_VERSION_NAME(version['value'])
-            url = STATE_NODE_SOFT_VERSION_URL(version['value'])
+            version_schema = extract_node_software_version(version['value'])
+            name = STATE_NODE_SOFT_VERSION_NAME(version_schema)
+            url = STATE_NODE_SOFT_VERSION_URL(version_schema)
             sw_data.append({
                 'name': name,
                 'url': url,
@@ -185,3 +187,16 @@ def sizeof_fmt(num):
             return (size_format % (num, unit)).strip()
         num /= 1024.0
     return "%.f %s" % (num, 'TB')
+
+
+def extract_node_software_version(version):
+    """
+    Extract version data from Node API reported string. Schema:
+    <branch_name>.<first7hex_revision><rYYYYmmDD.HHMM><pkg_version>
+    
+    @return dictionary with branch, rev, date, pkg keys.
+    """
+    raw, _, pkg = version.rpartition('-')
+    raw, _, date = raw.rpartition('-')
+    branch, _, rev = raw.rpartition('.')
+    return {'branch': branch, 'rev': rev, 'date': date, 'pkg': pkg}

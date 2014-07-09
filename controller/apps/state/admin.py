@@ -329,7 +329,7 @@ state_link.admin_order_field = 'state_set__value'
 
 def firmware_version(node):
     try:
-        version = node.soft_version.value
+        version = node.soft_version.version
     except NodeSoftwareVersion.DoesNotExist:
         return 'No data'
     else:

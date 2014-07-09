@@ -4,10 +4,12 @@ These will pass when you run "manage.py test".
 """
 import random
 import string
+import time
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
+from controller.core.exceptions import OperationLocked
 from users.models import Group
 from nodes.models import Node
 
@@ -36,17 +38,22 @@ class PingTests(TestCase):
         mgmt_net = node.mgmt_net
         ctype = ContentType.objects.get_for_model(mgmt_net)
         typed_pings = Ping.objects.filter(content_type=ctype)
-
-        # run task for pings generation
-        ping_task('mgmtnetworks.mgmtnetconf', ids=[mgmt_net.pk])
-
-        # related objects should exist
-        self.assertTrue(typed_pings.filter(object_id=mgmt_net.pk).exists(),
-            "Wait until pings are created.")
-
+        
+        # Wait until pings are created
+        timeout = 0
+        while not typed_pings.filter(object_id=mgmt_net.pk).exists():
+            try:
+                # run task manually to force pings generation
+                ping_task('mgmtnetworks.mgmtnetconf', ids=[mgmt_net.pk])
+            except OperationLocked:
+                pass # task is alreday being executed
+            time.sleep(1)
+            self.assertTrue(timeout < 60)
+            timeout +=1
+        
         # remove the node
         node.delete()
-
+        
         # related objects should NOT exist
         self.assertFalse(typed_pings.filter(object_id=mgmt_net.pk).exists(),
             "Pings has NOT been removed!")

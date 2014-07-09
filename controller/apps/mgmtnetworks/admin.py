@@ -4,7 +4,6 @@ from controller.admin.utils import insertattr, get_modeladmin
 from nodes.models import Node, Server
 from permissions.admin import PermissionGenericTabularInline
 
-from .forms import MgmtNetConfInlineForm
 from .models import MgmtNetConf
 
 
@@ -20,4 +19,3 @@ class MgmtNetConfInline(PermissionGenericTabularInline):
 
     def address(self, obj):
         return obj.addr.strNormal()
-

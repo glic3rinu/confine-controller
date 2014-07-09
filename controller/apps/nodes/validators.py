@@ -2,8 +2,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from IPy import IP
 
-from users.models import Group
-
 
 def validate_sliver_mac_prefix(value):
     try: 

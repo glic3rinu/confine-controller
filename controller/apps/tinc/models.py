@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.conf import settings as base_settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
@@ -32,7 +32,7 @@ class Host(models.Model):
     """
     description = models.CharField(max_length=256, null=True, blank=True,
             help_text='An optional free-form textual description of this host.')
-    owner = models.ForeignKey(get_user_model(), related_name='tinc_hosts',
+    owner = models.ForeignKey(base_settings.AUTH_USER_MODEL, related_name='tinc_hosts',
             help_text='The user who administrates this host (its creator by default)')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             on_delete=models.SET_NULL,

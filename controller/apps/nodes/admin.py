@@ -208,7 +208,8 @@ class ServerPropInline(PermissionTabularInline):
 
 
 class ServerAdmin(ChangeViewActions, PermissionModelAdmin):
-    list_display = ('__unicode__', 'description')
+    list_display = ('id', 'name', 'description')
+    list_display_links = ['name', 'id']
     change_form_template = 'admin/nodes/server/change_form.html'
     inlines = [MgmtNetConfInline, ServerApiInline, ServerPropInline]
 

@@ -382,8 +382,12 @@ class Server(models.Model):
     """
     Describes the testbed server (controller).
     """
-    description = models.CharField(max_length=256,
-            help_text='Free-form textual description of the server.')
+    name = models.CharField(max_length=256, unique=True,
+            help_text='A unique name for this server. A single non-empty line of '
+                      'free-form text with no whitespace surrounding it.',
+            validators=[validate_name])
+    description = models.TextField(blank=True,
+            help_text='Free-form textual description of this server.')
     
     objects = ServerManager()
     

@@ -40,9 +40,11 @@ class CustomMenu(Menu):
                     reverse('admin:nodes_server_changelist')),
                 items.MenuItem('Islands',
                     reverse('admin:nodes_island_changelist')),
-                items.MenuItem('Summary',
-                    reverse('admin:state_report')),
             ]
+            if is_installed('state'):
+                node_items.append(
+                    items.MenuItem('Summary', reverse('admin:state_report'))
+                )
             if is_installed('gis'):
                 node_items.insert(
                     1,
@@ -54,21 +56,25 @@ class CustomMenu(Menu):
                     children=node_items))
         
         if is_installed('slices') and user.has_module_perms('slices'):
+            slice_children = sliver_children = None
+            if is_installed('state'):
+                slice_children = [
+                    items.MenuItem('Status Overview',
+                        reverse('admin:state_slices')),
+                ]
+                sliver_children = [
+                    items.MenuItem('Status Overview',
+                        reverse('admin:state_slivers')),
+                ]
             self.children.append(items.MenuItem('Slices',
                 reverse('admin:slices_slice_changelist'),
                 children=[
                     items.MenuItem('Slices',
                         reverse('admin:slices_slice_changelist'),
-                        children=[
-                            items.MenuItem('Status Overview',
-                            reverse('admin:state_slices')),
-                    ]),
+                        children=slice_children),
                     items.MenuItem('Slivers',
                         reverse('admin:slices_sliver_changelist'),
-                        children=[
-                            items.MenuItem('Status Overview',
-                                reverse('admin:state_slivers')),
-                    ]),
+                        children=sliver_children),
                     items.MenuItem('Templates',
                         reverse('admin:slices_template_changelist')),
                 ]))

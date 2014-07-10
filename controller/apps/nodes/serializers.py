@@ -18,6 +18,7 @@ class ServerApiSerializer(serializers.ModelSerializer):
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
+    id = serializers.Field()
     api = ServerApiSerializer(many=True, allow_add_remove=True)
     properties = serializers.PropertyField()
     

@@ -98,6 +98,12 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServerSerializer
 
 
+# backwards compatibility default server #236
+class ServerDefaultDetail(ServerDetail):
+    def get_object(self, *args, **kwargs):
+        return get_object_or_404(Server, pk=2)
+
+
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/vnd.confine.server.Island.v0+json`](

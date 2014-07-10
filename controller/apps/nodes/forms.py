@@ -76,3 +76,8 @@ class NodeApiInlineForm(forms.ModelForm):
         super(NodeApiInlineForm, self).__init__(*args, **kwargs)
         if 'instance' not in kwargs and node and node.pk:
             self.initial['base_uri'] = NodeApi.default_base_uri(node)
+
+
+class ServerApiInlineForm(forms.ModelForm):
+    def clean_cert(self):
+        return self.cleaned_data['cert'] or None

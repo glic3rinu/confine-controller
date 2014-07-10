@@ -211,10 +211,6 @@ class ServerAdmin(ChangeViewActions, PermissionModelAdmin):
     list_display = ('__unicode__', 'description')
     change_form_template = 'admin/nodes/server/change_form.html'
     inlines = [MgmtNetConfInline, ServerApiInline, ServerPropInline]
-    
-    def has_delete_permission(self, *args, **kwargs):
-        """ It doesn't make sense to delete the server """
-        return False
 
 
 class IslandAdmin(PermissionModelAdmin):

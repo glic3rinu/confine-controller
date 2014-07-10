@@ -1,5 +1,5 @@
 from django.core import validators
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
 
 from controller.models.fields import NullableCharField, NullableTextField
@@ -366,6 +366,18 @@ class DirectIface(models.Model):
         return self.name
 
 
+class ServerQuerySet(models.query.QuerySet):
+    def delete(self):
+        """Check that at least one server remains undeleted."""
+        if self.count() == self.model.objects.count():
+            raise PermissionDenied("At least one server must exist!")
+        super(ServerQuerySet, self).delete()
+
+
+class ServerManager(models.Manager):
+    def get_query_set(self):
+        return ServerQuerySet(self.model, using=self.db)
+
 class Server(models.Model):
     """
     Describes the testbed server (controller).
@@ -373,12 +385,18 @@ class Server(models.Model):
     description = models.CharField(max_length=256,
             help_text='Free-form textual description of the server.')
     
+    objects = ServerManager()
+    
     def __unicode__(self):
         return 'server_%s' % self.pk
     
     class Meta:
         ordering = ['pk']
-
+    
+    def delete(self):
+        if Server.objects.count() == 1:
+            raise PermissionDenied("At least one server must exist!")
+        super(Server, self).delete()
 
 class ServerProp(BaseProp):
     """

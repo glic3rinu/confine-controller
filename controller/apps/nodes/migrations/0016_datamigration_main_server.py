@@ -5,6 +5,9 @@ from south.v2 import DataMigration
 from django.db import models
 
 class Migration(DataMigration):
+    depends_on = (
+        ("tinc", "0024_datamigration_generate_tinchost_name"),
+    )
 
     def update_server_pk(self, orm, old_pk, new_pk):
         server = orm.Server.objects.get(pk=old_pk)

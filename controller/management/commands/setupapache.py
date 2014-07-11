@@ -37,7 +37,7 @@ class Command(BaseCommand):
         
         # Avoid import errors
         from nodes.models import Server
-        server = Server.objects.get()
+        server = Server.objects.first()
         context = {
             'project_name': get_project_name(),
             'project_root': get_project_root(),

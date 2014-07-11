@@ -114,7 +114,7 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
         opts = self.model._meta
         context = {
             'host': host,
-            'server': Server.objects.get(),
+            'server': Server.objects.first(),
             'net_name': settings.TINC_NET_NAME,
             'opts': opts,
             'app_label': opts.app_label}

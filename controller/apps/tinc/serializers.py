@@ -8,6 +8,7 @@ from .models import TincAddress, TincHost, Gateway, Host
 
 def validate_tinc(self, attrs, source):
     """ transform /tinc null into [] because will match with related_tinc """
+    print attrs
     if attrs[source] is None:
         attrs[source] = []
     return attrs

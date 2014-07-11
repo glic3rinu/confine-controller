@@ -8,7 +8,6 @@ from .models import TincAddress, TincHost, Gateway, Host
 
 def validate_tinc(self, attrs, source):
     """ transform /tinc null into [] because will match with related_tinc """
-    print attrs
     if attrs[source] is None:
         attrs[source] = []
     return attrs
@@ -59,7 +58,11 @@ class TincHostRelatedField(serializers.RelatedField):
         """ Return a list of tinc configuration objects """
         if data:
             tinc_host = TincHost(pubkey=data.get('pubkey'))
-            tinc_host.full_clean(exclude=['content_type', 'object_id'])
+            # TODO deserialize addresses XXX
+            #tinc_addr = TincAddressSerializer(data=data.get('addresses'), many=True)
+            #for addr in data.get('addresses'):
+            #    tinc_addr = TincAddressSerializer(data=addr)
+            tinc_host.full_clean(exclude=['content_type', 'object_id', 'name'])
             return [tinc_host]
         return []
 

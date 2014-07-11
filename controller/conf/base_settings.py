@@ -236,7 +236,6 @@ FLUENT_DASHBOARD_APP_ICONS = {
     'slices/slice': "ChemSlice.png",
     'slices/sliver': "LXCBox2.png",
     'slices/template': "Application-x-gerber.png",
-    'tinc/gateway': "Network.png",
     'tinc/tincaddress': "X-office-address-book.png",
     'tinc/host': "computer-dell-dimension-E521.png",
     'issues/ticket': "Ticket_star.png",

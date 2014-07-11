@@ -122,12 +122,11 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     **Media type:** [`application/vnd.confine.server.Island.v0+json`](
         http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
     
-    This resource describes a network island (i.e. a disconnected part of a
-    community network) where the testbed is reachable from. A testbed is reachable
-    from an island when there is a [gateway](http://wiki.confine-project.eu/arch
-    :rest-api?&#gateway_at_server) that gives access to the testbed server
-    (possibly through other gateways), or when the [server](https://wiki.confine
-    -project.eu/arch:rest-api?&#server_at_server) itself is in that island.
+    This resource describes a network island, i.e. a possibly disconnected part
+    of a community network. The usage of islands is mainly orientative: it can
+    be used to signal user interfaces whether a node may see any servers, or
+    whether modifying a gateway may leave some nodes disconnected from the
+    testbed management network.
     """
     model = Island
     serializer_class = IslandSerializer

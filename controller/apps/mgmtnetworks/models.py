@@ -58,11 +58,6 @@ class MgmtNetConf(models.Model):
             ipv6_words.extend(['0', '0000'])
             ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
             return IP(':'.join(ipv6_words))
-        elif self.content_type.model == 'gateway':
-            # MGMT_IPV6_PREFIX:0:0001:gggg:gggg:gggg/128
-            ipv6_words.extend(['0', '0001'])
-            ipv6_words.extend(split_len(int_to_hex_str(self.object_id, 12), 4))
-            return IP(':'.join(ipv6_words))
         elif self.content_type.model == 'node':
             # MGMT_IPV6_PREFIX:N:0000::2/64 i
             ipv6_words.append(int_to_hex_str(self.object_id, 4))
@@ -92,7 +87,7 @@ class MgmtNetConf(models.Model):
     
     ## backwards compatibility #157
     def tinc_client(self):
-        if self.content_type.model in ['server', 'gateway']:
+        if self.content_type.model == 'server':
             return None
         return self.tinc()
 

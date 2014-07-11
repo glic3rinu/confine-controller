@@ -78,8 +78,6 @@ class CustomMenu(Menu):
                 self.children.append(items.MenuItem('Tinc',
                     reverse('admin:app_list', args=['tinc']),
                     children=[
-                        items.MenuItem('Gateways',
-                            reverse('admin:tinc_gateway_changelist')),
                         items.MenuItem('TincAddresses',
                             reverse('admin:tinc_tincaddress_changelist')),
                         items.MenuItem('Hosts',

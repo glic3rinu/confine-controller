@@ -9,8 +9,8 @@ from rest_framework.views import APIView
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
-from .models import Host, Gateway
-from .serializers import HostCreateSerializer, HostSerializer, GatewaySerializer
+from .models import Host
+from .serializers import HostCreateSerializer, HostSerializer
 
 
 class UploadPubkey(APIView):
@@ -64,33 +64,4 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     ctl = [UploadPubkey]
 
 
-class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
-    """
-    **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)
-    
-    This resource lists testbed [gateways](http://wiki.confine-project.eu/arch:
-    rest-api?&#gateway_at_server) and provides API URIs to navigate to them.
-    """
-    model = Gateway
-    serializer_class = GatewaySerializer
-
-
-class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)
-    
-    This resource describes a network gateway providing access to the testbed
-    [server](http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
-    and listening on tinc addresses on one or more community network
-    [islands](http://wiki.confine-project.eu/arch:rest-api?&#island_at_server).
-    The gateway connects to other gateways or the testbed server in
-    order to reach the later.
-    """
-    model = Gateway
-    serializer_class = GatewaySerializer
-
-
 api.register(HostList, HostDetail)
-api.register(GatewayList, GatewayDetail)

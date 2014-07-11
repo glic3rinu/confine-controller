@@ -51,10 +51,6 @@ class TincHostQuerySet(models.query.QuerySet):
     def hosts(self, *args, **kwargs):
         server_ct = ContentType.objects.get_for_model(Server)
         return self.exclude(content_type=server_ct).filter(*args, **kwargs)
-        
-    def gateways(self, *args, **kwargs):
-        gateway_ct = ContentType.objects.get_for_model(Gateway)
-        return self.filter(content_type=gateway_ct).filter(*args, **kwargs)
 
     def servers(self, *args, **kwargs):
         server_ct = ContentType.objects.get_for_model(Server)
@@ -120,7 +116,7 @@ class TincHost(models.Model):
     def subnet(self):
         if self.content_type.model == 'node':
             return self.address.make_net(64)
-        else: #self.content_type.model == [host|server|gateway]
+        else: #self.content_type.model == [host|server]
             return self.address
 
     @property
@@ -142,7 +138,7 @@ class TincHost(models.Model):
             if self.pubkey:
                 host += "\n\n%s" % self.pubkey
             return host
-        elif ct_model == 'server' or ct_model == 'gateway':
+        elif ct_model == 'server':
             # Returns tincd host file
             host = []
             for addr in self.addresses.all():
@@ -159,10 +155,11 @@ class TincHost(models.Model):
     
     def get_config(self):
         """
-        Returns client tinc.conf file content, prioritizing island related gateways
+        Returns client tinc.conf file content, prioritizing servers
+        that belongs to the same island.
         """
-        if self.content_type.model in ['server', 'gateway']:
-            raise TypeError("Cannot get_config from a server or gateway")
+        if self.content_type.model == 'server':
+            raise TypeError("Cannot get_config from a server.")
         config = ["Name = %s" % self.name]
         for server in self.connect_to:
             line = "ConnectTo = %s" % server.name
@@ -189,30 +186,14 @@ class TincHost(models.Model):
                 'ip -6 link set "$INTERFACE" down\n' % ip)
     
     def generate_key(self, commit=False):
-        if self.content_type.model in ['server', 'gateway']:
-            raise TypeError("Cannot generate_key from a server or gateway")
+        if self.content_type.model == 'server':
+            raise TypeError("Cannot generate_key from a server.")
         bob = Bob()
         bob.gen_key()
         if commit:
             self.pubkey = bob.get_pub_key(format='X.501')
             self.save()
         return bob.get_key(format='X.501')
-
-
-class Gateway(models.Model):
-    """
-    Describes a Gateway in the testbed. A machine giving entry to the testbed's 
-    management network from a set of network islands. It can help connect 
-    different parts of a management network located at different islands over 
-    some link external to them (e.g. the Internet).
-    """
-    related_tinc = generic.GenericRelation('tinc.TincHost')
-    related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
-    description = models.CharField(max_length=256,
-            help_text='Free-form textual description of this gateway.')
-
-    tinc = property(get_tinc)
-    mgmt_net = property(get_mgmt_net)
 
 
 class TincAddress(models.Model):

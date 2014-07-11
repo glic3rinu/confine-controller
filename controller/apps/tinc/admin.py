@@ -16,7 +16,7 @@ from permissions.admin import (PermissionGenericTabularInline, PermissionTabular
 
 from .filters import MyHostsListFilter
 from .forms import TincHostInlineForm
-from .models import Host, TincHost, TincAddress, Gateway
+from .models import Host, TincHost, TincAddress
 from . import settings
 
 
@@ -74,12 +74,6 @@ class TincAddressAdmin(PermissionModelAdmin):
     list_display = ['addr', 'port', 'island', 'host']
     list_filter = ['island__name', 'port', 'host']
     search_fields = ['addr', 'island__name', 'island__description', 'host__tinc_name']
-
-
-class GatewayAdmin(PermissionModelAdmin):
-    list_display = ['id', 'description']
-    list_display_links = ['id', 'description']
-    inlines = [MgmtNetConfInline, TincHostInline]
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
@@ -145,7 +139,6 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
 
 admin.site.register(Host, HostAdmin)
 admin.site.register(TincAddress, TincAddressAdmin)
-admin.site.register(Gateway, GatewayAdmin)
 
 
 # Monkey-Patching Section

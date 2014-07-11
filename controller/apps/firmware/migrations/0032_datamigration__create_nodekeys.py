@@ -5,6 +5,10 @@ from south.v2 import DataMigration
 from django.db import models
 
 class Migration(DataMigration):
+    # Run before dropping nodes.cert
+    needed_by = (
+        ("nodes", "0015_auto__del_field_node_cert"),
+    )
 
     def forwards(self, orm):
         "Create Nodekys objects for existing Nodes."

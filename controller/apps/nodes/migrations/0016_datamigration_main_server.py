@@ -4,13 +4,21 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
+from controller.utils.system import run
+
 class Migration(DataMigration):
     depends_on = (
         ("tinc", "0024_datamigration_generate_tinchost_name"),
     )
 
     def update_server_pk(self, orm, old_pk, new_pk):
-        server = orm.Server.objects.get(pk=old_pk)
+        try:
+            server = orm.Server.objects.get(pk=old_pk)
+        except orm.Server.DoesNotExist:
+            # Create a server
+            description = run('hostname', display=False).stdout
+            server = orm.Server.objects.create(pk=new_pk, description=description)
+            return # Related objects are alreday up to date!
         server.pk = new_pk
         server.save()
         
@@ -19,8 +27,7 @@ class Migration(DataMigration):
             related = orm[model].objects.filter(server=old_pk)
             related.update(server=new_pk)
             
-        
-        ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='server') # TODO
+        ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='server')
         for model in ['mgmtnetworks.MgmtNetConf', 'tinc.TincHost']:
             related = orm[model].objects.filter(content_type=ctype, object_id=old_pk)
             related.update(object_id=new_pk)

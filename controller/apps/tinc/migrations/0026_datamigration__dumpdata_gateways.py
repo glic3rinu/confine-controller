@@ -4,6 +4,7 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
+import json
 import logging
 
 from controller.utils import get_project_root
@@ -43,11 +44,43 @@ class Migration(DataMigration):
                 "NOTE: Gateway data has been dumped as json in %s" % self.GATEWAYS_FILE)
 
     def backwards(self, orm):
-        "Write your backwards methods here."
-        """Try to restore gateways from the dumped file."""
-        data = open(self.GATEWAYS_FILE, "r").read()
+        """
+        Code to restore gateways from the dumped file.
+
+        As Gateway models doesn't exists anymore, this code
+        will be 'best-efforts' executed during the migration
+        and is only provided to help operators.
+
+        If for any reason doesn't works properly, follow
+        the next steps to restore manually the gateways:
+        1. Restore tinc/models.py to include Gateway model.
+        2. Load data using django-admin.py loaddata
+        """
+        try:
+            data = open(self.GATEWAYS_FILE, "r").read()
+        except IOError:
+            logging.warning("Gateways NOT restored: cannot open file '%s'" % self.GATEWAYS_FILE)
+            return # Doesn't exist gateway backup
+        try:
+            datajs = json.loads(data)
+        except ValueError:
+            logging.warning("Gateways NOT restored: invalid JSON format (loaded file '%s')" % self.GATEWAYS_FILE)
+            return # Invalid JSON format
+
+        # handle gateways and create via south ORM
+        for key, obj in enumerate(datajs):
+            if obj['model'] == 'tinc.gateway':
+                gateway = datajs.pop(key)
+                orm.Gateway.objects.create(pk=obj['pk'], **gateway['fields'])
+
+        # Update Gateway auto id sequence
+        db.execute("SELECT setval('tinc_gateway_id_seq', (SELECT MAX(id) FROM tinc_gateway))")
+
+        # handle related objects
+        data = json.dumps(datajs)
         for obj in serializers.deserialize("json", data):
             obj.save()
+
 
     models = {
         u'contenttypes.contenttype': {

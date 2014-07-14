@@ -232,6 +232,9 @@ class TincAddress(models.Model):
 
 # Signals
 def tinchost_changed(sender, instance, **kwargs):
+    # Do nothing while loading fixtures or running migrations
+    if kwargs.get('raw', False):
+        return
     if hasattr(instance.content_object, 'update_set_state'): # is a node
         instance.content_object.update_set_state()
 

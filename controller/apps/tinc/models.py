@@ -30,7 +30,11 @@ class Host(models.Model):
     Describes an odd host computer connected to the testbed (through the 
     management network) with a known administrator.
     """
-    description = models.CharField(max_length=256, null=True, blank=True,
+    name = models.CharField(max_length=256, unique=True,
+            help_text='The unique name for this host. A single non-empty line of '
+                      'free-form text with no whitespace surrounding it.',
+            validators=[validate_name])
+    description = models.TextField(blank=True,
             help_text='An optional free-form textual description of this host.')
     owner = models.ForeignKey(base_settings.AUTH_USER_MODEL, related_name='tinc_hosts',
             help_text='The user who administrates this host (its creator by default)')
@@ -44,7 +48,7 @@ class Host(models.Model):
     mgmt_net = property(get_mgmt_net)
     
     def __unicode__(self):
-        return unicode(self.description or self.pk)
+        return self.name
 
 
 class TincHostQuerySet(models.query.QuerySet):

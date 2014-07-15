@@ -3,13 +3,13 @@ from __future__ import absolute_import
 import json
 import six
 
+from controller.utils.apps import is_installed
 from urlparse import urlparse
-from rest_framework.compat import smart_text
 
 from api import serializers
 from nodes.settings import NODES_NODE_ARCHS
 
-from .models import Slice, Sliver, Template, SliverIface
+from .models import Slice, Sliver, SliverDefaults, SliverIface, Template
 
 
 class FakeFileField(serializers.CharField):
@@ -37,6 +37,26 @@ class FakeFileField(serializers.CharField):
         return value
 
 
+class FileURLField(serializers.CharField):
+    """ Readonly Absolute URL field used for backwards compatibility """
+    def __init__(self, *args, **kwargs):
+        self.field_name = kwargs.pop('field', '')
+        kwargs.update({'read_only': True})
+        super(FileURLField, self).__init__(*args, **kwargs)
+    
+    def to_native(self, value):
+        """
+        Build an absolute URI based on the File URL if any,
+        otherwise fallback on field_name_uri
+        """
+        fieldfile = getattr(value, self.field_name)
+        if fieldfile:
+            uri = getattr(fieldfile, 'url')
+            request = self.context.get('request')
+            return request.build_absolute_uri(uri)
+        return getattr(value, self.field_name + '_uri')
+
+
 class SliverIfaceSerializer(serializers.ModelSerializer):
     parent_name = serializers.Field(source='parent')
     
@@ -56,14 +76,26 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field(source='api_id')
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField()
-    exp_data_uri = FakeFileField(field='exp_data', required=False)
+    data_uri = FakeFileField(field='data', required=False)
     overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
     mgmt_net = serializers.Field()
     
+    # FIXME remove when api.aggregate supports nested serializers
+    # is only required because SliverDefaultsSerializer imports resources
+    # serializers, and breaks api.aggregate functionality based on
+    # api._registry (see class SliverDefaultsSerializer)
+    if is_installed('resources'):
+        from resources.serializers import ResourceReqSerializer
+        resources = ResourceReqSerializer(many=True, required=False)
+    
+    # backwards compatibility (readonly)
+    exp_data_uri = FileURLField(source='*', field='data')
+    exp_data_sha256 = serializers.Field(source='data_sha256')
+    
     class Meta:
         model = Sliver
-        exclude = ('exp_data', 'overlay')
+        exclude = ('data', 'overlay')
     
     def to_native(self, obj):
         """ hack for implementing dynamic file_uri's on FakeFile """
@@ -98,35 +130,63 @@ class SliverDetailSerializer(SliverSerializer):
     class Meta:
         model = Sliver
         read_only_fields = ('node', 'slice')
-        exclude = ('exp_data', 'overlay')
+        exclude = ('data', 'overlay')
+
+
+class SliverDefaultsSerializer(serializers.ModelSerializer):
+    instance_sn = serializers.IntegerField(read_only=True)
+    data_uri = FakeFileField(field='data', required=False)
+    overlay_uri = FakeFileField(field='overlay', required=False)
+    template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
+    # FIXME refactor move to resources app when api.aggregate supports nested serializers
+    if is_installed('resources'):
+        from resources.serializers import ResourceReqSerializer
+        resources = ResourceReqSerializer(source='slice_resources', many=True, required=False)
+
+    class Meta:
+        model = SliverDefaults
+        exclude = ('id', 'slice', 'data', 'overlay')
+    
+    def to_native(self, obj):
+        """ hack for implementing dynamic file_uri's on FakeFile """
+        self.__object__ = obj
+        return super(SliverDefaultsSerializer, self).to_native(obj)
 
 
 class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     id = serializers.Field()
     expires_on = serializers.DateTimeField(read_only=True)
     instance_sn = serializers.IntegerField(read_only=True)
-    new_sliver_instance_sn = serializers.IntegerField(read_only=True)
-    vlan_nr = serializers.IntegerField(read_only=True)
     properties = serializers.PropertyField()
-    exp_data_uri = FakeFileField(field='exp_data', required=False)
-    overlay_uri = FakeFileField(field='overlay', required=False)
+    isolated_vlan_tag = serializers.IntegerField(read_only=True)
+    sliver_defaults = SliverDefaultsSerializer()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     
+    # backwards compatibility (readonly)
+    new_sliver_instance_sn = serializers.Field(source='sliver_defaults.instance_sn')
+    exp_data_uri = FileURLField(source='sliver_defaults', field='data')
+    exp_data_sha256 = serializers.Field(source='sliver_defaults.data_sha256')
+    overlay_uri = FileURLField(source='sliver_defaults', field='overlay')
+    overlay_sha256 = serializers.Field(source='sliver_defaults.overlay_sha256')
+    template = serializers.RelHyperlinkedRelatedField(source='sliver_defaults.template',
+        read_only=True, view_name='template-detail')
+    vlan_nr = serializers.Field()
+    
     class Meta:
         model = Slice
-        exclude = ('set_state', 'exp_data', 'overlay')
-    
-    def to_native(self, obj):
-        """ hack for implementing dynamic file_uri's on FakeFile """
-        self.__object__ = obj
-        return super(SliceCreateSerializer, self).to_native(obj)
+        exclude = ('set_state',)
 
 
 class SliceSerializer(SliceCreateSerializer):
+    # Hack to show explicit handled resource (Vlan) - #46-note87
+    # FIXME: can be removed when monkey-patch works in resources.serializers
+    if is_installed('resources'):
+        from resources.serializers import VlanResourceReqSerializer
+        resources = VlanResourceReqSerializer(source='*', read_only=True, required=False)
+    
     class Meta:
         model = Slice
-        exclude = ('exp_data', 'overlay')
         read_only_fields = ('group',)
 
 

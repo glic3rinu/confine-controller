@@ -53,17 +53,28 @@ class BaseResource(models.Model):
 
 
 class Resource(BaseResource):
-    max_sliver = models.PositiveIntegerField(null=True, blank=True)
-    dflt_sliver = models.PositiveIntegerField("Default sliver")
+    max_req = models.PositiveIntegerField("Max per sliver", null=True, blank=True)
+    dflt_req = models.PositiveIntegerField("Sliver default")
     
     def clean(self):
         super(Resource, self).clean()
         self.instance.clean(self)
+    
+    @property
+    def avail(self):
+        """
+        The currently unused amount of units of this resource
+        available in the testbed to be allocated to slices (may
+        be null if unknown).
+        """
+        # avoid calling this property for a non instantiated resource
+        if self.name:
+            return self.instance.available(self)
+        return None
 
 
-# TODO rename name to res_name
 class ResourceReq(BaseResource):
-    req = models.PositiveIntegerField(null=True, blank=True)
+    req = models.PositiveIntegerField("Amount", null=True, blank=True)
     
     class Meta:
         verbose_name = "Resource request"
@@ -72,6 +83,14 @@ class ResourceReq(BaseResource):
     def clean(self):
         super(ResourceReq, self).clean()
         self.instance.clean_req(self)
+    
+    def save(self, *args, **kwargs):
+        super(ResourceReq, self).save(*args, **kwargs)
+        self.instance.save(self)
+    
+    def delete(self, using=None):
+        self.instance.delete(self)
+        super(ResourceReq, self).delete(using=using)
 
 
 autodiscover('resources')

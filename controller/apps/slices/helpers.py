@@ -23,7 +23,7 @@ def remove_slice_id(view):
 def save_files_with_pk_value(obj, fields, *args, **kwargs):
     for field in fields:
         if getattr(obj, field):
-            # Dirty hack in order to allow pk values on exp_data filename
+            # Dirty hack in order to allow pk values on sliver data filename
             field_value = getattr(obj, field)
             setattr(obj, field, None)
             super(type(obj), obj).save(*args, **kwargs)
@@ -40,9 +40,9 @@ def state_value(state):
 
 
 def get_readonly_file_fields(obj):
-    """Mark as readonly if exists file for exp_data and overlay"""
+    """Mark as readonly if exists file for data and overlay"""
     readonly_fields = []
-    for field in ['exp_data', 'overlay']:
+    for field in ['data', 'overlay']:
         if bool(getattr(obj, field, False)): # False when obj is None
             readonly_fields += [field+'_uri', field+'_sha256']
     return readonly_fields

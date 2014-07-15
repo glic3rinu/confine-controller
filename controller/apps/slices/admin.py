@@ -16,15 +16,17 @@ from controller.admin.utils import (colored, admin_link, link, get_admin_link,
 from controller.admin.widgets import LinkedRelatedFieldWidgetWrapper
 from nodes.admin import NodeAdmin
 from nodes.models import Node
-from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from permissions.admin import (PermissionModelAdmin, PermissionStackedInline,
+    PermissionTabularInline)
 from users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
-from .forms import (SliceAdminForm, SliverAdminForm, SliverIfaceInlineForm,
+from .forms import (SliverDefaultsInlineForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
 from .helpers import wrap_action, remove_slice_id, state_value, get_readonly_file_fields
-from .models import Sliver, SliverProp, SliverIface, Slice, SliceProp, Template
+from .models import (Slice, SliceProp, Sliver, SliverDefaults, SliverProp,
+    SliverIface, Template)
 
 
 # List of ifaces displayed in SliverInline (and subclasses)
@@ -50,7 +52,7 @@ num_slivers.admin_order_field = 'slivers__count'
 
 
 def computed_sliver_set_state(sliver):
-    sliver_state = sliver.set_state
+    sliver_state = sliver.set_state or sliver.slice.sliver_defaults.set_state
     state = sliver.effective_set_state
     effective = state != sliver_state
     color = STATE_COLORS.get(state, "black")
@@ -94,7 +96,7 @@ class SliverIfaceInline(PermissionTabularInline):
         return super(SliverIfaceInline, self).get_formset(request, obj=obj, **kwargs)
 
 
-SLIVER_EMPTY_LABEL = "(from slice)"
+SLIVER_EMPTY_LABEL = "(from slice's sliver defaults)"
 class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
     list_display = [
         '__unicode__', admin_link('node'), admin_link('slice'), computed_sliver_set_state
@@ -108,7 +110,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'classes': ('collapse', 'info'),
             'description': 'If you want to define a URI, you should remove '
                            'previously the uploaded file.',
-            'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256',
+            'fields': ('data', 'data_uri', 'data_sha256',
                        'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
         }),
@@ -152,7 +154,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     def new_instance_sn(self, instance):
         if instance.pk:
             return instance.instance_sn
-        return instance.slice.new_sliver_instance_sn
+        return instance.slice.sliver_defaults.instance_sn
     new_instance_sn.short_description ='Instance sequence number'
     
     def has_add_permission(self, *args, **kwargs):
@@ -168,6 +170,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
     def get_readonly_fields(self, request, obj=None):
+        """Mark as readonly if exists file for data and overlay"""
         readonly_fields = super(SliverAdmin, self).get_readonly_fields(request, obj=obj)
         return readonly_fields + get_readonly_file_fields(obj)
     
@@ -205,7 +208,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         if db_field.name == 'set_state':
             blank_choice = (('', SLIVER_EMPTY_LABEL),)
             kwargs['choices'] = blank_choice + Slice.STATES
-        # TODO update empty_label for exp_data and overlay (FileField)
+        # TODO update empty_label for data and overlay (FileField)
         return super(SliverAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -408,7 +411,7 @@ class SliceSliversAdmin(SliverAdmin):
         context.update(extra_context or {})
         # warn user on missconfiguration
         if request.method == 'GET':
-            if not slice.template.is_active or \
+            if not slice.sliver_defaults.template.is_active or \
                 sliver.template and not sliver.template.is_active:
                 msg = "The template chosen for this sliver is NOT active. "\
                     "Please check its configuration."
@@ -533,37 +536,20 @@ class SlicePropInline(PermissionTabularInline):
         js = ('slices/js/collapsed_properties.js',)
 
 
-class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
-    list_display = [
-        'name', 'id', 'vlan_nr', colored_set_state, num_slivers, admin_link('template'),
-        'expires_on', admin_link('group')
-    ]
-    list_display_links = ('name', 'id')
-    list_filter = [MySlicesListFilter, 'set_state', 'template']
-    readonly_fields = ['instance_sn', 'new_sliver_instance_sn', 'expires_on']
-    date_hierarchy = 'expires_on'
-    search_fields = ['name']
-    inlines = [SlicePropInline, SliverInline]
-    actions = [reset_selected, renew_selected_slices]
-    form = SliceAdminForm
+class SliverDefaultsInline(PermissionStackedInline):
+    model = SliverDefaults
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'template', 'set_state','expires_on', 'group'),
-        }),
-        ('Advanced', {
-            'classes': ('collapse', 'info'),
+            'classes': ('info',),
             'description': 'If you want to define a URI, you should remove '
                            'previously the uploaded file.',
-            'fields': ('exp_data', 'exp_data_uri', 'exp_data_sha256', 'overlay',
-                       'overlay_uri', 'overlay_sha256', 'vlan_nr', 'instance_sn',
-                       'new_sliver_instance_sn'
-            )
+            'fields': ('template', 'set_state','data', 'data_uri', 'data_sha256',
+                       'overlay', 'overlay_uri', 'overlay_sha256', 'instance_sn')
         }),
     )
-    change_form_template = "admin/slices/slice/change_form.html"
-    save_and_continue = True
-    change_view_actions = [renew_selected_slices, reset_selected]
-    default_changelist_filters = (('my_slices', 'True'),)
+    readonly_fields = ['instance_sn']
+    form = SliverDefaultsInlineForm
+    can_delete = False
     
     class Media:
         css = {
@@ -571,6 +557,54 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
                 'slices/css/warning-form.css',)
         }
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'template':
+            formfield = self.formfield_for_foreignkey(db_field, **kwargs)
+            kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
+                db_field.rel, self.admin_site)
+        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
+            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
+        return super(SliverDefaultsInline, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def get_readonly_fields(self, request, obj=None):
+        """Mark as readonly if exists file for data and overlay"""
+        readonly_fields = super(SliverDefaultsInline, self).get_readonly_fields(request, obj=obj)
+        if obj is None:
+            return readonly_fields
+        return readonly_fields + get_readonly_file_fields(obj.sliver_defaults)
+
+
+class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin):
+    list_display = [
+        'name', 'id', 'isolated_vlan_tag', colored_set_state, num_slivers,
+        'display_template', 'expires_on', admin_link('group')
+    ]
+    list_display_links = ('name', 'id')
+    list_filter = [MySlicesListFilter, 'set_state', 'sliver_defaults__template']
+    readonly_fields = ['instance_sn', 'expires_on', 'isolated_vlan_tag']
+    date_hierarchy = 'expires_on'
+    search_fields = ['name']
+    inlines = [SlicePropInline, SliverDefaultsInline, SliverInline]
+    actions = [reset_selected, renew_selected_slices]
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'set_state', 'expires_on', 'group'),
+        }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('allow_isolated', 'isolated_vlan_tag', 'instance_sn')
+        }),
+    )
+    change_form_template = "admin/slices/slice/change_form.html"
+    save_and_continue = True
+    change_view_actions = [renew_selected_slices, reset_selected]
+    default_changelist_filters = (('my_slices', 'True'),)
+
+    class Media:
+        css = {
+            "all" : ("slices/css/hide_admin_obj_name.css",)
+        }
+    
     def queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
         related = ('group', 'template')
@@ -615,40 +649,44 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         return form
     
     def get_readonly_fields(self, request, obj=None):
-        """ Disable set_state transitions when slice is registered """
+        """ Disable set_state transitions on slice creation.
+            allow_isolated can be only updated on REGISTER state
+        """
         readonly_fields = super(SliceAdmin, self).get_readonly_fields(request, obj=obj)
-        if 'set_state' not in readonly_fields and obj is None:
-            return readonly_fields + ['set_state']
-        return readonly_fields + get_readonly_file_fields(obj)
+        if obj is None:
+            if 'set_state' not in readonly_fields:
+                return readonly_fields + ['set_state']
+        elif obj.set_state != Slice.REGISTER:
+            return readonly_fields + ['allow_isolated']
+        return readonly_fields
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make description input widget smaller """
         if db_field.name == 'description':
             kwargs['widget'] = forms.Textarea(attrs={'cols': 85, 'rows': 5})
-        elif db_field.name == 'template':
-            formfield = self.formfield_for_foreignkey(db_field, **kwargs)
-            kwargs['widget'] = LinkedRelatedFieldWidgetWrapper(formfield.widget,
-                db_field.rel, self.admin_site)
-        elif  '_sha256' in db_field.name or '_uri' in db_field.name:
-            kwargs['widget'] = forms.TextInput(attrs={'size': 80})
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """ Warn user on missconfigured slice:
             - when the slice's group cannot manage slices
-            - when slice template is inactive
+            - when slice's sliver defaults template is inactive
         """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
             if obj and not obj.group.allow_slices:
                 msg = "The slice group does not have permissions to manage slices"
                 messages.warning(request, msg)
-            if obj and not obj.template.is_active:
+            if obj and not obj.sliver_defaults.template.is_active:
                 msg = "The template chosen for this slice is NOT active. "\
                     "Please check its configuration."
                 messages.warning(request, msg)
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
+    
+    def display_template(self, obj):
+        """ Show SliverDefaults template on Slice changelist"""
+        return get_admin_link(obj.sliver_defaults.template)
+    display_template.short_description = 'template'
 
 
 class TemplateAdmin(PermissionModelAdmin):

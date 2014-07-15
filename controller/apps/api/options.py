@@ -97,6 +97,10 @@ class RestApi(object):
             # hook new attribute to each serializer
             for serializer in model_serializers:
                 serializer.base_fields.update({name: field(**kwargs)})
+        else:
+            import warnings
+            warnings.warn("Model %s not registered, so api.aggregate do nothing." % model)
+
 
 
 class ControllerRestApi(RestApi):

@@ -170,6 +170,8 @@ class Slice(models.Model):
     Describes a slice in the testbed. An slice is a set of resources spread over
     several nodes in a testbed which allows researchers to run experiments over it.
     """
+    MIN_VLAN_TAG = 0x100
+    MAX_VLAN_TAG = 0xfff
     REGISTER = 'register'
     DEPLOY = 'deploy'
     START = 'start'
@@ -191,74 +193,42 @@ class Slice(models.Model):
                       '(instance sequence number). Automatically incremented by the '
                       'reset function.',
             verbose_name='instance sequence number')
-    new_sliver_instance_sn = models.PositiveIntegerField(default=0, blank=True,
-            help_text='The instance sequence number that newly created slivers will '
-                      'get. Automatically incremented whenever a sliver of this slice '
-                      'is instructed to be updated.',
-            verbose_name='New sliver instance sequence number')
-    vlan_nr = models.IntegerField('VLAN number', null=True, blank=True,
-            help_text='VLAN number allocated to this slice. The only values that can '
+    allow_isolated = models.BooleanField(default=False,
+            help_text='Whether to request a VLAN tag for isolated sliver interfaces '
+                      '(see node architecture) at slice deployment time. If the '
+                      'allocation is successful, the tag is stored in the '
+                      '/isolated_vlan_tag member. Otherwise, the deployment of the '
+                      'slice fails',
+            verbose_name='Request isolated VLAN tag')
+    isolated_vlan_tag = models.IntegerField('Isolated VLAN tag', null=True, blank=True,
+            help_text='VLAN tag allocated to this slice. The only values that can '
                       'be set are null which means that no VLAN is wanted for the '
                       'slice, and -1 which asks the server to allocate for the slice '
-                      'a new VLAN number (100 <= vlan_nr < 0xFFF) while the slice is '
+                      'a new VLAN tag (100 <= vlan_tag < 0xFFF) while the slice is '
                       'instantiated (or active). It cannot be changed on an '
                       'instantiated slice with slivers having isolated interfaces.')
-    exp_data = models.FileField(blank=True, verbose_name='experiment data',
-            upload_to=make_upload_to('exp_data', settings.SLICES_SLICE_EXP_DATA_DIR,
-                                     settings.SLICES_SLICE_EXP_DATA_NAME,),
-            help_text='File containing experiment data for slivers (if they do not '
-                      'explicitly indicate one)')
-    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
-            help_text='The URI of a file containing experiment data for slivers (if '
-                      'they do not explicitly indicate one). Its format and contents '
-                      'depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the exp_data file, used to check its integrity. '
-                      'Automatically setted on file upload but compulsory when file URI '
-                      'has been specified.',
-            validators=[validate_sha256])
-    overlay = models.FileField(blank=True,
-            upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
-                                     settings.SLICES_SLICE_OVERLAY_NAME,),
-            help_text='File containing overlay for slivers (if they do not explicitly '
-                      'indicate one)',
-            validators=[validate_file_extensions(settings.SLICES_SLIVER_OVERLAY_EXTENSIONS)])
-    overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
-            help_text='The URI of a file containing an overlay for slivers (if they '
-                      'do not explicitly indicate one). The file must be an archive '
-                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
-                      'and will be applied on top of the used template. This member '
-                      'may be set directly or through the do-upload-overlay function.')
-    overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the previous file, used to check its integrity. '
-                      'Automatically setted on file upload but compulsory when file URI '
-                      'has been specified.',
-            validators=[validate_sha256])
     set_state = models.CharField(max_length=16, choices=STATES, default=REGISTER,
             help_text='The state set on this slice (set state) and its slivers '
                       '(if they do not explicitly indicate a lower one). '
-                      'Possible values: register (initial), &lt; deploy &lt; start. '
+                      'Possible values: register (initial) &lt; deploy &lt; start. '
                       'See <a href="https://wiki.confine-project.eu/arch:'
                       'slice-sliver-states">slice and sliver states</a> for the full '
                       'description of set states and possible transitions.')
-    template = models.ForeignKey(Template, limit_choices_to={'is_active':True},
-            help_text='The template to be used by the slivers of this slice (if they '
-                      'do not explicitly indicate one).')
     group = models.ForeignKey('users.Group', related_name='slices')
     
     def __unicode__(self):
         return self.name
     
     def update_set_state(self, commit=True):
-        if self.vlan_nr == -1:
-            if self.set_state in [self.DEPLOY, self.START]:
+        if self.set_state in [self.DEPLOY, self.START]:
+            if self.isolated_vlan_tag is None and self.allow_isolated:
                 try:
-                    self.vlan_nr = self._get_vlan_nr()
+                    self.isolated_vlan_tag = Slice._get_vlan_tag()
                 except VlanAllocationError:
                     self.set_state = self.REGISTER
-        elif self.vlan_nr > 0 and self.set_state == self.REGISTER:
+        elif self.isolated_vlan_tag > 0: # REGISTER state
             # transition to a register state, deallocating...
-            self.vlan_nr = -1
+            self.isolated_vlan_tag = None
         if commit:
             self.save()
     
@@ -267,24 +237,19 @@ class Slice(models.Model):
         self.update_set_state(commit=False)
         if not self.pk:
             self.expires_on = now() + settings.SLICES_SLICE_EXP_INTERVAL
-            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
-        set_sha256(self, ('exp_data', 'overlay'))
-        set_uri(self, ('exp_data', 'overlay'))
         super(Slice, self).save(*args, **kwargs)
     
     def clean(self):
         super(Slice, self).clean()
-        clean_sha256(self, ('exp_data', 'overlay'))
-        clean_uri(self, ('exp_data', 'overlay'))
         # clean set_state
         if not self.pk:
             if self.set_state != Slice.REGISTER:
                 raise ValidationError("Initial state must be Register")
+        # clean allow_isolated
         else:
             old = Slice.objects.get(pk=self.pk)
-            is_register = old.set_state != self.REGISTER
-            vlan_requested = self.vlan_nr == '-1'
-            if self.vlan_nr != old.vlan_nr and is_register and vlan_requested:
+            has_changed = self.allow_isolated != old.allow_isolated
+            if has_changed and old.set_state != self.REGISTER:
                 raise ValidationError("Vlan can not be requested in state != register")
     
     def renew(self):
@@ -302,21 +267,30 @@ class Slice(models.Model):
     
     @property
     def max_vlan_nr(self):
-        return int('fff', 16)
+        return Slice.MAX_VLAN_TAG
     
     @property
     def min_vlan_nr(self):
-        return int('100', 16)
+        return Slice.MIN_VLAN_TAG
     
-    def _get_vlan_nr(self):
-        qset = Slice.objects.exclude(vlan_nr=None).order_by('-vlan_nr')
-        last_nr = qset.first().vlan_nr if qset else 0
-        if last_nr < self.min_vlan_nr:
-            return self.min_vlan_nr
-        if last_nr >= self.max_vlan_nr:
+    @property
+    def vlan_nr(self):
+        # backwards-compatibility (#46 note-64)
+        if self.set_state != Slice.REGISTER:
+            return self.isolated_vlan_tag
+        else:
+            return -1 if self.allow_isolated else None
+
+    @classmethod
+    def _get_vlan_tag(cls):
+        qset = cls.objects.exclude(isolated_vlan_tag=None).order_by('-isolated_vlan_tag')
+        last_nr = qset.first().isolated_vlan_tag if qset else 0
+        if last_nr < cls.MIN_VLAN_TAG:
+            return cls.MIN_VLAN_TAG
+        if last_nr >= cls.MAX_VLAN_TAG:
             # Try to recycle old values ( very, very ineficient )
-            for new_nr in range(self.min_vlan_nr, self.max_vlan_nr):
-                if not Slice.objects.filter(vlan_nr=new_nr).exists():
+            for new_nr in range(cls.MIN_VLAN_TAG, cls.MAX_VLAN_TAG):
+                if not cls.objects.filter(vlan_nr=new_nr).exists():
                     return new_nr
             raise VlanAllocationError("No VLAN address space left.")
         return last_nr + 1
@@ -349,6 +323,82 @@ class SliceProp(models.Model):
         return self.name
 
 
+class SliverDefaults(models.Model):
+    """
+    Represents the attributes and relations that act as defaults for the
+    slivers of a slice.
+    """
+    slice = models.OneToOneField(Slice, related_name='sliver_defaults')
+    instance_sn = models.PositiveIntegerField(default=0, blank=True,
+            help_text='The instance sequence number that newly created slivers will '
+                      'get. Automatically incremented whenever a sliver of this slice '
+                      'is instructed to be updated.',
+            verbose_name='New sliver instance sequence number')
+    overlay = models.FileField(blank=True,
+            upload_to=make_upload_to('overlay', settings.SLICES_SLICE_OVERLAY_DIR,
+                                     settings.SLICES_SLICE_OVERLAY_NAME,),
+            help_text='File containing overlay for slivers (if they do not explicitly '
+                      'indicate one)',
+            validators=[validate_file_extensions(settings.SLICES_SLIVER_OVERLAY_EXTENSIONS)])
+    overlay_uri = models.CharField('overlay URI', max_length=256, blank=True,
+            help_text='The URI of a file containing an overlay for slivers (if they '
+                      'do not explicitly indicate one). The file must be an archive '
+                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
+                      'and will be applied on top of the used template. This member '
+                      'may be set directly or through the do-upload-overlay function.')
+    overlay_sha256 = models.CharField('overlay SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the previous file, used to check its integrity. '
+                      'This member may be set directly or through the do-upload-overlay '
+                      'function. Compulsory when a file has been specified.',
+            validators=[validate_sha256])
+    data = models.FileField(blank=True, verbose_name='sliver data',
+            upload_to=make_upload_to('data', settings.SLICES_SLICE_DATA_DIR,
+                                     settings.SLICES_SLICE_DATA_NAME,),
+            help_text='File containing experiment data for slivers (if they do not '
+                      'explicitly indicate one)')
+    data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
+            help_text='The URI of a file containing sliver data for slivers (if '
+                      'they do not explicitly indicate one). Its format and contents '
+                      'depend on the type of the template to be used.')
+    data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the data file, used to check its integrity. '
+                      'Compulsory when a file has been specified.',
+            validators=[validate_sha256])
+    set_state = models.CharField(max_length=16, choices=Slice.STATES, default=Slice.START,
+            help_text='The state set by default on its slivers (set state). '
+                      'Possible values: register &lt; deploy &lt; start (default). '
+                      'See <a href="https://wiki.confine-project.eu/arch:'
+                      'slice-sliver-states">slice and sliver states</a> for the full '
+                      'description of set states and possible transitions.')
+    template = models.ForeignKey(Template, limit_choices_to={'is_active':True},
+            help_text='The template to be used by the slivers of this slice (if they '
+                      'do not explicitly indicate one).')
+    
+    class Meta:
+        verbose_name_plural = 'sliver defaults'
+    
+    def clean(self):
+        super(SliverDefaults, self).clean()
+        clean_sha256(self, ('data', 'overlay'))
+        clean_uri(self, ('data', 'overlay'))
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('data', 'overlay'))
+        set_uri(self, ('data', 'overlay'))
+        super(SliverDefaults, self).save(*args, **kwargs)
+    
+    # FIXME can be removed when api.aggregate supports nested serializers
+    @property
+    def slice_resources(self):
+        return self.slice.resources
+    
+    @slice_resources.setter
+    def slice_resources(self, value):
+        self.slice.resources = value
+
+
 class Sliver(models.Model):
     """
     Describes a sliver in the testbed, an sliver is a partition of a node's 
@@ -362,18 +412,17 @@ class Sliver(models.Model):
             help_text='The number of times this sliver has been instructed to be '
                       'updated (instance sequence number).',
             verbose_name='instance sequence number')
-    exp_data = models.FileField(blank=True, verbose_name='experiment data',
-            upload_to=make_upload_to('exp_data', settings.SLICES_SLIVER_EXP_DATA_DIR,
-                                     settings.SLICES_SLIVER_EXP_DATA_NAME),
-            help_text='File containing experiment data for this sliver.')
-    exp_data_uri = models.CharField('exp. data URI', max_length=256, blank=True,
-            help_text='If present, the URI of a file containing experiment data for '
+    data = models.FileField(blank=True, verbose_name='sliver data',
+            upload_to=make_upload_to('data', settings.SLICES_SLIVER_DATA_DIR,
+                                     settings.SLICES_SLIVER_DATA_NAME),
+            help_text='File containing data for this sliver.')
+    data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
+            help_text='If present, the URI of a file containing data for '
                       'this sliver, instead of the one specified by the slice. Its '
                       'format and contents depend on the type of the template to be used.')
-    exp_data_sha256 = models.CharField('exp. data SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the exp data file, used to check its integrity. '
-                      'Automatically setted on file upload but compulsory when file URI '
-                      'has been specified.',
+    data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,
+            help_text='The SHA256 hash of the sliver data file, used to check its integrity. '
+                      'Compulsory when a file has been specified.',
             validators=[validate_sha256])
     overlay = models.FileField(blank=True,
             upload_to=make_upload_to('overlay', settings.SLICES_SLIVER_OVERLAY_DIR,
@@ -415,8 +464,8 @@ class Sliver(models.Model):
     
     def clean(self):
         super(Sliver, self).clean()
-        clean_sha256(self, ('exp_data', 'overlay'))
-        clean_uri(self, ('exp_data', 'overlay'))
+        clean_sha256(self, ('data', 'overlay'))
+        clean_uri(self, ('data', 'overlay'))
         # TODO can slivers be added to slice.set_state != Register?
 #        if self.set_state:
 #            slice = self.slice
@@ -428,10 +477,10 @@ class Sliver(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.instance_sn = self.slice.new_sliver_instance_sn
-            save_files_with_pk_value(self, ('exp_data', 'overlay'), *args, **kwargs)
-        set_sha256(self, ('exp_data', 'overlay'))
-        set_uri(self, ('exp_data', 'overlay'))
+            self.instance_sn = self.slice.sliver_defaults.instance_sn
+            save_files_with_pk_value(self, ('data', 'overlay'), *args, **kwargs)
+        set_sha256(self, ('data', 'overlay'))
+        set_uri(self, ('data', 'overlay'))
         super(Sliver, self).save(*args, **kwargs)
     
     @property
@@ -441,10 +490,13 @@ class Sliver(models.Model):
     @property
     def effective_set_state(self):
         slice = self.slice
-        if slice.set_state == slice.DEPLOY and self.set_state == slice.REGISTER:
-            return self.set_state
-        elif slice.set_state == slice.START and self.set_state in [slice.REGISTER, slice.DEPLOY]:
-            return self.set_state
+        # sliver set_state overrides sliver_defaults
+        set_state = self.set_state or slice.sliver_defaults.set_state
+        # effective set_state <= slice.set_state
+        if slice.set_state == slice.DEPLOY and set_state == slice.REGISTER:
+            return set_state
+        elif slice.set_state == slice.START and set_state in [slice.REGISTER, slice.DEPLOY]:
+            return set_state
         return slice.set_state
     
     @property
@@ -471,8 +523,8 @@ class Sliver(models.Model):
     def update(self):
         self.instance_sn += 1
         self.save()
-        self.slice.new_sliver_instance_sn += 1
-        self.slice.save()
+        self.slice.sliver_defaults.instance_sn += 1
+        self.slice.sliver_defaults.save()
     
     def force_update(self, async=False):
         if async:
@@ -544,8 +596,8 @@ class SliverIface(models.Model):
     parent = models.ForeignKey('nodes.DirectIface', null=True, blank=True,
             help_text="The name of a direct interface in the research device to use "
                       "for this interface's traffic (VLAN-tagged); the slice must "
-                      "have a non-null vlan_nr. Only meaningful (and mandatory) for "
-                      "isolated interfaces.")
+                      "have a non-null isolated_vlan_tag. Only meaningful (and "
+                      "mandatory) for isolated interfaces.")
     
     class Meta:
         unique_together = ('sliver', 'name')
@@ -608,7 +660,7 @@ class SliverIface(models.Model):
         if last_nr >= self.max_nr:
             # try to recycle old values
             for new_nr in range(1, self.max_nr):
-                if not Slice.objects.filter(sliver=self.sliver, vlan_nr=new_nr).exists():
+                if not Slice.objects.filter(sliver=self.sliver, isolated_vlan_tag=new_nr).exists():
                     return new_nr
             raise IfaceAllocationError("No Iface NR space left.")
         return last_nr + 1

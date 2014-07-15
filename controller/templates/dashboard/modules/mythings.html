@@ -1,0 +1,38 @@
+{% extends "admin_tools/dashboard/module.html" %}
+{% block module_content %}
+
+<div>
+  <p>Current status of your nodes (by groups):</p>
+  <table>
+    <thead>
+        <tr>
+            <td></td>
+            {% for state in nodes_states %}
+            <td>{{ state }}</td>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for group, nodes in user_nodes.items %}
+        <tr>
+            <td>
+                <a href="{% url 'admin:nodes_node_changelist' %}?group__id__exact={{ group.pk }}">{{ group }}</a>
+            </td>
+            {% for count in nodes %}
+                <td>{{ count }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div>
+    <p>List of your slices:</p>
+    <ol style="list-style-type: circle">
+        {% for slice in slices %}
+            <li><a href="{% url 'admin:slices_slice_change' slice.pk %}">{{ slice }}</a></li>
+        {% endfor %}
+    </ol>
+</div>
+{% endblock %}

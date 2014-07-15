@@ -20,7 +20,7 @@ def delete_orphan(*args, **kwargs):
     https://github.com/ledil/django-orphaned/
     """
     if not CLEAN_ORPHAN_FILES:
-        return # task disabled
+        return "This task is disabled. Check 'CLEAN_ORPHAN_FILES' setting."
     if not is_installed('django_orphaned'):
         raise ImproperlyConfigured("'delete_orphan' task requires django-orphan "\
              "app and is not installed.")
@@ -28,11 +28,13 @@ def delete_orphan(*args, **kwargs):
     orig_stdout = sys.stdout
     sys.stdout = content = StringIO()
     
+    # Perform a readonly call to get information about deleted files
+    management.call_command('deleteorphaned', info=True)
     management.call_command('deleteorphaned')
     
     sys.stdout = orig_stdout
     content.seek(0)
     result = content.getvalue()
     content.close()
-    return result.replace('\r', '').replace('\n', '')
+    return result.replace('\r', '')
 

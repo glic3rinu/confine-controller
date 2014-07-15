@@ -1,1 +1,1 @@
-REQUIRED_APPS = ['issues']
+REQUIRED_APPS = ['mgmtnetworks']

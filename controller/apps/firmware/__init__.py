@@ -1,1 +1,1 @@
-REQUIRED_APPS = ['firmware']
+REQUIRED_APPS = ['controller']

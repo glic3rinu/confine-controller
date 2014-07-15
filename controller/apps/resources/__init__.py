@@ -1,4 +1,4 @@
-REQUIRED_APPS = ['issues']
+REQUIRED_APPS = ['nodes', 'slices']
 
 from django.db.models.loading import get_model
 

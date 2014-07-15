@@ -33,7 +33,7 @@ from slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
 from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
-from .helpers import break_headers, break_lines, get_changes_data
+from .helpers import break_headers, break_lines, get_changes_data, sizeof_fmt
 from .models import NodeSoftwareVersion, State, StateHistory
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
@@ -329,7 +329,7 @@ state_link.admin_order_field = 'state_set__value'
 
 def firmware_version(node):
     try:
-        version = node.soft_version.value
+        version = node.soft_version.version
     except NodeSoftwareVersion.DoesNotExist:
         return 'No data'
     else:
@@ -341,6 +341,21 @@ def firmware_version(node):
 firmware_version.admin_order_field = 'soft_version__value'
 
 
+def disk_available(node):
+    try:
+        statejs = json.loads(node.state.data)
+    except ValueError:
+        return 'No data'
+    total = sizeof_fmt(statejs.get('disk_avail', 'N/A'))
+    slv_dflt = sizeof_fmt(statejs.get('disk_dflt_per_sliver', 'N/A'))
+    return "%s (%s)" % (total, slv_dflt)
+disk_available.short_description = mark_safe('<span class="help-text" title="Disk '
+    'available reported by the node:\ntotal (default per sliver)">Disk available</span>')
+
+
+
+insertattr(Node, 'list_display', disk_available)
+insertattr(NodeListAdmin, 'list_display', disk_available)
 insertattr(Node, 'list_display', firmware_version)
 insertattr(NodeListAdmin, 'list_display', firmware_version)
 insertattr(Node, 'list_display', state_link)

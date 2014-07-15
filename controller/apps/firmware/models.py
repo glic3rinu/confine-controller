@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import ast
+import logging
 import os
 import re
 from hashlib import sha256
@@ -9,6 +10,7 @@ from celery import states as celery_states
 from django import template
 from django.conf import settings as project_settings
 from django.core import validators
+from django.core.exceptions import SuspiciousFileOperation
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
@@ -125,6 +127,11 @@ class Build(models.Model):
                 self.image.file
             except IOError:
                 return self.DELETED
+            except SuspiciousFileOperation:
+                msg = ("There is some issue accessing build image file. Check "
+                       "that image.name path is inside image.storage.location.")
+                logging.exception(msg)
+                return 'ACCESS DENIED'
             else: 
                 if self.match_config:
                     return self.AVAILABLE
@@ -499,8 +506,9 @@ class NodeBuildFile(models.Model):
     
 
 # Create OneToOne NodeKeys instance on node creation
-@receiver(post_save, sender=Node)
-def create_favorites(sender, instance, created, **kwargs):
+# define a dispatch UID for avoid duplicate signals (#505)
+@receiver(post_save, sender=Node, dispatch_uid="node_keys")
+def create_nodekeys(sender, instance, created, **kwargs):
     if created:
         NodeKeys.objects.create(node=instance)
 

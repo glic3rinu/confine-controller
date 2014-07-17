@@ -186,6 +186,12 @@ class Build(models.Model):
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version,
             base_image=base_image.image, kwargs=kwargs)
+        
+        # handle registry api #245
+        cert = kwargs.pop('registry_cert')
+        config = ConfigFile.objects.first()
+        build_obj.add_file('/etc/registry.crt', cert, config)
+        
         if async:
             defer(build_task.delay, build_obj.pk, exclude=exclude, **kwargs)
         else:

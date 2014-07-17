@@ -10,3 +10,11 @@ span.help-text {
     background: url(/static/admin/img/icon-unknown.gif) no-repeat right;
     cursor: help;
 }
+
+.field-base_uri .vURLField {
+    width: 22em;
+}
+
+.field-cert .vLargeTextField {
+    width: 44em;
+}

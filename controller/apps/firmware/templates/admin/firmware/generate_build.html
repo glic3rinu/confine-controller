@@ -25,6 +25,19 @@
         {% endfor %}
     </fieldset>
     <fieldset class="module aligned">
+        <h2>Registry API</h2>
+        {{ api_form.non_field_errors }}
+        {% for field in api_form %}
+        <div class="form-row">
+            <div>
+            {{ field.errors }}
+            {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </fieldset>
+    <fieldset class="module aligned">
         <h2>Optional files</h2>
         {% if node.files.exists %}
         <div class="help">You can manage the stored values on

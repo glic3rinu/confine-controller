@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy
 
 from controller.utils.plugins.actions import sync_plugins_action
 
-from .forms import BaseImageForm, OptionalFilesForm
+from .forms import BaseImageForm, OptionalFilesForm, RegistryApiForm
 from .models import BaseImage, Build, Config
 
 
@@ -59,6 +59,7 @@ def get_firmware(modeladmin, request, queryset):
         'node': node,
         'img_form': BaseImageForm(arch=node.arch),
         'opt_form': OptionalFilesForm(prefix='opt'),
+        'api_form': RegistryApiForm(prefix='api'),
         'plugins': plugins,
     }
     
@@ -82,13 +83,23 @@ def get_firmware(modeladmin, request, queryset):
                     kwargs.update(plugin.instance.process_form_post(form))
                 else:
                     all_valid = False
+        
         # base image and optional files forms
         img_form = BaseImageForm(data=request.POST, arch=node.arch)
         opt_form = OptionalFilesForm(request.POST, prefix='opt')
-        # validate the two forms to get possible errors
+        api_form = RegistryApiForm(request.POST, prefix='api')
+        
+        # validate every form to get possible errors
         img_form_valid = img_form.is_valid() 
         opt_form_valid = opt_form.is_valid()
-        if all_valid and img_form_valid and opt_form_valid:
+        api_form_valid = api_form.is_valid()
+        if all_valid and img_form_valid and opt_form_valid and api_form_valid:
+            # provide ServerApi data to firmware generator (base_uri + cert)
+            # - base_uri will be handled by Config UCI
+            # - cert will be writed in a Config File
+            kwargs['registry_base_uri'] = api_form.cleaned_data['base_uri']
+            kwargs['registry_cert'] = api_form.cleaned_data['cert']
+            
             base_image = img_form.cleaned_data['base_image']
             optional_fields = opt_form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
@@ -98,6 +109,7 @@ def get_firmware(modeladmin, request, queryset):
             # Display form validation errors
             context['img_form'] = img_form
             context['opt_form'] = opt_form
+            context['api_form'] = api_form
             template = 'admin/firmware/generate_build.html'
             return TemplateResponse(request, template, context, current_app=site_name)
     

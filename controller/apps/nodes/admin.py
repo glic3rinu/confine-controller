@@ -198,6 +198,11 @@ class ServerApiInline(PermissionTabularInline):
     model = ServerApi
     extra = 1
     form = ServerApiInlineForm
+    
+    class Media:
+        css = {
+             'all': ('nodes/css/nodes-admin.css',)
+        }
 
 
 class ServerPropInline(PermissionTabularInline):

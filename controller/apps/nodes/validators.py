@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address
 from IPy import IP
+from M2Crypto import X509
 
 
 def validate_sliver_mac_prefix(value):
@@ -37,3 +38,12 @@ def validate_dhcp_range(value):
         int(offset)
     except:
         raise ValidationError('Range %s has not a valid format (#N).' % value)
+
+
+def validate_cert(value):
+    """Validate X.509 PEM-encoded certificate."""
+    value = value.encode('ascii')
+    try:
+        X509.load_cert_string(value, X509.FORMAT_PEM)
+    except X509.X509Error:
+        raise ValidationError('Invalid X.509 PEM-encoded certificate.')

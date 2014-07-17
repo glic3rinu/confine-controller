@@ -10,16 +10,17 @@ from pki import Bob
 
 from . import settings
 from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
-        validate_dhcp_range, validate_priv_ipv4_prefix)
+        validate_dhcp_range, validate_priv_ipv4_prefix, validate_cert)
 
 
 class Api(models.Model):
-    base_uri = models.CharField('base URI', max_length=256, blank=True,
-            help_text='The base URI of the API endpoint, if available.')
+    base_uri = models.URLField('base URI', max_length=256,
+            help_text='The base URI of the API endpoint.')
     cert = NullableTextField('Certificate', unique=True, null=True, blank=True,
-            help_text='X.509 PEM-encoded certificate for this RD. The certificate '
-                      'may be signed by a CA recognised in the testbed and required '
-                      'by clients and services accessing the node API.')
+            help_text='An optional X.509 PEM-encoded certificate for the API '
+                      'endpoint. Providing this may save API clients from '
+                      'checking the API certificate\'s signature.',
+            validators=[validate_cert])
     
     class Meta:
         abstract = True

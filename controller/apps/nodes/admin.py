@@ -1,10 +1,14 @@
 from __future__ import absolute_import
 
+import json
+
 from django import forms
+from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
+from django.http import HttpResponse, Http404
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
@@ -219,6 +223,30 @@ class ServerAdmin(ChangeViewActions, PermissionModelAdmin):
     list_display_links = ['name', 'id']
     change_form_template = 'admin/nodes/server/change_form.html'
     inlines = [MgmtNetConfInline, ServerApiInline, ServerPropInline]
+    
+    def get_urls(self):
+        urls = patterns("",
+            url("^api/$",
+                self.get_api_data_view,
+                name='nodes_server_api'),
+        )
+        return urls + super(ServerAdmin, self).get_urls()
+    
+    def get_api_data_view(self, request):
+        """Auxiliar view to fill registry api at build firmware form."""
+        try:
+            api_id = int(request.GET.get("id", ''))
+        except ValueError:
+            raise Http404
+        try:
+            api = ServerApi.objects.get(pk=api_id, type=ServerApi.REGISTRY)
+        except ServerApi.DoesNotExist:
+            raise Http404
+        response_data = json.dumps({
+            "base_uri": api.base_uri,
+            "cert": api.cert
+        })
+        return HttpResponse(response_data, content_type="application/json")
 
 
 class IslandAdmin(PermissionModelAdmin):

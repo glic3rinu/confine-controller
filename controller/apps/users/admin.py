@@ -18,6 +18,7 @@ from .filters import MyGroupsListFilter
 from .forms import (UserCreationForm, UserChangeForm, GroupRolesFormSet,
     UserRolesForm, JoinRequestForm, GroupAdminForm, GroupRolesInlineForm)
 from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
+from .registration import admin as reg_admin # overrides registration.admin
 
 
 class AuthTokenInline(PermissionTabularInline):

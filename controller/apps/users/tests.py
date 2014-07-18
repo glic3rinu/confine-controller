@@ -383,6 +383,12 @@ class RegistrationTestCase(BaseTestCase):
         form = RegistrationForm(data=data)
         self.assertTrue(form.is_valid())
         
+        # check form with valid but uncommon e-mail address
+        data_test = data.copy()
+        data_test['email'] = 'name.lastname+suffix@localhost' # a plus sign is valid!
+        form = RegistrationForm(data=data_test)
+        self.assertTrue(form.is_valid())
+        
         # doesn't validate with invalid username
         data_test = data.copy()
         data_test['username'] = 'Some invalid username' # spaces not accepted

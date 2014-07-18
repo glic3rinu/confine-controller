@@ -4,12 +4,44 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
+from django.db import models
+from django.core.management import call_command
+
+
+def get_config(orm):
+    """Get or create the firmware Config object."""
+    try:
+        config = orm.Config.objects.get()
+    except orm.Config.DoesNotExist:
+        # Initialize firmware data loading fixture
+        load_fixture('firmwareconfig.json', orm)
+        config = orm.Config.objects.get()
+    return config
+
+def load_fixture(file_name, orm):
+    """
+    Proper fixtures loading in south data migrations
+    https://djangosnippets.org/snippets/2897/
+    """
+    original_get_model = models.get_model
+    
+    def get_model_southern_style(*args):
+        try:
+            return orm['.'.join(args)]
+        except:
+            return original_get_model(*args)
+    
+    models.get_model = get_model_southern_style
+    call_command('loaddata', file_name)
+    models.get_model = original_get_model
+
+
 class Migration(DataMigration):
 
     def forwards(self, orm):
         "Update firmware configuration to include registry section."
         ### Update ConfigUCI ###
-        config = orm.Config.objects.get()
+        config = get_config(orm)
         orm.ConfigUCI.objects.create(section='registry registry', option='base_uri',
             value="node.firmware_build.kwargs_dict.get('registry_base_uri')", config=config)
         orm.ConfigUCI.objects.create(section='registry registry', option='cert',
@@ -28,7 +60,7 @@ class Migration(DataMigration):
     def backwards(self, orm):
         "Restore firmware configuration."
         ### Restore ConfigUCI ###
-        config = orm.Config.objects.get()
+        config = get_config(orm)
         orm.ConfigUCI.objects.filter(section='registry registry', option='base_uri', config=config).delete()
         orm.ConfigUCI.objects.filter(section='registry registry', option='cert', config=config).delete()
         # TODO (eventually) restore old config uci #245 note-25

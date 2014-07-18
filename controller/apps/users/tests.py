@@ -11,6 +11,7 @@ from urlparse import urlparse
 
 from controller.utils.apps import is_installed, remove_app
 from users.models import Group, Roles, User, ResourceRequest, JoinRequest
+from users.registration.forms import RegistrationFormUniqueEmail as RegistrationForm
 
 
 def url_path(url):
@@ -306,9 +307,9 @@ class GroupJoinTestCase(BaseTestCase):
 
 
 @unittest.skipUnless(is_installed('registration'), "django-registration is required")
-@unittest.skipIf(is_installed('captcha'), "remove 'captcha' from INSTALLED_APPS for properly run this test.")
 class RegistrationTestCase(BaseTestCase):
     
+    @unittest.skipIf(is_installed('captcha'), "remove 'captcha' from INSTALLED_APPS for properly run this test.")
     @override_settings(USERS_REGISTRATION_MODE = 'RESTRICTED',
         MAIL_REGISTRATION_APPROVE = 'vct@localhost')
         # Removing captcha doesn't seems to work
@@ -363,3 +364,57 @@ class RegistrationTestCase(BaseTestCase):
         self.client.login(username=name, password=password)
         response = self.client.get(reverse('admin:index'))
         self.assertEquals(response.status_code, 200)
+    
+    def test_registration_form(self):
+        """Test registration form validation."""
+        # Create user to validate duplicated username, name, email
+        User.objects.create(name='Frank', email='frank@localhost', username='frank')
+        
+        # Define valid data for user registration
+        data = {
+            'name': 'Name Lastname',
+            'username': 'name.lastname',
+            'email': 'name.lastname@localhost',
+            'password1': 's3cr3t',
+            'password2': 's3cr3t',
+        }
+        
+        # check form with valid data
+        form = RegistrationForm(data=data)
+        self.assertTrue(form.is_valid())
+        
+        # doesn't validate with invalid username
+        data_test = data.copy()
+        data_test['username'] = 'Some invalid username' # spaces not accepted
+        form = RegistrationForm(data=data_test)
+        self.assertFalse(form.is_valid(), "Invalid username shouldn't validate.")
+        
+        # check invalid email validation
+        data_test = data.copy()
+        data_test['email'] = 'invalid-email'
+        form = RegistrationForm(data=data_test)
+        self.assertFalse(form.is_valid(), "Invalid email shouldn't validate.")
+        
+        # check duplicated username
+        data_test = data.copy()
+        data_test['username'] = 'frank'
+        form = RegistrationForm(data=data_test)
+        self.assertFalse(form.is_valid(), "Duplicated username shouldn't validate.")
+        
+        # check duplicated name
+        data_test = data.copy()
+        data_test['name'] = 'Frank'
+        form = RegistrationForm(data=data_test)
+        self.assertFalse(form.is_valid(), "Duplicated name shouldn't validate.")
+        
+        # check duplicated email
+        data_test = data.copy()
+        data_test['email'] = 'frank@localhost'
+        form = RegistrationForm(data=data_test)
+        self.assertFalse(form.is_valid(), "Duplicated email shouldn't validate.")
+        
+        # check not matching passwords
+        data_test = data.copy()
+        data_test['password2'] = 'pass-not-matchs!'
+        form = RegistrationForm(data=data_test)
+        self.assertFalse(form.is_valid(), "Different passwords shouldn't validate.")

@@ -1,4 +1,5 @@
 from django import forms
+from django.core import validators
 from django.utils.translation import ugettext as _
 try:
     from django.contrib.auth import get_user_model
@@ -16,7 +17,9 @@ class RegistrationFormUniqueEmail(RegistrationForm):
     form for custom models.
     See source of registration/forms.py?at=v1.0
     """
-    username = forms.CharField(required=False)
+    username = forms.CharField(required=False,
+                               validators=[validators.RegexValidator('^[\w.+-]+$',
+                               'Enter a valid username.', 'invalid')])
     name = forms.CharField()
 
     def __init__(self, *args, **kwargs):

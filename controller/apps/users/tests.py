@@ -424,3 +424,13 @@ class RegistrationTestCase(BaseTestCase):
         data_test['password2'] = 'pass-not-matchs!'
         form = RegistrationForm(data=data_test)
         self.assertFalse(form.is_valid(), "Different passwords shouldn't validate.")
+    
+    def test_registration_admin_search(self):
+        """
+        Test registration profile admin search with custom
+        user model (#518).
+        """
+        self._login(superuser=True)
+        url = reverse('admin:registration_registrationprofile_changelist')
+        resp = self.client.get(url, {'q': 'foo'})
+        self.assertEquals(resp.status_code, 200)

@@ -12,7 +12,7 @@ class Base(ApiRoot):
     **Media type:** [`application/vnd.confine.server.Base.v0+json`](
         http://wiki.confine-project.eu/arch:rest-api?&#base_at_server)
     
-    This resource is located at the base URI of the server API. It
+    This resource is located at the base URI of the registry API. It
     describes testbed-wide parameters and provides the API URIs to
     navigate to other resources in the testbed.
     

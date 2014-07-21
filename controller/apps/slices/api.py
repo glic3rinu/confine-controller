@@ -139,11 +139,12 @@ class Update(APIView):
 
 class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Slice.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/slice"`](
+        http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource lists the [slices](http://wiki.confine-project.eu/arch:rest-
-    api?&#slice_at_server) present in the testbed and provides API URIs to
+    api#slice_at_registry) present in the testbed and provides API URIs to
     navigate to them.
     """
     model = Slice
@@ -154,11 +155,12 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Slice.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/slice"`](
+        http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource describes a slice in the testbed, including its [slivers](
-        http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server) with API
+        http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry) with API
     URIs to navigate to them.
     """
     model = Slice
@@ -188,11 +190,12 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Sliver.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/sliver"`](
+        http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource lists the [slivers](http://wiki.confine-project.eu/arch:rest-
-    api?&#sliver_at_server) present in the testbed and provides API URIs to
+    api#sliver_at_registry) present in the testbed and provides API URIs to
     navigate to them.
     """
     model = Sliver
@@ -202,13 +205,14 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Sliver.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/sliver"`](
+        http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource describes a sliver in the testbed, with API URIs to navigate
-    to the [slice](http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
+    to the [slice](http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     it is part of and the [node](http://wiki.confine-project.eu/arch:rest-api?
-    &#node_at_server) it is intended to run on.
+    &#node_at_registry) it is intended to run on.
     """
     model = Sliver
     serializer_class = SliverDetailSerializer
@@ -220,11 +224,12 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Template.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#template_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/template"`](
+        http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource lists the sliver [templates](http://wiki.confine-project.eu/
-    arch:rest-api?&#template_at_server) available in the testbed and provides
+    arch:rest-api#template_at_registry) available in the testbed and provides
     API URIs to navigate to them.
     """
     model = Template
@@ -233,12 +238,13 @@ class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Template.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#template_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/template"`](
+        http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource describes a template available in the testbed for [slices](
-    http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server) and
-    [slivers](http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    http://wiki.confine-project.eu/arch:rest-api#slice_at_registry) and
+    [slivers](http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     to use.
     """
     model = Template

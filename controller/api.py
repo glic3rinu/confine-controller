@@ -11,8 +11,9 @@ from controller.serializers import TestbedSerializer
 
 class Base(ApiRoot):
     """ 
-    **Media type:** [`application/vnd.confine.server.Base.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#base_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/base"`](
+        http://wiki.confine-project.eu/arch:rest-api#base_at_registry)
     
     This resource is located at the base URI of the server API. It
     describes testbed-wide parameters and provides the API URIs to

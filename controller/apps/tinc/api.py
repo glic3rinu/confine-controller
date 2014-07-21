@@ -35,11 +35,12 @@ class UploadPubkey(APIView):
 
 class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.HostList.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#hostlist_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/host"`](
+        http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource lists odd [hosts](http://wiki.confine-project.eu/arch:rest-
-    api?&#host_at_server) connected to the testbed (through the management
+    api#host_at_registry) connected to the testbed (through the management
     network) and provides API URIs to navigate to them.
     """
     model = Host
@@ -53,8 +54,9 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Host.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#host_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/host"`](
+        http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource describes an odd host computer connected to the testbed (through
     the management network) with a known administrator.
@@ -66,11 +68,12 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/gateway"`](
+        http://wiki.confine-project.eu/arch:rest-api#gateway_at_registry)
     
     This resource lists testbed [gateways](http://wiki.confine-project.eu/arch:
-    rest-api?&#gateway_at_server) and provides API URIs to navigate to them.
+    rest-api#gateway_at_registry) and provides API URIs to navigate to them.
     """
     model = Gateway
     serializer_class = GatewaySerializer
@@ -78,13 +81,14 @@ class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Gateway.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#gateway_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/gateway"`](
+        http://wiki.confine-project.eu/arch:rest-api#gateway_at_registry)
     
     This resource describes a network gateway providing access to the testbed
-    [server](http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+    [server](http://wiki.confine-project.eu/arch:rest-api#server_at_registry)
     and listening on tinc addresses on one or more community network
-    [islands](http://wiki.confine-project.eu/arch:rest-api?&#island_at_server).
+    [islands](http://wiki.confine-project.eu/arch:rest-api#island_at_registry).
     The gateway connects to other gateways or the testbed server in
     order to reach the later.
     """

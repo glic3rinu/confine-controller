@@ -8,6 +8,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
+from controller.utils.apps import is_installed
 from controller.utils.options import send_email_template
 from registration.models import RegistrationManager, RegistrationProfile, SHA1_RE
 
@@ -71,6 +72,8 @@ def notify_user_enabled(sender, instance, *args, **kwargs):
     if kwargs.get('raw', False):
         return # avoid conflicts when loading fixtures
     if settings.USERS_REGISTRATION_MODE != 'RESTRICTED':
+        return
+    if not is_installed('registration'):
         return
     
     # Only notify if user has been created via registration

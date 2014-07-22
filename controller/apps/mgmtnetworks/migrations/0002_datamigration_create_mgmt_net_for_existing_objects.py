@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class Migration(DataMigration):
     depends_on = (
-        ("tinc", "0013_auto__del_island"),
+        ("tinc", "0030_auto__chg_field_host_name__add_unique_host_name"),
     )
 
     def forwards(self, orm):

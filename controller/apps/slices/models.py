@@ -290,7 +290,7 @@ class Slice(models.Model):
         if last_nr >= cls.MAX_VLAN_TAG:
             # Try to recycle old values ( very, very ineficient )
             for new_nr in range(cls.MIN_VLAN_TAG, cls.MAX_VLAN_TAG):
-                if not cls.objects.filter(vlan_nr=new_nr).exists():
+                if not cls.objects.filter(isolated_vlan_tag=new_nr).exists():
                     return new_nr
             raise VlanAllocationError("No VLAN address space left.")
         return last_nr + 1

@@ -272,14 +272,6 @@ class Slice(models.Model):
     @property
     def min_vlan_nr(self):
         return Slice.MIN_VLAN_TAG
-    
-    @property
-    def vlan_nr(self):
-        # backwards-compatibility (#46 note-64)
-        if self.set_state != Slice.REGISTER:
-            return self.isolated_vlan_tag
-        else:
-            return -1 if self.allow_isolated else None
 
     @classmethod
     def _get_vlan_tag(cls):

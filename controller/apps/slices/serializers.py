@@ -33,26 +33,6 @@ class FakeFileField(serializers.CharField):
         return value
 
 
-class FileURLField(serializers.CharField):
-    """ Readonly Absolute URL field used for backwards compatibility """
-    def __init__(self, *args, **kwargs):
-        self.field_name = kwargs.pop('field', '')
-        kwargs.update({'read_only': True})
-        super(FileURLField, self).__init__(*args, **kwargs)
-    
-    def to_native(self, value):
-        """
-        Build an absolute URI based on the File URL if any,
-        otherwise fallback on field_name_uri
-        """
-        fieldfile = getattr(value, self.field_name)
-        if fieldfile:
-            uri = getattr(fieldfile, 'url')
-            request = self.context.get('request')
-            return request.build_absolute_uri(uri)
-        return getattr(value, self.field_name + '_uri')
-
-
 class SliverIfaceSerializer(serializers.ModelSerializer):
     parent_name = serializers.Field(source='parent')
     
@@ -83,10 +63,6 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     if is_installed('resources'):
         from resources.serializers import ResourceReqSerializer
         resources = ResourceReqSerializer(many=True, required=False)
-    
-    # backwards compatibility (readonly)
-    exp_data_uri = FileURLField(source='*', field='data')
-    exp_data_sha256 = serializers.Field(source='data_sha256')
     
     class Meta:
         model = Sliver
@@ -156,14 +132,6 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     sliver_defaults = SliverDefaultsSerializer()
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
-    
-    # backwards compatibility (readonly)
-    new_sliver_instance_sn = serializers.Field(source='sliver_defaults.instance_sn')
-    exp_data_uri = FileURLField(source='sliver_defaults', field='data')
-    exp_data_sha256 = serializers.Field(source='sliver_defaults.data_sha256')
-    template = serializers.RelHyperlinkedRelatedField(source='sliver_defaults.template',
-        read_only=True, view_name='template-detail')
-    vlan_nr = serializers.Field()
     
     class Meta:
         model = Slice

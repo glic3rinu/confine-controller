@@ -41,6 +41,10 @@ def build(build_id, *args, **kwargs):
         update_state(build, 15, 29, 'Preparing image file system')
         image.mount()
         
+        # handle registry api #245: put cert content into firmware image
+        build_file = build_obj.files.get(path='/etc/confine/registry-server.crt')
+        image.create_file(build_file)
+        
         files = config.eval_files(node, exclude=exclude, image=image)
         total = len(files)
         for num, build_file in enumerate(files):

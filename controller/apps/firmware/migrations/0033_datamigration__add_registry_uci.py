@@ -45,7 +45,7 @@ class Migration(DataMigration):
         orm.ConfigUCI.objects.create(section='registry registry', option='base_uri',
             value="node.firmware_build.kwargs_dict.get('registry_base_uri')", config=config)
         orm.ConfigUCI.objects.create(section='registry registry', option='cert',
-            value="'/etc/registry.crt'", config=config)
+            value="'/etc/confine/registry-server.crt'", config=config)
         # TODO (eventually): break backwards compatibility with old node firmware #245 note-25
         # orm.ConfigUCI.objects.filter(section='server server', option='base_path').delete()
 

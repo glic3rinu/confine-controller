@@ -189,7 +189,7 @@ class Build(models.Model):
         
         # handle registry api #245: save cert content into DB
         cert = kwargs.pop('registry_cert')
-        config = ConfigFile.objects.first()
+        config = ConfigFile.objects.get(path='/etc/config/confine')
         build_obj.add_file('/etc/confine/registry-server.crt', cert, config)
         
         if async:

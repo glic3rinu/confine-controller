@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core import validators
 from django.db import models
 
+from controller.settings import MGMT_IPV6_PREFIX
 from controller.utils.singletons.models import SingletonModel
 
 try:
@@ -37,7 +38,7 @@ class TestbedParams(models.Model):
                       'IPv6 prefix. See addressing for legal values. This '
                       'member can only be changed if all nodes are in the '
                       'safe set state (/set_state=safe).',
-            default=settings.MGMT_IPV6_PREFIX,
+            default=MGMT_IPV6_PREFIX,
             validators=[validators.validate_ipv6_address])
 
     def __unicode__(self):

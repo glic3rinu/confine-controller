@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions, SortableTabularInline
 from controller.admin.utils import get_admin_link
+from controller.utils.apps import is_installed
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request, enable_account, send_email
@@ -18,7 +19,9 @@ from .filters import MyGroupsListFilter
 from .forms import (UserCreationForm, UserChangeForm, GroupRolesFormSet,
     UserRolesForm, JoinRequestForm, GroupAdminForm, GroupRolesInlineForm)
 from .models import User, AuthToken, Roles, Group, JoinRequest, ResourceRequest
-from .registration import admin as reg_admin # overrides registration.admin
+
+if is_installed('registration'):
+    from .registration import admin as reg_admin # overrides registration.admin
 
 
 class AuthTokenInline(PermissionTabularInline):

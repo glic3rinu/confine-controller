@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions, serializers
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,6 +11,8 @@ from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
+from .renderers import (SliceProfileRenderer, SliverProfileRenderer,
+    TemplateProfileRenderer)
 from .serializers import (SliceSerializer, SliceCreateSerializer,
     SliverSerializer, SliverDetailSerializer, TemplateSerializer)
 
@@ -150,6 +153,7 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Slice
     add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
+    renderer_classes = [SliceProfileRenderer, BrowsableAPIRenderer]
     filter_fields = ('set_state', )
 
 
@@ -165,10 +169,12 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Slice
     serializer_class = SliceSerializer
+    renderer_classes = [SliceProfileRenderer, BrowsableAPIRenderer]
     ctl = [
         Renew, Reset, make_upload_file(Slice, 'data', 'data'),
         make_upload_file(Slice, 'overlay', 'overlay'),
     ]
+    
     def put(self, request, *args, **kwargs):
         """
         Check that set_state has not changed because has
@@ -200,6 +206,7 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
+    renderer_classes = [SliverProfileRenderer, BrowsableAPIRenderer]
     filter_fields = ('node', 'slice')
 
 
@@ -216,6 +223,7 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Sliver
     serializer_class = SliverDetailSerializer
+    renderer_classes = [SliverProfileRenderer, BrowsableAPIRenderer]
     ctl = [
         Update, make_upload_file(Sliver, 'data', 'data'),
         make_upload_file(Sliver, 'overlay', 'overlay'),
@@ -234,6 +242,7 @@ class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Template
     serializer_class = TemplateSerializer
+    renderer_classes = [TemplateProfileRenderer, BrowsableAPIRenderer]
 
 
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -249,6 +258,7 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Template
     serializer_class = TemplateSerializer
+    renderer_classes = [TemplateProfileRenderer, BrowsableAPIRenderer]
     ctl = [
         make_upload_file(Template, 'image', 'image'),
     ]

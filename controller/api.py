@@ -1,12 +1,14 @@
 from __future__ import absolute_import
 
 from django.utils.safestring import mark_safe
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.reverse import reverse
 
 from api import ApiRoot
 from controller import settings
 from controller.models import Testbed
 from controller.serializers import TestbedSerializer
+from controller.renderers import BaseProfileRenderer
 
 
 class Base(ApiRoot):
@@ -25,6 +27,8 @@ class Base(ApiRoot):
     For example: `curl -X GET %(url)s -H "Accept: application/json;
         indent=4"`
     """
+    renderer_classes = [BaseProfileRenderer, BrowsableAPIRenderer]
+    
     def get_object(self):
         return Testbed.objects.get()
     

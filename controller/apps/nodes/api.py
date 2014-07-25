@@ -2,13 +2,17 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Island, Node, Server
+from .renderers import (IslandProfileRenderer, NodeProfileRenderer,
+    ServerProfileRenderer)
 from .serializers import (IslandSerializer, NodeSerializer, NodeCreateSerializer,
     ServerSerializer)
 from .settings import NODES_NODE_API_NODE_BASE_URL
@@ -76,6 +80,7 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Node
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
+    renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
 
 
@@ -91,6 +96,8 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
+    renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
+    renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     ctl = [Reboot, RequestCert]
     
     def get(self, request, *args, **kwargs):
@@ -113,6 +120,7 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Server
     serializer_class = ServerSerializer
+    renderer_classes = [ServerProfileRenderer, BrowsableAPIRenderer]
     
     def get_object(self, *args, **kwargs):
         return get_object_or_404(Server)
@@ -130,6 +138,7 @@ class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Island
     serializer_class = IslandSerializer
+    renderer_classes = [IslandProfileRenderer, BrowsableAPIRenderer]
 
 
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -147,6 +156,7 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Island
     serializer_class = IslandSerializer
+    renderer_classes = [IslandProfileRenderer, BrowsableAPIRenderer]
 
 
 api.register(NodeList, NodeDetail)

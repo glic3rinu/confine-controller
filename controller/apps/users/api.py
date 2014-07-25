@@ -4,8 +4,10 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from rest_framework import status, exceptions
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 from api import api, generics
@@ -13,6 +15,7 @@ from controller.core.validators import validate_name
 from permissions.api import ApiPermissionsMixin
 
 from .models import User, Group, Roles
+from .renderers import GroupProfileRenderer, UserProfileRenderer
 from .serializers import (GroupSerializer, GroupCreateSerializer,
     UserSerializer, UserCreateSerializer)
 
@@ -74,6 +77,7 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = User
     add_serializer_class = UserCreateSerializer
     serializer_class = UserSerializer
+    renderer_classes = [UserProfileRenderer, BrowsableAPIRenderer]
 
     def pre_save(self, obj):
         super(UserList, self).pre_save(obj)
@@ -93,6 +97,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     ctl = [ChangeAuth]
     fields_superuser = ['is_active', 'is_superuser']
+    renderer_classes = [UserProfileRenderer, BrowsableAPIRenderer]
 
 
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -108,6 +113,7 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Group
     add_serializer_class = GroupCreateSerializer
     serializer_class = GroupSerializer
+    renderer_classes = [GroupProfileRenderer, BrowsableAPIRenderer]
     
     def post_save(self, obj, created=False):
         """ user that creates a group becomes its admin """
@@ -125,6 +131,7 @@ class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Group
     serializer_class = GroupSerializer
     fields_superuser = ['allow_nodes', 'allow_slices']
+    renderer_classes = [GroupProfileRenderer, BrowsableAPIRenderer]
 
 
 api.register(UserList, UserDetail)

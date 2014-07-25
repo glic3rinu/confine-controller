@@ -294,6 +294,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_CONTENT_NEGOTIATION_CLASS': 'api.negotiation.ProfileContentNegotiation'
 #    'PAGINATE_BY': 10,
 #    'PAGINATE_BY_PARAM': 'page_size',
 }

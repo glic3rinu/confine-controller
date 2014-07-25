@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
-from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from api import api, generics
 from api.utils import insert_ctl
@@ -14,6 +15,7 @@ from permissions.api import ApiPermissionsMixin
 
 from .exceptions import BaseImageNotAvailable
 from .models import BaseImage, Build, Config
+from .renderers import BaseImageProfileRenderer
 from .serializers import BaseImageSerializer, FirmwareSerializer
 
 
@@ -25,6 +27,7 @@ class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    renderer_classes = [BaseImageProfileRenderer, BrowsableAPIRenderer]
     controller_view = True
     # TODO customize rest_to_admin_url --> admin:firmware_config_change
 
@@ -37,6 +40,7 @@ class BaseImageDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    renderer_classes = [BaseImageProfileRenderer, BrowsableAPIRenderer]
     controller_view = True
 
 

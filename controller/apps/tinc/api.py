@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
@@ -10,6 +11,7 @@ from api import api, generics
 from permissions.api import ApiPermissionsMixin
 
 from .models import Host, Gateway
+from .renderers import GatewayProfileRenderer, HostProfileRenderer
 from .serializers import HostCreateSerializer, HostSerializer, GatewaySerializer
 
 
@@ -46,6 +48,7 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Host
     add_serializer_class = HostCreateSerializer
     serializer_class = HostSerializer
+    renderer_classes = [HostProfileRenderer, BrowsableAPIRenderer]
     
     def pre_save(self, obj):
         """ Set the object's owner, based on the incoming request. """
@@ -63,6 +66,7 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Host
     serializer_class = HostSerializer
+    renderer_classes = [HostProfileRenderer, BrowsableAPIRenderer]
     ctl = [UploadPubkey]
 
 
@@ -77,6 +81,7 @@ class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Gateway
     serializer_class = GatewaySerializer
+    renderer_classes = [GatewayProfileRenderer, BrowsableAPIRenderer]
 
 
 class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -94,6 +99,7 @@ class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Gateway
     serializer_class = GatewaySerializer
+    renderer_classes = [GatewayProfileRenderer, BrowsableAPIRenderer]
 
 
 api.register(HostList, HostDetail)

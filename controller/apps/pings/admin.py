@@ -133,12 +133,11 @@ class PingAdmin(PermissionModelAdmin):
     
     def timeseries_view(self, request, content_type_id, object_id):
         pings = Ping.objects.filter(content_type=content_type_id, object_id=object_id)
-        pings = pings.order_by('date').extra(select={'date': "EXTRACT(EPOCH FROM date)"})
-        series = pings.values_list('date', 'packet_loss', 'avg', 'min', 'max')
+        pings = pings.order_by('date').extra(select={'epoch': "EXTRACT(EPOCH FROM date)"})
+        series = pings.values_list('epoch', 'packet_loss', 'avg', 'min', 'max')
         data = [ [int(str(d).split('.')[0] + '000'),w,x,y,z] for d,w,x,y,z in series ]
         # DjangoJSONEncoder handles Decimal data
         return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type="application/json")
-
 
 admin.site.register(Ping, PingAdmin)
 

@@ -10,7 +10,8 @@ from django.test import TestCase
 from users.models import Group, User
 
 from .models import Slice, Sliver, Template
-from .exceptions import VlanAllocationError
+from slices.exceptions import VlanAllocationError # use absolute import because
+                                                  # of assertRaises!
 
 
 class SliceTests(TestCase):

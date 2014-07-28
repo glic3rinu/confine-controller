@@ -80,7 +80,6 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Node
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
-    renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
 
 
@@ -138,7 +137,6 @@ class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Island
     serializer_class = IslandSerializer
-    renderer_classes = [IslandProfileRenderer, BrowsableAPIRenderer]
 
 
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):

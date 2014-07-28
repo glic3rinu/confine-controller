@@ -27,7 +27,6 @@ class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
-    renderer_classes = [BaseImageProfileRenderer, BrowsableAPIRenderer]
     controller_view = True
     # TODO customize rest_to_admin_url --> admin:firmware_config_change
 

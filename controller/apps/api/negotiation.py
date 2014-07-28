@@ -29,7 +29,7 @@ class ProfileContentNegotiation(DefaultContentNegotiation):
     https://github.com/tomchristie/django-rest-framework/blob/2.3.14/rest_framework/negotiation.py
     
     """
-     def select_renderer(self, request, renderers, format_suffix=None):
+    def select_renderer(self, request, renderers, format_suffix=None):
         # Allow URL style format override.  eg. "?format=json
         format_query_param = self.settings.URL_FORMAT_OVERRIDE
         format = format_suffix or request.QUERY_PARAMS.get(format_query_param)

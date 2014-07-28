@@ -46,7 +46,6 @@ class ProfileContentNegotiation(DefaultContentNegotiation):
         for media_type_set in order_by_precedence(accepts):
             for renderer in renderers:
                 for media_type in media_type_set:
-                    print renderer, media_type, media_type_matches(renderer.media_type, media_type)
                     if media_type_matches(renderer.media_type, media_type):
                         # Return the most specific media type as accepted.
                         if (_MediaType(renderer.media_type).precedence >

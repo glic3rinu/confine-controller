@@ -77,7 +77,6 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = User
     add_serializer_class = UserCreateSerializer
     serializer_class = UserSerializer
-    renderer_classes = [UserProfileRenderer, BrowsableAPIRenderer]
 
     def pre_save(self, obj):
         super(UserList, self).pre_save(obj)
@@ -113,7 +112,6 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Group
     add_serializer_class = GroupCreateSerializer
     serializer_class = GroupSerializer
-    renderer_classes = [GroupProfileRenderer, BrowsableAPIRenderer]
     
     def post_save(self, obj, created=False):
         """ user that creates a group becomes its admin """

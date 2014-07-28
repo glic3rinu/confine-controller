@@ -153,7 +153,6 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Slice
     add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
-    renderer_classes = [SliceProfileRenderer, BrowsableAPIRenderer]
     filter_fields = ('set_state', )
 
 
@@ -206,7 +205,6 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
-    renderer_classes = [SliverProfileRenderer, BrowsableAPIRenderer]
     filter_fields = ('node', 'slice')
 
 
@@ -242,7 +240,6 @@ class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Template
     serializer_class = TemplateSerializer
-    renderer_classes = [TemplateProfileRenderer, BrowsableAPIRenderer]
 
 
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):

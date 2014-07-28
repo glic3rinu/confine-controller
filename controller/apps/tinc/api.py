@@ -48,7 +48,6 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Host
     add_serializer_class = HostCreateSerializer
     serializer_class = HostSerializer
-    renderer_classes = [HostProfileRenderer, BrowsableAPIRenderer]
     
     def pre_save(self, obj):
         """ Set the object's owner, based on the incoming request. """
@@ -81,7 +80,6 @@ class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Gateway
     serializer_class = GatewaySerializer
-    renderer_classes = [GatewayProfileRenderer, BrowsableAPIRenderer]
 
 
 class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):

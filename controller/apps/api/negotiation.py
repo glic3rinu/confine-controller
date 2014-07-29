@@ -58,4 +58,4 @@ class ProfileContentNegotiation(DefaultContentNegotiation):
                             # Accepted media type is 'application/json; indent=8'
                             return renderer, media_type
         
-        raise exceptions.NotAcceptable(available_renderers=renderers)
+        raise NotAcceptable(available_renderers=renderers)

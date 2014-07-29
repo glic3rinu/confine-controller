@@ -460,8 +460,25 @@ class NodeKeys(models.Model):
     PRIVATE = '/etc/uhttpd.key.pem'
     KEY_FILES = [TINC, CERT, PRIVATE]
     
-    ssh_auth = models.TextField('SSH authorized keys', blank=True, null=True,
-            help_text='PEM-encoded RSA public keys allowed for ssh access as root.')
+    allow_node_admins = models.BooleanField('Allow current node admins',
+            default=True,
+            help_text='Enable this option to permanently allow the current '
+                      'group and node administrators\' SSH keys to log into '
+                      'the node as root.')
+    sync_node_admins = models.BooleanField('Synchronize node admins',
+            default=False,
+            help_text='Enable this option to also allow current or future '
+                      'group and node administrators\' SSH keys (as configured '
+                      'in the registry) to log into the node as root. '
+                      'Please note that this may expose your node to an attack '
+                      'if the testbed registry is compromised.')
+    ssh_auth = models.TextField('Additional keys', blank=True, null=True,
+            help_text='Enter additional SSH keys (in "authorized_keys" format) '
+                      'permanently allowed to log into the node as root. '
+                      'You may leave the default keys to allow centralized '
+                      'maintenance of your node by the controller. Please note '
+                      'that this may expose your node to an attack if the '
+                      'controller is compromised.')
     # MD5SUM hashed password in OpenWRT shadow format
     ssh_pass = models.CharField(max_length=128, blank=True, null=True)
     node = models.OneToOneField('nodes.Node', primary_key=True, related_name='keys')

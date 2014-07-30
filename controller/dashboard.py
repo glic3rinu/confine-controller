@@ -8,4 +8,4 @@ class CustomIndexDashboard(FluentIndexDashboard):
     """
     def init_with_context(self, context):
         super(CustomIndexDashboard, self).init_with_context(context)
-        self.children.append(MyThingsDashboardModule())
+        self.children.insert(-1, MyThingsDashboardModule())

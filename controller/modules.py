@@ -24,7 +24,7 @@ class MyThingsDashboardModule(DashboardModule):
         for group in user.groups.all():
             nodes[group] = []
             qs_nodes = Node.objects.filter(group=group)
-            for  state in nodes_states:
+            for state in nodes_states:
                 nodes[group].append(qs_nodes.filter(state_set__value=state).count())
         
         context['nodes_states'] = nodes_states

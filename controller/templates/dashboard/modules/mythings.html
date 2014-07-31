@@ -18,6 +18,7 @@
     }
 </style>
 
+{% if node_states %}
 <div>
   <p>Current status of your nodes:</p>
   <table id="node-status">
@@ -43,7 +44,9 @@
     </tbody>
   </table>
 </div>
+{% endif %}
 
+{% if slices %}
 <div>
     <p>List of your slices:</p>
     <ol style="list-style-type: circle">
@@ -55,4 +58,5 @@
         {% endif %}
     </ol>
 </div>
+{% endif %}
 {% endblock %}

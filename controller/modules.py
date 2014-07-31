@@ -29,6 +29,9 @@ class MyThingsDashboardModule(DashboardModule):
         
         context['nodes_states'] = nodes_states
         context['user_nodes'] = nodes
+        
+        # initialize to calculate is_empty
+        self.has_data = nodes or slices
     
     def is_empty(self):
-        return False
+        return not self.has_data

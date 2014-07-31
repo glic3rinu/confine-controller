@@ -49,14 +49,17 @@ def get_slices_data(request):
     for group in Group.objects.all():
         # init structs
         slices_count = group.slices.count()
-        group_data = {'name': "Group: %s (%s slices)" % (group.name, slices_count)}
+        group_data = {
+            'name': "Group: %s (%s slices)" % (group.name, slices_count),
+            'uri': reverse('admin:users_group_change', args=(group.id,)),
+        }
         group_slices = []
         
         # get group slices info
         for slice in group.slices.all():
             group_slices.append({
                 'name': slice.name,
-                'uri':  reverse('slice-detail', args=(slice.id,)),
+                'uri':  reverse('admin:slices_slice_change', args=(slice.id,)),
                 'size': slice.slivers.count(),
             })
             
@@ -94,7 +97,7 @@ def get_slivers_data(request):
                 g_slices = ", ".join([slv.slice.name for slv in node.slivers.all()])
             group_nodes.append({
                 'name': node.name,
-                'uri':  reverse('node-detail', args=[node.id]),
+                'uri':  reverse('admin:nodes_node_change', args=[node.id]),
                 'size': node.slivers.count(),
                 'slices': g_slices
             })
@@ -103,6 +106,7 @@ def get_slivers_data(request):
         slc_data.append({
             'name': "Group: %s (%s nodes)" % (group.name, nodes_count),
             'children': group_nodes,
+            'uri': reverse('admin:users_group_change', args=(group.id,)),
         })
 
     response_data = json.dumps({

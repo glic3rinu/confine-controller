@@ -93,7 +93,7 @@ class CustomMenu(Menu):
                     ]))
             elif user.has_module_perms('tinc'):
                 self.children.append(
-                    items.MenuItem('Tinc Hosts',
+                    items.MenuItem('Tinc hosts',
                         reverse('admin:tinc_host_changelist')))
         
         if user.is_superuser:

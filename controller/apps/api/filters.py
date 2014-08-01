@@ -11,7 +11,7 @@ def value_casting(value):
     Given a str value passed as URL parameter return a
     typed one based on REST API filtering specs.
     
-    Can raise ValueError
+    Can raise UnprocessableEntity
     """
     # string must be put inside double quotes
     if value.startswith('"') and value.endswith('"'):
@@ -23,7 +23,8 @@ def value_casting(value):
         value = int(value)
     except ValueError:
         raise UnprocessableEntity("Filtering using invalid type. Have you "
-                                  "forgot to double quote strings?")
+                                  "forgotten to put string value inside "
+                                  "double quotes?")
     return value
 
 
@@ -47,6 +48,7 @@ class ControllerFilterBackend(BaseFilterBackend):
     CONFINE REST API Filtering implementation.
     https://wiki.confine-project.eu/arch:rest-api#filtering
     
+    Can raise UnprocessableEntity
     """
     def filter_queryset(self, request, queryset, view):
         """Filter base queryset against query parameters."""

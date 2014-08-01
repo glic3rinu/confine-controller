@@ -92,7 +92,7 @@ class Node(models.Model):
             help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                       'used as the node sliver MAC prefix. See <a href="http://wiki.'
                       'confine-project.eu/arch:addressing">addressing</a> for legal '
-                      'values. %s when null.</a>.' % SLIVER_MAC_PREFIX_DFLT)
+                      'values. %s when null.' % SLIVER_MAC_PREFIX_DFLT)
     priv_ipv4_prefix = NullableCharField('Private IPv4 prefix', null=True,
             blank=True, max_length=19, validators=[validate_priv_ipv4_prefix],
             help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '

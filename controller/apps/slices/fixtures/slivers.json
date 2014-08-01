@@ -78,5 +78,16 @@
         "parent": null,
         "sliver": 2
     }
+},
+{
+    "pk": 4,
+    "model": "slices.sliveriface",
+    "fields": {
+        "nr": 3,
+        "type": "public4",
+        "name": "pub4",
+        "parent": null,
+        "sliver": 2
+    }
 }
 ]

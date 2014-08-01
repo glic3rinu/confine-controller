@@ -38,5 +38,105 @@
         "arch": "i686", 
         "description": ""
     }
+},
+{
+    "pk": 3,
+    "model": "nodes.node",
+    "fields": {
+        "sliver_pub_ipv6": "none",
+        "sliver_pub_ipv4": "dhcp",
+        "set_state": "safe",
+        "sliver_mac_prefix": null,
+        "name": "Basibe",
+        "island": null,
+        "priv_ipv4_prefix": null,
+        "group": 1,
+        "cert": null,
+        "local_iface": "eth0",
+        "sliver_pub_ipv4_range": "#8",
+        "boot_sn": 1,
+        "arch": "x86_64",
+        "description": ""
+    }
+},
+{
+    "pk": 4,
+    "model": "nodes.node",
+    "fields": {
+        "sliver_pub_ipv6": "none",
+        "sliver_pub_ipv4": "dhcp",
+        "set_state": "production",
+        "sliver_mac_prefix": null,
+        "name": "Posets",
+        "island": null,
+        "priv_ipv4_prefix": null,
+        "group": 1,
+        "cert": null,
+        "local_iface": "eth0",
+        "sliver_pub_ipv4_range": "#8",
+        "boot_sn": 0,
+        "arch": "i686",
+        "description": ""
+    }
+},
+{
+    "pk": 5,
+    "model": "nodes.node",
+    "fields": {
+        "sliver_pub_ipv6": "none",
+        "sliver_pub_ipv4": "dhcp",
+        "set_state": "safe",
+        "sliver_mac_prefix": null,
+        "name": "the yeah node",
+        "island": null,
+        "priv_ipv4_prefix": null,
+        "group": 1,
+        "cert": null,
+        "local_iface": "eth0",
+        "sliver_pub_ipv4_range": "#8",
+        "boot_sn": 0,
+        "arch": "i686",
+        "description": ""
+    }
+},
+{
+    "pk": 6,
+    "model": "nodes.node",
+    "fields": {
+        "sliver_pub_ipv6": "none",
+        "sliver_pub_ipv4": "dhcp",
+        "set_state": "safe",
+        "sliver_mac_prefix": null,
+        "name": "maladeta",
+        "island": null,
+        "priv_ipv4_prefix": null,
+        "group": 1,
+        "cert": null,
+        "local_iface": "eth0",
+        "sliver_pub_ipv4_range": "#8",
+        "boot_sn": 0,
+        "arch": "i686",
+        "description": ""
+    }
+},
+{
+    "pk": 7,
+    "model": "nodes.node",
+    "fields": {
+        "sliver_pub_ipv6": "none",
+        "sliver_pub_ipv4": "dhcp",
+        "set_state": "debug",
+        "sliver_mac_prefix": null,
+        "name": "double \"quotes\"",
+        "island": null,
+        "priv_ipv4_prefix": null,
+        "group": 1,
+        "cert": null,
+        "local_iface": "eth0",
+        "sliver_pub_ipv4_range": "#8",
+        "boot_sn": 0,
+        "arch": "i686",
+        "description": ""
+    }
 }
 ]

@@ -188,9 +188,9 @@ FILE_UPLOAD_PERMISSIONS = 0644
 
 # Admin Tools
 ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
+ADMIN_TOOLS_INDEX_DASHBOARD = 'controller.dashboard.CustomIndexDashboard'
 
 # Fluent dashboard
-ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 FLUENT_DASHBOARD_ICON_THEME = '../controller/icons'
 
 FLUENT_DASHBOARD_APP_GROUPS = (

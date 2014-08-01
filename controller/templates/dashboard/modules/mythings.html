@@ -1,0 +1,62 @@
+{% extends "admin_tools/dashboard/module.html" %}
+{% block module_content %}
+
+<style>
+    #node-status {
+        width: 96%;
+        margin: 0 2%;
+    }
+    #node-status th {
+        font-weight: bold;
+    }
+    #node-status td, #node-status th {
+        text-align: center;
+    }
+    #node-status th:first-child,
+    #node-status td:first-child {
+        text-align: left;
+    }
+</style>
+
+{% if node_states %}
+<div>
+  <p>Current status of your nodes:</p>
+  <table id="node-status">
+    <thead>
+        <tr>
+            <th>Group</th>
+            {% for state in nodes_states %}
+            <th>{{ state }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for group, nodes in user_nodes.items %}
+        <tr>
+            <td>
+                <a href="{% url 'admin:nodes_node_changelist' %}?group__id__exact={{ group.pk }}">{{ group }}</a>
+            </td>
+            {% for count in nodes %}
+                <td>{{ count }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if slices %}
+<div>
+    <p>List of your slices:</p>
+    <ol style="list-style-type: circle">
+        {% for slc in slices|slice:":3" %}
+            <li><a href="{% url 'admin:slices_slice_change' slc.pk %}">{{ slc }}</a></li>
+        {% endfor %}
+        {% if slices|length > 3 %}
+            <li><a href="{% url 'admin:slices_slice_changelist' %}">...</a></li>
+        {% endif %}
+    </ol>
+</div>
+{% endif %}
+{% endblock %}

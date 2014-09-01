@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from api.utils import insert_ctl
 from nodes.api import NodeDetail
 from nodes.models import Node
@@ -22,11 +23,12 @@ from .serializers import BaseImageSerializer, FirmwareSerializer
 class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/controller/v0/baseimage"`](
+        profile="http://confine-project.eu/schema/controller/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#baseimage_at_controller)
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     controller_view = True
     # TODO customize rest_to_admin_url --> admin:firmware_config_change
 

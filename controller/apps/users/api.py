@@ -11,6 +11,7 @@ from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from controller.core.validators import validate_name
 from permissions.api import ApiPermissionsMixin
 
@@ -67,7 +68,7 @@ class ChangeAuth(APIView):
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/user"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#user_at_registry)
     
     This resource lists the [users](http://wiki.confine-project.eu/arch:rest-
@@ -77,6 +78,7 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = User
     add_serializer_class = UserCreateSerializer
     serializer_class = UserSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
     def pre_save(self, obj):
         super(UserList, self).pre_save(obj)
@@ -102,7 +104,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/group"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#group_at_registry)
     
     This resource lists the [groups](http://wiki.confine-project.eu/arch:rest-
@@ -112,6 +114,7 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Group
     add_serializer_class = GroupCreateSerializer
     serializer_class = GroupSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     
     def post_save(self, obj, created=False):
         """ user that creates a group becomes its admin """

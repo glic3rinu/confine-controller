@@ -8,6 +8,7 @@ from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Island, Node, Server
@@ -70,7 +71,7 @@ class RequestCert(APIView):
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """ 
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/node"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#node_at_registry)
     
     This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
@@ -80,6 +81,7 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Node
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
 
 
@@ -95,7 +97,6 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Node
     serializer_class = NodeSerializer
-    renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     ctl = [Reboot, RequestCert]
     
@@ -128,7 +129,7 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/island"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#island_at_registry)
     
     This resource lists the network [islands](http://wiki.confine-project.eu/
@@ -137,6 +138,7 @@ class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Island
     serializer_class = IslandSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):

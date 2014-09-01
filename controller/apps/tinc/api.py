@@ -8,6 +8,7 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Host, Gateway
@@ -38,7 +39,7 @@ class UploadPubkey(APIView):
 class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/host"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource lists odd [hosts](http://wiki.confine-project.eu/arch:rest-
@@ -48,6 +49,7 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Host
     add_serializer_class = HostCreateSerializer
     serializer_class = HostSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     
     def pre_save(self, obj):
         """ Set the object's owner, based on the incoming request. """
@@ -72,7 +74,7 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
 class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/gateway"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#gateway_at_registry)
     
     This resource lists testbed [gateways](http://wiki.confine-project.eu/arch:
@@ -80,6 +82,7 @@ class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Gateway
     serializer_class = GatewaySerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):

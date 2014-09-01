@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
@@ -143,7 +144,7 @@ class Update(APIView):
 class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/slice"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource lists the [slices](http://wiki.confine-project.eu/arch:rest-
@@ -153,6 +154,7 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Slice
     add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('set_state', )
 
 
@@ -196,7 +198,7 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/sliver"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource lists the [slivers](http://wiki.confine-project.eu/arch:rest-
@@ -205,6 +207,7 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('node', 'slice')
 
 
@@ -231,7 +234,7 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
 class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/template"`](
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource lists the sliver [templates](http://wiki.confine-project.eu/
@@ -240,6 +243,7 @@ class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Template
     serializer_class = TemplateSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):

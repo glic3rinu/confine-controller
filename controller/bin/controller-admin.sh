@@ -90,7 +90,8 @@ function print_install_requirements_help () {
 
 
 function install_requirements () {
-    opts=$(getopt -o dph -l development,production,help -- "$@") || exit 1
+    # local is a deprecated option but kept for backwards compatibility
+    opts=$(getopt -o dlph -l development,local,production,help -- "$@") || exit 1
     set -- $opts
     development=false
     production=true
@@ -98,6 +99,7 @@ function install_requirements () {
     while [ $# -gt 0 ]; do
         case $1 in
             -d|--development) development=true; production=false; shift ;;
+            -l|--local) production=true; shift ;; # backwards compatibility
             -p|--production) production=true; shift ;;
             -h|--help) print_install_requirements_help; exit 0 ;;
             (--) shift; break;;

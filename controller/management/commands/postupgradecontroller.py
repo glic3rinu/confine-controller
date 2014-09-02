@@ -24,6 +24,9 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--development', action='store_true', dest='development', default=False,
                 help='Only install development requirements'),
+            make_option('--local', action='store_true', dest='local', default=False,
+                help='Only install local requirements (DEPRECATED: only for '
+                     'backwards compatibility purposes)'),
             make_option('--no-restart', action='store_false', dest='restart', default=True,
                 help='Do not restart services'),
             make_option('--specifics', action='store_true', dest='specifics_only',
@@ -43,6 +46,10 @@ class Command(BaseCommand):
     
     @check_root
     def handle(self, *args, **options):
+        # Warn about deprecated options
+        if options.get('local'):
+            self.stderr.write("Warning: 'local' option is deprecated and will be ignored.\n")
+        
         version = options.get('version')
         upgrade_notes = []
         if version:

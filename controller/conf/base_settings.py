@@ -286,7 +286,7 @@ EMAIL_REGISTRATION_APPROVE = '' # Only required if USERS_REGISTRATION_MODE = RES
 # rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',),
+        'api.filters.ControllerFilterBackend',),
     'DEFAULT_PERMISSION_CLASSES': (
         'permissions.api.TestbedPermissionBackend',
     ),

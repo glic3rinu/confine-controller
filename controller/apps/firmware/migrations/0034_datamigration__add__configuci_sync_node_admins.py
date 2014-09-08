@@ -5,13 +5,14 @@ from south.v2 import DataMigration
 from django.db import models
 
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
 
 def get_config(orm):
     """Get or create the firmware Config object."""
     try:
         config = orm.Config.objects.get()
-    except orm.Config.DoesNotExist:
+    except ObjectDoesNotExist:
         # Initialize firmware data loading fixture
         load_fixture('firmwareconfig.json', orm)
         config = orm.Config.objects.get()

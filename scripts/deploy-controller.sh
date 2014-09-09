@@ -493,7 +493,7 @@ print_deploy_help () {
 		            filesystem path where base images are stored
 		    
 		    ${bold}-b, --build_image${normal}
-		            path where builded images gets stored
+		            path where built images gets stored
 		    
 		${bold}EXAMPLES${normal}
 		    controller-admin.sh deploy --type bootable --image /tmp/server.img --suite squeeze

@@ -40,7 +40,7 @@ from .tasks import build as build_task
 
 class BuildQuerySet(models.query.QuerySet):
     def get_current(self, node):
-        """ Given an node returns an up-to-date builded image, if exists """
+        """ Given an node returns an up-to-date built image, if it exists """
         build = Build.objects.get(node=node)
         if build.state != Build.AVAILABLE: 
             return build
@@ -52,7 +52,7 @@ class BuildQuerySet(models.query.QuerySet):
 
 class Build(models.Model):
     """
-    Represents a builded image for a research device. All the build information
+    Represents a built image for a research device. All the build information
     is copied, not referenced by related objects that can change over time.
     Only the most recent build of each node is stored in order to keep the model simple
     """
@@ -216,7 +216,7 @@ class Build(models.Model):
 
 
 class BuildFile(models.Model):
-    """ Describes a file of a builded image """
+    """ Describes a file of a built image """
     build = models.ForeignKey(Build, related_name='files')
     config = models.ForeignKey('firmware.ConfigFile', related_name='files')
     path = models.CharField(max_length=256)
@@ -507,8 +507,7 @@ class NodeKeys(models.Model):
 
 
 class NodeBuildFile(models.Model):
-    """
-    Describes a persistent file of a builded image.
+    """Describes a persistent file of a built image.
     Allows reusing BuildFiles between firmware builds.
     """
     node = models.ForeignKey('nodes.Node', related_name='files')

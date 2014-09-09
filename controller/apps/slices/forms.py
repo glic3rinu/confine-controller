@@ -20,6 +20,14 @@ class SliverDefaultsInlineForm(forms.ModelForm):
             if cleaned_data.get(field_name):
                 cleaned_data[field_name + "_uri"] = ''
         return cleaned_data
+    
+    def has_changed(self):
+        """
+        Hack to force form validation.
+        (avoid create an slice without sliver_defaults)
+        
+        """
+        return True
 
 
 class SliverAdminForm(forms.ModelForm):

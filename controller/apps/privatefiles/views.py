@@ -93,6 +93,9 @@ def get_file(request, app_label, model_name, field_name, object_id, filename):
     condition = getattr(instance, field_name).condition
     if condition(request, instance):
         pre_download.send(sender=model, instance=instance, field_name=field_name, request=request)
-        return METHOD(request, instance, field_name)
+        try:
+            return METHOD(request, instance, field_name)
+        except OSError:
+            raise Http404
     else:
         raise PermissionDenied()

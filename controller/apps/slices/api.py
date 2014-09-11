@@ -3,13 +3,17 @@ from __future__ import absolute_import
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions, serializers
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
+from .renderers import (SliceProfileRenderer, SliverProfileRenderer,
+    TemplateProfileRenderer)
 from .serializers import (SliceSerializer, SliceCreateSerializer,
     SliverSerializer, SliverDetailSerializer, TemplateSerializer)
 
@@ -91,8 +95,16 @@ def make_upload_file(model, field, field_url):
             else:
                 msg = "Only multipart/form-data is supported"
                 raise exceptions.ParseError(detail=msg)
+            # Slice refactor: data & overlay moved to SliverDefaults (#234)
+            # FIXME: better approach for differences template vs data|overlay?
+            try:
+                obj = obj.sliver_defaults
+            except AttributeError: # template use case
+                dst_model = model
+            else:
+                dst_model = type(obj)
             # TODO move this validation logic elsewhere
-            for validator in model._meta.get_field_by_name(field)[0].validators:
+            for validator in dst_model._meta.get_field_by_name(field)[0].validators:
                 try:
                     validator(uploaded_file)
                 except ValidationError as e:
@@ -131,34 +143,39 @@ class Update(APIView):
 
 class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Slice.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource lists the [slices](http://wiki.confine-project.eu/arch:rest-
-    api?&#slice_at_server) present in the testbed and provides API URIs to
+    api#slice_at_registry) present in the testbed and provides API URIs to
     navigate to them.
     """
     model = Slice
     add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('set_state', )
 
 
 class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Slice.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/slice"`](
+        http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource describes a slice in the testbed, including its [slivers](
-        http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server) with API
+        http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry) with API
     URIs to navigate to them.
     """
     model = Slice
     serializer_class = SliceSerializer
+    renderer_classes = [SliceProfileRenderer, BrowsableAPIRenderer]
     ctl = [
-        Renew, Reset, make_upload_file(Slice, 'exp_data', 'exp-data'),
+        Renew, Reset, make_upload_file(Slice, 'data', 'data'),
         make_upload_file(Slice, 'overlay', 'overlay'),
     ]
+    
     def put(self, request, *args, **kwargs):
         """
         Check that set_state has not changed because has
@@ -180,61 +197,69 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Sliver.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource lists the [slivers](http://wiki.confine-project.eu/arch:rest-
-    api?&#sliver_at_server) present in the testbed and provides API URIs to
+    api#sliver_at_registry) present in the testbed and provides API URIs to
     navigate to them.
     """
     model = Sliver
     serializer_class = SliverSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('node', 'slice')
 
 
 class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Sliver.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/sliver"`](
+        http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource describes a sliver in the testbed, with API URIs to navigate
-    to the [slice](http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server)
+    to the [slice](http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     it is part of and the [node](http://wiki.confine-project.eu/arch:rest-api?
-    &#node_at_server) it is intended to run on.
+    &#node_at_registry) it is intended to run on.
     """
     model = Sliver
     serializer_class = SliverDetailSerializer
+    renderer_classes = [SliverProfileRenderer, BrowsableAPIRenderer]
     ctl = [
-        Update, make_upload_file(Sliver, 'exp_data', 'exp-data'),
+        Update, make_upload_file(Sliver, 'data', 'data'),
         make_upload_file(Sliver, 'overlay', 'overlay'),
     ]
 
 
 class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Template.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#template_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource lists the sliver [templates](http://wiki.confine-project.eu/
-    arch:rest-api?&#template_at_server) available in the testbed and provides
+    arch:rest-api#template_at_registry) available in the testbed and provides
     API URIs to navigate to them.
     """
     model = Template
     serializer_class = TemplateSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Template.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#template_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/template"`](
+        http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource describes a template available in the testbed for [slices](
-    http://wiki.confine-project.eu/arch:rest-api?&#slice_at_server) and
-    [slivers](http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    http://wiki.confine-project.eu/arch:rest-api#slice_at_registry) and
+    [slivers](http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     to use.
     """
     model = Template
     serializer_class = TemplateSerializer
+    renderer_classes = [TemplateProfileRenderer, BrowsableAPIRenderer]
     ctl = [
         make_upload_file(Template, 'image', 'image'),
     ]

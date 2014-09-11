@@ -1,1 +1,1 @@
-REQUIRED_APPS = ['tinc', 'issues']
+REQUIRED_APPS = ['tinc']

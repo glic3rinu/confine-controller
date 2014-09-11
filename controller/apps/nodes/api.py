@@ -2,13 +2,18 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Island, Node, Server
+from .renderers import (IslandProfileRenderer, NodeProfileRenderer,
+    ServerProfileRenderer)
 from .serializers import (IslandSerializer, NodeSerializer, NodeCreateSerializer,
     ServerSerializer)
 from .settings import NODES_NODE_API_BASE_URI_DEFAULT
@@ -38,30 +43,34 @@ class Reboot(APIView):
 
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """ 
-    **Media type:** [`application/vnd.confine.server.Node.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#node_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#node_at_registry)
     
     This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
-    api?&#node_at_server) available in the testbed and provides API URIs to
+    api#node_at_registry) available in the testbed and provides API URIs to
     navigate to them.
     """
     model = Node
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Node.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#node_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/node"`](
+        http://wiki.confine-project.eu/arch:rest-api#node_at_registry)
     
     This resource describes a node in the testbed as well as listing the
-    [slivers](http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_server)
+    [slivers](http://wiki.confine-project.eu/arch:rest-api?&#sliver_at_registry)
     intended to run on it with API URIs to navigate to them.
     """
     model = Node
     serializer_class = NodeSerializer
+    renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     ctl = [Reboot]
     
     def get(self, request, *args, **kwargs):
@@ -89,13 +98,15 @@ class ServerList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """ 
-    **Media type:** [`application/vnd.confine.server.Server.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/server"`](
+        http://wiki.confine-project.eu/arch:rest-api#server_at_registry)
     
     This resource describes the testbed server (controller).
     """
     model = Server
     serializer_class = ServerSerializer
+    renderer_classes = [ServerProfileRenderer, BrowsableAPIRenderer]
 
 
 # backwards compatibility default server #236
@@ -106,21 +117,24 @@ class ServerDefaultDetail(ServerDetail):
 
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Island.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#island_at_registry)
     
     This resource lists the network [islands](http://wiki.confine-project.eu/
-    arch:rest-api?&#island_at_server) supported by the testbed and provides
+    arch:rest-api#island_at_registry) supported by the testbed and provides
     API URIs to navigate to them.
     """
     model = Island
     serializer_class = IslandSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Island.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#island_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/island"`](
+        http://wiki.confine-project.eu/arch:rest-api#island_at_registry)
     
     This resource describes a network island, i.e. a possibly disconnected part
     of a community network. The usage of islands is mainly orientative: it can
@@ -130,6 +144,7 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     model = Island
     serializer_class = IslandSerializer
+    renderer_classes = [IslandProfileRenderer, BrowsableAPIRenderer]
 
 
 api.register(NodeList, NodeDetail)

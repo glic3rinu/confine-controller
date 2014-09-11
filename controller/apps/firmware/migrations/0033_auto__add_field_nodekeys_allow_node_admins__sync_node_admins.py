@@ -1,79 +1,31 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-from django.db import models
-from django.core.management import call_command
 
-
-def get_config(orm):
-    """Get or create the firmware Config object."""
-    try:
-        config = orm.Config.objects.get()
-    except orm.Config.DoesNotExist:
-        # Initialize firmware data loading fixture
-        load_fixture('firmwareconfig.json', orm)
-        config = orm.Config.objects.get()
-    return config
-
-def load_fixture(file_name, orm):
-    """
-    Proper fixtures loading in south data migrations
-    https://djangosnippets.org/snippets/2897/
-    """
-    original_get_model = models.get_model
-    
-    def get_model_southern_style(*args):
-        try:
-            return orm['.'.join(args)]
-        except:
-            return original_get_model(*args)
-    
-    models.get_model = get_model_southern_style
-    call_command('loaddata', file_name)
-    models.get_model = original_get_model
-
-
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Update firmware configuration to include registry section."
-        ### Update ConfigUCI ###
-        config = get_config(orm)
-        orm.ConfigUCI.objects.create(section='registry registry', option='base_uri',
-            value="node.firmware_build.kwargs_dict.get('registry_base_uri')", config=config)
-        orm.ConfigUCI.objects.create(section='registry registry', option='cert',
-            value="'/etc/confine/registry-server.crt'", config=config)
-        # TODO (eventually): break backwards compatibility with old node firmware #245 note-25
-        # orm.ConfigUCI.objects.filter(section='server server', option='base_path').delete()
+        # Adding field 'NodeKeys.allow_node_admins'
+        db.add_column(u'firmware_nodekeys', 'allow_node_admins',
+                      self.gf('django.db.models.fields.BooleanField')(default=True),
+                      keep_default=False)
 
-        ### Update Config file /etc/config/confine ###
-        # TODO (eventually): break backwards compatibility: remove 'server server' section
-        cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
-        new_content = cfile.content.replace("])", ", 'registry registry'])")
-        assert 'registry registry' in new_content
-        cfile.content = new_content
-        cfile.save()
+        # Adding field 'NodeKeys.sync_node_admins'
+        db.add_column(u'firmware_nodekeys', 'sync_node_admins',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
 
     def backwards(self, orm):
-        "Restore firmware configuration."
-        ### Restore ConfigUCI ###
-        config = get_config(orm)
-        orm.ConfigUCI.objects.filter(section='registry registry', option='base_uri', config=config).delete()
-        orm.ConfigUCI.objects.filter(section='registry registry', option='cert', config=config).delete()
-        # TODO (eventually) restore old config uci #245 note-25
-        # orm.ConfigUCI.objects.create(section='server server', option='base_path',
-        #   value="'/api'", config=config)
+        # Deleting field 'NodeKeys.allow_node_admins'
+        db.delete_column(u'firmware_nodekeys', 'allow_node_admins')
 
-        ### Restore Config file /etc/config/confine ###
-        cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
-        new_content = cfile.content.replace(", 'registry registry'])", "])")
-        assert 'registry registry' not in new_content
-        cfile.content = new_content
-        cfile.save()
-        
+        # Deleting field 'NodeKeys.sync_node_admins'
+        db.delete_column(u'firmware_nodekeys', 'sync_node_admins')
+
 
     models = {
         u'firmware.baseimage': {
@@ -153,9 +105,11 @@ class Migration(DataMigration):
         },
         u'firmware.nodekeys': {
             'Meta': {'object_name': 'NodeKeys'},
+            'allow_node_admins': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'keys'", 'unique': 'True', 'primary_key': 'True', 'to': u"orm['nodes.Node']"}),
             'ssh_auth': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'ssh_pass': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'})
+            'ssh_pass': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
+            'sync_node_admins': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
         u'nodes.island': {
             'Meta': {'object_name': 'Island'},
@@ -167,6 +121,7 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'Node'},
             'arch': ('django.db.models.fields.CharField', [], {'default': "'i686'", 'max_length': '16'}),
             'boot_sn': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
+            'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'nodes'", 'to': u"orm['users.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -191,4 +146,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['firmware']
-    symmetrical = True

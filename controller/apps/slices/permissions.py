@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 from permissions import Permission, ReadOnlyPermission, RelatedPermission
 
-from .models import Slice, Sliver, SliceProp, SliverProp, Template, SliverIface
+from .models import (Slice, Sliver, SliverDefaults, Template, SliceProp,
+    SliverProp, SliverIface)
 
 
 class SlicePermission(Permission):
@@ -31,6 +32,7 @@ class SlicePermission(Permission):
 
 Slice.has_permission = SlicePermission()
 Sliver.has_permission = RelatedPermission('slice')
+SliverDefaults.has_permission = RelatedPermission('slice')
 SliceProp.has_permission = RelatedPermission('slice')
 SliverProp.has_permission = RelatedPermission('sliver.slice')
 SliverIface.has_permission = RelatedPermission('sliver.slice')

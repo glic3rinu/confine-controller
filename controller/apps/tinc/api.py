@@ -2,15 +2,18 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Host
 from .serializers import HostCreateSerializer, HostSerializer
+from .renderers import HostProfileRenderer
 
 
 class UploadPubkey(APIView):
@@ -35,16 +38,18 @@ class UploadPubkey(APIView):
 
 class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.HostList.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#hostlist_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource lists odd [hosts](http://wiki.confine-project.eu/arch:rest-
-    api?&#host_at_server) connected to the testbed (through the management
+    api#host_at_registry) connected to the testbed (through the management
     network) and provides API URIs to navigate to them.
     """
     model = Host
     add_serializer_class = HostCreateSerializer
     serializer_class = HostSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     
     def pre_save(self, obj):
         """ Set the object's owner, based on the incoming request. """
@@ -53,14 +58,16 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Host.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#host_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/host"`](
+        http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource describes an odd host computer connected to the testbed (through
     the management network) with a known administrator.
     """
     model = Host
     serializer_class = HostSerializer
+    renderer_classes = [HostProfileRenderer, BrowsableAPIRenderer]
     ctl = [UploadPubkey]
 
 

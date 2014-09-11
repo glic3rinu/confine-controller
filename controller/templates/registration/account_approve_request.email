@@ -1,7 +1,7 @@
 {% if subject %}New user registration (approval request){% endif %}
 {% if message %}Dear operator,
 A new user ({{ user }}) has created an account. Due the system policy you must approve
-this account for enabling it.
+this account to enable it.
 
 Please use the admin interface for doing the required operations.
 http://{{ site }}{% url 'admin:users_user_change' user.id %}

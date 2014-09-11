@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+
+{% block branding-stetic %}
+    <div id="header-branding"></div>
+
+    <style media="screen" type="text/css">
+    #content h1 {
+        margin-bottom: 2em;
+    }
+    #user-tools {
+        visibility: hidden;
+    }
+    #message {
+        min-height: 10em;
+    }
+    </style>
+{% endblock %}
+
+{% block title %}403 Forbidden | {{ SITE_VERBOSE_NAME }} {% endblock %}
+
+
+{% block nav-global %}
+{% endblock %}
+
+{% block breadcrumb-stetic %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+    <h1>403 Forbidden</h1>
+
+    <div id="message">
+        <p>You have tried to perform an illegal action or you don't have
+        enough rights to perform it.</p>
+        <button onclick="window.history.back();">Go back!</button>
+    </div>
+    <hr style="background-color:#B6B6B6;">
+    <p><a href="http://wiki.confine-project.eu/soft:server">confine-controller</a></p>
+
+{% endblock %}

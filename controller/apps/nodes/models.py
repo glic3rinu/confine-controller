@@ -160,14 +160,14 @@ class Node(models.Model):
                       'local network (see <a href="https://wiki.confine-project.eu/'
                       'arch:node">node architecture</a>). Possible values: none (no '
                       'public IPv4 support), dhcp (addresses configured using DHCP), '
-                      'range (addresses chosen from a range, see sliver_pub_ipv4_range).')
+                      'range (addresses chosen from a range, see <em>Sliver public IPv4 range</em>).')
     sliver_pub_ipv4_range = NullableCharField('Sliver public IPv4 range', max_length=256,
             blank=True, null=True, default=settings.NODES_NODE_SLIVER_PUB_IPV4_RANGE_DFLT,
             help_text='Describes the public IPv4 range that can be used by sliver '
-                      'public interfaces. If /sliver_pub_ipv4 is none, its value is '
-                      'null. If /sliver_pub_ipv4 is dhcp, its value is #N, where N '
+                      'public interfaces. If <em>Sliver public IPv4</em> is <em>none</em>, its value is '
+                      'null. If <em>Sliver public IPv4</em> is <em>dhcp</em>, its value is <em>#N</em>, where N '
                       'is the decimal integer number of DHCP addresses reserved for '
-                      'slivers. If /sliver_pub_ipv4 is range, its value is BASE_IP#N, '
+                      'slivers. If <em>Sliver public IPv4</em> is <em>range</em>, its value is <em>BASE_IP#N</em>, '
                       'where N is the decimal integer number of consecutive addresses '
                       'reserved for slivers after and including the range\'s base '
                       'address BASE_IP (an IP address in the local network).')
@@ -176,7 +176,7 @@ class Node(models.Model):
             help_text='A 16-bit integer number in 0x-prefixed hexadecimal notation '
                       'used as the node sliver MAC prefix. See <a href="http://wiki.'
                       'confine-project.eu/arch:addressing">addressing</a> for legal '
-                      'values. %s when null.</a>.' % SLIVER_MAC_PREFIX_DFLT)
+                      'values. %s when null.' % SLIVER_MAC_PREFIX_DFLT)
     priv_ipv4_prefix = NullableCharField('Private IPv4 prefix', null=True,
             blank=True, max_length=19, validators=[validate_priv_ipv4_prefix],
             help_text='IPv4 /24 network in CIDR notation used as a node private IPv4 '

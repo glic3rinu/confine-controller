@@ -40,7 +40,7 @@ from .tasks import build as build_task
 
 class BuildQuerySet(models.query.QuerySet):
     def get_current(self, node):
-        """ Given an node returns an up-to-date builded image, if exists """
+        """ Given an node returns an up-to-date built image, if it exists """
         build = Build.objects.get(node=node)
         if build.state != Build.AVAILABLE: 
             return build
@@ -52,7 +52,7 @@ class BuildQuerySet(models.query.QuerySet):
 
 class Build(models.Model):
     """
-    Represents a builded image for a research device. All the build information
+    Represents a built image for a research device. All the build information
     is copied, not referenced by related objects that can change over time.
     Only the most recent build of each node is stored in order to keep the model simple
     """
@@ -222,7 +222,7 @@ class Build(models.Model):
 
 
 class BuildFile(models.Model):
-    """ Describes a file of a builded image """
+    """ Describes a file of a built image """
     build = models.ForeignKey(Build, related_name='files')
     config = models.ForeignKey('firmware.ConfigFile', related_name='files')
     path = models.CharField(max_length=256)
@@ -466,8 +466,25 @@ class NodeKeys(models.Model):
     PRIVATE = '/etc/uhttpd.key.pem'
     KEY_FILES = [TINC, CERT, PRIVATE]
     
-    ssh_auth = models.TextField('SSH authorized keys', blank=True, null=True,
-            help_text='PEM-encoded RSA public keys allowed for ssh access as root.')
+    allow_node_admins = models.BooleanField('Allow current node admins',
+            default=True,
+            help_text='Enable this option to permanently allow the current '
+                      'group and node administrators\' SSH keys to log into '
+                      'the node as root.')
+    sync_node_admins = models.BooleanField('Synchronize node admins',
+            default=False,
+            help_text='Enable this option to also allow current or future '
+                      'group and node administrators\' SSH keys (as configured '
+                      'in the registry) to log into the node as root. '
+                      'Please note that this may expose your node to an attack '
+                      'if the testbed registry is compromised.')
+    ssh_auth = models.TextField('Additional keys', blank=True, null=True,
+            help_text='Enter additional SSH keys (in "authorized_keys" format) '
+                      'permanently allowed to log into the node as root. '
+                      'You may leave the default keys to allow centralized '
+                      'maintenance of your node by the controller. Please note '
+                      'that this may expose your node to an attack if the '
+                      'controller is compromised.')
     # MD5SUM hashed password in OpenWRT shadow format
     ssh_pass = models.CharField(max_length=128, blank=True, null=True)
     node = models.OneToOneField('nodes.Node', primary_key=True, related_name='keys')
@@ -496,8 +513,7 @@ class NodeKeys(models.Model):
 
 
 class NodeBuildFile(models.Model):
-    """
-    Describes a persistent file of a builded image.
+    """Describes a persistent file of a built image.
     Allows reusing BuildFiles between firmware builds.
     """
     node = models.ForeignKey('nodes.Node', related_name='files')

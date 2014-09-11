@@ -1,1 +1,1 @@
-Welcome to {{ site }}, please enable your account befor {{ expiration_days }} days.
+Welcome to {{ site }}, please enable your account within {{ expiration_days }} days.

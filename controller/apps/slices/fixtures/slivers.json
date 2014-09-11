@@ -8,9 +8,9 @@
         "description": "",
         "overlay": "",
         "instance_sn": 0,
-        "exp_data": "",
-        "exp_data_sha256": "",
-        "exp_data_uri": "",
+        "data": "",
+        "data_sha256": "",
+        "data_uri": "",
         "set_state": null,
         "template": null,
         "overlay_sha256": "",
@@ -26,9 +26,9 @@
         "description": "",
         "overlay": "",
         "instance_sn": 4,
-        "exp_data": "",
-        "exp_data_sha256": "",
-        "exp_data_uri": "",
+        "data": "",
+        "data_sha256": "",
+        "data_uri": "",
         "set_state": null,
         "template": null,
         "overlay_sha256": "",
@@ -75,6 +75,17 @@
         "nr": 2,
         "type": "management",
         "name": "mgmt1",
+        "parent": null,
+        "sliver": 2
+    }
+},
+{
+    "pk": 4,
+    "model": "slices.sliveriface",
+    "fields": {
+        "nr": 3,
+        "type": "public4",
+        "name": "pub4",
         "parent": null,
         "sliver": 2
     }

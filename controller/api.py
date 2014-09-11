@@ -1,16 +1,21 @@
 from __future__ import absolute_import
 
 from django.utils.safestring import mark_safe
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.reverse import reverse
 
 from api import ApiRoot
 from controller import settings
+from controller.models import Testbed
+from controller.serializers import TestbedSerializer
+from controller.renderers import BaseProfileRenderer
 
 
 class Base(ApiRoot):
     """ 
-    **Media type:** [`application/vnd.confine.server.Base.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#base_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v0/base"`](
+        http://wiki.confine-project.eu/arch:rest-api#base_at_registry)
     
     This resource is located at the base URI of the registry API. It
     describes testbed-wide parameters and provides the API URIs to
@@ -22,22 +27,25 @@ class Base(ApiRoot):
     For example: `curl -X GET %(url)s -H "Accept: application/json;
         indent=4"`
     """
+    renderer_classes = [BaseProfileRenderer, BrowsableAPIRenderer]
+    
+    def get_object(self):
+        return Testbed.objects.get()
+    
     def get(self, request, *args, **kwargs):
         response = super(Base, self).get(request, *args, **kwargs)
         
-        testbed_params = {
-            #239 Remove firmware configuration cruft from data model
-            #"priv_ipv4_prefix_dflt": settings.PRIV_IPV4_PREFIX_DFLT,
-            #"sliver_mac_prefix_dflt": settings.SLIVER_MAC_PREFIX_DFLT,
-            "mgmt_ipv6_prefix": settings.MGMT_IPV6_PREFIX,
-        }
+        # testbed_params + testbed_resources
+        testbed = self.get_object()
+        serializer = TestbedSerializer(testbed)
+        response.data.update(serializer.data)
+        
         confine_params = {
             "debug_ipv6_prefix": settings.DEBUG_IPV6_PREFIX,
             "priv_ipv6_prefix": settings.PRIV_IPV6_PREFIX
         }
         response.data.update({
             "uri": reverse('base', request=request),
-            "testbed_params": testbed_params,
             "confine_params": confine_params })
         return response
     

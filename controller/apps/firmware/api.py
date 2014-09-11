@@ -2,11 +2,13 @@ from __future__ import absolute_import
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
-from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from api import api, generics
+from api.renderers import ResourceListJSONRenderer
 from api.utils import insert_ctl
 from nodes.api import NodeDetail
 from nodes.models import Node
@@ -14,27 +16,32 @@ from permissions.api import ApiPermissionsMixin
 
 from .exceptions import BaseImageNotAvailable
 from .models import BaseImage, Build, Config
+from .renderers import BaseImageProfileRenderer
 from .serializers import BaseImageSerializer, FirmwareSerializer
 
 
 class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.controller.BaseImage.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api#baseimage_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/controller/v0/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#baseimage_at_controller)
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     controller_view = True
     # TODO customize rest_to_admin_url --> admin:firmware_config_change
 
 
 class BaseImageDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    **Media type:** [`application/vnd.confine.controller.BaseImage.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api#baseimage_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/controller/v0/baseimage"`](
+        http://wiki.confine-project.eu/arch:rest-api#baseimage_at_controller)
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
+    renderer_classes = [BaseImageProfileRenderer, BrowsableAPIRenderer]
     controller_view = True
 
 

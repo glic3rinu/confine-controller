@@ -76,7 +76,7 @@ apt-get install tinc iproute
 
 <h2>2. Create and configure the tinc network</h2>
 {% code 'bash' %}
-# Create and configure the {{ net_name }} network
+# Create and configure the "{{ net_name }}" network
 mkdir /etc/tinc/{{ net_name }}
 
 echo '{{ host.tinc.get_config|safe }}' > /etc/tinc/{{ net_name }}/tinc.conf
@@ -103,18 +103,18 @@ chmod a+rx /etc/tinc/{{ net_name }}/tinc-{up,down}
 tincd -n {{ net_name }} -K
 {% endcode %}
 <p>Now you have to upload your public key on your <a href="{% url opts|admin_urlname:'change' host.pk %}">{{ host.description|capfirst }}</a> host page. </p>
-<p>You can found the key at the end of <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}</span> file.</p>
+<p>You can find the key at the end of the <span style='color:#40015a; '>/etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}</span> file.</p>
 
 
-<h2>4. Start tinc daemon</h2>
+<h2>4. Start the tinc daemon</h2>
 {% code 'bash' %}
-# Enable {{ net_name }} network to automatically start on boot
+# Enable the "{{ net_name }}" network to automatically start on boot
 echo {{ net_name }} >> /etc/tinc/nets.boot
 
 # Restart the tinc service in order to apply the new configuration
 /etc/init.d/tinc restart
 
-# Try if your connection is working by ping the server
+# Try if your connection is working by pinging the server
 ping6 {{ server.tinc.address }}
 {% endcode %}
 

@@ -6,13 +6,14 @@ from controller.forms.widgets import ShowText
 from permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin
-from .forms import ResourceInlineFormSet, VerboseNameShowTextWidget, ResourceReqInlineFormSet
+from .forms import (ResourceInlineFormSet, ResourceReqInlineFormSet,
+    ResourceReqForm, VerboseNameShowTextWidget)
 from .models import Resource, ResourceReq
 
 
 class ResourceAdminInline(PermissionGenericTabularInline):
-    fields = ['name', 'max_sliver', 'dflt_sliver', 'unit']
-    readonly_fields = ['unit']
+    fields = ['name', 'unit', 'max_req', 'dflt_req', 'avail']
+    readonly_fields = ['unit', 'avail']
     model = Resource
     formset = ResourceInlineFormSet
     extra = 0
@@ -31,14 +32,18 @@ class ResourceAdminInline(PermissionGenericTabularInline):
 
 
 class ResourceReqAdminInline(PermissionGenericTabularInline):
-    fields = ['name', 'req', 'unit']
+    fields = ['name', 'unit', 'req']
     readonly_fields = ['unit']
     model = ResourceReq
     max_num = 0
+    form = ResourceReqForm
     formset = ResourceReqInlineFormSet
     can_delete = False
     
     class Media:
+        css = {
+            "all": ("resources/css/resource-admin.css",)
+        }
         js = ('resources/js/collapsed_resource_requests.js',)
     
     def formfield_for_dbfield(self, db_field, **kwargs):

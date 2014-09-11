@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'maintenance',
     'notifications',
     'monitor',
+    'resources',
     
     # Third-party apps
     'south',
@@ -187,9 +188,9 @@ FILE_UPLOAD_PERMISSIONS = 0644
 
 # Admin Tools
 ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'
+ADMIN_TOOLS_INDEX_DASHBOARD = 'controller.dashboard.CustomIndexDashboard'
 
 # Fluent dashboard
-ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 FLUENT_DASHBOARD_ICON_THEME = '../controller/icons'
 
 FLUENT_DASHBOARD_APP_GROUPS = (
@@ -284,7 +285,7 @@ EMAIL_REGISTRATION_APPROVE = '' # Only required if USERS_REGISTRATION_MODE = RES
 # rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',),
+        'api.filters.ControllerFilterBackend',),
     'DEFAULT_PERMISSION_CLASSES': (
         'permissions.api.TestbedPermissionBackend',
     ),
@@ -292,6 +293,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_CONTENT_NEGOTIATION_CLASS': 'api.negotiation.ProfileContentNegotiation'
 #    'PAGINATE_BY': 10,
 #    'PAGINATE_BY_PARAM': 'page_size',
 }

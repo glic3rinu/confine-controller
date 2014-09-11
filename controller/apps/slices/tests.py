@@ -7,8 +7,33 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.test import TestCase
 
-from users.models import User
-from slices.models import Slice, Sliver, Template
+from users.models import Group, User
+
+from .models import Slice, Sliver, Template
+from slices.exceptions import VlanAllocationError # use absolute import because
+                                                  # of assertRaises!
+
+
+class SliceTests(TestCase):
+    fixtures = ['groups']
+    
+    def test_get_vlan_tag(self):
+        # create slices with isolated_vlan_tag to use all vlan tags
+        group = Group.objects.first()
+        kwargs = dict(group=group, set_state=Slice.DEPLOY, allow_isolated=True)
+        vlan_tags = range(Slice.MIN_VLAN_TAG, Slice.MAX_VLAN_TAG + 1)
+        Slice.objects.bulk_create([
+            Slice(name="Slice_%i" % tag, isolated_vlan_tag=tag, **kwargs) for tag in vlan_tags
+        ])
+        
+        # should raise exception because no address space left
+        self.assertRaises(VlanAllocationError, Slice._get_vlan_tag)
+        
+        # remove an object to release one address
+        Slice.objects.first().delete()
+        new_tag = Slice._get_vlan_tag()
+        self.assertTrue(Slice.MIN_VLAN_TAG <= new_tag)
+        self.assertTrue(Slice.MAX_VLAN_TAG >= new_tag)
 
 
 class SliceTestCase(TestCase):
@@ -25,6 +50,7 @@ class SliceTestCase(TestCase):
         slice1 = Slice.objects.get(pk=2)
         slice0.name = slice1.name
         self.assertRaises(IntegrityError, slice0.save)
+
 
 class SliceViewsTestCase(TestCase):
     fixtures = ['groups', 'nodes', 'slices', 'slivers', 'templates']

@@ -1,4 +1,4 @@
-REQUIRED_APPS = ['issues']
+REQUIRED_APPS = ['nodes', 'slices']
 
 from django.db.models.loading import get_model
 
@@ -21,6 +21,16 @@ class ResourcePlugin(object):
     
     def clean_req(self, resource):
         pass
+    
+    def save(self, resource):
+        pass
+    
+    def delete(self, resource):
+        pass
+    
+    def available(self, resource):
+        """ Get the number of unused resources. """
+        return None
     
     @classmethod
     def get_producers_models(cls):

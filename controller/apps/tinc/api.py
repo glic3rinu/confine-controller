@@ -71,4 +71,19 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     ctl = [UploadPubkey]
 
 
+# backwards compatibility #245 note-42
+from api import ApiRoot
+from api.utils import link_header
+from rest_framework.decorators import api_view
+
+@api_view(['GET'])
+def gateway_list(request):
+    base_link = [
+        ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+        ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
+    ]
+    headers = {'Link': link_header(base_link, request)}
+    return Response([], headers=headers)
+
+
 api.register(HostList, HostDetail)

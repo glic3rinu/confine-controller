@@ -85,9 +85,7 @@ class TincHost(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        if not hasattr(self, 'content_type'):
-            return u'tinc_%s' % self.object_id
-        return self._name
+        return self.name if self.name else self._name
     
     @property
     def _name(self):

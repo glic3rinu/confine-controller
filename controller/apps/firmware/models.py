@@ -214,7 +214,8 @@ class Build(models.Model):
         if not self.base_image or self.base_image not in base_images:
             return False
         exclude = list(config.files.optional().values_list('pk', flat=True))
-        old_files = self.files.exclude(config__is_optional=True)
+        old_files = self.files.exclude(config__is_optional=True)\
+                        .exclude(path='/etc/confine/registry-server.crt')
         old_files = set( (f.path,f.content) for f in old_files )
         new_files = config.eval_files(self.node, exclude=exclude)
         new_files = set( (f.path,f.content) for f in new_files )

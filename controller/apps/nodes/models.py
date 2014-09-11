@@ -393,7 +393,7 @@ class Server(models.Model):
     objects = ServerManager()
     
     def __unicode__(self):
-        return 'server_%s' % self.pk
+        return self.name
     
     class Meta:
         ordering = ['pk']

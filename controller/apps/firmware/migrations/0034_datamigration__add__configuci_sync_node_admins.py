@@ -4,36 +4,201 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.management import call_command
 
 def get_config(orm):
     """Get or create the firmware Config object."""
-    try:
-        config = orm.Config.objects.get()
-    except ObjectDoesNotExist:
-        # Initialize firmware data loading fixture
-        load_fixture('firmwareconfig.json', orm)
-        config = orm.Config.objects.get()
-    return config
+    if not orm.Config.objects.exists():
+        # Initialize firmware data
+        create_initial_objects(orm)
+    return orm.Config.objects.get()
 
-def load_fixture(file_name, orm):
+def create_initial_objects(orm):
     """
-    Proper fixtures loading in south data migrations
-    https://djangosnippets.org/snippets/2897/
+    Use South ORM to create objects instead of using fixtures!
+    firmware/fixtures/firmwareconfig.json is not longer necessary
     """
-    original_get_model = models.get_model
-    
-    def get_model_southern_style(*args):
-        try:
-            return orm['.'.join(args)]
-        except:
-            return original_get_model(*args)
-    
-    models.get_model = get_model_southern_style
-    call_command('loaddata', file_name)
-    models.get_model = original_get_model
+    config = orm.Config.objects.create(**{
+        "version": "0.1",
+        "description": "Confine Firmware",
+        "image_name": "confine-firmware-%(node_name)s-%(arch)s.img.gz"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "id",
+        "value": "'%.4x' % node.id"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "local_ifname",
+        "value": "node.local_iface"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "mac_prefix16",
+        "value": "':'.join(re.findall('..', node.get_sliver_mac_prefix()[2:6]))"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "priv_ipv4_prefix24",
+        "value": "node.get_priv_ipv4_prefix().split('.0/24')[0]"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "public_ipv4_avail",
+        "value": "str(node.sliver_pub_ipv4_num)"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "rd_public_ipv4_proto",
+        "value": "'dhcp'"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "sl_public_ipv4_proto",
+        "value": "'dhcp'"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "rd_if_iso_parents",
+        "value": "' '.join(node.direct_ifaces.values_list('name', flat=True))"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "testbed testbed",
+        "config": config,
+        "option": "mgmt_ipv6_prefix48",
+        "value": "MGMT_IPV6_PREFIX.split('::')[0]"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "tinc-net confine",
+        "config": config,
+        "option": "enabled",
+        "value": "'1'"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "node node",
+        "config": config,
+        "option": "state",
+        "value": "'prepared'"
+    })
+    orm.ConfigUCI.objects.create(**{
+        "section": "server server",
+        "config": config,
+        "option": "base_path",
+        "value": "'/api'"
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": True,
+        "content": "self.config.render_uci(node, sections=['node node', 'server server', 'testbed testbed'])",
+        "mode": "",
+        "is_optional": False,
+        "path": "/etc/config/confine",
+        "config": config
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": True,
+        "content": "[ server.get_host(island=node.island) for server in node.tinc.connect_to ]",
+        "mode": "",
+        "is_optional": False,
+        "path": "[ \"/etc/tinc/confine/hosts/%s\" % server for server in node.tinc.connect_to ]",
+        "config": config
+    })
+    file_3 = orm.ConfigFile.objects.create(**{
+        "priority": 1,
+        "is_active": True,
+        "content": "node.tinc.generate_key(commit=True)",
+        "mode": "og-rw",
+        "is_optional": True,
+        "path": "/etc/tinc/confine/rsa_key.priv",
+        "config": config
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": True,
+        "content": "node.tinc.get_host()",
+        "mode": "",
+        "is_optional": False,
+        "path": "'/etc/tinc/confine/hosts/%s' % node.tinc.name",
+        "config": config
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": True,
+        "content": "node.tinc.get_config()",
+        "mode": "",
+        "is_optional": False,
+        "path": "/etc/tinc/confine/tinc.conf",
+        "config": config
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": False,
+        "content": "node.tinc.get_tinc_up()",
+        "mode": "+x",
+        "is_optional": False,
+        "path": "/etc/tinc/confine/tinc-up",
+        "config": config
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": False,
+        "content": "node.tinc.get_tinc_down()",
+        "mode": "+x",
+        "is_optional": False,
+        "path": "/etc/tinc/confine/tinc-down",
+        "config": config
+    })
+    orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": False,
+        "content": "self.config.render_uci(node, sections=['tinc-net confine'])",
+        "mode": "",
+        "is_optional": False,
+        "path": "/etc/config/tinc",
+        "config": config
+    })
+    file_9 = orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": True,
+        "content": "node.generate_certificate(key=files[0].content, commit=True).strip()",
+        "mode": "",
+        "is_optional": True,
+        "path": "/etc/uhttpd.crt.pem",
+        "config": config
+    })
+    file_10 = orm.ConfigFile.objects.create(**{
+        "priority": 0,
+        "is_active": True,
+        "content": "files[0].content",
+        "mode": "og-rw",
+        "is_optional": True,
+        "path": "/etc/uhttpd.key.pem",
+        "config": config
+    })
+    orm.ConfigFileHelpText.objects.create(**{
+        "help_text": "This file is the private key for the management overlay. \r\nNotice that the node public key will be automatically updated and your node may lose connectivity to the management network until the new image is installed.\r\n",
+        "config": config,
+        "file": file_3
+    })
+    orm.ConfigFileHelpText.objects.create(**{
+        "help_text": "This file contains the certificate for node authentication.\r\nPlease notice that this depends on the RSA keys generated for the tinc overlay, so you must also select the rsa_key.priv if you want a certificate. Also if there is any node.certificate it will be overwritten.",
+        "config": config,
+        "file": file_9
+    })
+    orm.ConfigFileHelpText.objects.create(**{
+        "help_text": "This file contains the node private key for uhttpd service.\r\nYou should also select /etc/tinc/confine/rsa_key.priv for generating this file.\r\n",
+        "config": config,
+        "file": file_10
+    })
 
 
 class Migration(DataMigration):

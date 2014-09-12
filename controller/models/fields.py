@@ -2,7 +2,7 @@ from django.db import models
 from django.core import exceptions
 from django.utils.text import capfirst
 
-from controller.core.validators import validate_rsa_pubkey
+from controller.core.validators import validate_cert, validate_rsa_pubkey
 from controller.forms.fields import MultiSelectFormField
 from controller.utils.apps import is_installed
 
@@ -82,11 +82,9 @@ class MultiSelectField(models.Field):
 class RSAPublicKeyField(models.TextField):
     default_validators = [validate_rsa_pubkey]
     
-    def __init__(self, *args, **kwargs):
-        return super(RSAPublicKeyField, self).__init__(*args, **kwargs)
-    
-    def get_prep_value(self, value):
-        return value.strip() if value else None
+    def get_db_prep_value(self, value, connection=None, prepared=False):
+        """Remove carriage return to avoid problems on API representation."""
+        return value.replace('\r\n', '\n').strip() if value else None
     
     # TODO to_python returns an rsa key?
 
@@ -106,9 +104,13 @@ class NullableCharField(models.CharField):
          return value or None
 
 
-class NullableTextField(models.TextField):
-     def get_db_prep_value(self, value, connection=None, prepared=False):
-         return value or None
+class PEMCertificateField(models.TextField):
+    """X.509 PEM-encoded certificate."""
+    default_validators = [validate_cert]
+    
+    def get_db_prep_value(self, value, connection=None, prepared=False):
+        """Remove carriage return to avoid problems on API representation."""
+        return value.replace('\r\n', '\n').strip() if value else None
 
 
 class TrimmedCharField(models.CharField):
@@ -125,6 +127,6 @@ if is_installed('south'):
     add_introspection_rules([], ["^controller\.models\.fields\.RSAPublicKeyField"])
     add_introspection_rules([], ["^controller\.models\.fields\.URIField"])
     add_introspection_rules([], ["^controller\.models\.fields\.NullableCharField"])
-    add_introspection_rules([], ["^controller\.models\.fields\.NullableTextField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.PEMCertificateField"])
     add_introspection_rules([], ["^controller\.models\.fields\.TrimmedCharField"])
 

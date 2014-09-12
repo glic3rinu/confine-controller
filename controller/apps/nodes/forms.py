@@ -80,4 +80,5 @@ class NodeApiInlineForm(forms.ModelForm):
 
 class ServerApiInlineForm(forms.ModelForm):
     def clean_cert(self):
+        """Replace '' with None to allow multiple empty certificates."""
         return self.cleaned_data['cert'] or None

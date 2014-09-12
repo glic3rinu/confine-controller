@@ -6,7 +6,7 @@ from uuid import UUID
 
 from django.core import validators
 from django.core.exceptions import ValidationError
-from M2Crypto import BIO, RSA
+from M2Crypto import BIO, RSA, X509
 
 from controller.utils.ssl import pkcs_to_x501
 
@@ -17,6 +17,15 @@ def validate_uuid(value):
     except:
         msg = '%s is a badly formed hexadecimal UUID string.' % value
         raise ValidationError(msg)
+
+
+def validate_cert(value):
+    """Validate X.509 PEM-encoded certificate."""
+    value = value.encode('ascii')
+    try:
+        X509.load_cert_string(value, X509.FORMAT_PEM)
+    except X509.X509Error:
+        raise ValidationError('Invalid X.509 PEM-encoded certificate.')
 
 
 def validate_rsa_pubkey(value):

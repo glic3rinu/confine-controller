@@ -2,7 +2,7 @@ from django.core import validators
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
 
-from controller.models.fields import NullableCharField, NullableTextField
+from controller.models.fields import NullableCharField, PEMCertificateField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_name, validate_prop_name, validate_net_iface_name
 from controller.utils.functional import cached
@@ -10,17 +10,16 @@ from pki import Bob
 
 from . import settings
 from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
-        validate_dhcp_range, validate_priv_ipv4_prefix, validate_cert)
+        validate_dhcp_range, validate_priv_ipv4_prefix)
 
 
 class Api(models.Model):
     base_uri = models.URLField('base URI', max_length=256,
             help_text='The base URI of the API endpoint.')
-    cert = NullableTextField('Certificate', unique=True, null=True, blank=True,
+    cert = PEMCertificateField('Certificate', unique=True, null=True, blank=True,
             help_text='An optional X.509 PEM-encoded certificate for the API '
                       'endpoint. Providing this may save API clients from '
-                      'checking the API certificate\'s signature.',
-            validators=[validate_cert])
+                      'checking the API certificate\'s signature.')
     
     class Meta:
         abstract = True

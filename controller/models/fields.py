@@ -104,6 +104,11 @@ class NullableCharField(models.CharField):
          return value or None
 
 
+class NullableTextField(models.TextField):
+     def get_db_prep_value(self, value, connection=None, prepared=False):
+         return value or None
+
+
 class PEMCertificateField(models.TextField):
     """X.509 PEM-encoded certificate."""
     default_validators = [validate_cert]
@@ -127,6 +132,7 @@ if is_installed('south'):
     add_introspection_rules([], ["^controller\.models\.fields\.RSAPublicKeyField"])
     add_introspection_rules([], ["^controller\.models\.fields\.URIField"])
     add_introspection_rules([], ["^controller\.models\.fields\.NullableCharField"])
+    add_introspection_rules([], ["^controller\.models\.fields\.NullableTextField"])
     add_introspection_rules([], ["^controller\.models\.fields\.PEMCertificateField"])
     add_introspection_rules([], ["^controller\.models\.fields\.TrimmedCharField"])
 

@@ -72,10 +72,20 @@ class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
         """
         from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
         qs = super(URIListCreateAPIView, self).get_queryset()
-        per_page = self.request.GET.get('per_page', settings.DEFAULT_PER_PAGE)
+        per_page = self.request.GET.get('per_page')
         num_page = self.request.GET.get('page')
         
+        # validate per_page
+        try:
+            per_page = int(per_page)
+        except (ValueError, TypeError):
+            per_page = settings.DEFAULT_PER_PAGE
+        else:
+            # per_page cannot be less than 1
+            per_page = max(1, per_page)
         paginator = Paginator(qs, per_page)
+        
+        # validate num_page
         try:
             page = paginator.page(num_page)
         except PageNotAnInteger:

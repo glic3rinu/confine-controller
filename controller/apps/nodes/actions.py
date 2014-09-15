@@ -62,7 +62,6 @@ def request_cert(modeladmin, request, queryset):
         "opts": opts,
         "app_label": app_label,
         'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
-        "form": form,
     }
     
     # User has provided a CSR
@@ -76,7 +75,8 @@ def request_cert(modeladmin, request, queryset):
             context.update({'cert': signed_cert})
             return TemplateResponse(request, 'admin/nodes/node/show_certificate.html', context,
                 current_app=modeladmin.admin_site.name)
-    
+
+    context['form'] = form
     # Display the confirmation page
     return TemplateResponse(request, 'admin/nodes/node/request_certificate.html', context, 
         current_app=modeladmin.admin_site.name)

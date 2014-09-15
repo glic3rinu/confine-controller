@@ -308,3 +308,6 @@ USE_ETAGS = True
 
 # common.api
 CUSTOM_API_ROOT = 'controller.api.Base'
+
+# REST API pagination
+DEFAULT_PER_PAGE = 25

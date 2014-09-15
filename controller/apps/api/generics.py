@@ -1,10 +1,11 @@
+from django.conf import settings
 from rest_framework import generics
 from rest_framework.generics import *
 
 from controller.models.utils import is_singleton
 
 from . import ApiRoot
-from .helpers import model_name_urlize
+from .helpers import build_pagination_link, model_name_urlize
 from .serializers import DynamicReadonlyFieldsModelSerializer
 from .utils import link_header
 
@@ -45,14 +46,54 @@ class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
         return super(URIListCreateAPIView, self).get_serializer_class()
     
     def get(self, request, *args, **kwargs):
-        """ Add link header """
+        """ Add link header and pagination links."""
         response = super(URIListCreateAPIView, self).get(request, *args, **kwargs)
         base_link = [
             ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
             ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
         ]
-        response['Link'] = link_header(base_link, request)
+        base_links = link_header(base_link, request)
+        
+        # generate pagination links
+        pagination_links = [
+            build_pagination_link(request, 'first', '1'),
+            build_pagination_link(request, 'last', self.last_page),
+            build_pagination_link(request, 'prev', self.prev_page),
+            build_pagination_link(request, 'next', self.next_page),
+        ]
+        pagination_links = [link for link in pagination_links if link is not None]
+        response['Link'] =  base_links + ', ' + ', '.join(pagination_links)
         return response
+    
+    def get_queryset(self):
+        """
+        Return a queryset based on pagination:
+        http://wiki.confine-project.eu/arch:rest-api#pagination
+        """
+        from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+        qs = super(URIListCreateAPIView, self).get_queryset()
+        per_page = self.request.GET.get('per_page', settings.DEFAULT_PER_PAGE)
+        num_page = self.request.GET.get('page')
+        
+        paginator = Paginator(qs, per_page)
+        try:
+            page = paginator.page(num_page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            page = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            page = paginator.page(paginator.num_pages)
+        
+        # store pagination to create link headers: first, last, prev, next.
+        self.last_page = page.paginator.num_pages
+        self.prev_page = page.previous_page_number() if page.has_previous() else None
+        self.next_page = page.next_page_number() if page.has_next() else None
+        
+        # filter against queryset because a queryset is required by filtering.
+        # FIXME find a more clean and efficient approach.
+        ids = [obj.pk for obj in page.object_list]
+        return qs.filter(pk__in=ids)
     
     def get_success_headers(self, data):
         try:

@@ -1,3 +1,6 @@
+import urllib
+import urlparse
+
 from django.conf.urls import patterns, url
 from django.utils import six
 from django.utils.encoding import force_unicode
@@ -34,3 +37,13 @@ def get_registry_urls(registry):
         )
     
     return urlpatterns
+
+def build_pagination_link(request, rel, page):
+    if page is None:
+        return
+    url = urlparse.urlparse(request.get_full_path())
+    query = dict(urlparse.parse_qsl(url.query))
+    query['page'] = page
+    query = urllib.urlencode(query)
+    url = request.build_absolute_uri(url.path + '?' + query)
+    return '<%s>; rel="%s"' % (url, rel)

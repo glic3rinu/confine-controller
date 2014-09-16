@@ -1,8 +1,5 @@
 from __future__ import absolute_import
 
-import json
-import six
-
 from django.db.models import Q
 
 from api import serializers

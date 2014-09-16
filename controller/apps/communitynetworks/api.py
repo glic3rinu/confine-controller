@@ -5,10 +5,7 @@ from rest_framework import status, exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.utils import insert_ctl
-
 from nodes.models import Node
-from nodes.api import NodeDetail
 
 
 class CacheCNDB(APIView):

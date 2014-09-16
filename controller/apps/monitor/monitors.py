@@ -2,8 +2,6 @@ import json
 import re
 from functools import partial
 
-from django.utils import timezone
-
 from controller.utils.system import run
 
 from .settings import MONITOR_DISK_FREE_LIMIT, MONITOR_DISK_WARN_RATIO

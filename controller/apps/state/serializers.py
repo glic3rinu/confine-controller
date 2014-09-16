@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from api import api, serializers
+from api import serializers
 
 from .models import State
 

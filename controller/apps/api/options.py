@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 from django.conf import settings
 from django.conf.urls import patterns, url
-from django.utils import six
 from django.utils.importlib import import_module
 from rest_framework.views import APIView
 from rest_framework.response import Response

@@ -1,4 +1,3 @@
-from django.core.urlresolvers import NoReverseMatch
 from rest_framework.reverse import reverse
 
 

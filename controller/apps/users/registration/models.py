@@ -10,7 +10,7 @@ from django.dispatch import receiver
 
 from controller.utils.apps import is_installed
 from controller.utils.options import send_email_template
-from registration.models import RegistrationManager, RegistrationProfile, SHA1_RE
+from registration.models import RegistrationProfile, SHA1_RE
 
 
 class CustomRegistrationManager(models.Manager):

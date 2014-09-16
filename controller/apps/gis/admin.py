@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-from django.contrib import admin
 from django.forms.widgets import TextInput
 from django_google_maps import fields as map_fields
 

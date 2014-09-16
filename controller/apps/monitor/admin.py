@@ -1,9 +1,7 @@
 import json
-import time
 from datetime import timedelta, datetime
 
 from django.conf.urls import patterns, url
-from django.contrib import admin
 from django.core.management import call_command
 from django.http import HttpResponse, Http404
 from django.utils import timezone
@@ -13,7 +11,6 @@ from controller.admin.utils import get_modeladmin, wrap_admin_view
 from controller.utils.time import group_by_interval
 from nodes.models import Server
 
-from . import settings
 from .models import TimeSerie
 
 

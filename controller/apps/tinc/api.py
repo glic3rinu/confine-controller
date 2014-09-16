@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from api import api, generics

@@ -1,5 +1,4 @@
 import sys
-from StringIO import StringIO
 
 from celery.task import periodic_task
 from celery.task.schedules import crontab

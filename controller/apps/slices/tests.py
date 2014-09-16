@@ -9,7 +9,7 @@ from django.test import TestCase
 
 from users.models import Group, User
 
-from .models import Slice, Sliver, Template
+from .models import Slice, Sliver
 from slices.exceptions import VlanAllocationError # use absolute import because
                                                   # of assertRaises!
 
@@ -56,8 +56,8 @@ class SliceViewsTestCase(TestCase):
     fixtures = ['groups', 'nodes', 'slices', 'slivers', 'templates']
     
     def setUp(self):
-        user = User.objects.create_user(name='tech', username='tech',
-                                        email='tech@localhost', password='tech')
+        User.objects.create_user(name='tech', username='tech',
+                                 email='tech@localhost', password='tech')
         self.assertTrue(self.client.login(username='tech', password='tech'))
     
     def test_slice_changelist(self):

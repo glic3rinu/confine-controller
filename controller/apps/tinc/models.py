@@ -4,14 +4,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
 from django_transaction_signals import defer
-from IPy import IP
 
 from controller import settings as controller_settings
 from controller.models.fields import RSAPublicKeyField
 from controller.models.utils import generate_chainer_manager
-from controller.utils.ip import split_len, int_to_hex_str
 from controller.core.validators import validate_host_name, validate_name, OrValidator
-from mgmtnetworks.models import MgmtNetConf, get_mgmt_net
+from mgmtnetworks.models import get_mgmt_net
 from nodes.models import Server, Node
 from pki import Bob
 

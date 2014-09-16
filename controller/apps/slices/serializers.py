@@ -1,8 +1,5 @@
 from __future__ import absolute_import
 
-import json
-import six
-
 from controller.utils.apps import is_installed
 from urlparse import urlparse
 
@@ -32,7 +29,6 @@ class FakeFileField(serializers.CharField):
         object_file = getattr(self.parent.__object__, self.field_name)
         if object_file:
             request = self.context.get('request', None)
-            format = self.context.get('format', None)
             return request.build_absolute_uri(object_file.url)
         return value
 

@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from nodes.models import Node
 from state.models import State
-from .models import NodeGeolocation
+
 from .settings import GIS_MAP_CENTER, GIS_MAP_ZOOM
 
 STATES_LEGEND = ['online', 'offline', 'unknown'] # aggregated states as in report

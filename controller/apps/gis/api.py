@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from api import api, generics
+from api import generics
 from api.utils import insert_ctl
 from nodes.api import NodeDetail
 

@@ -8,7 +8,7 @@ from django.contrib.admin.util import unquote
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe

@@ -3,10 +3,8 @@ from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_text
 
-from controller.forms.widgets import ShowText
-
 from . import ResourcePlugin
-from .models import Resource, ResourceReq
+from .models import ResourceReq
 
 
 class VerboseNameShowTextWidget(forms.Widget):

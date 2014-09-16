@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import json
-import time
 
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType

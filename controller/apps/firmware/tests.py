@@ -5,6 +5,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
+from django.core.exceptions import SuspiciousFileOperation
 from django.test import TestCase
 
 from nodes.models import Node

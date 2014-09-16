@@ -3,7 +3,6 @@ import math
 import subprocess
 import sys
 import os
-from datetime import datetime
 
 from celery.task import periodic_task, task
 from celery.task.schedules import crontab

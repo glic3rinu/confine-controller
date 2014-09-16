@@ -6,8 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 
 from controller.admin import ChangeListDefaultFilter
-from controller.admin.utils import (get_modeladmin, insertattr, admin_link,
-    wrap_admin_view)
+from controller.admin.utils import insertattr, admin_link, wrap_admin_view
 from controller.forms.widgets import ReadOnlyWidget
 from mgmtnetworks.admin import MgmtNetConfInline
 from nodes.models import Island, Node, Server

@@ -2,17 +2,13 @@ from __future__ import absolute_import
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from django.utils.crypto import get_random_string
 from rest_framework import status, exceptions
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
-from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 from api import api, generics
 from api.renderers import ResourceListJSONRenderer
-from controller.core.validators import validate_name
 from permissions.api import ApiPermissionsMixin
 
 from .models import User, Group, Roles

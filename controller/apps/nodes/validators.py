@@ -3,8 +3,6 @@ from django.core.validators import validate_ipv4_address
 from IPy import IP
 from M2Crypto import X509
 
-from users.models import Group
-
 
 def validate_sliver_mac_prefix(value):
     try: 

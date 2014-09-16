@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from controller.admin.utils import insertattr, get_modeladmin
-from nodes.models import Node, Server
 from permissions.admin import PermissionGenericTabularInline
 
 from .forms import MgmtNetConfInlineForm

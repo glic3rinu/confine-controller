@@ -1,8 +1,4 @@
-from django import forms
-from django.contrib import admin
-
 from controller.admin.utils import insertattr
-from controller.forms.widgets import ShowText
 from permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin

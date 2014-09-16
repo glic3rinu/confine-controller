@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from registration.backends.default.views import ActivationView, RegistrationView
+from registration.backends.default.views import ActivationView
 
 from .utils import get_backend
 from .views import ActivationRestrictedView, RegistrationOpenView, RegistrationClosedView

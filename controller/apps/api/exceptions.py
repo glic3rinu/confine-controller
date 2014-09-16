@@ -1,4 +1,4 @@
-from rest_framework.exceptions import *
+from rest_framework.exceptions import APIException
 
 
 class UnprocessableEntity(APIException):

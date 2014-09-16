@@ -12,15 +12,15 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
             make_option('--db_name', dest='db_name', default='controller',
-                help='Specifies the database to create.'),
+                help='Specifies the database name to create.'),
             make_option('--db_user', dest='db_user', default='confine',
-                help='Specifies the database to create.'),
+                help='Specifies the user to connect to the database.'),
             make_option('--db_password', dest='db_password', default='confine',
-                help='Specifies the database to create.'),
+                help='Specifies the password to connect to the database.'),
             make_option('--db_host', dest='db_host', default='localhost',
-                help='Specifies the database to create.'),
+                help='Specifies the host where is the database.'),
             make_option('--db_port', dest='db_port', default='5432',
-                help='Specifies the database to create.'),
+                help='Specifies the port to connect to the database.'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '

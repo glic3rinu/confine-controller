@@ -25,7 +25,7 @@ class Command(BaseCommand):
             )
     
     option_list = BaseCommand.option_list
-    help = 'Run monitors.'
+    help = 'Run monitors to diagnose system health.'
     
     def handle(self, *args, **options):
         problems = []

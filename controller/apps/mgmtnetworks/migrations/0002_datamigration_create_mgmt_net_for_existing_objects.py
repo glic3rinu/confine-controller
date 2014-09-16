@@ -8,9 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 
 
 class Migration(DataMigration):
-    depends_on = (
-        ("tinc", "0030_auto__chg_field_host_name__add_unique_host_name"),
-    )
 
     def forwards(self, orm):
         "Generate MgmtNetConf objects for existing Nodes, Servers, Hosts and Gateways"
@@ -100,10 +97,9 @@ class Migration(DataMigration):
         },
         u'tinc.host': {
             'Meta': {'object_name': 'Host'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tinc_hosts'", 'to': u"orm['users.User']"})
         },
         u'tinc.tincaddress': {

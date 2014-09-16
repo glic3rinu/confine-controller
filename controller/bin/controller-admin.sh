@@ -145,6 +145,7 @@ function install_requirements () {
                      djangorestframework==2.3.13 \
                      paramiko==1.13.0 \
                      Pygments==1.6 \
+                     pyflakes==0.8.1 \
                      requests==2.2.1 \
                      greenlet==0.4.2 \
                      gevent==1.0"

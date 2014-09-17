@@ -174,3 +174,8 @@ class Command(BaseCommand):
         else:
             update_settings(TINC_TINCD_SEND_HUP=False)
         self.stdout.write('Tincd server successfully created and configured.')
+        self.stdout.write('NOTE: restarting the following services is required '
+                          'to apply updated configuration:\n'
+                          'tincd, uwsgi, celeryd.\n'
+                          'Please run: "sudo python manage.py restartservices" or '
+                          'restart they manually.')

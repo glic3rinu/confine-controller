@@ -14,7 +14,9 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default='confine',
-                help='Specifies the system user that would generate the firmwares.'),
+                help='Specifies the system user that would run celery tasks.'),
+            make_option('--group', dest='group', default='confine',
+                help='Specifies the system group that would run celery tasks.'),
             make_option('--processes', dest='processes', default=5,
                 help='Number of celeryd processes.'),
             make_option('--greenlets', dest='greenlets', default=1000,
@@ -22,7 +24,7 @@ class Command(BaseCommand):
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
-                     'cleleryd process owner, which is the user how will perform tincd updates'),
+                     'celeryd process owner, which is the user how will perform tincd updates'),
             )
     
     option_list = BaseCommand.option_list
@@ -32,6 +34,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         context = {'site_root': get_site_root(),
                    'username': options.get('username'),
+                   'group': options.get('group'),
                    'bin_path': path.join(get_controller_root(), 'bin'),
                    'processes': options.get('processes'),
                    'greenlets': options.get('greenlets') }
@@ -64,7 +67,7 @@ class Command(BaseCommand):
             '\n'
             '# Workers should run as an unprivileged user.\n'
             'CELERYD_USER="%(username)s"\n'
-            'CELERYD_GROUP="$CELERYD_USER"\n'
+            'CELERYD_GROUP="%(group)s"\n'
             '\n'
             '# Persistent revokes\n'
             'CELERYD_STATE_DB="$CELERYD_CHDIR/persistent_revokes"\n'
@@ -73,13 +76,13 @@ class Command(BaseCommand):
             'CELERYEV="$CELERYD_CHDIR/manage.py"\n'
             'CELERYEV_CAM="djcelery.snapshot.Camera"\n'
             'CELERYEV_USER="$CELERYD_USER"\n'
-            'CELERYEV_GROUP="$CELERYD_USER"\n'
+            'CELERYEV_GROUP="$CELERYD_GROUP"\n'
             'CELERYEV_OPTS="celeryev"\n'
             '\n'
             '# Celerybeat\n'
             'CELERYBEAT="${CELERYD_CHDIR}/manage.py celerybeat"\n'
             'CELERYBEAT_USER="$CELERYD_USER"\n'
-            'CELERYBEAT_GROUP="$CELERYD_USER"\n'
+            'CELERYBEAT_GROUP="$CELERYD_GROUP"\n'
             'CELERYBEAT_CHDIR="$CELERYD_CHDIR"\n'
             'CELERYBEAT_OPTS="--schedule=/var/run/celerybeat-schedule"\n' % context)
         

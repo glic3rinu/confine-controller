@@ -171,22 +171,25 @@ def get_node_version_data():
     return { 'groups': groups, 'totals': totals }
 
 
-def sizeof_fmt(num):
+def sizeof_fmt(num, unit=None):
     """
     Get human readable version of storage size.
     @num should be provided as Megabyte
     Based on http://stackoverflow.com/a/1094933/1538221
     """
+    # handle non default explicit units
+    if unit is not None and unit != 'MiB':
+        return "%.f %s" % (num, unit)
     try:
         num = float(num)
     except ValueError:
         return num
-    for i, unit in enumerate(['MB','GB']):
+    for i, unit in enumerate(['MiB','GiB']):
         if abs(num) < 1024.0:
             size_format = "%3.0f %s" if i == 0 else "%3.1f %s"
             return (size_format % (num, unit)).strip()
         num /= 1024.0
-    return "%.f %s" % (num, 'TB')
+    return "%.f %s" % (num, 'TiB')
 
 
 def extract_node_software_version(version):

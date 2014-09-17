@@ -346,8 +346,25 @@ def disk_available(node):
         statejs = json.loads(node.state.data)
     except ValueError:
         return 'No data'
-    total = sizeof_fmt(statejs.get('disk_avail', 'N/A'))
-    slv_dflt = sizeof_fmt(statejs.get('disk_dflt_per_sliver', 'N/A'))
+    
+    # legacy disk info (node firmware < 2014-09-02)
+    total = statejs.get('disk_avail')
+    slv_dflt = statejs.get('disk_dflt_per_sliver')
+    
+    # standar disk info via resources management
+    disk_resource = {}
+    for resource in statejs.get('resources', {}):
+        if resource.get('name') == 'disk':
+            disk_resource = resource
+            break
+    total = total or disk_resource.get('avail', 'N/A')
+    slv_dflt = slv_dflt or disk_resource.get('dflt_req', 'N/A')
+    
+    # convert to human readable
+    unit = disk_resource.get('unit')
+    total = sizeof_fmt(total, unit)
+    slv_dflt = sizeof_fmt(slv_dflt, unit)
+    
     return "%s (%s)" % (total, slv_dflt)
 disk_available.short_description = mark_safe('<span class="help-text" title="Disk '
     'available reported by the node:\ntotal (default per sliver)">Disk available</span>')

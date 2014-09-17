@@ -1,4 +1,5 @@
 import gevent
+import json
 import requests
 
 from django.test import LiveServerTestCase
@@ -6,11 +7,12 @@ from django.test import LiveServerTestCase
 from nodes.models import Node
 from users.models import Group
 
+from .admin import disk_available
 from .helpers import extract_node_software_version, sizeof_fmt
 from .models import State
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
-class StateTest(LiveServerTestCase):
+class StateTests(LiveServerTestCase):
     def setUp(self):
         group = Group.objects.create(name='Group', allow_nodes=True)
         self.node = Node.objects.create(name='Test', group=group)
@@ -28,11 +30,11 @@ class StateTest(LiveServerTestCase):
     
     def test_helper_sizeof_fmt(self):
         # Test helper used by disk_available (#339)
-        self.assertIn('MB', sizeof_fmt(0))
-        self.assertIn('GB', sizeof_fmt(-1 * 2**10))
-        self.assertIn('GB', sizeof_fmt(2**10))
-        self.assertIn('TB', sizeof_fmt(2**20))
-        self.assertIn('TB', sizeof_fmt(2**50))
+        self.assertIn('MiB', sizeof_fmt(0))
+        self.assertIn('GiB', sizeof_fmt(-1 * 2**10))
+        self.assertIn('GiB', sizeof_fmt(2**10))
+        self.assertIn('TiB', sizeof_fmt(2**20))
+        self.assertIn('TiB', sizeof_fmt(2**50))
         self.assertEquals('N/A', sizeof_fmt('N/A'))
     
     def test_node_soft_version(self):
@@ -56,3 +58,56 @@ class StateTest(LiveServerTestCase):
             # Try to generate url and name based on settings
             STATE_NODE_SOFT_VERSION_URL(version)
             STATE_NODE_SOFT_VERSION_NAME(version)
+    
+    def test_disk_available(self):
+        data = json.dumps({
+            "name": "UPC-lab104-VM07",
+            "soft_version": "testing.bd6d896-r20140902.1052-1",
+            "resources": [
+                {
+                    "avail": 5250,
+                    "dflt_req": 200,
+                    "max_req": 1000,
+                    "name": "disk",
+                    "unit": "MiB"
+                },
+                {
+                    "avail": 8,
+                    "dflt_req": 0,
+                    "max_req": 1,
+                    "name": "pub_ipv4",
+                    "unit": "addrs"
+                },
+                {
+                    "avail": 0,
+                    "dflt_req": 0,
+                    "max_req": 0,
+                    "name": "pub_ipv6",
+                    "unit": "addrs"
+                }
+            ]
+        })
+        State.objects.create(content_object=self.node, data=data)
+        disk_info = disk_available(self.node)
+        self.assertEqual("5.1 GiB (200 MiB)", disk_info)
+    
+    def test_disk_available_old_firmware(self):
+        data = json.dumps({
+            "name": "Gallia",
+            "soft_version": "testing.70de099-r20140211.1450-1",
+            "disk_avail": 40202,
+            "disk_dflt_per_sliver": 1000,
+            "disk_max_per_sliver": 2000
+        })
+        State.objects.create(content_object=self.node, data=data)
+        disk_info = disk_available(self.node)
+        self.assertEqual("39.3 GiB (1000 MiB)", disk_info)
+    
+    def test_disk_available_nodata(self):
+        data = json.dumps({
+            "name": "Gallia",
+            "soft_version": "testing.70de099-r20140211.1450-1"
+        })
+        State.objects.create(content_object=self.node, data=data)
+        disk_info = disk_available(self.node)
+        self.assertEqual("N/A (N/A)", disk_info)

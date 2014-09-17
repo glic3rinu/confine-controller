@@ -178,4 +178,4 @@ class Command(BaseCommand):
                           'to apply updated configuration:\n'
                           'tincd, uwsgi, celeryd.\n'
                           'Please run: "sudo python manage.py restartservices" or '
-                          'restart they manually.')
+                          'restart them manually.')

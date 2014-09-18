@@ -36,6 +36,12 @@ class Migration(DataMigration):
             with open(self.GATEWAYS_FILE, "w") as out:
                 serializers.serialize("json", all_objects, indent=4, stream=out)
 
+            # remove all data to avoid orphan objects
+            qs_taddr.delete()
+            qs_thost.delete()
+            qs_mgmtnet.delete()
+            qs_gw.delete()
+
             # warn user
             logging.warning("As discussed on issue #236, gateways disappear "
                 "from testbed architecture. Sorry but automatic migration is not "

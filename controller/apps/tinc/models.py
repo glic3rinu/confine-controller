@@ -3,6 +3,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
+from django.db.models.signals import post_save, post_delete
 from django_transaction_signals import defer
 from IPy import IP
 
@@ -232,7 +233,9 @@ class TincAddress(models.Model):
         return self.server.name
 
 
-# Signals
+###  Signals  ###
+
+# update the node set_state on tinc config update
 def tinchost_changed(sender, instance, **kwargs):
     # Do nothing while loading fixtures or running migrations
     if kwargs.get('raw', False):
@@ -240,8 +243,6 @@ def tinchost_changed(sender, instance, **kwargs):
     if hasattr(instance.content_object, 'update_set_state'): # is a node
         instance.content_object.update_set_state()
 
-from django.db.models.signals import post_save, post_delete
-# update the node set_state depending on tinc configuration
 post_save.connect(tinchost_changed, sender=TincHost)
 post_delete.connect(tinchost_changed, sender=TincHost)
 

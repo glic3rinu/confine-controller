@@ -1,6 +1,7 @@
 from django.core import validators
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
+from django.db.models.signals import post_save, post_delete
 
 from controller.models.fields import NullableCharField, PEMCertificateField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
@@ -431,3 +432,16 @@ class Island(models.Model):
     
     def __unicode__(self):
         return self.name
+
+
+###  Signals  ###
+
+# update the node set_state on nodeapi update
+def nodeapi_changed(sender, instance, **kwargs):
+    # Do nothing while loading fixtures or running migrations
+    if kwargs.get('raw', False):
+        return
+    instance.node.update_set_state()
+
+post_save.connect(nodeapi_changed, sender=NodeApi)
+post_delete.connect(nodeapi_changed, sender=NodeApi)

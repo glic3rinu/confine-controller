@@ -15,8 +15,7 @@ from .renderers import (IslandProfileRenderer, NodeProfileRenderer,
     ServerProfileRenderer)
 from .serializers import (IslandSerializer, NodeSerializer, NodeCreateSerializer,
     ServerSerializer)
-from .settings import NODES_NODE_API_NODE_BASE_URL
-from .validators import validate_csr
+from .settings import NODES_NODE_API_BASE_URI_DEFAULT
 
 
 class Reboot(APIView):
@@ -39,32 +38,6 @@ class Reboot(APIView):
             response_data = {'detail': 'Node instructed to reboot'}
             return Response(response_data, status=status.HTTP_200_OK)
         raise exceptions.ParseError(detail='This endpoint do not accept data')
-
-
-class RequestCert(APIView):
-    """
-    **Relation type:** [`http://confine-project.eu/rel/controller/do-request-cert`](
-        http://confine-project.eu/rel/controller/do-request-cert)
-    
-    Contains the function URI used to upload this node's certificate request to 
-    be signed by the testbed CA and set as the node's certificate.
-    
-    POST data: `ASCII-armored PEM representation of the CSR as a string.`
-    """
-    url_name = 'request-cert'
-    rel = 'http://confine-project.eu/rel/controller/do-request-api-cert'
-    
-    def post(self, request, *args, **kwargs):
-        csr = request.DATA
-        node = get_object_or_404(Node, pk=kwargs.get('pk'))
-        self.check_object_permissions(self.request, node)
-        try:
-            validate_csr(csr, node)
-        except Exception as e:
-            raise exceptions.ParseError(detail='Malformed CSR: %s' % e.message)
-        node.sign_cert_request(csr.strip())
-        response_data = {'detail': 'Sign certificate request accepted'}
-        return Response(response_data, status=status.HTTP_202_ACCEPTED)
 
 
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -97,16 +70,29 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Node
     serializer_class = NodeSerializer
     renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
-    ctl = [Reboot, RequestCert]
+    ctl = [Reboot]
     
     def get(self, request, *args, **kwargs):
         """ Add node-base relation to link header """
         response = super(NodeDetail, self).get(request, *args, **kwargs)
         node = self.get_object()
-        url = NODES_NODE_API_NODE_BASE_URL % {'mgmt_addr': node.mgmt_net.addr}
+        url = NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': node.mgmt_net.addr}
         rel = 'http://confine-project.eu/rel/server/node-base'
         response['Link'] += ', <%s>; rel="%s"' % (url, rel)
         return response
+
+
+class ServerList(ApiPermissionsMixin, generics.URIListCreateAPIView):
+    """
+    **Media type:** [`application/vnd.confine.server.Server.v0+json`](
+        http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+    
+    This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
+    api?&#server_at_server) available in the testbed and provides API URIs to
+    navigate to them.
+    """
+    model = Server
+    serializer_class = ServerSerializer
 
 
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -120,9 +106,12 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Server
     serializer_class = ServerSerializer
     renderer_classes = [ServerProfileRenderer, BrowsableAPIRenderer]
-    
+
+
+# backwards compatibility default server #236
+class ServerDefaultDetail(ServerDetail):
     def get_object(self, *args, **kwargs):
-        return get_object_or_404(Server)
+        return get_object_or_404(Server, pk=2)
 
 
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -146,12 +135,11 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
         profile="http://confine-project.eu/schema/registry/v0/island"`](
         http://wiki.confine-project.eu/arch:rest-api#island_at_registry)
     
-    This resource describes a network island (i.e. a disconnected part of a
-    community network) where the testbed is reachable from. A testbed is reachable
-    from an island when there is a [gateway](http://wiki.confine-project.eu/arch
-    :rest-api?&#gateway_at_registry) that gives access to the testbed server
-    (possibly through other gateways), or when the [server](https://wiki.confine
-    -project.eu/arch:rest-api?&#server_at_registry) itself is in that island.
+    This resource describes a network island, i.e. a possibly disconnected part
+    of a community network. The usage of islands is mainly orientative: it can
+    be used to signal user interfaces whether a node may see any servers, or
+    whether modifying a gateway may leave some nodes disconnected from the
+    testbed management network.
     """
     model = Island
     serializer_class = IslandSerializer
@@ -159,5 +147,5 @@ class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 api.register(NodeList, NodeDetail)
-api.register(ServerDetail, ServerDetail)
+api.register(ServerList, ServerDetail)
 api.register(IslandList, IslandDetail)

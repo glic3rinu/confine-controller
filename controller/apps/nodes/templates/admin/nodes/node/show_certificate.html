@@ -1,0 +1,53 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .certificate {
+        background: #EDF3FE;
+        border: 1px solid #ccc;
+        display: inline-block;
+        font-family: monospace;
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst|escape }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url 'admin:nodes_node_change' node.pk %}">{{ node }}</a>
+    &rsaquo; Request Certificate
+</div>
+{% endblock %}
+
+
+
+{% block content %}
+<div style="margin-left:20px;">
+
+<div class="level4">
+<p>
+    This is the signed certificate that can be used for properly authenticate
+    the node on the testbed (see <a class="urlextern" rel="nofollow"
+    href="http://en.wikipedia.org/wiki/Certificate_signing_request"
+    title="http://en.wikipedia.org/wiki/Certificate_signing_request">certiticate
+    request</a> for more information).
+</p>
+<p>
+    <strong>NOTE:</strong> the behaviour of this page has changed, and now it's
+    only provided as an utility, so this certificate has <strong>not</strong>
+    been stored anywhere. If you want to use it, you need to save it
+    manually (<i>e.g. in the node's api section</i>).
+</p>
+<div class="certificate">
+    {{ cert|linebreaks }}
+</div>
+{% endblock %}
+

@@ -57,7 +57,7 @@ class Command(BaseCommand):
         if overide or not ca.get_cert():
             # Avoid import errors
             from nodes.models import Server
-            server = Server.objects.get()
+            server = Server.objects.first()
             common_name = options.get('common_name') or str(server.mgmt_net.addr)
             country = options.get('dn_country')
             state = options.get('dn_state')

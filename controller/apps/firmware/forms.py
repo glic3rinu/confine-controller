@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.safestring import mark_safe
 
+from nodes.models import ServerApi
+
 from .models import BaseImage, Config
 
 
@@ -31,3 +33,46 @@ class BaseImageForm(forms.Form):
         qs = BaseImage.objects.filter_by_arch(arch).order_by('-default')
         self.fields['base_image'].queryset = qs
         self.fields['base_image'].initial = qs[0] if qs.exists() else None
+
+
+class RegistryApiModelChoiceField(forms.ModelChoiceField):
+    def __init__(self, **kwargs):
+        qs = ServerApi.objects.filter(type=ServerApi.REGISTRY)
+        super(RegistryApiModelChoiceField, self).__init__(queryset=qs, **kwargs)
+
+    def label_from_instance(self, obj):
+        island_name = obj.island.name if obj.island else 'Management network'
+        return "%s (%s @ %s)" % (obj.base_uri, obj.server.name, island_name)
+
+
+class RegistryApiForm(forms.ModelForm):
+    registry_api = RegistryApiModelChoiceField(required=False,
+                        help_text="Existing Registry APIs that can be choosed "
+                                  "to fill URI and certificate automatically.")
+    
+    class Meta:
+        model = ServerApi
+        fields = ['registry_api', 'base_uri', 'cert']
+        widgets = {
+            'base_uri': forms.URLInput(attrs={'class': 'vURLField'}),
+            'cert': forms.Textarea(attrs={'class': 'vLargeTextField'})
+        }
+        help_texts = {
+            'base_uri': 'A URI where an endpoint of the registry API can be accessed.',
+            'cert': ('An X.509 PEM-encoded certificate for the API endpoint. '
+                     'Required for HTTPS and other encrypted connections.')
+        }
+    
+    def clean(self):
+        cleaned_data = super(RegistryApiForm, self).clean()
+        base_uri = cleaned_data.get("base_uri")
+        cert = cleaned_data.get("cert")
+        if base_uri and base_uri.startswith('https://') and not cert:
+            raise forms.ValidationError("Certificate is required for HTTPS.")
+        return cleaned_data
+    
+    def validate_unique(self):
+        """
+        Disable unique validation because no object will be created.
+        """
+        pass

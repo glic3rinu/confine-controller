@@ -3,6 +3,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
 from django.db import models
+from django.db.models.signals import post_save, post_delete
 from django_transaction_signals import defer
 
 from controller import settings as controller_settings
@@ -53,10 +54,6 @@ class TincHostQuerySet(models.query.QuerySet):
     def hosts(self, *args, **kwargs):
         server_ct = ContentType.objects.get_for_model(Server)
         return self.exclude(content_type=server_ct).filter(*args, **kwargs)
-        
-    def gateways(self, *args, **kwargs):
-        gateway_ct = ContentType.objects.get_for_model(Gateway)
-        return self.filter(content_type=gateway_ct).filter(*args, **kwargs)
 
     def servers(self, *args, **kwargs):
         server_ct = ContentType.objects.get_for_model(Server)
@@ -72,6 +69,9 @@ class TincHost(models.Model):
     non empty array of addresses.
 
     """
+    name = models.CharField(max_length=32, unique=True,
+            help_text='The name given to this host in the tinc network, '
+                      'usually TYPE_ID (e.g. server_4).')
     pubkey = RSAPublicKeyField('public Key', unique=True, null=True, blank=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
     content_type = models.ForeignKey(ContentType)
@@ -84,18 +84,16 @@ class TincHost(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        if not hasattr(self, 'content_type'):
-            return u'tinc_%s' % self.object_id
-        if self.content_type.model == 'server': # FIXME on #236 multi-server
-            return 'server'
-        return u'%s_%s' % (self.content_type.model, self.object_id)
+        return self.name if self.name else self._name
     
     @property
-    def name(self):
-        return str(self)
+    def _name(self):
+        return u'%s_%s' % (self.content_type.model, self.object_id)
     
     def save(self, *args, **kwargs):
         if not self.pk:
+            # generate and initialize name
+            self.name = self._name
             # Try to restore object to allow update in nested serialization
             try:
                 obj = TincHost.objects.get(content_type_id=self.content_type_id,
@@ -119,7 +117,7 @@ class TincHost(models.Model):
     def subnet(self):
         if self.content_type.model == 'node':
             return self.address.make_net(64)
-        else: #self.content_type.model == [host|server|gateway]
+        else: #self.content_type.model == [host|server]
             return self.address
 
     @property
@@ -141,7 +139,7 @@ class TincHost(models.Model):
             if self.pubkey:
                 host += "\n\n%s" % self.pubkey
             return host
-        elif ct_model == 'server' or ct_model == 'gateway':
+        elif ct_model == 'server':
             # Returns tincd host file
             host = []
             for addr in self.addresses.all():
@@ -158,10 +156,11 @@ class TincHost(models.Model):
     
     def get_config(self):
         """
-        Returns client tinc.conf file content, prioritizing island related gateways
+        Returns client tinc.conf file content, prioritizing servers
+        that belongs to the same island.
         """
-        if self.content_type.model in ['server', 'gateway']:
-            raise TypeError("Cannot get_config from a server or gateway")
+        if self.content_type.model == 'server':
+            raise TypeError("Cannot get_config from a server.")
         config = ["Name = %s" % self.name]
         for server in self.connect_to:
             line = "ConnectTo = %s" % server.name
@@ -188,30 +187,14 @@ class TincHost(models.Model):
                 'ip -6 link set "$INTERFACE" down\n' % ip)
     
     def generate_key(self, commit=False):
-        if self.content_type.model in ['server', 'gateway']:
-            raise TypeError("Cannot generate_key from a server or gateway")
+        if self.content_type.model == 'server':
+            raise TypeError("Cannot generate_key from a server.")
         bob = Bob()
         bob.gen_key()
         if commit:
             self.pubkey = bob.get_pub_key(format='X.501')
             self.save()
         return bob.get_key(format='X.501')
-
-
-class Gateway(models.Model):
-    """
-    Describes a Gateway in the testbed. A machine giving entry to the testbed's 
-    management network from a set of network islands. It can help connect 
-    different parts of a management network located at different islands over 
-    some link external to them (e.g. the Internet).
-    """
-    related_tinc = generic.GenericRelation('tinc.TincHost')
-    related_mgmtnet = generic.GenericRelation('mgmtnetworks.MgmtNetConf')
-    description = models.CharField(max_length=256,
-            help_text='Free-form textual description of this gateway.')
-
-    tinc = property(get_tinc)
-    mgmt_net = property(get_mgmt_net)
 
 
 class TincAddress(models.Model):
@@ -248,13 +231,16 @@ class TincAddress(models.Model):
         return self.server.name
 
 
-# Signals
+###  Signals  ###
+
+# update the node set_state on tinc config update
 def tinchost_changed(sender, instance, **kwargs):
+    # Do nothing while loading fixtures or running migrations
+    if kwargs.get('raw', False):
+        return
     if hasattr(instance.content_object, 'update_set_state'): # is a node
         instance.content_object.update_set_state()
 
-from django.db.models.signals import post_save, post_delete
-# update the node set_state depending on tinc configuration
 post_save.connect(tinchost_changed, sender=TincHost)
 post_delete.connect(tinchost_changed, sender=TincHost)
 

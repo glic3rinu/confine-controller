@@ -5,10 +5,18 @@ from django.db.models import Q
 from api import serializers
 
 from . import settings
-from .models import DirectIface, Island, Node, Server
+from .models import DirectIface, Island, Node, NodeApi, Server, ServerApi
+
+
+class ServerApiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServerApi
+        fields = ('type', 'base_uri', 'cert', 'island')
 
 
 class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
+    id = serializers.Field()
+    api = ServerApiSerializer(many=True, allow_add_remove=True)
     properties = serializers.PropertyField()
     
     class Meta:
@@ -47,6 +55,12 @@ class IslandSerializer(serializers.UriHyperlinkedModelSerializer):
         model = Island
 
 
+class NodeApiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NodeApi
+        fields = ('type', 'base_uri', 'cert')
+
+
 #239 Remove firmware configuration cruft from data model
 FW_CONFIG_FIELDS = ('local_iface', 'priv_ipv4_prefix', 'sliver_pub_ipv6',
     'sliver_pub_ipv4', 'sliver_pub_ipv4_range', 'sliver_mac_prefix')
@@ -57,8 +71,9 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     slivers = serializers.RelHyperlinkedRelatedField(many=True, read_only=True,
         view_name='sliver-detail')
     direct_ifaces = DirectIfaceSerializer(required=False, many=True, allow_add_remove=True)
-    cert = serializers.Field()
+    cert = serializers.Field(source='api.cert')
     boot_sn = serializers.IntegerField(read_only=True)
+    api = NodeApiSerializer(required=False)
     
     class Meta:
         model = Node

@@ -10,9 +10,9 @@ from api import api, generics
 from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
-from .models import Host, Gateway
-from .renderers import GatewayProfileRenderer, HostProfileRenderer
-from .serializers import HostCreateSerializer, HostSerializer, GatewaySerializer
+from .models import Host
+from .serializers import HostCreateSerializer, HostSerializer
+from .renderers import HostProfileRenderer
 
 
 class UploadPubkey(APIView):
@@ -70,37 +70,19 @@ class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     ctl = [UploadPubkey]
 
 
-class GatewayList(ApiPermissionsMixin, generics.URIListCreateAPIView):
-    """
-    **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
-        http://wiki.confine-project.eu/arch:rest-api#gateway_at_registry)
-    
-    This resource lists testbed [gateways](http://wiki.confine-project.eu/arch:
-    rest-api#gateway_at_registry) and provides API URIs to navigate to them.
-    """
-    model = Gateway
-    serializer_class = GatewaySerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
+# backwards compatibility #245 note-42
+from api import ApiRoot
+from api.utils import link_header
+from rest_framework.decorators import api_view
 
-
-class GatewayDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/gateway"`](
-        http://wiki.confine-project.eu/arch:rest-api#gateway_at_registry)
-    
-    This resource describes a network gateway providing access to the testbed
-    [server](http://wiki.confine-project.eu/arch:rest-api#server_at_registry)
-    and listening on tinc addresses on one or more community network
-    [islands](http://wiki.confine-project.eu/arch:rest-api#island_at_registry).
-    The gateway connects to other gateways or the testbed server in
-    order to reach the later.
-    """
-    model = Gateway
-    serializer_class = GatewaySerializer
-    renderer_classes = [GatewayProfileRenderer, BrowsableAPIRenderer]
+@api_view(['GET'])
+def gateway_list(request):
+    base_link = [
+        ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
+        ('base_controller', ApiRoot.CONTROLLER_REL_PREFIX + 'base'),
+    ]
+    headers = {'Link': link_header(base_link, request)}
+    return Response([], headers=headers)
 
 
 api.register(HostList, HostDetail)
-api.register(GatewayList, GatewayDetail)

@@ -4,7 +4,7 @@ from api import api, serializers
 from nodes.models import Server, Node
 from mgmtnetworks.serializers import MgmtNetConfRelatedField
 
-from .models import TincAddress, TincHost, Gateway, Host
+from .models import TincAddress, TincHost, Host
 
 def validate_tinc(self, attrs, source):
     """ transform /tinc null into [] because will match with related_tinc """
@@ -58,21 +58,13 @@ class TincHostRelatedField(serializers.RelatedField):
         """ Return a list of tinc configuration objects """
         if data:
             tinc_host = TincHost(pubkey=data.get('pubkey'))
-            tinc_host.full_clean(exclude=['content_type', 'object_id'])
+            # TODO deserialize addresses XXX
+            #tinc_addr = TincAddressSerializer(data=data.get('addresses'), many=True)
+            #for addr in data.get('addresses'):
+            #    tinc_addr = TincAddressSerializer(data=addr)
+            tinc_host.full_clean(exclude=['content_type', 'object_id', 'name'])
             return [tinc_host]
         return []
-
-
-class GatewaySerializer(serializers.UriHyperlinkedModelSerializer):
-    id = serializers.Field()
-    mgmt_net = MgmtNetConfRelatedField(source='related_mgmtnet')
-    tinc = TincHostRelatedField(source='related_tinc', required=False)
-    
-    class Meta:
-        model = Gateway
-    
-    def validate_tinc(self, attrs, source):
-        return validate_tinc(self, attrs, source)
 
 
 class HostCreateSerializer(serializers.UriHyperlinkedModelSerializer):

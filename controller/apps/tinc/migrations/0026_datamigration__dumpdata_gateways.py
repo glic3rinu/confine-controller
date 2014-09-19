@@ -4,27 +4,89 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from django.contrib.contenttypes.models import ContentType
+import json
+import logging
 
+from controller.utils import get_project_root
+from django.core import serializers
+from os import path
 
 class Migration(DataMigration):
+    GATEWAYS_FILE = path.join(get_project_root(), 'gateways.json')
 
     def forwards(self, orm):
-        "Generate MgmtNetConf objects for existing Nodes, Servers, Hosts and Gateways"
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        
-        for model_name in ['nodes.Node', 'nodes.Server', 'tinc.Host', 'tinc.Gateway']:
-            model = orm[model_name]
-            ct = ContentType.objects.get_for_model(model)
-            for obj in model.objects.all():
-                orm.MgmtNetConf.objects.get_or_create(content_type_id=ct.pk, object_id=obj.pk)
-        
+        """
+        Dump the gateways in the database (if any) to a file
+        and warn the user that should migrate manually them.
+        """
+        if orm.Gateway.objects.exists():
+            qs_gw = orm.Gateway.objects.all()
+
+            # keep related objects: mgmtnetconf + tinc + addresses
+            gw_ids = qs_gw.values_list('pk', flat=True)
+            ctype = orm['contenttypes.ContentType'].objects.get(app_label='tinc', model='gateway')
+
+            qs_mgmtnet = orm['mgmtnetworks.MgmtNetConf'].objects.filter(content_type=ctype, object_id__in=gw_ids)
+            qs_thost = orm.TincHost.objects.filter(content_type=ctype, object_id__in=gw_ids)
+            qs_taddr = orm.TincAddress.objects.filter(host_id__in=qs_thost.values_list('pk', flat=True))
+
+            all_objects = list(qs_gw) + list(qs_mgmtnet) + list(qs_thost) + list(qs_taddr)
+
+            # dump data to a file
+            with open(self.GATEWAYS_FILE, "w") as out:
+                serializers.serialize("json", all_objects, indent=4, stream=out)
+
+            # remove all data to avoid orphan objects
+            qs_taddr.delete()
+            qs_thost.delete()
+            qs_mgmtnet.delete()
+            qs_gw.delete()
+
+            # warn user
+            logging.warning("As discussed on issue #236, gateways disappear "
+                "from testbed architecture. Sorry but automatic migration is not "
+                "possible. As some gateways exists in your testbed, manually "
+                "intervention is required to create equivalent servers.\n"
+                "NOTE: Gateway data has been dumped as json in %s" % self.GATEWAYS_FILE)
 
     def backwards(self, orm):
-        "Remove MgmtNetConf objects"
-        orm.MgmtNetConf.objects.all().delete()
+        """
+        Code to restore gateways from the dumped file.
+
+        As Gateway models doesn't exists anymore, this code
+        will be 'best-efforts' executed during the migration
+        and is only provided to help operators.
+
+        If for any reason doesn't works properly, follow
+        the next steps to restore manually the gateways:
+        1. Restore tinc/models.py to include Gateway model.
+        2. Load data using django-admin.py loaddata
+        """
+        try:
+            data = open(self.GATEWAYS_FILE, "r").read()
+        except IOError:
+            logging.warning("Gateways NOT restored: cannot open file '%s'" % self.GATEWAYS_FILE)
+            return # Doesn't exist gateway backup
+        try:
+            datajs = json.loads(data)
+        except ValueError:
+            logging.warning("Gateways NOT restored: invalid JSON format (loaded file '%s')" % self.GATEWAYS_FILE)
+            return # Invalid JSON format
+
+        # handle gateways and create via south ORM
+        for key, obj in enumerate(datajs):
+            if obj['model'] == 'tinc.gateway':
+                gateway = datajs.pop(key)
+                orm.Gateway.objects.create(pk=obj['pk'], **gateway['fields'])
+
+        # Update Gateway auto id sequence
+        db.execute("SELECT setval('tinc_gateway_id_seq', (SELECT MAX(id) FROM tinc_gateway))")
+
+        # handle related objects
+        data = json.dumps(datajs)
+        for obj in serializers.deserialize("json", data):
+            obj.save()
+
 
     models = {
         u'contenttypes.contenttype': {
@@ -41,54 +103,11 @@ class Migration(DataMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {})
         },
-        u'nodes.directiface': {
-            'Meta': {'unique_together': "(['name', 'node'],)", 'object_name': 'DirectIface'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
-            'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'direct_ifaces'", 'to': u"orm['nodes.Node']"})
-        },
         u'nodes.island': {
             'Meta': {'object_name': 'Island'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'})
-        },
-        u'nodes.node': {
-            'Meta': {'object_name': 'Node'},
-            'arch': ('django.db.models.fields.CharField', [], {'default': "'i686'", 'max_length': '16'}),
-            'boot_sn': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
-            'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'nodes'", 'to': u"orm['users.Group']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
-            'local_iface': ('django.db.models.fields.CharField', [], {'default': "'eth0'", 'max_length': '16'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'}),
-            'priv_ipv4_prefix': ('controller.models.fields.NullableCharField', [], {'max_length': '19', 'null': 'True', 'blank': 'True'}),
-            'set_state': ('django.db.models.fields.CharField', [], {'default': "'debug'", 'max_length': '16'}),
-            'sliver_mac_prefix': ('controller.models.fields.NullableCharField', [], {'max_length': '5', 'null': 'True', 'blank': 'True'}),
-            'sliver_pub_ipv4': ('django.db.models.fields.CharField', [], {'default': "'dhcp'", 'max_length': '8'}),
-            'sliver_pub_ipv4_range': ('controller.models.fields.NullableCharField', [], {'default': "'#8'", 'max_length': '256', 'null': 'True', 'blank': 'True'}),
-            'sliver_pub_ipv6': ('django.db.models.fields.CharField', [], {'default': "'none'", 'max_length': '8'})
-        },
-        u'nodes.nodeprop': {
-            'Meta': {'unique_together': "(('node', 'name'),)", 'object_name': 'NodeProp'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
-            'node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'properties'", 'to': u"orm['nodes.Node']"}),
-            'value': ('django.db.models.fields.CharField', [], {'max_length': '256'})
-        },
-        u'nodes.server': {
-            'Meta': {'object_name': 'Server'},
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
-        u'nodes.serverprop': {
-            'Meta': {'unique_together': "(('server', 'name'),)", 'object_name': 'ServerProp'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
-            'server': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'properties'", 'to': u"orm['nodes.Server']"}),
-            'value': ('django.db.models.fields.CharField', [], {'max_length': '256'})
         },
         u'tinc.gateway': {
             'Meta': {'object_name': 'Gateway'},
@@ -114,6 +133,7 @@ class Migration(DataMigration):
             'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincHost'},
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
             'pubkey': ('controller.models.fields.RSAPublicKeyField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
@@ -150,5 +170,5 @@ class Migration(DataMigration):
         }
     }
 
-    complete_apps = ['nodes', 'tinc', 'mgmtnetworks']
+    complete_apps = ['mgmtnetworks', 'tinc']
     symmetrical = True

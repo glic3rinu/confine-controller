@@ -1,14 +1,6 @@
 {% extends "admin/permissions_change_form.html" %}
 {% load i18n utils %}
 
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-    <a href="../../">{% trans 'Home' %}</a> &rsaquo; 
-    <a href="../">{{ app_label|capfirst|escape }}</a> &rsaquo; 
-    {{ opts.verbose_name|capfirst }}
-</div>
-{% endblock %}
-
 {% block object-tools-items %}
 {% for item in object_tools_items %}
     {% if item.always_display or has_change_permission %}

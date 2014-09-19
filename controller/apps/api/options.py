@@ -26,7 +26,7 @@ class ApiRoot(APIView):
     -H "Accept: application/json; indent=4"`
     """
     CONFINE_REL_PREFIX = 'http://confine-project.eu/rel/'
-    REGISTRY_REL_PREFIX = CONFINE_REL_PREFIX + 'server/'
+    REGISTRY_REL_PREFIX = CONFINE_REL_PREFIX + 'registry/'
     CONTROLLER_REL_PREFIX = CONFINE_REL_PREFIX + 'controller/'
     
     def get(base_view, request, format=None):
@@ -40,6 +40,9 @@ class ApiRoot(APIView):
             name = name if is_singleton(model) else '%s-list' % name
             rel = ApiRoot.REGISTRY_REL_PREFIX + name
             relations.append((name, rel))
+        
+        # backwards compatibility rel links #236
+        relations.append(('server', ApiRoot.REGISTRY_REL_PREFIX + 'server'))
         
         # http://confine-project.eu/rel/controller like resources
         for model in api._registry_controller:

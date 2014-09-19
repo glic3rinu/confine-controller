@@ -17,7 +17,7 @@ class Base(ApiRoot):
         profile="http://confine-project.eu/schema/registry/v0/base"`](
         http://wiki.confine-project.eu/arch:rest-api#base_at_registry)
     
-    This resource is located at the base URI of the server API. It
+    This resource is located at the base URI of the registry API. It
     describes testbed-wide parameters and provides the API URIs to
     navigate to other resources in the testbed.
     

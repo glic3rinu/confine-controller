@@ -4,24 +4,45 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
+
 class Migration(DataMigration):
-    # Run before dropping nodes.cert
-    needed_by = (
-        ("nodes", "0015_auto__del_field_node_cert"),
-    )
 
     def forwards(self, orm):
-        "Create Nodekys objects for existing Nodes."
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        for node in orm['nodes.Node'].objects.all():
-            orm.NodeKeys.objects.create(node=node)
+        "Update firmware configuration to include registry section."
+        ### Update ConfigUCI ###
+        config = orm.Config.objects.get()
+        orm.ConfigUCI.objects.create(section='registry registry', option='base_uri',
+            value="node.firmware_build.kwargs_dict.get('registry_base_uri')", config=config)
+        orm.ConfigUCI.objects.create(section='registry registry', option='cert',
+            value="'/etc/confine/registry-server.crt'", config=config)
+        # TODO (eventually): break backwards compatibility with old node firmware #245 note-25
+        # orm.ConfigUCI.objects.filter(section='server server', option='base_path').delete()
+
+        ### Update Config file /etc/config/confine ###
+        # TODO (eventually): break backwards compatibility: remove 'server server' section
+        cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
+        new_content = cfile.content.replace("])", ", 'registry registry'])")
+        assert 'registry registry' in new_content
+        cfile.content = new_content
+        cfile.save()
 
     def backwards(self, orm):
-        "Remove all NodeKeys objects."
-        orm.NodeKeys.objects.all().delete()
+        "Restore firmware configuration."
+        ### Restore ConfigUCI ###
+        config = orm.Config.objects.get()
+        orm.ConfigUCI.objects.filter(section='registry registry', option='base_uri', config=config).delete()
+        orm.ConfigUCI.objects.filter(section='registry registry', option='cert', config=config).delete()
+        # TODO (eventually) restore old config uci #245 note-25
+        # orm.ConfigUCI.objects.create(section='server server', option='base_path',
+        #   value="'/api'", config=config)
 
+        ### Restore Config file /etc/config/confine ###
+        cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
+        new_content = cfile.content.replace(", 'registry registry'])", "])")
+        assert 'registry registry' not in new_content
+        cfile.content = new_content
+        cfile.save()
+        
 
     models = {
         u'firmware.baseimage': {
@@ -115,11 +136,10 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'Node'},
             'arch': ('django.db.models.fields.CharField', [], {'default': "'i686'", 'max_length': '16'}),
             'boot_sn': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
-            'cert': ('controller.models.fields.NullableTextField', [], {'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'nodes'", 'to': u"orm['users.Group']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'blank': 'True'}),
+            'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'local_iface': ('django.db.models.fields.CharField', [], {'default': "'eth0'", 'max_length': '16'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'}),
             'priv_ipv4_prefix': ('controller.models.fields.NullableCharField', [], {'max_length': '19', 'null': 'True', 'blank': 'True'}),

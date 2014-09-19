@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from rest_framework import serializers
 
 from api import api
-from controller.utils.apps import is_installed
 from nodes.models import Server, Node
 
 from .models import CnHost
@@ -19,9 +18,3 @@ class CnHostSerializer(serializers.ModelSerializer):
 # https://groups.google.com/forum/#!topic/django-rest-framework/2iEat5mCbvY/discussion
 api.aggregate(Node, CnHostSerializer, name='cn', required=False)
 api.aggregate(Server, CnHostSerializer, name='cn', required=False)
-
-
-
-if is_installed('tinc'):
-    from tinc.models import Gateway
-    api.aggregate(Gateway, CnHostSerializer, name='cn', required=False)

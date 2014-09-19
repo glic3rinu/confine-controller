@@ -92,11 +92,7 @@ class Command(BaseCommand):
                     prompt_username = None
                     continue
         
-        server, __ = Server.objects.get_or_create(pk=1)
-        if not server.description:
-            server.description = run('hostname').stdout
-            server.save()
-        
+        server = Server.objects.first()
         server_ct = ContentType.objects.get_for_model(Server)
         tinc_server, __ = TincHost.objects.get_or_create(object_id=1,
             content_type=server_ct)

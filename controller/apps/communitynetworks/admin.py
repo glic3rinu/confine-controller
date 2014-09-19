@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from controller.admin.utils import insertattr, insert_change_view_action, link
-from controller.utils.apps import is_installed
 from nodes.models import Server, Node
 from permissions.admin import PermissionGenericTabularInline
 
@@ -34,8 +33,3 @@ insert_change_view_action(Node, cache_node_db)
 
 insertattr(Node, 'inlines', CnHostInline)
 insertattr(Server, 'inlines', CnHostInline)
-
-if is_installed('tinc'):
-    from tinc.models import Gateway
-    insertattr(Gateway, 'inlines', CnHostInline)
-    insertattr(Gateway, 'list_display', app_url_link)

@@ -1,18 +1,19 @@
 from __future__ import absolute_import
 
+import json
+
 from django import forms
+from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
+from django.http import HttpResponse, Http404
 from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import colored, admin_link, docstring_as_help_tip
 from controller.core.exceptions import InvalidMgmtAddress
-from controller.models.utils import get_help_text
-from controller.utils.html import monospace_format
-from controller.utils.singletons.admin import SingletonModelAdmin
 from mgmtnetworks.admin import MgmtNetConfInline
 from mgmtnetworks.utils import reverse as mgmt_reverse
 from permissions.admin import PermissionModelAdmin, PermissionTabularInline
@@ -20,8 +21,10 @@ from users.helpers import filter_group_queryset
 
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
-from .forms import DirectIfaceInlineFormSet
-from .models import DirectIface, Island, Node, NodeProp, Server, ServerProp
+from .forms import (DirectIfaceInlineFormSet, NodeApiInlineForm,
+    NodeApiInlineFormset, ServerApiInlineForm)
+from .models import (DirectIface, Island, Node, NodeApi, NodeProp, Server,
+    ServerApi, ServerProp)
 
 
 STATES_COLORS = {
@@ -30,6 +33,13 @@ STATES_COLORS = {
     Node.SAFE: 'blue',
     Node.PRODUCTION: 'green',
 }
+
+
+class NodeApiInline(PermissionTabularInline):
+    model = NodeApi
+    extra = 0
+    formset = NodeApiInlineFormset
+    form = NodeApiInlineForm
 
 
 class NodePropInline(PermissionTabularInline):
@@ -56,8 +66,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     list_filter = [MyNodesListFilter, 'arch', 'set_state', 'group']
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
-    readonly_fields = ['boot_sn', 'display_cert']
-    inlines = [MgmtNetConfInline, DirectIfaceInline, NodePropInline]
+    readonly_fields = ['boot_sn']
+    inlines = [MgmtNetConfInline, DirectIfaceInline, NodeApiInline, NodePropInline]
     weights = {
         'inlines': {
             NodePropInline: 2
@@ -65,11 +75,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
     }
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'group', 'set_state', 'island'),
-        }),
-        ('Advanced', {
-            'classes': ('collapse',),
-            'fields': ('arch', 'display_cert', 'boot_sn')
+            'fields': ('name', 'description', 'group', 'set_state', 'island',
+                       'arch', 'boot_sn'),
         }),
         ('Firmware configuration', {
             'classes': ('collapse', 'warning'),
@@ -96,17 +103,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         return colored('set_state', STATES_COLORS, verbose=True, bold=False)(node)
     display_set_state.short_description = 'Set state'
     display_set_state.admin_order_field = 'set_state'
-    
-    def display_cert(self, node):
-        """ Display certificate with some contextual help if cert is not present """
-        if not node.pk:
-            return "Certificates can be requested once the node is saved for the first time."
-        if not node.cert:
-            req_url = reverse('admin:nodes_node_request-cert', args=[node.pk])
-            return mark_safe("<a href='%s'>Request certificate</a>" % req_url)
-        return monospace_format(node.cert)
-    display_cert.short_description = 'Certificate'
-    display_cert.help_text = get_help_text(Node, 'cert')
     
     def num_ifaces(self, node):
         """ Display number of direct ifaces, used on changelist """
@@ -188,7 +184,7 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         """ Warning user if the node is not fully configured """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
-            if obj and not obj.cert:
+            if obj and obj.api and not obj.api.cert:
                 messages.warning(request, 'This node lacks a valid certificate '
                 '(will be automatically generated during firmware build).')
             if obj and not obj.group.allow_nodes:
@@ -202,6 +198,17 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
                 form_url=form_url, extra_context=extra_context)
 
 
+class ServerApiInline(PermissionTabularInline):
+    model = ServerApi
+    extra = 1
+    form = ServerApiInlineForm
+    
+    class Media:
+        css = {
+             'all': ('nodes/css/nodes-admin.css',)
+        }
+
+
 class ServerPropInline(PermissionTabularInline):
     model = ServerProp
     extra = 1
@@ -211,13 +218,35 @@ class ServerPropInline(PermissionTabularInline):
         js = ('nodes/js/collapsed_node_properties.js',)
 
 
-class ServerAdmin(ChangeViewActions, SingletonModelAdmin, PermissionModelAdmin):
+class ServerAdmin(ChangeViewActions, PermissionModelAdmin):
+    list_display = ('id', 'name', 'description')
+    list_display_links = ['name', 'id']
     change_form_template = 'admin/nodes/server/change_form.html'
-    inlines = [MgmtNetConfInline, ServerPropInline]
+    inlines = [MgmtNetConfInline, ServerApiInline, ServerPropInline]
     
-    def has_delete_permission(self, *args, **kwargs):
-        """ It doesn't make sense to delete the server """
-        return False
+    def get_urls(self):
+        urls = patterns("",
+            url("^api/$",
+                self.get_api_data_view,
+                name='nodes_server_api'),
+        )
+        return urls + super(ServerAdmin, self).get_urls()
+    
+    def get_api_data_view(self, request):
+        """Auxiliar view to fill registry api at build firmware form."""
+        try:
+            api_id = int(request.GET.get("id", ''))
+        except ValueError:
+            raise Http404
+        try:
+            api = ServerApi.objects.get(pk=api_id, type=ServerApi.REGISTRY)
+        except ServerApi.DoesNotExist:
+            raise Http404
+        response_data = json.dumps({
+            "base_uri": api.base_uri,
+            "cert": api.cert
+        })
+        return HttpResponse(response_data, content_type="application/json")
 
 
 class IslandAdmin(PermissionModelAdmin):

@@ -25,6 +25,34 @@
         {% endfor %}
     </fieldset>
     <fieldset class="module aligned">
+        <h2>Registry API</h2>
+        {{ api_form.non_field_errors }}
+        {% for field in api_form %}
+        <div class="form-row">
+            <div>
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            <p class="help">{{ field.help_text }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        <script type="text/javascript">
+            // Wait until jQuery has been loaded by django
+            window.onload = function () {
+                $("#id_api-registry_api").change(function() {
+                    var api_id = $(this).val();
+                    if(!api_id) { return; } //Do nothing for blank value
+                    $.getJSON("{% url 'admin:nodes_server_api' %}", {id: api_id},
+                          function(api) {
+                              $("#id_api-base_uri").val(api["base_uri"]);
+                              $("#id_api-cert").val(api["cert"]);
+                          });
+                });
+            }
+        </script>
+    </fieldset>
+    <fieldset class="module aligned">
         <h2>Optional files</h2>
         {% if node.files.exists %}
         <div class="help">You can manage the stored values on

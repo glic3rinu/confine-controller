@@ -1,15 +1,103 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_save, post_delete
 
-from controller.models.fields import NullableCharField, NullableTextField
+from controller.models.fields import NullableCharField, PEMCertificateField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
 from controller.core.validators import validate_name, validate_prop_name, validate_net_iface_name
-from controller.utils.singletons.models import SingletonModel
-from pki import ca, Bob
+from pki import Bob
 
 from . import settings
 from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
         validate_dhcp_range, validate_priv_ipv4_prefix)
+
+
+class Api(models.Model):
+    base_uri = models.URLField('base URI', max_length=256,
+            help_text='The base URI of the API endpoint.')
+    cert = PEMCertificateField('Certificate', unique=True, null=True, blank=True,
+            help_text='An optional X.509 PEM-encoded certificate for the API '
+                      'endpoint. Providing this may save API clients from '
+                      'checking the API certificate\'s signature.')
+    
+    class Meta:
+        abstract = True
+
+
+class NodeApiManager(models.Manager):
+    def create_default(self, node, cert=None):
+        base_uri = NodeApi.default_base_uri(node)
+        return self.create(node=node, base_uri=base_uri, cert=cert)
+
+
+class NodeApi(Api):
+    """
+    Data on the endpoint that can be used to access this node's REST API.
+    Please note that the API may be offered by another host (e.g. a caching
+    proxy), which doesn't preclude the node from running the API itself as
+    well (e.g. on its management network address).
+
+    """
+    NODE = 'node'
+    TYPES = ((NODE, 'Node'),)
+    
+    type = models.CharField(max_length=16, choices=TYPES, default=NODE)
+    node = models.OneToOneField('nodes.Node', primary_key=True, related_name='_api')
+    
+    objects = NodeApiManager()
+    
+    class Meta:
+        verbose_name = 'node API'
+        verbose_name_plural = 'node API'
+    
+    @property
+    def is_configured(self):
+        if self.base_uri.startswith('https') and not self.cert:
+            return False
+        return True
+    
+    @classmethod
+    def default_base_uri(cls, node):
+        if node.mgmt_net is None:
+            return ''
+        mgmt_addr = node.mgmt_net.addr
+        return settings.NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
+
+
+class ServerApiManager(models.Manager):
+    def create_default(self, server, type, cert=None):
+        mgmt_addr = self.server.mgmt_net.addr
+        base_uri = settings.NODES_SERVER_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}
+        return self.create(server=server, type=type, base_uri=base_uri, cert=cert)
+
+
+class ServerApi(Api):
+    """
+    Data on the endpoints that can be used to access this server's REST API.
+    Please note that the API may be offered by another host (e.g. a caching
+    proxy), which doesn't preclude the server from running the API itself as
+    well (e.g. on its management network address).
+    """
+    REGISTRY = 'registry'
+    CONTROLLER = 'controller'
+    TYPES = (
+        (REGISTRY, 'Registry'),
+        (CONTROLLER, 'Controller'),
+    )
+    
+    type = models.CharField(max_length=16, choices=TYPES)
+    server = models.ForeignKey('nodes.Server', related_name='api')
+    island = models.ForeignKey('nodes.Island', null=True, blank=True,
+            on_delete=models.SET_NULL,
+            help_text='An optional island used to hint where this API endpoint '
+                      'is reachable from. An API endpoint reachable from the '
+                      'management network may omit this member.')
+    
+    objects = ServerApiManager()
+    
+    class Meta:
+        verbose_name = 'server API'
+        verbose_name_plural = 'server APIs'
 
 
 class Node(models.Model):
@@ -47,10 +135,6 @@ class Node(models.Model):
             help_text='A unique name for this node. A single non-empty line of '
                       'free-form text with no whitespace surrounding it.',
             validators=[validate_name])
-    cert = NullableTextField('Certificate', unique=True, null=True, blank=True,
-            help_text='X.509 PEM-encoded certificate for this RD. The certificate '
-                      'may be signed by a CA recognised in the testbed and required '
-                      'by clients and services accessing the node API.')
     description = models.TextField(blank=True,
             help_text='Free-form textual description of this host/device.')
     arch = models.CharField('Architecture', max_length=16,
@@ -150,7 +234,9 @@ class Node(models.Model):
         super(Node, self).clean()
     
     def update_set_state(self, commit=True):
-        if not self.cert or not self.mgmt_net.is_configured():
+        mgmtnet_conf = getattr(self.mgmt_net, 'is_configured', False)
+        api_conf = getattr(self.api, 'is_configured', False)
+        if not mgmtnet_conf or not api_conf:
             # bad_conf
             self.set_state = Node.DEBUG
         else:
@@ -162,11 +248,30 @@ class Node(models.Model):
                 #     self.set_state = Node.SAFE
                 pass
         if commit:
-            self.save()
+            self.save(updated_set_state=True)
     
     def save(self, *args, **kwargs):
-        self.update_set_state(commit=False)
+        updated_set_state = kwargs.pop('updated_set_state', False)
         super(Node, self).save(*args, **kwargs)
+        # Call after save to be able to access related objects
+        if not updated_set_state:
+            self.update_set_state()
+    
+    @property
+    def api(self):
+        try:
+            return self._api
+        except NodeApi.DoesNotExist:
+            return None
+    
+    @api.setter
+    def api(self, value):
+        if value is None:
+            try:
+                self._api.delete()
+            except NodeApi.DoesNotExist:
+                return  # is alreday None
+        self._api = value
     
     def reboot(self):
         self.boot_sn += 1
@@ -195,12 +300,6 @@ class Node(models.Model):
             return int(self.sliver_pub_ipv4_range.split('#')[1])
         return 0
     
-    def sign_cert_request(self, scr, commit=True):
-        self.cert = ca.sign_request(scr).as_pem().strip()
-        if commit:
-            self.save()
-        return self.cert
-    
     def generate_certificate(self, key, commit=False, user=None):
         if user is None:
             # We pick one pseudo-random admin
@@ -208,11 +307,13 @@ class Node(models.Model):
         addr = str(self.mgmt_net.addr)
         bob = Bob(key=key)
         scr = bob.create_request(Email=user.email, CN=addr)
-        return self.sign_cert_request(scr, commit=commit)
-    
-    def revoke_certificate(self):
-        self.cert = None
-        self.save()
+        signed_cert = self.mgmt_net.sign_cert_request(scr)
+        if commit:
+            if self.api is None:
+                self.api = NodeApi.objects.create_default(node=self)
+            self.api.cert = signed_cert
+            self.api.save()
+        return signed_cert
 
 
 class BaseProp(models.Model):
@@ -264,19 +365,41 @@ class DirectIface(models.Model):
         return self.name
 
 
-class Server(SingletonModel):
+class ServerQuerySet(models.query.QuerySet):
+    def delete(self):
+        """Check that at least one server remains undeleted."""
+        if self.count() == self.model.objects.count():
+            raise PermissionDenied("At least one server must exist!")
+        super(ServerQuerySet, self).delete()
+
+
+class ServerManager(models.Manager):
+    def get_query_set(self):
+        return ServerQuerySet(self.model, using=self.db)
+
+class Server(models.Model):
     """
     Describes the testbed server (controller).
     """
-    description = models.CharField(max_length=256,
-            help_text='Free-form textual description of the server.')
+    name = models.CharField(max_length=256, unique=True,
+            help_text='A unique name for this server. A single non-empty line of '
+                      'free-form text with no whitespace surrounding it.',
+            validators=[validate_name])
+    description = models.TextField(blank=True,
+            help_text='Free-form textual description of this server.')
     
-    class Meta:
-        verbose_name_plural = "server"
+    objects = ServerManager()
     
     def __unicode__(self):
-        return 'Server'
-
+        return self.name
+    
+    class Meta:
+        ordering = ['pk']
+    
+    def delete(self):
+        if Server.objects.count() == 1:
+            raise PermissionDenied("At least one server must exist!")
+        super(Server, self).delete()
 
 class ServerProp(BaseProp):
     """
@@ -307,3 +430,16 @@ class Island(models.Model):
     
     def __unicode__(self):
         return self.name
+
+
+###  Signals  ###
+
+# update the node set_state on nodeapi update
+def nodeapi_changed(sender, instance, **kwargs):
+    # Do nothing while loading fixtures or running migrations
+    if kwargs.get('raw', False):
+        return
+    instance.node.update_set_state()
+
+post_save.connect(nodeapi_changed, sender=NodeApi)
+post_delete.connect(nodeapi_changed, sender=NodeApi)

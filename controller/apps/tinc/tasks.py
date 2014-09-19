@@ -25,7 +25,7 @@ def update_tincd():
     
     # File-based lock mechanism to prevent concurrency problems
     with LockFile(hosts_path+'.lock', expire=60):
-        hosts = TincHost.objects.hosts() # clients + gateways
+        hosts = TincHost.objects.hosts() # clients
         # Batch processing of tinc clients for efficiency/max_arg_length tradeoff
         scripts = []
         total = len(hosts)

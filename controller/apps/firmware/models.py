@@ -185,6 +185,12 @@ class Build(models.Model):
         config = Config.objects.get()
         build_obj = Build.objects.create(node=node, version=config.version,
             base_image=base_image.image, kwargs=kwargs)
+        
+        # handle registry api #245: save cert content into DB
+        cert = kwargs.pop('registry_cert')
+        config = ConfigFile.objects.get(path='/etc/config/confine')
+        build_obj.add_file('/etc/confine/registry-server.crt', cert, config)
+        
         if async:
             defer(build_task.delay, build_obj.pk, exclude=exclude, **kwargs)
         else:
@@ -207,7 +213,8 @@ class Build(models.Model):
         if not self.base_image or self.base_image not in base_images:
             return False
         exclude = list(config.files.optional().values_list('pk', flat=True))
-        old_files = self.files.exclude(config__is_optional=True)
+        old_files = self.files.exclude(config__is_optional=True)\
+                        .exclude(path='/etc/confine/registry-server.crt')
         old_files = set( (f.path,f.content) for f in old_files )
         new_files = config.eval_files(self.node, exclude=exclude)
         new_files = set( (f.path,f.content) for f in new_files )
@@ -533,7 +540,7 @@ construct_safe_locals = Signal(providing_args=["instance", "safe_locals"])
 
 @receiver(construct_safe_locals, dispatch_uid="firmware.update_safe_locals")
 def update_safe_locals(sender, safe_locals, **kwargs):
-    safe_locals.update({'server': Server.objects.get(), 're': re})
+    safe_locals.update({'server': Server.objects.first(), 're': re})
     safe_locals.update(dict((setting, getattr(controller_settings, setting))
         for setting in dir(controller_settings) if setting.isupper() ))
     safe_locals.update(dict((setting, getattr(project_settings, setting))

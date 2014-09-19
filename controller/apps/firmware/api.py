@@ -9,7 +9,7 @@ from api import api, generics
 from api.renderers import ResourceListJSONRenderer
 from api.utils import insert_ctl
 from nodes.api import NodeDetail
-from nodes.models import Node
+from nodes.models import Node, Server, ServerApi
 from permissions.api import ApiPermissionsMixin
 
 from .exceptions import BaseImageNotAvailable
@@ -54,16 +54,29 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
         node = get_object_or_404(Node, pk=pk)
         if not request.DATA:
             config = get_object_or_404(Config)
-            # TODO allow choose base image??
-            base_image = config.get_images(node).order_by('-default').first()
-            if base_image is None:
-                raise BaseImageNotAvailable
+            kwargs = {}
+            
+            ### Initialize defaults ###
             async = True
             success_status = status.HTTP_202_ACCEPTED
+            # allow asynchronous requests
             if '201-created' == request.META.get('HTTP_EXPECT', None):
                 async = False
                 success_status = status.HTTP_201_CREATED
-            build = Build.build(node, base_image, async=async)
+            
+            # TODO allow choose base image
+            base_image = config.get_images(node).order_by('-default').first()
+            if base_image is None:
+                raise BaseImageNotAvailable
+            
+            # TODO allow choose registry API
+            main_server = Server.objects.first()
+            registry = main_server.api.filter(type=ServerApi.REGISTRY).first()
+            kwargs['registry_base_uri'] = registry.base_uri
+            kwargs['registry_cert'] = registry.cert or ''
+            
+            ### call firmware build task ###
+            build = Build.build(node, base_image, async=async, **kwargs)
             serializer = self.serializer_class(build, data=request.DATA)
             return Response(serializer.data, status=success_status)
         raise exceptions.ParseError(detail='This endpoint only accepts null data')

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from permissions import Permission, ReadOnlyPermission, AllowAllPermission
 
-from .models import TincHost, Host, Gateway, TincAddress
+from .models import TincHost, Host, TincAddress
 
 
 class HostPermission(Permission):
@@ -29,5 +29,4 @@ class HostPermission(Permission):
 # handled by the parent object
 TincHost.has_permission = AllowAllPermission()
 Host.has_permission = HostPermission()
-Gateway.has_permission = ReadOnlyPermission()
 TincAddress.has_permission = ReadOnlyPermission()

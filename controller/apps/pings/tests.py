@@ -52,7 +52,7 @@ class PingTests(TestCase):
         mgmt_net = node.mgmt_net
         ctype = ContentType.objects.get_for_model(mgmt_net)
         typed_pings = Ping.objects.filter(content_type=ctype)
-
+        
         # Wait until pings are created
         timeout = 0
         while not typed_pings.filter(object_id=mgmt_net.pk).exists():
@@ -64,10 +64,10 @@ class PingTests(TestCase):
             time.sleep(1)
             self.assertTrue(timeout < 60)
             timeout +=1
-
+        
         # remove the node
         node.delete()
-
+        
         # related objects should NOT exist
         self.assertFalse(typed_pings.filter(object_id=mgmt_net.pk).exists(),
             "Pings has NOT been removed!")

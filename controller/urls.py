@@ -50,6 +50,8 @@ if is_installed('api'):
     urlpatterns += patterns('',
         url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
         url(r'^api-token-auth/', 'rest_framework.authtoken.views.obtain_auth_token', name='api-token-auth'),
+        # backwards compatibility #245 note-42
+        url(r'^api/gateways/', 'tinc.api.gateway_list', name='gateway-list'),
         url(r'^api/', include(api.urls)),)
 
 

@@ -22,6 +22,18 @@ class SliverStateListFilter(NodeStateListFilter):
         return State.SLIVER_STATES
 
 
+class StateContentTypeFilter(SimpleListFilter):
+    title = 'Object type'
+    parameter_name = 'object_type'
+    
+    def lookups(self, request, model_admin):
+        return State.objects.values_list('content_type__pk', 'content_type__model').distinct('content_type')
+    
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(content_type__pk=self.value())
+
+
 class FirmwareVersionListFilter(SimpleListFilter):
     title = 'Firmware ver'
     parameter_name = 'soft_version'

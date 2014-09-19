@@ -32,7 +32,8 @@ from slices.helpers import wrap_action
 from slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
-from .filters import NodeStateListFilter, SliverStateListFilter, FirmwareVersionListFilter
+from .filters import (NodeStateListFilter, SliverStateListFilter,
+    StateContentTypeFilter, FirmwareVersionListFilter)
 from .helpers import break_headers, break_lines, get_changes_data, sizeof_fmt
 from .models import NodeSoftwareVersion, State, StateHistory
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
@@ -199,6 +200,9 @@ class StateHistoryAdmin(PermissionModelAdmin):
 
 
 class StateAdmin(ChangeViewActions, PermissionModelAdmin):
+    list_display = ['id', 'content_type_link', 'current', 'content_object_link']
+    list_filter = (StateContentTypeFilter, 'value',)
+    ordering = ('content_type', 'object_id')
     fieldsets = (
         (None, {
             'fields': ('url_link', 'last_seen', 'last_contact',
@@ -274,8 +278,24 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     
     def current(self, instance):
         state = display_current(instance)
-        return mark_safe('<a href="history">%s</a>' % (state))
+        url = reverse("admin:state_state_history", args=(instance.pk,))
+        return mark_safe('<a href="%s">%s</a>' % (url, state))
     display_current.short_description = 'current'
+    
+    def content_object_link(self, instance):
+        ctype = instance.content_type
+        url_pattern = "admin:%s_%s_change" % (ctype.app_label, ctype.model)
+        url = reverse(url_pattern, args=(instance.object_id,))
+        return mark_safe('<a href="%s">%s</a>' % (url, instance.content_object))
+    content_object_link.admin_order_field = 'object_id'
+    content_object_link.short_description = 'object'
+    
+    def content_type_link(self, instance):
+        ctype = instance.content_type
+        url = reverse("admin:%s_%s_changelist" % (ctype.app_label, ctype.model))
+        return mark_safe('<a href="%s">%s</a>' % (url, instance.content_type))
+    content_type_link.admin_order_field = 'content_type'
+    content_type_link.short_description = 'object type'
     
     def has_add_permission(self, request):
         """ Object states can not be manually created """

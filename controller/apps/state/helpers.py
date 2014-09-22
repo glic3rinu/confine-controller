@@ -203,3 +203,21 @@ def extract_node_software_version(version):
     raw, _, date = raw.rpartition('-')
     branch, _, rev = raw.rpartition('.')
     return {'branch': branch, 'rev': rev, 'date': date, 'pkg': pkg}
+
+
+def extract_disk_available(statejs):
+    # legacy disk info (node firmware < 2014-09-02)
+    total = statejs.get('disk_avail')
+    slv_dflt = statejs.get('disk_dflt_per_sliver')
+    
+    # standar disk info via resources management
+    disk_resource = {}
+    for resource in statejs.get('resources', {}):
+        if resource.get('name') == 'disk':
+            disk_resource = resource
+            break
+    return {
+        'total': total or disk_resource.get('avail', 'N/A'),
+        'slv_dflt': slv_dflt or disk_resource.get('dflt_req', 'N/A'),
+        'unit': disk_resource.get('unit')
+    }

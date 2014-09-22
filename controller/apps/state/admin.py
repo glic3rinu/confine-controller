@@ -34,7 +34,8 @@ from slices.models import Sliver, Slice
 from .actions import refresh, refresh_state, show_state
 from .filters import (NodeStateListFilter, SliverStateListFilter,
     StateContentTypeFilter, FirmwareVersionListFilter)
-from .helpers import break_headers, break_lines, get_changes_data, sizeof_fmt
+from .helpers import (break_headers, break_lines, extract_disk_available,
+    get_changes_data, sizeof_fmt)
 from .models import NodeSoftwareVersion, State, StateHistory
 from .settings import (STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME,
         STATE_FLAPPING_CHANGES, STATE_FLAPPING_MINUTES)
@@ -367,23 +368,11 @@ def disk_available(node):
     except ValueError:
         return 'No data'
     
-    # legacy disk info (node firmware < 2014-09-02)
-    total = statejs.get('disk_avail')
-    slv_dflt = statejs.get('disk_dflt_per_sliver')
-    
-    # standar disk info via resources management
-    disk_resource = {}
-    for resource in statejs.get('resources', {}):
-        if resource.get('name') == 'disk':
-            disk_resource = resource
-            break
-    total = total or disk_resource.get('avail', 'N/A')
-    slv_dflt = slv_dflt or disk_resource.get('dflt_req', 'N/A')
-    
+    disk = extract_disk_available(statejs)
     # convert to human readable
-    unit = disk_resource.get('unit')
-    total = sizeof_fmt(total, unit)
-    slv_dflt = sizeof_fmt(slv_dflt, unit)
+    unit = disk['unit']
+    total = sizeof_fmt(disk['total'], unit)
+    slv_dflt = sizeof_fmt(disk['slv_dflt'], unit)
     
     return "%s (%s)" % (total, slv_dflt)
 disk_available.short_description = mark_safe('<span class="help-text" title="Disk '

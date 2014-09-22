@@ -1,5 +1,4 @@
 import gevent
-import json
 import requests
 
 from django.test import LiveServerTestCase
@@ -7,8 +6,8 @@ from django.test import LiveServerTestCase
 from nodes.models import Node
 from users.models import Group
 
-from .admin import disk_available
-from .helpers import extract_node_software_version, sizeof_fmt
+from .helpers import (extract_disk_available, extract_node_software_version,
+    sizeof_fmt)
 from .models import State
 from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
 
@@ -60,7 +59,7 @@ class StateTests(LiveServerTestCase):
             STATE_NODE_SOFT_VERSION_NAME(version)
     
     def test_disk_available(self):
-        data = json.dumps({
+        data = {
             "name": "UPC-lab104-VM07",
             "soft_version": "testing.bd6d896-r20140902.1052-1",
             "resources": [
@@ -86,28 +85,31 @@ class StateTests(LiveServerTestCase):
                     "unit": "addrs"
                 }
             ]
-        })
-        State.objects.create(content_object=self.node, data=data)
-        disk_info = disk_available(self.node)
-        self.assertEqual("5.1 GiB (200 MiB)", disk_info)
+        }
+        disk = extract_disk_available(data)
+        self.assertEqual(5250, disk['total'])
+        self.assertEqual(200, disk['slv_dflt'])
+        self.assertEqual("MiB", disk['unit'])
     
     def test_disk_available_old_firmware(self):
-        data = json.dumps({
+        data = {
             "name": "Gallia",
             "soft_version": "testing.70de099-r20140211.1450-1",
             "disk_avail": 40202,
             "disk_dflt_per_sliver": 1000,
             "disk_max_per_sliver": 2000
-        })
-        State.objects.create(content_object=self.node, data=data)
-        disk_info = disk_available(self.node)
-        self.assertEqual("39.3 GiB (1000 MiB)", disk_info)
+        }
+        disk = extract_disk_available(data)
+        self.assertEqual(40202, disk['total'])
+        self.assertEqual(1000, disk['slv_dflt'])
+        self.assertIsNone(disk['unit'])
     
     def test_disk_available_nodata(self):
-        data = json.dumps({
+        data = {
             "name": "Gallia",
             "soft_version": "testing.70de099-r20140211.1450-1"
-        })
-        State.objects.create(content_object=self.node, data=data)
-        disk_info = disk_available(self.node)
-        self.assertEqual("N/A (N/A)", disk_info)
+        }
+        disk = extract_disk_available(data)
+        self.assertEqual('N/A', disk['total'])
+        self.assertEqual('N/A', disk['slv_dflt'])
+        self.assertIsNone(disk['unit'])

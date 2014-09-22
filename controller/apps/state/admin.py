@@ -375,8 +375,9 @@ def disk_available(node):
     slv_dflt = sizeof_fmt(disk['slv_dflt'], unit)
     
     return "%s (%s)" % (total, slv_dflt)
-disk_available.short_description = mark_safe('<span class="help-text" title="Disk '
-    'available reported by the node:\ntotal (default per sliver)">Disk available</span>')
+disk_available.short_description = mark_safe('<span class="help-text" '
+    'title="Disk available reported by the node:\ntotal (default per sliver)" '
+    'style="padding-left:0; padding-right:12px">Disk available</span>')
 
 
 

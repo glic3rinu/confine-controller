@@ -17,6 +17,7 @@ class BaseIface(object):
     AUTO_CREATE = False
     CREATE_BY_DEFAULT = False
     UNIQUE = False
+    DISABLED_MSG = 'no support'
     
     def clean_model(self, iface):
         """ additional logic to be executed during model.clean() """
@@ -43,6 +44,7 @@ class IsolatedIface(BaseIface):
     """
     DEFAULT_NAME = 'iso0'
     ALLOW_BULK = False
+    DISABLED_MSG = 'no VLAN requested'
     
     def clean_model(self, iface):
         if iface.sliver_id and not iface.sliver.slice.vlan_nr:

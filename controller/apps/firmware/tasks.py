@@ -5,6 +5,7 @@ from celery.task import task
 
 from controller.models.utils import get_file_field_base_path
 
+from .helpers import pem2der_string
 from .image import Image
 
 
@@ -54,6 +55,19 @@ def build(build_id, *args, **kwargs):
             image.create_file(build_file)
             build_file.build = build_obj
             build_file.save()
+        
+        # generate binary versions of uhttpd key and certificate #410
+        from .models import BuildFile # avoid circular imports
+        for pem_path in ['/etc/uhttpd.crt.pem', '/etc/uhttpd.key.pem']:
+            try:
+                pem_file = build_obj.files.get(path=pem_path)
+            except BuildFile.DoesNotExist:
+                pass
+            else:
+                der_content = pem2der_string(pem_file.content)
+                der_path = pem_path.rstrip('.pem')
+                der_file = BuildFile(path=der_path, content=der_content, config=pem_file.config)
+                image.create_file(der_file)
         
         plugins = config.plugins.active()
         total = len(plugins)

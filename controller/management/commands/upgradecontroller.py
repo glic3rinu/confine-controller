@@ -23,6 +23,8 @@ class Command(BaseCommand):
                 help='Only run "pip install confine-controller --upgrade"'),
             make_option('--controller_version', dest='version', default=False,
                 help='Specifies what version of the controller you want to install'),
+            make_option('--proxy', dest='proxy',
+                help='Specify a proxy in the form [user:passwd@]proxy.server:port.'),
             )
     
     option_list = BaseCommand.option_list
@@ -34,6 +36,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         current_version = get_version()
         current_path = get_existing_pip_installation()
+        proxy = '--proxy %s' % options.get('proxy') if options.get('proxy') else ''
         
 #        # Getting version that will be installed, yeah pip doesn't support it :)
 #        pypi_url = 'https://pypi.python.org/pypi/confine-controller'
@@ -67,15 +70,15 @@ class Command(BaseCommand):
                     # if desired_version == 'dev':
                     #     r('pip install -e git+http://git.confine-project.eu/confine/controller.git@master#egg=confine-controller')
                     # else:
-                        r('pip install confine-controller==%s' % desired_version)
+                        r('pip %s install confine-controller==%s' % (proxy, desired_version))
                 else:
                     # Did I mentioned how I hate PIP?
                     if run('pip --version|cut -d" " -f2').stdout == '1.0':
-                        r('pip install confine-controller --upgrade')
+                        r('pip %s install confine-controller --upgrade' % proxy)
                     else:
                         # (Fucking pip)^2, it returns exit code 0 even when fails
                         # because requirement already up-to-date
-                        r('pip install confine-controller --upgrade --force')
+                        r('pip %s install confine-controller --upgrade --force' % proxy)
             except CommandError:
                 # Restore backup
                 run('rm -rf %s' % current_path)
@@ -97,4 +100,5 @@ class Command(BaseCommand):
         
         # version specific upgrade operations
         if not options.get('pip_only'):
-            call_command("postupgradecontroller", version=current_version)
+            call_command("postupgradecontroller", version=current_version,
+                proxy=options.get('proxy'))

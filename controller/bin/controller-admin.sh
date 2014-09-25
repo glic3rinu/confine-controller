@@ -82,6 +82,9 @@ function print_install_requirements_help () {
 		    ${bold}-p, --production${normal}
 		        Installs all controller requirements using apt-get and pip (default)
 		    
+		    ${bold}--proxy <proxy>${normal}
+                Specify a proxy in the form [user:passwd@]proxy.server:port.
+		    
 		    ${bold}-h, --help${normal}
 		        Displays this help text
 		
@@ -91,16 +94,18 @@ function print_install_requirements_help () {
 
 function install_requirements () {
     # local is a deprecated option but kept for backwards compatibility
-    opts=$(getopt -o dlph -l development,local,production,help -- "$@") || exit 1
+    opts=$(getopt -u -o dlph -l development,local,production,proxy:,help -- "$@") || exit 1
     set -- $opts
     development=false
     production=true
+    proxy=''
     
     while [ $# -gt 0 ]; do
         case $1 in
             -d|--development) development=true; production=false; shift ;;
             -l|--local) production=true; shift ;; # backwards compatibility
             -p|--production) production=true; shift ;;
+            --proxy) proxy="--proxy $2"; shift 2;;
             -h|--help) print_install_requirements_help; exit 0 ;;
             (--) shift; break;;
             (-*) echo "$0: Err. - unrecognized option $1" 1>&2; exit 1;;
@@ -162,7 +167,7 @@ function install_requirements () {
     
     run apt-get update
     run apt-get install -y $DEVELOPMENT_APT
-    run pip install $DEVELOPMENT_PIP
+    run pip install $proxy $DEVELOPMENT_PIP
     
     # Some versions of rabbitmq-server will not start automatically by default unless ...
     sed -i "s/# Default-Start:.*/# Default-Start:     2 3 4 5/" /etc/init.d/rabbitmq-server
@@ -175,16 +180,16 @@ function install_requirements () {
         [ ! -e /usr/lib/libjpeg.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libjpeg.so /usr/lib
         [ ! -e /usr/lib/libfreetype.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libfreetype.so /usr/lib
         [ ! -e /usr/lib/libz.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libz.so /usr/lib
-        run pip install $PRODUCTION_PIP
+        run pip install $proxy $PRODUCTION_PIP
     fi
     
     if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
         # Debian squeeze compat: Install kombu version compatible with old amq protocol
-        run pip install celery==3.0.17 kombu==2.4.7 --upgrade
+        run pip install $proxy celery==3.0.17 kombu==2.4.7 --upgrade
         if ! $development; then
             # Make sure gevent is a recent version 
             # TODO: remove when all deployments have been upgraded
-            run pip install gevent --upgrade
+            run pip install $proxy gevent --upgrade
         fi
     fi
 }

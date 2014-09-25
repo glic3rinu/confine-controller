@@ -35,6 +35,8 @@ class Command(BaseCommand):
                 dest='print_upgrade_notes', help='Do not print specific upgrade notes'),
             make_option('--from', dest='version', default=False,
                 help="Controller's version from where you are upgrading, i.e 0.6.32"),
+            make_option('--proxy', dest='proxy',
+                help='Specify a proxy in the form [user:passwd@]proxy.server:port.'),
             )
     
     option_list = BaseCommand.option_list
@@ -111,6 +113,8 @@ class Command(BaseCommand):
             run('chmod +x %s' % controller_admin)
             
             extra = '--development' if development else ''
+            if options.get('proxy'):
+                extra += ' --proxy %s' % options.get('proxy')
             run("%s install_requirements " % controller_admin + extra)
             run("python manage.py collectstatic --noinput")
             

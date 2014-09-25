@@ -186,11 +186,6 @@ function install_requirements () {
     if [[ $(rabbitmqctl status|grep RabbitMQ|cut -d'"' -f4) == "1.8.1" ]]; then
         # Debian squeeze compat: Install kombu version compatible with old amq protocol
         run pip install $proxy celery==3.0.17 kombu==2.4.7 --upgrade
-        if ! $development; then
-            # Make sure gevent is a recent version 
-            # TODO: remove when all deployments have been upgraded
-            run pip install $proxy gevent --upgrade
-        fi
     fi
 }
 export -f install_requirements

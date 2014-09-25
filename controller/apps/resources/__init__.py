@@ -53,7 +53,7 @@ class ResourcePlugin(object):
         for resource in cls.plugins:
             if resource.name == name:
                 return resource()
-        raise KeyError('Resource with name %s can not be found' % name)
+        raise KeyError("Resource with name '%s' can not be found" % name)
     
     @classmethod
     def _get_related_models(cls, category):

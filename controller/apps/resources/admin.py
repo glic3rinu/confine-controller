@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from controller.admin.utils import insertattr
 from permissions.admin import PermissionGenericTabularInline
 
@@ -47,6 +49,18 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
         if db_field.name == 'name':
             kwargs['widget'] = VerboseNameShowTextWidget()
         return super(ResourceReqAdminInline, self).formfield_for_dbfield(db_field, **kwargs)
+    
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Remove 'name' from readonly fields because its value
+        is required to call properly Resource.get
+        ResourceReqForm is in charge of mark it as readonly.
+        
+        """
+        ro_fields = super(ResourceReqAdminInline, self).get_readonly_fields(request, obj=obj)
+        if 'name' in ro_fields:
+            ro_fields.remove('name')
+        return ro_fields
 
 
 for producer_model in ResourcePlugin.get_producers_models():

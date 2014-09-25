@@ -149,4 +149,5 @@ class SliverIfaceBulkForm(forms.Form):
             else:
                 kwargs['initial'] = _boolean_icon(False)
                 kwargs['widget'] = ShowText()
+                kwargs['label'] += ' (%s)' % iface_object.VERBOSE_DISABLED_MSG
             self.fields[iface_type] = forms.BooleanField(**kwargs)

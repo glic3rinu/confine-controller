@@ -18,6 +18,8 @@ class BaseIface(object):
     CREATE_BY_DEFAULT = False
     UNIQUE = False
     DISABLED_MSG = 'no support'
+    VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
+                            "for this kind of sliver interface.")
     
     def clean_model(self, iface):
         """ additional logic to be executed during model.clean() """
@@ -45,6 +47,8 @@ class IsolatedIface(BaseIface):
     DEFAULT_NAME = 'iso0'
     ALLOW_BULK = False
     DISABLED_MSG = 'no VLAN requested'
+    VERBOSE_DISABLED_MSG = ("The parent slice does not request the necessary "
+                            "VLAN number.")
     
     def clean_model(self, iface):
         if iface.sliver_id and not iface.sliver.slice.vlan_nr:
@@ -80,6 +84,8 @@ class Pub6Iface(BaseIface):
     interface will be bridged to the community network.
     """
     DEFAULT_NAME = 'pub1'
+    VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
+                            "for public IPv6 sliver interfaces.")
     
     def ipv6_addr(self, iface):
         return 'Unknown'

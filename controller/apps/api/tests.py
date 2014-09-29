@@ -2,6 +2,7 @@
 Test controller api app.
 """
 import json
+import urlparse
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -139,3 +140,134 @@ class FilteringTests(TestCase):
         url = reverse('node-list')
         resp = self.client.get(url + '?/name=foo')
         self.assertEqual(resp.status_code, 422)
+
+
+class PaginationTests(TestCase):
+    fixtures = ['groups.json', 'nodes.json']
+    
+    def get_page(self, url):
+        url = urlparse.urlparse(url)
+        query = dict(urlparse.parse_qsl(url.query))
+        return int(query['page'])
+    
+    def extract_header_links(self, header_link):
+        """Process response and return dictionary links"""
+        value, rel = zip(*[link.split('; ') for link in header_link.split(', ')])
+        value = [val.lstrip("<").rstrip(">") for val in value]
+        rel = [r.split('=')[1].strip('"') for r in rel]
+        return dict(zip(rel, value))
+    
+    def check_pagination_links(self, header_link, current_page=1):
+        """
+        Check that header includes links to other pages of
+        the listing.
+        
+        """
+        links = self.extract_header_links(header_link)
+        
+        # headers should always include first, last links
+        self.assertIn('first', links)
+        self.assertIn('last', links)
+        
+        # headers may include next, prev links
+        first_page = self.get_page(links['first'])
+        last_page = self.get_page(links['last'])
+        if current_page > first_page:
+            self.assertIn('prev', links)
+        if current_page < last_page:
+            self.assertIn('next', links)
+        
+        return links
+    
+    def test_correct_default_pagination(self):
+        """Test pagination with implicit page and per_page."""
+        url = reverse('node-list')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.check_pagination_links(resp['Link'])
+
+    def test_correct_invalid_page(self):
+        """Test pagination with page < 1 and page > MAX."""
+        url = reverse('node-list')
+        resp = self.client.get(url + '?page=-1')
+        self.assertEqual(resp.status_code, 200)
+        links = self.check_pagination_links(resp['Link'])
+        
+        last_page = self.get_page(links['last'])
+        resp = self.client.get('%s?page=%i' % (url, last_page + 1))
+        self.assertEqual(resp.status_code, 200)
+        self.check_pagination_links(resp['Link'])
+    
+    def test_correct_invalid_per_page(self):
+        """Test pagination with invalid per_page values."""
+        url = reverse('node-list')
+        resp = self.client.get(url + '?per_page=0')
+        self.assertEqual(resp.status_code, 200)
+        self.check_pagination_links(resp['Link'])
+        
+        resp = self.client.get(url + '?per_page=NaN')
+        self.assertEqual(resp.status_code, 200)
+        self.check_pagination_links(resp['Link'])
+    
+    def test_follow_pagination_links(self):
+        """Test follow next and prev link collecting all objects."""
+        url = reverse('node-list')
+        resp = self.client.get(url + '?per_page=3')
+        links = self.check_pagination_links(resp['Link'])
+        
+        # follow forwards
+        nodes = []
+        current_page = 1
+        last_page = self.get_page(links['last'])
+        while True:
+            resp = self.client.get(url + '?per_page=3&page=%i' % current_page)
+            nodes += json.loads(resp.content)
+            links = self.check_pagination_links(resp['Link'], current_page)
+            if current_page == last_page:
+                break
+            current_page = self.get_page(links['next'])
+        
+        nodes_db = set(Node.objects.values_list('id', flat=True))
+        nodes_id = set([node['id'] for node in nodes])
+        self.assertEquals(nodes_db, nodes_id)
+        
+        # follow backwards
+        nodes = []
+        current_page = self.get_page(links['last'])
+        first_page = self.get_page(links['first'])
+        while True:
+            resp = self.client.get(url + '?per_page=3&page=%i' % current_page)
+            nodes += json.loads(resp.content)
+            links = self.check_pagination_links(resp['Link'], current_page)
+            if current_page == first_page:
+                break
+            current_page = self.get_page(links['prev'])
+        
+        nodes_db = set(Node.objects.values_list('id', flat=True))
+        nodes_id = set([node['id'] for node in nodes])
+        self.assertEquals(nodes_db, nodes_id)
+
+
+class IntegrationTests(TestCase):
+    fixtures = ['groups.json', 'nodes.json']
+    
+    def test_pagination_with_filtering(self):
+        """
+        Test combination of pagination and filtering.
+        Expected result: 2 pages with 1 node per page.
+        
+        """
+        url = reverse('node-list')
+        filter_query = '/set_state="production"'
+        pagination = 'per_page=1&page=2'
+        resp = self.client.get(url + '?%s&%s' % (filter_query, pagination))
+        self.assertEqual(resp.status_code, 200)
+        node_js = json.loads(resp.content)
+        
+        # check number objects returned
+        node_qs = Node.objects.filter(set_state="production")[1:2]
+        self.assertEqual(len(node_js), node_qs.count())
+        
+        # check if objects return really match
+        for node in node_js:
+            self.assertEqual(node['set_state'], "production")

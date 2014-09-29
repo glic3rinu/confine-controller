@@ -54,6 +54,9 @@ class ControllerFilterBackend(BaseFilterBackend):
         """Filter base queryset against query parameters."""
         kwargs = {}
         for attr, value in request.QUERY_PARAMS.iteritems():
+            # exclude pagination parameters from filtering
+            if attr in ['page', 'per_page']:
+                continue
             attr = json_pointer_to_django(attr)
             value = value_casting(value)
             kwargs[attr] = value

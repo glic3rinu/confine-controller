@@ -18,6 +18,7 @@ class USBImagePlugin(FirmwarePlugin):
     description = ('Optionally puts the firmware image into confine-install USB image.\n'
         'The base image can be downloaded from http://media.confine-project.eu/'
         'confine-install/confine-install.img.gz and stored in %s.' % usb_image)
+    enabled_by_default = True
     
     def get_form(self):
         class USBImageForm(forms.Form):

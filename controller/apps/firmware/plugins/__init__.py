@@ -6,6 +6,7 @@ from controller.utils.plugins import PluginMount
 class FirmwarePlugin(object):
     description = ''
     verbose_name = ''
+    enabled_by_default = False
     
     __metaclass__ = PluginMount
     

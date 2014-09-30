@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.safestring import mark_safe
+from django.views.generic import RedirectView
 
 from controller.admin.utils import display_timesince, wrap_admin_view
 from controller.core.serializers import DecimalJSONEncoder
@@ -71,6 +72,11 @@ class PingAdmin(PermissionModelAdmin):
             url("^(?P<content_type_id>\d+)/(?P<object_id>\d+)/timeseries/$",
                 wrap_admin_view(self, self.timeseries_view),
                 name='pings_ping_timeseries'),
+            # As raw list of pings has no view we should handle manually
+            # for example redirecting to the admin index.
+            url("^$",
+                RedirectView.as_view(pattern_name='admin:index'),
+                name='pings_ping_changelist'),
         )
         return urls
         # + super(PingAdmin, self).get_urls()

@@ -1,5 +1,8 @@
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.utils.encoding import force_unicode
 
 
 def wrap_action(action, modeladmin):
@@ -46,3 +49,15 @@ def get_readonly_file_fields(obj):
         if bool(getattr(obj, field, False)): # False when obj is None
             readonly_fields += [field+'_uri', field+'_sha256']
     return readonly_fields
+
+
+def log_sliver_history(user_id, object, msg):
+    """Log sliver history on the node (debug purposes)"""
+    LogEntry.objects.log_action(
+        user_id         = user_id,
+        content_type_id = ContentType.objects.get_for_model(object.node).pk,
+        object_id       = object.node.pk,
+        object_repr     = force_unicode(object.node),
+        action_flag     = CHANGE,
+        change_message  = msg
+    )

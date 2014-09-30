@@ -24,7 +24,8 @@ from .actions import renew_selected_slices, reset_selected, update_selected, cre
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
 from .forms import (SliverDefaultsInlineForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
-from .helpers import wrap_action, remove_slice_id, state_value, get_readonly_file_fields
+from .helpers import (get_readonly_file_fields, log_sliver_history,
+    remove_slice_id, state_value, wrap_action)
 from .models import (Slice, SliceProp, Sliver, SliverDefaults, SliverProp,
     SliverIface, Template)
 
@@ -189,6 +190,9 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
                     SliverIface.objects.create(sliver=object, type=iface_type,
                                                name=iface_object.DEFAULT_NAME)
         super(SliverAdmin, self).log_addition(request, object)
+        # log sliver history on the node #523
+        msg = 'Added sliver "%s" (%i).' % (object, object.pk)
+        log_sliver_history(request.user.pk, object, msg)
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make description input widget smaller and update empty label """
@@ -237,6 +241,15 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             messages.warning(request, msg)
         return super(SliverAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
+    
+    def log_change(self, request, object, message):
+        super(SliverAdmin, self).log_change(request, object, message)
+        # log sliver history on the node #523
+        if 'set_state' in message:
+            msg = ('Changed set_state to "%s" of sliver "%s" (%i). NOTE: set '
+                  'state may differ from effective set state.' %
+                   (object.set_state, object, object.pk))
+            log_sliver_history(request.user.pk, object, msg)
 
 
 class NodeListAdmin(NodeAdmin):

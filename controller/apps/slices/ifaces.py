@@ -75,6 +75,17 @@ class Pub4Iface(BaseIface):
     
     def ipv4_addr(self, iface):
         return 'Unknown'
+    
+    def is_allowed(self, slice, queryset):
+        for node in queryset.all():
+            try:
+                pub_ipv4 = node.resources.get(name='pub_ipv4')
+            except node.resources.DoesNotExist:
+                return False
+            else:
+                if pub_ipv4.max_req == 0:
+                    return False
+        return True
 
 
 class Pub6Iface(BaseIface):
@@ -91,7 +102,15 @@ class Pub6Iface(BaseIface):
         return 'Unknown'
     
     def is_allowed(self, slice, queryset):
-        return not queryset.filter(sliver_pub_ipv6=Node.NONE).exists()
+        for node in queryset.all():
+            try:
+                pub_ipv6 = node.resources.get(name='pub_ipv6')
+            except node.resources.DoesNotExist:
+                return False
+            else:
+                if pub_ipv6.max_req == 0:
+                    return False
+        return True
 
 
 class DebugIface(BaseIface):

@@ -15,6 +15,7 @@ class AuthKeysPlugin(FirmwarePlugin):
     verbose_name = 'SSH authorized keys'
     description = ('Enables the inclusion of user SSH Authorized Keys\n'
                    'Current authorized keys file: %s' % keys_path)
+    enabled_by_default = True
     
     def get_form(self):
         class AuthKeysForm(forms.ModelForm):

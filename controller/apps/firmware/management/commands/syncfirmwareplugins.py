@@ -5,12 +5,7 @@ from firmware.plugins import FirmwarePlugin
 
 
 class Command(BaseCommand):
-    def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
-        self.option_list = BaseCommand.option_list
-    
-    option_list = BaseCommand.option_list
-    help = 'Sync existing plugins with the database'
+    help = 'Synchronize existing firmware plugins with the database.'
     
     def handle(self, *args, **options):
         config, __ = Config.objects.get_or_create(pk=1)
@@ -18,8 +13,9 @@ class Command(BaseCommand):
         for plugin in FirmwarePlugin.plugins:
             label = plugin.__name__
             module = plugin.__module__
-            obj, __ = ConfigPlugin.objects.get_or_create(config=config, label=label,
-                module=module)
+            is_active = plugin.enabled_by_default
+            obj, __ = ConfigPlugin.objects.get_or_create(config=config,
+                label=label, module=module, defaults={'is_active': is_active})
             existing_pks.append(obj.pk)
             self.stdout.write('Found %s (%s)' % (label, module))
         # Delete unused plugins

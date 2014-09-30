@@ -13,6 +13,7 @@ class SfaObjectSerializer(serializers.ModelSerializer):
         model = SfaObject
         exclude = ('object_id', 'content_type', 'id')
 
+# TODO /sfa writable -> UUID only writable on creation, once set cannot be changed
 
 for model in [Node, User, Group, Slice]:
     api.aggregate(model, SfaObjectSerializer, name='sfa')

@@ -258,8 +258,8 @@ class NodeListAdmin(NodeAdmin):
     slivers hooked on Slice
     """
     list_display = [
-        'add_sliver_link', 'id', link('cn_url', description='CN URL'), 'arch',
-        'display_set_state', admin_link('group'), 'num_ifaces', num_slivers,
+        'add_sliver_link', 'id', 'arch', 'display_set_state',
+        admin_link('group'), 'num_ifaces', num_slivers,
         'display_sliver_pub_ipv4_range'
     ]
     list_display_links = ['add_sliver_link', 'id']

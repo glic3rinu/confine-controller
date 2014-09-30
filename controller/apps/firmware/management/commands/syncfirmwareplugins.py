@@ -5,12 +5,7 @@ from firmware.plugins import FirmwarePlugin
 
 
 class Command(BaseCommand):
-    def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
-        self.option_list = BaseCommand.option_list
-    
-    option_list = BaseCommand.option_list
-    help = 'Sync existing plugins with the database'
+    help = 'Synchronize existing firmware plugins with the database.'
     
     def handle(self, *args, **options):
         config, __ = Config.objects.get_or_create(pk=1)

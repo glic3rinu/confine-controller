@@ -1,7 +1,9 @@
+import warnings
+
 from optparse import make_option
 from os import path
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from controller.utils.paths import get_site_root, get_controller_root
 from controller.utils.system import run, check_root
@@ -13,7 +15,9 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--username', dest='username', default='confine',
+            make_option('--username', dest='username', default='',
+                help='Deprecated. Use --user instead.'),
+            make_option('--user', dest='user', default='',
                 help='Specifies the system user that would run celery tasks.'),
             make_option('--group', dest='group', default='',
                 help='Specifies the system group that would run celery tasks.'),
@@ -24,7 +28,8 @@ class Command(BaseCommand):
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '
                      'You must use --username with --noinput, and must contain the '
-                     'celeryd process owner, which is the user how will perform tincd updates'),
+                     'cleeryd process owner, which is the user how will perform tincd updates'),
+
             )
     
     option_list = BaseCommand.option_list
@@ -32,9 +37,15 @@ class Command(BaseCommand):
     
     @check_root
     def handle(self, *args, **options):
+        if options.get('username'):
+            warnings.warn('"username" has been deprecated in favor of "user"', DeprecationWarning)
+        if options.get('user') and options.get('username'):
+            raise CommandError("Only one of this options should be provided: --user OR --username")
+        
+        user = options.get('user') or options.get('username') or 'confine'
         context = {'site_root': get_site_root(),
-                   'username': options.get('username'),
-                   'group': options.get('group') or options.get('username'),
+                   'user': user,
+                   'group': options.get('group') or user,
                    'bin_path': path.join(get_controller_root(), 'bin'),
                    'processes': options.get('processes'),
                    'greenlets': options.get('greenlets') }
@@ -66,7 +77,7 @@ class Command(BaseCommand):
             'CELERYEV_PID_FILE="/var/run/celery/celeryev.pid"\n'
             '\n'
             '# Workers should run as an unprivileged user.\n'
-            'CELERYD_USER="%(username)s"\n'
+            'CELERYD_USER="%(user)s"\n'
             'CELERYD_GROUP="%(group)s"\n'
             '\n'
             '# Persistent revokes\n'

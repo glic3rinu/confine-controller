@@ -23,9 +23,7 @@ class Command(BaseCommand):
             make_option('--threads', dest='threads', default=50,
                 help='WSGIDaemonProcess threads.'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
-                help='Tells Django to NOT prompt the user for input of any kind. '
-                     'You must use --username with --noinput, and must contain the '
-                     'cleeryd process owner, which is the user how will perform tincd updates'),
+                help='Tells Django to NOT prompt the user for input of any kind.'),
             )
     
     option_list = BaseCommand.option_list

@@ -26,10 +26,7 @@ class Command(BaseCommand):
             make_option('--greenlets', dest='greenlets', default=1000,
                 help='Number of celeryd greenlets (gevent-based tasks).'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
-                help='Tells Django to NOT prompt the user for input of any kind. '
-                     'You must use --username with --noinput, and must contain the '
-                     'cleeryd process owner, which is the user how will perform tincd updates'),
-
+                help='Tells Django to NOT prompt the user for input of any kind.'),
             )
     
     option_list = BaseCommand.option_list

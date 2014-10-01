@@ -15,7 +15,7 @@ class Command(BaseCommand):
         self.option_list = BaseCommand.option_list + (
             make_option('--username', dest='username', default='confine',
                 help='Specifies the system user that would run celery tasks.'),
-            make_option('--group', dest='group', default='confine',
+            make_option('--group', dest='group', default='',
                 help='Specifies the system group that would run celery tasks.'),
             make_option('--processes', dest='processes', default=5,
                 help='Number of celeryd processes.'),
@@ -34,7 +34,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         context = {'site_root': get_site_root(),
                    'username': options.get('username'),
-                   'group': options.get('group'),
+                   'group': options.get('group') or options.get('username'),
                    'bin_path': path.join(get_controller_root(), 'bin'),
                    'processes': options.get('processes'),
                    'greenlets': options.get('greenlets') }

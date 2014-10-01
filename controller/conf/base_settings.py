@@ -30,6 +30,13 @@ CONN_MAX_AGE = 60*10
 # In a Windows environment this must be set to your system time zone.
 TIME_ZONE = 'UTC'
 
+# The default formatting to use for displaying datetime fields in
+# any part of the system. Note that if USE_L10N is set to True, then
+# the locale-dictated format has higher precedence and will be applied
+# instead. See allowed date format strings:
+# https://docs.djangoproject.com/en/dev/ref/templates/builtins/#std:templatefilter-date
+DATETIME_FORMAT = 'N j, Y, P e'
+
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
@@ -40,7 +47,7 @@ USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
-USE_L10N = True
+USE_L10N = False
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True

@@ -163,6 +163,8 @@ def make_colored_address(old_method, field='', filters={}):
             if getattr(obj, k) != v:
                 return addr
         obj = getattr(obj, field, obj)
+        if obj.pk is None:
+            return None
         ct = ContentType.objects.get_for_model(type(obj))
         url = reverse('admin:pings_ping_list', args=(ct.pk, obj.pk))
         state = Ping.get_state(obj)

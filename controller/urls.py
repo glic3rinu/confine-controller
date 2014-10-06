@@ -6,9 +6,6 @@ from django.conf.urls import patterns, include, url
 from controller.utils.apps import is_installed
 
 
-admin.autodiscover()
-
-
 urlpatterns = patterns('',
     # Password reset
     url(r'^admin/password_reset/$',

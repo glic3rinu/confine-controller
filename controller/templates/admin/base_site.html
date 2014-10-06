@@ -19,6 +19,9 @@
 {% block nav-global %}
 {% if user.is_active and user.is_staff %}
 {% if not is_popup %}
+{# FIXME temporal workaound until django-admin-tools supports Django 1.7 #}
+{# https://bitbucket.org/izi/django-admin-tools/issue/147/ #}
+<br style="clear:both">
 {% admin_tools_render_menu %}
 {% endif %}
 {% endif %}

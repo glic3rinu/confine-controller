@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
-from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import User, Group, Roles
@@ -74,7 +73,6 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = User
     add_serializer_class = UserCreateSerializer
     serializer_class = UserSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
     def pre_save(self, obj):
         super(UserList, self).pre_save(obj)
@@ -110,7 +108,6 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Group
     add_serializer_class = GroupCreateSerializer
     serializer_class = GroupSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     
     def post_save(self, obj, created=False):
         """ user that creates a group becomes its admin """

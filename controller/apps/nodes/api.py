@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
-from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Island, Node, Server
@@ -53,7 +52,6 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Node
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
 
 
@@ -126,7 +124,6 @@ class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Island
     serializer_class = IslandSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):

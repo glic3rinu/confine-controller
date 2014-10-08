@@ -23,6 +23,8 @@ class ControllerBase(object):
         return ApiRoot.REGISTRY_REL_PREFIX
 
 
+from rest_framework.renderers import BrowsableAPIRenderer
+from api.renderers import ResourceListJSONRenderer
 class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
     """
     Used for read-write endpotins to represent a collection of
@@ -33,6 +35,8 @@ class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
     
     """
     add_serializer_class = None # Serializer used on object creation
+    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
+    
     def get_serializer_class(self):
         # TODO until the partial response is not implemented we'll serve full resources
 #        if self.request.method == 'GET' and not hasattr(self, 'response'):

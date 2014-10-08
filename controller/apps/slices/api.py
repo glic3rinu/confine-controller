@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
-from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
@@ -154,7 +153,6 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Slice
     add_serializer_class = SliceCreateSerializer
     serializer_class = SliceSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('set_state', )
 
 
@@ -207,7 +205,6 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Sliver
     serializer_class = SliverSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     filter_fields = ('node', 'slice')
 
 
@@ -243,7 +240,6 @@ class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = Template
     serializer_class = TemplateSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
 
 
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):

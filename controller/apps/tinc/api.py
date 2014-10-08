@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api import api, generics
-from api.renderers import ResourceListJSONRenderer
 from permissions.api import ApiPermissionsMixin
 
 from .models import Host
@@ -48,7 +47,6 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     model = Host
     add_serializer_class = HostCreateSerializer
     serializer_class = HostSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     
     def pre_save(self, obj):
         """ Set the object's owner, based on the incoming request. """

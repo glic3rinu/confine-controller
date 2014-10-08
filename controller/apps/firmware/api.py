@@ -6,7 +6,6 @@ from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 
 from api import api, generics
-from api.renderers import ResourceListJSONRenderer
 from api.utils import insert_ctl
 from nodes.api import NodeDetail
 from nodes.models import Node, Server, ServerApi
@@ -26,7 +25,6 @@ class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     model = BaseImage
     serializer_class = BaseImageSerializer
-    renderer_classes = [ResourceListJSONRenderer, BrowsableAPIRenderer]
     controller_view = True
     # TODO customize rest_to_admin_url --> admin:firmware_config_change
 

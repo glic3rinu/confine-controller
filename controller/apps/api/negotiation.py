@@ -12,6 +12,12 @@ def media_type_matches(first, other):
     for key in first.params.keys():
         if key != 'profile' and other.params.get(key, None) != first.params.get(key, None):
             return False
+    
+    # handle specific profile parameter
+    first_profile = first.params.get('profile', False)
+    other_profile = other.params.get('profile', False)
+    if first_profile and other_profile and first_profile != other_profile:
+        return False
 
     if first.sub_type != '*' and other.sub_type != '*'  and other.sub_type != first.sub_type:
         return False

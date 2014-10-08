@@ -17,6 +17,8 @@ PING_DEFAULT_INSTANCE = getattr(settings, 'PING_DEFAULT_INSTANCE', (
         'downsamples': (
             # Limitations: you can not say 16 months or 40 days
             #              but you can say 2 years or 2 months
+            (relativedelta(years=1), timedelta(minutes=240)),
+            (relativedelta(months=6), timedelta(minutes=60)),
             (relativedelta(months=3), timedelta(minutes=20)),
             (relativedelta(months=2), timedelta(minutes=10)),
             (relativedelta(weeks=2), timedelta(minutes=5)),

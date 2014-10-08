@@ -14,6 +14,7 @@ from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (colored, admin_link, link, get_admin_link,
     insertattr, get_modeladmin, wrap_admin_view, docstring_as_help_tip)
 from controller.admin.widgets import LinkedRelatedFieldWidgetWrapper
+from controller.core.exceptions import DisallowedSliverCreation
 from nodes.admin import NodeAdmin
 from nodes.models import Node
 from permissions.admin import (PermissionModelAdmin, PermissionStackedInline,
@@ -402,6 +403,8 @@ class SliceSliversAdmin(SliverAdmin):
         # hook for future use on self.save_model()
         slice = get_object_or_404(Slice, pk=slice_id)
         node = get_object_or_404(Node, pk=node_id)
+        if Sliver.objects.filter(node=node, slice=slice).exists():
+            raise DisallowedSliverCreation()
         self.slice_id = slice_id
         self.node_id = node_id
         title = 'Add sliver %s@%s' % (get_admin_link(slice), get_admin_link(node))

@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.test import TestCase
 
+from nodes.models import Node
 from users.models import Group, User
 
 from .models import Slice, Sliver
@@ -56,7 +57,7 @@ class SliceViewsTestCase(TestCase):
     fixtures = ['groups', 'nodes', 'slices', 'slivers', 'templates']
     
     def setUp(self):
-        User.objects.create_user(name='tech', username='tech',
+        User.objects.create_superuser(name='tech', username='tech',
                                  email='tech@localhost', password='tech')
         self.assertTrue(self.client.login(username='tech', password='tech'))
     
@@ -96,3 +97,32 @@ class SliceViewsTestCase(TestCase):
         sliver_change_url = reverse('admin:slices_slice_slivers', args=(slice.pk, sliver.pk))
         response = self.client.get(sliver_change_url)
         self.assertEqual(response.status_code, 200)
+    
+    def test_add_sliver_view(self):
+        slice = Slice.objects.get(pk=2)
+        node = Node.objects.get(pk=2)
+        self.assertFalse(Sliver.objects.filter(slice=slice, node=node))
+        add_sliver_url = reverse('admin:slices_slice_add_sliver',
+            kwargs={'slice_id': slice.pk, 'node_id': node.pk})
+        
+        response = self.client.get(add_sliver_url)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_incorrect_add_sliver_view(self):
+        """
+        Try to access to add_sliver_view with a combination
+        of node and slice that alreday exists in a sliver.
+        
+        Controller should avoid that, because posting it
+        should raise IntegrityError: duplicate key value
+        violates unique constraint (slice_id, node_id)
+        """
+        sliver = Sliver.objects.first()
+        slice = sliver.slice
+        node = sliver.node
+        self.assertTrue(Sliver.objects.filter(slice=slice, node=node))
+        add_sliver_url = reverse('admin:slices_slice_add_sliver',
+            kwargs={'slice_id': slice.pk, 'node_id': node.pk})
+        
+        response = self.client.get(add_sliver_url)
+        self.assertEqual(response.status_code, 400)

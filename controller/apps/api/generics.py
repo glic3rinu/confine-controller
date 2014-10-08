@@ -1,11 +1,13 @@
 from django.conf import settings
 from rest_framework import generics
 from rest_framework.generics import *
+from rest_framework.renderers import BrowsableAPIRenderer
 
 from controller.models.utils import is_singleton
 
 from . import ApiRoot
 from .helpers import build_pagination_link, model_name_urlize
+from .renderers import ResourceListJSONRenderer
 from .serializers import DynamicReadonlyFieldsModelSerializer
 from .utils import link_header
 
@@ -23,8 +25,6 @@ class ControllerBase(object):
         return ApiRoot.REGISTRY_REL_PREFIX
 
 
-from rest_framework.renderers import BrowsableAPIRenderer
-from api.renderers import ResourceListJSONRenderer
 class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
     """
     Used for read-write endpotins to represent a collection of

@@ -20,7 +20,7 @@ def pem2der_string(pem_string):
     der_file = tempfile.NamedTemporaryFile()
     
     if 'CERTIFICATE' in pem_string:
-        run('openssl rsa -in %s -outform DER -out %s' % (pem_file.name, der_file.name))
+        run('openssl x509 -in %s -outform DER -out %s' % (pem_file.name, der_file.name))
     elif 'RSA PRIVATE KEY' in pem_string:
         run('openssl rsa -in %s -outform DER -out %s' % (pem_file.name, der_file.name))
     else:

@@ -1,8 +1,8 @@
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.negotiation import DefaultContentNegotiation
-from rest_framework.utils.mediatypes import order_by_precedence
-from rest_framework.utils.mediatypes import _MediaType
+from rest_framework.utils.mediatypes import _MediaType, order_by_precedence
 
+from .utils.profiles import _Profile, profile_matches
 
 
 def media_type_matches(first, other):
@@ -14,15 +14,16 @@ def media_type_matches(first, other):
             return False
     
     # handle specific profile parameter
-    first_profile = first.params.get('profile', False)
-    other_profile = other.params.get('profile', False)
-    if first_profile and other_profile and first_profile != other_profile:
+    if not profile_matches(first.params.get('profile', None),
+                           other.params.get('profile', None)):
         return False
 
-    if first.sub_type != '*' and other.sub_type != '*'  and other.sub_type != first.sub_type:
+    if (first.sub_type != '*' and other.sub_type != '*'  and
+        other.sub_type != first.sub_type):
         return False
 
-    if first.main_type != '*' and other.main_type != '*' and other.main_type != first.main_type:
+    if (first.main_type != '*' and other.main_type != '*' and
+        other.main_type != first.main_type):
         return False
 
     return True
@@ -54,7 +55,7 @@ class ProfileContentNegotiation(DefaultContentNegotiation):
                 for media_type in media_type_set:
                     if media_type_matches(renderer.media_type, media_type):
                         # Return the most specific media type as accepted.
-                        if (_MediaType(renderer.media_type).precedence >
+                        if (_MediaType(renderer.media_type).precedence >=
                             _MediaType(media_type).precedence):
                             # Eg client requests '*/*'
                             # Accepted media type is 'application/json'

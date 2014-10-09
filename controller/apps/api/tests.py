@@ -10,6 +10,8 @@ from django.test import TestCase
 from nodes.models import Node
 from slices.models import Sliver
 
+from .utils.profiles import _Profile, profile_matches
+
 
 class FilteringTests(TestCase):
     fixtures = ['groups.json', 'nodes.json', 'slices.json', 'slivers.json',
@@ -271,3 +273,57 @@ class IntegrationTests(TestCase):
         # check if objects return really match
         for node in node_js:
             self.assertEqual(node['set_state'], "production")
+
+
+class ProfileTests(TestCase):
+    
+    def assertEqual_schema_profile(self, schema):
+        profile = _Profile(schema['uri'])
+        self.assertEqual(schema['api'], profile.api)
+        self.assertEqual(schema['version'], profile.version)
+        self.assertEqual(schema['resource'], profile.resource)
+    
+    def test_parse_full_profile_uri(self):
+        schema = {
+            'uri': "http://confine-project.eu/schema/registry/v0/base",
+            'api': 'registry',
+            'version': 'v0',
+            'resource': 'base',
+        }
+        self.assertEqual_schema_profile(schema)
+    
+    def test_parse_profile_version_less_uri(self):
+        schema = {
+            'uri': "http://confine-project.eu/schema/registry/base",
+            'api': 'registry',
+            'version': None,
+            'resource': 'base',
+        }
+        self.assertEqual_schema_profile(schema)
+    
+    def test_parse_resource_list_profile_uri(self):
+        schema = {
+            'uri': "http://confine-project.eu/schema/registry/v3/resource-list",
+            'api': 'registry',
+            'version': 'v3',
+            'resource': 'resource-list',
+        }
+        self.assertEqual_schema_profile(schema)
+    
+    def test_parse_invalid_profile_uri(self):
+        self.assertRaises(ValueError, _Profile, "http://foo.go")
+    
+    def test_matching_profiles_version_less(self):
+        first = "http://confine-project.eu/schema/registry/v3/node"
+        other = "http://confine-project.eu/schema/registry/node"
+        self.assertTrue(profile_matches(first, other))
+    
+    def test_matching_profiles_none(self):
+        first = None
+        other = "http://confine-project.eu/schema/registry/node"
+        self.assertTrue(profile_matches(first, other))
+    
+    def test_not_matching_profiles(self):
+        first = "http://confine-project.eu/schema/registry/v3/node"
+        other = "http://confine-project.eu/schema/registry/v0/node"
+        self.assertFalse(profile_matches(first, other))

@@ -47,8 +47,7 @@ class IsolatedIface(BaseIface):
     DEFAULT_NAME = 'iso0'
     ALLOW_BULK = False
     DISABLED_MSG = 'no VLAN or no Direct Ifaces'
-    VERBOSE_DISABLED_MSG = ("The parent slice does not request the necessary "
-                            "VLAN number.")
+    VERBOSE_DISABLED_MSG = "Isolated interface cannot be added on bulk creation."
     
     def clean_model(self, iface):
         if iface.sliver_id and not iface.sliver.slice.allow_isolated:

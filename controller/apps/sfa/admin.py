@@ -19,7 +19,7 @@ class SfaObjectInline(PermissionGenericTabularInline):
         ro_fields = super(SfaObjectInline, self).get_readonly_fields(request, obj=obj)
         sfa = obj.sfa
         if obj.sfa is not None and 'uuid' not in ro_fields:
-            return ro_fields + ['uuid']
+            return ro_fields + ('uuid',)
         return ro_fields
 
 

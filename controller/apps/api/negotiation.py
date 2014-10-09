@@ -14,9 +14,12 @@ def media_type_matches(first, other):
             return False
     
     # handle specific profile parameter
-    if not profile_matches(first.params.get('profile', None),
-                           other.params.get('profile', None)):
-        return False
+    try:
+        if not profile_matches(first.params.get('profile', None),
+                               other.params.get('profile', None)):
+            return False
+    except ValueError:
+        raise NotAcceptable("Invalid profile requested." )
 
     if (first.sub_type != '*' and other.sub_type != '*'  and
         other.sub_type != first.sub_type):

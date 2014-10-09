@@ -149,5 +149,13 @@
         "cert": "-----BEGIN CERTIFICATE-----\nMIIC2jCCAcKgAwIBAwIEOVpwgTANBgkqhkiG9w0BAQsFADAcMRowGAYDVQQDExFm\nZDY1OmZjNDE6YzUwZjo6MjAeFw0xNDA0MTEwNzEwMThaFw0xODA0MTAwNzEwMTha\nMEIxIjAgBgkqhkiG9w0BCQEWE3ZjdCthZG1pbkBsb2NhbGhvc3QxHDAaBgNVBAMT\nE2ZkNjU6ZmM0MTpjNTBmOjI6OjIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQC+Pe9Qi5laCRGEUHdDSFzP+ummNkDAO1nRMcStC+WYeDWtgIa111oiFV0N\n5a/CzD4qcTw0Ez3simfx2L41ov6nk6C7bffDeTQAn/h/a3pL2aKMSw0PwaOOnlBT\nZKQ4k6MW/BJN5ZRtWmXx5pziBlyiVFuJSl5qXatSmgT+56wKvhSXOYok2SFSkwg+\nxXPsjcCwQjqzK74brZOIj5Syj0JG3RsRo64CJZtM+nHX5sbzDP1koCBqNhyrOeJS\nIiGGxrH/8MGm3SzuQdN8tTI7t/IFkGqQIIJm9RMSvO/FQCsO2FselBG02OXaNH/d\npzW0RZP1hvS39TGv3r/ri+Rel3xhAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAIac\nif2dYiY6N1W5wFi7ZV+SbPVjObDejyn3ZYVDaFE8immLALdwpLcbDkreAE5YZLhL\nRfwo7Mn3PaBV2TU7wkDf0vwUQgcc9AZtNuc1hq72g7lzWvKyK7OgpQCk+1h0Otcq\nbsbEo5JPukIPZlu5eIgwgYkyjsWT9Jobx1t2lDwfhNDogU/5bmWajMpI1fe99EKv\nC4xNMTZXxx/qWEGB9tGMuVFmrT6u5MZQy4c80HoyTbDTQ5NImQqaEboMCazSnjnq\naFGn4UVUNzA7G0CWIqJc7rxe2x9eswgl1ytdaVzlTv95+rM4Bc16UxZj7uv8M58X\nmKbbFoluMtLXl+z62nY=\n-----END CERTIFICATE-----",
         "type": "node"
     }
+},
+{
+    "pk": 1,
+    "model": "nodes.directiface",
+    "fields": {
+        "node": 1,
+        "name": "eth0"
+    }
 }
 ]

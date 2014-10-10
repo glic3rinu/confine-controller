@@ -17,6 +17,9 @@ class BaseIface(object):
     AUTO_CREATE = False
     CREATE_BY_DEFAULT = False
     UNIQUE = False
+    DISABLED_MSG = 'no support'
+    VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
+                            "for this kind of sliver interface.")
     
     def clean_model(self, iface):
         """ additional logic to be executed during model.clean() """
@@ -43,15 +46,22 @@ class IsolatedIface(BaseIface):
     """
     DEFAULT_NAME = 'iso0'
     ALLOW_BULK = False
+    DISABLED_MSG = 'no VLAN or no Direct Ifaces'
+    VERBOSE_DISABLED_MSG = "Isolated interfaces cannot be added on bulk creation."
     
     def clean_model(self, iface):
-        if iface.sliver_id and not iface.sliver.slice.vlan_nr:
-            raise ValidationError("Slice vlan_nr is mandatory for isolated interfaces.")
+        if iface.sliver_id and not iface.sliver.slice.allow_isolated:
+            raise ValidationError("Slice configuration doesn't allow isolated interfaces.")
         if not iface.parent:
             raise ValidationError("Parent is mandatory for isolated interfaces.")
     
     def is_allowed(self, slice, queryset):
-        return bool(slice.vlan_nr)
+        """
+        All the nodes should have at least one direct interface
+        and the slice had requested a VLAN tag.
+        """
+        return (slice.allow_isolated and
+            not queryset.filter(direct_ifaces__isnull=True).exists())
 
 
 class Pub4Iface(BaseIface):
@@ -61,6 +71,8 @@ class Pub4Iface(BaseIface):
     interface will be bridged to the community network.
     """
     DEFAULT_NAME = 'pub0'
+    VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
+                            "for public IPv4 sliver interfaces.")
     
     def clean_model(self, iface):
         super(Pub4Iface, self).clean_model(iface)
@@ -69,6 +81,17 @@ class Pub4Iface(BaseIface):
     
     def ipv4_addr(self, iface):
         return 'Unknown'
+    
+    def is_allowed(self, slice, queryset):
+        for node in queryset:
+            try:
+                pub_ipv4 = node.resources.get(name='pub_ipv4')
+            except node.resources.model().DoesNotExist:
+                return False
+            else:
+                if pub_ipv4.max_req == 0:
+                    return False
+        return True
 
 
 class Pub6Iface(BaseIface):
@@ -78,12 +101,22 @@ class Pub6Iface(BaseIface):
     interface will be bridged to the community network.
     """
     DEFAULT_NAME = 'pub1'
+    VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
+                            "for public IPv6 sliver interfaces.")
     
     def ipv6_addr(self, iface):
         return 'Unknown'
     
     def is_allowed(self, slice, queryset):
-        return not queryset.filter(sliver_pub_ipv6=Node.NONE).exists()
+        for node in queryset:
+            try:
+                pub_ipv6 = node.resources.get(name='pub_ipv6')
+            except node.resources.model().DoesNotExist:
+                return False
+            else:
+                if pub_ipv6.max_req == 0:
+                    return False
+        return True
 
 
 class DebugIface(BaseIface):

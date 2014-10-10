@@ -7,12 +7,14 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.test import TestCase
 
-from nodes.models import Node
+from nodes.models import Node, DirectIface
+from resources.models import Resource
 from users.models import Group, User
 
+# use absolute import because of assertRaises!
+from slices.exceptions import VlanAllocationError
+from .ifaces import IsolatedIface, Pub4Iface, Pub6Iface
 from .models import Slice, Sliver
-from slices.exceptions import VlanAllocationError # use absolute import because
-                                                  # of assertRaises!
 
 
 class SliceTests(TestCase):
@@ -126,3 +128,77 @@ class SliceViewsTestCase(TestCase):
         
         response = self.client.get(add_sliver_url)
         self.assertEqual(response.status_code, 400)
+
+
+class SliverIfacesTests(TestCase):
+    fixtures = ['groups', 'nodes', 'slices', 'slivers', 'templates']
+    
+    def setUp(self):
+        # Node with direct ifaces
+        self.node_direct_iface = Node.objects.get(pk=1)
+        self.assertTrue(self.node_direct_iface.direct_ifaces.exists())
+        
+        # Node without direct ifaces
+        self.node_no_direct_iface = Node.objects.get(pk=2)
+        self.assertFalse(self.node_no_direct_iface.direct_ifaces.exists())
+        
+        # Slice supports VLAN
+        self.slice_vlan = Slice.objects.get(pk=1)
+        self.assertTrue(self.slice_vlan.allow_isolated)
+        
+        # Slice doesn't support VLAN
+        self.slice_no_vlan = Slice.objects.get(pk=2)
+        self.assertFalse(self.slice_no_vlan.allow_isolated)
+    
+    def test_isolated_allowed(self):
+        nodes = Node.objects.filter(pk=self.node_direct_iface.pk)
+        slice = self.slice_vlan
+        isolated = IsolatedIface()
+        self.assertTrue(isolated.is_allowed(slice, nodes))
+    
+    def test_isolated_no_vlan(self):
+        nodes = Node.objects.filter(pk=self.node_direct_iface.pk)
+        slice = self.slice_no_vlan
+        isolated = IsolatedIface()
+        self.assertFalse(isolated.is_allowed(slice, nodes))
+    
+    def test_isolated_no_direct_ifaces(self):
+        nodes = Node.objects.filter(pk=self.node_no_direct_iface.pk)
+        slice = self.slice_vlan
+        isolated = IsolatedIface()
+        self.assertFalse(isolated.is_allowed(slice, nodes))
+    
+    def test_public4_allowed(self):
+        node = self.node_direct_iface
+        # create resource pub4 on the node
+        node.resources.create(name='pub_ipv4', dflt_req=0, max_req=1)
+        nodes = Node.objects.filter(pk=node.pk)
+        slice = self.slice_vlan
+        pub4 = Pub4Iface()
+        self.assertTrue(pub4.is_allowed(slice, nodes))
+    
+    def test_public4_disallowed(self):
+        node = self.node_direct_iface
+        # check that the node doesn't have pub4 addresses
+        self.assertFalse(node.resources.filter(name='pub_ipv4').exists())
+        nodes = Node.objects.filter(pk=node.pk)
+        slice = self.slice_vlan
+        pub4 = Pub4Iface()
+    
+    def test_public6_allowed(self):
+        node = self.node_direct_iface
+        # create resource pub6 on the node
+        node.resources.create(name='pub_ipv6', dflt_req=0, max_req=1)
+        nodes = Node.objects.filter(pk=node.pk)
+        slice = self.slice_vlan
+        pub6 = Pub6Iface()
+        self.assertTrue(pub6.is_allowed(slice, nodes))
+    
+    def test_public6_disallowed(self):
+        node = self.node_direct_iface
+        # check that the node doesn't have pub6 addresses
+        self.assertFalse(node.resources.filter(name='pub_ipv6').exists())
+        nodes = Node.objects.filter(pk=node.pk)
+        slice = self.slice_vlan
+        pub6 = Pub6Iface()
+        self.assertFalse(pub6.is_allowed(slice, nodes))

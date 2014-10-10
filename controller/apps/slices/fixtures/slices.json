@@ -3,11 +3,11 @@
     "pk": 1,
     "model": "slices.slice",
     "fields": {
-        "set_state": "deploy",
+        "set_state": "register",
         "group": 1,
         "name": "openwrt-slice-example",
         "instance_sn": 3,
-        "allow_isolated": false,
+        "allow_isolated": true,
         "isolated_vlan_tag": null,
         "expires_on": "2014-06-25",
         "description": "openwrt-slice-example"

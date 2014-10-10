@@ -7,6 +7,7 @@ from nodes.models import Node
 
 from .helpers import state_value
 from .models import SliverDefaults, Sliver
+from .widgets import IfacesSelect
 
 
 class SliverDefaultsInlineForm(forms.ModelForm):
@@ -119,13 +120,15 @@ class SliverIfaceInlineForm(forms.ModelForm):
             self.fields['parent'].queryset = self.node.direct_ifaces
             # Hook slice for future processing on iface.model_clean()
             self.instance.slice = self.slice
-            # Remove unallowed iface types from choices
+            # Mark as disabled unallowed iface types from choices
             queryset = Node.objects.filter(pk=self.node.id)
             choices = self.fields['type'].choices
+            disabled_choices = []
             for iface_type, iface_object in Sliver.get_registered_ifaces().items():
                 if not iface_object.is_allowed(self.slice, queryset):
-                    choices = [choice for choice in choices if choice[0] != iface_type]
-            self.fields['type'].choices = choices
+                    disabled_choices.append(iface_type)
+            self.fields['type'].widget = IfacesSelect(choices=choices,
+                                            disabled_choices=disabled_choices)
 
 
 class SliverIfaceBulkForm(forms.Form):
@@ -146,4 +149,5 @@ class SliverIfaceBulkForm(forms.Form):
             else:
                 kwargs['initial'] = _boolean_icon(False)
                 kwargs['widget'] = ShowText()
+                kwargs['label'] += ' (%s)' % iface_object.VERBOSE_DISABLED_MSG
             self.fields[iface_type] = forms.BooleanField(**kwargs)

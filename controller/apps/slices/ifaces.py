@@ -47,7 +47,7 @@ class IsolatedIface(BaseIface):
     DEFAULT_NAME = 'iso0'
     ALLOW_BULK = False
     DISABLED_MSG = 'no VLAN or no Direct Ifaces'
-    VERBOSE_DISABLED_MSG = "Isolated interface cannot be added on bulk creation."
+    VERBOSE_DISABLED_MSG = "Isolated interfaces cannot be added on bulk creation."
     
     def clean_model(self, iface):
         if iface.sliver_id and not iface.sliver.slice.allow_isolated:
@@ -71,6 +71,8 @@ class Pub4Iface(BaseIface):
     interface will be bridged to the community network.
     """
     DEFAULT_NAME = 'pub0'
+    VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
+                            "for public IPv4 sliver interfaces.")
     
     def clean_model(self, iface):
         super(Pub4Iface, self).clean_model(iface)

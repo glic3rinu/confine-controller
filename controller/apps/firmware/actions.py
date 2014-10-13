@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy
 
 from controller.utils.plugins.actions import sync_plugins_action
 
+from .exceptions import ConcurrencyError
 from .forms import BaseImageForm, OptionalFilesForm, RegistryApiForm
 from .models import BaseImage, Build, Config
 
@@ -103,8 +104,14 @@ def get_firmware(modeladmin, request, queryset):
             base_image = img_form.cleaned_data['base_image']
             optional_fields = opt_form.cleaned_data
             exclude = [ field for field, value in optional_fields.iteritems() if not value ]
-            build = Build.build(node, base_image, async=True, exclude=exclude, **kwargs)
-            modeladmin.log_change(request, node, "Build firmware")
+            try:
+                build = Build.build(node, base_image, async=True, exclude=exclude, **kwargs)
+            except ConcurrencyError as e:
+                # handle a duplicate build request but keep request
+                # as progress bar or download page will be shown.
+                messages.error(request, e.message)
+            else:
+                modeladmin.log_change(request, node, "Build firmware")
         else:
             # Display form validation errors
             context['img_form'] = img_form

@@ -11,7 +11,7 @@ from nodes.api import NodeDetail
 from nodes.models import Node, Server, ServerApi
 from permissions.api import ApiPermissionsMixin
 
-from .exceptions import BaseImageNotAvailable
+from .exceptions import BaseImageNotAvailable, ConcurrencyError
 from .models import BaseImage, Build, Config
 from .renderers import BaseImageProfileRenderer
 from .serializers import BaseImageSerializer, FirmwareSerializer
@@ -74,7 +74,10 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
             kwargs['registry_cert'] = registry.cert or ''
             
             ### call firmware build task ###
-            build = Build.build(node, base_image, async=async, **kwargs)
+            try:
+                build = Build.build(node, base_image, async=async, **kwargs)
+            except ConcurrencyError as e:
+                raise exceptions.Throttled(detail=e.message)
             serializer = self.serializer_class(build, data=request.DATA)
             return Response(serializer.data, status=success_status)
         raise exceptions.ParseError(detail='This endpoint only accepts null data')

@@ -262,7 +262,9 @@ class IntegrationTests(TestCase):
         url = reverse('node-list')
         filter_query = '/set_state="production"'
         pagination = 'per_page=1&page=2'
-        resp = self.client.get(url + '?%s&%s' % (filter_query, pagination))
+        url_query = '&'.join([filter_query, pagination])
+        
+        resp = self.client.get("%s?%s" % (url, url_query))
         self.assertEqual(resp.status_code, 200)
         node_js = json.loads(resp.content)
         
@@ -273,6 +275,38 @@ class IntegrationTests(TestCase):
         # check if objects return really match
         for node in node_js:
             self.assertEqual(node['set_state'], "production")
+    
+    def test_pagination_filtering_member_selection(self):
+        url = reverse('node-list')
+        filter_query = '/set_state="production"'
+        pagination = 'per_page=1&page=2'
+        member_query = 'show=/name,/set_state'
+        url_query = '&'.join([filter_query, pagination, member_query])
+        
+        resp = self.client.get("%s?%s" % (url, url_query))
+        self.assertEqual(resp.status_code, 200)
+        node_js = json.loads(resp.content)
+        
+        # check number objects returned
+        node_qs = Node.objects.filter(set_state="production")[1:2]
+        self.assertEqual(len(node_js), node_qs.count())
+        
+        # check if objects return really match
+        for node in node_js:
+            self.assertEqual(node['set_state'], "production")
+        
+        #TODO extend test when member selection implemented
+
+
+class MemberSelectionTests(TestCase):
+    fixtures = ['groups.json']
+    
+    def test_basic_member_selection(self):
+        url = reverse('group-list')
+        member_query = 'show=/name'
+        resp = self.client.get(url + '?%s' % member_query)
+        self.assertEqual(resp.status_code, 200)
+        #TODO extend test when member selection implemented
 
 
 class ProfileTests(TestCase):

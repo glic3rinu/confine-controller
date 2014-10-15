@@ -70,7 +70,7 @@ class NodeSafeState(Notification):
         return obj.group.get_emails(roles=[Roles.GROUP_ADMIN, Roles.NODE_ADMIN])
     
     def get_context(self, obj):
-        context = super(NodeNotAvailable, self).get_context(obj)
+        context = super(NodeSafeState, self).get_context(obj)
         context.update({
             'node': obj,
             'exp_warn': STATE_NODE_SAFE_WARNING

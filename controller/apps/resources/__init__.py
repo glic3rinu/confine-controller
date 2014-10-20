@@ -5,6 +5,9 @@ from django.db.models.loading import get_model
 from controller.utils import plugins
 
 
+default_app_config = 'resources.apps.ResourcesConfig'
+
+
 class ResourcePlugin(object):
     name = ''
     unit = ''

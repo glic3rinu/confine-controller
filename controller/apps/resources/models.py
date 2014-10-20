@@ -94,8 +94,4 @@ class ResourceReq(BaseResource):
 
 autodiscover('resources')
 
-for producer_model in ResourcePlugin.get_producers_models():
-    producer_model.add_to_class('resources', generic.GenericRelation('resources.Resource'))
 
-for consumer_model in ResourcePlugin.get_consumers_models():
-    consumer_model.add_to_class('resources', generic.GenericRelation('resources.ResourceReq'))

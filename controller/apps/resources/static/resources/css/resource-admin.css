@@ -1,5 +1,5 @@
 /* custom style for readonly field */
-.field-name input[readonly=True] {
+.field-name input[readonly] {
     border: none;
     background: none;
     text-transform: capitalize;

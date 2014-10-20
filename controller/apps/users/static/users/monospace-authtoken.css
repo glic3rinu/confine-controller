@@ -1,5 +1,6 @@
 td.field-data p {
     font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace;
+    word-break: break-all;
 }
 
 td.field-data textarea {

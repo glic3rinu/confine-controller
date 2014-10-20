@@ -15,6 +15,10 @@ body {
     line-height: 30px;
 }
 
+#header #branding h1 a {
+    color: #fff;
+}
+
 .version:before {
     content: "v";
     opacity: 0.6;

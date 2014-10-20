@@ -156,11 +156,12 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         for iface_type, iface_object in Sliver.get_registered_ifaces().items():
             """ Hook registered ifaces """
             if not iface_type in self.list_display and not iface_object.AUTO_CREATE:
-                def display_ifaces(instance, iface_type=iface_type):
+                def display_ifaces(cls, instance, iface_type=iface_type):
                     return instance.interfaces.filter(type=iface_type).count()
                 display_ifaces.short_description = iface_type.capitalize()
                 display_ifaces.boolean = iface_object.UNIQUE
-                setattr(self, iface_type, display_ifaces)
+                # hook as class attribute to avoid admin.E108 check
+                setattr(SliverAdmin, iface_type, display_ifaces)
                 self.list_display.append(iface_type)
         super(SliverAdmin, self).__init__(*args, **kwargs)
     

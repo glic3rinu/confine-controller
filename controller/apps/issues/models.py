@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_delete
@@ -8,7 +8,7 @@ from controller.models.utils import generate_chainer_manager
 from controller.utils import send_email_template
 from users.models import Group, Roles, User
 
-from . import settings
+from .settings import ISSUES_NOTIFY_SUPERUSERS, ISSUES_SUPPORT_EMAILS
 
 
 class QueueQuerySet(models.query.QuerySet):
@@ -84,11 +84,11 @@ class Ticket(models.Model):
         (PRIVATE, 'Private'),
     )
     
-    created_by = models.ForeignKey(get_user_model(), null=True, blank=True,
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
             related_name='created_tickets', on_delete=models.SET_NULL)
     created_by_name = models.CharField(max_length=60)
     group = models.ForeignKey(Group, null=True, blank=True, related_name='assigned_tickets')
-    owner = models.ForeignKey(get_user_model(), null=True, blank=True,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
             related_name='owned_tickets', verbose_name='assigned to')
     queue = models.ForeignKey(Queue, related_name='tickets', null=True, blank=True)
     subject = models.CharField(max_length=256)
@@ -110,12 +110,12 @@ class Ticket(models.Model):
     
     def get_notification_emails(self):
         """ Get emails of the users related to the ticket """
-        emails = list(settings.ISSUES_SUPPORT_EMAILS)
+        emails = list(ISSUES_SUPPORT_EMAILS)
         emails.append(self.created_by.email)
         if self.owner:
             emails.append(self.owner.email)
         else: # No ticket owner, so lets notify staff
-            if settings.ISSUES_NOTIFY_SUPERUSERS:
+            if ISSUES_NOTIFY_SUPERUSERS:
                 superusers = User.objects.filter(is_superuser=True)
                 emails += superusers.values_list('email', flat=True)
             if self.group:
@@ -195,7 +195,7 @@ class Ticket(models.Model):
 
 class Message(models.Model):
     ticket = models.ForeignKey('issues.Ticket', related_name='messages')
-    author = models.ForeignKey(get_user_model(), null=True, blank=True,
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
              on_delete=models.SET_NULL)
     author_name = models.CharField(max_length=60)
     content = models.TextField()
@@ -216,13 +216,13 @@ class Message(models.Model):
 class TicketTracker(models.Model):
     """ Keeps track of user read tickets """
     ticket = models.ForeignKey(Ticket)
-    user = models.ForeignKey(get_user_model())
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     
     class Meta:
         unique_together = (('ticket', 'user'),)
 
 
-@receiver(pre_delete, sender=get_user_model())
+@receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
 def update_author_data(sender, instance, **kwargs):
     """save author info for using when user is deleted (#289)"""
     # update tickets

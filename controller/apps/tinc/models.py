@@ -8,7 +8,6 @@ from django_transaction_signals import defer
 
 from controller import settings as controller_settings
 from controller.models.fields import RSAPublicKeyField
-from controller.models.utils import generate_chainer_manager
 from controller.core.validators import validate_host_name, validate_name, OrValidator
 from mgmtnetworks.models import get_mgmt_net
 from nodes.models import Server, Node
@@ -93,7 +92,7 @@ class TincHost(models.Model):
     object_id = models.PositiveIntegerField()
     
     content_object = generic.GenericForeignKey()
-    objects = generate_chainer_manager(TincHostQuerySet)
+    objects = TincHostQuerySet.as_manager()
     
     class Meta:
         ordering = ['content_type', 'object_id']

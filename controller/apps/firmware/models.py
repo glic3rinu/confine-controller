@@ -22,7 +22,6 @@ from privatefiles import PrivateFileField
 from controller import settings as controller_settings
 from controller.core.validators import validate_file_extensions, validate_name
 from controller.models.fields import MultiSelectField
-from controller.models.utils import generate_chainer_manager
 from controller.utils.auth import any_auth_method
 from controller.utils.functional import cached
 from nodes.models import Node, Server
@@ -78,7 +77,7 @@ class Build(models.Model):
             help_text="Celery task ID")
     kwargs = models.TextField()
     
-    objects = generate_chainer_manager(BuildQuerySet)
+    objects = BuildQuerySet.as_manager()
     
     class Meta:
         ordering = ['-date']
@@ -346,7 +345,7 @@ class BaseImage(models.Model):
             help_text='If true this base image will be preselected on the firmware '
                       'generation form')
     
-    objects = generate_chainer_manager(BaseImageQuerySet)
+    objects = BaseImageQuerySet.as_manager()
     
     def __unicode__(self):
         return u"%s (%s)" % (self.name, self.filename)
@@ -402,7 +401,7 @@ class ConfigFile(models.Model):
     is_optional = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     
-    objects = generate_chainer_manager(ConfigFileQuerySet)
+    objects = ConfigFileQuerySet.as_manager()
     
     class Meta:
         unique_together = ['config', 'path']

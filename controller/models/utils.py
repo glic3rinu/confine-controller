@@ -5,25 +5,6 @@ from django.db import models
 from controller.utils.singletons.models import SingletonModel
 
 
-def generate_chainer_manager(qs_class):
-    # Allow chained managers
-    # Based on http://djangosnippets.org/snippets/562/#c2486
-    class ChainerManager(models.Manager):
-        def __init__(self):
-            super(ChainerManager,self).__init__()
-            self.queryset_class = qs_class
-        
-        def get_queryset(self):
-            return self.queryset_class(self.model)
-        
-        def __getattr__(self, attr, *args):
-            try:
-                return getattr(type(self), attr, *args)
-            except AttributeError:
-                return getattr(self.get_queryset(), attr, *args)
-    return ChainerManager()
-
-
 def get_field_value(obj, field_name):
     names = field_name.split('__')
     rel = getattr(obj, names.pop(0))

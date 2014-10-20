@@ -4,7 +4,6 @@ from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from controller.models.utils import generate_chainer_manager
 from controller.utils import send_email_template
 from users.models import Group, Roles, User
 
@@ -23,7 +22,7 @@ class Queue(models.Model):
     notify_node_admins = models.BooleanField(default=False)
     notify_slice_admins = models.BooleanField(default=False)
     
-    objects = generate_chainer_manager(QueueQuerySet)
+    objects = QueueQuerySet.as_manager()
     
     def __unicode__(self):
         return self.name
@@ -100,7 +99,7 @@ class Ticket(models.Model):
     last_modified_on = models.DateTimeField(auto_now=True)
     cc = models.TextField('CC', blank=True, help_text="emails to send a carbon copy")
     
-    objects = generate_chainer_manager(TicketQuerySet)
+    objects = TicketQuerySet.as_manager()
     
     class Meta:
         ordering = ["-last_modified_on"]

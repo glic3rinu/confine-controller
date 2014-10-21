@@ -20,7 +20,7 @@ from djcelery.models import TaskState
 from privatefiles import PrivateFileField
 
 from controller import settings as controller_settings
-from controller.core.validators import validate_file_extensions, validate_name
+from controller.core.validators import FileExtValidator, validate_name
 from controller.models.fields import MultiSelectField
 from controller.utils.auth import any_auth_method
 from controller.utils.functional import cached
@@ -340,7 +340,7 @@ class BaseImage(models.Model):
     image = models.FileField(storage=settings.FIRMWARE_BASE_IMAGE_STORAGE,
             upload_to=settings.FIRMWARE_BASE_IMAGE_PATH,
             help_text='Image file compressed in gzip. The file name must end in .img.gz',
-            validators=[validate_file_extensions(FIRMWARE_BASE_IMAGE_EXTENSIONS)])
+            validators=[FileExtValidator(FIRMWARE_BASE_IMAGE_EXTENSIONS)])
     default = models.BooleanField(default=False,
             help_text='If true this base image will be preselected on the firmware '
                       'generation form')

@@ -6,6 +6,7 @@ from uuid import UUID
 
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.utils.deconstruct import deconstructible
 from M2Crypto import BIO, RSA, X509
 
 from controller.utils.ssl import pkcs_to_x501
@@ -105,16 +106,27 @@ def validate_sha256(value):
         raise ValidationError('This is not an SHA256 HEX digest.')
 
 
-def validate_file_extensions(extensions):
-    def _validate_extensions(value, extensions=extensions):
-        for extension in extensions:
+@deconstructible
+class FileExtValidator(object):
+    extensions = []
+    message = 'Select a file with valid extension (%s).'
+    
+    def __init__(self, extensions=None):
+        if extensions is not None:
+            self.extensions = extensions
+        self.message = self.message % ', '.join(self.extensions)
+    
+    def __call__(self, value):
+        for extension in self.extensions:
             if value.name.endswith(extension):
                 return
-        msg = '"%s" does not have a valid extension %s' % (value, extensions)
-        raise ValidationError(msg)
-    return _validate_extensions
+        raise ValidationError(self.message)
+    
+    def __eq__(self, other):
+        return set(self.extensions) == set(other.extensions)
 
 
+@deconstructible
 class OrValidator(object):
     """
     Run validators with an OR logic
@@ -134,5 +146,6 @@ class OrValidator(object):
             else:
                 return
         raise type(e)(' OR '.join(msg))
-
-
+    
+    def __eq__(self, other):
+        return set(self.validators) == set(other.validators)

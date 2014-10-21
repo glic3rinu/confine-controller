@@ -1,10 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from controller.core.validators import (validate_net_iface_name_with_vlan,
-    validate_ssh_pubkey)
+from controller.core.validators import (FileExtValidator,
+    validate_net_iface_name_with_vlan, validate_ssh_pubkey)
 from controller.utils import decode_version
-
 from users.models import User
 
 
@@ -65,6 +64,16 @@ class ControllerTests(TestCase):
 
 
 class ValidatorsTests(TestCase):
+    def test_file_ext_validator(self):
+        instance = BaseImage()
+        validator = FileExtValidator(['img.gz'])
+        
+        instance.image.name = '/tmp/image.img.gz'
+        validator(instance.image)
+        
+        instance.image.name = '/tmp/bad_format.jpg'
+        self.assertRaises(ValidationError, validator, instance.image)
+    
     def test_validate_net_iface_name_with_vlan(self):
         # http://wiki.openwrt.org/doc/networking/network.interfaces
         validate_net_iface_name_with_vlan('eth')

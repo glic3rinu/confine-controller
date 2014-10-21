@@ -1,6 +1,4 @@
 import hashlib
-import os
-import tempfile
 
 from django_transaction_signals import defer
 from django.core.exceptions import ValidationError
@@ -9,14 +7,14 @@ from django.utils.timezone import now
 
 from controller.models.fields import MultiSelectField, NullableCharField
 from controller.utils import autodiscover
-from controller.core.validators import (validate_net_iface_name, validate_prop_name,
-        validate_sha256, validate_file_extensions, validate_name)
+from controller.core.validators import (FileExtValidator,
+    validate_net_iface_name, validate_prop_name, validate_sha256, validate_name)
 from nodes.models import Node
 from nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .exceptions import VlanAllocationError, IfaceAllocationError
-from .helpers import save_files_with_pk_value
+from .helpers import save_files_with_pk_value, UploadToGenerator
 from .tasks import force_slice_update, force_sliver_update
 
 
@@ -83,35 +81,6 @@ def set_uri(self, fields):
             setattr(self, field_name + '_uri', '')
 
 
-def make_upload_to(field_name, base_path, file_name):
-    """ dynamically generate file names with randomness for upload_to args """
-    def upload_path(instance, filename, base_path=base_path, file_name=file_name,
-                    field_name=field_name):
-        if not file_name or instance is None:
-            return os.path.join(base_path, filename)
-        field = type(instance)._meta.get_field_by_name(field_name)[0]
-        storage_location = field.storage.base_location
-        abs_path = os.path.join(storage_location, base_path)
-        splited = filename.split('.')
-        context = {
-            'pk': instance.pk,
-            'original': filename,
-            'prefix': splited[0],
-            'suffix': splited[1] if len(splited) > 1 else ''
-        }
-        if '%(rand)s' in file_name:
-            prefix, suffix = file_name.split('%(rand)s')
-            prefix = prefix % context
-            suffix = suffix % context
-            with tempfile.NamedTemporaryFile(dir=abs_path, prefix=prefix, suffix=suffix) as f:
-                name = f.name.split('/')[-1]
-        else:
-            name = file_name % context
-        name = name.replace(' ', '_')
-        return os.path.join(base_path, name)
-    return upload_path
-
-
 class Template(models.Model):
     """
     Describes a template available in the testbed for slices and slivers to use.
@@ -137,9 +106,9 @@ class Template(models.Model):
             default=settings.SLICES_TEMPLATE_ARCH_DFLT)
     is_active = models.BooleanField(default=True)
     image = models.FileField(help_text="Template's image file.",
-            upload_to=make_upload_to('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
+            upload_to=UploadToGenerator('image', settings.SLICES_TEMPLATE_IMAGE_DIR,
                                      settings.SLICES_TEMPLATE_IMAGE_NAME),
-            validators=[validate_file_extensions(settings.SLICES_TEMPLATE_IMAGE_EXTENSIONS)])
+            validators=[FileExtValidator(settings.SLICES_TEMPLATE_IMAGE_EXTENSIONS)])
     image_uri = models.CharField('image URI', max_length=256, blank=True,
             help_text='The URI of this template\'s image file. This member '
                       'cannot be changed if the template is in use. This '
@@ -327,7 +296,7 @@ class SliverDefaults(models.Model):
                       'is instructed to be updated.',
             verbose_name='New sliver instance sequence number')
     data = models.FileField(blank=True, verbose_name='sliver data',
-            upload_to=make_upload_to('data', settings.SLICES_SLICE_DATA_DIR,
+            upload_to=UploadToGenerator('data', settings.SLICES_SLICE_DATA_DIR,
                                      settings.SLICES_SLICE_DATA_NAME,),
             help_text='File containing experiment data for slivers (if they do not '
                       'explicitly indicate one)')
@@ -393,7 +362,7 @@ class Sliver(models.Model):
                       'updated (instance sequence number).',
             verbose_name='instance sequence number')
     data = models.FileField(blank=True, verbose_name='sliver data',
-            upload_to=make_upload_to('data', settings.SLICES_SLIVER_DATA_DIR,
+            upload_to=UploadToGenerator('data', settings.SLICES_SLIVER_DATA_DIR,
                                      settings.SLICES_SLIVER_DATA_NAME),
             help_text='File containing data for this sliver.')
     data_uri = NullableCharField('sliver data URI', max_length=256, blank=True,

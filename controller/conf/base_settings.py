@@ -145,7 +145,6 @@ INSTALLED_APPS = (
     'resources',
     
     # Third-party apps
-    'south',
     'django_extensions',
     'djcelery',
     'djcelery_email',

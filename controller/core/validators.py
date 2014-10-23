@@ -7,6 +7,7 @@ from uuid import UUID
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.utils.deconstruct import deconstructible
+from django.utils.translation import ugettext_lazy as _
 from M2Crypto import BIO, RSA, X509
 
 from controller.utils.ssl import pkcs_to_x501
@@ -73,11 +74,9 @@ def validate_net_iface_name_with_vlan(value):
             'Enter a valid network interface name.', 'invalid')(value)
 
 
-def validate_host_name(value):
-    ValidHostnameRegex = ("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)"
-                          "*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$")
-    validators.RegexValidator(re.compile(ValidHostnameRegex),
-            'Insert a valid host name.', 'invalid')(value)
+hostname_re = re.compile(r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)'
+                           '*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$')
+validate_host_name = validators.RegexValidator(hostname_re, 'Insert a valid host name.', 'invalid')
 
 
 def validate_prop_name(value):
@@ -126,8 +125,21 @@ class FileExtValidator(object):
         return set(self.extensions) == set(other.extensions)
 
 
+def validate_tinc_address(value):
+    """IPv4 address or host name."""
+    try:
+        validate_ipv4_address(value)
+    except ValidationError:
+        try:
+            validate_host_name(value)
+        except ValidationError:
+            raise ValidationError(_('Enter a valid tinc address (IPv4 or host name).'), code='invalid')
+
+
 @deconstructible
 class OrValidator(object):
+    # FIXME for some reason django migrations detects changes on models
+    #       when this validator is used.
     """
     Run validators with an OR logic
     """
@@ -148,4 +160,7 @@ class OrValidator(object):
         raise type(e)(' OR '.join(msg))
     
     def __eq__(self, other):
-        return set(self.validators) == set(other.validators)
+        return (
+            isinstance(other, OrValidator) and
+            set(self.validators) == set(other.validators)
+        )

@@ -8,7 +8,8 @@ from django_transaction_signals import defer
 
 from controller import settings as controller_settings
 from controller.models.fields import RSAPublicKeyField
-from controller.core.validators import validate_host_name, validate_name, OrValidator
+from controller.core.validators import (validate_host_name, validate_name,
+    validate_tinc_address)
 from mgmtnetworks.models import get_mgmt_net
 from nodes.models import Server, Node
 from pki import Bob
@@ -215,7 +216,7 @@ class TincAddress(models.Model):
     """
     addr = models.CharField('address', max_length=128,
             help_text='The tinc IP address or host name of the host this one connects to.',
-            validators=[OrValidator([validators.validate_ipv4_address, validate_host_name])])
+            validators=[validate_tinc_address])
     port = models.SmallIntegerField(default=settings.TINC_PORT_DFLT,
             help_text='TCP/UDP port of this tinc address.')
     island = models.ForeignKey('nodes.Island', null=True, blank=True,

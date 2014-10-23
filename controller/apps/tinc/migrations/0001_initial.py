@@ -2,11 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import re
 import controller.core.validators
 import django.db.models.deletion
 from django.conf import settings
-import django.core.validators
 import controller.models.fields
 
 
@@ -36,7 +34,7 @@ class Migration(migrations.Migration):
             name='TincAddress',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('addr', models.CharField(help_text=b'The tinc IP address or host name of the host this one connects to.', max_length=128, verbose_name=b'address', validators=[controller.core.validators.OrValidator([django.core.validators.RegexValidator(re.compile('^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$'), 'Enter a valid IPv4 address.', 'invalid'), controller.core.validators.validate_host_name])])),
+                ('addr', models.CharField(help_text=b'The tinc IP address or host name of the host this one connects to.', max_length=128, verbose_name=b'address', validators=[controller.core.validators.validate_tinc_address])),
                 ('port', models.SmallIntegerField(default=b'655', help_text=b'TCP/UDP port of this tinc address.')),
             ],
             options={

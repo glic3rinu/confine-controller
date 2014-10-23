@@ -93,7 +93,8 @@ class TincHost(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             # generate and initialize name
-            self.name = self._name
+            if not self.name:
+                self.name = self._name
             # Try to restore object to allow update in nested serialization
             try:
                 obj = TincHost.objects.get(content_type_id=self.content_type_id,

@@ -7,6 +7,10 @@ from django.db import models, migrations
 def init_firmware_config(apps, schema_editor):
     ### Config ###
     Config = apps.get_model("firmware", "Config")
+    
+    if Config.objects.exists():
+        return # data already created
+    
     config = Config.objects.create(version="0.1", description="Confine Firmware",
         image_name="confine-firmware-%(node_name)s-%(arch)s.img.gz")
     

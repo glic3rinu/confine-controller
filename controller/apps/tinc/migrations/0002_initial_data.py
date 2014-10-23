@@ -12,7 +12,8 @@ def create_tinc_server(apps, schema_editor):
     server = apps.get_model("nodes", "Server").objects.first()
     
     TincHost = apps.get_model("tinc", "TincHost")
-    tinc = TincHost.objects.create(content_type=ctype, object_id=server.pk, name='server')
+    tinc = TincHost.objects.update_or_create(content_type=ctype,
+        object_id=server.pk, defaults={'name': 'server'})
 
 
 def delete_tinc_server(apps, schema_editor):

@@ -8,6 +8,10 @@ from controller.utils.system import run
 
 def create_main_server(apps, schema_editor):
     Server = apps.get_model("nodes", "Server")
+    
+    if Server.objects.exists():
+        return # data already created
+    
     server = Server.objects.create(name=run('hostname', display=False).stdout)
     
     # server.pk should be 2 (#245 backwards compatibility)

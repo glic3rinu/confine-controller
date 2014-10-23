@@ -6,6 +6,10 @@ from django.db import models, migrations
 
 def init_testbed(apps, schema_editor):
     Testbed = apps.get_model("controller", "Testbed")
+    
+    if Testbed.objects.exists():
+        return # data already created
+    
     testbed = Testbed.objects.create()
     
     TestbedParams = apps.get_model("controller", "TestbedParams")

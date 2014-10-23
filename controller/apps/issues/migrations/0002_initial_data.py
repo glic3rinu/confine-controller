@@ -6,6 +6,10 @@ from django.db import models, migrations
 
 def init_queues(apps, schema_editor):
     Queue = apps.get_model("issues", "Queue")
+    
+    if Queue.objects.exists():
+        return # data already created
+    
     Queue.objects.bulk_create([
         Queue(name="Web Interface", default=True),
         Queue(name="Nodes", notify_node_admins=True),

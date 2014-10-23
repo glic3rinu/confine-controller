@@ -158,7 +158,7 @@ function install_requirements () {
                      greenlet==0.4.5 \
                      gevent==1.0.1"
     PRODUCTION_PIP="django-simple-captcha==0.4.4 \
-                    django-registration==1.0 \
+                    git+https://github.com/marcusmartins/django-registration.git \
                     django-google-maps==0.2.3"
     
     # Make sure locales are in place before installing postgres

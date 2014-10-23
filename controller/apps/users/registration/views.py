@@ -15,20 +15,20 @@ class RegistrationOpenView(RegistrationView):
     Regitration open, everyone can register as user.
     
     """
-    def register(self, request, **cleaned_data):
+    def register(self, **cleaned_data):
         """ Initialize custom user data model """
         username, name, email, password = (cleaned_data['username'],
             cleaned_data['name'], cleaned_data['email'], cleaned_data['password1'])
         if Site._meta.installed:
             site = Site.objects.get_current()
         else:
-            site = RequestSite(request)
+            site = RequestSite(self.request)
         
         new_user = RegistrationProfile.extra_manager.create_inactive_user(
                         username, name, email, password, site)
         signals.user_registered.send(sender=self.__class__,
                                      user=new_user,
-                                     request=request)
+                                     request=self.request)
         return new_user
 
 
@@ -37,7 +37,7 @@ class RegistrationClosedView(RegistrationView):
     Registration disabled. Only the admins can create new users.
     
     """
-    def registration_allowed(self, request):
+    def registration_allowed(self):
         return False
 
 
@@ -47,7 +47,7 @@ class ActivationRestrictedView(ActivationView):
     after the account confirmation
     
     """
-    def activate(self, request, activation_key):
+    def activate(self, activation_key):
         """
         Mark the account as email confirmed and send an email to
         the administrators asking their approval.
@@ -57,8 +57,8 @@ class ActivationRestrictedView(ActivationView):
         if activated_user:
             # email confirmed but user still remains disabled
             # send mail admin requesting enable the account
-            site = RequestSite(request)
-            context = { 'request': request, 'site': site, 'user': activated_user }
+            site = RequestSite(self.request)
+            context = { 'request': self.request, 'site': site, 'user': activated_user }
             template = 'registration/account_approve_request.email'
             to = settings.EMAIL_REGISTRATION_APPROVE
             # check if is a valid email

@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from django import forms
 from django.core import validators
 from django.utils.translation import ugettext as _
@@ -25,8 +26,15 @@ class RegistrationFormUniqueEmail(RegistrationForm):
     def __init__(self, *args, **kwargs):
         """ Reorder form fields """
         super(RegistrationFormUniqueEmail, self).__init__(*args, **kwargs)
-        self.fields.keyOrder.pop(self.fields.keyOrder.index('name'))
-        self.fields.keyOrder.insert(0, 'name')
+        
+        keys = self.fields.keys()
+        keys.pop(keys.index('name'))
+        keys.insert(0, 'name')
+        
+        new_fields = OrderedDict()
+        for key in keys:
+            new_fields[key] = self.fields[key]
+        self.fields = new_fields
 
     def clean_email(self):
         """

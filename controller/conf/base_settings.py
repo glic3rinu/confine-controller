@@ -316,4 +316,4 @@ USE_ETAGS = True
 CUSTOM_API_ROOT = 'controller.api.Base'
 
 # REST API pagination
-DEFAULT_PER_PAGE = 25
+DEFAULT_PER_PAGE = None # Disable pagination by default

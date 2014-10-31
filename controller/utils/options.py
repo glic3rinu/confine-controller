@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os
+import re
 import time
 import warnings
 from distutils.sysconfig import get_python_lib
@@ -32,6 +33,27 @@ def autodiscover(module):
             if module_has_submodule(mod, module):
                 print '%s module caused this error:' % module
                 raise
+
+
+def decode_version(version):
+    """
+    Reverse operation of controller get_version
+    Converts a string formated version into a three integer
+    tuple (major, major2, minor). E.g. (1, 1, 3)
+    
+    """
+    version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
+    minor_release = version_re.search(version)
+    if minor_release is not None:
+        major, major2, minor = version_re.search(version).groups()
+    else:
+        version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
+        if version_re.search(version) is not None:
+            major, major2 = version_re.search(version).groups()
+            minor = 0
+        else:
+            raise ValueError('Invalid controller version string "%s".' % version)
+    return int(major), int(major2), int(minor)
 
 
 def is_installed(app):

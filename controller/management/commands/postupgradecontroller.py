@@ -2,8 +2,10 @@ import re
 import os
 from optparse import make_option
 
+from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 
+from controller.utils import decode_version
 from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
 
@@ -55,14 +57,10 @@ class Command(BaseCommand):
         version = options.get('version')
         upgrade_notes = []
         if version:
-            version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
-            minor_release = version_re.search(version)
-            if minor_release is not None:
-                major, major2, minor = version_re.search(version).groups()
-            else:
-                version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
-                major, major2 = version_re.search(version).groups()
-                minor = 0
+            try:
+                major, major2, minor = decode_version(version)
+            except ValueError as e:
+                raise CommandError(e)
             # Represent version as two digits per number: 1.2.2 -> 10202
             version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
             

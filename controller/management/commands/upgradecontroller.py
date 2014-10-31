@@ -8,11 +8,21 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 from controller import get_version
+from controller.utils import decode_version
 from controller.utils import get_existing_pip_installation
 from controller.utils.system import run, check_root
 
 
 r = functools.partial(run, silent=False)
+
+
+def validate_controller_version(version):
+    if not version or version == 'dev':
+        return
+    try:
+        decode_version(version)
+    except ValueError as e:
+        raise CommandError(e)
 
 
 class Command(BaseCommand):
@@ -51,6 +61,7 @@ class Command(BaseCommand):
         
         if current_path is not None:
             desired_version = options.get('version')
+            validate_controller_version(desired_version)
             if current_version == desired_version:
                 msg = "Not upgrading, you already have version %s installed"
                 raise CommandError(msg % desired_version)

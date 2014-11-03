@@ -56,12 +56,33 @@ def action_with_confirmation(action_name, extra_context={},
 
 def has_sudo_permissions(func):
     """
-    Check if the user has the required permission to execute an action
+    Check if the user has superuser permission to execute the action
     Inspired in user_passes_test from django.contrib.auth.decorators
     """
     @wraps(func, assigned=available_attrs(func))
     def decorator(modeladmin, request, queryset):
         if request.user.is_superuser:
+            return func(modeladmin, request, queryset)
+        else:
+            msg = "You don't have enought rights to perform this action!"
+            modeladmin.message_user(request, msg, messages.ERROR)
+            return None #raise PermissionDenied()
+    return decorator
+
+
+def has_change_permissions(func):
+    """
+    Check if the user has the required permission to execute an action
+    Inspired in user_passes_test from django.contrib.auth.decorators
+    """
+    @wraps(func, assigned=available_attrs(func))
+    def decorator(modeladmin, request, queryset):
+        can_change = True
+        for obj in queryset:
+            if not obj.has_permission(request.user, 'change'):
+                can_change = False
+                break
+        if request.user.is_superuser or can_change:
             return func(modeladmin, request, queryset)
         else:
             msg = "You don't have enought rights to perform this action!"

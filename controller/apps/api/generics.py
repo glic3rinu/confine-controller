@@ -90,7 +90,7 @@ class URIListCreateAPIView(ControllerBase, generics.ListCreateAPIView):
         
         # Is pagination disabled?
         if per_page is None:
-            per_page = qs.count()
+            per_page = max(1, qs.count())
         paginator = Paginator(qs, per_page)
         
         # validate num_page

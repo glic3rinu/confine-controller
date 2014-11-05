@@ -94,7 +94,7 @@ class Command(BaseCommand):
         
         server = Server.objects.first()
         server_ct = ContentType.objects.get_for_model(Server)
-        tinc_server, __ = TincHost.objects.get_or_create(object_id=1,
+        tinc_server, __ = TincHost.objects.get_or_create(object_id=server.pk,
             content_type=server_ct)
         
         tinc_port = options.get('default_port')

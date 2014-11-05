@@ -5,7 +5,28 @@ from optparse import make_option
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 
-from controller.utils import decode_version
+try:
+    from controller.utils import decode_version
+except ImportError:
+    # backwards compatibility < 0.11.3
+    # duplicated code of controller.utils.decode_version
+    # because on upgrade python executes new command code
+    # but without restarting services so cannot found
+    # controller.utils.decode_version
+    def decode_version(version):
+        version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
+        minor_release = version_re.search(version)
+        if minor_release is not None:
+            major, major2, minor = version_re.search(version).groups()
+        else:
+            version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
+            if version_re.search(version) is not None:
+                major, major2 = version_re.search(version).groups()
+                minor = 0
+            else:
+                raise ValueError('Invalid controller version string "%s".' % version)
+        return int(major), int(major2), int(minor)
+
 from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
 

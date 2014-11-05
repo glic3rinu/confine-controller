@@ -100,7 +100,11 @@ class Build(models.Model):
     @property
     def kwargs_dict(self):
         """ Return stored kwargs as a python dictionary """
-        return ast.literal_eval(self.kwargs)
+        try:
+            return ast.literal_eval(self.kwargs)
+        except (SyntaxError, ValueError):
+            # malformed kwargs string
+            return {}
 
     @property
     @cached

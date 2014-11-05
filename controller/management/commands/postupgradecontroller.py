@@ -5,6 +5,7 @@ from optparse import make_option
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 
+from controller.utils import decode_version
 from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
 
@@ -49,8 +50,6 @@ class Command(BaseCommand):
     
     @check_root
     def handle(self, *args, **options):
-        # Avoid import errors
-        from controller.utils import decode_version
         # Warn about deprecated options
         if options.get('local'):
             self.stderr.write("Warning: 'local' option is deprecated and will be ignored.\n")

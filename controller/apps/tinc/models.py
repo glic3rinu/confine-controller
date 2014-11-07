@@ -55,9 +55,9 @@ class TincHostQuerySet(models.query.QuerySet):
         server_ct = ContentType.objects.get_for_model(Server)
         return self.exclude(content_type=server_ct).filter(*args, **kwargs)
 
-    def servers(self, *args, **kwargs):
-        server_ct = ContentType.objects.get_for_model(Server)
-        return self.filter(content_type=server_ct).filter(*args, **kwargs)
+
+def get_default_gateway():
+    return Server.objects.get_default().tinc
 
 
 class TincHost(models.Model):
@@ -74,6 +74,9 @@ class TincHost(models.Model):
                       'usually TYPE_ID (e.g. server_4).')
     pubkey = RSAPublicKeyField('public Key', unique=True, null=True, blank=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
+    default_connect_to = models.ForeignKey('self', default=get_default_gateway,
+            limit_choices_to={'addresses__isnull': False}, null=True, blank=True,
+            on_delete=models.PROTECT)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -124,10 +127,11 @@ class TincHost(models.Model):
     @property
     def connect_to(self):
         """
-        Returns all active TincHosts to use on tincd ConnectTo.
-        Only trusted instances can act as servers.
+        Returns TincHosts with TincAddress that can be used
+        on tincd ConnectTo configuration option.
         """
-        return TincHost.objects.servers()
+        # TODO: sort by trust (servers > hosts)
+        return TincHost.objects.filter(addresses__isnull=False)
     
     def get_host(self, island=None):
         # Ignore orphan TincHost objects that prevent proper update_tincd!
@@ -157,20 +161,15 @@ class TincHost(models.Model):
     
     def get_config(self):
         """
-        Returns client tinc.conf file content, prioritizing servers
-        that belongs to the same island.
+        Returns client tinc.conf file content based on default
+        tinc gatway configured.
         """
         if self.content_type.model == 'server':
             raise TypeError("Cannot get_config from a server.")
-        config = ["Name = %s" % self.name]
-        for server in self.connect_to:
-            line = "ConnectTo = %s" % server.name
-            tinc_island = self.content_object.island
-            has_island = server.addresses.filter(island=tinc_island).exists()
-            if tinc_island and has_island:
-                config.insert(0, line)
-            else:
-                config.append(line)
+        config = [
+            "Name = %s" % self.name,
+            "ConnectTo = %s" % self.default_connect_to.name
+        ]
         return '\n'.join(config)
 
     def get_tinc_up(self):

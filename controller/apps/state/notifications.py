@@ -21,9 +21,10 @@ class NodeNotAvailable(Notification):
     default_message = (
         'Dear node operator\n\n'
         'This is a report about your group nodes that appear as offline.\n'
-        'Visit the following URLs to check their configuration\n'
+        'Visit the following URLs to check their configuration:\n'
         '{% for node in nodes %}\n'
-        '\thttp://{{ site.domain }}{% url \'admin:nodes_node_change\' node.pk %}\n'
+        '    {% ifchanged node.set_state %} == set_state {{ node.set_state|upper }} == {% endifchanged %}\n'
+        '    - {{ node}} http://{{ site.domain }}{% url \'admin:nodes_node_change\' node.pk %}\n'
         '{% endfor %}')
     expire_window = timedelta(days=7)
     
@@ -55,7 +56,7 @@ class NodeNotAvailable(Notification):
     def get_context(self, obj):
         context = super(NodeNotAvailable, self).get_context(obj)
         nodes_unavailable = []
-        for node in obj.nodes.all().order_by('pk'):
+        for node in obj.nodes.all().order_by('set_state'):
             if self._node_unavailable(node):
                 nodes_unavailable.append(node)
         context.update({

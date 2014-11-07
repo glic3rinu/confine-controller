@@ -7,6 +7,7 @@ class Notification(object):
     verbose_name = ''
     default_subject = ''
     default_message = ''
+    expire_window = None
     
     __metaclass__ = PluginMount
     

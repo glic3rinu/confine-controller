@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from datetime import timedelta
 from django.db.models import Q
 from django.utils import timezone
 
@@ -24,6 +25,7 @@ class NodeNotAvailable(Notification):
         '{% for node in nodes %}\n'
         '\thttp://{{ site.domain }}{% url \'admin:nodes_node_change\' node.pk %}\n'
         '{% endfor %}')
+    expire_window = timedelta(days=7)
     
     def _node_unavailable(self, node):
         """Check that node is offline or nodata for a defined time."""

@@ -3,6 +3,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.template import Context, Template
+from django.utils import timezone
 
 from controller.utils.plugins.models import PluginModel
 
@@ -20,6 +21,11 @@ class Notification(PluginModel):
         instance = self.instance
         for obj in instance.model.objects.all():
             valid_delivereds = self.delivered.filter(object_id=obj.pk, is_valid=True)
+            # purge expired delivered instances
+            if instance.expire_window is not None:
+                expiration_time = timezone.now() - instance.expire_window
+                valid_delivereds.filter(date__lt=expiration_time).delete()
+            
             if instance.check_condition(obj):
                 if not valid_delivereds.exists():
                     self.deliver(obj)

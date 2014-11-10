@@ -113,7 +113,6 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             'description': 'If you want to define a URI, you should remove '
                            'previously the uploaded file.',
             'fields': ('data', 'data_uri', 'data_sha256',
-                       'overlay', 'overlay_uri', 'overlay_sha256',
                        'new_instance_sn')
         }),
     )
@@ -172,7 +171,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return super(SliverAdmin, self).get_form(request, obj, **kwargs)
     
     def get_readonly_fields(self, request, obj=None):
-        """Mark as readonly if exists file for data and overlay"""
+        """Mark as readonly if exists file for data."""
         readonly_fields = super(SliverAdmin, self).get_readonly_fields(request, obj=obj)
         return readonly_fields + get_readonly_file_fields(obj)
     
@@ -213,7 +212,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         if db_field.name == 'set_state':
             blank_choice = (('', SLIVER_EMPTY_LABEL),)
             kwargs['choices'] = blank_choice + Slice.STATES
-        # TODO update empty_label for data and overlay (FileField)
+        # TODO update empty_label for sliver data (FileField)
         return super(SliverAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -560,7 +559,7 @@ class SliverDefaultsInline(PermissionStackedInline):
             'description': 'If you want to define a URI, you should remove '
                            'previously the uploaded file.',
             'fields': ('template', 'set_state','data', 'data_uri', 'data_sha256',
-                       'overlay', 'overlay_uri', 'overlay_sha256', 'instance_sn')
+                       'instance_sn')
         }),
     )
     readonly_fields = ['instance_sn']
@@ -583,7 +582,7 @@ class SliverDefaultsInline(PermissionStackedInline):
         return super(SliverDefaultsInline, self).formfield_for_dbfield(db_field, **kwargs)
     
     def get_readonly_fields(self, request, obj=None):
-        """Mark as readonly if exists file for data and overlay"""
+        """Mark as readonly if exists file for data."""
         readonly_fields = super(SliverDefaultsInline, self).get_readonly_fields(request, obj=obj)
         if obj is None:
             return readonly_fields

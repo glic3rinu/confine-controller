@@ -23,7 +23,7 @@ class TincHostInline(PermissionGenericTabularInline):
     # TODO TincAddress nested inlines: https://code.djangoproject.com/ticket/9025
     # TODO warn user when it tries to modify a tinchost with depends on more than 
     #      one client without alternative path
-    fields = ['pubkey', 'clear_pubkey']
+    fields = ['pubkey', 'clear_pubkey', 'default_connect_to']
     model = TincHost
     form = TincHostInlineForm
     max_num = 1

@@ -66,6 +66,7 @@ class BuildFileInline(admin.TabularInline):
 class ConfigFileInline(admin.TabularInline):
     model = ConfigFile
     extra = 0
+    ordering = ['-priority', 'path']
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make some char input widgets larger """

@@ -376,6 +376,9 @@ class ServerQuerySet(models.query.QuerySet):
 class ServerManager(models.Manager):
     def get_query_set(self):
         return ServerQuerySet(self.model, using=self.db)
+    
+    def get_default(self):
+        return self.order_by('id').first()
 
 class Server(models.Model):
     """

@@ -13,15 +13,15 @@ class Migration(DataMigration):
     def forwards(self, orm):
         """
         Update firmware configuration to support tinc default gateway (#236).
-        
         NAME is the default gateway tinc name
+        
         == ConfigFiles ==
         /etc/tinc/confine/hosts/NAME
         /etc/tinc/confine/tinc.conf with the connectTo=NAME
         /etc/confine/tinc-gateways/NAME primary gateways host files to be later copied to /etc/tinc/confine/hosts/
         
         == UCI ==
-        confine.mgmt_net.tinc_gateway=NAME
+        confine.node.tinc_gateway=NAME
         """
         # Note: Don't use "from appname.models import ModelName".
         # Use orm.ModelName to refer to models in this application,
@@ -29,7 +29,7 @@ class Migration(DataMigration):
         config = orm.Config.objects.get()
         orm.ConfigUCI.objects.create(
             config=config,
-            section="confine mgmt_net",
+            section="node node",
             option="tinc_gateway",
             value="node.tinc.default_connect_to.name"
         )
@@ -44,25 +44,17 @@ class Migration(DataMigration):
         gw_cfile.path = '[ "/etc/confine/tinc-gateways/%s" % server for server in node.tinc.connect_to ]'
         gw_cfile.save()
         
-        # update /etc/config/confine to include new UCI section to render it
-        uci_cfile = orm.ConfigFile.objects.get(path="/etc/config/confine")
-        uci_cfile.content = "self.config.render_uci(node, sections=['confine mgmt_net', 'node node', 'server server', 'testbed testbed', 'registry registry'])"
-        uci_cfile.save()
 
     def backwards(self, orm):
         "Revert firmware configuration changes."
         config = orm.Config.objects.get()
-        orm.ConfigUCI.objects.filter(config=config, section="confine mgmt_net", option="tinc_gateway").delete()
+        orm.ConfigUCI.objects.filter(config=config, section="node node", option="tinc_gateway").delete()
         orm.ConfigFile.objects.filter(config=config, path="'/etc/tinc/confine/hosts/%s' % node.tinc.default_connect_to.name").delete()
         # update path of tinc-gateways --> hosts
         gw_cfile = orm.ConfigFile.objects.get(path__contains='server for server in node.tinc.connect_to')
         gw_cfile.path = '[ "/etc/tinc/confine/hosts/%s" % server for server in node.tinc.connect_to ]'
         gw_cfile.save()
         
-        # remove 'confine mgmt_net' section of /etc/config/confine
-        uci_cfile = orm.ConfigFile.objects.get(path="/etc/config/confine")
-        uci_cfile.content = "self.config.render_uci(node, sections=['node node', 'server server', 'testbed testbed', 'registry registry'])"
-        uci_cfile.save()
 
     models = {
         u'firmware.baseimage': {

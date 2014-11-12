@@ -11,12 +11,14 @@ class Migration(DataMigration):
         # Note: Don't use "from appname.models import ModelName".
         # Use orm.ModelName to refer to models in this application,
         # and orm['appname.ModelName'] for models in other applications.
+        host_ctype = orm['contenttypes.ContentType'].objects.get(app_label='tinc', model='host')
         node_ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='node')
         server_ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='server')
         main_server = orm['nodes.Server'].objects.order_by('id').first()
         gw = orm['tinc.TincHost'].objects.get(content_type=server_ctype, object_id=main_server.pk)
         
         orm['tinc.TincHost'].objects.filter(content_type=node_ctype).update(default_connect_to=gw)
+        orm['tinc.TincHost'].objects.filter(content_type=host_ctype).update(default_connect_to=gw)
 
     def backwards(self, orm):
         "Write your backwards methods here."

@@ -12,7 +12,7 @@ from django_transaction_signals import defer
 
 from controller.utils.functional import cached
 from controller.utils.time import heartbeat_expires as heartbeatexpires
-from nodes.models import Node
+from nodes.models import Node, NodeApi
 from slices.models import Sliver
 
 from . import settings
@@ -177,10 +177,12 @@ class State(models.Model):
     def get_url(self):
         model = self.content_type.model_class()
         name = model.__name__.upper()
-        # TODO get URI from the node/sliver api_path ?
         URI = getattr(settings, "STATE_%s_%s" % (name, 'URI'))
+        # If node doesn't have api use the default base uri
+        node = self.get_node()
+        base_uri = getattr(node.api, 'base_uri', NodeApi.default_base_uri(node))
         context = {
-            'mgmt_addr': self.get_node().mgmt_net.addr,
+            'base_uri': base_uri,
             'object_id': self.object_id
         }
         return URI % context

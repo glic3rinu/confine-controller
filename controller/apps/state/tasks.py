@@ -7,6 +7,7 @@ from celery.task import periodic_task, task
 from django.db.models import get_model
 
 from controller.utils import LockFile
+from controller.utils.ssl import TLSv1HttpAdapter
 
 from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
@@ -28,6 +29,12 @@ def get_state(state_module, ids=[], lock=True, patch=False):
             gevent.monkey.patch_all(thread=False, select=False)
         
         glets = []
+        session = requests.Session()
+        session.verify = False # FIXME verify node certificate
+        # CNS only supports TLSv1 but requests use whatever
+        # version is default in the underlying library so we
+        # need to use a HttpAdater to ensure compatibility
+        session.mount('https://', TLSv1HttpAdapter())
         for obj in objects:
             try:
                 etag = json.loads(obj.state.metadata)['headers']['etag']
@@ -35,7 +42,7 @@ def get_state(state_module, ids=[], lock=True, patch=False):
                 headers = {}
             else:
                 headers = {'If-None-Match': etag}
-            glets.append(gevent.spawn(requests.get, obj.state.get_url(), headers=headers))
+            glets.append(gevent.spawn(session.get, obj.state.get_url(), headers=headers))
         
         # wait for all greenlets to finish
         gevent.joinall(glets)

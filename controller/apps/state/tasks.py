@@ -9,6 +9,7 @@ from django.db.models import get_model
 
 from controller.utils import LockFile
 from controller.utils.ssl import SSLAdapter
+from pki import ca
 
 from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
@@ -31,7 +32,12 @@ def get_state(state_module, ids=[], lock=True, patch=False):
         
         glets = []
         session = requests.Session()
-        session.verify = False # FIXME verify node certificate
+        
+        # check node API certificate against controller CA
+        # TODO: try verify but if fails try again without verifying
+        # and create a new state that marks as UNVERIFIED??
+        session.verify = ca.cert_path
+        
         # CNS only supports TLSv1 but requests use whatever
         # version is default in the underlying library so we
         # need to use a HttpAdater to ensure compatibility

@@ -1,5 +1,6 @@
 import json
 import os
+import ssl
 
 import gevent
 import requests
@@ -7,7 +8,7 @@ from celery.task import periodic_task, task
 from django.db.models import get_model
 
 from controller.utils import LockFile
-from controller.utils.ssl import TLSv1HttpAdapter
+from controller.utils.ssl import SSLAdapter
 
 from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
@@ -34,7 +35,7 @@ def get_state(state_module, ids=[], lock=True, patch=False):
         # CNS only supports TLSv1 but requests use whatever
         # version is default in the underlying library so we
         # need to use a HttpAdater to ensure compatibility
-        session.mount('https://', TLSv1HttpAdapter())
+        session.mount('https://', SSLAdapter(ssl_version=ssl.PROTOCOL_TLSv1))
         for obj in objects:
             try:
                 etag = json.loads(obj.state.metadata)['headers']['etag']

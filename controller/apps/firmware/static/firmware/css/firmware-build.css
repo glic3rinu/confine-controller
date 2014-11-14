@@ -18,3 +18,15 @@
     position: absolute;
     bottom: 0;
 }
+
+/*** firmware build change_view ***/
+.form-row.field-kwargs div p {
+    table-layout: fixed;
+    word-wrap: break-word;
+    word-break: break-all;
+    word-break: break-word; /* Non standar webkit */
+}
+
+.form-row.dynamic-files td.field-monospace_content p {
+    white-space: pre;
+}

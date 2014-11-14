@@ -124,6 +124,11 @@ class BuildAdmin(admin.ModelAdmin):
     ]
     inlines = [BuildFileInline]
     
+    class Media:
+        css = {
+             'all': ('firmware/css/firmware-build.css',)
+        }
+    
     def colored_state(self, build):
         return colored('state', STATE_COLORS)(build)
     colored_state.short_description = "State"

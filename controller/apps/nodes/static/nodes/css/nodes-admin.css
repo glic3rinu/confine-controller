@@ -12,9 +12,5 @@ span.help-text {
 }
 
 .field-base_uri .vURLField {
-    width: 22em;
-}
-
-.field-cert .vLargeTextField {
-    width: 44em;
+    width: 24em;
 }

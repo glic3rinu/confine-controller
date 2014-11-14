@@ -59,7 +59,7 @@ for value in ['SLICES_SLICE_EXP_DATA_DIR', 'SLICES_SLICE_EXP_DATA_NAME',
 # Warn user of removed settings on #200
 # TODO: remove this warning on v0.12
 for value in ['SLICES_SLICE_OVERLAY_DIR', 'SLICES_SLICE_OVERLAY_NAME',
-              'SLICES_SLICE_OVERLAY_DIR', 'SLICES_SLICE_EXP_DATA_NAME',
+              'SLICES_SLIVER_OVERLAY_DIR', 'SLICES_SLIVER_OVERLAY_NAME',
               'SLICES_SLIVER_OVERLAY_EXTENSIONS']:
     if hasattr(settings, value):
         warnings.warn("'%s' setting has been removed (see #200)." % value)

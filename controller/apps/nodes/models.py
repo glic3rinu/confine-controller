@@ -22,6 +22,12 @@ class Api(models.Model):
     
     class Meta:
         abstract = True
+    
+    def clean(self):
+        super(Api, self).clean()
+        # base_uri SHOULD always end with slash '/'
+        if not self.base_uri.endswith('/'):
+            self.base_uri += '/'
 
 
 class NodeApiManager(models.Manager):

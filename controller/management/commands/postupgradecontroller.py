@@ -27,9 +27,9 @@ except ImportError:
                 raise ValueError('Invalid controller version string "%s".' % version)
         return int(major), int(major2), int(minor)
 
+from controller.utils import get_project_root
 from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
-
 
 def deprecate_periodic_tasks(names):
     from djcelery.models import PeriodicTask
@@ -130,6 +130,15 @@ class Command(BaseCommand):
                 # We can force south to merge migrations because
                 # are implemented to be runned without dependencies
                 run('python manage.py migrate tinc 0030 --merge --noinput')
+                
+                # Take a snapshot current gateways on API format for backwards
+                # compatibility purposes before dropping it
+                context = {
+                    'gw_url': 'http://localhost/api/gateways/',
+                    'output': os.path.join(get_project_root(), 'gateways.api.json'),
+                }
+                run('wget -nv --header="Accept: application/json" '
+                    '--no-check-certificate %(gw_url)s -O %(output)s' % context)
         
         if not options.get('specifics_only'):
             # Common stuff

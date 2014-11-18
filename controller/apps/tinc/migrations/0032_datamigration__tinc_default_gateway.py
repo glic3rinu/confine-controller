@@ -15,7 +15,7 @@ class Migration(DataMigration):
         node_ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='node')
         server_ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='server')
         main_server = orm['nodes.Server'].objects.order_by('id').first()
-        gw = orm['tinc.TincHost'].objects.get(content_type=server_ctype, object_id=main_server.pk)
+        gw, _ = orm['tinc.TincHost'].objects.get_or_create(content_type=server_ctype, object_id=main_server.pk)
         
         orm['tinc.TincHost'].objects.filter(content_type=node_ctype).update(default_connect_to=gw)
         orm['tinc.TincHost'].objects.filter(content_type=host_ctype).update(default_connect_to=gw)

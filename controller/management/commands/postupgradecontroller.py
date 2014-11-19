@@ -2,7 +2,7 @@ import re
 import os
 from optparse import make_option
 
-from django.core.management import call_command, CommandError
+from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 
 try:
@@ -97,7 +97,7 @@ class Command(BaseCommand):
                     from south.models import MigrationHistory
                     migrated = MigrationHistory.objects.filter(app_name='maintenance').exists()
                     if not migrated:
-                        call_command('migrate', 'maintenance', '0001', fake=True)
+                        run('python manage.py migrate maintenance 0001 --fake')
             if version < 1002:
                 # Update monitor settings (fix typo and add DiskFreeMonitor)
                 context = {
@@ -129,7 +129,7 @@ class Command(BaseCommand):
                 # * v0.11.3 tinc adds 0023..0027
                 # We can force south to merge migrations because
                 # are implemented to be runned without dependencies
-                call_command('migrate', 'tinc', '0030', merge=True, noinput=True)
+                run('python manage.py migrate tinc 0030 --merge --noinput')
                 
                 # Take a snapshot current gateways on API format for backwards
                 # compatibility purposes before dropping it
@@ -151,18 +151,18 @@ class Command(BaseCommand):
             if options.get('proxy'):
                 extra += ' --proxy %s' % options.get('proxy')
             run("%s install_requirements " % controller_admin + extra)
-            call_command('collectstatic', noinput=True)
+            run("python manage.py collectstatic --noinput")
             
-            call_command('syncdb', noinput=True)
-            call_command('migrate', noinput=True)
+            run("python manage.py syncdb --noinput")
+            run("python manage.py migrate --noinput")
             if is_installed('firmware'):
-                call_command('syncfirmwareplugins')
+                run("python manage.py syncfirmwareplugins")
             if is_installed('notifications'):
-                call_command('syncnotifications')
+                run("python manage.py syncnotifications")
             if is_installed('resources'):
-                call_command('syncresources')
+                run("python manage.py syncresources")
             if options.get('restart'):
-                call_command('restartservices')
+                run("python manage.py restartservices")
         
         if not version:
             self.stderr.write('\nNext time you migth want to provide a --from argument '

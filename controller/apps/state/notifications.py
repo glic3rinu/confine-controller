@@ -19,12 +19,12 @@ class NodeNotAvailable(Notification):
     verbose_name = 'Node not available notification'
     default_subject = 'Group {{ group.name }} has {{ nodes|length }} node(s) OFFLINE for more than {{ exp_warn.days }} days'
     default_message = (
-        'Dear node operator\n\n'
+        'Dear node administrator\n\n'
         'This is a report about your group nodes that appear as offline.\n'
-        'Visit the following URLs to check their configuration:\n'
+        'Please visit the following URLs to check their configuration:\n'
         '{% for node in nodes %}\n'
         '    {% ifchanged node.set_state %} == set_state {{ node.set_state|upper }} == {% endifchanged %}\n'
-        '    - {{ node}} http://{{ site.domain }}{% url \'admin:nodes_node_change\' node.pk %}\n'
+        '    - {{ node }} http://{{ site.domain }}{% url \'admin:nodes_node_change\' node.pk %}\n'
         '{% endfor %}')
     expire_window = timedelta(days=7)
     

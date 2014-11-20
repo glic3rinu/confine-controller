@@ -1,15 +1,18 @@
 import gevent
 import requests
 
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, TestCase
+from django.utils import timezone
 
 from nodes.models import Node
 from users.models import Group
 
 from .helpers import (extract_disk_available, extract_node_software_version,
     sizeof_fmt)
-from .models import State
-from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
+from .models import State, StateHistory
+from .notifications import NodeNotAvailable
+from .settings import (STATE_NODE_OFFLINE_WARNING, STATE_NODE_SOFT_VERSION_URL,
+    STATE_NODE_SOFT_VERSION_NAME)
 
 class StateTests(LiveServerTestCase):
     def setUp(self):
@@ -113,3 +116,35 @@ class StateTests(LiveServerTestCase):
         self.assertEqual('N/A', disk['total'])
         self.assertEqual('N/A', disk['slv_dflt'])
         self.assertIsNone(disk['unit'])
+
+
+class NotAvailableNotificationTests(TestCase):
+    def setUp(self):
+        self.group = Group.objects.create(name='Group', allow_nodes=True)
+        self.node = Node.objects.create(name='Test', group=self.group)
+        self.na = NodeNotAvailable()
+    
+    def test_node_offline_without_history(self):
+        State.objects.create(content_object=self.node, value=State.OFFLINE)
+        self.assertFalse(self.na.check_condition(self.group))
+    
+    def test_node_offline_long_time(self):
+        state = State.objects.create(content_object=self.node, value=State.OFFLINE)
+        end = timezone.now()
+        start = end - 2*STATE_NODE_OFFLINE_WARNING
+        StateHistory.objects.create(state=state, value=State.OFFLINE, start=start, end=end)
+        self.assertTrue(self.na.check_condition(self.group))
+    
+    def test_node_flapping_state(self):
+        state = State.objects.create(content_object=self.node, value=State.OFFLINE)
+        # offline state history
+        end = timezone.now()
+        start = end - STATE_NODE_OFFLINE_WARNING/2
+        StateHistory.objects.create(state=state, value=State.OFFLINE, start=start, end=end)
+        
+        # production state history
+        end = start
+        start = end - STATE_NODE_OFFLINE_WARNING/2
+        StateHistory.objects.create(state=state, value=Node.PRODUCTION, start=start, end=end)
+        
+        self.assertFalse(self.na.check_condition(self.group))

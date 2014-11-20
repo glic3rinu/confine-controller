@@ -19,7 +19,8 @@ class TincHostInlineForm(forms.ModelForm):
                   "adding a new one.")
     default_connect_to = GroupedModelChoiceField(label='Default connect to',
         group_by_field='content_type', group_label=get_gateway_label,
-        queryset=TincHost.objects.filter(addresses__isnull=False))
+        queryset=TincHost.objects.filter(addresses__isnull=False),
+        required=False)
     
     class Meta:
         model = TincHost

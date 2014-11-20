@@ -2,6 +2,7 @@ from django.conf import settings as base_settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django_transaction_signals import defer
@@ -92,6 +93,11 @@ class TincHost(models.Model):
     @property
     def _name(self):
         return u'%s_%s' % (self.content_type.model, self.object_id)
+    
+    def clean(self):
+        if (self.content_type.model in ['node', 'host'] and
+            self.default_connect_to is None):
+            raise ValidationError('You should configure a default gateway.')
     
     def save(self, *args, **kwargs):
         if not self.pk:

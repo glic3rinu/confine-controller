@@ -66,6 +66,7 @@ class BuildFileInline(admin.TabularInline):
 class ConfigFileInline(admin.TabularInline):
     model = ConfigFile
     extra = 0
+    ordering = ['-priority', 'path']
     
     def formfield_for_dbfield(self, db_field, **kwargs):
         """ Make some char input widgets larger """
@@ -122,6 +123,11 @@ class BuildAdmin(admin.ModelAdmin):
         'build_date', 'task_link', 'task_id', 'base_image'
     ]
     inlines = [BuildFileInline]
+    
+    class Media:
+        css = {
+             'all': ('firmware/css/firmware-build.css',)
+        }
     
     def colored_state(self, build):
         return colored('state', STATE_COLORS)(build)

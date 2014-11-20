@@ -26,6 +26,24 @@ class BuildTests(TestCase):
             build.state
         except SuspiciousFileOperation:
             self.failureException
+    
+    def test_kwargs_dict(self):
+        b = Build(kwargs="{'registry_cert': u'', 'usb_image': False}")
+        self.assertIsInstance(b.kwargs_dict, dict)
+        self.assertEqual(['registry_cert', 'usb_image'], b.kwargs_dict.keys())
+        self.assertEqual(b.kwargs_dict['registry_cert'], u'')
+        self.assertFalse(b.kwargs_dict['usb_image'])
+    
+    def test_invalid_kwargs_dict(self):
+        # can handle invalid kwargs format?
+        b = Build(kwargs=u'')
+        self.assertIsInstance(b.kwargs_dict, dict)
+        
+        b.kwargs = None
+        self.assertIsInstance(b.kwargs_dict, dict)
+        
+        b.kwargs = "{'malformed_dict':}"
+        self.assertIsInstance(b.kwargs_dict, dict)
 
 
 class PluginTests(TestCase):

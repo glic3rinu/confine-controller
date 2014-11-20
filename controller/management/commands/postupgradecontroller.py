@@ -2,11 +2,34 @@ import re
 import os
 from optparse import make_option
 
+from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 
+try:
+    from controller.utils import decode_version
+except ImportError:
+    # backwards compatibility < 0.11.3
+    # duplicated code of controller.utils.decode_version
+    # because on upgrade python executes new command code
+    # but without restarting services so cannot found
+    # controller.utils.decode_version
+    def decode_version(version):
+        version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
+        minor_release = version_re.search(version)
+        if minor_release is not None:
+            major, major2, minor = version_re.search(version).groups()
+        else:
+            version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
+            if version_re.search(version) is not None:
+                major, major2 = version_re.search(version).groups()
+                minor = 0
+            else:
+                raise ValueError('Invalid controller version string "%s".' % version)
+        return int(major), int(major2), int(minor)
+
+from controller.utils import get_project_root
 from controller.utils.apps import is_installed
 from controller.utils.system import run, check_root
-
 
 def deprecate_periodic_tasks(names):
     from djcelery.models import PeriodicTask
@@ -55,14 +78,10 @@ class Command(BaseCommand):
         version = options.get('version')
         upgrade_notes = []
         if version:
-            version_re = re.compile(r'^\s*(\d+)\.(\d+)\.(\d+).*')
-            minor_release = version_re.search(version)
-            if minor_release is not None:
-                major, major2, minor = version_re.search(version).groups()
-            else:
-                version_re = re.compile(r'^\s*(\d+)\.(\d+).*')
-                major, major2 = version_re.search(version).groups()
-                minor = 0
+            try:
+                major, major2, minor = decode_version(version)
+            except ValueError as e:
+                raise CommandError(e)
             # Represent version as two digits per number: 1.2.2 -> 10202
             version = int(str(major) + "%02d" % int(major2) + "%02d" % int(minor))
             
@@ -104,6 +123,22 @@ class Command(BaseCommand):
                     ' - Enable disk monitor\n'
                     ' Please read the monitor app doc (MONITOR_MONITORS setting)\n'
                     'AUTOUPDATE: %s' % autoupdate_status)
+            if version <= 1102:
+                # Handle InconsistentMigrationHistory on tinc app
+                # * v0.11.2 tinc includes 0022, 0028..0030
+                # * v0.11.3 tinc adds 0023..0027
+                # We can force south to merge migrations because
+                # are implemented to be runned without dependencies
+                run('python manage.py migrate tinc 0030 --merge --noinput')
+                
+                # Take a snapshot current gateways on API format for backwards
+                # compatibility purposes before dropping it
+                context = {
+                    'gw_url': 'http://localhost/api/gateways/',
+                    'output': os.path.join(get_project_root(), 'gateways.api.json'),
+                }
+                run('wget -nv --header="Accept: application/json" '
+                    '--no-check-certificate %(gw_url)s -O %(output)s' % context)
         
         if not options.get('specifics_only'):
             # Common stuff

@@ -248,6 +248,13 @@ class PaginationTests(TestCase):
         nodes_db = set(Node.objects.values_list('id', flat=True))
         nodes_id = set([node['id'] for node in nodes])
         self.assertEquals(nodes_db, nodes_id)
+    
+    def test_paginate_empty_queryset(self):
+        # Regression test ZeroDivisionError
+        assert not Sliver.objects.exists(), "Slivers queryset is not empty."
+        url = reverse('sliver-list')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
 
 
 class IntegrationTests(TestCase):

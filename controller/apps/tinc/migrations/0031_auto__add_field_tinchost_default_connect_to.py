@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Initialize host name if is empty."
-        # Note: Don't use "from appname.models import ModelName".
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        for host in orm.Host.objects.filter(name=''):
-            host.name = 'Host %s' % host.pk
-            host.save()
+        # Adding field 'TincHost.default_connect_to'
+        db.add_column(u'tinc_tinchost', 'default_connect_to',
+                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tinc.TincHost'], null=True, on_delete=models.PROTECT),
+                      keep_default=False)
+
 
     def backwards(self, orm):
-        "Write your backwards methods here."
+        # Deleting field 'TincHost.default_connect_to'
+        db.delete_column(u'tinc_tinchost', 'default_connect_to_id')
+
 
     models = {
         u'contenttypes.contenttype': {
@@ -34,10 +35,10 @@ class Migration(DataMigration):
         },
         u'tinc.host': {
             'Meta': {'object_name': 'Host'},
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'island': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['nodes.Island']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '256'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tinc_hosts'", 'to': u"orm['users.User']"})
         },
         u'tinc.tincaddress': {
@@ -50,6 +51,7 @@ class Migration(DataMigration):
         },
         u'tinc.tinchost': {
             'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'TincHost'},
+            'default_connect_to': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['tinc.TincHost']", 'null': 'True', 'on_delete': 'models.PROTECT'}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
@@ -90,4 +92,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['tinc']
-    symmetrical = True

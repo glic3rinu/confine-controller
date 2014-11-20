@@ -141,14 +141,15 @@ class Template(models.Model):
                                      settings.SLICES_TEMPLATE_IMAGE_NAME),
             validators=[validate_file_extensions(settings.SLICES_TEMPLATE_IMAGE_EXTENSIONS)])
     image_uri = models.CharField('image URI', max_length=256, blank=True,
-            help_text='The URI of a file containing an image for slivers (if they '
-                      'do not explicitly indicate one). The file must be an archive '
-                      '(e.g. a .tar.gz) of the upper directory of an overlayfs filesystem, '
-                      'and will be applied on top of the used template. This member '
-                      'may be set directly or through the do-upload-overlay function.')
+            help_text='The URI of this template\'s image file. This member '
+                      'cannot be changed if the template is in use. This '
+                      'member may be set directly or through the '
+                      'do-upload-image controller API function.')
     image_sha256 = models.CharField('image SHA256', max_length=64, blank=True,
-            help_text='The SHA256 hash of the image file, used to check its integrity. '
-                      'Compulsory when a file has been specified.',
+            help_text='The SHA256 hash of the previous file, used to check its '
+                      'integrity. This member cannot be changed if the '
+                      'template is in use. This member may be set directly or '
+                      'through the do-upload-image controller API function.',
             validators=[validate_sha256])
     
     def __unicode__(self):

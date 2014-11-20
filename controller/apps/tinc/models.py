@@ -2,6 +2,7 @@ from django.conf import settings as base_settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django_transaction_signals import defer
@@ -55,9 +56,9 @@ class TincHostQuerySet(models.query.QuerySet):
         server_ct = ContentType.objects.get_for_model(Server)
         return self.exclude(content_type=server_ct).filter(*args, **kwargs)
 
-    def servers(self, *args, **kwargs):
-        server_ct = ContentType.objects.get_for_model(Server)
-        return self.filter(content_type=server_ct).filter(*args, **kwargs)
+
+def get_default_gateway():
+    return Server.objects.get_default().tinc
 
 
 class TincHost(models.Model):
@@ -74,6 +75,9 @@ class TincHost(models.Model):
                       'usually TYPE_ID (e.g. server_4).')
     pubkey = RSAPublicKeyField('public Key', unique=True, null=True, blank=True,
             help_text='PEM-encoded RSA public key used on tinc management network.')
+    default_connect_to = models.ForeignKey('self', default=get_default_gateway,
+            limit_choices_to={'addresses__isnull': False}, null=True, blank=True,
+            on_delete=models.PROTECT)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     
@@ -90,10 +94,16 @@ class TincHost(models.Model):
     def _name(self):
         return u'%s_%s' % (self.content_type.model, self.object_id)
     
+    def clean(self):
+        if (self.content_type.model in ['node', 'host'] and
+            self.default_connect_to is None):
+            raise ValidationError('You should configure a default gateway.')
+    
     def save(self, *args, **kwargs):
         if not self.pk:
             # generate and initialize name
-            self.name = self._name
+            if not self.name:
+                self.name = self._name
             # Try to restore object to allow update in nested serialization
             try:
                 obj = TincHost.objects.get(content_type_id=self.content_type_id,
@@ -123,10 +133,11 @@ class TincHost(models.Model):
     @property
     def connect_to(self):
         """
-        Returns all active TincHosts to use on tincd ConnectTo.
-        Only trusted instances can act as servers.
+        Returns TincHosts with TincAddress that can be used
+        on tincd ConnectTo configuration option.
         """
-        return TincHost.objects.servers()
+        # TODO: sort by trust (servers > hosts)
+        return TincHost.objects.filter(addresses__isnull=False)
     
     def get_host(self, island=None):
         # Ignore orphan TincHost objects that prevent proper update_tincd!
@@ -156,20 +167,15 @@ class TincHost(models.Model):
     
     def get_config(self):
         """
-        Returns client tinc.conf file content, prioritizing servers
-        that belongs to the same island.
+        Returns client tinc.conf file content based on default
+        tinc gatway configured.
         """
         if self.content_type.model == 'server':
             raise TypeError("Cannot get_config from a server.")
-        config = ["Name = %s" % self.name]
-        for server in self.connect_to:
-            line = "ConnectTo = %s" % server.name
-            tinc_island = self.content_object.island
-            has_island = server.addresses.filter(island=tinc_island).exists()
-            if tinc_island and has_island:
-                config.insert(0, line)
-            else:
-                config.append(line)
+        config = [
+            "Name = %s" % self.name,
+            "ConnectTo = %s" % self.default_connect_to.name
+        ]
         return '\n'.join(config)
 
     def get_tinc_up(self):

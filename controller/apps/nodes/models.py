@@ -22,6 +22,12 @@ class Api(models.Model):
     
     class Meta:
         abstract = True
+    
+    def clean(self):
+        super(Api, self).clean()
+        # base_uri SHOULD always end with slash '/'
+        if not self.base_uri.endswith('/'):
+            self.base_uri += '/'
 
 
 class NodeApiManager(models.Manager):
@@ -376,6 +382,9 @@ class ServerQuerySet(models.query.QuerySet):
 class ServerManager(models.Manager):
     def get_query_set(self):
         return ServerQuerySet(self.model, using=self.db)
+    
+    def get_default(self):
+        return self.order_by('id').first()
 
 class Server(models.Model):
     """

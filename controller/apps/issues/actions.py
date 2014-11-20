@@ -3,7 +3,8 @@ import sys
 from django.contrib import messages
 from django.db import transaction
 
-from controller.admin.decorators import action_with_confirmation, has_sudo_permissions
+from controller.admin.decorators import (action_with_confirmation,
+    has_change_permissions, has_sudo_permissions)
 
 from .forms import ChangeReasonForm
 from .helpers import markdown_formated_changes
@@ -15,7 +16,7 @@ def change_ticket_state_factory(action, final_state):
         'action': action,
         'form': ChangeReasonForm()
     }
-    @has_sudo_permissions
+    @has_change_permissions
     @transaction.atomic
     @action_with_confirmation(action, extra_context=context)
     def change_ticket_state(modeladmin, request, queryset, action=action, final_state=final_state):
@@ -59,7 +60,7 @@ for state, name in action_map.items():
     setattr(thismodule, '%s_tickets' % name, action)
 
 
-@has_sudo_permissions
+@has_change_permissions
 @transaction.atomic
 def take_tickets(modeladmin, request, queryset):
     for ticket in queryset:

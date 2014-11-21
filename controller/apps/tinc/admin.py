@@ -72,7 +72,7 @@ class ReadOnlyTincAddressInline(PermissionTabularInline):
 class TincAddressAdmin(PermissionModelAdmin):
     list_display = ['addr', 'port', 'island', 'host']
     list_filter = ['island__name', 'port', 'host']
-    search_fields = ['addr', 'island__name', 'island__description', 'host__tinc_name']
+    search_fields = ['addr', 'island__name', 'island__description', 'host__name']
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):

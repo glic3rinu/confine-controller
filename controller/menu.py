@@ -80,7 +80,7 @@ class CustomMenu(Menu):
                 ]))
         
         if is_installed('tinc'):
-            if user.is_superuser:
+            if user.has_module_perms('tinc'):
                 self.children.append(items.MenuItem('Tinc',
                     reverse('admin:app_list', args=['tinc']),
                     children=[
@@ -89,10 +89,6 @@ class CustomMenu(Menu):
                         items.MenuItem('Hosts',
                             reverse('admin:tinc_host_changelist')),
                     ]))
-            elif user.has_module_perms('tinc'):
-                self.children.append(
-                    items.MenuItem('Tinc hosts',
-                        reverse('admin:tinc_host_changelist')))
         
         if user.is_superuser:
             administration_models = ()

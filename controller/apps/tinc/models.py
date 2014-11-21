@@ -84,6 +84,7 @@ class TincHost(models.Model):
     objects = generate_chainer_manager(TincHostQuerySet)
     
     class Meta:
+        ordering = ['content_type', 'object_id']
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):

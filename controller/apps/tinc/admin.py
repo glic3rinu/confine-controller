@@ -13,8 +13,9 @@ from nodes.models import Island, Node, Server
 from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
-from .filters import MyHostsListFilter
+from .filters import MyHostsListFilter, MyTincAddressListFilter
 from .forms import TincHostInlineForm
+from .helpers import get_user_tinchosts
 from .models import Host, TincHost, TincAddress
 from . import settings
 
@@ -71,8 +72,17 @@ class ReadOnlyTincAddressInline(PermissionTabularInline):
 
 class TincAddressAdmin(PermissionModelAdmin):
     list_display = ['addr', 'port', 'island', 'host']
-    list_filter = ['island__name', 'port', 'host']
+    list_filter = [MyTincAddressListFilter, 'island', 'port', 'host']
     search_fields = ['addr', 'island__name', 'island__description', 'host__name']
+    
+    def get_form(self, request, obj=None, *args, **kwargs):
+        """ Filter hosts to show only user related. """
+        form = super(TincAddressAdmin, self).get_form(request, obj=obj, *args, **kwargs)
+        if not request.user.is_superuser and 'host' in form.base_fields:
+            qs = form.base_fields['host'].queryset
+            qs = qs.filter(pk__in=get_user_tinchosts(request.user))
+            form.base_fields['host'].queryset = qs
+        return form
 
 
 class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):

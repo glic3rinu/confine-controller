@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 from controller.forms.models import GroupedModelChoiceField
 
@@ -24,6 +25,13 @@ class TincHostInlineForm(forms.ModelForm):
     
     class Meta:
         model = TincHost
+    
+    def clean_default_connect_to(self):
+        default_connect_to = self.cleaned_data['default_connect_to']
+        if (default_connect_to is None and self.instance and
+            self.instance.content_type.model in ['node', 'host']):
+            raise ValidationError('You should configure a default gateway.')
+        return default_connect_to
     
     def save(self, commit=True):
         if self.cleaned_data['clear_pubkey']:

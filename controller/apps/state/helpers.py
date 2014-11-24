@@ -62,8 +62,19 @@ def fetch_state(obj):
         response.headers['ssl_verified'] = obj_state_url.startswith('https')
     except requests.exceptions.SSLError:
         session.verify = False
-        response = session.get(obj_state_url, headers=headers)
-        response.headers['ssl_verified'] = False
+        ## Parse response because cames from an untrusted node ##
+        with closing(session.get(obj.state.get_url(), headers=headers, stream=True)) as response:
+            response.headers['ssl_verified'] = False
+            # Limit response size
+            if response.headers.get('content-length') is None:
+                raise RuntimeError('Unknown content-length.')
+            if int(response.headers['content-length']) > 32768: # 32 KiB
+                raise RuntimeError('Node response is too long (max content-length exceded).')
+            # Handle malformed or not JSON response
+            try:
+                response.json()
+            except ValueError:
+                raise RuntimeError('Malformed JSON in node response.')
     return response
 
 

@@ -182,7 +182,7 @@ def sizeof_fmt(num, unit=None):
         return "%.f %s" % (num, unit)
     try:
         num = float(num)
-    except ValueError:
+    except (TypeError, ValueError):
         return num
     for i, unit in enumerate(['MiB','GiB']):
         if abs(num) < 1024.0:

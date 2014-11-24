@@ -1,16 +1,12 @@
-import json
-import os
-import ssl
-
 import gevent
-import requests
+import os
+
 from celery.task import periodic_task, task
 from django.db.models import get_model
 
 from controller.utils import LockFile
-from controller.utils.ssl import SSLAdapter
-from pki import ca
 
+from .helpers import fetch_state
 from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
 
@@ -30,26 +26,7 @@ def get_state(state_module, ids=[], lock=True, patch=False):
         if patch:
             gevent.monkey.patch_all(thread=False, select=False)
         
-        glets = []
-        session = requests.Session()
-        
-        # check node API certificate against controller CA
-        # TODO: try verify but if fails try again without verifying
-        # and create a new state that marks as UNVERIFIED??
-        session.verify = ca.cert_path
-        
-        # CNS only supports TLSv1 but requests use whatever
-        # version is default in the underlying library so we
-        # need to use a HttpAdater to ensure compatibility
-        session.mount('https://', SSLAdapter(ssl_version=ssl.PROTOCOL_TLSv1))
-        for obj in objects:
-            try:
-                etag = json.loads(obj.state.metadata)['headers']['etag']
-            except (ValueError, KeyError):
-                headers = {}
-            else:
-                headers = {'If-None-Match': etag}
-            glets.append(gevent.spawn(session.get, obj.state.get_url(), headers=headers))
+        glets = [gevent.spawn(fetch_state, obj) for obj in objects]
         
         # wait for all greenlets to finish
         gevent.joinall(glets)

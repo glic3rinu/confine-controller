@@ -107,7 +107,13 @@ def display_current(instance):
         state += '*'
     else:
         state = '<b>%s</b>' % state
-    return '<span style="color:%s;" title="%s">%s</span>' % (color, title, state)
+    # warn about failed verification of SSL certificate
+    if (not instance.ssl_verified and
+        instance.value not in [State.OFFLINE, State.NODATA, State.UNKNOWN]):
+        extra_style = 'text-decoration:line-through;'
+    else:
+        extra_style = ''
+    return '<span style="color:%s;%s" title="%s">%s</span>' % (color, extra_style, title, state)
 
 
 class StateHistoryAdmin(PermissionModelAdmin):

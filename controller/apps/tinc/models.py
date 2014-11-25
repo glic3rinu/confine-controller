@@ -88,7 +88,8 @@ class TincHost(models.Model):
         unique_together = ('content_type', 'object_id')
     
     def __unicode__(self):
-        return self.name if self.name else self._name
+        name = self.name if self.name else self._name
+        return '%s (%s)' % (name, self.content_object)
     
     @property
     def _name(self):

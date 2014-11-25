@@ -60,7 +60,7 @@ class State(models.Model):
     metadata = models.TextField()
     data = models.TextField()
     add_date = models.DateTimeField(auto_now_add=True)
-    ssl_verified = models.BooleanField(default=False,
+    ssl_verified = models.BooleanField('verified', default=False,
             help_text='SSL certificate verified on node API retrieval.')
     
     content_object = generic.GenericForeignKey()

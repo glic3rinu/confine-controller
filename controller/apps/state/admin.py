@@ -212,8 +212,8 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     ordering = ('content_type', 'object_id')
     fieldsets = (
         (None, {
-            'fields': ('url_link', 'last_seen', 'last_contact',
-                       'last_try', 'next_retry', 'last_change', 'current')
+            'fields': ('url_link', 'last_seen', 'last_contact', 'last_try',
+                       'next_retry', 'last_change', 'current', 'ssl_verified')
         }),
         ('Details', {
             'fields': (display_metadata, display_data)
@@ -221,7 +221,7 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     )
     readonly_fields = [
         'url_link', 'last_seen', 'last_try', 'next_retry', 'current', 'last_change',
-        display_metadata, display_data, 'last_contact'
+        display_metadata, display_data, 'last_contact', 'ssl_verified'
     ]
     change_view_actions = [refresh]
     change_form_template = 'admin/state/state/change_form.html'

@@ -163,3 +163,12 @@ class DynamicReadonlyFieldsModelSerializer(UriHyperlinkedModelSerializer):
         for field_name in ro_fields:
             self.fields[field_name].read_only = True
  
+
+class JSONField(Field):
+    def field_to_native(self, obj, field_name):
+        value = getattr(obj, field_name)
+        try:
+            value = json.loads(value)
+        except ValueError:
+            pass
+        return value

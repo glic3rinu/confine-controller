@@ -10,8 +10,10 @@ class StateSerializer(serializers.ModelSerializer):
     last_change_on = serializers.Field()
     url = serializers.URLField(source='get_url')
     verified = serializers.Field(source='ssl_verified')
+    metadata = serializers.JSONField()
+    data = serializers.JSONField()
     
     class Meta:
         model = State
         fields = ('current', 'last_change_on', 'last_seen_on', 'url',
-                  'verified')
+                  'verified', 'metadata', 'data')

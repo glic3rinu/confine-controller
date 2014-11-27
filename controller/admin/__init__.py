@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.contrib.admin import options, actions
 from django.contrib.admin.helpers import AdminReadonlyField
 from django.contrib.admin.util import NestedObjects, quote

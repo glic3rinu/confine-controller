@@ -54,6 +54,10 @@ class TincHostQuerySet(models.query.QuerySet):
     def hosts(self, *args, **kwargs):
         server_ct = ContentType.objects.get_for_model(Server)
         return self.exclude(content_type=server_ct).filter(*args, **kwargs)
+    
+    def servers(self, *args, **kwargs):
+        """Returns TincHosts with TincAddress."""
+        return self.filter(addresses__isnull=False, *args, **kwargs).distinct()
 
 
 def get_default_gateway():
@@ -132,8 +136,7 @@ class TincHost(models.Model):
         Returns TincHosts with TincAddress that can be used
         on tincd ConnectTo configuration option.
         """
-        # TODO: sort by trust (servers > hosts)
-        return TincHost.objects.filter(addresses__isnull=False)
+        return TincHost.objects.servers()
     
     def get_host(self, island=None):
         # Ignore orphan TincHost objects that prevent proper update_tincd!

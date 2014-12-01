@@ -17,7 +17,7 @@ class SliverDefaultsInlineForm(forms.ModelForm):
     def clean(self):
         """Clean _uri when uploading a file"""
         cleaned_data = super(SliverDefaultsInlineForm, self).clean()
-        for field_name in ('data', 'overlay'):
+        for field_name in ('data',):
             if cleaned_data.get(field_name):
                 cleaned_data[field_name + "_uri"] = ''
         return cleaned_data
@@ -48,7 +48,7 @@ class SliverAdminForm(forms.ModelForm):
     def clean(self):
         """Clean _uri when uploading a file"""
         cleaned_data = super(SliverAdminForm, self).clean()
-        for field_name in ('data', 'overlay'):
+        for field_name in ('data',):
             if cleaned_data.get(field_name):
                 cleaned_data[field_name + "_uri"] = ''
         return cleaned_data
@@ -73,7 +73,7 @@ class SliceSliversForm(forms.ModelForm):
     def clean(self):
         """Clean _uri when uploading a file"""
         cleaned_data = super(SliceSliversForm, self).clean()
-        for field_name in ('data', 'overlay'):
+        for field_name in ('data',):
             if cleaned_data.get(field_name):
                 cleaned_data[field_name + "_uri"] = ''
         return cleaned_data

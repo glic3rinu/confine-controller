@@ -73,7 +73,6 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     interfaces = SliverIfaceSerializer(required=False, many=True, allow_add_remove=True)
     properties = serializers.PropertyField()
     data_uri = FakeFileField(field='data', required=False)
-    overlay_uri = FakeFileField(field='overlay', required=False)
     instance_sn = serializers.IntegerField(read_only=True)
     mgmt_net = serializers.Field()
     
@@ -91,7 +90,7 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     
     class Meta:
         model = Sliver
-        exclude = ('data', 'overlay')
+        exclude = ('data',)
     
     def to_native(self, obj):
         """ hack for implementing dynamic file_uri's on FakeFile """
@@ -126,13 +125,12 @@ class SliverDetailSerializer(SliverSerializer):
     class Meta:
         model = Sliver
         read_only_fields = ('node', 'slice')
-        exclude = ('data', 'overlay')
+        exclude = ('data',)
 
 
 class SliverDefaultsSerializer(serializers.ModelSerializer):
     instance_sn = serializers.IntegerField(read_only=True)
     data_uri = FakeFileField(field='data', required=False)
-    overlay_uri = FakeFileField(field='overlay', required=False)
     template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
     # FIXME refactor move to resources app when api.aggregate supports nested serializers
     if is_installed('resources'):
@@ -141,7 +139,7 @@ class SliverDefaultsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SliverDefaults
-        exclude = ('id', 'slice', 'data', 'overlay')
+        exclude = ('id', 'slice', 'data')
     
     def to_native(self, obj):
         """ hack for implementing dynamic file_uri's on FakeFile """
@@ -163,8 +161,6 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
     new_sliver_instance_sn = serializers.Field(source='sliver_defaults.instance_sn')
     exp_data_uri = FileURLField(source='sliver_defaults', field='data')
     exp_data_sha256 = serializers.Field(source='sliver_defaults.data_sha256')
-    overlay_uri = FileURLField(source='sliver_defaults', field='overlay')
-    overlay_sha256 = serializers.Field(source='sliver_defaults.overlay_sha256')
     template = serializers.RelHyperlinkedRelatedField(source='sliver_defaults.template',
         read_only=True, view_name='template-detail')
     vlan_nr = serializers.Field()

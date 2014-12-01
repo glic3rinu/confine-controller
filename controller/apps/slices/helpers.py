@@ -43,9 +43,9 @@ def state_value(state):
 
 
 def get_readonly_file_fields(obj):
-    """Mark as readonly if exists file for data and overlay"""
+    """Mark as readonly if exists file for data."""
     readonly_fields = []
-    for field in ['data', 'overlay']:
+    for field in ['data',]:
         if bool(getattr(obj, field, False)): # False when obj is None
             readonly_fields += [field+'_uri', field+'_sha256']
     return readonly_fields

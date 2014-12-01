@@ -32,15 +32,12 @@
     "model": "slices.sliverdefaults",
     "fields": {
         "slice": 1,
-        "overlay": "",
         "instance_sn": 4,
         "data": "confine-slice-openwrt-exp-data.tgz",
         "data_uri": "",
         "set_state": "start",
         "data_sha256": "21ae296006185c7110b80632f3d8e69961b56dc6a859223ea6afe6c5e73c1def",
-        "template": 2,
-        "overlay_sha256": "",
-        "overlay_uri": ""
+        "template": 2
     }
 },
 {
@@ -48,15 +45,12 @@
     "model": "slices.sliverdefaults",
     "fields": {
         "slice": 2,
-        "overlay": "",
         "instance_sn": 0,
         "data": "confine-slice-debian-exp-data.tgz",
         "data_uri": "",
         "set_state": "start",
         "data_sha256": "3c254719c4cb8e7aa13f690e638cd39f38d71ada2fb467b76ca776e6f2d73f15",
-        "template": 1,
-        "overlay_sha256": "",
-        "overlay_uri": ""
+        "template": 1
     }
 }
 ]

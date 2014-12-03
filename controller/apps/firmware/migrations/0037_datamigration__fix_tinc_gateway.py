@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
@@ -7,25 +6,25 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        """Remove unused UCI entries."""
-        # Note: Don't use "from appname.models import ModelName". 
+        """
+        Fix ConfigFile '/etc/confine/tinc-gateways/* path generation.
+        Use tinc.name instead of tinc.__unicode__
+        
+        == ConfigFiles ==
+        /etc/confine/tinc-gateways/NAME
+        """
+        # Note: Don't use "from appname.models import ModelName".
         # Use orm.ModelName to refer to models in this application,
         # and orm['appname.ModelName'] for models in other applications.
-        orm.ConfigUCI.objects.filter(section='server server', option='base_path').delete()
-        
-        # server section doesn't have any UCI so render it is no longer necessary
-        # update /etc/config/confine to include new UCI section to render it
-        orm.ConfigFile.objects.filter(path="/etc/config/confine").update(
-            content="self.config.render_uci(node, sections=['node node', 'testbed testbed', 'registry registry'])")
+        gw_cfile = orm.ConfigFile.objects.get(path__contains='server for server in node.tinc.connect_to')
+        gw_cfile.path = '[ "/etc/confine/tinc-gateways/%s" % server.name for server in node.tinc.connect_to ]'
+        gw_cfile.save()
 
     def backwards(self, orm):
-        """Restore old UCI entries."""
-        config = orm.Config.objects.get()
-        orm.ConfigUCI.objects.create(config=config, section='server server', option='base_path', value="'/api'")
-        
-        # restore UCI sections to render
-        orm.ConfigFile.objects.filter(path="/etc/config/confine").update(
-            content="self.config.render_uci(node, sections=['node node', 'server server', 'testbed testbed', 'registry registry'])")
+        """Undo patch."""
+        gw_cfile = orm.ConfigFile.objects.get(path__contains='server.name for server in node.tinc.connect_to')
+        gw_cfile.path = '[ "/etc/confine/tinc-gateways/%s" % server for server in node.tinc.connect_to ]'
+        gw_cfile.save()
 
     models = {
         u'firmware.baseimage': {

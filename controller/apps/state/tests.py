@@ -1,4 +1,5 @@
 import gevent
+import json
 import requests
 
 from django.test import LiveServerTestCase, TestCase
@@ -8,12 +9,14 @@ from nodes.models import Node, NodeApi
 from slices.models import Slice, Sliver
 from users.models import Group
 
+from .admin import display_current
 from .helpers import (extract_disk_available, extract_node_software_version,
     sizeof_fmt)
 from .models import State, StateHistory
 from .notifications import NodeNotAvailable
 from .settings import (STATE_NODE_OFFLINE_WARNING, STATE_NODE_SOFT_VERSION_URL,
     STATE_NODE_SOFT_VERSION_NAME)
+
 
 class StateTests(LiveServerTestCase):
     fixtures = ['groups.json', 'nodes.json', 'slices.json', 'slivers.json', 'templates.json']
@@ -139,6 +142,29 @@ class StateTests(LiveServerTestCase):
         url_schema = '%(base_uri)sslivers/%(object_id)d/'
         context = {'base_uri': sliver.node.api.base_uri, 'object_id': sliver.pk}
         self.assertEqual(sliver.state.get_url(), url_schema % context)
+    
+    def test_display_current(self):
+        state = State(value='production', last_try_on=timezone.now(), ssl_verified=False)
+        state.data = json.dumps({
+            "errors": [
+                {
+                    "member": "", 
+                    "message": "Value=nil ERR_RETRY /usr/lib/lua/confine/data.lua:149:"\
+                               " wget returned: '404 NOT FOUND'"
+                }
+            ],
+        })
+        
+        display_state = display_current(state)
+        self.assertIn('verification failed', display_state)
+        self.assertIn('ERR_RETRY', display_state)
+        self.assertIn(state.value.upper(), display_state)
+        
+    def test_display_current_invalid_state(self):
+        state = State(value='invalid', last_try_on=timezone.now(), ssl_verified=False)
+        display_state = display_current(state)
+        self.assertIn('verification failed', display_state)
+        self.assertIn(state.value, display_state)
 
 
 class NotAvailableNotificationTests(TestCase):

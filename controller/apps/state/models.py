@@ -51,9 +51,9 @@ class State(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     last_seen_on = models.DateTimeField(null=True,
-            help_text='Last time the state retrieval was successfull')
+            help_text='Last time the state retrieval was successfull.')
     last_try_on = models.DateTimeField(null=True,
-            help_text='Last time the state retrieval operation has been executed')
+            help_text='Last time the state retrieval operation has been executed.')
     last_contact_on = models.DateTimeField(null=True,
             help_text='Last API pull of this resource received from the node.')
     value = models.CharField(max_length=32, choices=STATES)
@@ -61,7 +61,8 @@ class State(models.Model):
     data = models.TextField()
     add_date = models.DateTimeField(auto_now_add=True)
     ssl_verified = models.BooleanField('verified', default=False,
-            help_text='SSL certificate verified on node API retrieval.')
+            help_text='Whether the SSL certificate could be verified on node '
+                      'API retrieval.')
     
     content_object = generic.GenericForeignKey()
     

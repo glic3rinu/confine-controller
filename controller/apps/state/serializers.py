@@ -15,5 +15,6 @@ class StateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = State
-        fields = ('current', 'last_change_on', 'last_seen_on', 'url',
-                  'verified', 'metadata', 'data')
+        fields = ('url', 'current', 'last_change_on', 'last_seen_on',
+                  'last_try_on', 'verified', 'metadata', 'data')
+        read_only_fields = ('last_seen_on', 'last_try_on')

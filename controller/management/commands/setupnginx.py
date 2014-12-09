@@ -119,7 +119,7 @@ class Command(BaseCommand):
             elif diff.return_code == 1:
                 # File is different, save the old one
                 if interactive:
-                    msg = ("\n\nFile %(file)s be updated, do you like to overide "
+                    msg = ("\n\nFile %(file)s be updated, do you like to override "
                            "it? (yes/no): " % context)
                     confirm = input(msg)
                     while 1:

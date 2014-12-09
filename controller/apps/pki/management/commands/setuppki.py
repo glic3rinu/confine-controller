@@ -10,8 +10,8 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--overide', dest='overide', action='store_true',
-                default=False, help='Force overide cert and keys if exists.'),
+            make_option('--override', dest='override', action='store_true',
+                default=False, help='Force override cert and keys if exists.'),
             make_option('--country', dest='dn_country', default='',
                 help='Certificate Distinguished Name Country.'),
             make_option('--state', dest='dn_state', default='',
@@ -35,7 +35,7 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         # TODO correct key file permissions
-        overide = options.get('overide')
+        override = options.get('override')
         interactive = options.get('interactive')
         
         try:
@@ -43,18 +43,18 @@ class Command(BaseCommand):
         except IOError:
             key = False
         
-        if overide or not key:
+        if override or not key:
             self.stdout.write('writing new private key to \'%s\'' % ca.priv_key_path)
             self.stdout.write('writing new public key to \'%s\'' % ca.pub_key_path)
             ca.gen_key(commit=True)
-            overide = True
+            override = True
         
         try:
             ca.get_cert()
         except IOError:
-            overide = True
+            override = True
         
-        if overide or not ca.get_cert():
+        if override or not ca.get_cert():
             # Avoid import errors
             from nodes.models import Server
             server = Server.objects.first()
@@ -113,4 +113,4 @@ class Command(BaseCommand):
             return
         
         self.stdout.write('\nYour cert and keys are already in place.\n'
-                          ' Use --overide in order to overide them.\n\n')
+                          ' Use --override in order to override them.\n\n')

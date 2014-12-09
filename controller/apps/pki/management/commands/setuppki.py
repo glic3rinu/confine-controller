@@ -104,8 +104,12 @@ class Command(BaseCommand):
                 'OU': org_unit,
                 'Email': email,
                 'CN': common_name }
-            ca.gen_cert(commit=True, **subject)
+            cert = ca.gen_cert(commit=True, **subject)
             self.stdout.write('writing new certificate to \'%s\'' % ca.cert_path)
+            
+            # Update mgmt network Server APIs certificate
+            server.api.filter(base_uri__contains=server.mgmt_net.addr).update(
+                cert=cert.as_pem())
             return
         
         self.stdout.write('\nYour cert and keys are already in place.\n'

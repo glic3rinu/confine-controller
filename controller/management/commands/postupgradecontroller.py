@@ -259,6 +259,14 @@ class Command(BaseCommand):
                 msg = "Firmware configuration updated successfully. Updated ConfigFile ID: %i." % cfg_file.pk
             upgrade_notes.append("%s\nPlease check version 0.10.4 release notes:\n"
                 "https://wiki.confine-project.eu/soft:server-release-notes#section0104" % msg)
+        if version < 1103:
+            # Update mgmt network Server APIs certificate
+            from nodes.models import Server
+            from pki import ca
+            server = Server.objects.get_default()
+            server.api.filter(base_uri__contains=server.mgmt_net.addr).update(
+                cert=ca.get_cert().as_pem())
+            upgrade_notes.append("Updated Server APIs certificate.")
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

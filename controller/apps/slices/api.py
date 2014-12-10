@@ -94,8 +94,8 @@ def make_upload_file(model, field, field_url):
             else:
                 msg = "Only multipart/form-data is supported"
                 raise exceptions.ParseError(detail=msg)
-            # Slice refactor: data & overlay moved to SliverDefaults (#234)
-            # FIXME: better approach for differences template vs data|overlay?
+            # Slice refactor: data moved to SliverDefaults (#234)
+            # FIXME: better approach for differences template vs data?
             try:
                 obj = obj.sliver_defaults
             except AttributeError: # template use case
@@ -171,7 +171,6 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     renderer_classes = [SliceProfileRenderer, BrowsableAPIRenderer]
     ctl = [
         Renew, Reset, make_upload_file(Slice, 'data', 'data'),
-        make_upload_file(Slice, 'overlay', 'overlay'),
     ]
     
     def put(self, request, *args, **kwargs):
@@ -224,7 +223,6 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     renderer_classes = [SliverProfileRenderer, BrowsableAPIRenderer]
     ctl = [
         Update, make_upload_file(Sliver, 'data', 'data'),
-        make_upload_file(Sliver, 'overlay', 'overlay'),
     ]
 
 

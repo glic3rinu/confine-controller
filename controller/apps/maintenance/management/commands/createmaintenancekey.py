@@ -11,8 +11,8 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
         self.option_list = BaseCommand.option_list + (
-            make_option('--overide', dest='overide', action='store_true',
-                default=False, help='Force overide cert and keys if exists.'),
+            make_option('--override', dest='override', action='store_true',
+                default=False, help='Force override cert and keys if exists.'),
             make_option('--noinput', action='store_false', dest='interactive', default=True,
                 help='Tells Django to NOT prompt the user for input of any kind. '),
             )
@@ -22,7 +22,7 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         # TODO correct key file permissions
-        overide = options.get('overide')
+        override = options.get('override')
         
         bob = Bob()
         
@@ -32,9 +32,9 @@ class Command(BaseCommand):
         try:
             bob.load_key(key_path)
         except:
-            overide = True
+            override = True
         
-        if overide:
+        if override:
             bob.gen_key()
             self.stdout.write('Writing new key to \'%s\'' % MAINTENANCE_KEY_PATH)
             bob.store_key(MAINTENANCE_KEY_PATH)
@@ -44,4 +44,4 @@ class Command(BaseCommand):
             return
 
         self.stdout.write('\nYour keys are already in place.\n'
-                          ' Use --overide in order to overide them.\n\n')
+                          ' Use --override in order to override them.\n\n')

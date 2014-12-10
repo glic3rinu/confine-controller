@@ -32,24 +32,11 @@ SLICES_SLICE_DATA_DIR = getattr(settings, 'SLICES_SLICE_DATA_DIR',
 SLICES_SLICE_DATA_NAME = getattr(settings, 'SLICES_SLICE_DATA_NAME',
         getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME', 'slice-%(pk)d-%(original)s'))
 
-SLICES_SLICE_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
-
-SLICES_SLICE_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_OVERLAY_NAME',
-        'slice-%(pk)d-%(original)s')
-
 SLICES_SLIVER_DATA_DIR = getattr(settings, 'SLICES_SLIVER_DATA_DIR',
         getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data'))
 
 SLICES_SLIVER_DATA_NAME = getattr(settings, 'SLICES_SLIVER_DATA_NAME',
         getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME', 'sliver-%(pk)d-%(original)s'))
-
-SLICES_SLIVER_OVERLAY_DIR = getattr(settings, 'SLICES_SLICE_OVERLAY_DIR', 'overlay')
-
-SLICES_SLIVER_OVERLAY_NAME = getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME',
-        'sliver-%(pk)d-%(original)s')
-
-SLICES_SLIVER_OVERLAY_EXTENSIONS = getattr(settings, 'SLICES_SLIVER_OVERLAY_EXTENSIONS',
-        ('.tar.gz', '.tgz'))
 
 
 # 30 days expiration interval
@@ -68,3 +55,11 @@ for value in ['SLICES_SLICE_EXP_DATA_DIR', 'SLICES_SLICE_EXP_DATA_NAME',
         new_value = value.replace('EXP_DATA', 'DATA')
         warnings.warn("'%s' setting has been renamed to '%s' (see #234)." %
             (value, new_value), DeprecationWarning)
+
+# Warn user of removed settings on #200
+# TODO: remove this warning on v0.12
+for value in ['SLICES_SLICE_OVERLAY_DIR', 'SLICES_SLICE_OVERLAY_NAME',
+              'SLICES_SLIVER_OVERLAY_DIR', 'SLICES_SLIVER_OVERLAY_NAME',
+              'SLICES_SLIVER_OVERLAY_EXTENSIONS']:
+    if hasattr(settings, value):
+        warnings.warn("'%s' setting has been removed (see #200)." % value)

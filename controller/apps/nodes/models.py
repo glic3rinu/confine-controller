@@ -15,7 +15,7 @@ from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
 class Api(models.Model):
     base_uri = models.URLField('base URI', max_length=256,
             help_text='The base URI of the API endpoint.')
-    cert = PEMCertificateField('Certificate', unique=True, null=True, blank=True,
+    cert = PEMCertificateField('Certificate', null=True, blank=True,
             help_text='An optional X.509 PEM-encoded certificate for the API '
                       'endpoint. Providing this may save API clients from '
                       'checking the API certificate\'s signature.')

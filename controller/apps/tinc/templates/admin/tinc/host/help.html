@@ -57,11 +57,11 @@ Name = {{ host.tinc.name }}
 Host address {{ host.tinc.subnet.strNormal }}/48
 
 # hosts/{{ host.tinc.name }}
-Subnet = {{ host.tinc.subnet.strNormal }}
+Subnet = {{ host.tinc.subnet.strNormal }}/128
 
 {% for gw in host.tinc.connect_to %}# hosts/{{ gw }}
 {% for addr in gw.addresses.all %}Address = {{ addr }} {{ addr.port }}
-{% endfor %}Subnet = {{ gw.subnet.strNormal }}
+{% endfor %}Subnet = {{ gw.subnet.strNormal }}/128
 
 {{ gw.pubkey }}{% endfor %}
 {% endcode %}

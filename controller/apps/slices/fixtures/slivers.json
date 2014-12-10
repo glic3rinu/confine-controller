@@ -6,15 +6,12 @@
         "node": 1,
         "slice": 1,
         "description": "",
-        "overlay": "",
         "instance_sn": 0,
         "data": "",
         "data_sha256": "",
         "data_uri": "",
         "set_state": null,
-        "template": null,
-        "overlay_sha256": "",
-        "overlay_uri": ""
+        "template": null
     }
 },
 {
@@ -24,15 +21,12 @@
         "node": 2,
         "slice": 1,
         "description": "",
-        "overlay": "",
         "instance_sn": 4,
         "data": "",
         "data_sha256": "",
         "data_uri": "",
         "set_state": null,
-        "template": null,
-        "overlay_sha256": "",
-        "overlay_uri": ""
+        "template": null
     }
 },
 {

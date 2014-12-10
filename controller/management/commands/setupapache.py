@@ -100,8 +100,8 @@ class Command(BaseCommand):
         elif diff.return_code == 1:
             # File is different, save the old one
             if interactive:
-                msg = ("\n\nFile %(apache_conf_file)s should "
-                       "be updated, do you like to overide it? (yes/no): " % context)
+                msg = ("\n\nFile %(apache_conf_file)s should be updated, do "
+                       "you like to override it? (yes/no): " % context)
                 confirm = input(msg)
                 while 1:
                     if confirm not in ('yes', 'no'):

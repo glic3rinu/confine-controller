@@ -124,13 +124,6 @@ class Command(BaseCommand):
                     ' Please read the monitor app doc (MONITOR_MONITORS setting)\n'
                     'AUTOUPDATE: %s' % autoupdate_status)
             if version <= 1102:
-                # Handle InconsistentMigrationHistory on tinc app
-                # * v0.11.2 tinc includes 0022, 0028..0030
-                # * v0.11.3 tinc adds 0023..0027
-                # We can force south to merge migrations because
-                # are implemented to be runned without dependencies
-                run('python manage.py migrate tinc 0030 --merge --noinput')
-                
                 # Take a snapshot current gateways on API format for backwards
                 # compatibility purposes before dropping it
                 context = {
@@ -139,6 +132,12 @@ class Command(BaseCommand):
                 }
                 run('wget -nv --header="Accept: application/json" '
                     '--no-check-certificate %(gw_url)s -O %(output)s' % context)
+                # Handle InconsistentMigrationHistory on tinc app
+                # * v0.11.2 tinc includes 0022, 0028..0030
+                # * v0.11.3 tinc adds 0023..0027
+                # We can force south to merge migrations because
+                # are implemented to be runned without dependencies
+                run('python manage.py migrate tinc 0030 --merge --noinput')
         
         if not options.get('specifics_only'):
             # Common stuff
@@ -259,6 +258,29 @@ class Command(BaseCommand):
                 msg = "Firmware configuration updated successfully. Updated ConfigFile ID: %i." % cfg_file.pk
             upgrade_notes.append("%s\nPlease check version 0.10.4 release notes:\n"
                 "https://wiki.confine-project.eu/soft:server-release-notes#section0104" % msg)
+        if version < 1103:
+            # Update mgmt network Server APIs certificate
+            # perform raw SQL querie because models hasn't been
+            # reloaded yet and cannot access e.g. server.api
+            from django.db import connection
+            from nodes.models import Server
+            from pki import ca
+            
+            server_id = Server.objects.order_by('id').first().pk
+            try:
+                cert = ca.get_cert().as_pem()
+            except IOError:
+                msg = ("Failed to update Server APIs certificate. Missing "
+                       "server certificate '%s'.\n"
+                       "Run 'python manage.py setuppki --help'" % ca.cert_path)
+                upgrade_notes.append(msg)
+            else:
+                update_sql = ('UPDATE "nodes_serverapi" SET cert = %s '
+                              'WHERE "nodes_serverapi"."server_id" = %s')
+                cursor = connection.cursor()
+                cursor.execute(update_sql, [cert, server_id])
+                del cursor
+                upgrade_notes.append("Updated Server APIs certificate.")
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

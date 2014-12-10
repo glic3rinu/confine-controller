@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from users.models import Group, User
-from .models import Island, Node, Server, ServerApi
+from .models import Island, Node, NodeApi, Server, ServerApi
 
 
 class IslandTest(TestCase):
@@ -50,6 +50,37 @@ class NodeTest(TestCase):
         # valid dhcp configuration
         node.sliver_pub_ipv4_range = '#3'
         node.full_clean()
+    
+    def test_api_duplicate_cert(self):
+        # Can exists node APIs with duplicate certificates
+        # e.g. two nodes delegate their API to a proxy server
+        uri = 'https://foo_proxy.local'
+        cert = """
+               -----BEGIN CERTIFICATE-----
+               MIIC6jCCAdKgAwIBAwIEUBs03jANBgkqhkiG9w0BAQsFADAcMRowGAYDVQQDExFm
+               ZDY1OmZjNDE6YzUwZjo6MjAeFw0xNDExMjcxNDA5NDBaFw0xODExMjYxNDA5NDBa
+               MFIxMDAuBgkqhkiG9w0BCQEWIWdyb3VwYWRtaW4xNDE3MDk3MzczMTcwQGxvY2Fs
+               aG9zdDEeMBwGA1UEAxMVZmQ2NTpmYzQxOmM1MGY6NTdlOjoyMIIBIjANBgkqhkiG
+               9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0RuoerrwIzbmqDaP1E6ZQ8YI6ctWGicUWlvT
+               mXxdSnr/9zzO1lT23zylJoJiBBTtFTNnUbmlcQeHlWYX+sS/N/ztqpiuEGZzrUL4
+               fDrfrLtcqjxOaY8VwNCK/Zxh562rgdcvNyKvs/4KD8uvBqHVFeA6wfoFu+N9zOfJ
+               /5zTBFV+ZM1iHRyvCgo14If/MsjFVso7BTpTGkRA9VXRVHXgNP3eI+cZ34xtNoXd
+               /DKCIg+sko+EbENCMTxwKzeJeBA0Dalo6O/52O/WHxP14kqcvDFlN4eprrK6MnrF
+               qQ9xmfkmRRQSL2AuJKvUX+Nj7N8LyfZ+3q6bttkRWd+AdvxTTQIDAQABMA0GCSqG
+               SIb3DQEBCwUAA4IBAQAqhd7NVUBex/J7/c73exdjan/RLY9C3h4Kh+Vvz3HRkxSY
+               YiC2IeC+oiS/o2m8hA5J+B3Alnkuu8QRyE9Xz0W8/sUPEHsZShPdZz68aHt2oMOg
+               Lkkkx8xYlX7p4bkJzM0A5kZ3zNdq0AsgCePLeV0DLexhLDQZo9uHahL9byNGVKxH
+               bEZfhECmKZSvxn0zOsToxVJrUSemBrUa93YW97zpLHlgA5WQn6ccz489i2Q/9qVZ
+               ZU7FnHfMSuOasG8JPgC1IgeYAYBuLXP/gUMapU+9OxaaCjjDFJGnMupfmn2Endss
+               g+avz/mFfePLGvtjJosQLNN2dKobEm+Lgautgt5s
+               -----END CERTIFICATE-----
+               """
+        node_one = Node.objects.create(name='one', group=self.group)
+        node_two = Node.objects.create(name='two', group=self.group)
+        NodeApi.objects.create(node=node_one, cert=cert, base_uri=uri)
+        NodeApi.objects.create(node=node_two, cert=cert, base_uri=uri)
+        self.assertEqual(node_one.api.cert, cert)
+        self.assertEqual(node_two.api.cert, cert)
 
 
 class ServerTest(TestCase):

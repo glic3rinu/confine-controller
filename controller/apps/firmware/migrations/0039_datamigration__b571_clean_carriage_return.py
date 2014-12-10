@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
@@ -6,22 +7,16 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        """
-        Fix ConfigFile '/etc/confine/tinc-gateways/* path generation.
-        Use tinc.name instead of tinc.__unicode__
-        
-        == ConfigFiles ==
-        /etc/confine/tinc-gateways/NAME
-        """
+        """Remove carriage return from stored node keys."""
         # Note: Don't use "from appname.models import ModelName".
         # Use orm.ModelName to refer to models in this application,
         # and orm['appname.ModelName'] for models in other applications.
-        gw_cfile = orm.ConfigFile.objects.get(path__contains='server for server in node.tinc.connect_to')
-        gw_cfile.path = '[ "/etc/confine/tinc-gateways/%s" % server.name for server in node.tinc.connect_to ]'
-        gw_cfile.save()
+        for nbfile in orm.NodeBuildFile.objects.filter(content__contains='\r'):
+            nbfile.content = nbfile.content.replace('\r\n', '\n')
+            nbfile.save()
 
     def backwards(self, orm):
-        """Nothing to be done."""
+        "Nothing TBD, we don't want to restore problematic '\r'."
 
     models = {
         u'firmware.baseimage': {

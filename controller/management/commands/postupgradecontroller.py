@@ -260,12 +260,27 @@ class Command(BaseCommand):
                 "https://wiki.confine-project.eu/soft:server-release-notes#section0104" % msg)
         if version < 1103:
             # Update mgmt network Server APIs certificate
+            # perform raw SQL querie because models hasn't been
+            # reloaded yet and cannot access e.g. server.api
+            from django.db import connection
             from nodes.models import Server
             from pki import ca
-            server = Server.objects.get_default()
-            server.api.filter(base_uri__contains=server.mgmt_net.addr).update(
-                cert=ca.get_cert().as_pem())
-            upgrade_notes.append("Updated Server APIs certificate.")
+            
+            server_id = Server.objects.order_by('id').first().pk
+            try:
+                cert = ca.get_cert().as_pem()
+            except IOError:
+                msg = ("Failed to update Server APIs certificate. Missing "
+                       "server certificate '%s'.\n"
+                       "Run 'python manage.py setuppki --help'" % ca.cert_path)
+                upgrade_notes.append(msg)
+            else:
+                update_sql = ('UPDATE "nodes_serverapi" SET cert = %s '
+                              'WHERE "nodes_serverapi"."server_id" = %s')
+                cursor = connection.cursor()
+                cursor.execute(update_sql, [cert, server_id])
+                del cursor
+                upgrade_notes.append("Updated Server APIs certificate.")
         
         if upgrade_notes and options.get('print_upgrade_notes'):
             self.stdout.write('\n\033[1m\n'

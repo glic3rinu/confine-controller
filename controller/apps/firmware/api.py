@@ -14,7 +14,8 @@ from permissions.api import ApiPermissionsMixin
 from .exceptions import BaseImageNotAvailable, ConcurrencyError
 from .models import BaseImage, Build, Config
 from .renderers import BaseImageProfileRenderer
-from .serializers import BaseImageSerializer, FirmwareSerializer
+from .serializers import (BaseImageSerializer, FirmwareSerializer,
+    NodeFirmwareConfigSerializer)
 
 
 class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
@@ -50,37 +51,31 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
     
     def post(self, request, pk, *args, **kwargs):
         node = get_object_or_404(Node, pk=pk)
-        if not request.DATA:
-            config = get_object_or_404(Config)
-            kwargs = {}
-            
-            ### Initialize defaults ###
-            async = True
-            success_status = status.HTTP_202_ACCEPTED
-            # allow asynchronous requests
-            if '201-created' == request.META.get('HTTP_EXPECT', None):
-                async = False
-                success_status = status.HTTP_201_CREATED
-            
-            # TODO allow choose base image
-            base_image = config.get_images(node).order_by('-default').first()
-            if base_image is None:
-                raise BaseImageNotAvailable
-            
-            # TODO allow choose registry API
-            main_server = Server.objects.first()
-            registry = main_server.api.filter(type=ServerApi.REGISTRY).first()
-            kwargs['registry_base_uri'] = registry.base_uri
-            kwargs['registry_cert'] = registry.cert or ''
-            
-            ### call firmware build task ###
-            try:
-                build = Build.build(node, base_image, async=async, **kwargs)
-            except ConcurrencyError as e:
-                raise exceptions.Throttled(detail=e.message)
-            serializer = self.serializer_class(build, data=request.DATA)
-            return Response(serializer.data, status=success_status)
-        raise exceptions.ParseError(detail='This endpoint only accepts null data')
+        data = request.DATA or {}
+        
+        fw_config = NodeFirmwareConfigSerializer(node, data=data)
+        if not fw_config.is_valid():
+            raise exceptions.ParseError(detail=fw_config.errors)
+        
+        ### Initialize defaults ###
+        kwargs = fw_config.data
+        base_image = BaseImage.objects.get(pk=kwargs.pop('base_image'))
+        async = True
+        success_status = status.HTTP_202_ACCEPTED
+        
+        # allow asynchronous requests
+        if '201-created' == request.META.get('HTTP_EXPECT', None):
+            async = False
+            success_status = status.HTTP_201_CREATED
+        
+        ### call firmware build task ###
+        try:
+            build = Build.build(node, base_image, async=async, **kwargs)
+        except ConcurrencyError as e:
+            raise exceptions.Throttled(detail=e.message)
+        
+        serializer = self.serializer_class(build)
+        return Response(serializer.data, status=success_status)
 
 
 insert_ctl(NodeDetail, Firmware)

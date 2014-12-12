@@ -1,8 +1,12 @@
 from __future__ import absolute_import
 
+from controller.core.validators import validate_cert
+
 from api import serializers
+from nodes.models import Server, ServerApi
 from nodes.settings import NODES_NODE_ARCHS
 
+from .exceptions import BaseImageNotAvailable
 from .models import BaseImage, Build, Config
 
 
@@ -71,3 +75,65 @@ class FirmwareSerializer(serializers.ModelSerializer):
         if self.object:
             return self.object.state_description
         return ""
+
+
+
+class NodeFirmwareConfigSerializer(serializers.Serializer):
+    base_image = serializers.IntegerField(required=False)
+    registry_base_uri = serializers.URLField(required=False)
+    registry_cert = serializers.CharField(required=False,
+                                          validators=[validate_cert])
+    
+    def __init__(self, node, *args, **kwargs):
+        super(NodeFirmwareConfigSerializer, self).__init__(*args, **kwargs)
+        self.node = node
+    
+    def get_default_registry(self):
+        main_server = Server.objects.get_default()
+        return main_server.api.filter(type=ServerApi.REGISTRY).first()
+    
+    def validate_base_image(self, attrs, source):
+        """
+        Initialize default base image (if any).
+        Check if provided base image ID exists and has compatible
+        arch with the node.
+        
+        """
+        value = attrs.get(source, None)
+        config = Config.objects.get()
+        base_img_qs = config.get_images(self.node)
+        
+        if not value:
+            base_image = base_img_qs.order_by('-default').first()
+            if base_image is None:
+                raise BaseImageNotAvailable
+            attrs[source] = base_image.pk
+        
+        else:
+            try:
+                base_image = base_img_qs.get(pk=value)
+            except BaseImage.DoesNotExist as e:
+                raise BaseImageNotAvailable(detail=str(e))
+        
+        return attrs
+    
+    def validate(self, attrs):
+        """
+        Initialize registry defaults and check if certificate is
+        provided for HTTPS base URIs.
+        
+        """
+        base_uri = attrs.get('registry_base_uri', '')
+        cert = attrs.get('registry_cert', '')
+        
+        # initialize registry defaults
+        if not base_uri and not cert:
+            base_uri = self.get_default_registry().base_uri
+            cert = self.get_default_registry().cert
+            attrs['registry_base_uri'] = base_uri
+            attrs['registry_cert'] = cert
+        
+        if base_uri.startswith('https://') and not cert:
+            raise serializers.ValidationError("Certificate is required for HTTPS.")
+        
+        return attrs

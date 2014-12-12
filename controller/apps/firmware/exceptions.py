@@ -12,8 +12,8 @@ class BaseImageNotAvailable(APIException):
     """
     Raised when there is no available base image for a given node architecture
     """
-    status_code = 404
-    detail = "No base image compatible with the architecture of this node."
+    status_code = 400
+    default_detail = "No base image compatible with the architecture of this node."
 
 
 class UnexpectedImageFormat(Exception):

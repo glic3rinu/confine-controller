@@ -22,7 +22,7 @@ from users.helpers import filter_group_queryset
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter
 from .forms import (DirectIfaceInlineFormSet, NodeApiInlineForm,
-    NodeApiInlineFormset, ServerApiInlineForm)
+    NodeApiInlineFormset)
 from .models import (DirectIface, Island, Node, NodeApi, NodeProp, Server,
     ServerApi, ServerProp)
 
@@ -201,7 +201,6 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
 class ServerApiInline(PermissionTabularInline):
     model = ServerApi
     extra = 1
-    form = ServerApiInlineForm
     
     class Media:
         css = {

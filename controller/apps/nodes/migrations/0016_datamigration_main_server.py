@@ -4,7 +4,6 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from controller.utils.system import run
 
 class Migration(DataMigration):
     depends_on = (
@@ -12,13 +11,7 @@ class Migration(DataMigration):
     )
 
     def update_server_pk(self, orm, old_pk, new_pk):
-        try:
-            server = orm.Server.objects.get(pk=old_pk)
-        except orm.Server.DoesNotExist:
-            # Create a server
-            description = run('hostname', display=False).stdout
-            server = orm.Server.objects.create(pk=new_pk, description=description)
-            return # Related objects are alreday up to date!
+        server = orm.Server.objects.get(pk=old_pk)
         server.pk = new_pk
         server.save()
         

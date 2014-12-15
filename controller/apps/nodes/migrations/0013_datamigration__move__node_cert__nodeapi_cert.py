@@ -8,6 +8,7 @@ from IPy import IP
 
 from controller.settings import MGMT_IPV6_PREFIX
 from controller.utils.ip import int_to_hex_str
+from controller.utils.system import run
 from nodes.settings import NODES_NODE_API_BASE_URI_DEFAULT, NODES_SERVER_API_BASE_URI_DEFAULT
 
 from nodes.models import ServerApi
@@ -41,6 +42,11 @@ class Migration(DataMigration):
             orm.NodeApi.objects.create(node=node, base_uri=url, cert=node.cert)
 
         # Create two ServerApi for server (one for REGISTRY and another for CONTROLLER)
+        if not orm.Server.objects.exists():
+            # Create the main server
+            description = run('hostname', display=False).stdout
+            server = orm.Server.objects.create(description=description)
+        
         for server in orm.Server.objects.all():
             mgmt_addr = server_mgmt_address(server)
             url = NODES_SERVER_API_BASE_URI_DEFAULT % {'mgmt_addr': mgmt_addr}

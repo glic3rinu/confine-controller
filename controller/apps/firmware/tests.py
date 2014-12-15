@@ -9,11 +9,14 @@ from django.core.exceptions import SuspiciousFileOperation
 from django.core.management import call_command
 from django.test import TestCase
 
-from nodes.models import Node
+from nodes.models import Node, Server, ServerApi
+from pki import ca
 from users.models import Group
 
-from .models import Build, ConfigPlugin
+from .models import BaseImage, Build, Config, ConfigPlugin
+from .serializers import NodeFirmwareConfigSerializer
 from .settings import FIRMWARE_BUILD_IMAGE_STORAGE
+
 
 class BuildTests(TestCase):
     def test_handle_access_denied_image_file(self):
@@ -61,3 +64,132 @@ class PluginTests(TestCase):
         enabled = plugins.filter(is_active=True).values_list('label', flat=True)
         self.assertIn('USBImagePlugin', enabled)
         self.assertIn('AuthKeysPlugin', enabled)
+
+
+class NodeFirmwareConfigTests(TestCase):
+    def setUp(self):
+        # FirmwareConfig --> migration firmware/0034
+        config = Config.objects.get()
+       
+        # BaseImage for i686 nodes
+        self.base_image = BaseImage.objects.create(name='bi', config=config,
+                                                   architectures=['i686'])
+        
+        # ServerApi --> migration nodes/0013 + configure server cert
+        self.assertTrue(ServerApi.objects.filter(type='registry').exists())
+        call_command('setuppki', verbosity=0, interactive=False)
+        server = Server.objects.get_default()
+        server.api.filter(base_uri__contains=server.mgmt_net.addr).update(
+            cert=ca.get_cert().as_pem()
+        )
+        
+        # Node
+        self.group = Group.objects.create(name='group', allow_nodes=True)
+        self.node = Node.objects.create(name='node', group=self.group, arch='i686')
+    
+    def test_valid_no_data(self):
+        serializer = NodeFirmwareConfigSerializer(self.node, data={})
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_valid_no_base_image(self):
+        data = {
+            "registry_base_uri": "http://[fd65:fc41:c50f::2]/api/",
+            "registry_cert": ""
+        }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_valid_http(self):
+        data = {
+            "base_image": self.base_image.pk,
+            "registry_base_uri": "http://[fd65:fc41:c50f::2]/api/",
+            "registry_cert": ""
+        }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_valid_https(self):
+        data = {
+            "base_image": self.base_image.pk,
+            "registry_base_uri": "https://[fd65:fc41:c50f::2]/api/",
+            "registry_cert": (
+                "-----BEGIN CERTIFICATE-----\n"
+                "MIICxjCCAa6gAwIBAwIEOutGXzANBgkqhkiG9w0BAQsFADAcMRowGAYDVQQDExFm\n"
+                "ZDY1OmZjNDE6YzUwZjo6MjAeFw0xNDA0MDgwOTEyMzdaFw0xODA0MDcwOTEyMzda\n"
+                "MBwxGjAYBgNVBAMTEWZkNjU6ZmM0MTpjNTBmOjoyMIIBIjANBgkqhkiG9w0BAQEF\n"
+                "AAOCAQ8AMIIBCgKCAQEAqDCfwaYC2mtCksS1ER22fZWM5UJdkDlMoTiSmG2sLgxA\n"
+                "hvnD7koocrsxi1MEZkTEnbDJPzAH+hLGMUyveMDZ/yBhYCvfMJOO+J36Dplyi4EG\n"
+                "zfM1QwATZxuTAOzAzZW8FbIhQ6ExQJPvKjpir6FhfXglKbZm8iP7u3V6twFHAtiE\n"
+                "a4AkMNEkgHjmvLfB+G4wE+k/WEHU4HH/EZmMF9y8Zq8Wku+PrUql034MYlnHqkzh\n"
+                "QTK9UJGrTyT5hjp6a8XOz6J7zPhLG0Y7vIir/9NeIKVYCUVPstQhMqBWaA48gM+r\n"
+                "umqMp3YDamUs6XxI9FVk5x24o5WUungyjw0N3nLb3QIDAQABoxAwDjAMBgNVHRME\n"
+                "BTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCJdgEX9Gc7/NWsj0sLqfPAdLw+c40W\n"
+                "Ff17ftW3ok3V27HFLi6HAk5gL4LO4pCxt7emMpxmMxyLETmSAkDZ7mgv3T2Vg1cc\n"
+                "XRsJhX/h3LBcV68TVCKsnEYzf7FqBfcQmE1ZQQ1F72+ITwrARDEgnD2pyZQ0olCx\n"
+                "1z2XatQykneg9GpJQhZAlIfFT8ke7TWDzIkx808498wMBdUnork6piUO6KGOsJ9O\n"
+                "NCHdn/ThGxv9CPCcBJ7asHdD9HkQT2IPKoRnA7KKMXZx84bn5qI7pr79BfAHvw/T\n"
+                "+k+vlEz1nSrreue3bv1Aq17ZlIB6IQga11hLaHqkT6hSkoBJwpUhsY6C\n"
+                "-----END CERTIFICATE-----")
+         }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_invalid_https_without_cert(self):
+        data = {
+            "base_image": self.base_image.pk,
+            "registry_base_uri": "https://[fd65:fc41:c50f::2]/api/",
+            "registry_cert": ""
+        }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_base_image_not_available(self):
+        data = { "base_image": -1 }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_base_image_id(self):
+        data = { "base_image": "invalid_ID" }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_registry_base_uri(self):
+        data = { "registry_base_uri": "foo:/malformed" }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_registry_cert(self):
+        data = { "registry_cert": "--FOO CERT--"}
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_cert_but_not_registry_base_uri(self):
+        # only cert but not base_uri
+        data = {
+            "registry_cert": (
+                "-----BEGIN CERTIFICATE-----\n"
+                "MIICxjCCAa6gAwIBAwIEOutGXzANBgkqhkiG9w0BAQsFADAcMRowGAYDVQQDExFm\n"
+                "ZDY1OmZjNDE6YzUwZjo6MjAeFw0xNDA0MDgwOTEyMzdaFw0xODA0MDcwOTEyMzda\n"
+                "MBwxGjAYBgNVBAMTEWZkNjU6ZmM0MTpjNTBmOjoyMIIBIjANBgkqhkiG9w0BAQEF\n"
+                "AAOCAQ8AMIIBCgKCAQEAqDCfwaYC2mtCksS1ER22fZWM5UJdkDlMoTiSmG2sLgxA\n"
+                "hvnD7koocrsxi1MEZkTEnbDJPzAH+hLGMUyveMDZ/yBhYCvfMJOO+J36Dplyi4EG\n"
+                "zfM1QwATZxuTAOzAzZW8FbIhQ6ExQJPvKjpir6FhfXglKbZm8iP7u3V6twFHAtiE\n"
+                "a4AkMNEkgHjmvLfB+G4wE+k/WEHU4HH/EZmMF9y8Zq8Wku+PrUql034MYlnHqkzh\n"
+                "QTK9UJGrTyT5hjp6a8XOz6J7zPhLG0Y7vIir/9NeIKVYCUVPstQhMqBWaA48gM+r\n"
+                "umqMp3YDamUs6XxI9FVk5x24o5WUungyjw0N3nLb3QIDAQABoxAwDjAMBgNVHRME\n"
+                "BTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCJdgEX9Gc7/NWsj0sLqfPAdLw+c40W\n"
+                "Ff17ftW3ok3V27HFLi6HAk5gL4LO4pCxt7emMpxmMxyLETmSAkDZ7mgv3T2Vg1cc\n"
+                "XRsJhX/h3LBcV68TVCKsnEYzf7FqBfcQmE1ZQQ1F72+ITwrARDEgnD2pyZQ0olCx\n"
+                "1z2XatQykneg9GpJQhZAlIfFT8ke7TWDzIkx808498wMBdUnork6piUO6KGOsJ9O\n"
+                "NCHdn/ThGxv9CPCcBJ7asHdD9HkQT2IPKoRnA7KKMXZx84bn5qI7pr79BfAHvw/T\n"
+                "+k+vlEz1nSrreue3bv1Aq17ZlIB6IQga11hLaHqkT6hSkoBJwpUhsY6C\n"
+                "-----END CERTIFICATE-----")
+        }
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_unsupported_node_arch(self):
+        # Build firmware node with arch incompatible (no base images)
+        node_x64 = Node.objects.create(name='Node_x64', group=self.group, arch='x64')
+        serializer = NodeFirmwareConfigSerializer(node_x64, data={})
+        self.assertFalse(serializer.is_valid())

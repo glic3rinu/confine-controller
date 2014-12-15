@@ -90,7 +90,10 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
     
     def get_default_registry(self):
         main_server = Server.objects.get_default()
-        return main_server.api.filter(type=ServerApi.REGISTRY).first()
+        dflt_api = main_server.api.filter(type=ServerApi.REGISTRY).first()
+        if dflt_api is None:
+            raise ServerApi.DoesNotExist("Doesn't exist default registry API.")
+        return dflt_api
     
     def validate_base_image(self, attrs, source):
         """
@@ -106,14 +109,19 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
         if not value:
             base_image = base_img_qs.order_by('-default').first()
             if base_image is None:
-                raise BaseImageNotAvailable
+                raise serializers.ValidationError(
+                    "No base image compatible with the architecture of this "
+                    "node."
+                )
             attrs[source] = base_image.pk
         
         else:
             try:
                 base_image = base_img_qs.get(pk=value)
             except BaseImage.DoesNotExist as e:
-                raise BaseImageNotAvailable(detail=str(e))
+                raise serializers.ValidationError(
+                    "Invalid ID - object does not exist."
+                )
         
         return attrs
     
@@ -126,8 +134,13 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
         base_uri = attrs.get('registry_base_uri', '')
         cert = attrs.get('registry_cert', '')
         
-        # initialize registry defaults
-        if not base_uri and not cert:
+        if not base_uri:
+            if cert:
+                raise serializers.ValidationError(
+                    {'registry_base_uri': ['this field is required.']}
+                )
+            
+            # initialize registry defaults
             base_uri = self.get_default_registry().base_uri
             cert = self.get_default_registry().cert
             attrs['registry_base_uri'] = base_uri

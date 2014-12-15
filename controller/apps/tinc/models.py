@@ -61,7 +61,15 @@ class TincHostQuerySet(models.query.QuerySet):
 
 
 def get_default_gateway():
-    return Server.objects.get_default().tinc
+    server_ctype = ContentType.objects.get_for_model(Server)
+    try:
+        server_id = Server.objects.get_default().pk
+    except Server.DoesNotExist:
+        return None
+    try:
+        return TincHost.objects.get(content_type=server_ctype, object_id=server_id)
+    except TincHost.DoesNotExist:
+        return None
 
 
 class TincHost(models.Model):

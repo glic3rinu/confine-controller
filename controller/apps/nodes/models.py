@@ -384,6 +384,8 @@ class ServerManager(models.Manager):
         return ServerQuerySet(self.model, using=self.db)
     
     def get_default(self):
+        if not self.exists():
+            raise self.model.DoesNotExist
         return self.order_by('id').first()
 
 class Server(models.Model):

@@ -5,6 +5,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
+from django.db import connection
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -42,15 +43,23 @@ class TincAddressTests(TestCase):
 
 
 class TincHostTests(TestCase):
-    def test_get_default_gateway(self):
-        # There is no server to act as gateway
-        self.assertIsNone(get_default_gateway())
+    def delete_all_servers(self):
+        # delete using RAW SQL to avoid programmatic restrictions
+        cursor = connection.cursor()
+        cursor.execute('DELETE FROM nodes_server')
+        del cursor
         
+    def test_get_default_gateway(self):
         # Main server acts as default gateway
-        server = Server.objects.create(name='srv')
+        server = Server.objects.get_default()
         self.assertEqual(server.tinc, get_default_gateway())
+        
+        # There is no server to act as gateway
+        self.delete_all_servers()
+        self.assertIsNone(get_default_gateway())
     
     def test_maxium_recursion_depth(self):
         # Test particular situation which raised max recursion depth
+        self.delete_all_servers()
         server = Server.objects.create(name='srv')
         self.assertIsNotNone(server.tinc)

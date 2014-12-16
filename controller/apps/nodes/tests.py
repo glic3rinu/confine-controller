@@ -1,6 +1,7 @@
 import json
+import unittest
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -124,3 +125,13 @@ class ServerTest(TestCase):
         self.assertIn('cert', apijs)
         self.assertEqual(apijs['base_uri'], self.server_api.base_uri)
         self.assertEqual(apijs['cert'], self.server_api.cert)
+    
+    @unittest.skipUnless(Server.objects.exists(), "At least one server should exist." )
+    def test_delete_unique_server(self):
+        # try to delete all queryset
+        self.assertRaises(PermissionDenied, Server.objects.all().delete)
+        
+        # try to delete server instance
+        server = Server.objects.get_default()
+        Server.objects.exclude(pk=server.pk).delete()
+        self.assertRaises(PermissionDenied, server.delete)

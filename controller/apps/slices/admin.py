@@ -54,15 +54,23 @@ num_slivers.admin_order_field = 'slivers__count'
 
 
 def computed_sliver_set_state(sliver):
-    sliver_state = sliver.set_state or sliver.slice.sliver_defaults.set_state
+    # init state representation
     state = sliver.effective_set_state
-    effective = state != sliver_state
     color = STATE_COLORS.get(state, "black")
     state = filter(lambda s: s[0] == state, Slice.STATES)[0][1]
     title = ''
-    if effective:
+    
+    # compute if state is overrided by...
+    sliver_state = sliver.set_state or sliver.slice.sliver_defaults.set_state
+    # ...slice
+    if state != sliver_state:
         title = 'Set state from slice, sliver set state is &quot;%s&quot;' % sliver_state
         state += '*'
+    # ...sliver defaults
+    elif sliver.set_state is None:
+        title = 'Set state from sliver defaults, sliver set state is &quot;%s&quot;' % sliver_state
+        state += '*'
+    
     return mark_safe('<span style="color:%s;" title="%s">%s</span>' % (color, title, state))
 computed_sliver_set_state.short_description = 'Set state'
 

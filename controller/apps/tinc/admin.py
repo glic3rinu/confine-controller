@@ -2,8 +2,10 @@ from __future__ import absolute_import
 
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
+from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
+from django.utils.safestring import mark_safe
 
 from controller.admin import ChangeListDefaultFilter
 from controller.admin.utils import insertattr, admin_link, wrap_admin_view
@@ -47,7 +49,7 @@ class TincHostInline(PermissionGenericTabularInline):
         return readonly_fields
     
     def get_formset(self, request, obj=None, **kwargs):
-        """ Warning user if the tinc host is not fully configured """
+        """ Warn user if the tinc host is not fully configured """
         if (obj and obj.mgmt_net.backend == 'tinc' and obj.tinc.pubkey is None and
             request.method == 'GET'):
             msg = 'This %s misses a tinc public key ' % obj._meta.verbose_name
@@ -55,6 +57,15 @@ class TincHostInline(PermissionGenericTabularInline):
                 msg += '(will be automatically generated during firmware build).'
             messages.warning(request, msg)
         return super(TincHostInline, self).get_formset(request, obj=obj, **kwargs)
+    
+    def get_fieldsets(self, request, obj=None):
+        """Add link to manage tinc addresses."""
+        if obj and self.has_change_permission(request, obj, view=False):
+            title = self.verbose_name_plural
+            url = "%s?host__id__exact=%i" % (reverse('admin:tinc_tincaddress_changelist'), obj.tinc.pk)
+            add_button = '%s <a href="%s">(Manage tinc addresses)</a>' % (title, url)
+            self.verbose_name_plural = mark_safe(add_button)
+        return super(TincHostInline, self).get_fieldsets(request, obj=obj)
 
 
 class TincAddressInline(PermissionTabularInline):

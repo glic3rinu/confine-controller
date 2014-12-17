@@ -2,13 +2,24 @@ import os
 
 from django import forms
 
-from controller.core.validators import validate_ssh_pubkey
 from controller.utils.html import MONOSPACE_FONTS
 from controller.utils.system import run
 
+from api import serializers
 from firmware.models import NodeKeys
 from firmware.plugins import FirmwarePlugin
 from firmware.settings import FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH as keys_path
+
+
+def process_data(node, data):
+    admins_keys = []
+    if data.get('allow_node_admins'):
+        for admin in node.group.admins:
+            admins_keys += admin.auth_tokens.values_list('data', flat=True)
+    return {
+        'admins_keys': '\n'.join(admins_keys),
+        'additional_keys': data['ssh_auth']
+    }
 
 
 class AuthKeysPlugin(FirmwarePlugin):
@@ -38,26 +49,36 @@ class AuthKeysPlugin(FirmwarePlugin):
                     msg = "Loaded default keys as initial value."
                 super(AuthKeysForm, self).__init__(*args, **kwargs)
                 self.fields['ssh_auth'].help_text += ' <span style="color:red">%s</span>' % msg
-            
-            def clean_ssh_auth(self):
-                ssh_auth = self.cleaned_data.get("ssh_auth").strip()
-                for ssh_pubkey in ssh_auth.splitlines():
-                    if not ssh_pubkey.lstrip().startswith('#'): # ignore comments
-                        validate_ssh_pubkey(ssh_pubkey)
-                return ssh_auth
         
         return AuthKeysForm
     
+    def get_serializer(self):
+        class AuthKeysSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = NodeKeys
+                fields = ('allow_node_admins', 'ssh_auth', 'sync_node_admins')
+            
+            def __init__(self, node, *args, **kwargs):
+                super(AuthKeysSerializer, self).__init__(*args, **kwargs)
+                self.node = node
+            
+            def validate_ssh_auth(self, attrs, source):
+                # For some reason is_valid doesn't call field validators!
+                from firmware.validators import validate_ssh_auth
+                validate_ssh_auth(attrs.get(source, ''))
+                return attrs
+            
+            def process_post(self):
+                assert self.is_valid()
+                self.object.node = self.node
+                self.save()
+                return process_data(self.node, self.data)
+        
+        return AuthKeysSerializer
+    
     def process_form_post(self, form):
         form.save() # save into db after form validation
-        admins_keys = []
-        if form.cleaned_data.get('allow_node_admins'):
-            for admin in form.node.group.admins:
-                admins_keys += admin.auth_tokens.values_list('data', flat=True)
-        return {
-            'admins_keys': '\n'.join(admins_keys),
-            'additional_keys': form.cleaned_data['ssh_auth']
-        }
+        return process_data(form.node, form.cleaned_data)
     
     def pre_umount(self, image, build, *args, **kwargs):
         """ Creating ssh authorized keys file """

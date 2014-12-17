@@ -52,23 +52,37 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
     def post(self, request, pk, *args, **kwargs):
         node = get_object_or_404(Node, pk=pk)
         data = request.DATA or {}
+        errors = {}
         
         fw_config = NodeFirmwareConfigSerializer(node, data=data)
         if not fw_config.is_valid():
-            raise exceptions.ParseError(detail=fw_config.errors)
+            errors.update(fw_config.errors)
         
-        ### Initialize defaults ###
+        # initialize firmware configuration
         kwargs = fw_config.data
         base_image = BaseImage.objects.get(pk=kwargs.pop('base_image'))
         async = True
         success_status = status.HTTP_202_ACCEPTED
+        
+        # get plugins configuration
+        config = Config.objects.get()
+        for plugin in config.plugins.active():
+            serializer_class = plugin.instance.get_serializer()
+            if serializer_class:
+                serializer = serializer_class(node, data=data)
+                if serializer.is_valid():
+                    kwargs.update(serializer.process_post())
+                else:
+                    errors.update(serializer.errors)
+        if errors:
+            raise exceptions.ParseError(detail=errors)
         
         # allow asynchronous requests
         if '201-created' == request.META.get('HTTP_EXPECT', None):
             async = False
             success_status = status.HTTP_201_CREATED
         
-        ### call firmware build task ###
+        # call firmware build task
         try:
             build = Build.build(node, base_image, async=async, **kwargs)
         except ConcurrencyError as e:

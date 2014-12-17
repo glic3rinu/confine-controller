@@ -8,7 +8,32 @@ from django import forms
 
 from controller.utils.system import run
 
+from api import serializers
 from firmware.plugins import FirmwarePlugin
+
+def process_data(node, data):
+    # Disable and reset root password
+    if data['disabled']:
+        node.keys.ssh_pass = None
+        node.keys.save()
+        return {'password': False}
+    
+    # Use stored password
+    if node.keys.ssh_pass:
+        return {'password': node.keys.ssh_pass}
+    
+    # Use NEW provided password - compute hash
+    password = data['password']
+    hash_type = 1 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
+    salt_chars = string.ascii_letters + string.digits
+    salt_length = 8 #random.randint(1, 16)
+    salt = ''.join(random.choice(salt_chars) for x in range(salt_length))
+    crypted_password = crypt.crypt(password, "$%i$%s$" % (hash_type, salt))
+    
+    # store crypted password
+    node.keys.ssh_pass = crypted_password
+    node.keys.save()
+    return {'password': crypted_password}
 
 
 class PasswordPlugin(FirmwarePlugin):
@@ -57,30 +82,32 @@ class PasswordPlugin(FirmwarePlugin):
         
         return PasswordForm
     
+    def get_serializer(self):
+        class PasswordSerializer(serializers.Serializer):
+            disable_password = serializers.BooleanField(default=True)
+            password = serializers.CharField(default='', required=False)
+            
+            def __init__(self, node, *args, **kwargs):
+                super(PasswordSerializer, self).__init__(*args, **kwargs)
+                self.node = node
+            
+            def validate(self, attrs):
+                # check that password is provided or has been disabled
+                if not attrs['disable_password'] and not attrs['password']:
+                    raise serializers.ValidationError(
+                        'You must provide a password or disable it.'
+                    )
+                return attrs
+            
+            def process_post(self):
+                assert self.is_valid()
+                self.data['disabled'] = self.data['disable_password']
+                return process_data(self.node, self.data)
+        
+        return PasswordSerializer
+    
     def process_form_post(self, form):
-        """ Calculating password hash """
-        # Disable and clean up root pasword
-        if form.cleaned_data['disabled']:
-            form.node.keys.ssh_pass = None
-            form.node.keys.save()
-            return {'password': False}
-        
-        # Use stored password
-        if form.node.keys.ssh_pass:
-            return {'password': form.node.keys.ssh_pass}
-        
-        # Use NEW provided password
-        password = form.cleaned_data['password2']
-        hash_type = 1 # 1:MD5, 2a:Blowfish, 5:SHA-256, 6:SHA-512
-        salt_chars = string.ascii_letters + string.digits
-        salt_length = 8 #random.randint(1, 16)
-        salt = ''.join(random.choice(salt_chars) for x in range(salt_length))
-        crypted_password = crypt.crypt(password, "$%i$%s$" % (hash_type, salt))
-        
-        # store crypted password
-        form.node.keys.ssh_pass = crypted_password
-        form.node.keys.save()
-        return {'password': crypted_password}
+        return process_data(form.node, form.cleaned_data)
     
     def pre_umount(self, image, build, *args, **kwargs):
         """ Configuring image password """

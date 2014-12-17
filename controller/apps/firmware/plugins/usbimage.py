@@ -5,6 +5,7 @@ from django import forms
 from controller.utils.paths import get_site_root
 from controller.utils.system import run
 
+from api import serializers
 from firmware.image import Image
 from firmware.plugins import FirmwarePlugin
 from firmware.settings import FIRMWARE_PLUGINS_USB_IMAGE
@@ -26,6 +27,19 @@ class USBImagePlugin(FirmwarePlugin):
                 help_text='Select this option if you want to install the node image '
                     'from a USB stick. This option requires a node internal hard drive.')
         return USBImageForm
+    
+    def get_serializer(self):
+        class USBImageSerializer(serializers.Serializer):
+            usb_image = serializers.BooleanField(required=False, default=False)
+            
+            def __init__(self, node, *args, **kwargs):
+                 super(USBImageSerializer, self).__init__(*args, **kwargs)
+            
+            def process_post(self):
+                assert self.is_valid()
+                return self.data
+        
+        return USBImageSerializer
     
     def process_form_post(self, form):
         return {'usb_image': form.cleaned_data['usb_image']}

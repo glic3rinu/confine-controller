@@ -14,6 +14,9 @@ from pki import ca
 from users.models import Group
 
 from .models import BaseImage, Build, Config, ConfigPlugin
+from .plugins.authkeys import AuthKeysPlugin
+from .plugins.password import PasswordPlugin
+from .plugins.usbimage import USBImagePlugin
 from .serializers import NodeFirmwareConfigSerializer
 from .settings import FIRMWARE_BUILD_IMAGE_STORAGE
 
@@ -64,6 +67,85 @@ class PluginTests(TestCase):
         enabled = plugins.filter(is_active=True).values_list('label', flat=True)
         self.assertIn('USBImagePlugin', enabled)
         self.assertIn('AuthKeysPlugin', enabled)
+
+
+class AuthKeysPluginTests(TestCase):
+    def setUp(self):
+        self.group = Group.objects.create(name='group', allow_nodes=True)
+        self.node = Node.objects.create(name='node', group=self.group, arch='i686')
+        plugin = AuthKeysPlugin()
+        self.serializer_class = plugin.get_serializer()
+    
+    def test_serializer_valid(self):
+        data = {
+            "allow_node_admins": True,
+            "ssh_auth": "",
+            "sync_node_admins": False,
+        }
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_serializer_valid_no_data(self):
+        data = {}
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_serializer_invalid_ssh_key(self):
+        # invalid ssh key
+        data = {
+            "allow_node_admins": True,
+            "ssh_auth": "foo_ssh_key",
+            "sync_node_admins": False,
+        }
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+
+
+class PasswordPluginTests(TestCase):
+    def setUp(self):
+        self.group = Group.objects.create(name='group', allow_nodes=True)
+        self.node = Node.objects.create(name='node', group=self.group, arch='i686')
+        plugin = PasswordPlugin()
+        self.serializer_class = plugin.get_serializer()
+    
+    def test_serializer_valid(self):
+        data = {'password': 'secret'}
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+    
+    def test_serializer_valid_disable(self):
+        data = {'disable_password': True}
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertFalse(serializer.data['password'])
+    
+    def test_serializer_valid_no_data(self):
+        data = {}
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertFalse(serializer.data['password'])
+    
+    def test_serializer_invalid_no_password_but_enabled(self):
+        data = {
+            'disable_password': False,
+            'password': '',
+        }
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+
+
+class USBImagePluginTests(TestCase):
+    def setUp(self):
+        self.group = Group.objects.create(name='group', allow_nodes=True)
+        self.node = Node.objects.create(name='node', group=self.group, arch='i686')
+        plugin = USBImagePlugin()
+        self.serializer_class = plugin.get_serializer()
+    
+    def test_serializer_valid_no_data(self):
+        data = {}
+        serializer = self.serializer_class(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertFalse(serializer.data['usb_image'])
 
 
 class NodeFirmwareConfigTests(TestCase):

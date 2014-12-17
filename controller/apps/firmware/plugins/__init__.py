@@ -22,6 +22,9 @@ class FirmwarePlugin(object):
     def get_form(self):
         pass
     
+    def get_serializer(self):
+        pass
+    
     def pre_umount(self, image, build, *args, **kwargs):
         pass
     

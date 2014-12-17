@@ -35,6 +35,7 @@ from .context import context as eval_context
 from .exceptions import ConcurrencyError
 from .settings import FIRMWARE_BASE_IMAGE_EXTENSIONS
 from .tasks import build as build_task
+from .validators import validate_ssh_auth
 
 
 class BuildQuerySet(models.query.QuerySet):
@@ -488,7 +489,8 @@ class NodeKeys(models.Model):
                       'You may leave the default keys to allow centralized '
                       'maintenance of your node by the controller. Please note '
                       'that this may expose your node to an attack if the '
-                      'controller is compromised.')
+                      'controller is compromised.',
+            validators=[validate_ssh_auth])
     # MD5SUM hashed password in OpenWRT shadow format
     ssh_pass = models.CharField(max_length=128, blank=True, null=True)
     node = models.OneToOneField('nodes.Node', primary_key=True, related_name='keys')

@@ -179,8 +179,8 @@ class StateHistoryAdmin(PermissionModelAdmin):
         """ Filter changelist by object """
         from django.contrib.admin.views.main import ChangeList
         class ObjectChangeList(ChangeList):
-            def get_query_set(self, *args, **kwargs):
-                qs = super(ObjectChangeList, self).get_query_set(*args, **kwargs)
+            def get_queryset(self, *args, **kwargs):
+                qs = super(ObjectChangeList, self).get_queryset(*args, **kwargs)
                 if hasattr(request, 'state_id'):
                     return qs.filter(state=request.state_id)
                 return qs

@@ -13,14 +13,14 @@ def generate_chainer_manager(qs_class):
             super(ChainerManager,self).__init__()
             self.queryset_class = qs_class
         
-        def get_query_set(self):
+        def get_queryset(self):
             return self.queryset_class(self.model)
         
         def __getattr__(self, attr, *args):
             try:
                 return getattr(type(self), attr, *args)
             except AttributeError:
-                return getattr(self.get_query_set(), attr, *args)
+                return getattr(self.get_queryset(), attr, *args)
     return ChainerManager()
 
 

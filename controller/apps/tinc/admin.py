@@ -150,9 +150,9 @@ class HostAdmin(ChangeListDefaultFilter, PermissionModelAdmin):
                 form.base_fields['owner'].initial = user
         return form
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """ Prevent regular users to see hosts from other users """
-        qset = super(HostAdmin, self).queryset(request)
+        qset = super(HostAdmin, self).get_queryset(request)
         if request.user.is_superuser:
             return qset
         return qset.filter(owner=request.user)

@@ -133,14 +133,14 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
             assert is_production, "Problem removing PRODUCTION from set_state"
         return form
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """
         Annotate direct iface and slivers counter to allow ordering
         on change list. Intercept search query to allow search nodes
         by management network IP
         """
         related = ('group', 'island')
-        qs = super(NodeAdmin, self).queryset(request).select_related(*related)
+        qs = super(NodeAdmin, self).get_queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('direct_ifaces', distinct=True))
         # FIXME: try to move to slices to avoid coupling nodes with slices app
         qs = qs.annotate(models.Count('slivers', distinct=True))

@@ -191,10 +191,10 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         readonly_fields = super(SliverAdmin, self).get_readonly_fields(request, obj=obj)
         return readonly_fields + get_readonly_file_fields(obj)
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """ Annotate number of ifaces for future ordering on the changelist """
         related = ('node', 'slice')
-        qs = super(SliverAdmin, self).queryset(request).select_related(*related)
+        qs = super(SliverAdmin, self).get_queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('interfaces', distinct=True))
         return qs
     
@@ -303,9 +303,9 @@ class NodeListAdmin(NodeAdmin):
         actions = super(NodeListAdmin, self).get_actions(request)
         return { 'create_slivers': actions['create_slivers'] }
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """ Filter node list excluding nodes with already slivers of the slice """
-        qs = super(NodeListAdmin, self).queryset(request)
+        qs = super(NodeListAdmin, self).get_queryset(request)
         qs = qs.exclude(slivers__slice=self.slice_id)
         qs = qs.annotate(models.Count('slivers'))
         return qs
@@ -636,10 +636,10 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             "all" : ("slices/css/hide_admin_obj_name.css",)
         }
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """ Annotate number of slivers on the slice for sorting on changelist """
         related = ('group', 'template')
-        qs = super(SliceAdmin, self).queryset(request).select_related(*related)
+        qs = super(SliceAdmin, self).get_queryset(request).select_related(*related)
         qs = qs.annotate(models.Count('slivers', distinct=True))
         return qs
     

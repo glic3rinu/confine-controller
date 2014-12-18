@@ -7,10 +7,10 @@ import random
 import string
 import time
 
-from datetime import datetime
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils import timezone
 
 from controller.core.exceptions import OperationLocked
 from users.models import Group, User
@@ -76,13 +76,13 @@ class PingTests(TestCase):
         """Check that JSON serializes Decimal as a numeric value."""
         # Create ping object
         group = Group.objects.create(name='group_%s' % self.random_number())
-        node = Node.objects.create(name='node_%s' % self.random_number, group=group)
+        node = Node.objects.create(name='node_%s' % self.random_number(), group=group)
         
         ctype_id = ContentType.objects.get_for_model(node.mgmt_net).pk
         object_id = node.mgmt_net.pk
         
         ping = Ping.objects.create(content_type_id=ctype_id, object_id=object_id,
-            min=0.123, max=9.123, avg=4.567, mdev=0.2, date=datetime.now())
+            packet_loss=0, min=0.123, max=9.123, avg=4.567, mdev=0.2, date=timezone.now())
         
         # get timeseries view
         kwargs = dict(content_type_id=ctype_id, object_id=object_id)

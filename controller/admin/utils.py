@@ -128,7 +128,7 @@ def action_to_view(action, modeladmin):
         response = action(modeladmin, request, queryset)
         if not response:
             opts = modeladmin.model._meta
-            url = 'admin:%s_%s_change' % (opts.app_label, opts.module_name)
+            url = 'admin:%s_%s_change' % (opts.app_label, opts.model_name)
             return redirect(url, object_id)
         return response
     return action_view

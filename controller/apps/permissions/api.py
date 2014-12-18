@@ -47,7 +47,7 @@ class ApiPermissionsMixin(object):
             model_cls = type(obj)
             context = {
                 'app_label': model_cls._meta.app_label,
-                'model_name': model_cls._meta.module_name, }
+                'model_name': model_cls._meta.model_name, }
             perm = '%(app_label)s.add_%(model_name)s' % context
             if not request.user.has_perm(perm, obj):
                 raise exceptions.PermissionDenied()

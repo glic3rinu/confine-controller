@@ -9,7 +9,7 @@ import time
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import skipUnlessDBFeature, TestCase
 from django.utils import timezone
 
 from controller.core.exceptions import OperationLocked
@@ -72,6 +72,11 @@ class PingTests(TestCase):
         self.assertFalse(typed_pings.filter(object_id=mgmt_net.pk).exists(),
             "Pings has NOT been removed!")
     
+    # sqlite doesn't support extract epoch but django
+    # doesn't implements 'date_extract_sql' yet so we
+    # chose a feature supported by postgresql but
+    # not by sqlite to do the trick.
+    @skipUnlessDBFeature('supports_timezones')
     def test_timeseries_json_serializer(self):
         """Check that JSON serializes Decimal as a numeric value."""
         # Create ping object

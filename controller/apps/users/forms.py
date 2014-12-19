@@ -40,6 +40,8 @@ class UserChangeForm(forms.ModelForm):
     
     class Meta:
         model = User
+        fields = ('username', 'name', 'email', 'description', 'is_active',
+            'is_superuser', 'last_login', 'date_joined')
     
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -114,6 +116,7 @@ class GroupAdminForm(forms.ModelForm):
     
     class Meta:
         model = Group
+        fields = ('name', 'description', 'allow_nodes', 'allow_slices',)
     
     def __init__(self, *args, **kwargs):
         super(GroupAdminForm, self).__init__(*args, **kwargs)
@@ -171,6 +174,7 @@ class JoinRequestForm(forms.ModelForm):
     
     class Meta:
         model = JoinRequest
+        fields = ('roles', 'action')
     
     def clean(self):
         action = self.cleaned_data.get('action')

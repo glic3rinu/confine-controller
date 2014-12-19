@@ -106,6 +106,7 @@ class ResourceReqForm(forms.ModelForm):
 
     class Meta:
         model = ResourceReq
+        fields = ('req',)
 
     def __init__(self, *args, **kwargs):
         super(ResourceReqForm, self).__init__(*args, **kwargs)

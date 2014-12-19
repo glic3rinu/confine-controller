@@ -183,7 +183,7 @@ class NodeFirmwareConfigTests(TestCase):
     
     def test_valid_http(self):
         data = {
-            "base_image": self.base_image.pk,
+            "base_image_id": self.base_image.pk,
             "registry_base_uri": "http://[fd65:fc41:c50f::2]/api/",
             "registry_cert": ""
         }
@@ -192,7 +192,7 @@ class NodeFirmwareConfigTests(TestCase):
     
     def test_valid_https(self):
         data = {
-            "base_image": self.base_image.pk,
+            "base_image_id": self.base_image.pk,
             "registry_base_uri": "https://[fd65:fc41:c50f::2]/api/",
             "registry_cert": (
                 "-----BEGIN CERTIFICATE-----\n"
@@ -218,7 +218,7 @@ class NodeFirmwareConfigTests(TestCase):
     
     def test_invalid_https_without_cert(self):
         data = {
-            "base_image": self.base_image.pk,
+            "base_image_id": self.base_image.pk,
             "registry_base_uri": "https://[fd65:fc41:c50f::2]/api/",
             "registry_cert": ""
         }
@@ -226,12 +226,12 @@ class NodeFirmwareConfigTests(TestCase):
         self.assertFalse(serializer.is_valid())
     
     def test_invalid_base_image_not_available(self):
-        data = { "base_image": -1 }
+        data = { "base_image_id": -1 }
         serializer = NodeFirmwareConfigSerializer(self.node, data=data)
         self.assertFalse(serializer.is_valid())
     
     def test_invalid_base_image_id(self):
-        data = { "base_image": "invalid_ID" }
+        data = { "base_image_id": "invalid_ID" }
         serializer = NodeFirmwareConfigSerializer(self.node, data=data)
         self.assertFalse(serializer.is_valid())
     

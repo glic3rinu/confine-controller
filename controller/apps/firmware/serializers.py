@@ -79,7 +79,7 @@ class FirmwareSerializer(serializers.ModelSerializer):
 
 
 class NodeFirmwareConfigSerializer(serializers.Serializer):
-    base_image = serializers.IntegerField(required=False)
+    base_image_id = serializers.IntegerField(required=False)
     registry_base_uri = serializers.URLField(required=False)
     registry_cert = serializers.CharField(required=False,
                                           validators=[validate_cert])
@@ -95,7 +95,7 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
             raise ServerApi.DoesNotExist("Doesn't exist default registry API.")
         return dflt_api
     
-    def validate_base_image(self, attrs, source):
+    def validate_base_image_id(self, attrs, source):
         """
         Initialize default base image (if any).
         Check if provided base image ID exists and has compatible

@@ -8,6 +8,7 @@ from controller.core.validators import validate_name, validate_prop_name, valida
 from pki import Bob
 
 from . import settings
+from .helpers import url_on_mgmt_net
 from .validators import (validate_sliver_mac_prefix, validate_ipv4_range,
         validate_dhcp_range, validate_priv_ipv4_prefix)
 
@@ -309,16 +310,24 @@ class Node(models.Model):
     def generate_certificate(self, key, commit=False, user=None):
         if user is None:
             # We pick one pseudo-random admin
+            assert self.group.admins.exists()
             user = self.group.admins[0]
         addr = str(self.mgmt_net.addr)
         bob = Bob(key=key)
         scr = bob.create_request(Email=user.email, CN=addr)
         signed_cert = self.mgmt_net.sign_cert_request(scr)
+        
+        # Keep current certificate if node API has been customized
+        # (e.g. API delegated to a gateway)
         if commit:
             if self.api is None:
                 self.api = NodeApi.objects.create_default(node=self)
-            self.api.cert = signed_cert
-            self.api.save()
+            
+            # Check if node API base_uri refers node mgmt_net addr
+            if url_on_mgmt_net(self.api.base_uri, self.mgmt_net.addr):
+                self.api.cert = signed_cert
+                self.api.save()
+        
         return signed_cert
 
 

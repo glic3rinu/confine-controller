@@ -27,6 +27,9 @@ class IslandTest(TestCase):
 class NodeTest(TestCase):
     def setUp(self):
         self.group = Group.objects.create(name='group', allow_nodes=True)
+        admin = User.objects.create_user(username='admin', name='admin',
+            email='admin@localhost', password='admin')
+        self.group.roles.create(user=admin, is_group_admin=True)
     
     def test_sliver_pub_ipv4(self):
         """Check proper validation of Node.sliver_pub_ipv4 (#391)"""
@@ -82,6 +85,41 @@ class NodeTest(TestCase):
         NodeApi.objects.create(node=node_two, cert=cert, base_uri=uri)
         self.assertEqual(node_one.api.cert, cert)
         self.assertEqual(node_two.api.cert, cert)
+    
+    def test_generate_certificate_node_api_none(self):
+        # Fw generator should create a default api with its certificate
+        node = Node.objects.create(name='node', group=self.group)
+        key = node.tinc.generate_key(commit=True)
+        self.assertFalse(NodeApi.objects.filter(node=node).exists())
+        
+        cert = node.generate_certificate(key, commit=True)
+        
+        self.assertTrue(NodeApi.objects.filter(node=node).exists())
+        self.assertIn(str(node.mgmt_net.addr), node.api.base_uri)
+        self.assertEqual(node.api.cert, cert)
+    
+    def test_generate_certificate_node_api_mgmt_net(self):
+        # Fw generator should generate and store api certificate
+        node = Node.objects.create(name='node', group=self.group)
+        key = node.tinc.generate_key(commit=True)
+        NodeApi.objects.create_default(node)
+        
+        cert = node.generate_certificate(key, commit=True)
+        self.assertIn(str(node.mgmt_net.addr), node.api.base_uri)
+        self.assertEqual(node.api.cert, cert)
+    
+    def test_generate_certificate_node_api_proxy_delegated(self):
+        # Fw generator should keep current node api certificate
+        node = Node.objects.create(name='node', group=self.group)
+        proxy_key = node.tinc.generate_key(commit=False)
+        proxy_cert = node.generate_certificate(proxy_key, commit=False)
+        NodeApi.objects.create(node=node, base_uri='https://proxy', cert=proxy_cert)
+        
+        key = node.tinc.generate_key(commit=True)
+        cert = node.generate_certificate(key, commit=True)
+        
+        self.assertIsNotNone(node.api.base_uri)
+        self.assertEqual(node.api.cert, proxy_cert, "Customized certificate overrided!")
 
 
 class ServerTest(TestCase):
@@ -126,8 +164,9 @@ class ServerTest(TestCase):
         self.assertEqual(apijs['base_uri'], self.server_api.base_uri)
         self.assertEqual(apijs['cert'], self.server_api.cert)
     
-    @unittest.skipUnless(Server.objects.exists(), "At least one server should exist." )
     def test_delete_unique_server(self):
+        if not Server.objects.exists():
+            raise unittest.SkipTest("At least one server should exist.")
         # try to delete all queryset
         self.assertRaises(PermissionDenied, Server.objects.all().delete)
         

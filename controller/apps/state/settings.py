@@ -7,9 +7,8 @@ STATE_LOCK_DIR = getattr(settings, 'STATE_LOCK_DIR', '/dev/shm/')
 
 STATE_NODE_PULL_TIMEOUT = getattr(settings, 'STATE_NODE_PULL_TIMEOUT', timedelta(hours=2))
 
-
 STATE_NODE_URI = getattr(settings, 'STATE_NODESTATE_URI',
-    'http://[%(mgmt_addr)s]/confine/api/node/')
+    '%(base_uri)snode/')
 
 STATE_SCHEDULE = getattr(settings, 'STATE_SCHEDULE', 200)
 
@@ -21,7 +20,7 @@ STATE_FLAPPING_CHANGES = getattr(settings, 'STATE_FLAPPING_CHANGES', 2)
 STATE_FLAPPING_MINUTES = getattr(settings, 'STATE_FLAPPING_MINUTES', 15)
 
 STATE_SLIVER_URI = getattr(settings, 'STATE_SLIVER_URI',
-    'http://[%(mgmt_addr)s]/confine/api/slivers/%(object_id)d/')
+    '%(base_uri)sslivers/%(object_id)d/')
 
 
 STATE_NODE_SOFT_VERSION_URL = getattr(settings, 'STATE_NODE_SOFT_VERSION_URL',

@@ -1,13 +1,12 @@
-import json
+import gevent
 import os
 
-import gevent
-import requests
 from celery.task import periodic_task, task
 from django.db.models import get_model
 
 from controller.utils import LockFile
 
+from .helpers import fetch_state
 from .settings import STATE_LOCK_DIR, STATE_SCHEDULE
 
 
@@ -27,15 +26,7 @@ def get_state(state_module, ids=[], lock=True, patch=False):
         if patch:
             gevent.monkey.patch_all(thread=False, select=False)
         
-        glets = []
-        for obj in objects:
-            try:
-                etag = json.loads(obj.state.metadata)['headers']['etag']
-            except (ValueError, KeyError):
-                headers = {}
-            else:
-                headers = {'If-None-Match': etag}
-            glets.append(gevent.spawn(requests.get, obj.state.get_url(), headers=headers))
+        glets = [gevent.spawn(fetch_state, obj) for obj in objects]
         
         # wait for all greenlets to finish
         gevent.joinall(glets)

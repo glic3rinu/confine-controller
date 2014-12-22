@@ -12,7 +12,7 @@ from django_transaction_signals import defer
 
 from controller.utils.functional import cached
 from controller.utils.time import heartbeat_expires as heartbeatexpires
-from nodes.models import Node
+from nodes.models import Node, NodeApi
 from slices.models import Sliver
 
 from . import settings
@@ -51,15 +51,18 @@ class State(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     last_seen_on = models.DateTimeField(null=True,
-            help_text='Last time the state retrieval was successfull')
+            help_text='Last time the state retrieval was successfull.')
     last_try_on = models.DateTimeField(null=True,
-            help_text='Last time the state retrieval operation has been executed')
+            help_text='Last time the state retrieval operation has been executed.')
     last_contact_on = models.DateTimeField(null=True,
             help_text='Last API pull of this resource received from the node.')
     value = models.CharField(max_length=32, choices=STATES)
     metadata = models.TextField()
     data = models.TextField()
     add_date = models.DateTimeField(auto_now_add=True)
+    ssl_verified = models.BooleanField('verified', default=False,
+            help_text='Whether the SSL certificate could be verified on node '
+                      'API retrieval.')
     
     content_object = generic.GenericForeignKey()
     
@@ -118,6 +121,7 @@ class State(models.Model):
         response = get_data(glet)
         if response is not None:
             state.last_seen_on = now
+            state.ssl_verified = response.headers.pop('ssl_verified', False)
             if response.status_code != 304:
                 state.data = response.text
                 if isinstance(obj, Node):
@@ -126,7 +130,8 @@ class State(models.Model):
                 'url': response.url,
                 # CaseInsensitiveDict not JSON serializable (#468)
                 'headers': dict(response.headers),
-                'status_code': response.status_code
+                'status_code': response.status_code,
+                'ssl_verified': state.ssl_verified,
             })
             state._compute_current()
         else:
@@ -177,10 +182,12 @@ class State(models.Model):
     def get_url(self):
         model = self.content_type.model_class()
         name = model.__name__.upper()
-        # TODO get URI from the node/sliver api_path ?
         URI = getattr(settings, "STATE_%s_%s" % (name, 'URI'))
+        # If node doesn't have api use the default base uri
+        node = self.get_node()
+        base_uri = getattr(node.api, 'base_uri', NodeApi.default_base_uri(node))
         context = {
-            'mgmt_addr': self.get_node().mgmt_net.addr,
+            'base_uri': base_uri,
             'object_id': self.object_id
         }
         return URI % context

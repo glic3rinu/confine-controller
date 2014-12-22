@@ -81,33 +81,52 @@ display_data.short_description = 'data'
 
 
 def display_current(instance):
+    state = instance.current
+    style = 'color:%s;' % STATES_COLORS.get(state, "black")
+    flapping = ''
+    unverified = ''
+    
+    # Include error messages (if any) as tooltip
     try:
-        # Include error messages (if any) as tooltip
         errors = json.loads(instance.data).get('errors', [])
     except ValueError:
-        title = ''
+        error_msg = ''
     else:
-        title = '\n'.join([error.get('message', '') for error in errors])
-        title = escape(title).replace('\n', '&#10;')
-    state = instance.current
-    color = STATES_COLORS.get(state, "black")
+        error_msg = '\n'.join([error.get('message', '') for error in errors])
+        error_msg = escape(error_msg).replace('\n', '&#10;')
+    
+    # check if the current state match with the defined ones
     try:
-        # check if the current state match with the defined ones
         state = filter(lambda s: s[0] == instance.current, State.STATES)[0][1]
     except IndexError:
         # This situation can happen on State renames like on #385 and no data
-        # migration is applied to existing objects (we add a note but keep the
-        # app working because is not a big issue)
-        title = 'Invalid or legacy state'
-    start = timezone.now()-datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
+        # migration is applied to existing objects (ignore, not a big issue)
+        state += '?'
+    
+    # check if state is flapping
+    start = timezone.now() - datetime.timedelta(minutes=STATE_FLAPPING_MINUTES)
     changes = instance.history.filter(start__gt=start).count()
     if changes >= STATE_FLAPPING_CHANGES:
         context = (changes, STATE_FLAPPING_MINUTES)
-        title += 'This state is flapping (%i/%imin)' % context
+        flapping = 'This state is flapping (%i/%imin)' % context
         state += '*'
-    else:
+    
+    # warn about failed verification of SSL certificate
+    if (not instance.ssl_verified and
+        instance.value not in [State.OFFLINE, State.NODATA, State.UNKNOWN]):
+        style += 'text-decoration:line-through;'
+        unverified = '(verification failed)'
+    
+    if not unverified and not flapping:
         state = '<b>%s</b>' % state
-    return '<span style="color:%s;" title="%s">%s</span>' % (color, title, state)
+    
+    context = {
+        'flapping': flapping,
+        'unverified': unverified,
+        'error_msg': error_msg,
+    }
+    title = "%(flapping)s %(unverified)s\n%(error_msg)s" % context
+    return '<span style="%s" title="%s">%s</span>' % (style, title, state)
 
 
 class StateHistoryAdmin(PermissionModelAdmin):
@@ -206,8 +225,8 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     ordering = ('content_type', 'object_id')
     fieldsets = (
         (None, {
-            'fields': ('url_link', 'last_seen', 'last_contact',
-                       'last_try', 'next_retry', 'last_change', 'current')
+            'fields': ('url_link', 'last_seen', 'last_contact', 'last_try',
+                       'next_retry', 'last_change', 'current', 'ssl_verified')
         }),
         ('Details', {
             'fields': (display_metadata, display_data)
@@ -215,7 +234,7 @@ class StateAdmin(ChangeViewActions, PermissionModelAdmin):
     )
     readonly_fields = [
         'url_link', 'last_seen', 'last_try', 'next_retry', 'current', 'last_change',
-        display_metadata, display_data, 'last_contact'
+        display_metadata, display_data, 'last_contact', 'ssl_verified'
     ]
     change_view_actions = [refresh]
     change_form_template = 'admin/state/state/change_form.html'

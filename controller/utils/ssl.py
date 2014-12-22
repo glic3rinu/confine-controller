@@ -1,4 +1,27 @@
+from __future__ import absolute_import
+
 import base64
+
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.poolmanager import PoolManager
+
+
+class SSLAdapter(HTTPAdapter):
+    """
+    An HTTPS Transport Adapter that uses an arbitrary SSL version.
+    
+    Thanks to Cory (Lukasa)
+    https://lukasa.co.uk/2013/01/Choosing_SSL_Version_In_Requests/
+    """
+    def __init__(self, ssl_version=None, **kwargs):
+        self.ssl_version = ssl_version
+        super(SSLAdapter, self).__init__(**kwargs)
+
+    def init_poolmanager(self, connections, maxsize, block=False):
+        self.poolmanager = PoolManager(num_pools=connections,
+                                       maxsize=maxsize,
+                                       block=block,
+                                       ssl_version=self.ssl_version)
 
 
 def _der_length(length):
@@ -18,8 +41,8 @@ def pkcs_to_x501(pubkey):
     """ 
     Converts an RSA public key in PKCS#1 to X.501
     
-    Tanks to Piet van Oostrum
-       https://groups.google.com/d/msg/comp.lang.python/1IP2p00diiY/htGAsHHFDTkJ
+    Thanks to Piet van Oostrum
+    https://groups.google.com/d/msg/comp.lang.python/1IP2p00diiY/htGAsHHFDTkJ
     """
     pubkey = pubkey.strip()
     pk = pubkey.splitlines()

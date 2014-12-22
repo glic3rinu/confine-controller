@@ -1,10 +1,17 @@
 import datetime
-from collections import OrderedDict
-from dateutil.relativedelta import relativedelta
+import json
+import requests
+import ssl
 
+from collections import OrderedDict
+from contextlib import closing
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
+from controller.utils.ssl import SSLAdapter
+
 from nodes.models import Node
+from pki import ca
 from slices.models import Slice, Sliver
 from users.models import Group
 
@@ -25,6 +32,50 @@ def break_lines(text, every=150):
             line = line.replace('\\n', '\n' + ' '*distance)
         result.append(line)
     return '\n'.join(result)
+
+
+def fetch_state(obj):
+    """
+    Fetch object state via Node API.
+
+    Node API certificate will be verified against controller CA
+    (if any), although verification fails, state will be retrieved
+    but marked as not trusted.
+    """
+    # Use HTTP Etag to allow 304 Not Modified to be returned
+    try:
+        etag = json.loads(obj.state.metadata)['headers']['etag']
+    except (ValueError, KeyError):
+        headers = {}
+    else:
+        headers = {'If-None-Match': etag}
+    
+    # CNS only supports TLSv1 but requests use whatever
+    # version is default in the underlying library so we
+    # need to use a HttpAdater to ensure compatibility
+    session = requests.Session()
+    session.mount('https://', SSLAdapter(ssl_version=ssl.PROTOCOL_TLSv1))
+    session.verify = ca.cert_path
+    try:
+        obj_state_url = obj.state.get_url()
+        response = session.get(obj_state_url, headers=headers)
+        response.headers['ssl_verified'] = obj_state_url.startswith('https')
+    except requests.exceptions.SSLError:
+        session.verify = False
+        ## Parse response because cames from an untrusted node ##
+        with closing(session.get(obj.state.get_url(), headers=headers, stream=True)) as response:
+            response.headers['ssl_verified'] = False
+            # Limit response size
+            if response.headers.get('content-length') is None:
+                raise RuntimeError('Unknown content-length.')
+            if int(response.headers['content-length']) > 32768: # 32 KiB
+                raise RuntimeError('Node response is too long (max content-length exceded).')
+            # Handle malformed or not JSON response
+            try:
+                response.json()
+            except ValueError:
+                raise RuntimeError('Malformed JSON in node response.')
+    return response
 
 
 def get_changes_data(state):

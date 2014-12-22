@@ -5,6 +5,7 @@ from controller.core.validators import validate_cert
 from api import serializers
 from nodes.models import Server, ServerApi
 from nodes.settings import NODES_NODE_ARCHS
+from tinc.models import TincHost
 
 from .exceptions import BaseImageNotAvailable
 from .models import BaseImage, Build, Config
@@ -81,8 +82,13 @@ class FirmwareSerializer(serializers.ModelSerializer):
 class NodeFirmwareConfigSerializer(serializers.Serializer):
     base_image_id = serializers.IntegerField(required=False)
     registry_base_uri = serializers.URLField(required=False)
-    registry_cert = serializers.CharField(required=False,
-                                          validators=[validate_cert])
+    registry_cert = serializers.CharField(
+        required=False, validators=[validate_cert]
+    )
+    tinc_default_gateway = serializers.ChoiceField(
+        required=False,
+        choices=TincHost.objects.servers().values_list('name', 'name')
+    )
     
     def __init__(self, node, *args, **kwargs):
         super(NodeFirmwareConfigSerializer, self).__init__(*args, **kwargs)
@@ -149,4 +155,12 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
         if base_uri.startswith('https://') and not cert:
             raise serializers.ValidationError("Certificate is required for HTTPS.")
         
+        # serializer is valid - apply changes
+        # FIXME(santiago): changes are applied even if fails plugins validation.
+        # http://tomchristie.github.io/rest-framework-2-docs/api-guide/serializers#saving-object-state
+        gw_name = attrs.get('tinc_default_gateway', None)
+        if gw_name:
+            default_gateway = TincHost.objects.get(name=gw_name)
+            self.node.tinc.default_connect_to = default_gateway
+            self.node.tinc.save()
         return attrs

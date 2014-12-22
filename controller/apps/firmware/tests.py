@@ -216,6 +216,25 @@ class NodeFirmwareConfigTests(TestCase):
         serializer = NodeFirmwareConfigSerializer(self.node, data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
     
+    def test_valid_tinc_default_gateway(self):
+        gateway = Server.objects.first().tinc
+        data = {"tinc_default_gateway": gateway.name}
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertEqual(self.node.tinc.default_connect_to, gateway)
+    
+    def test_invalid_tinc_default_gateway_does_not_exist(self):
+        data = {"tinc_default_gateway": "invalid_gateway"}
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
+    def test_invalid_tinc_default_gateway_no_addresses(self):
+        gateway = self.node.tinc
+        self.assertFalse(gateway.addresses.exists())
+        data = {"tinc_default_gateway": gateway.name}
+        serializer = NodeFirmwareConfigSerializer(self.node, data=data)
+        self.assertFalse(serializer.is_valid())
+    
     def test_invalid_https_without_cert(self):
         data = {
             "base_image_id": self.base_image.pk,

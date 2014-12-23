@@ -113,6 +113,7 @@ class Monitor(object):
 class BasicNetMonitor(Monitor):
     type = 'basicnet'
     verbose_name = 'Network IO (%(iface)s)'
+    graph = 'basicnet'
     relativity_fields = ['RX', 'TX']
     cmd = (
        'grep %(iface)s /proc/net/dev | sed "s/^\s*//" | awk -F "[ :]*" {\'print "{'

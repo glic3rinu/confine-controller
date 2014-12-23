@@ -46,7 +46,18 @@ class Monitor(object):
     
     def execute(self):
         env = "export LINES=1000; export COLUMNS=1000; "
-        return json.loads(run(env + self.cmd).stdout), []
+        result = {}
+        problems = []
+        try:
+            result = json.loads(run(env + self.cmd).stdout)
+        except ValueError as error:
+            msg = "Error on monitor '%s': %s ('%s')" % (self.type, error, self.cmd)
+            problems.append(msg)
+            # TODO(santiago) configure logging and log this error
+            #import logging
+            #logger = logging.getLogger('ERROR')
+            #logger.error(msg)
+        return result, problems
     
     def store(self, value):
         TimeSerie.objects.create(name=self.name, value=value)

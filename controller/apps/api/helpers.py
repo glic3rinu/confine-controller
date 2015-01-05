@@ -31,6 +31,10 @@ def get_registry_urls(registry):
             url(r'^%s/$' % name_plural,
                 list_view.as_view(),
                 name=name if is_singleton(model) else '%s-list' % name),
+            url(r'^%s/(?P<pk>[0-9]+)/$' % name_plural,
+                detail_view.as_view(),
+                name="%s-detail" % name),
+            # backwards compatibility #617 (without final slash)
             url(r'^%s/(?P<pk>[0-9]+)$' % name_plural,
                 detail_view.as_view(),
                 name="%s-detail" % name),

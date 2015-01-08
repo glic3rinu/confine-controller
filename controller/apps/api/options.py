@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import warnings
+
 from django.conf import settings
 from django.conf.urls import patterns, url
 from django.utils.importlib import import_module
@@ -100,8 +102,8 @@ class RestApi(object):
             for serializer in model_serializers:
                 serializer.base_fields.update({name: field(**kwargs)})
         else:
-            import warnings
-            warnings.warn("Model %s not registered, so api.aggregate do nothing." % model)
+            warnings.warn("Model %s not registered, so api.aggregate does "
+                          " nothing." % model)
 
 
 

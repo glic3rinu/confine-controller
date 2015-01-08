@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from functools import update_wrapper
+import warnings
 
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from django.utils.html import escape
 from django.utils.importlib import import_module
 from django.utils.safestring import mark_safe
+from functools import update_wrapper
 
 from controller.models.utils import get_field_value
 from controller.utils.time import timesince, timeuntil
@@ -50,7 +51,12 @@ def insert_change_view_action(model, action):
     """ inserts action to modeladmin.change_view_actions """
     is_model = models.Model in model.__mro__
     modeladmin = get_modeladmin(model) if is_model else model
-    modeladmin.set_change_view_action(action)
+    # prevent AttributeError on premature calls
+    if modeladmin is None:
+        warnings.warn("Unregistered Model %s, insert_change_view_action does "
+                      "nothing." % model)
+    else:
+        modeladmin.set_change_view_action(action)
 
 
 def link(attribute, description='', admin_order_field=True, base_url=''):

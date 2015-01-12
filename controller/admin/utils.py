@@ -28,10 +28,6 @@ def get_modeladmin(model, run_import_module=True):
 def insertattr(model, name, value, weight=0):
     is_model = models.Model in model.__mro__
     modeladmin = get_modeladmin(model) if is_model else model
-    # prevent AttributeError on premature calls
-    if modeladmin is None:
-        warnings.warn("Unregistered Model %s, insertattr does nothing." % model)
-        return
     # Avoid inlines defined on parent class be shared between subclasses
     # Seems that if we use tuples they are lost in some conditions like changing
     # the tuple in modeladmin.__init__
@@ -59,7 +55,8 @@ def insert_change_view_action(model, action):
     if modeladmin is None:
         warnings.warn("Unregistered Model %s, insert_change_view_action does "
                       "nothing." % model)
-        return
+    else:
+        modeladmin.set_change_view_action(action)
 
 
 def link(attribute, description='', admin_order_field=True, base_url=''):

@@ -3,6 +3,8 @@ Tests for slices app using the unittest module.
 These will pass when you run "manage.py test".
 """
 
+import json
+
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.test import TestCase
@@ -202,3 +204,32 @@ class SliverIfacesTests(TestCase):
         slice = self.slice_vlan
         pub6 = Pub6Iface()
         self.assertFalse(pub6.is_allowed(slice, nodes))
+
+
+class SliverTests(TestCase):
+    fixtures = ['groups', 'nodes', 'slices', 'slivers', 'templates']
+    
+    def test_f450_sliver_without_mgmt_iface(self):
+        sliver = Sliver.objects.get(pk=1)
+        self.assertFalse(sliver.interfaces.filter(type='management').exists())
+        
+        sliver_url = reverse('sliver-detail', args=(sliver.pk,))
+        response = self.client.get(sliver_url)
+        self.assertEqual(response.status_code, 200)
+        
+        sliverjs = json.loads(response.content)
+        self.assertIsNone(sliverjs['mgmt_net'])
+    
+    def test_f450_sliver_with_mgmt_iface(self):
+        sliver = Sliver.objects.get(pk=2)
+        mgmt_iface = sliver.interfaces.filter(type='management').first()
+        self.assertIsNotNone(mgmt_iface)
+        
+        sliver_url = reverse('sliver-detail', args=(sliver.pk,))
+        response = self.client.get(sliver_url)
+        self.assertEqual(response.status_code, 200)
+        
+        sliverjs = json.loads(response.content)
+        self.assertIsNotNone(sliverjs['mgmt_net'])
+        self.assertEqual(sliverjs['mgmt_net']['addr'], str(mgmt_iface.ipv6_addr))
+        self.assertEqual(sliverjs['mgmt_net']['backend'], 'native')

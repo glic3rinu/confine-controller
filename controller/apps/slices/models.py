@@ -472,12 +472,18 @@ class Sliver(models.Model):
     
     @property
     def mgmt_net(self):
+        """
+        Only available if the sliver has interfaces of type management,
+        in which case the management address is that of the first
+        management interface, with "native" as a backend. Otherwise
+        the whole member is null.
+        """
         if self.mgmt_iface is None:
             return None
-        # FIXME when #157 is merged, replace with a MgmtNetConf instance
-        #       and also use its readonly serializer
         return {
-            "backend":"native",
+            "backend": "native",
+            "addr": self.mgmt_iface.ipv6_addr,
+            # keep for backwards compatibility (see #450 note 15)
             "address": self.mgmt_iface.ipv6_addr
         }
 

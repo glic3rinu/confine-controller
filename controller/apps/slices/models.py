@@ -339,11 +339,13 @@ class SliverDefaults(models.Model):
                                      settings.SLICES_SLICE_DATA_NAME,),
             help_text='File containing experiment data for slivers (if they do not '
                       'explicitly indicate one)')
-    data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
+    data_uri = NullableCharField('sliver data URI', max_length=256, blank=True,
+            null=True,
             help_text='The URI of a file containing sliver data for slivers (if '
                       'they do not explicitly indicate one). Its format and contents '
                       'depend on the type of the template to be used.')
-    data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,
+    data_sha256 = NullableCharField('sliver data SHA256', max_length=64,
+            blank=True, null=True,
             help_text='The SHA256 hash of the data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])
@@ -399,11 +401,13 @@ class Sliver(models.Model):
             upload_to=make_upload_to('data', settings.SLICES_SLIVER_DATA_DIR,
                                      settings.SLICES_SLIVER_DATA_NAME),
             help_text='File containing data for this sliver.')
-    data_uri = models.CharField('sliver data URI', max_length=256, blank=True,
+    data_uri = NullableCharField('sliver data URI', max_length=256, blank=True,
+            null=True,
             help_text='If present, the URI of a file containing data for '
                       'this sliver, instead of the one specified by the slice. Its '
                       'format and contents depend on the type of the template to be used.')
-    data_sha256 = models.CharField('sliver data SHA256', max_length=64, blank=True,
+    data_sha256 = NullableCharField('sliver data SHA256', max_length=64,
+            blank=True, null=True,
             help_text='The SHA256 hash of the sliver data file, used to check its integrity. '
                       'Compulsory when a file has been specified.',
             validators=[validate_sha256])

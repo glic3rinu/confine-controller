@@ -20,7 +20,23 @@ from .models import Slice, Sliver
 
 
 class SliceTests(TestCase):
-    fixtures = ['groups']
+    fixtures = ['groups', 'nodes', 'slices', 'slivers', 'templates']
+    
+    def test_bug623_data_fields_as_null(self):
+        slice = Slice.objects.get(pk=3)
+        self.assertIsNone(slice.sliver_defaults.data_uri)
+        self.assertIsNone(slice.sliver_defaults.data_sha256)
+        
+        slice_url = reverse('slice-detail', args=(slice.pk,))
+        response = self.client.get(slice_url)
+        self.assertEqual(response.status_code, 200)
+        try:
+            slicejs = json.loads(response.content)
+        except (TypeError, ValueError) as e:
+            self.fail("Invalid response format: %s" % e)
+        
+        self.assertIsNone(slicejs['sliver_defaults']['data_uri'])
+        self.assertIsNone(slicejs['sliver_defaults']['data_sha256'])
     
     def test_get_vlan_tag(self):
         # create slices with isolated_vlan_tag to use all vlan tags
@@ -35,7 +51,7 @@ class SliceTests(TestCase):
         self.assertRaises(VlanAllocationError, Slice._get_vlan_tag)
         
         # remove an object to release one address
-        Slice.objects.first().delete()
+        Slice.objects.filter(isolated_vlan_tag__isnull=False).first().delete()
         new_tag = Slice._get_vlan_tag()
         self.assertTrue(Slice.MIN_VLAN_TAG <= new_tag)
         self.assertTrue(Slice.MAX_VLAN_TAG >= new_tag)
@@ -233,3 +249,16 @@ class SliverTests(TestCase):
         self.assertIsNotNone(sliverjs['mgmt_net'])
         self.assertEqual(sliverjs['mgmt_net']['addr'], str(mgmt_iface.ipv6_addr))
         self.assertEqual(sliverjs['mgmt_net']['backend'], 'native')
+
+    def test_bug623_data_fields_as_null(self):
+        sliver = Sliver.objects.get(pk=1)
+        self.assertIsNone(sliver.data_uri)
+        self.assertIsNone(sliver.data_sha256)
+        
+        sliver_url = reverse('sliver-detail', args=(sliver.pk,))
+        response = self.client.get(sliver_url)
+        self.assertEqual(response.status_code, 200)
+        
+        sliverjs = json.loads(response.content)
+        self.assertIsNone(sliverjs['data_uri'])
+        self.assertIsNone(sliverjs['data_sha256'])

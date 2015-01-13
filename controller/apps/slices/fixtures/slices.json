@@ -28,6 +28,20 @@
     }
 },
 {
+    "pk": 3,
+    "model": "slices.slice",
+    "fields": {
+        "set_state": "register",
+        "group": 1,
+        "name": "nodata-slice-example",
+        "instance_sn": 0,
+        "allow_isolated": false,
+        "isolated_vlan_tag": null,
+        "expires_on": "2015-06-14",
+        "description": "nodata-slice-example"
+    }
+},
+{
     "pk": 1,
     "model": "slices.sliverdefaults",
     "fields": {
@@ -50,6 +64,19 @@
         "data_uri": "",
         "set_state": "start",
         "data_sha256": "3c254719c4cb8e7aa13f690e638cd39f38d71ada2fb467b76ca776e6f2d73f15",
+        "template": 1
+    }
+},
+{
+    "pk": 3,
+    "model": "slices.sliverdefaults",
+    "fields": {
+        "slice": 3,
+        "instance_sn": 0,
+        "data": null,
+        "data_uri": null,
+        "set_state": "start",
+        "data_sha256": null,
         "template": 1
     }
 }

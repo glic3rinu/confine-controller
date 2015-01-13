@@ -7,9 +7,9 @@
         "slice": 1,
         "description": "",
         "instance_sn": 0,
-        "data": "",
-        "data_sha256": "",
-        "data_uri": "",
+        "data": null,
+        "data_sha256": null,
+        "data_uri": null,
         "set_state": null,
         "template": null
     }
@@ -22,9 +22,9 @@
         "slice": 1,
         "description": "",
         "instance_sn": 4,
-        "data": "",
-        "data_sha256": "",
-        "data_uri": "",
+        "data": null,
+        "data_sha256": null,
+        "data_uri": null,
         "set_state": null,
         "template": null
     }

@@ -85,8 +85,8 @@ class PingAdmin(PermissionModelAdmin):
         """ Filter changelist by object """
         from django.contrib.admin.views.main import ChangeList
         class ObjectChangeList(ChangeList):
-            def get_query_set(self, *args, **kwargs):
-                qs = super(ObjectChangeList, self).get_query_set(*args, **kwargs)
+            def get_queryset(self, *args, **kwargs):
+                qs = super(ObjectChangeList, self).get_queryset(*args, **kwargs)
                 if hasattr(request, 'ping_list_args'):
                     content_type, object_id = request.ping_list_args
                     return qs.filter(content_type=content_type, object_id=object_id)

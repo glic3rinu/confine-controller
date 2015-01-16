@@ -13,6 +13,8 @@ from .widgets import IfacesSelect
 class SliverDefaultsInlineForm(forms.ModelForm):
     class Meta:
         model = SliverDefaults
+        fields = ('template', 'set_state', 'data', 'data_uri', 'data_sha256',
+                  'instance_sn')
     
     def clean(self):
         """Clean _uri when uploading a file"""

@@ -15,7 +15,7 @@ class AddOrChangeInlineForm(admin.options.InlineModelAdmin):
     """
     def get_formset(self, request, obj=None, **kwargs):
         # Determine if we need to use add_form or change_form
-        field_name = self.model._meta.module_name
+        field_name = self.model._meta.model_name
         try:
             getattr(obj, field_name)
         except (self.model.DoesNotExist, AttributeError):
@@ -60,7 +60,7 @@ class ChangeViewActions(admin.options.ModelAdmin):
             new_urls += patterns("",
                 url(pattern % action.url_name,
                     admin_site.admin_view(action),
-                    name='%s_%s_%s' % (opts.app_label, opts.module_name, action.url_name)))
+                    name='%s_%s_%s' % (opts.app_label, opts.model_name, action.url_name)))
         return new_urls + urls
     
     def _prepare_change_view_action(self, action):

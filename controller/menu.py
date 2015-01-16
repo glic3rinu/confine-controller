@@ -15,11 +15,11 @@ def api_link(context):
     if 'object_id' in context: 
         object_id = context['object_id']
         try:
-            return reverse('%s-detail' % opts.module_name, args=[object_id])
+            return reverse('%s-detail' % opts.model_name, args=[object_id])
         except:
             return reverse('base')
     try:
-        return reverse('%s-list' % opts.module_name)
+        return reverse('%s-list' % opts.model_name)
     except:
         return reverse('base')
 

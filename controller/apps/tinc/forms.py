@@ -25,6 +25,7 @@ class TincHostInlineForm(forms.ModelForm):
     
     class Meta:
         model = TincHost
+        fields = ('pubkey',)
     
     def clean_default_connect_to(self):
         default_connect_to = self.cleaned_data['default_connect_to']

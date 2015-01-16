@@ -77,6 +77,7 @@ class TicketForm(forms.ModelForm):
     
     class Meta:
         model = Ticket
+        exclude = ('last_modified_on', 'cc',)
     
     def __init__(self, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)

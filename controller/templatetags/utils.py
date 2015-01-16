@@ -41,7 +41,7 @@ def rest_to_admin_url(context):
     url = 'admin:index'
     args = []
     if model:
-        url = 'admin:%s_%s' % (model._meta.app_label, model._meta.module_name)
+        url = 'admin:%s_%s' % (model._meta.app_label, model._meta.model_name)
         pk = view.kwargs.get(view.pk_url_kwarg)
         if pk:
             url += '_change'

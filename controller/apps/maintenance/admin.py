@@ -45,7 +45,7 @@ def num_instances(execution):
         done = done.exclude(state=Instance.TIMEOUT)
     done = done.count()
     url = reverse('admin:maintenance_instance_changelist')
-    url += '?%s=%s' % (execution._meta.module_name, execution.pk)
+    url += '?%s=%s' % (execution._meta.model_name, execution.pk)
     return mark_safe('<b><a href="%s">%d out of %d</a></b>' % (url, done, total))
 num_instances.short_description = 'Instances'
 
@@ -178,7 +178,7 @@ class OperationAdmin(PermissionModelAdmin, ChangeViewActions):
     def num_executions(self, instance):
         num = instance.executions.count()
         url = reverse('admin:maintenance_execution_changelist')
-        url += '?%s=%s' % (instance._meta.module_name, instance.pk)
+        url += '?%s=%s' % (instance._meta.model_name, instance.pk)
         return mark_safe('<a href="%s">%d</a>' % (url, num))
     num_executions.short_description = 'Executions'
     
@@ -261,9 +261,9 @@ class ExecutionAdmin(ChangeViewActions):
         """ Avoid add execution directly, must be added via an operation """
         return False
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         related = ('operation',)
-        return super(ExecutionAdmin, self).queryset(request).select_related(*related)
+        return super(ExecutionAdmin, self).get_queryset(request).select_related(*related)
 
 
 class InstanceAdmin(ChangeViewActions):
@@ -345,9 +345,9 @@ class InstanceAdmin(ChangeViewActions):
         context.update(extra_context or {})
         return super(InstanceAdmin, self).changelist_view(request, extra_context=context)
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         related = ('execution', 'node')
-        return super(InstanceAdmin, self).queryset(request).select_related(*related)
+        return super(InstanceAdmin, self).get_queryset(request).select_related(*related)
 
 
 admin.site.register(Operation, OperationAdmin)

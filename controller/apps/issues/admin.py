@@ -79,9 +79,9 @@ class MessageInline(PermissionTabularInline):
         self.form.user = request.user
         return super(MessageInline, self).get_formset(request, obj, **kwargs)
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """ Don't show any message """
-        qs = super(MessageInline, self).queryset(request)
+        qs = super(MessageInline, self).get_queryset(request)
         return qs.none()
 
 
@@ -267,10 +267,10 @@ class TicketAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         return display_timesince(instance.last_modified_on)
     last_modified.admin_order_field = 'last_modified_on'
     
-    def queryset(self, request):
+    def get_queryset(self, request):
         """ Filter tickets according to their visibility preference """
         related = ('created_by', 'group', 'queue')
-        qs = super(TicketAdmin, self).queryset(request).select_related(*related)
+        qs = super(TicketAdmin, self).get_queryset(request).select_related(*related)
         return qs.visible_by(request.user)
     
     def get_fieldsets(self, request, obj=None):
@@ -369,8 +369,8 @@ class QueueAdmin(PermissionModelAdmin):
     num_tickets.short_description = 'Tickets'
     num_tickets.admin_order_field = 'tickets__count'
     
-    def queryset(self, request):
-        qs = super(QueueAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(QueueAdmin, self).get_queryset(request)
         qs = qs.annotate(models.Count('tickets'))
         return qs
 

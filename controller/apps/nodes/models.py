@@ -389,7 +389,7 @@ class ServerQuerySet(models.query.QuerySet):
 
 
 class ServerManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return ServerQuerySet(self.model, using=self.db)
     
     def get_default(self):

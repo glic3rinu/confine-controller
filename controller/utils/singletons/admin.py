@@ -12,7 +12,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         return False
         
     def get_urls(self):
-        info = self.model._meta.app_label, self.model._meta.module_name
+        info = self.model._meta.app_label, self.model._meta.model_name
         urlpatterns = patterns('',
             url(r'^(?P<object_id>\d+)/history/$',
                 wrap_admin_view(self, self.history_view),

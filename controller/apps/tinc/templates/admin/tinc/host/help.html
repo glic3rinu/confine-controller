@@ -51,7 +51,7 @@ if (document.getElementById(theID).style.display == "block") {
 {% code 'bash' %}
 # tinc.conf
 Name = {{ host.tinc.name }}
-{% for gw in host.tinc.connect_to %}ConnectTo = {{ gw }}
+{% for gw in host.tinc.connect_to %}ConnectTo = {{ gw.name }}
 {% endfor %}
 # tinc-up and tinc-down
 Host address {{ host.tinc.subnet.strNormal }}/48
@@ -59,7 +59,7 @@ Host address {{ host.tinc.subnet.strNormal }}/48
 # hosts/{{ host.tinc.name }}
 Subnet = {{ host.tinc.subnet.strNormal }}/128
 
-{% for gw in host.tinc.connect_to %}# hosts/{{ gw }}
+{% for gw in host.tinc.connect_to %}# hosts/{{ gw.name }}
 {% for addr in gw.addresses.all %}Address = {{ addr }} {{ addr.port }}
 {% endfor %}Subnet = {{ gw.subnet.strNormal }}/128
 
@@ -85,7 +85,7 @@ mkdir /etc/tinc/{{ net_name }}/hosts
 
 echo '{{ host.tinc.get_host|safe }}' > /etc/tinc/{{ net_name }}/hosts/{{ host.tinc.name }}
 {% for gw in host.tinc.connect_to %}
-echo '{{ gw.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ gw }}
+echo '{{ gw.get_host }}' > /etc/tinc/{{ net_name }}/hosts/{{ gw.name }}
 {% endfor %}
 # Create scripts for setting up and down the network interface
 echo '{{ host.tinc.get_tinc_up|safe }}' > /etc/tinc/{{ net_name }}/tinc-up

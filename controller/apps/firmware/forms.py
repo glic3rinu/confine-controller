@@ -47,7 +47,8 @@ class RegistryApiModelChoiceField(forms.ModelChoiceField):
 
 class RegistryApiForm(forms.ModelForm):
     registry_api = RegistryApiModelChoiceField(required=False,
-                        help_text="Existing Registry APIs that can be choosed "
+                        label="Registry API service",
+                        help_text="Existing registry API services that can be chosen "
                                   "to fill URI and certificate automatically.")
     
     class Meta:

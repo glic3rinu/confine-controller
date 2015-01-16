@@ -60,7 +60,7 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
         
         # initialize firmware configuration
         kwargs = fw_config.data
-        base_image = BaseImage.objects.get(pk=kwargs.pop('base_image'))
+        base_image = BaseImage.objects.get(pk=kwargs.pop('base_image_id'))
         async = True
         success_status = status.HTTP_202_ACCEPTED
         

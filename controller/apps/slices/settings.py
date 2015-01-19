@@ -26,17 +26,16 @@ SLICES_TEMPLATE_IMAGE_NAME = getattr(settings, 'SLICES_TEMPLATE_IMAGE_NAME', '')
 SLICES_TEMPLATE_IMAGE_EXTENSIONS = getattr(settings, 'SLICES_TEMPLATE_IMAGE_EXTENSIONS',
         ('.tar.gz', '.tgz'))
 
-SLICES_SLICE_DATA_DIR = getattr(settings, 'SLICES_SLICE_DATA_DIR',
-        getattr(settings, 'SLICES_SLICE_EXP_DATA_DIR', 'exp_data'))
+SLICES_SLICE_DATA_DIR = getattr(settings, 'SLICES_SLICE_DATA_DIR', 'exp_data')
 
 SLICES_SLICE_DATA_NAME = getattr(settings, 'SLICES_SLICE_DATA_NAME',
-        getattr(settings, 'SLICES_SLICE_EXP_DATA_NAME', 'slice-%(pk)d-%(original)s'))
+        'slice-%(pk)d-%(original)s')
 
 SLICES_SLIVER_DATA_DIR = getattr(settings, 'SLICES_SLIVER_DATA_DIR',
-        getattr(settings, 'SLICES_SLIVER_EXP_DATA_DIR', 'exp_data'))
+        'exp_data')
 
 SLICES_SLIVER_DATA_NAME = getattr(settings, 'SLICES_SLIVER_DATA_NAME',
-        getattr(settings, 'SLICES_SLIVER_EXP_DATA_NAME', 'sliver-%(pk)d-%(original)s'))
+        'sliver-%(pk)d-%(original)s')
 
 
 # 30 days expiration interval
@@ -46,15 +45,6 @@ SLICES_SLICE_EXP_WARN = getattr(settings, 'SLICES_SLICE_EXP_WARN', timedelta(day
 
 # List of disabled sliver ifaces. i.e. ['management', 'public4']
 SLICES_DISABLED_SLIVER_IFACES = getattr(settings, 'SLICES_DISABLED_SLIVER_IFACES', [])
-
-# Warn user of settings rename on #234
-# TODO: *_EXP_DATA_* settings will be removed on 0.11.1 (not backwards compatibility)
-for value in ['SLICES_SLICE_EXP_DATA_DIR', 'SLICES_SLICE_EXP_DATA_NAME',
-    'SLICES_SLIVER_EXP_DATA_NAME', 'SLICES_SLIVER_EXP_DATA_DIR']:
-    if hasattr(settings, value):
-        new_value = value.replace('EXP_DATA', 'DATA')
-        warnings.warn("'%s' setting has been renamed to '%s' (see #234)." %
-            (value, new_value), DeprecationWarning)
 
 # Warn user of removed settings on #200
 # TODO: remove this warning on v0.12

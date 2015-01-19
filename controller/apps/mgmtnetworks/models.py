@@ -84,23 +84,7 @@ class MgmtNetConf(models.Model):
     def sign_cert_request(self, scr):
         """Sign a certificate request for a management network host."""
         return ca.sign_request(scr).as_pem().strip()
-    
-    ## backwards compatibility #157
-    def tinc_client(self):
-        if self.content_type.model == 'server':
-            return None
-        return self.tinc()
 
-    def tinc_server(self):
-        if self.content_type.model in ['node', 'host']:
-            return None
-        return self.tinc()
-
-    def tinc(self):
-        return getattr(self.content_object, 'tinc', None)
-
-    def native(self):
-        return None
 
 # Monkey-Patching Section
 

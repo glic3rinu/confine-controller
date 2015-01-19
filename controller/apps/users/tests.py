@@ -10,6 +10,8 @@ from django.test.utils import override_settings
 from urlparse import urlparse
 
 from controller.utils.apps import is_installed, remove_app
+from controller.tests import AuthenticatedTestCase
+
 from users.models import Group, Roles, User, ResourceRequest, JoinRequest
 from users.registration.forms import RegistrationFormUniqueEmail as RegistrationForm
 
@@ -17,50 +19,8 @@ from users.registration.forms import RegistrationFormUniqueEmail as Registration
 def url_path(url):
     return urlparse(url).path
 
-"""
-Tests:
-    1. create group
-        - without resource requests
-        - with resource requests
-    2. create requests in a group
-    3. accept request
-"""
 
-class BaseTestCase(TestCase):
-    fixtures = ['groups.json', 'users.json', 'roles.json']
-
-    class Meta:
-        abstract = True
-
-    def setUp(self):
-        """
-        By default the tests are executed as unprivileged user
-        """
-        # Update the passwords to be usable during testing 
-        # because fixture and test can have different PASSWORD_HASHERS
-        for user in User.objects.all():
-            user.set_password("%spass" % user.username)
-            user.save()
-
-        self._login()
-
-    def _login(self, superuser=False, admin=False, tech=False):
-        """ Login a user to the system """
-        self.client.logout()
-        if superuser:
-            user = 'super'
-        elif admin:
-            user = 'admin'
-        elif tech:
-            user = 'tech'
-        else:
-            user='user'
-        pwd = "%spass" % user
-        res = self.client.login(username=user, password=pwd)
-        self.assertTrue(res, "Logging in user %s, pwd %s failed." % (user, pwd))
-
-
-class GroupFormTestCase(BaseTestCase):
+class GroupFormTestCase(AuthenticatedTestCase):
     """
     Test the interaction with the group registration form
     used for requesting the registration of a new group in
@@ -220,7 +180,7 @@ class GroupFormTestCase(BaseTestCase):
         self.assertFalse(qs_req.exists())
 
 
-class GroupJoinTestCase(BaseTestCase):
+class GroupJoinTestCase(AuthenticatedTestCase):
     """ Join request (to a group) tests """
 
     def test_create_join_request(self):
@@ -307,7 +267,7 @@ class GroupJoinTestCase(BaseTestCase):
 
 
 @unittest.skipUnless(is_installed('registration'), "django-registration is required")
-class RegistrationTestCase(BaseTestCase):
+class RegistrationTestCase(AuthenticatedTestCase):
     
     @unittest.skipIf(is_installed('captcha'), "remove 'captcha' from INSTALLED_APPS for properly run this test.")
     @override_settings(USERS_REGISTRATION_MODE = 'RESTRICTED',

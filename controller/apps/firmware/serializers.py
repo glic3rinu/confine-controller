@@ -1,8 +1,13 @@
 from __future__ import absolute_import
 
-from api import serializers
-from nodes.settings import NODES_NODE_ARCHS
+from controller.core.validators import validate_cert
 
+from api import serializers
+from nodes.models import Server, ServerApi
+from nodes.settings import NODES_NODE_ARCHS
+from tinc.models import TincHost
+
+from .exceptions import BaseImageNotAvailable
 from .models import BaseImage, Build, Config
 
 
@@ -71,3 +76,91 @@ class FirmwareSerializer(serializers.ModelSerializer):
         if self.object:
             return self.object.state_description
         return ""
+
+
+
+class NodeFirmwareConfigSerializer(serializers.Serializer):
+    base_image_id = serializers.IntegerField(required=False)
+    registry_base_uri = serializers.URLField(required=False)
+    registry_cert = serializers.CharField(
+        required=False, validators=[validate_cert]
+    )
+    tinc_default_gateway = serializers.ChoiceField(
+        required=False,
+        choices=TincHost.objects.servers().values_list('name', 'name')
+    )
+    
+    def __init__(self, node, *args, **kwargs):
+        super(NodeFirmwareConfigSerializer, self).__init__(*args, **kwargs)
+        self.node = node
+    
+    def get_default_registry(self):
+        main_server = Server.objects.get_default()
+        dflt_api = main_server.api.filter(type=ServerApi.REGISTRY).first()
+        if dflt_api is None:
+            raise ServerApi.DoesNotExist("Doesn't exist default registry API.")
+        return dflt_api
+    
+    def validate_base_image_id(self, attrs, source):
+        """
+        Initialize default base image (if any).
+        Check if provided base image ID exists and has compatible
+        arch with the node.
+        
+        """
+        value = attrs.get(source, None)
+        config = Config.objects.get()
+        base_img_qs = config.get_images(self.node)
+        
+        if not value:
+            base_image = base_img_qs.order_by('-default').first()
+            if base_image is None:
+                raise serializers.ValidationError(
+                    "No base image compatible with the architecture of this "
+                    "node."
+                )
+            attrs[source] = base_image.pk
+        
+        else:
+            try:
+                base_image = base_img_qs.get(pk=value)
+            except BaseImage.DoesNotExist as e:
+                raise serializers.ValidationError(
+                    "Invalid ID - object does not exist."
+                )
+        
+        return attrs
+    
+    def validate(self, attrs):
+        """
+        Initialize registry defaults and check if certificate is
+        provided for HTTPS base URIs.
+        
+        """
+        base_uri = attrs.get('registry_base_uri', '')
+        cert = attrs.get('registry_cert', '')
+        
+        if not base_uri:
+            if cert:
+                raise serializers.ValidationError(
+                    {'registry_base_uri': ['this field is required.']}
+                )
+            
+            # initialize registry defaults
+            base_uri = self.get_default_registry().base_uri
+            cert = self.get_default_registry().cert
+            attrs['registry_base_uri'] = base_uri
+            attrs['registry_cert'] = cert
+        
+        if base_uri.startswith('https://') and not cert:
+            raise serializers.ValidationError("Certificate is required for HTTPS.")
+        
+        # serializer is valid - apply changes
+        # FIXME(santiago): changes are applied even if fails plugins validation.
+        # http://tomchristie.github.io/rest-framework-2-docs/api-guide/serializers#saving-object-state
+        gw_name = attrs.get('tinc_default_gateway', None)
+        if gw_name:
+            default_gateway = TincHost.objects.get(name=gw_name)
+            self.node.tinc.default_connect_to = default_gateway
+            self.node.tinc.save()
+        return attrs

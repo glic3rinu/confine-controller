@@ -36,14 +36,6 @@ def get_registry_urls(registry):
                 name="%s-detail" % name),
         )
     
-    # backwards compatibility rel links #236
-    from nodes.api import ServerDefaultDetail
-    urlpatterns += patterns('',
-        url(r'^server/$',
-            ServerDefaultDetail.as_view(),
-            name="server"),
-    )
-    
     return urlpatterns
 
 def build_pagination_link(request, rel, page):

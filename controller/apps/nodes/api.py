@@ -106,12 +106,6 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     renderer_classes = [ServerProfileRenderer, BrowsableAPIRenderer]
 
 
-# backwards compatibility default server #236
-class ServerDefaultDetail(ServerDetail):
-    def get_object(self, *args, **kwargs):
-        return get_object_or_404(Server, pk=2)
-
-
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;

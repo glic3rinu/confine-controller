@@ -53,16 +53,13 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
         node = get_object_or_404(Node, pk=pk)
         data = request.DATA or {}
         errors = {}
+        kwargs = {}
         
         fw_config = NodeFirmwareConfigSerializer(node, data=data)
-        if not fw_config.is_valid():
+        if fw_config.is_valid():
+            kwargs.update(fw_config.data)
+        else:
             errors.update(fw_config.errors)
-        
-        # initialize firmware configuration
-        kwargs = fw_config.data
-        base_image = BaseImage.objects.get(pk=kwargs.pop('base_image_id'))
-        async = True
-        success_status = status.HTTP_202_ACCEPTED
         
         # get plugins configuration
         config = Config.objects.get()
@@ -76,6 +73,11 @@ class Firmware(generics.RetrieveUpdateDestroyAPIView):
                     errors.update(serializer.errors)
         if errors:
             raise exceptions.ParseError(detail=errors)
+        
+        # initialize firmware configuration
+        base_image = BaseImage.objects.get(pk=kwargs.pop('base_image_id'))
+        async = True
+        success_status = status.HTTP_202_ACCEPTED
         
         # allow asynchronous requests
         if '201-created' == request.META.get('HTTP_EXPECT', None):

@@ -474,8 +474,6 @@ class Sliver(models.Model):
         return {
             "backend": "native",
             "addr": self.mgmt_iface.ipv6_addr,
-            # keep for backwards compatibility (see #450 note 15)
-            "address": self.mgmt_iface.ipv6_addr
         }
 
     @property

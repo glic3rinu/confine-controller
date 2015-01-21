@@ -63,3 +63,9 @@ class TincHostTests(TestCase):
         self.delete_all_servers()
         server = Server.objects.create(name='srv')
         self.assertIsNotNone(server.tinc)
+    
+    def test_default_gateway_initialization(self):
+        # Test that on clean installations default gateway name has
+        # been initialized (is not empty).
+        gw = get_default_gateway()
+        self.assertNotEqual(gw.name, u'')

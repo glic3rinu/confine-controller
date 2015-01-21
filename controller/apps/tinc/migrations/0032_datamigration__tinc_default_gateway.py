@@ -6,6 +6,10 @@ from django.db import models
 
 class Migration(DataMigration):
 
+    depends_on = (
+        ("nodes", "0017_auto__add_field_server_name"),
+    )
+
     def forwards(self, orm):
         "Initialize existing Node.tinc.default_connect_to."
         # Note: Don't use "from appname.models import ModelName".
@@ -15,7 +19,8 @@ class Migration(DataMigration):
         node_ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='node')
         server_ctype = orm['contenttypes.ContentType'].objects.get(app_label='nodes', model='server')
         main_server = orm['nodes.Server'].objects.order_by('id').first()
-        gw, _ = orm['tinc.TincHost'].objects.get_or_create(content_type=server_ctype, object_id=main_server.pk)
+        gw, _ = orm['tinc.TincHost'].objects.get_or_create(content_type=server_ctype,
+                    object_id=main_server.pk, defaults={'name': 'server'})
         
         orm['tinc.TincHost'].objects.filter(content_type=node_ctype).update(default_connect_to=gw)
         orm['tinc.TincHost'].objects.filter(content_type=host_ctype).update(default_connect_to=gw)

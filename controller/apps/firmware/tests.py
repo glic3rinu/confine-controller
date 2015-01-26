@@ -217,7 +217,17 @@ class NodeFirmwareConfigTests(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
     
     def test_valid_tinc_default_gateway(self):
-        gateway = Server.objects.first().tinc
+        # check if default server exists
+        dflt_server = Server.objects.first()
+        self.assertIsNotNone(dflt_server)
+        
+        # check if server's tinc configuration has been initialized
+        gateway = dflt_server.related_tinc.first()
+        self.assertIsNotNone(gateway)
+        
+        # create an address for tinc
+        gateway.addresses.create(addr='1.0.0.1')
+        
         data = {"tinc_default_gateway": gateway.name}
         serializer = NodeFirmwareConfigSerializer(self.node, data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)

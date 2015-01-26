@@ -85,10 +85,7 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
     registry_cert = serializers.CharField(
         required=False, validators=[validate_cert]
     )
-    tinc_default_gateway = serializers.ChoiceField(
-        required=False,
-        choices=TincHost.objects.servers().values_list('name', 'name')
-    )
+    tinc_default_gateway = serializers.CharField(required=False)
     
     def __init__(self, node, *args, **kwargs):
         super(NodeFirmwareConfigSerializer, self).__init__(*args, **kwargs)
@@ -100,6 +97,18 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
         if dflt_api is None:
             raise ServerApi.DoesNotExist("Doesn't exist default registry API.")
         return dflt_api
+    
+    def validate_tinc_default_gateway(self, attrs, source):
+        value = attrs.get(source, None)
+        choices = TincHost.objects.servers().values_list('name', flat=True)
+        
+        if value is not None and value not in choices:
+            raise serializers.ValidationError(
+                'Select a valid choice. "%s" is not one of the available '
+                'choices.' % value
+            )
+        
+        return attrs
     
     def validate_base_image_id(self, attrs, source):
         """

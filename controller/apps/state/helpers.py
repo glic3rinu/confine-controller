@@ -56,25 +56,30 @@ def fetch_state(obj):
     session = requests.Session()
     session.mount('https://', SSLAdapter(ssl_version=ssl.PROTOCOL_TLSv1))
     session.verify = ca.cert_path
+    obj_state_url = obj.state.get_url()
+    # set timeout to avoid waiting until connection expires
+    # TODO(santiago): replace timeout with a tuple when upgrade requests 2.4+
     try:
-        obj_state_url = obj.state.get_url()
-        response = session.get(obj_state_url, headers=headers)
+        response = session.get(obj_state_url, headers=headers, timeout=20)
         response.headers['ssl_verified'] = obj_state_url.startswith('https')
     except requests.exceptions.SSLError:
         session.verify = False
-        ## Parse response because cames from an untrusted node ##
-        with closing(session.get(obj.state.get_url(), headers=headers, stream=True)) as response:
-            response.headers['ssl_verified'] = False
-            # Limit response size
-            if response.headers.get('content-length') is None:
-                raise RuntimeError('Unknown content-length.')
-            if int(response.headers['content-length']) > 32768: # 32 KiB
-                raise RuntimeError('Node response is too long (max content-length exceded).')
-            # Handle malformed or not JSON response
-            try:
-                response.json()
-            except ValueError:
-                raise RuntimeError('Malformed JSON in node response.')
+        response = session.get(obj_state_url, headers=headers, timeout=20)
+        response.headers['ssl_verified'] = False
+        ## TODO(santiago) Parse response because cames from an untrusted node ##
+        #with closing(session.get(obj_state_url, headers=headers, stream=True, timeout=5)) as response:
+        #    response.headers['ssl_verified'] = False
+        #    # Limit response size
+        #    if response.headers.get('content-length') is None:
+        #        raise RuntimeError('Unknown content-length.')
+        #    if int(response.headers['content-length']) > 32768: # 32 KiB
+        #        raise RuntimeError('Node response is too long (max content-length exceded).')
+        #    # Handle malformed or not JSON response
+        #    # FIXME: response can be empty '', json convertion fails! (#629)
+        #    try:
+        #        response.json()
+        #    except ValueError:
+        #        raise RuntimeError('Malformed JSON in node response.')
     return response
 
 

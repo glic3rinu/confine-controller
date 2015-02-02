@@ -12,6 +12,12 @@ STATE_NODE_URI = getattr(settings, 'STATE_NODESTATE_URI',
 
 STATE_SCHEDULE = getattr(settings, 'STATE_SCHEDULE', 200)
 
+# node API request connect timeout
+STATE_FETCH_TIMEOUT_CONNECT = 10
+
+# node API request read timeout
+STATE_FETCH_TIMEOUT_READ = 20
+
 # Percentage
 STATE_EXPIRE_WINDOW = getattr(settings, 'STATE_EXPIRE_WINDOW', 350)
 

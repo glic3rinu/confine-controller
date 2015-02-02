@@ -15,7 +15,8 @@ from pki import ca
 from slices.models import Slice, Sliver
 from users.models import Group
 
-from .settings import STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME
+from .settings import (STATE_FETCH_TIMEOUT_CONNECT, STATE_FETCH_TIMEOUT_READ,
+    STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME)
 
 
 def break_headers(header):
@@ -57,14 +58,17 @@ def fetch_state(obj):
     session.mount('https://', SSLAdapter(ssl_version=ssl.PROTOCOL_TLSv1))
     session.verify = ca.cert_path
     obj_state_url = obj.state.get_url()
+    
     # set timeout to avoid waiting until connection expires
-    # TODO(santiago): replace timeout with a tuple when upgrade requests 2.4+
+    # using tuple (connect, read) timeout requires requests 2.4+
+    timeout = (STATE_FETCH_TIMEOUT_CONNECT, STATE_FETCH_TIMEOUT_READ)
+    
     try:
-        response = session.get(obj_state_url, headers=headers, timeout=20)
+        response = session.get(obj_state_url, headers=headers, timeout=timeout)
         response.headers['ssl_verified'] = obj_state_url.startswith('https')
     except requests.exceptions.SSLError:
         session.verify = False
-        response = session.get(obj_state_url, headers=headers, timeout=20)
+        response = session.get(obj_state_url, headers=headers, timeout=timeout)
         response.headers['ssl_verified'] = False
         ## TODO(santiago) Parse response because cames from an untrusted node ##
         #with closing(session.get(obj_state_url, headers=headers, stream=True, timeout=5)) as response:

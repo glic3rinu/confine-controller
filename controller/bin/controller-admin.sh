@@ -133,28 +133,32 @@ function install_requirements () {
     
     PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
     
-    DEVELOPMENT_PIP="Django==1.6.5 \
+    #TODO(santiago): django-jsonfield 1.0 breaks backwards compatibility
+    #                https://github.com/bradjasper/django-jsonfield/issues/57
+    #TODO(santiago): Markdown 2.5 has some backwards incompatible changes
+    #                https://pythonhosted.org/Markdown/release-2.5.html
+    DEVELOPMENT_PIP="Django==1.6.10 \
                      django-celery-email==1.0.4 \
-                     django-fluent-dashboard==0.3.6 \
-                     South==0.8.4 \
+                     django-fluent-dashboard==0.4 \
+                     South==1.0.2 \
                      IPy==0.81 \
-                     django-extensions==1.3.3 \
+                     django-extensions==1.4.9 \
                      django-transaction-signals==1.0.0 \
                      django-celery==3.0.23 \
                      celery==3.0.24 \
                      kombu==2.5.15 \
-                     jsonfield==0.9.20 \
+                     jsonfield==0.9.23 \
                      Markdown==2.4 \
-                     django-filter==0.7 \
-                     django-admin-tools==0.5.1 \
-                     djangorestframework==2.3.13 \
-                     paramiko==1.13.0 \
-                     Pygments==1.6 \
+                     django-filter==0.9.2 \
+                     django-admin-tools==0.5.2 \
+                     djangorestframework==2.3.14 \
+                     paramiko==1.15.2 \
+                     Pygments==2.0.1 \
                      pyflakes==0.8.1 \
-                     requests==2.2.1 \
-                     greenlet==0.4.2 \
-                     gevent==1.0"
-    PRODUCTION_PIP="django-simple-captcha==0.4.2 \
+                     requests==2.5.1 \
+                     greenlet==0.4.5 \
+                     gevent==1.0.1"
+    PRODUCTION_PIP="django-simple-captcha==0.4.4 \
                     django-registration==1.0 \
                     django-google-maps==0.2.3"
     

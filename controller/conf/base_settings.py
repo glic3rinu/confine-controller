@@ -289,6 +289,11 @@ LOGIN_REDIRECT_URL = '/admin/'
 USERS_REGISTRATION_MODE = 'OPEN' # [OPEN|RESTRICTED|CLOSED]
 EMAIL_REGISTRATION_APPROVE = '' # Only required if USERS_REGISTRATION_MODE = RESTRICTED
 
+# django-simple-captcha
+SOUTH_MIGRATION_MODULES = {
+    'captcha': 'captcha.south_migrations', # required with Django < 1.7 and South
+}
+
 # rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (

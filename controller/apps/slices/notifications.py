@@ -28,7 +28,7 @@ class SliceExpiration(Notification):
         return obj.expires_on <= threshold
     
     def get_recipients(self, obj):
-        return obj.group.get_emails(roles=[Roles.GROUP_ADMIN, Roles.SLICE_ADMIN])
+        return obj.group.get_emails(roles=[Roles.SLICE_ADMIN])
     
     def get_context(self, obj):
         context = super(SliceExpiration, self).get_context(obj)

@@ -51,7 +51,7 @@ class NodeNotAvailable(Notification):
         return False
     
     def get_recipients(self, obj):
-        return obj.get_emails(roles=[Roles.GROUP_ADMIN, Roles.NODE_ADMIN])
+        return obj.get_emails(roles=[Roles.NODE_ADMIN])
     
     def get_context(self, obj):
         context = super(NodeNotAvailable, self).get_context(obj)
@@ -94,7 +94,7 @@ class NodeSafeState(Notification):
         return offline and threshold
 
     def get_recipients(self, obj):
-        return obj.group.get_emails(roles=[Roles.GROUP_ADMIN, Roles.NODE_ADMIN])
+        return obj.group.get_emails(roles=[Roles.NODE_ADMIN])
     
     def get_context(self, obj):
         context = super(NodeSafeState, self).get_context(obj)

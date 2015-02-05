@@ -189,9 +189,9 @@ DEFAULT_FILE_STORAGE = 'controller.core.storage.DoubleExtensionAwareFileSystemSt
 # The numeric mode (i.e. 0644) to set newly uploaded files to
 FILE_UPLOAD_PERMISSIONS = 0644
 
-#################################
-## 3RD PARTY APPS CONIGURATION ##
-#################################
+##################################
+## 3RD PARTY APPS CONFIGURATION ##
+##################################
 
 # Admin Tools
 ADMIN_TOOLS_MENU = 'controller.menu.CustomMenu'

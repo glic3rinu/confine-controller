@@ -725,8 +725,7 @@ class TemplateAdmin(PermissionModelAdmin):
         'name', 'description', 'type', 'node_archs_str', 'image', 'is_active'
     ]
     list_filter = ['is_active', 'type', 'node_archs']
-    #FIXME node_archs: contains rather than exact
-    search_fields = ['name', 'description', 'type', 'node_archs']
+    search_fields = ['name', 'description', 'type', '=node_archs', '^node_archs']
     fields = [
         'name', 'description', 'type', 'node_archs', 'image', 'image_sha256', 'is_active'
     ]

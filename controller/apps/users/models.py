@@ -321,8 +321,7 @@ class JoinRequest(models.Model):
         template = 'users/created_join_request.email'
         send_email_template(template=template, context=context, to=to)
     
-    # TODO rename to approbation or something better
-    def send_acceptation_email(self, site):
+    def send_approval_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_join_request.email'
         to = self.user.email
@@ -370,7 +369,7 @@ class ResourceRequest(models.Model):
         template = 'users/created_resource_request.email'
         send_email_template(template=template, context=context, to=to)
     
-    def send_acceptation_email(self, site):
+    def send_approval_email(self, site):
         context = { 'request': self, 'site': site }
         template = 'users/accepted_resource_request.email'
         to = self.group.get_emails(role=Roles.GROUP_ADMIN)

@@ -154,7 +154,7 @@ class GroupAdminForm(forms.ModelForm):
                 req = group.resource_requests.filter(resource=resource)
                 if req:
                     req.accept()
-                    req.send_acceptation_email(site=site)
+                    req.send_approval_email(site=site)
         return group
 
 
@@ -194,7 +194,7 @@ class JoinRequestForm(forms.ModelForm):
         if roles and action in ['accept', '']:
             # Accept if explicit and also when a role is selected without any action
             jrequest.accept(roles=roles)
-            jrequest.send_acceptation_email(site=site)
+            jrequest.send_approval_email(site=site)
             log = "Accepted join request of user %s with initial roles: %s." % (username, roles)
         elif action == 'reject':
             jrequest.reject()

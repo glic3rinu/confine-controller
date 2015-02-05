@@ -1,8 +1,11 @@
 from django.contrib.auth import models as auth_models
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core import validators
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
 from controller.utils import send_email_template
@@ -381,3 +384,17 @@ class ResourceRequest(models.Model):
         setattr(self.group, 'allow_%s' % self.resource, True)
         self.group.save()
         self.delete()
+
+
+# SIGNALS
+
+@receiver(pre_delete, sender=User)
+def prevent_group_without_admin_user(sender, instance, **kwargs):
+    for rol in instance.roles.filter(is_group_admin=True):
+        prevent_group_without_admin_role(sender, rol, **kwargs)
+
+
+@receiver(pre_delete, sender=Roles)
+def prevent_group_without_admin_role(sender, instance, **kwargs):
+    if not instance.group.roles.filter(is_group_admin=True).exclude(user=instance.user).exists():
+        raise PermissionDenied('The group must have at least one admin.')

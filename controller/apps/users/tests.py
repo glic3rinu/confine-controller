@@ -4,8 +4,9 @@ import unittest
 
 from django.conf import settings
 from django.core import mail
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.test.utils import override_settings
 from urlparse import urlparse
 
@@ -394,3 +395,47 @@ class RegistrationTestCase(AuthenticatedTestCase):
         url = reverse('admin:registration_registrationprofile_changelist')
         resp = self.client.get(url, {'q': 'foo'})
         self.assertEquals(resp.status_code, 200)
+
+
+class GroupAdminTests(TransactionTestCase):
+    def test_delete_last_group_admin_user(self):
+        # We shouldn't be able to delete a group admin if is the last one.
+        group = Group.objects.create(name='group')
+        user = User.objects.create_user('user', 'user@localhost', name='user')
+        Roles.objects.create(group=group, user=user, is_group_admin=True)
+        
+        self.assertRaises(PermissionDenied, user.delete)
+        self.assertTrue(group.roles.filter(is_group_admin=True).exists())
+    
+    def test_delete_last_group_admin_role(self):
+        # We shouldn't be able to delete a group admin if is the last one.
+        group = Group.objects.create(name='group')
+        user = User.objects.create_user('user', 'user@localhost', name='user')
+        rol = Roles.objects.create(group=group, user=user, is_group_admin=True)
+        
+        self.assertRaises(PermissionDenied, rol.delete)
+        self.assertTrue(group.roles.filter(is_group_admin=True).exists())
+    
+    def test_delete_a_group_admin_user(self):
+        # We should be able to delete a group admin if there is others.
+        group = Group.objects.create(name='group')
+        user = User.objects.create_user('user', 'user@localhost', name='user')
+        user2 = User.objects.create_user('user2', 'user2@localhost', name='user2')
+        Roles.objects.create(group=group, user=user, is_group_admin=True)
+        Roles.objects.create(group=group, user=user2, is_group_admin=True)
+        
+        user.delete()
+        self.assertTrue(group.roles.filter(is_group_admin=True).exists())
+        self.assertFalse(group.roles.filter(is_group_admin=True, user=user).exists())
+    
+    def test_delete_a_group_admin_role(self):
+        # We should be able to delete a group admin if there is others.
+        group = Group.objects.create(name='group')
+        user = User.objects.create_user('user', 'user@localhost', name='user')
+        user2 = User.objects.create_user('user2', 'user2@localhost', name='user2')
+        rol = Roles.objects.create(group=group, user=user, is_group_admin=True)
+        Roles.objects.create(group=group, user=user2, is_group_admin=True)
+        
+        rol.delete()
+        self.assertTrue(group.roles.filter(is_group_admin=True).exists())
+        self.assertFalse(group.roles.filter(is_group_admin=True, user=user).exists())

@@ -436,14 +436,6 @@ class Sliver(models.Model):
         super(Sliver, self).clean()
         clean_sha256(self, ('data',))
         clean_uri(self, ('data',))
-        # TODO can slivers be added to slice.set_state != Register?
-#        if self.set_state:
-#            slice = self.slice
-#            msg = 'violating sliver.set_state <= slice.set_state (register < deploy < start)'
-#            if slice.set_state == Slice.REGISTER and self.set_state != Slice.REGISTER:
-#                raise ValidationError(msg)
-#            if slice.set_state == Slice.DEPLOY and self.set_state == Slice.START:
-#                raise ValidationError(msg)
     
     def save(self, *args, **kwargs):
         if not self.pk:

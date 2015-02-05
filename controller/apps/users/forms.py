@@ -52,7 +52,6 @@ class UserChangeForm(forms.ModelForm):
 
 class GroupRolesFormSet(forms.models.BaseInlineFormSet):
     """ At least on admin per group """
-    # TODO: ensure this also when deleting a user (more triky though)
     def clean(self):
         super(GroupRolesFormSet, self).clean()
         # Only checking in change forms

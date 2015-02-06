@@ -387,14 +387,15 @@ class ResourceRequest(models.Model):
 
 
 # SIGNALS
-
-@receiver(pre_delete, sender=User)
-def prevent_group_without_admin_user(sender, instance, **kwargs):
-    for rol in instance.roles.filter(is_group_admin=True):
-        prevent_group_without_admin_role(sender, rol, **kwargs)
-
-
-@receiver(pre_delete, sender=Roles)
-def prevent_group_without_admin_role(sender, instance, **kwargs):
-    if not instance.group.roles.filter(is_group_admin=True).exclude(user=instance.user).exists():
-        raise PermissionDenied('The group must have at least one admin.')
+# FIXME(santiago): prevent groups without group admin.
+# The following code is too restrictive and disallow group deletion!
+#@receiver(pre_delete, sender=User)
+#def prevent_group_without_admin_user(sender, instance, **kwargs):
+#    for rol in instance.roles.filter(is_group_admin=True):
+#        prevent_group_without_admin_role(sender, rol, **kwargs)
+#
+#
+#@receiver(pre_delete, sender=Roles)
+#def prevent_group_without_admin_role(sender, instance, **kwargs):
+#    if not instance.group.roles.filter(is_group_admin=True).exclude(user=instance.user).exists():
+#        raise PermissionDenied('The group must have at least one admin.')

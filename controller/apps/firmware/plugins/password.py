@@ -47,7 +47,7 @@ class PasswordPlugin(FirmwarePlugin):
                     required=False,
                     help_text='Disable root authentiation using password method. '
                               'Old stored password will be removed.')
-            password1 = forms.CharField(label='Password', required=False,
+            password = forms.CharField(label='Password', required=False,
                     help_text='Enter a password to be set for the root user. ',
                     widget=forms.PasswordInput)
             password2 = forms.CharField(label='Password confirmation', required=False,
@@ -58,13 +58,13 @@ class PasswordPlugin(FirmwarePlugin):
                 super(PasswordForm, self).__init__(*args, **kwargs)
                 assert hasattr(self.node, 'keys'), "The node doesn't have keys, have you runned firmware migrations?"
                 if self.node.keys.ssh_pass:
-                    self.fields['password1'].help_text += ('<span style="color:red">'
+                    self.fields['password'].help_text += ('<span style="color:red">'
                         'If empty the previous password will be used.</span>')
             
             def clean(self):
                 cleaned_data = super(PasswordForm, self).clean()
                 disabled = cleaned_data.get("disabled")
-                new_password = cleaned_data.get("password1")
+                new_password = cleaned_data.get("password")
                 old_password = self.node.keys.ssh_pass
                 if not (disabled or new_password or old_password):
                     raise forms.ValidationError("You need to provide a root "
@@ -72,11 +72,11 @@ class PasswordPlugin(FirmwarePlugin):
                 return cleaned_data
             
             def clean_password2(self):
-                password1 = self.cleaned_data.get("password1")
+                password = self.cleaned_data.get("password")
                 password2 = self.cleaned_data.get("password2")
-                if password1 and not password2:
+                if password and not password2:
                     raise forms.ValidationError("Both fields are required")
-                if password1 and password2 and password1 != password2:
+                if password and password2 and password != password2:
                     raise forms.ValidationError("Passwords don't match")
                 return password2
         

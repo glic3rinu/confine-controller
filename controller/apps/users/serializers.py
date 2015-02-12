@@ -8,11 +8,6 @@ from .models import AuthToken, User, Group, Roles
 class GroupRolesSerializer(serializers.ModelSerializer):
     group = serializers.RelHyperlinkedRelatedField(view_name='group-detail')
     
-    # Backwards compatibilty #414
-    is_admin = serializers.Field(source='is_group_admin')
-    is_technician = serializers.Field(source='is_node_admin')
-    is_researcher = serializers.Field(source='is_slice_admin')
-    
     class Meta:
         model = Roles
         exclude = ['id', 'user']
@@ -27,11 +22,6 @@ class GroupRolesSerializer(serializers.ModelSerializer):
 
 class UserRolesSerializer(serializers.ModelSerializer):
     user = serializers.RelHyperlinkedRelatedField(view_name='user-detail')
-    
-    # Backwards compatibilty #414
-    is_admin = serializers.Field(source='is_group_admin')
-    is_technician = serializers.Field(source='is_node_admin')
-    is_researcher = serializers.Field(source='is_slice_admin')
     
     class Meta:
         model = Roles

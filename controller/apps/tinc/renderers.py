@@ -4,4 +4,4 @@ from api.renderers import ProfileJSONRenderer
 
 
 class HostProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/registry/v0/host'
+    profile = 'http://confine-project.eu/schema/registry/v1/host'

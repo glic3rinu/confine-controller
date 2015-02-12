@@ -143,7 +143,7 @@ class Update(APIView):
 class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource lists the [slices](http://wiki.confine-project.eu/arch:rest-
@@ -159,7 +159,7 @@ class SliceList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/slice"`](
+        profile="http://confine-project.eu/schema/registry/v1/slice"`](
         http://wiki.confine-project.eu/arch:rest-api#slice_at_registry)
     
     This resource describes a slice in the testbed, including its [slivers](
@@ -195,7 +195,7 @@ class SliceDetail(generics.RetrieveUpdateDestroyAPIView):
 class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource lists the [slivers](http://wiki.confine-project.eu/arch:rest-
@@ -210,7 +210,7 @@ class SliverList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/sliver"`](
+        profile="http://confine-project.eu/schema/registry/v1/sliver"`](
         http://wiki.confine-project.eu/arch:rest-api#sliver_at_registry)
     
     This resource describes a sliver in the testbed, with API URIs to navigate
@@ -229,7 +229,7 @@ class SliverDetail(generics.RetrieveUpdateDestroyAPIView):
 class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource lists the sliver [templates](http://wiki.confine-project.eu/
@@ -243,7 +243,7 @@ class TemplateList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/template"`](
+        profile="http://confine-project.eu/schema/registry/v1/template"`](
         http://wiki.confine-project.eu/arch:rest-api#template_at_registry)
     
     This resource describes a template available in the testbed for [slices](

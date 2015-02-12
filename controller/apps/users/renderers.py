@@ -4,8 +4,8 @@ from api.renderers import ProfileJSONRenderer
 
 
 class UserProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/registry/v0/user'
+    profile = 'http://confine-project.eu/schema/registry/v1/user'
 
 
 class GroupProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/registry/v0/group'
+    profile = 'http://confine-project.eu/schema/registry/v1/group'

@@ -37,7 +37,7 @@ class UploadPubkey(APIView):
 class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource lists odd [hosts](http://wiki.confine-project.eu/arch:rest-
@@ -56,7 +56,7 @@ class HostList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/host"`](
+        profile="http://confine-project.eu/schema/registry/v1/host"`](
         http://wiki.confine-project.eu/arch:rest-api#host_at_registry)
     
     This resource describes an odd host computer connected to the testbed (through

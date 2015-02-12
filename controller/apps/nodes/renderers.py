@@ -4,12 +4,12 @@ from api.renderers import ProfileJSONRenderer
 
 
 class IslandProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/registry/v0/island'
+    profile = 'http://confine-project.eu/schema/registry/v1/island'
 
 
 class NodeProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/registry/v0/node'
+    profile = 'http://confine-project.eu/schema/registry/v1/node'
 
 
 class ServerProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/registry/v0/server'
+    profile = 'http://confine-project.eu/schema/registry/v1/server'

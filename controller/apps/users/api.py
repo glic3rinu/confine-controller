@@ -63,7 +63,7 @@ class ChangeAuth(APIView):
 class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#user_at_registry)
     
     This resource lists the [users](http://wiki.confine-project.eu/arch:rest-
@@ -83,7 +83,7 @@ class UserList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/user"`](
+        profile="http://confine-project.eu/schema/registry/v1/user"`](
         http://wiki.confine-project.eu/arch:rest-api#user_at_registry)
     
     This resource describes a person using the testbed.
@@ -98,7 +98,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#group_at_registry)
     
     This resource lists the [groups](http://wiki.confine-project.eu/arch:rest-
@@ -117,7 +117,7 @@ class GroupList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class GroupDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/group"`](
+        profile="http://confine-project.eu/schema/registry/v1/group"`](
         http://wiki.confine-project.eu/arch:rest-api#group_at_registry)
     
     This resource describes a group of users using the testbed.

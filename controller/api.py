@@ -14,7 +14,7 @@ from controller.renderers import BaseProfileRenderer
 class Base(ApiRoot):
     """ 
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/base"`](
+        profile="http://confine-project.eu/schema/registry/v1/base"`](
         http://wiki.confine-project.eu/arch:rest-api#base_at_registry)
     
     This resource is located at the base URI of the registry API. It

@@ -19,15 +19,15 @@ from .settings import NODES_NODE_API_BASE_URI_DEFAULT
 
 class Reboot(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-reboot`](
-        http://confine-project.eu/rel/server/do-reboot)
+    **Relation type:** [`http://confine-project.eu/rel/registry/do-reboot`](
+        http://confine-project.eu/rel/registry/do-reboot)
     
     Endpoint containing the function URI used to reboot this node.
     
     POST data: `null`
     """
     url_name = 'reboot'
-    rel = 'http://confine-project.eu/rel/server/do-reboot'
+    rel = 'http://confine-project.eu/rel/registry/do-reboot'
     
     def post(self, request, *args, **kwargs):
         if not request.DATA:
@@ -69,15 +69,6 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = NodeSerializer
     renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     ctl = [Reboot]
-    
-    def get(self, request, *args, **kwargs):
-        """ Add node-base relation to link header """
-        response = super(NodeDetail, self).get(request, *args, **kwargs)
-        node = self.get_object()
-        url = NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': node.mgmt_net.addr}
-        rel = 'http://confine-project.eu/rel/server/node-base'
-        response['Link'] += ', <%s>; rel="%s"' % (url, rel)
-        return response
 
 
 class ServerList(ApiPermissionsMixin, generics.URIListCreateAPIView):

@@ -19,15 +19,15 @@ from .serializers import (SliceSerializer, SliceCreateSerializer,
 
 class Renew(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-renew`](
-        http://confine-project.eu/rel/server/do-renew)
+    **Relation type:** [`http://confine-project.eu/rel/registry/do-renew`](
+        http://confine-project.eu/rel/registry/do-renew)
     
     Contains the function URI used to renew this slice.
     
     POST data: `null`
     """
     url_name = 'renew'
-    rel = 'http://confine-project.eu/rel/server/do-renew'
+    rel = 'http://confine-project.eu/rel/registry/do-renew'
     
     def post(self, request, *args, **kwargs):
         if not request.DATA:
@@ -41,15 +41,15 @@ class Renew(APIView):
 
 class Reset(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-reset`](
-    http://confine-project.eu/rel/server/do-reset)
+    **Relation type:** [`http://confine-project.eu/rel/registry/do-reset`](
+    http://confine-project.eu/rel/registry/do-reset)
     
     Contains the function URI used to reset this slice.
     
     POST data: `null`
     """
     url_name = 'reset'
-    rel = 'http://confine-project.eu/rel/server/do-reset'
+    rel = 'http://confine-project.eu/rel/registry/do-reset'
     
     def post(self, request, *args, **kwargs):
         if not request.DATA:
@@ -120,15 +120,15 @@ def make_upload_file(model, field, field_url):
 
 class Update(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-update`](
-        http://confine-project.eu/rel/server/do-update)
+    **Relation type:** [`http://confine-project.eu/rel/registry/do-update`](
+        http://confine-project.eu/rel/registry/do-update)
     
     Contains the function URI used to update this sliver.
     
     POST data: `null`
     """
     url_name = 'update'
-    rel = 'http://confine-project.eu/rel/server/do-update'
+    rel = 'http://confine-project.eu/rel/registry/do-update'
     
     def post(self, request, *args, **kwargs):
         if not request.DATA:

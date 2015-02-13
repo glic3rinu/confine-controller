@@ -34,7 +34,7 @@ class ApiRoot(APIView):
             ('base', ApiRoot.REGISTRY_REL_PREFIX + 'base'),
             ('api-token-auth', ApiRoot.CONTROLLER_REL_PREFIX + 'do-get-auth-token')
         ]
-        # http://confine-project.eu/rel/server like resources
+        # http://confine-project.eu/rel/registry like resources
         for model in api._registry:
             name = model_name_urlize(model)
             name = name if is_singleton(model) else '%s-list' % name

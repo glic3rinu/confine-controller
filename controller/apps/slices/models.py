@@ -362,6 +362,9 @@ class SliverDefaults(models.Model):
     class Meta:
         verbose_name_plural = 'sliver defaults'
     
+    def __unicode__(self):
+        return "%s" % self.slice
+    
     def clean(self):
         super(SliverDefaults, self).clean()
         clean_sha256(self, ('data',))

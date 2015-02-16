@@ -21,7 +21,7 @@ from .serializers import (BaseImageSerializer, FirmwareSerializer,
 class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/controller/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/controller/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#baseimage_at_controller)
     """
     model = BaseImage
@@ -33,7 +33,7 @@ class BaseImageList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class BaseImageDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/controller/v0/baseimage"`](
+        profile="http://confine-project.eu/schema/controller/v1/baseimage"`](
         http://wiki.confine-project.eu/arch:rest-api#baseimage_at_controller)
     """
     model = BaseImage

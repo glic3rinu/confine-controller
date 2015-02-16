@@ -326,9 +326,9 @@ class ProfileTests(TestCase):
     
     def test_parse_full_profile_uri(self):
         schema = {
-            'uri': "http://confine-project.eu/schema/registry/v0/base",
+            'uri': "http://confine-project.eu/schema/registry/v1/base",
             'api': 'registry',
-            'version': 'v0',
+            'version': 'v1',
             'resource': 'base',
         }
         self.assertEqual_schema_profile(schema)
@@ -366,5 +366,5 @@ class ProfileTests(TestCase):
     
     def test_not_matching_profiles(self):
         first = "http://confine-project.eu/schema/registry/v3/node"
-        other = "http://confine-project.eu/schema/registry/v0/node"
+        other = "http://confine-project.eu/schema/registry/v1/node"
         self.assertFalse(profile_matches(first, other))

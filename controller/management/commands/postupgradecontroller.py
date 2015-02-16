@@ -124,14 +124,6 @@ class Command(BaseCommand):
                     ' Please read the monitor app doc (MONITOR_MONITORS setting)\n'
                     'AUTOUPDATE: %s' % autoupdate_status)
             if version <= 1102:
-                # Take a snapshot current gateways on API format for backwards
-                # compatibility purposes before dropping it
-                context = {
-                    'gw_url': 'http://localhost/api/gateways/',
-                    'output': os.path.join(get_project_root(), 'gateways.api.json'),
-                }
-                run('wget -nv --header="Accept: application/json" '
-                    '--no-check-certificate %(gw_url)s -O %(output)s' % context)
                 # Handle InconsistentMigrationHistory on tinc app
                 # * v0.11.2 tinc includes 0022, 0028..0030
                 # * v0.11.3 tinc adds 0023..0027

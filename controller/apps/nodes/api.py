@@ -19,15 +19,15 @@ from .settings import NODES_NODE_API_BASE_URI_DEFAULT
 
 class Reboot(APIView):
     """
-    **Relation type:** [`http://confine-project.eu/rel/server/do-reboot`](
-        http://confine-project.eu/rel/server/do-reboot)
+    **Relation type:** [`http://confine-project.eu/rel/registry/do-reboot`](
+        http://confine-project.eu/rel/registry/do-reboot)
     
     Endpoint containing the function URI used to reboot this node.
     
     POST data: `null`
     """
     url_name = 'reboot'
-    rel = 'http://confine-project.eu/rel/server/do-reboot'
+    rel = 'http://confine-project.eu/rel/registry/do-reboot'
     
     def post(self, request, *args, **kwargs):
         if not request.DATA:
@@ -42,7 +42,7 @@ class Reboot(APIView):
 class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """ 
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#node_at_registry)
     
     This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
@@ -58,7 +58,7 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/node"`](
+        profile="http://confine-project.eu/schema/registry/v1/node"`](
         http://wiki.confine-project.eu/arch:rest-api#node_at_registry)
     
     This resource describes a node in the testbed as well as listing the
@@ -69,24 +69,16 @@ class NodeDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = NodeSerializer
     renderer_classes = [NodeProfileRenderer, BrowsableAPIRenderer]
     ctl = [Reboot]
-    
-    def get(self, request, *args, **kwargs):
-        """ Add node-base relation to link header """
-        response = super(NodeDetail, self).get(request, *args, **kwargs)
-        node = self.get_object()
-        url = NODES_NODE_API_BASE_URI_DEFAULT % {'mgmt_addr': node.mgmt_net.addr}
-        rel = 'http://confine-project.eu/rel/server/node-base'
-        response['Link'] += ', <%s>; rel="%s"' % (url, rel)
-        return response
 
 
 class ServerList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
-    **Media type:** [`application/vnd.confine.server.Server.v0+json`](
-        http://wiki.confine-project.eu/arch:rest-api?&#server_at_server)
+    **Media type:** [`application/json;
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
+        http://wiki.confine-project.eu/arch:rest-api#server_at_registry)
     
-    This resource lists the [nodes](http://wiki.confine-project.eu/arch:rest-
-    api?&#server_at_server) available in the testbed and provides API URIs to
+    This resource lists the [servers](http://wiki.confine-project.eu/arch:rest-
+    api#server_at_registry) available in the testbed and provides API URIs to
     navigate to them.
     """
     model = Server
@@ -96,7 +88,7 @@ class ServerList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     """ 
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/server"`](
+        profile="http://confine-project.eu/schema/registry/v1/server"`](
         http://wiki.confine-project.eu/arch:rest-api#server_at_registry)
     
     This resource describes the testbed server (controller).
@@ -106,16 +98,10 @@ class ServerDetail(generics.RetrieveUpdateDestroyAPIView):
     renderer_classes = [ServerProfileRenderer, BrowsableAPIRenderer]
 
 
-# backwards compatibility default server #236
-class ServerDefaultDetail(ServerDetail):
-    def get_object(self, *args, **kwargs):
-        return get_object_or_404(Server, pk=2)
-
-
 class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/resource-list"`](
+        profile="http://confine-project.eu/schema/registry/v1/resource-list"`](
         http://wiki.confine-project.eu/arch:rest-api#island_at_registry)
     
     This resource lists the network [islands](http://wiki.confine-project.eu/
@@ -129,7 +115,7 @@ class IslandList(ApiPermissionsMixin, generics.URIListCreateAPIView):
 class IslandDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     **Media type:** [`application/json;
-        profile="http://confine-project.eu/schema/registry/v0/island"`](
+        profile="http://confine-project.eu/schema/registry/v1/island"`](
         http://wiki.confine-project.eu/arch:rest-api#island_at_registry)
     
     This resource describes a network island, i.e. a possibly disconnected part

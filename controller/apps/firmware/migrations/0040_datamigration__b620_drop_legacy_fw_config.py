@@ -4,36 +4,51 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        "Update firmware configuration to include registry section."
-        ### Update ConfigUCI ###
-        config = orm.Config.objects.get()
-        orm.ConfigUCI.objects.create(section='registry registry', option='base_uri',
-            value="node.firmware_build.kwargs_dict.get('registry_base_uri')", config=config)
-        orm.ConfigUCI.objects.create(section='registry registry', option='cert',
-            value="'/etc/confine/registry-server.crt'", config=config)
+        "Drop legacy firmware configuration. #245 note-25"
+        # Note: Don't use "from appname.models import ModelName". 
+        # Use orm.ModelName to refer to models in this application,
+        # and orm['appname.ModelName'] for models in other applications.
+        orm.Config.objects.update(version='0.3.2')
+        
+        # remove legacy UCI entries
+        orm.ConfigUCI.objects.filter(section='server server', option='base_path').delete()
+        orm.ConfigUCI.objects.filter(section='tinc-net confine', option='enable').delete()
+        
+        # remove legacy Config files
+        orm.ConfigFile.objects.filter(path='/etc/config/tinc').delete()
+        orm.ConfigFile.objects.filter(path='/etc/tinc/confine/tinc-down').delete()
+        orm.ConfigFile.objects.filter(path='/etc/tinc/confine/tinc-up').delete()
+        
+        # update confine Config file: don't render 'server server' section
+        cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
+        cfile.content = "self.config.render_uci(node, sections=['node node', 'registry registry', 'testbed testbed'])"
+        cfile.save()
 
-        ### Update Config file /etc/config/confine ###
+    def backwards(self, orm):
+        "Restore legacy firmware configuration."
+        orm.Config.objects.update(version='0.3.1')
+        cfg = orm.Config.objects.get()
+        
+        # restore legacy UCI entries
+        orm.ConfigUCI.objects.create(config=cfg, section='server server', option='base_path', value="'/api'")
+        orm.ConfigUCI.objects.create(config=cfg, section='tinc-net confine', option='enable', value="'1'")
+        
+        # restore legacy Config files
+        orm.ConfigFile.objects.create(config=cfg, path='/etc/config/tinc',
+            content="self.config.render_uci(node, sections=['tinc-net confine'])", is_active=False)
+        orm.ConfigFile.objects.create(config=cfg, path='/etc/tinc/confine/tinc-down',
+            content="node.tinc.get_tinc_down()", is_active=False)
+        orm.ConfigFile.objects.create(config=cfg, path='/etc/tinc/confine/tinc-up',
+            content="node.tinc.get_tinc_up()", is_active=False)
+        
+        # restore confine Config file: render 'server server' section
         cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
         cfile.content = ("self.config.render_uci(node, sections=['node node', "
                          "'registry registry', 'server server', 'testbed testbed'])")
         cfile.save()
-
-    def backwards(self, orm):
-        "Restore firmware configuration."
-        ### Restore ConfigUCI ###
-        config = orm.Config.objects.get()
-        orm.ConfigUCI.objects.filter(section='registry registry', option='base_uri', config=config).delete()
-        orm.ConfigUCI.objects.filter(section='registry registry', option='cert', config=config).delete()
-
-        ### Restore Config file /etc/config/confine ###
-        cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')
-        cfile.content = "self.config.render_uci(node, sections=['node node', 'server server', 'testbed testbed'])"
-        cfile.save()
-        
 
     models = {
         u'firmware.baseimage': {
@@ -113,9 +128,11 @@ class Migration(DataMigration):
         },
         u'firmware.nodekeys': {
             'Meta': {'object_name': 'NodeKeys'},
+            'allow_node_admins': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'node': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'keys'", 'unique': 'True', 'primary_key': 'True', 'to': u"orm['nodes.Node']"}),
             'ssh_auth': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'ssh_pass': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'})
+            'ssh_pass': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
+            'sync_node_admins': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
         u'nodes.island': {
             'Meta': {'object_name': 'Island'},

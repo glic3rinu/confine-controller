@@ -222,7 +222,7 @@ class TincAddress(models.Model):
     island = models.ForeignKey('nodes.Island', null=True, blank=True,
             on_delete=models.SET_NULL,
             help_text='<a href="http://wiki.confine-project.eu/arch:rest-api#island_'
-                      'at_server">Island</a> this tinc address is reachable from.')
+                      'at_registry">Island</a> this tinc address is reachable from.')
     host = models.ForeignKey(TincHost, related_name='addresses')
     
     class Meta:

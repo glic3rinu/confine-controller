@@ -4,4 +4,4 @@ from api.renderers import ProfileJSONRenderer
 
 
 class BaseImageProfileRenderer(ProfileJSONRenderer):
-    profile = 'http://confine-project.eu/schema/controller/v0/baseimage'
+    profile = 'http://confine-project.eu/schema/controller/v1/baseimage'

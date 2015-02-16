@@ -34,19 +34,7 @@ def get_registry_urls(registry):
             url(r'^%s/(?P<pk>[0-9]+)/$' % name_plural,
                 detail_view.as_view(),
                 name="%s-detail" % name),
-            # backwards compatibility #617 (without final slash)
-            url(r'^%s/(?P<pk>[0-9]+)$' % name_plural,
-                detail_view.as_view(),
-                name="%s-detail" % name),
         )
-    
-    # backwards compatibility rel links #236
-    from nodes.api import ServerDefaultDetail
-    urlpatterns += patterns('',
-        url(r'^server/$',
-            ServerDefaultDetail.as_view(),
-            name="server"),
-    )
     
     return urlpatterns
 

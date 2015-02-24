@@ -312,7 +312,12 @@ class Node(models.Model):
             # We pick one pseudo-random admin
             assert self.group.admins.exists()
             user = self.group.admins[0]
+        if not key:
+            # restore stored private key
+            key = self.keys.private or self.keys.tinc
+            assert key, 'A private key should be provided to generate a certificate.'
         addr = str(self.mgmt_net.addr)
+        key = str(key)
         bob = Bob(key=key)
         scr = bob.create_request(Email=user.email, CN=addr)
         signed_cert = self.mgmt_net.sign_cert_request(scr)

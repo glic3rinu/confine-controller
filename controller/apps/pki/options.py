@@ -63,7 +63,8 @@ class CA(object):
         ca_priv_evp = EVP.PKey()
         ca_priv_evp.assign_rsa(self.get_key())
         cert = X509.X509()
-        cert.set_version(3)
+        # X509 version field is 0-based
+        cert.set_version(0x2) # set to X509v3
         # Set Serial number
         serial = random.randrange(1, sys.maxint)
         cert.set_serial_number(serial)

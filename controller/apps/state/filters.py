@@ -6,7 +6,7 @@ from .settings import STATE_NODE_SOFT_VERSION_NAME
 
 
 class NodeStateListFilter(SimpleListFilter):
-    title = 'Current state'
+    title = 'current state'
     parameter_name = 'state'
     
     def lookups(self, request, model_admin):
@@ -23,7 +23,7 @@ class SliverStateListFilter(NodeStateListFilter):
 
 
 class StateContentTypeFilter(SimpleListFilter):
-    title = 'Object type'
+    title = 'object type'
     parameter_name = 'object_type'
     
     def lookups(self, request, model_admin):
@@ -35,7 +35,7 @@ class StateContentTypeFilter(SimpleListFilter):
 
 
 class FirmwareVersionListFilter(SimpleListFilter):
-    title = 'Firmware ver'
+    title = 'firmware version'
     parameter_name = 'soft_version'
     
     def lookups(self, request, model_admin):

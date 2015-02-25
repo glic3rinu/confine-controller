@@ -4,12 +4,12 @@ from django.utils.encoding import force_text
 
 class MyNodesListFilter(SimpleListFilter):
     """ Filter Nodes by group according to request.user """
-    title = 'Nodes'
+    title = 'nodes'
     parameter_name = 'my_nodes'
     
     def lookups(self, request, model_admin):
         return (
-            ('True', 'My Nodes'),
+            ('True', 'My nodes'),
             ('False', 'All'),
         )
     

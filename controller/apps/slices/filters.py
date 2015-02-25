@@ -8,12 +8,12 @@ from .models import Slice
 
 class MySlicesListFilter(MySimpleListFilter):
     """ Filter slices by group according to request.user """
-    title = 'Slices'
+    title = 'slices'
     parameter_name = 'my_slices'
     
     def lookups(self, request, model_admin):
         return (
-            ('True', 'My Slices'),
+            ('True', 'My slices'),
             ('False', 'All'),
         )
     
@@ -24,12 +24,12 @@ class MySlicesListFilter(MySimpleListFilter):
 
 class MySliversListFilter(MySimpleListFilter):
     """ Filter slices by group according to request.user """
-    title = 'Slivers'
+    title = 'slivers'
     parameter_name = 'my_slivers'
     
     def lookups(self, request, model_admin):
         return (
-            ('True', 'My Slivers'),
+            ('True', 'My slivers'),
             ('False', 'All'),
         )
     
@@ -40,7 +40,7 @@ class MySliversListFilter(MySimpleListFilter):
 
 class SliverSetStateListFilter(SimpleListFilter):
     """ Filter sliver by their set_state (it can depend on the slice state) """
-    title = 'Set State'
+    title = 'set state'
     parameter_name = 'set_state'
     
     def lookups(self, request, model_admin):

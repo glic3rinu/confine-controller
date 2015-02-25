@@ -144,7 +144,7 @@ class Node(models.Model):
             validators=[validate_name])
     description = models.TextField(blank=True,
             help_text='Free-form textual description of this host/device.')
-    arch = models.CharField('Architecture', max_length=16,
+    arch = models.CharField('architecture', max_length=16,
             choices=settings.NODES_NODE_ARCHS, default=settings.NODES_NODE_ARCH_DFLT,
             help_text='Architecture of this RD (as reported by uname -m).',)
     local_iface = models.CharField('Local interface', max_length=16, 

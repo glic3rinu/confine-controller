@@ -3,12 +3,12 @@ from django.contrib.admin import SimpleListFilter
 
 class MyGroupsListFilter(SimpleListFilter):
     """ Filter slices by group according to request.user """
-    title = 'Groups'
+    title = 'groups'
     parameter_name = 'my_groups'
     
     def lookups(self, request, model_admin):
         return (
-            ('True', 'My Groups'),
+            ('True', 'My groups'),
         )
     
     def queryset(self, request, queryset):

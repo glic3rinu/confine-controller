@@ -411,8 +411,10 @@ insertattr(Sliver, 'list_display', state_link)
 insertattr(Node, 'actions', refresh_state)
 insertattr(Sliver, 'actions', refresh_state)
 insertattr(Node, 'list_filter', NodeStateListFilter)
+insertattr(NodeListAdmin, 'list_filter', NodeStateListFilter)
 insertattr(Sliver, 'list_filter', SliverStateListFilter)
 insertattr(Node, 'list_filter', FirmwareVersionListFilter)
+
 SliverInline.sliver_state = state_link
 SliverInline.readonly_fields.append('sliver_state')
 SliverInline.fields.append('sliver_state')

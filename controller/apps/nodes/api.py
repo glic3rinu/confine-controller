@@ -1,10 +1,13 @@
 from __future__ import absolute_import
 
+from django.core import management
 from django.shortcuts import get_object_or_404
 from rest_framework import status, exceptions
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from controller.utils.apps import is_installed
 
 from api import api, generics
 from permissions.api import ApiPermissionsMixin
@@ -53,6 +56,10 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     add_serializer_class = NodeCreateSerializer
     serializer_class = NodeSerializer
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
+    
+    def post_save(self, obj, created=False):
+        if created and is_installed('resources'):
+            management.call_command('syncresources')
 
 
 class NodeDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -33,3 +33,20 @@ class MyNodesListFilter(SimpleListFilter):
                 'display': title,
             }
 
+
+class NodesPub4IfaceListFilter(SimpleListFilter):
+    """Filter nodes which have support for public IPv4 sliver interfaces."""
+    title = 'public IPv4 iface support'
+    parameter_name = 'pub4iface'
+    
+    def lookups(self, request, model_admin):
+        return (
+            ('True', 'Nodes that support public IPv4 ifaces'),
+        )
+    
+    def queryset(self, request, queryset):
+        if self.value() == 'True':
+            return queryset.filter(
+                resources__name='pub_ipv4').filter(
+                resources__max_req__gt=0
+            )

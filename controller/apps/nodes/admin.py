@@ -5,7 +5,6 @@ import json
 from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, Http404
@@ -20,7 +19,7 @@ from permissions.admin import PermissionModelAdmin, PermissionTabularInline
 from users.helpers import filter_group_queryset
 
 from .actions import request_cert, reboot_selected
-from .filters import MyNodesListFilter
+from .filters import MyNodesListFilter, NodesPub4IfaceListFilter
 from .forms import (DirectIfaceInlineFormSet, NodeApiInlineForm,
     NodeApiInlineFormset)
 from .models import (DirectIface, Island, Node, NodeApi, NodeProp, Server,
@@ -63,7 +62,8 @@ class NodeAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmin
         'num_ifaces', admin_link('island')
     ]
     list_display_links = ['name', 'id']
-    list_filter = [MyNodesListFilter, 'arch', 'set_state', 'group']
+    list_filter = [MyNodesListFilter, 'arch', 'set_state', 'group',
+                   NodesPub4IfaceListFilter]
     default_changelist_filters = (('my_nodes', 'True'),)
     search_fields = ['description', 'name', 'id']
     readonly_fields = ['boot_sn']

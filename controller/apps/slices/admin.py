@@ -456,6 +456,7 @@ class SliverInline(PermissionTabularInline):
     model = Sliver
     max_num = 0
     fields = ['sliver_link', 'node_link', computed_sliver_set_state] + SLIVER_IFACES
+    ordering = ['node__name']
     readonly_fields = [
         'sliver_link', 'node_link', computed_sliver_set_state, 'sliver_note1',
         'sliver_note2'

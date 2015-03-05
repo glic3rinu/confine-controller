@@ -92,7 +92,4 @@ class AuthKeysPlugin(FirmwarePlugin):
             'auth_keys_path': os.path.join(image.mnt, 'etc/dropbear/authorized_keys')
         }
         run('echo "%(auth_keys)s" > %(auth_keys_path)s' % context)
-        os.chown(context['auth_keys_path'], 0, 0)
-        key_stat = os.stat(context['auth_keys_path'])
-        assert 0 == key_stat.st_uid == key_stat.st_gid, "Failing when changing ownership!"
         run('chmod 0600 %(auth_keys_path)s' % context)

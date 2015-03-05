@@ -16,7 +16,10 @@ def update_state(build, progress, next, description):
 
 @task(name="firmware.build")
 def build(build_id, *args, **kwargs):
-    """ Builds a firmware image for build.node, excluding exclude files """
+    """
+    Builds a firmware image for build.node, excluding exclude files.
+    
+    """
     # Avoid circular imports
     from firmware.models import Build, Config
     
@@ -34,14 +37,15 @@ def build(build_id, *args, **kwargs):
     
     try:
         # Build the image
+        # 1. Initialize workspace.
         image.prepare()
         
+        # 2. Extract base image.
         update_state(build, 5, 14, 'Unpackaging base image')
-        image.gunzip()
+        image.extract()
         
+        # 3. Add configuration files to the base image.
         update_state(build, 15, 29, 'Preparing image file system')
-        image.mount()
-        
         # handle registry api #245: put cert content into firmware image
         build_file = build_obj.files.get(path='/etc/confine/registry-server.crt')
         image.create_file(build_file)
@@ -74,8 +78,9 @@ def build(build_id, *args, **kwargs):
         for num, plugin in enumerate(plugins):
             plugin.instance.pre_umount(image, build_obj, *args, **kwargs)
         
-        update_state(build, 60, 74, 'Unmounting image file system')
-        image.umount()
+        # 4. Generate the new image.
+        update_state(build, 60, 94, 'Building the image')
+        image.build()
         
         # Post umount
         for num, plugin in enumerate(plugins):
@@ -86,12 +91,11 @@ def build(build_id, *args, **kwargs):
             update_state(build, current, next, instance.post_umount.__doc__)
             instance.post_umount(image, build_obj, *args, **kwargs)
         
-        update_state(build, 80, 94, 'Compressing image')
-        image.gzip()
         
         update_state(build, 95, 99, 'Cleaning up')
         
-        # Image name
+        # 5. Move & link generated images /bin/x86
+        # TODO(santiago): which images keep? (generic, VirtualBox, VMware)
         image_name = config.get_image_name(node, build_obj)
         for plugin in config.plugins.active():
             image_name = plugin.instance.update_image_name(image_name, **kwargs)
@@ -99,6 +103,7 @@ def build(build_id, *args, **kwargs):
         dest_path = os.path.join(base_path, image_name)
         image.move(dest_path)
     finally:
+        # 6. cleanup (remove temporal folder)
         image.clean()
     
     build_obj.image = dest_path

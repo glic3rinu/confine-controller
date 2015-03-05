@@ -1,0 +1,4 @@
+* Fix progress bar.
+* Fix Base Image file extension (.tar.bz2 / tar.gz). Discuss about prefered format.
+    - Validation: update default setting FIRMWARE_BASE_IMAGE_EXTENSIONS
+* CNS doesn't start confine services (confine-system, tinc, uhttpd...)

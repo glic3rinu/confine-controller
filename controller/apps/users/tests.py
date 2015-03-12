@@ -398,13 +398,14 @@ class RegistrationTestCase(AuthenticatedTestCase):
 
 
 class GroupAdminTests(TransactionTestCase):
-    # TODO(santiago): reimplement tests a higher level.
+    # TODO(santiago): reimplement tests in a higher level.
     # It's not possible to difference at model level these situations:
     # a) Try to delete group, includes deleting group admin, it's OK
     #    but raises Error because group doesn't have group admin.
     #    Django deletes first the user (group admin), then the group.
     # b) Try to delete group admin, raise Error (OK)
     
+    @unittest.skip("Skipping until reimplement it in a higher level.")
     def test_delete_last_group_admin_user(self):
         # We shouldn't be able to delete a group admin if is the last one.
         group = Group.objects.create(name='group')
@@ -414,6 +415,7 @@ class GroupAdminTests(TransactionTestCase):
         self.assertRaises(PermissionDenied, user.delete)
         self.assertTrue(group.roles.filter(is_group_admin=True).exists())
     
+    @unittest.skip("Skipping until reimplement it in a higher level.")
     def test_delete_last_group_admin_role(self):
         # We shouldn't be able to delete a group admin if is the last one.
         group = Group.objects.create(name='group')

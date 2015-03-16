@@ -73,11 +73,18 @@ class Pub4Iface(BaseIface):
     DEFAULT_NAME = 'pub0'
     VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
                             "for public IPv4 sliver interfaces.")
+    NR_MAIN_IFACE = 2
     
     def clean_model(self, iface):
         super(Pub4Iface, self).clean_model(iface)
         if iface.sliver_id and iface.sliver.node.sliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
+
+        is_main_iface = (not hasattr(iface, 'sliver') or
+                         not iface.sliver.interfaces.filter(type=iface.type).exclude(id=iface.id).exists())
+        if is_main_iface and iface.nr != Pub4Iface.NR_MAIN_IFACE:
+            raise ValidationError("nr should be %i for the main public4 "
+                                  "interface." % Pub4Iface.NR_MAIN_IFACE)
     
     def ipv4_addr(self, iface):
         return 'Unknown'
@@ -151,6 +158,13 @@ class PrivateIface(BaseIface):
     DEFAULT_NAME = 'priv'
     AUTO_CREATE = True
     UNIQUE = True
+    NR_MAIN_IFACE = 0
+    
+    def clean_model(self, iface):
+        super(PrivateIface, self).clean_model(iface)
+        if iface.nr != PrivateIface.NR_MAIN_IFACE:
+            raise ValidationError("nr should be %i for the private interface." %
+                                  PrivateIface.NR_MAIN_IFACE)
     
     def ipv6_addr(self, iface):
         """ PRIV_IPV6_PREFIX:0:1000:ssss:ssss:ssss/64 """
@@ -165,9 +179,6 @@ class PrivateIface(BaseIface):
     def ipv4_addr(self, iface):
         """ {X.Y.Z}.S is the address of sliver #S """
         return 'Unknown'
-    
-    def _get_nr(self, iface):
-        return 0
 
 
 Sliver.register_iface(Pub4Iface, 'public4')

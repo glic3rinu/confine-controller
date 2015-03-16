@@ -561,7 +561,7 @@ class SliverIface(models.Model):
                       "mandatory) for isolated interfaces.")
     
     class Meta:
-        unique_together = ('sliver', 'name')
+        unique_together = (('sliver', 'name'), ('sliver', 'nr'))
         verbose_name = 'sliver interface'
         verbose_name_plural = 'sliver interfaces'
     
@@ -570,13 +570,11 @@ class SliverIface(models.Model):
     
     def clean(self):
         super(SliverIface, self).clean()
+        if self.nr > self.max_nr:
+            raise ValidationError("Ensure that nr value is less than or equal "
+                                  "to %i." % self.max_nr)
         if self.type:
             Sliver.get_registered_ifaces()[self.type].clean_model(self)
-    
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.nr = self._get_nr()
-        super(SliverIface, self).save(*args, **kwargs)
     
     @property
     def parent_name(self):
@@ -607,21 +605,3 @@ class SliverIface(models.Model):
         if self.type == '':
             return None
         return Sliver.get_registered_ifaces()[self.type].ipv4_addr(self)
-    
-    def _get_nr(self):
-        """ Calculates nr value of the new SliverIface """
-        iface = Sliver.get_registered_ifaces()[self.type]
-        # first check if iface has defined its own _get_nr()
-        if hasattr(iface, '_get_nr'):
-            return iface._get_nr(self)
-        # TODO use sliver_pub_ipv{4,6}_range/avail/total for PUBLIC{4,6}
-        if not SliverIface.objects.filter(sliver=self.sliver).exists():
-            return 1
-        last_nr = SliverIface.objects.filter(sliver=self.sliver).order_by('-nr').first().nr
-        if last_nr >= self.max_nr:
-            # try to recycle old values
-            for new_nr in range(1, self.max_nr):
-                if not Slice.objects.filter(sliver=self.sliver, isolated_vlan_tag=new_nr).exists():
-                    return new_nr
-            raise IfaceAllocationError("No Iface NR space left.")
-        return last_nr + 1

@@ -94,12 +94,14 @@ class SliverPropInline(PermissionTabularInline):
 
 class SliverIfaceInline(PermissionTabularInline):
     model = SliverIface
-    readonly_fields = ['nr', 'ipv6_addr', 'ipv4_addr']
+    fields = ('name', 'type', 'parent', 'nr', 'ipv6_addr', 'ipv4_addr')
+    readonly_fields = ['ipv6_addr', 'ipv4_addr']
     extra = 0
     formset = SliverIfaceInlineFormSet
     verbose_name_plural = mark_safe('Sliver network interfaces <a href="http://wiki.'
         'confine-project.eu/arch:node" onclick="return showAddAnotherPopup(this);">(Help)</a>')
     form = SliverIfaceInlineForm
+    ordering = ['nr']
     
     class Media:
         css = {

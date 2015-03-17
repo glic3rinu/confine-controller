@@ -33,7 +33,7 @@
     "pk": 1,
     "model": "slices.sliveriface",
     "fields": {
-        "nr": 1,
+        "nr": 0,
         "type": "private",
         "name": "priv",
         "parent": null,
@@ -44,7 +44,7 @@
     "pk": 2,
     "model": "slices.sliveriface",
     "fields": {
-        "nr": 1,
+        "nr": 0,
         "type": "private",
         "name": "priv",
         "parent": null,
@@ -67,19 +67,19 @@
     "model": "slices.sliveriface",
     "fields": {
         "nr": 2,
-        "type": "management",
-        "name": "mgmt1",
+        "type": "public4",
+        "name": "pub4",
         "parent": null,
         "sliver": 2
     }
 },
 {
-    "pk": 4,
+    "pk": 5,
     "model": "slices.sliveriface",
     "fields": {
         "nr": 3,
-        "type": "public4",
-        "name": "pub4",
+        "type": "management",
+        "name": "mgmt1",
         "parent": null,
         "sliver": 2
     }

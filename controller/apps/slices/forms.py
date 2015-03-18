@@ -7,7 +7,7 @@ from nodes.models import Node
 
 from .helpers import state_value
 from .models import Sliver, SliverDefaults, SliverIface
-from .validators import validate_ifaces_nr
+from .validators import validate_ifaces_nr, validate_private_iface
 from .widgets import IfacesSelect
 
 
@@ -105,18 +105,6 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
     
     def clean(self):
         super(SliverIfaceInlineFormSet, self).clean()
-        
-        # check that mandatory private interface has been defined
-        priv_ifaces = 0
-        for form in self.forms:
-            if (form.cleaned_data.get('type', '') == 'private' and
-                not form.cleaned_data.get('DELETE', False)):
-                priv_ifaces += 1
-            if priv_ifaces > 1:
-                raise ValidationError('There can only be one interface of type private.')
-        if priv_ifaces == 0:
-            raise ValidationError('There must exist one interface of type private.')
-        
         # normalize form data to perform unificated validation
         interfaces = []
         for form in self.forms:
@@ -124,7 +112,8 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
                 form.cleaned_data.pop('DELETE', '')
                 interfaces.append(SliverIface(**form.cleaned_data))
         
-        # validate nr depending on interface type (#633)
+        validate_private_iface(interfaces)
+        
         for name, iface_cls in Sliver.get_registered_ifaces().items():
             validate_ifaces_nr(name, iface_cls, interfaces)
 

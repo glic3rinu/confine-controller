@@ -7,7 +7,7 @@ from api import serializers
 from nodes.settings import NODES_NODE_ARCHS
 
 from .models import Slice, Sliver, SliverDefaults, SliverIface, Template
-from .validators import validate_ifaces_nr
+from .validators import validate_ifaces_nr, validate_private_iface
 
 
 class FakeFileField(serializers.CharField):
@@ -97,7 +97,8 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
         if priv_ifaces == 0:
             raise serializers.ValidationError('There must exist one interface of type private.')
         
-        # validate nr depending on interface type (#633)
+        validate_private_iface(interfaces)
+        
         for name, iface_cls in Sliver.get_registered_ifaces().items():
             validate_ifaces_nr(name, iface_cls, interfaces)
         return attrs

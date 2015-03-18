@@ -6,25 +6,9 @@ from controller.forms.widgets import ShowText
 from nodes.models import Node
 
 from .helpers import state_value
-from .models import SliverDefaults, Sliver
+from .models import Sliver, SliverDefaults, SliverIface
+from .validators import validate_ifaces_nr
 from .widgets import IfacesSelect
-
-
-def clean_ifaces_nr(name, iface_cls, forms):
-    if not hasattr(iface_cls, 'NR_MAIN_IFACE'):
-        return
-    
-    valid_nr_main_iface = True
-    for form in forms:
-        if (form.cleaned_data.get('type', '') == name and
-            not form.cleaned_data.get('DELETE', False)):
-            if form.cleaned_data.get('nr', '') == iface_cls.NR_MAIN_IFACE:
-                return
-            valid_nr_main_iface = False
-    
-    if not valid_nr_main_iface:
-        raise ValidationError('nr should be %i for the main %s interface.' %
-                              (iface_cls.NR_MAIN_IFACE, name))
 
 
 class SliverDefaultsInlineForm(forms.ModelForm):
@@ -133,9 +117,16 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
         if priv_ifaces == 0:
             raise ValidationError('There must exist one interface of type private.')
         
+        # normalize form data to perform unificated validation
+        interfaces = []
+        for form in self.forms:
+            if not form.cleaned_data.get('DELETE', False):
+                form.cleaned_data.pop('DELETE', '')
+                interfaces.append(SliverIface(**form.cleaned_data))
+        
         # validate nr depending on interface type (#633)
         for name, iface_cls in Sliver.get_registered_ifaces().items():
-            clean_ifaces_nr(name, iface_cls, self.forms)
+            validate_ifaces_nr(name, iface_cls, interfaces)
 
 
 class SliverIfaceInlineForm(forms.ModelForm):

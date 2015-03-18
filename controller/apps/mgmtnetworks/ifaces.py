@@ -20,15 +20,6 @@ class MgmtIface(BaseIface):
     CREATE_BY_DEFAULT = True
     NR_MAIN_IFACE = 1
     
-    def clean_model(self, iface):
-        super(MgmtIface, self).clean_model(iface)
-        is_main_iface = (not hasattr(iface, 'sliver') or
-                         not iface.sliver.interfaces.filter(type=iface.type)\
-                                                    .exclude(id=iface.id).exists())
-        if is_main_iface and iface.nr != MgmtIface.NR_MAIN_IFACE:
-            raise ValidationError("nr should be %i for the main management "
-                                  "interface." % MgmtIface.NR_MAIN_IFACE)
-    
     def ipv6_addr(self, iface):
         """ MGMT_IPV6_PREFIX:N:10ii:ssss:ssss:ssss/64 """
         # Hex representation of the needed values

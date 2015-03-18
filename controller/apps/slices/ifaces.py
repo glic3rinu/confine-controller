@@ -79,12 +79,6 @@ class Pub4Iface(BaseIface):
         super(Pub4Iface, self).clean_model(iface)
         if iface.sliver_id and iface.sliver.node.sliver_pub_ipv4 == 'none':
             raise ValidationError("public4 is only available if node's sliver_pub_ipv4 is not None")
-
-        is_main_iface = (not hasattr(iface, 'sliver') or
-                         not iface.sliver.interfaces.filter(type=iface.type).exclude(id=iface.id).exists())
-        if is_main_iface and iface.nr != Pub4Iface.NR_MAIN_IFACE:
-            raise ValidationError("nr should be %i for the main public4 "
-                                  "interface." % Pub4Iface.NR_MAIN_IFACE)
     
     def ipv4_addr(self, iface):
         return 'Unknown'
@@ -181,6 +175,7 @@ class PrivateIface(BaseIface):
         return 'Unknown'
 
 
+# TODO(santiago): define iface name as class constant?
 Sliver.register_iface(Pub4Iface, 'public4')
 Sliver.register_iface(IsolatedIface, 'isolated')
 Sliver.register_iface(Pub6Iface, 'public6')

@@ -121,7 +121,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
     list_display = [
         '__unicode__', admin_link('node'), admin_link('slice'), computed_sliver_set_state
     ]
-    list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice__name']
+    list_filter = [MySliversListFilter, SliverSetStateListFilter, 'slice', 'slice__group']
     fieldsets = (
         (None, {
             'fields': ('description', 'template', 'set_state')
@@ -614,7 +614,7 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         'display_template', 'expires_on', admin_link('group')
     ]
     list_display_links = ('name', 'id')
-    list_filter = [MySlicesListFilter, 'set_state', 'sliver_defaults__template']
+    list_filter = [MySlicesListFilter, 'set_state', 'group', 'sliver_defaults__template']
     readonly_fields = ['instance_sn', 'expires_on', 'isolated_vlan_tag']
     date_hierarchy = 'expires_on'
     search_fields = ['name']

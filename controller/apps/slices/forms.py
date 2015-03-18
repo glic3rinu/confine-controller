@@ -10,6 +10,23 @@ from .models import SliverDefaults, Sliver
 from .widgets import IfacesSelect
 
 
+def clean_ifaces_nr(name, iface_cls, forms):
+    if not hasattr(iface_cls, 'NR_MAIN_IFACE'):
+        return
+    
+    valid_nr_main_iface = True
+    for form in forms:
+        if (form.cleaned_data.get('type', '') == name and
+            not form.cleaned_data.get('DELETE', False)):
+            if form.cleaned_data.get('nr', '') == iface_cls.NR_MAIN_IFACE:
+                return
+            valid_nr_main_iface = False
+    
+    if not valid_nr_main_iface:
+        raise ValidationError('nr should be %i for the main %s interface.' %
+                              (iface_cls.NR_MAIN_IFACE, name))
+
+
 class SliverDefaultsInlineForm(forms.ModelForm):
     class Meta:
         model = SliverDefaults
@@ -82,8 +99,8 @@ class SliceSliversForm(forms.ModelForm):
 
 
 class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
-    """ Provides initial Direct ifaces """
     def __init__(self, *args, **kwargs):
+        """Provides initial interfaces."""
         if not kwargs['instance'].pk and 'data' not in kwargs:
             all_ifaces = Sliver.get_registered_ifaces()
             auto_ifaces = [ (t,o) for t,o in all_ifaces.items()
@@ -92,7 +109,8 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
             initial_data = {
                 'interfaces-TOTAL_FORMS': unicode(total),
                 'interfaces-INITIAL_FORMS': u'0',
-                'interfaces-MAX_NUM_FORMS': u'',}
+                'interfaces-MAX_NUM_FORMS': u'',
+            }
             for num, iface in enumerate(auto_ifaces):
                 iface_type, iface_object = iface
                 initial_data['interfaces-%d-name' % num] = iface_object.DEFAULT_NAME
@@ -101,16 +119,22 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
         super(SliverIfaceInlineFormSet, self).__init__(*args, **kwargs)
     
     def clean(self):
-        """Check that one interface of type private has been defined."""
         super(SliverIfaceInlineFormSet, self).clean()
+        
+        # check that mandatory private interface has been defined
         priv_ifaces = 0
         for form in self.forms:
-            if form.cleaned_data.get('type', '') == 'private' and not form.cleaned_data.get('DELETE', False):
+            if (form.cleaned_data.get('type', '') == 'private' and
+                not form.cleaned_data.get('DELETE', False)):
                 priv_ifaces += 1
             if priv_ifaces > 1:
                 raise ValidationError('There can only be one interface of type private.')
         if priv_ifaces == 0:
             raise ValidationError('There must exist one interface of type private.')
+        
+        # validate nr depending on interface type (#633)
+        for name, iface_cls in Sliver.get_registered_ifaces().items():
+            clean_ifaces_nr(name, iface_cls, self.forms)
 
 
 class SliverIfaceInlineForm(forms.ModelForm):

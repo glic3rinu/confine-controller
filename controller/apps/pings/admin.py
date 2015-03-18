@@ -156,6 +156,8 @@ def make_colored_address(old_method, field='', filters={}):
     its related time series data
     """
     def colored_address(self, obj, old_method=old_method, field=field, filters=filters):
+        if obj.pk is None:
+            return None
         addr = old_method(self, obj)
         for k,v in filters.items():
             if getattr(obj, k) != v:

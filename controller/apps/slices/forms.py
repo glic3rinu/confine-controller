@@ -115,6 +115,7 @@ class SliverIfaceInlineFormSet(forms.models.BaseInlineFormSet):
                 iface_type, iface_object = iface
                 initial_data['interfaces-%d-name' % num] = iface_object.DEFAULT_NAME
                 initial_data['interfaces-%d-type' % num] = iface_type
+                initial_data['interfaces-%d-nr' % num] = iface_object.NR_MAIN_IFACE
             kwargs['data'] = initial_data
         super(SliverIfaceInlineFormSet, self).__init__(*args, **kwargs)
     

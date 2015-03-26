@@ -1,5 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from controller.core.validators import validate_net_iface_name_with_vlan
 from controller.utils import decode_version
 
 from users.models import User
@@ -59,3 +61,16 @@ class ControllerTests(TestCase):
         self.assertRaises(ValueError, decode_version, '=0.34b')
         self.assertRaises(TypeError, decode_version, None)
         self.assertRaises(TypeError, decode_version, 0123)
+
+
+class ValidatorsTests(TestCase):
+    def test_validate_net_iface_name_with_vlan(self):
+        # http://wiki.openwrt.org/doc/networking/network.interfaces
+        validate_net_iface_name_with_vlan('eth')
+        validate_net_iface_name_with_vlan('eth0')
+        validate_net_iface_name_with_vlan('eth0.10')
+        validate_net_iface_name_with_vlan('wlan1')
+        validate_net_iface_name_with_vlan('wlan.0')
+        validate_net_iface_name_with_vlan('wlan1.20')
+        self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, '0eth')
+        self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, 'WLAN')

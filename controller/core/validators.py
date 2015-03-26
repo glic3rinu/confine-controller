@@ -61,6 +61,10 @@ def validate_net_iface_name(value):
     validators.RegexValidator(re.compile('^[a-z]+[0-9]*$'),
             'Enter a valid network interface name.', 'invalid')(value)
 
+def validate_net_iface_name_with_vlan(value):
+    validators.RegexValidator(re.compile('^[a-zA-Z][a-zA-Z0-9\-]*([.][1-9][0-9]*)?$'),
+            'Enter a valid network interface name.', 'invalid')(value)
+
 
 def validate_host_name(value):
     ValidHostnameRegex = ("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)"

@@ -72,5 +72,6 @@ class ValidatorsTests(TestCase):
         validate_net_iface_name_with_vlan('wlan1')
         validate_net_iface_name_with_vlan('wlan.0')
         validate_net_iface_name_with_vlan('wlan1.20')
+        validate_net_iface_name_with_vlan('WLAN')
         self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, '0eth')
-        self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, 'WLAN')
+        self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, 'eth1.01')

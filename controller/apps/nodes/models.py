@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, post_delete
 
 from controller.models.fields import NullableCharField, PEMCertificateField
 from controller.settings import PRIV_IPV6_PREFIX, PRIV_IPV4_PREFIX_DFLT, SLIVER_MAC_PREFIX_DFLT
-from controller.core.validators import validate_name, validate_prop_name, validate_net_iface_name
+from controller.core.validators import validate_name, validate_prop_name, validate_net_iface_name, validate_net_iface_name_with_vlan
 from pki import Bob
 
 from . import settings
@@ -149,7 +149,7 @@ class Node(models.Model):
             help_text='Architecture of this RD (as reported by uname -m).',)
     local_iface = models.CharField('Local interface', max_length=16, 
             default=settings.NODES_NODE_LOCAL_IFACE_DFLT, 
-            validators=[validate_net_iface_name],
+            validators=[validate_net_iface_name_with_vlan],
             help_text='Name of the interface used as a local interface. See <a href='
                       '"wiki.confine-project.eu/arch:node">node architecture</a>.')
     sliver_pub_ipv6 = models.CharField('Sliver public IPv6', max_length=8,
@@ -370,7 +370,7 @@ class DirectIface(models.Model):
     
     See node architecture: http://wiki.confine-project.eu/arch:node
     """
-    name = models.CharField(max_length=16, validators=[validate_net_iface_name],
+    name = models.CharField(max_length=16, validators=[validate_net_iface_name_with_vlan],
             help_text='The name of the interface used as a local interface (non-empty). '
                       'See <a href="https://wiki.confine-project.eu/arch:node">node '
                       'architecture</a>.')

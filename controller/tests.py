@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from controller.core.validators import validate_net_iface_name_with_vlan
+from controller.core.validators import (validate_net_iface_name_with_vlan,
+    validate_ssh_pubkey)
 from controller.utils import decode_version
 
 from users.models import User
@@ -75,3 +76,16 @@ class ValidatorsTests(TestCase):
         validate_net_iface_name_with_vlan('WLAN')
         self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, '0eth')
         self.assertRaises(ValidationError, validate_net_iface_name_with_vlan, 'eth1.01')
+    
+    def test_validate_ssh_pubkey(self):
+        pubkey = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsHDcbPXptz4i6iz2EGif'
+                  'D8JZ3acFnR6FG6aPDQxmoESLjNw6n6MoVOkeXvs+Phgra30dQLnLa23pFCb'
+                  'vYxrX5HY370Dtx2981uz0RFws+85pBviIIsdnma/Wzz05PDhTb3vnTGUOp+'
+                  'xOKRl6xptiESbz+Jgi1ImCkx85rBCWj9jQQNi0hddkBi41F/UzMLorWGICa'
+                  'yC/wGvg7JDnYhlKv+HXSYoylQvnrY/891mR6BNBYU+N1506VndHLz0VDWii'
+                  'bxwM2vkpy6h+/dt2OLsMXzuDSSUpqYynwYXPC6PaCzzrv18qBTUzT9dof0x'
+                  'o6Nib+clykex/C7FnIaFD4HW9N')
+        pubkey_with_comment = pubkey + ' confine@confine'
+        validate_ssh_pubkey(pubkey)
+        validate_ssh_pubkey(pubkey_with_comment)
+        self.assertRaises(ValidationError, validate_ssh_pubkey, 'ssh-rsa FooPubKey')

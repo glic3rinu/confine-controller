@@ -540,7 +540,9 @@ class SliverIface(models.Model):
     sliver = models.ForeignKey(Sliver, related_name='interfaces')
     nr = models.PositiveIntegerField('number',
             help_text='The unique 8-bit, positive integer number of this interface '
-                      'in this sliver. Interface #0 is always the private interface.')
+                      'in this sliver. Interface #0 is always the private interface, '
+                      '#1 is by convention the main management interface and '
+                      '#2 is by convention the main public interface.')
     name = models.CharField(max_length=10,
             help_text='The name of this interface. It must match the regular '
                       'expression ^[a-z]+[0-9]*$ and have no more than 10 characters.',

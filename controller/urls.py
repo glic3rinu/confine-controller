@@ -59,3 +59,8 @@ if is_installed('api'):
 if is_installed('gis'):
     urlpatterns += patterns('',
         url(r'^gis/', include('gis.urls')),)
+
+
+if is_installed('public'):
+    urlpatterns += patterns('',
+        url(r'^public/', include('public.urls')),)

@@ -143,6 +143,7 @@ INSTALLED_APPS = (
     'notifications',
     'monitor',
     'resources',
+    'public',
     
     # Third-party apps
     'south',

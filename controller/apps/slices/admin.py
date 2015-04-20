@@ -713,6 +713,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
                 msg = "The template chosen for this slice is NOT active. "\
                     "Please check its configuration."
                 messages.warning(request, msg)
+            if obj and not obj.description:
+                #FIXME(santiago): check if has a complete description.
+                msg = ("The slice description is empty. Please provide some "
+                       "details about the experiment or service run (will be "
+                       "used as feedback to the Community).")
+                messages.warning(request, msg)
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)
     

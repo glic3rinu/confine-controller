@@ -1,0 +1,3 @@
+* Clean and format of templates/public/node_sliver_detail.html
+* Warn user if the slice's description doesn't have enought information.
+* Log slice life events (sliver addition...)

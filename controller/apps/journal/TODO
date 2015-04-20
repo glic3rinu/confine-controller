@@ -1,3 +1,4 @@
-* Clean and format of templates/public/node_sliver_detail.html
-* Warn user if the slice's description doesn't have enought information.
-* Log slice life events (sliver addition...)
+- Clean and format of templates/public/node_sliver_detail.html
+- Warn user if the slice's description is empty or doesn't have enought information.
+- Refactor view into admin View? (take advantatge of ordering and filtering)
+- DATA migration: create logs for existing Slivers.

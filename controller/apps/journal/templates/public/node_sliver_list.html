@@ -52,12 +52,12 @@ $(document).ready(function() {
         <div class="end">End date</div>
         <div class="info"></div>
     </div>
-{% for sliver in node.slivers.all %}
+{% for sliver in slivers %}
     <div class="sliver {% cycle 'odd' 'even' %}">
-        <div class="name"><a href="{% url 'admin:slices_slice_change' sliver.slice.pk %}">{{ sliver.slice.name }}</a></div>
-        <div class="group"><a href="{% url 'admin:users_group_change' sliver.slice.group.pk %}">{{ sliver.slice.group.name }}</a></div>
-        <div class="start">{# sliver.slice.start #}Nov. 1, 2013</div>
-        <div class="end">{# sliver.slice.end #}Dec. 29, 2014</div>
+        <div class="name"><a href="{% url 'admin:slices_slice_change' sliver.slice.pk|default:0 %}">{{ sliver.slice_data.name }}</a></div>
+        <div class="group"><a href="{% url 'admin:users_group_change' sliver.group.id %}">{{ sliver.group.name }}</a></div>
+        <div class="start">{{ sliver.created_on }}</div>
+        <div class="end">{{ sliver.expires_on }}</div>
         <div class="info"><a href="#" data-sliver-url="{% url 'public_sliver_detail' sliver.pk %}">details</a></div>
     </div>
 {% endfor %}

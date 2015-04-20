@@ -61,6 +61,6 @@ if is_installed('gis'):
         url(r'^gis/', include('gis.urls')),)
 
 
-if is_installed('public'):
+if is_installed('journal'):
     urlpatterns += patterns('',
-        url(r'^public/', include('public.urls')),)
+        url(r'^public/', include('journal.urls')),)

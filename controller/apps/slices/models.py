@@ -184,7 +184,10 @@ class Slice(models.Model):
                       'text with no whitespace surrounding it.',
             validators=[validate_name])
     description = models.TextField(blank=True,
-            help_text='An optional free-form textual description of this slice.')
+            help_text='An optional free-form textual description of this slice.'
+                      'e.g. what is being tested, what were the results, '
+                      'possible impact of the experiment, URL to related '
+                      'resources...')
     expires_on = models.DateField(null=True, blank=True, default=get_expires_on,
             help_text='Expiration date of this slice. Automatically deleted once '
                       'expires.')

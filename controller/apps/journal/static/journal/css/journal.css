@@ -1,0 +1,16 @@
+.sliver div { display: inline-block; padding: 0.5em;}
+.sliver.odd {}
+.sliver.even { background: #f3f2f4; }
+.header { background: rgb(200, 218, 218); }
+.name { width: 160px; }
+.group { width: 120px; }
+.start, .end { width: 120px; }
+.info { width: 120px;}
+
+#sliver-detail {
+    background: #f3f2f4;
+    border: 1px solid #f3f2f4;
+    border-radius: 10px;
+    margin-top: 5em;
+    padding: 1em;
+}

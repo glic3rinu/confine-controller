@@ -2,47 +2,17 @@
 
 {% load i18n admin_static staticfiles %}
 
-{# block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "state/css/report.css" %}" />{% endblock #}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "journal/css/journal.css" %}" />{% endblock %}
 
 {% block extrahead %}
   {{ block.super }}
   <script src="{% static "admin_tools/js/jquery/jquery.min.js" %}" type="text/javascript"></script>
-  {#<script src="{% static "state/js/report.js" %}" type="text/javascript"></script>#}
-    
-    
-<script>
-$(document).ready(function() {
-    // load sliver details via AJAX
-    $('.sliver .info a').on("click", function() {
-        url = $(this).data('sliver-url');
-        $('#sliver-detail-content').load(url);
-    });
-});
-</script>
+  <script src="{% static "journal/js/journal.js" %}" type="text/javascript"></script>
 {% endblock %}
 
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-<style>
-.sliver div { display: inline-block; padding: 0.5em;}
-.sliver.odd {}
-.sliver.even { background: #f3f2f4; }
-.header { background: rgb(200, 218, 218); }
-.name { width: 160px; }
-.group { width: 120px; }
-.start, .end { width: 120px; }
-.info { width: 120px;}
-
-#sliver-detail {
-    background: #f3f2f4;
-    border: 1px solid #f3f2f4;
-    border-radius: 10px;
-    margin-top: 5em;
-    padding: 1em;
-}
-</style>
-
 <div id="content">
     <h2>Experiments/services on node <a href="{% url 'admin:nodes_node_change' node.pk %}">{{ node.name }}</a></h2>
     <div class="sliver header">

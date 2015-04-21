@@ -1,2 +1,1 @@
-- Clean and format of templates/public/node_sliver_detail.html
 - Refactor view into admin View? (take advantatge of ordering and filtering)

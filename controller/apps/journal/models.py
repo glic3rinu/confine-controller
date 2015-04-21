@@ -6,6 +6,8 @@ from jsonfield import JSONField
 
 from slices.models import Sliver
 
+from .helpers import extract_sliver_data
+
 
 class SliverLog(models.Model):
     slice = models.ForeignKey('slices.Slice', null=True, related_name='+',
@@ -17,20 +19,6 @@ class SliverLog(models.Model):
             help_text='Date when the sliver expires (or it has expired).')
     data = JSONField(help_text='Log info: experiment/service description, '
                                 'about the owner group...')
-    
-    def extract_data(self, sliver):
-        return {
-            'description': sliver.description,
-            'slice': {
-                'name': sliver.slice.name,
-                'description': sliver.slice.description,
-            },
-            'group': {
-                'id': sliver.slice.group.id,
-                'name': sliver.slice.group.name,
-                'description': sliver.slice.group.description,
-            }
-        }
     
     @property
     def description(self):
@@ -59,7 +47,7 @@ class SliverLog(models.Model):
 def log_sliver_event(instance, event):
     """Create or update sliver log."""
     log, _ = SliverLog.objects.get_or_create(slice=instance.slice, node=instance.node)
-    log.data = log.extract_data(instance)
+    log.data = extract_sliver_data(instance)
     log.expires_on = instance.slice.expires_on if event == 'create' else now()
     log.save()
 

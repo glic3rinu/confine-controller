@@ -52,8 +52,9 @@ class Image(object):
     
     def build(self): #TODO(santiago) allow customization (e.g. PACKAGES)
         """Build the image usin OpenWRT ImageBuilder."""
+        packages = "confine-recommended"
         img_builder = os.path.join(self.tmp, 'OpenWrt-ImageBuilder-x86_generic-for-linux-x86_64')
-        r('make image -C %s PROFILE="Generic" PACKAGES="confine-system tinc" FILES="%s"' % (img_builder, self.mnt))
+        r('make image -C %s PROFILE="Generic" PACKAGES="%s" FILES="%s"' % (img_builder, packages, self.mnt))
     
     def prepare(self):
         """ create temporary directories needed for building the image """

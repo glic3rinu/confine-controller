@@ -262,3 +262,13 @@ class SliverTests(TestCase):
         sliverjs = json.loads(response.content)
         self.assertIsNone(sliverjs['data_uri'])
         self.assertIsNone(sliverjs['data_sha256'])
+
+
+class HelpersTests(TestCase):
+    def test_is_valid_description(self):
+        from .helpers import is_valid_description
+        self.assertFalse(is_valid_description(""))
+        self.assertFalse(is_valid_description("Too few words."))
+        self.assertFalse(is_valid_description("fooooooooooooooooooooooooooooooo."))
+        self.assertTrue(is_valid_description("This is an experiment to check "
+                                             "network speed."))

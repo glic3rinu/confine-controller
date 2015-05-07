@@ -51,6 +51,15 @@ def get_readonly_file_fields(obj):
     return readonly_fields
 
 
+def is_valid_description(description):
+    """
+    Check if the slice/sliver description provides enough information.
+    """
+    if len(description) < 10 or len(description.split()) < 5:
+        return False
+    return True
+
+
 def log_sliver_history(user_id, object, msg):
     """Log sliver history on the node (debug purposes)"""
     LogEntry.objects.log_action(

@@ -1,0 +1,39 @@
+{% extends "admin/index.html" %}
+
+{% load i18n admin_static staticfiles %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "journal/css/journal.css" %}" />{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% static "admin_tools/js/jquery/jquery.min.js" %}" type="text/javascript"></script>
+  <script src="{% static "journal/js/journal.js" %}" type="text/javascript"></script>
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content">
+    <h2>Experiments/services on node <a href="{% url 'admin:nodes_node_change' node.pk %}">{{ node.name }}</a></h2>
+    <div class="sliver header">
+        <div class="name">Name</div>
+        <div class="group">Run by</div>
+        <div class="start">Start date</div>
+        <div class="end">End date</div>
+        <div class="info"></div>
+    </div>
+{% for sliver in slivers %}
+    <div class="sliver {% cycle 'odd' 'even' %}">
+        <div class="name"><a href="{% url 'admin:slices_slice_change' sliver.slice.pk|default:0 %}">{{ sliver.slice_data.name }}</a></div>
+        <div class="group"><a href="{% url 'admin:users_group_change' sliver.group.id %}">{{ sliver.group.name }}</a></div>
+        <div class="start">{{ sliver.created_on }}</div>
+        <div class="end">{{ sliver.expires_on }}</div>
+        <div class="info"><a href="#" data-sliver-url="{% url 'public_sliver_detail' sliver.pk %}">details</a></div>
+    </div>
+{% endfor %}
+    <div id="sliver-detail">
+        [?] select a sliver for more details.
+        <div id="sliver-detail-content"></div>
+    </div>
+</div>
+{% endblock %}

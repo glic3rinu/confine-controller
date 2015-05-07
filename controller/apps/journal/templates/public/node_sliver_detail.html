@@ -1,0 +1,16 @@
+{# Sliver detailed report #}
+{# environment vars: sliver #}
+
+<h3>Sliver details:</h3>
+<pre><code>
+- Title: {{ sliver.slice_data.name }}
+- Who: {{ sliver.group.name }}, {{ sliver.group.description }}
+- Information: {{ sliver.slice_data.description }} | {{ sliver.description }}
+{% comment "Details that should be provided by researchers" %}
+    * What is being tested.
+    * What were the results. 
+    * Possible impact of the experiment.
+    * URL to detailed info (papers/publications, results, graphs, source code...)
+      http://community-lab.net/experiments/iminds-mlab/
+{% endcomment %}
+</code></pre>

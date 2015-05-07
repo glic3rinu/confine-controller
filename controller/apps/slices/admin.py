@@ -25,8 +25,8 @@ from .actions import renew_selected_slices, reset_selected, update_selected, cre
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter
 from .forms import (SliverDefaultsInlineForm, SliverAdminForm, SliverIfaceInlineForm,
     SliverIfaceInlineFormSet, SliceSliversForm)
-from .helpers import (get_readonly_file_fields, log_sliver_history,
-    remove_slice_id, state_value, wrap_action)
+from .helpers import (get_readonly_file_fields, is_valid_description,
+    log_sliver_history, remove_slice_id, state_value, wrap_action)
 from .models import (Slice, SliceProp, Sliver, SliverDefaults, SliverProp,
     SliverIface, Template)
 
@@ -238,23 +238,33 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
             int(object_id)
         except ValueError:
             object_id = None
-        sliver = get_object_or_404(Sliver, pk=object_id)
-        slice_link = get_admin_link(sliver.slice)
-        node_link = get_admin_link(sliver.node)
+        obj = get_object_or_404(Sliver, pk=object_id)
+        slice_link = get_admin_link(obj.slice)
+        node_link = get_admin_link(obj.node)
         context = {
             'title': mark_safe('Change sliver %s@%s' % (slice_link, node_link)),
             'header_title': 'Change sliver'
         }
         context.update(extra_context or {})
-        # warn user when sliver.set_state > slice.set_state
-        # Only check on GET (for avoid false/duplicated warnings on POSTing)
-        sliver_state = sliver.set_state
-        slice_state = sliver.slice.set_state
-        if (request.method == 'GET' and
-                state_value(sliver_state) > state_value(slice_state)):
-            msg = "Note: the slice's set state \"%s\" overrides the sliver's \
-                   current set state \"%s\"."% (slice_state, sliver_state)
-            messages.warning(request, msg)
+        
+        if request.method == 'GET':
+            # notify user about relevant sliver config
+            sliver_state = obj.set_state
+            slice_state = obj.slice.set_state
+            if state_value(sliver_state) > state_value(slice_state):
+                msg = ("Note: the slice's set state '%s' overrides the "
+                       "sliver's current set state '%s'.") % (slice_state,
+                        sliver_state)
+                messages.warning(request, msg)
+            
+            if (not is_valid_description(obj.slice.description) and
+                not is_valid_description(obj.description)):
+                msg = ("The sliver description is too short. Please provide "
+                       "more details about the experiment or service. Help us "
+                       "providing valuable feedback to Community Networks' "
+                       "members.")
+                messages.warning(request, msg)
+        
         return super(SliverAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=context)
     
@@ -699,9 +709,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
         return super(SliceAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        """ Warn user on missconfigured slice:
-            - when the slice's group cannot manage slices
-            - when slice's sliver defaults template is inactive
+        """
+        Warn user on:
+            1. Missconfigured slice:
+                a) Slice's group cannot manage slices
+                b) Slice's sliver defaults template is inactive
+            2. Too little information on the slice's description
         """
         if request.method == 'GET':
             obj = self.get_object(request, object_id)
@@ -711,6 +724,12 @@ class SliceAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdmi
             if obj and not obj.sliver_defaults.template.is_active:
                 msg = "The template chosen for this slice is NOT active. "\
                     "Please check its configuration."
+                messages.warning(request, msg)
+            if obj and not is_valid_description(obj.description):
+                msg = ("The slice description is too short. Please provide "
+                       "more details about the experiment or service. Help us "
+                       "providing valuable feedback to Community Networks' "
+                       "members.")
                 messages.warning(request, msg)
         return super(SliceAdmin, self).change_view(request, object_id,
                 form_url=form_url, extra_context=extra_context)

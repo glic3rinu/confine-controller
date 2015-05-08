@@ -16,9 +16,9 @@ class BackendFactory(object):
     @classmethod
     def create(cls):
         modes = {
-            'OPEN': 'users.registration.OpenBackend',
-            'RESTRICTED': 'users.registration.RestrictedBackend',
-            'CLOSED': 'users.registration.ClosedBackend' }
+            'OPEN': 'controller.apps.users.registration.OpenBackend',
+            'RESTRICTED': 'controller.apps.users.registration.RestrictedBackend',
+            'CLOSED': 'controller.apps.users.registration.ClosedBackend' }
         try:
             mode = settings.USERS_REGISTRATION_MODE
             backend = modes.get(mode)

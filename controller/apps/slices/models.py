@@ -8,8 +8,8 @@ from django.utils.timezone import now
 from controller.models.fields import MultiSelectField, NullableCharField
 from controller.core.validators import (FileExtValidator,
     validate_net_iface_name, validate_prop_name, validate_sha256, validate_name)
-from nodes.models import Node
-from nodes.settings import NODES_NODE_ARCHS
+from controller.apps.nodes.models import Node
+from controller.apps.nodes.settings import NODES_NODE_ARCHS
 
 from . import settings
 from .exceptions import VlanAllocationError, IfaceAllocationError

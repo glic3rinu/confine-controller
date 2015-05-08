@@ -7,8 +7,8 @@ from django_transaction_signals import defer
 from djcelery.models import TaskState
 
 from controller.utils.apps import is_installed
-from nodes.models import Node
-from state.models import State, node_heartbeat
+from controller.apps.nodes.models import Node
+from controller.apps.state.models import State, node_heartbeat
 
 from . import settings
 from .exceptions import ConcurrencyError
@@ -195,8 +195,8 @@ def retry_pending_operations(sender, node, **kwargs):
         instance.run()
 
 
-if is_installed('firmware'):
-    from firmware.models import construct_safe_locals
+if is_installed('controller.apps.firmware'):
+    from controller.apps.firmware.models import construct_safe_locals
     @receiver(construct_safe_locals, dispatch_uid="maintenance.update_safe_locals")
     def update_safe_locals(sender, safe_locals, **kwargs):
         safe_locals.update(dict((setting, getattr(settings, setting))

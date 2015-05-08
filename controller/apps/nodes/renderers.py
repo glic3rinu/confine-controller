@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from api.renderers import ProfileJSONRenderer
+from controller.apps.api.renderers import ProfileJSONRenderer
 
 
 class IslandProfileRenderer(ProfileJSONRenderer):

@@ -3,7 +3,7 @@ from IPy import IP
 
 from controller.settings import DEBUG_IPV6_PREFIX
 from controller.utils.ip import int_to_hex_str, split_len
-from nodes.models import Node
+from controller.apps.nodes.models import Node
 
 from .models import Sliver
 

@@ -3,7 +3,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.utils.six.moves import input
 
-from pki import ca
+from controller.apps.pki.import ca
 
 
 class Command(BaseCommand):
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         
         if override or not ca.get_cert():
             # Avoid import errors
-            from nodes.models import Server
+            from controller.apps.nodes.models import Server
             server = Server.objects.first()
             common_name = options.get('common_name') or str(server.mgmt_net.addr)
             country = options.get('dn_country')

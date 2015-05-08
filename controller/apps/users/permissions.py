@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions import Permission
+from controller.apps.permissions import Permission
 
 from .models import User, AuthToken, Group, Roles, JoinRequest
 

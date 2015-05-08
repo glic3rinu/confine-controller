@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.reverse import reverse
 
-from api import ApiRoot
+from controller.apps.api import ApiRoot
 from controller import settings
 from controller.models import Testbed
 from controller.serializers import TestbedSerializer

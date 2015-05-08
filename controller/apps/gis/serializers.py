@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from api import serializers
+from controller.apps.api import serializers
 
 from .models import NodeGeolocation
 

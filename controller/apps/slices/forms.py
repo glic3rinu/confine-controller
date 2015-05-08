@@ -3,7 +3,7 @@ from django.contrib.admin.templatetags.admin_list import _boolean_icon
 from django.core.exceptions import ValidationError
 
 from controller.forms.widgets import ShowText
-from nodes.models import Node
+from controller.apps.nodes.models import Node
 
 from .helpers import state_value
 from .models import Sliver, SliverDefaults, SliverIface

@@ -1,7 +1,7 @@
 from admin_tools.dashboard.modules import DashboardModule
 
-from nodes.models import Node
-from slices.models import Slice
+from controller.apps.nodes.models import Node
+from controller.apps.slices.models import Slice
 
 class MyThingsDashboardModule(DashboardModule):
     """

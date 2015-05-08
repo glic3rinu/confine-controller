@@ -9,12 +9,12 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.test import TestCase
 
-from nodes.models import Node, DirectIface
-from resources.models import Resource
-from users.models import Group, User
+from controller.apps.nodes.models import Node, DirectIface
+from controller.apps.resources.models import Resource
+from controller.apps.users.models import Group, User
 
 # use absolute import because of assertRaises!
-from slices.exceptions import VlanAllocationError
+from controller.apps.slices.exceptions import VlanAllocationError
 from .ifaces import IsolatedIface, Pub4Iface, Pub6Iface
 from .models import Slice, Sliver
 

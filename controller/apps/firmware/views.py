@@ -7,9 +7,9 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 from controller.admin.utils import get_modeladmin
-from nodes.models import Node
+from controller.apps.nodes.models import Node
 
-from firmware.models import Build
+from .models import Build
 
 
 def build_info_view(request, node_id):

@@ -74,7 +74,7 @@ AdminReadonlyField.__init__ = __init__
 # Testbed admin class
 from controller.models import Testbed, TestbedParams
 from controller.utils.singletons.admin import SingletonModelAdmin
-from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from controller.apps.permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 class TestbedParamsInline(PermissionTabularInline):
     model = TestbedParams

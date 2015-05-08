@@ -4,7 +4,8 @@ from django.test import TestCase
 from controller.core.validators import (FileExtValidator,
     validate_net_iface_name_with_vlan, validate_ssh_pubkey)
 from controller.utils import decode_version
-from users.models import User
+from controller.apps.firmware.models import BaseImage
+from controller.apps.users.models import User
 
 
 class AuthenticatedTestCase(TestCase):

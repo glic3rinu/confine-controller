@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions.admin import PermissionGenericTabularInline
+from controller.apps.permissions.admin import PermissionGenericTabularInline
 
 from .models import MgmtNetConf
 

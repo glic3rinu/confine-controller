@@ -6,9 +6,9 @@ import unittest
 from django.test import LiveServerTestCase, TestCase
 from django.utils import timezone
 
-from nodes.models import Node, NodeApi
-from slices.models import Slice, Sliver
-from users.models import Group
+from controller.apps.nodes.models import Node, NodeApi
+from controller.apps.slices.models import Slice, Sliver
+from controller.apps.users.models import Group
 
 from .helpers import (extract_disk_available, extract_node_software_version,
     sizeof_fmt)

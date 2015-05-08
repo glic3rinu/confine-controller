@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from nodes.models import Node
-from permissions import Permission, RelatedPermission
+from controller.apps.nodes.models import Node
+from controller.apps.permissions import Permission, RelatedPermission
 
 from .models import Build, NodeBuildFile
 

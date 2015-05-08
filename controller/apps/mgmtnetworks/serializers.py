@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from api import api, serializers
-from nodes.models import Server, Node
+from controller.apps.api import api, serializers
+from controller.apps.nodes.models import Server, Node
 
 from .models import MgmtNetConf
 

@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 from rest_framework import serializers
 
-from api import api
-from nodes.models import Server, Node
+from controller.apps.api import api
+from controller.apps.nodes.models import Server, Node
 
 from .models import CnHost
 

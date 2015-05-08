@@ -42,11 +42,11 @@ class Group(models.Model):
         super(Group, self).save(*args, **kwargs)
         if not original: return
         if original.allow_slices and not self.allow_slices:
-            from slices.models import Slice
+            from controller.apps.slices.models import Slice
             Slice.objects.filter(group=self, \
                 set_state=Slice.START).update(set_state=Slice.DEPLOY)
         if original.allow_nodes and not self.allow_nodes:
-            from nodes.models import Node
+            from controller.apps.nodes.models import Node
             Node.objects.filter(group=self, \
                 set_state=Node.PRODUCTION).update(set_state=Node.SAFE)
     @property

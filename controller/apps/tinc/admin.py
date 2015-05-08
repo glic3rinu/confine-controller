@@ -10,9 +10,9 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeListDefaultFilter
 from controller.admin.utils import insertattr, admin_link, wrap_admin_view
 from controller.forms.widgets import ReadOnlyWidget
-from mgmtnetworks.admin import MgmtNetConfInline
-from nodes.models import Island, Node, Server
-from permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
+from controller.apps.mgmtnetworks.admin import MgmtNetConfInline
+from controller.apps.nodes.models import Island, Node, Server
+from controller.apps.permissions.admin import (PermissionGenericTabularInline, PermissionTabularInline,
     PermissionModelAdmin)
 
 from .filters import MyHostsListFilter, MyTincAddressListFilter

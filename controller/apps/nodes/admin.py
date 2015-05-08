@@ -13,10 +13,10 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import colored, admin_link, docstring_as_help_tip
 from controller.core.exceptions import InvalidMgmtAddress
-from mgmtnetworks.admin import MgmtNetConfInline
-from mgmtnetworks.utils import reverse as mgmt_reverse
-from permissions.admin import PermissionModelAdmin, PermissionTabularInline
-from users.helpers import filter_group_queryset
+from controller.apps.mgmtnetworks.admin import MgmtNetConfInline
+from controller.apps.mgmtnetworks.utils import reverse as mgmt_reverse
+from controller.apps.permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from controller.apps.users.helpers import filter_group_queryset
 
 from .actions import request_cert, reboot_selected
 from .filters import MyNodesListFilter, NodesPub4IfaceListFilter

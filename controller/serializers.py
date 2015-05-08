@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from api import serializers
+from controller.apps.api import serializers
 from controller.models import Testbed, TestbedParams
 
 class TestbedParamsSerializer(serializers.ModelSerializer):

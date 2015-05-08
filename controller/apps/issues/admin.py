@@ -13,7 +13,7 @@ from markdown import markdown
 
 from controller.admin import ChangeViewActions, ChangeListDefaultFilter
 from controller.admin.utils import (get_admin_link, colored, wrap_admin_view, display_timesince)
-from permissions.admin import PermissionTabularInline, PermissionModelAdmin
+from controller.apps.permissions.admin import PermissionTabularInline, PermissionModelAdmin
 
 from .actions import (reject_tickets, resolve_tickets, take_tickets,close_tickets,
     mark_as_unread, mark_as_read, set_default_queue)

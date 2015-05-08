@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 from controller.admin.utils import insertattr
-from nodes.models import Node
-from permissions.admin import PermissionGenericTabularInline
-from slices.models import Slice
-from users.models import User, Group
+from controller.apps.nodes.models import Node
+from controller.apps.permissions.admin import PermissionGenericTabularInline
+from controller.apps.slices.models import Slice
+from controller.apps.users.models import User, Group
 
 from .models import SfaObject
 

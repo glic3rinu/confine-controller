@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from slices.models import Slice
+from controller.apps.slices.models import Slice
 from . import ResourcePlugin, settings
 
 

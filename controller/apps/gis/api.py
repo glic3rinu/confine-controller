@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from api import generics
-from api.utils import insert_ctl
-from nodes.api import NodeDetail
+from controller.apps.api import generics
+from controller.apps.api.utils import insert_ctl
+from controller.apps.nodes.api import NodeDetail
 
 from .models import NodeGeolocation
 from .serializers import NodeGeolocationSerializer

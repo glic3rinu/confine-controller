@@ -18,7 +18,7 @@ def update_state(build, progress, next, description):
 def build(build_id, *args, **kwargs):
     """ Builds a firmware image for build.node, excluding exclude files """
     # Avoid circular imports
-    from firmware.models import Build, Config
+    from controller.apps.firmware.models import Build, Config
     
     exclude = kwargs.get('exclude', [])
     

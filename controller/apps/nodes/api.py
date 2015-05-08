@@ -9,8 +9,8 @@ from rest_framework.views import APIView
 
 from controller.utils.apps import is_installed
 
-from api import api, generics
-from permissions.api import ApiPermissionsMixin
+from controller.apps.api import api, generics
+from controller.apps.permissions.api import ApiPermissionsMixin
 
 from .models import Island, Node, Server
 from .renderers import (IslandProfileRenderer, NodeProfileRenderer,
@@ -58,7 +58,7 @@ class NodeList(ApiPermissionsMixin, generics.URIListCreateAPIView):
     filter_fields = ('arch', 'set_state', 'group', 'group__name')
     
     def post_save(self, obj, created=False):
-        if created and is_installed('resources'):
+        if created and is_installed('controller.apps.resources'):
             management.call_command('syncresources')
 
 

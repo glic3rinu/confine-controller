@@ -5,7 +5,7 @@ from . import ResourcePlugin
 
 
 class ResourcesConfig(AppConfig):
-    name = 'resources'
+    name = 'controller.apps.resources'
     
     def ready(self):
         for producer_model in ResourcePlugin.get_producers_models():

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from controller.admin.utils import insertattr
-from permissions.admin import PermissionGenericTabularInline
+from controller.apps.permissions.admin import PermissionGenericTabularInline
 
 from . import ResourcePlugin
 from .forms import (ResourceInlineFormSet, ResourceReqInlineFormSet,
@@ -66,6 +66,6 @@ class ResourceReqAdminInline(PermissionGenericTabularInline):
 for producer_model in ResourcePlugin.get_producers_models():
     insertattr(producer_model, 'inlines', ResourceAdminInline)
 
-from slices.admin import SliceSliversAdmin
+from controller.apps.slices.admin import SliceSliversAdmin
 for consumer_model in list(ResourcePlugin.get_consumers_models()) + [SliceSliversAdmin]:
     insertattr(consumer_model, 'inlines', ResourceReqAdminInline, weight=-1)

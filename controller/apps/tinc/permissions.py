@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions import Permission, AllowAllPermission
+from controller.apps.permissions import Permission, AllowAllPermission
 
 from .models import TincHost, Host, TincAddress
 

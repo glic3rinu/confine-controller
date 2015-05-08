@@ -7,7 +7,7 @@ from django.utils.timezone import now
 
 from controller.models.fields import URIField
 from controller.utils.apps import is_installed
-from nodes.models import Node, Server
+from controller.apps.nodes.models import Node, Server
 
 from . import settings
 
@@ -97,9 +97,9 @@ class CnHost(models.Model):
         for field in fields:
             node = self.content_object
             if field == 'gis':
-                if not is_installed('gis'):
-                    raise ImproperlyConfigured("'%s' field cannot be cached from CNDB (gis app is not installed)." % field)
-                from gis.models import NodeGeolocation
+                if not is_installed('controller.apps.gis'):
+                    raise ImproperlyConfigured("'%s' field cannot be cached from CNDB (controller.apps.gis app is not installed)." % field)
+                from controller.apps.gis.models import NodeGeolocation
                 position = cndb.get('attributes').get('position')
                 lat, lon = position.get('lat'), position.get('lon')
                 # update the node info

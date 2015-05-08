@@ -5,7 +5,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 from controller.utils import send_email_template
-from users.models import Group, Roles, User
+from controller.apps.users.models import Group, Roles, User
 
 from .settings import ISSUES_NOTIFY_SUPERUSERS, ISSUES_SUPPORT_EMAILS
 

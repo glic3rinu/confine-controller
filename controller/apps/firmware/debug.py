@@ -5,8 +5,8 @@ from .models import Config
 def debug_build(node, base_image=None, exclude=[]):
     """ 
     Function used for debuging the firmware generation
-        from firmware.debug import debug_build
-        from nodes.models import Node
+        from controller.apps.firmware.debug import debug_build
+        from controller.apps.nodes.models import Node
         debug_build(Node.objects.all()[0])
     """
     config = Config.objects.get()

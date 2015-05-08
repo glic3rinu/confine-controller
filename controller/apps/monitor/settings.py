@@ -31,32 +31,32 @@ RABBITMQ = ('rabbitmq', '[./]*rabbit', 2, 2)
 
 
 MONITOR_MONITORS = getattr(settings, 'MONITOR_MONITORS', (
-    ('monitor.monitors.NumProcessesMonitor', {
+    ('controller.apps.monitor.monitors.NumProcessesMonitor', {
             'processes': (TINC, CELERY_W1, CELERY_W2, CELERYEV, CELERYBEAT,
                           POSTGRESQL, RABBITMQ)
         }),
-    ('monitor.monitors.LoadAvgMonitor',),
-    ('monitor.monitors.FreeMonitor',),
-#    ('monitor.monitors.Apache2StatusMonitor', {
+    ('controller.apps.monitor.monitors.LoadAvgMonitor',),
+    ('controller.apps.monitor.monitors.FreeMonitor',),
+#    ('controller.apps.monitor.monitors.Apache2StatusMonitor', {
 #            'url': 'http://localhost/server-status',
 #        }),
-#    ('monitor.monitors.NginxStatusMonitor', {
+#    ('controller.apps.monitor.monitors.NginxStatusMonitor', {
 #            'url': 'https://controller.confine-project.eu/status',
 #        }),
-#    ('monitor.monitors.DebugPageLoadTimeMonitor', {
+#    ('controller.apps.monitor.monitors.DebugPageLoadTimeMonitor', {
 #            'name': 'indexpageload',
 #            'url': 'http://127.0.0.1/admin/'
 #        }),
-#    ('monitor.monitors.DebugPageLoadTimeMonitor', {
+#    ('controller.apps.monitor.monitors.DebugPageLoadTimeMonitor', {
 #            'name': 'apiuserpageload',
 #            'url': 'http://127.0.0.1/api/nodes/'
 #        }),
-#    ('monitor.monitors.BasicNetMonitor', {'iface': 'confine'}),
-    ('monitor.monitors.ProcessesCPUMonitor', {
+#    ('controller.apps.monitor.monitors.BasicNetMonitor', {'iface': 'confine'}),
+    ('controller.apps.monitor.monitors.ProcessesCPUMonitor', {
             'processes': (TINC, CELERY_W1, CELERY_W2, POSTGRESQL, RABBITMQ),
         }),
-    ('monitor.monitors.ProcessesMemoryMonitor', {
+    ('controller.apps.monitor.monitors.ProcessesMemoryMonitor', {
             'processes': (TINC, CELERY_W1, CELERY_W2, POSTGRESQL),
         }),
-    ('monitor.monitors.DiskFreeMonitor',),
+    ('controller.apps.monitor.monitors.DiskFreeMonitor',),
 ))

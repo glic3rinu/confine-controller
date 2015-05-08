@@ -14,9 +14,9 @@ from controller.admin import ChangeViewActions
 from controller.admin.utils import (get_admin_link, colored, admin_link, wrap_admin_view,
     action_to_view, display_timesince)
 from controller.utils.html import monospace_format, MONOSPACE_FONTS
-from nodes.admin import NodeAdmin
-from nodes.models import Node
-from permissions.admin import PermissionModelAdmin
+from controller.apps.nodes.admin import NodeAdmin
+from controller.apps.nodes.models import Node
+from controller.apps.permissions.admin import PermissionModelAdmin
 
 from .actions import ( execute_operation, run_instance, kill_instance,
     revoke_instance, manage_instances )

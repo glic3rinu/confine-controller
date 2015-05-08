@@ -10,8 +10,8 @@ from controller.admin.utils import (get_modeladmin, get_admin_link, insertattr,
     colored, wrap_admin_view, docstring_as_help_tip)
 from controller.utils.html import monospace_format
 from controller.utils.singletons.admin import SingletonModelAdmin
-from nodes.models import Node
-from permissions.admin import PermissionTabularInline
+from controller.apps.nodes.models import Node
+from controller.apps.permissions.admin import PermissionTabularInline
 
 from .actions import get_firmware, sync_plugins
 from .models import (BaseImage, Config, ConfigUCI, Build, ConfigFile, ConfigPlugin,

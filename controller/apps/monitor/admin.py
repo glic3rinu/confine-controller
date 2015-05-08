@@ -9,7 +9,7 @@ from django.template.response import TemplateResponse
 
 from controller.admin.utils import get_modeladmin, wrap_admin_view
 from controller.utils.time import group_by_interval
-from nodes.models import Server
+from controller.apps.nodes.models import Server
 
 from .models import TimeSerie
 

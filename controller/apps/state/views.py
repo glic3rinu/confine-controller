@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from users.models import Group
+from controller.apps.users.models import Group
 from .helpers import get_report_data, get_node_version_data
 
 def report_view(request):

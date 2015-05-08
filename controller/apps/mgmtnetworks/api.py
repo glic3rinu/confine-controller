@@ -5,9 +5,9 @@ from rest_framework import status, exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.utils import insert_ctl
-from nodes.api import NodeDetail
-from nodes.models import Node
+from controller.apps.api.utils import insert_ctl
+from controller.apps.nodes.api import NodeDetail
+from controller.apps.nodes.models import Node
 
 from .validators import validate_csr
 

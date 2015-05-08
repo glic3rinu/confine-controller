@@ -1,5 +1,5 @@
 from django import template
-from users.models import JoinRequest
+from controller.apps.users.models import JoinRequest
 
 register = template.Library()
 

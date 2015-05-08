@@ -5,7 +5,7 @@ from rest_framework import status, exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from nodes.models import Node
+from controller.apps.nodes.models import Node
 
 
 class CacheCNDB(APIView):

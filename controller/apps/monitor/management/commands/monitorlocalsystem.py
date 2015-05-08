@@ -6,8 +6,8 @@ from optparse import make_option
 from django.core.mail import mail_admins, get_connection
 from django.core.management.base import BaseCommand
 
-from monitor import settings
-from monitor.models import TimeSerie
+from controller.apps.monitor.import settings
+from controller.apps.monitor.models import TimeSerie
 
 
 class Command(BaseCommand):

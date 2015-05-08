@@ -7,7 +7,7 @@ from django.utils import timezone
 @periodic_task(name="slices.clean_expired_slices", run_every=crontab(minute=0, hour=0))
 def clean_expired_slices():
     """ Delete expired slices """
-    from slices.models import Slice
+    from controller.apps.slices.models import Slice
     now = timezone.now()
     
     # Delete expired slices
@@ -23,7 +23,7 @@ def clean_expired_slices():
 
 @task(name="slices.force_slice_update")
 def force_slice_update(slice_id):
-    from slices.models import Slice
+    from controller.apps.slices.models import Slice
     slice = Slice.objects.get(pk=slice_id)
     for sliver in slice.slivers.all():
         force_sliver_update(sliver.pk)
@@ -31,6 +31,6 @@ def force_slice_update(slice_id):
 
 @task(name="slices.force_sliver_update")
 def force_sliver_update(sliver_id):
-    from slices.models import Sliver
+    from controller.apps.slices.models import Sliver
     sliver = Sliver.objects.get(pk=sliver_id)
     return "NOT IMPLEMENTED"

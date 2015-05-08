@@ -13,8 +13,8 @@ from urlparse import urlparse
 from controller.utils.apps import is_installed, remove_app
 from controller.tests import AuthenticatedTestCase
 
-from users.models import Group, Roles, User, ResourceRequest, JoinRequest
-from users.registration.forms import RegistrationFormUniqueEmail as RegistrationForm
+from .models import Group, Roles, User, ResourceRequest, JoinRequest
+from .registration.forms import RegistrationFormUniqueEmail as RegistrationForm
 
 
 def url_path(url):

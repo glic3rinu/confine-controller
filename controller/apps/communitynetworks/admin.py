@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
 from controller.admin.utils import insertattr, insert_change_view_action, link
-from nodes.models import Server, Node
-from permissions.admin import PermissionGenericTabularInline
+from controller.apps.nodes.models import Server, Node
+from controller.apps.permissions.admin import PermissionGenericTabularInline
 
 from .actions import cache_node_db
 from .models import CnHost

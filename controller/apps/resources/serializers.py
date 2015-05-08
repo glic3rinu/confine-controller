@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from api import api, serializers
+from controller.apps.api import api, serializers
 from controller.models import Testbed
 from controller.api import TestbedSerializer
-from slices.models import Slice
+from controller.apps.slices.models import Slice
 
 from . import ResourcePlugin
 from .models import Resource, ResourceReq

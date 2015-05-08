@@ -13,8 +13,8 @@ except (ImportError, AttributeError):
     pass
 
 ## Add South introspect rules for privatefiles.PrivateField
-if 'privatefiles' and 'south' in settings.INSTALLED_APPS:
-    from privatefiles import PrivateFileField
+if 'controller.apps.privatefiles' and 'south' in settings.INSTALLED_APPS:
+    from controller.apps.privatefiles import PrivateFileField
     from south.modelsinspector import add_introspection_rules
     rules = [((PrivateFileField,), [], {"attachment" : ["attachment", {"default": True}],},)]
     add_introspection_rules(rules, ["^privatefiles\.models\.fields\.PrivateFileField"])

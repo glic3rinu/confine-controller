@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from api import api, serializers
-from nodes.models import Server, Node
-from mgmtnetworks.serializers import MgmtNetConfRelatedField
+from controller.apps.api import api, serializers
+from controller.apps.nodes.models import Server, Node
+from controller.apps.mgmtnetworks.serializers import MgmtNetConfRelatedField
 
 from .models import TincAddress, TincHost, Host
 

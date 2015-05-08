@@ -41,4 +41,4 @@ class FirmwarePlugin(object):
 modules = glob.glob(os.path.join(os.path.dirname(__file__), '*.py'))
 for module in modules:
     module_name = os.path.basename(module)[:-3]
-    exec 'from firmware.plugins.%s import *' % module_name
+    exec 'from controller.apps.firmware.plugins.%s import *' % module_name

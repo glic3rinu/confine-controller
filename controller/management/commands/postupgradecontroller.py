@@ -88,11 +88,11 @@ class Command(BaseCommand):
             # Pre-upgrade operations (version specific)
             if version < 835:
                 # prevent schema migrations from failing
-                if is_installed('firmware'):
-                    from firmware.models import Build
+                if is_installed('controller.apps.firmware'):
+                    from controller.apps.firmware.models import Build
                     Build.objects.filter(base_image=None).update(base_image='')
             if version <= 902:
-                if is_installed('maintenance'):
+                if is_installed('controller.apps.maintenance'):
                     # Apply losed migrations
                     from south.models import MigrationHistory
                     migrated = MigrationHistory.objects.filter(app_name='maintenance').exists()
@@ -146,11 +146,11 @@ class Command(BaseCommand):
             
             run("python manage.py syncdb --noinput")
             run("python manage.py migrate --noinput")
-            if is_installed('firmware'):
+            if is_installed('controller.apps.firmware'):
                 run("python manage.py syncfirmwareplugins")
-            if is_installed('notifications'):
+            if is_installed('controller.apps.notifications'):
                 run("python manage.py syncnotifications")
-            if is_installed('resources'):
+            if is_installed('controller.apps.resources'):
                 run("python manage.py syncresources")
             if options.get('restart'):
                 run("python manage.py restartservices")
@@ -168,7 +168,7 @@ class Command(BaseCommand):
             deprecate_periodic_tasks(('state.ping',))
         if version < 809:
             # Add PKI directories
-            from pki import ca
+            from controller.apps.pki.import ca
             from controller.utils.paths import get_site_root
             site_root = get_site_root()
             username = run("stat -c %%U %s" % site_root)
@@ -193,7 +193,7 @@ class Command(BaseCommand):
                 'introduced in 0.8.38.\nIt is strongly recommended to upgrade by\n'
                 '  > sudo python manage.py setupceleryd\n')
             # Deprecate x86 and amd64 architectures
-            from nodes.models import Node
+            from controller.apps.nodes.models import Node
             Node.objects.filter(arch='x86').update(arch='i686')
             Node.objects.filter(arch='amd64').update(arch='x86_64')
             upgrade_notes.append('In order to support Base authentication while downloading '
@@ -216,8 +216,8 @@ class Command(BaseCommand):
             from django.utils import translation
             translation.activate('en-us')
             # Change template types for more generic ones
-            from slices.models import Template
-            from slices.settings import SLICES_TEMPLATE_TYPES
+            from controller.apps.slices.models import Template
+            from controller.apps.slices.settings import SLICES_TEMPLATE_TYPES
             template_types = [ t[0] for t in SLICES_TEMPLATE_TYPES ]
             if 'debian' in template_types:
                 Template.objects.filter(type='debian6').update(type='debian')
@@ -227,7 +227,7 @@ class Command(BaseCommand):
             deprecate_periodic_tasks(('state.nodestate', 'state.sliverstate'))
         if version <= 907:
             # Generate sha256
-            from slices.models import Template
+            from controller.apps.slices.models import Template
             for template in Template.objects.all():
                 template.save()
             upgrade_notes.append("It is extremly recommended to update your database "
@@ -238,7 +238,7 @@ class Command(BaseCommand):
                 "into DATABASES setting within <project_name>/<project_name>/settings.py")
         if version <= 1003:
             # Update firmware configuration after Island refactor (#264)
-            from firmware.models import ConfigFile
+            from controller.apps.firmware.models import ConfigFile
             try:
                 cfg_file = ConfigFile.objects.get(path__contains="node.tinc.connect_to")
             except (ConfigFile.DoesNotExist, ConfigFile.MultipleObjectsReturned):
@@ -255,8 +255,8 @@ class Command(BaseCommand):
             # perform raw SQL querie because models hasn't been
             # reloaded yet and cannot access e.g. server.api
             from django.db import connection
-            from nodes.models import Server
-            from pki import ca
+            from controller.apps.nodes.models import Server
+            from controller.apps.pki.import ca
             
             server_id = Server.objects.order_by('id').first().pk
             try:

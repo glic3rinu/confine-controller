@@ -2,8 +2,8 @@ from django.contrib.gis.shortcuts import render_to_kml
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 
-from nodes.models import Node
-from state.models import State
+from controller.apps.nodes.models import Node
+from controller.apps.state.models import State
 
 from .settings import GIS_MAP_CENTER, GIS_MAP_ZOOM
 

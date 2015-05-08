@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions import RelatedPermission
+from controller.apps.permissions import RelatedPermission
 
 from .models import Resource, ResourceReq
 

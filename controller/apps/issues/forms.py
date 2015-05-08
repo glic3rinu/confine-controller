@@ -5,7 +5,7 @@ from markdown import markdown
 
 from controller.forms.utils import admin_link
 from controller.forms.widgets import ReadOnlyWidget, ShowText
-from users.models import User
+from controller.apps.users.models import User
 
 from .models import Queue, Ticket
 

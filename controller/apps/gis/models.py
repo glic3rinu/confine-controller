@@ -2,7 +2,7 @@ from django_google_maps import fields as map_fields
 
 from django.db import models
 
-from nodes.models import Node
+from controller.apps.nodes.models import Node
 
 
 class Geolocation(models.Model):

@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 
-from nodes.models import ServerApi
+from controller.apps.nodes.models import ServerApi
 
 from .models import BaseImage, Config
 

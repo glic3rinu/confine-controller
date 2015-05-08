@@ -32,7 +32,7 @@ class CustomMenu(Menu):
             items.MenuItem('Dashboard', reverse('admin:index')),
             items.Bookmarks(),]
         
-        if is_installed('nodes') and user.has_module_perms('nodes'):
+        if is_installed('controller.apps.nodes') and user.has_module_perms('nodes'):
             node_items = [
                 items.MenuItem('Nodes',
                     reverse('admin:nodes_node_changelist')),
@@ -41,11 +41,11 @@ class CustomMenu(Menu):
                 items.MenuItem('Islands',
                     reverse('admin:nodes_island_changelist')),
             ]
-            if is_installed('state'):
+            if is_installed('controller.apps.state'):
                 node_items.append(
                     items.MenuItem('Summary', reverse('admin:state_report'))
                 )
-            if is_installed('gis'):
+            if is_installed('controller.apps.gis'):
                 node_items.insert(
                     1,
                     items.MenuItem('Nodes Map', reverse('gis_map'))
@@ -55,9 +55,9 @@ class CustomMenu(Menu):
                     reverse('admin:nodes_node_changelist'),
                     children=node_items))
         
-        if is_installed('slices') and user.has_module_perms('slices'):
+        if is_installed('controller.apps.slices') and user.has_module_perms('slices'):
             slice_children = sliver_children = None
-            if is_installed('state'):
+            if is_installed('controller.apps.state'):
                 slice_children = [
                     items.MenuItem('Status Overview',
                         reverse('admin:state_slices')),
@@ -79,7 +79,7 @@ class CustomMenu(Menu):
                         reverse('admin:slices_template_changelist')),
                 ]))
         
-        if is_installed('tinc'):
+        if is_installed('controller.apps.tinc'):
             if user.has_module_perms('tinc'):
                 self.children.append(items.MenuItem('Tinc',
                     reverse('admin:app_list', args=['tinc']),
@@ -119,7 +119,7 @@ class CustomMenu(Menu):
                     children=user_items)
             )
             
-            if is_installed('maintenance'):
+            if is_installed('controller.apps.maintenance'):
                 maintenance_items = [
                     items.MenuItem('Operation',
                         reverse('admin:maintenance_operation_changelist')),
@@ -132,7 +132,7 @@ class CustomMenu(Menu):
                         children=maintenance_items)
                     )
             
-            if is_installed('issues'):
+            if is_installed('controller.apps.issues'):
                 issues_items = [
                     items.MenuItem('Tickets',
                         reverse('admin:issues_ticket_changelist')),
@@ -145,7 +145,7 @@ class CustomMenu(Menu):
                         children=issues_items)
                     )
             
-            if is_installed('firmware'):
+            if is_installed('controller.apps.firmware'):
                 firmware_items = [
                     items.MenuItem('Configuration',
                         reverse('admin:firmware_config_change')),
@@ -158,7 +158,7 @@ class CustomMenu(Menu):
                         children=firmware_items)
                     )
             
-            if is_installed('notifications'):
+            if is_installed('controller.apps.notifications'):
                 admin_item.children.append(
                     items.MenuItem('Notifications',
                         reverse('admin:notifications_notification_changelist')),
@@ -171,7 +171,7 @@ class CustomMenu(Menu):
                 items.MenuItem('Groups',
                     reverse('admin:users_group_changelist')),
                 ]
-            if is_installed('issues'):
+            if is_installed('controller.apps.issues'):
                 admin_items.append(
                     items.MenuItem('Tickets',
                         reverse('admin:issues_ticket_changelist'))
@@ -181,7 +181,7 @@ class CustomMenu(Menu):
         
         self.children.append(admin_item)
         
-        if is_installed('api'):
+        if is_installed('controller.apps.api'):
             self.children.append(items.MenuItem('API', api_link(context)))
         
         self.children.append(items.MenuItem('Documentation',

@@ -4,9 +4,9 @@ from datetime import timedelta
 from django.db.models import Q
 from django.utils import timezone
 
-from nodes.models import Node
-from notifications import Notification
-from users.models import Group, Roles
+from controller.apps.nodes.models import Node
+from controller.apps.notifications import Notification
+from controller.apps.users.models import Group, Roles
 
 from .models import State
 from .settings import STATE_NODE_OFFLINE_WARNING, STATE_NODE_SAFE_WARNING

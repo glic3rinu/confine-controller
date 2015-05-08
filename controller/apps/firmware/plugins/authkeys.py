@@ -5,10 +5,10 @@ from django import forms
 from controller.utils.html import MONOSPACE_FONTS
 from controller.utils.system import run
 
-from api import serializers
-from firmware.models import NodeKeys
-from firmware.plugins import FirmwarePlugin
-from firmware.settings import FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH as keys_path
+from controller.apps.api import serializers
+from controller.apps.firmware.models import NodeKeys
+from controller.apps.firmware.plugins import FirmwarePlugin
+from controller.apps.firmware.settings import FIRMWARE_PLUGINS_INITIAL_AUTH_KEYS_PATH as keys_path
 
 
 def process_data(node, data):
@@ -64,7 +64,7 @@ class AuthKeysPlugin(FirmwarePlugin):
             
             def validate_ssh_auth(self, attrs, source):
                 # For some reason is_valid doesn't call field validators!
-                from firmware.validators import validate_ssh_auth
+                from controller.apps.firmware.validators import validate_ssh_auth
                 validate_ssh_auth(attrs.get(source, ''))
                 return attrs
             

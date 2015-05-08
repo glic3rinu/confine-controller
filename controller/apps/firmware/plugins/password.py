@@ -8,8 +8,8 @@ from django import forms
 
 from controller.utils.system import run
 
-from api import serializers
-from firmware.plugins import FirmwarePlugin
+from controller.apps.api import serializers
+from controller.apps.firmware.plugins import FirmwarePlugin
 
 def process_data(node, data):
     # Disable and reset root password

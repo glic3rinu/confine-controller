@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from permissions import Permission
-from users.models import Group
+from controller.apps.permissions import Permission
+from controller.apps.users.models import Group
 
 from .models import SfaObject
 

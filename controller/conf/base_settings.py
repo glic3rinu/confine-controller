@@ -103,7 +103,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'state.middlewares.NodePullHeartBeat',
+    'controller.apps.state.middlewares.NodePullHeartBeat',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS =(
@@ -125,30 +125,30 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     # confine-controller apps
     'controller',
-    'api',
-    'nodes',
-    'slices',
-    'issues',
-    'state',
-    'mgmtnetworks',
-    'communitynetworks',
-    'pings',
-    'tinc', # after pings to avoid cannot import name Host
-#    'sfa',
-    'firmware',
-    'gis',
-    'users',
-    'pki',
-    'maintenance',
-    'notifications',
-    'monitor',
-    'resources',
+    'controller.apps.api',
+    'controller.apps.nodes',
+    'controller.apps.slices',
+    'controller.apps.issues',
+    'controller.apps.state',
+    'controller.apps.mgmtnetworks',
+    'controller.apps.communitynetworks',
+    'controller.apps.pings',
+    'controller.apps.tinc', # after pings to avoid cannot import name Host
+#    'controller.apps.sfa',
+    'controller.apps.firmware',
+    'controller.apps.gis',
+    'controller.apps.users',
+    'controller.apps.pki',
+    'controller.apps.maintenance',
+    'controller.apps.notifications',
+    'controller.apps.monitor',
+    'controller.apps.resources',
+    'controller.apps.privatefiles',
     
     # Third-party apps
     'django_extensions',
     'djcelery',
     'djcelery_email',
-    'privatefiles',
     'registration',
     'captcha', 
     'django_google_maps',
@@ -169,14 +169,14 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     
     # confine-controller apps that should load last
-    'permissions', # because of overriding admin templates
+    'controller.apps.permissions', # because of overriding admin templates
 )
 
 AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
-    'permissions.auth.TestbedPermissionBackend',
-    'users.auth.EmailBackend',
+    'controller.apps.permissions.auth.TestbedPermissionBackend',
+    'controller.apps.users.auth.EmailBackend',
 ]
 
 # Email config
@@ -202,31 +202,31 @@ FLUENT_DASHBOARD_ICON_THEME = '../controller/icons'
 FLUENT_DASHBOARD_APP_GROUPS = (
     ('Nodes', {
         'models': (
-            'nodes.*',
+            'controller.apps.nodes.*',
         ),
         'collapsible': True,
     }),
     ('Slices', {
         'models': (
-            'slices.*',
+            'controller.apps.slices.*',
         ),
         'collapsible': True,
     }),
     ('Administration', {
         'models': (
-            'users.models.User',
-            'users.models.Group',
-            'issues.models.Ticket',
+            'controller.apps.users.models.User',
+            'controller.apps.users.models.Group',
+            'controller.apps.issues.models.Ticket',
             'djcelery.models.TaskState',
-            'firmware.models.Config',
-            'maintenance.models.Operation',
-            'notifications.models.Notification',
+            'controller.apps.firmware.models.Config',
+            'controller.apps.maintenance.models.Operation',
+            'controller.apps.notifications.models.Notification',
         ),
         'collapsible': True,
     }),
     ('Tinc', {
         'models': (
-            'tinc.*',
+            'controller.apps.tinc.*',
         ),
         'collapsible': True,
     }),
@@ -296,15 +296,15 @@ SOUTH_MIGRATION_MODULES = {
 # rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
-        'api.filters.ControllerFilterBackend',),
+        'controller.apps.api.filters.ControllerFilterBackend',),
     'DEFAULT_PERMISSION_CLASSES': (
-        'permissions.api.TestbedPermissionBackend',
+        'controller.apps.permissions.api.TestbedPermissionBackend',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'DEFAULT_CONTENT_NEGOTIATION_CLASS': 'api.negotiation.ProfileContentNegotiation'
+    'DEFAULT_CONTENT_NEGOTIATION_CLASS': 'controller.apps.api.negotiation.ProfileContentNegotiation'
 #    'PAGINATE_BY': 10,
 #    'PAGINATE_BY_PARAM': 'page_size',
 }

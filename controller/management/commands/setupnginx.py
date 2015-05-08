@@ -8,7 +8,7 @@ from django.utils.six.moves import input
 from controller.utils.paths import get_project_root, get_site_root, get_project_name
 from controller.utils.system import run, check_root, get_default_celeryd_username
 
-from pki import ca
+from controller.apps.pki.import ca
 
 
 class Command(BaseCommand):
@@ -33,7 +33,7 @@ class Command(BaseCommand):
         interactive = options.get('interactive')
         
         # Avoid import errors
-        from nodes.models import Server
+        from controller.apps.nodes.models import Server
         server = Server.objects.first()
         context = {
             'project_name': get_project_name(),

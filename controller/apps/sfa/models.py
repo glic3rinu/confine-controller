@@ -4,9 +4,9 @@ from django.db import models
 
 from controller.core.validators import validate_uuid, validate_rsa_pubkey
 from controller.models.fields import RSAPublicKeyField
-from nodes.models import Node
-from slices.models import Slice
-from users.models import User, Group
+from controller.apps.nodes.models import Node
+from controller.apps.slices.models import Slice
+from controller.apps.users.models import User, Group
 
 
 class SfaObject(models.Model):

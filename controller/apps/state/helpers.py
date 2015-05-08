@@ -10,10 +10,10 @@ from django.utils import timezone
 
 from controller.utils.ssl import SSLAdapter
 
-from nodes.models import Node
-from pki import ca
-from slices.models import Slice, Sliver
-from users.models import Group
+from controller.apps.nodes.models import Node
+from controller.apps.pki import ca
+from controller.apps.slices.models import Slice, Sliver
+from controller.apps.users.models import Group
 
 from .settings import (STATE_FETCH_TIMEOUT_CONNECT, STATE_FETCH_TIMEOUT_READ,
     STATE_NODE_SOFT_VERSION_URL, STATE_NODE_SOFT_VERSION_NAME)

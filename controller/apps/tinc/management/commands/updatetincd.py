@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from tinc.tasks import update_tincd
+from controller.apps.tinc.tasks import update_tincd
 
 
 class Command(BaseCommand):

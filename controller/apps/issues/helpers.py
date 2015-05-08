@@ -7,7 +7,7 @@ def filter_actions(modeladmin, ticket, request):
     if ticket.state == modeladmin.model.CLOSED:
         del_actions = actions
     else:
-        from issues.actions import action_map
+        from controller.apps.issues.actions import action_map
         del_actions = [action_map.get(ticket.state, None)]
         if ticket.owner == request.user:
             del_actions.append('take')

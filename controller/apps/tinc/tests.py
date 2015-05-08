@@ -9,8 +9,8 @@ from django.db import connection
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from nodes.models import Island, Server
-from users.models import User
+from controller.apps.nodes.models import Island, Server
+from controller.apps.users.models import User
 
 from .models import get_default_gateway, TincAddress
 

@@ -15,11 +15,11 @@ from controller.admin.utils import (colored, admin_link, link, get_admin_link,
     insertattr, get_modeladmin, wrap_admin_view, docstring_as_help_tip)
 from controller.admin.widgets import LinkedRelatedFieldWidgetWrapper
 from controller.core.exceptions import DisallowedSliverCreation
-from nodes.admin import NodeAdmin
-from nodes.models import Node
-from permissions.admin import (PermissionModelAdmin, PermissionStackedInline,
+from controller.apps.nodes.admin import NodeAdmin
+from controller.apps.nodes.models import Node
+from controller.apps.permissions.admin import (PermissionModelAdmin, PermissionStackedInline,
     PermissionTabularInline)
-from users.helpers import filter_group_queryset
+from controller.apps.users.helpers import filter_group_queryset
 
 from .actions import renew_selected_slices, reset_selected, update_selected, create_slivers
 from .filters import MySlicesListFilter, MySliversListFilter, SliverSetStateListFilter

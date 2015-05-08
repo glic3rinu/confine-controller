@@ -12,9 +12,9 @@ from M2Crypto import BIO, RSA
 from controller import settings
 from controller.utils import update_settings
 from controller.utils.system import check_root, run, get_default_celeryd_username
-from nodes.models import Server
+from controller.apps.nodes.models import Server
 
-from tinc.settings import (TINC_NET_NAME, TINC_PORT_DFLT,
+from controller.apps.tinc.settings import (TINC_NET_NAME, TINC_PORT_DFLT,
     TINC_TINCD_ROOT, TINC_TINCD_BIN, TINC_TINCD_SEND_HUP)
 
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
     @transaction.atomic
     @check_root
     def handle(self, *args, **options):
-        from tinc.models import TincHost, TincAddress
+        from controller.apps.tinc.models import TincHost, TincAddress
         interactive = options.get('interactive')
         username = options.get('username')
         

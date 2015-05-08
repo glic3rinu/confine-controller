@@ -14,7 +14,7 @@ from django.views.generic import RedirectView
 from controller.admin.utils import display_timesince, wrap_admin_view
 from controller.core.serializers import DecimalJSONEncoder
 from controller.utils.apps import is_installed
-from permissions.admin import PermissionModelAdmin
+from controller.apps.permissions.admin import PermissionModelAdmin
 
 from .models import Ping
 from .settings import PING_INSTANCES

@@ -5,8 +5,8 @@ from IPy import IP
 
 from controller import settings as controller_settings
 from controller.utils.ip import split_len, int_to_hex_str
-from nodes.models import Node, Server
-from pki import ca
+from controller.apps.nodes.models import Node, Server
+from controller.apps.pki import ca
 
 
 def get_mgmt_net(self):

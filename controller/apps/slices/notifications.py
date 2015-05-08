@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 from django.utils import timezone
 
-from notifications import Notification
-from users.models import Roles
+from controller.apps.notifications import Notification
+from controller.apps.users.models import Roles
 
 from .models import Slice
 from .settings import SLICES_SLICE_EXP_WARN

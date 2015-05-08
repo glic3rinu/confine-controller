@@ -13,8 +13,8 @@ from django.test import skipUnlessDBFeature, TestCase
 from django.utils import timezone
 
 from controller.core.exceptions import OperationLocked
-from users.models import Group, User
-from nodes.models import Node
+from controller.apps.nodes.models import Node
+from controller.apps.users.models import Group, User
 
 from .models import Ping
 from .tasks import ping as ping_task

@@ -17,15 +17,15 @@ from django.template import Context
 from django.utils.functional import cached_property
 from django_transaction_signals import defer
 from djcelery.models import TaskState
-from privatefiles import PrivateFileField
 
 from controller import settings as controller_settings
 from controller.core.validators import FileExtValidator, validate_name
 from controller.models.fields import MultiSelectField
 from controller.utils.auth import any_auth_method
 from controller.utils.functional import cached
-from nodes.models import Node, Server
-from nodes.settings import NODES_NODE_ARCHS
+from controller.apps.nodes.models import Node, Server
+from controller.apps.nodes.settings import NODES_NODE_ARCHS
+from controller.apps.privatefiles import PrivateFileField
 from controller.utils.plugins.models import PluginModel
 from controller.utils.singletons.models import SingletonModel
 

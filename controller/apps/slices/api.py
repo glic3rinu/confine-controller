@@ -7,8 +7,8 @@ from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api import api, generics
-from permissions.api import ApiPermissionsMixin
+from controller.apps.api import api, generics
+from controller.apps.permissions.api import ApiPermissionsMixin
 
 from .models import Slice, Sliver, Template
 from .renderers import (SliceProfileRenderer, SliverProfileRenderer,

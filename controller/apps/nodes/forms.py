@@ -4,7 +4,7 @@ from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
 from controller.forms.widgets import ShowText
-from mgmtnetworks.validators import validate_csr
+from controller.apps.mgmtnetworks.validators import validate_csr
 
 from .models import NodeApi
 from .settings import NODES_NODE_DIRECT_IFACES_DFLT

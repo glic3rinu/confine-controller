@@ -2,10 +2,10 @@ from __future__ import absolute_import
 
 from controller.core.validators import validate_cert
 
-from api import serializers
-from nodes.models import Server, ServerApi
-from nodes.settings import NODES_NODE_ARCHS
-from tinc.models import TincHost
+from controller.apps.api import serializers
+from controller.apps.nodes.models import Server, ServerApi
+from controller.apps.nodes.settings import NODES_NODE_ARCHS
+from controller.apps.tinc.models import TincHost
 
 from .exceptions import BaseImageNotAvailable
 from .models import BaseImage, Build, Config

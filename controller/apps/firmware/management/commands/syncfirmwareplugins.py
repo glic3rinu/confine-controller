@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from firmware.models import Config, ConfigPlugin
-from firmware.plugins import FirmwarePlugin
+from controller.apps.firmware.models import Config, ConfigPlugin
+from controller.apps.firmware.plugins import FirmwarePlugin
 
 
 class Command(BaseCommand):

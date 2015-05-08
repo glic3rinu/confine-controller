@@ -10,9 +10,9 @@ from controller import settings as controller_settings
 from controller.models.fields import RSAPublicKeyField
 from controller.core.validators import (validate_host_name, validate_name,
     validate_tinc_address)
-from mgmtnetworks.models import get_mgmt_net
-from nodes.models import Server, Node
-from pki import Bob
+from controller.apps.mgmtnetworks.models import get_mgmt_net
+from controller.apps.nodes.models import Server, Node
+from controller.apps.pki import Bob
 
 from . import settings
 from .tasks import update_tincd

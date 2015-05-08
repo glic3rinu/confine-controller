@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from api import api, serializers
-from nodes.models import Node
-from slices.models import Slice
-from users.models import User, Group
+from controller.apps.api import api, serializers
+from controller.apps.nodes.models import Node
+from controller.apps.slices.models import Slice
+from controller.apps.users.models import User, Group
 
 from .models import SfaObject
 

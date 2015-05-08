@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from django.db.models import Q
 
-from api import serializers
+from controller.apps.api import serializers
 
 from . import settings
 from .models import DirectIface, Island, Node, NodeApi, Server, ServerApi
@@ -23,7 +23,7 @@ class ServerSerializer(serializers.UriHyperlinkedModelSerializer):
         model = Server
     
     def validate_tinc(self, attrs, source):
-        from tinc.serializers import validate_tinc
+        from controller.apps.tinc.serializers import validate_tinc
         return validate_tinc(self, attrs, source)
 
 
@@ -102,7 +102,7 @@ class NodeCreateSerializer(serializers.UriHyperlinkedModelSerializer):
         return fields
     
     def validate_tinc(self, attrs, source):
-        from tinc.serializers import validate_tinc
+        from controller.apps.tinc.serializers import validate_tinc
         return validate_tinc(self, attrs, source)
 
 

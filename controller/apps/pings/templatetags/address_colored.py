@@ -3,8 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
-from pings.models import Ping
-from pings.admin import STATES_COLORS
+from controller.apps.pings.models import Ping
+from controller.apps.pings.admin import STATES_COLORS
 
 
 register = template.Library()

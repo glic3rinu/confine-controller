@@ -3,8 +3,8 @@ from IPy import IP
 
 from controller.settings import MGMT_IPV6_PREFIX
 from controller.utils.ip import int_to_hex_str, split_len
-from slices.ifaces import BaseIface
-from slices.models import Sliver
+from controller.apps.slices.ifaces import BaseIface
+from controller.apps.slices.models import Sliver
 
 
 class MgmtIface(BaseIface):

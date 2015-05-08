@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from users.models import Group, User
+from controller.apps.users.models import Group, User
 from .models import Island, Node, NodeApi, Server, ServerApi
 
 

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions import AllowAllPermission
+from controller.apps.permissions import AllowAllPermission
 
 from .models import CnHost
 

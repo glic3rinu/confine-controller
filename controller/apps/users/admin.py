@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from controller.admin import ChangeViewActions, SortableTabularInline
 from controller.admin.utils import get_admin_link
 from controller.utils.apps import is_installed
-from permissions.admin import PermissionModelAdmin, PermissionTabularInline
+from controller.apps.permissions.admin import PermissionModelAdmin, PermissionTabularInline
 
 from .actions import join_request, enable_account, send_email
 from .filters import MyGroupsListFilter

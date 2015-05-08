@@ -5,10 +5,10 @@ from django import forms
 from controller.utils.paths import get_site_root
 from controller.utils.system import run
 
-from api import serializers
-from firmware.image import Image
-from firmware.plugins import FirmwarePlugin
-from firmware.settings import FIRMWARE_PLUGINS_USB_IMAGE
+from controller.apps.api import serializers
+from controller.apps.firmware.image import Image
+from controller.apps.firmware.plugins import FirmwarePlugin
+from controller.apps.firmware.settings import FIRMWARE_PLUGINS_USB_IMAGE
 
 
 usb_image = FIRMWARE_PLUGINS_USB_IMAGE % {'site_root': get_site_root()}

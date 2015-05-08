@@ -5,11 +5,11 @@ from rest_framework import status, exceptions
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 
-from api import api, generics
-from api.utils import insert_ctl
-from nodes.api import NodeDetail
-from nodes.models import Node, Server, ServerApi
-from permissions.api import ApiPermissionsMixin
+from controller.apps.api import api, generics
+from controller.apps.api.utils import insert_ctl
+from controller.apps.nodes.api import NodeDetail
+from controller.apps.nodes.models import Node, Server, ServerApi
+from controller.apps.permissions.api import ApiPermissionsMixin
 
 from .exceptions import BaseImageNotAvailable, ConcurrencyError
 from .models import BaseImage, Build, Config

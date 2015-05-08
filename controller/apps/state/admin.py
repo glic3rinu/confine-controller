@@ -22,14 +22,14 @@ from controller.admin.utils import (insertattr, get_admin_link, colored, get_mod
 from controller.models.utils import get_help_text
 from controller.utils.html import urlize
 from controller.utils.time import timesince
-from nodes.admin import STATES_COLORS as NODE_STATES_COLORS
-from nodes.models import Node
-from permissions.admin import PermissionModelAdmin
-from slices.admin import (SliverInline, SliverNodeInline, NodeListAdmin, SliceAdmin,
+from controller.apps.nodes.admin import STATES_COLORS as NODE_STATES_COLORS
+from controller.apps.nodes.models import Node
+from controller.apps.permissions.admin import PermissionModelAdmin
+from controller.apps.slices.admin import (SliverInline, SliverNodeInline, NodeListAdmin, SliceAdmin,
         SliceSliversAdmin)
-from slices.admin import STATE_COLORS as SLIVER_STATES_COLORS
-from slices.helpers import wrap_action
-from slices.models import Sliver, Slice
+from controller.apps.slices.admin import STATE_COLORS as SLIVER_STATES_COLORS
+from controller.apps.slices.helpers import wrap_action
+from controller.apps.slices.models import Sliver, Slice
 
 from .actions import refresh, refresh_state, show_state
 from .filters import (NodeStateListFilter, SliverStateListFilter,

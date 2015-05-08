@@ -12,8 +12,8 @@ from django_transaction_signals import defer
 
 from controller.utils.functional import cached
 from controller.utils.time import heartbeat_expires as heartbeatexpires
-from nodes.models import Node, NodeApi
-from slices.models import Sliver
+from controller.apps.nodes.models import Node, NodeApi
+from controller.apps.slices.models import Sliver
 
 from . import settings
 from .helpers import extract_node_software_version

@@ -2,8 +2,8 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
-from notifications.models import Notification as NotificationModel
-from notifications import Notification
+from controller.apps.notifications.models import Notification as NotificationModel
+from controller.apps.notifications.import Notification
 
 
 class Command(BaseCommand):

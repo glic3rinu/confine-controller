@@ -3,12 +3,12 @@ from __future__ import absolute_import
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
-from api import exceptions, generics
-from api.utils import insert_ctl
-from nodes.api import NodeDetail
-from nodes.models import Node
-from slices.api import SliverDetail
-from slices.models import Sliver
+from controller.apps.api import exceptions, generics
+from controller.apps.api.utils import insert_ctl
+from controller.apps.nodes.api import NodeDetail
+from controller.apps.nodes.models import Node
+from controller.apps.slices.api import SliverDetail
+from controller.apps.slices.models import Sliver
 
 from .serializers import StateSerializer
 from .tasks import get_state

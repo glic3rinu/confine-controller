@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from permissions import Permission, ReadOnlyPermission, RelatedPermission
+from controller.apps.permissions import Permission, ReadOnlyPermission, RelatedPermission
 
 from .models import DirectIface, Island, Node, NodeProp, Server
 

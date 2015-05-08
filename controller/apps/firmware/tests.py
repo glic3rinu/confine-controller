@@ -9,9 +9,9 @@ from django.core.exceptions import SuspiciousFileOperation
 from django.core.management import call_command
 from django.test import TestCase
 
-from nodes.models import Node, Server, ServerApi
-from pki import ca
-from users.models import Group
+from controller.apps.nodes.models import Node, Server, ServerApi
+from controller.apps.pki import ca
+from controller.apps.users.models import Group
 
 from .models import BaseImage, Build, Config, ConfigPlugin
 from .plugins.authkeys import AuthKeysPlugin

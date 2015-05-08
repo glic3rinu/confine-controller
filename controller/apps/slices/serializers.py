@@ -3,8 +3,8 @@ from __future__ import absolute_import
 from controller.utils.apps import is_installed
 from urlparse import urlparse
 
-from api import serializers
-from nodes.settings import NODES_NODE_ARCHS
+from controller.apps.api import serializers
+from controller.apps.nodes.settings import NODES_NODE_ARCHS
 
 from .models import Slice, Sliver, SliverDefaults, SliverIface, Template
 from .validators import validate_ifaces_nr, validate_private_iface
@@ -60,8 +60,8 @@ class SliverSerializer(serializers.UriHyperlinkedModelSerializer):
     # is only required because SliverDefaultsSerializer imports resources
     # serializers, and breaks api.aggregate functionality based on
     # api._registry (see class SliverDefaultsSerializer)
-    if is_installed('resources'):
-        from resources.serializers import ResourceReqSerializer
+    if is_installed('controller.apps.resources'):
+        from controller.apps.resources.serializers import ResourceReqSerializer
         resources = ResourceReqSerializer(many=True, required=False)
     
     class Meta:
@@ -116,8 +116,8 @@ class SliverDefaultsSerializer(serializers.ModelSerializer):
     data_uri = FakeFileField(field='data', required=False)
     template = serializers.RelHyperlinkedRelatedField(view_name='template-detail')
     # FIXME refactor move to resources app when api.aggregate supports nested serializers
-    if is_installed('resources'):
-        from resources.serializers import ResourceReqSerializer
+    if is_installed('controller.apps.resources'):
+        from controller.apps.resources.serializers import ResourceReqSerializer
         resources = ResourceReqSerializer(source='slice_resources', many=True, required=False)
 
     class Meta:
@@ -148,8 +148,8 @@ class SliceCreateSerializer(serializers.UriHyperlinkedModelSerializer):
 class SliceSerializer(SliceCreateSerializer):
     # Hack to show explicit handled resource (Vlan) - #46-note87
     # FIXME: can be removed when monkey-patch works in resources.serializers
-    if is_installed('resources'):
-        from resources.serializers import VlanResourceReqSerializer
+    if is_installed('controller.apps.resources'):
+        from controller.apps.resources.serializers import VlanResourceReqSerializer
         resources = VlanResourceReqSerializer(source='*', read_only=True, required=False)
     
     class Meta:

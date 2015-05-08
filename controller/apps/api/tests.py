@@ -7,8 +7,8 @@ import urlparse
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from nodes.models import Node
-from slices.models import Sliver
+from controller.apps.nodes.models import Node
+from controller.apps.slices.models import Sliver
 
 from .utils.profiles import _Profile, profile_matches
 

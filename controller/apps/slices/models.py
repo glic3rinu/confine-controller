@@ -6,7 +6,6 @@ from django.db import models
 from django.utils.timezone import now
 
 from controller.models.fields import MultiSelectField, NullableCharField
-from controller.utils import autodiscover
 from controller.core.validators import (FileExtValidator,
     validate_net_iface_name, validate_prop_name, validate_sha256, validate_name)
 from nodes.models import Node
@@ -496,7 +495,6 @@ class SliverProp(models.Model):
 
 
 # Autodiscover sliver ifaces
-autodiscover('ifaces')
 IFACE_TYPE_CHOICES = tuple(
     (name, name.capitalize()) for name in Sliver.get_registered_ifaces() )
 

@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import controller.core.validators
+import controller.apps.privatefiles.models.fields
 import django.core.files.storage
-import privatefiles.models.fields
+import controller.apps.firmware.validators
 import controller.models.fields
 
 
@@ -31,10 +32,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Build',
             fields=[
-                ('node', models.OneToOneField(related_name=b'firmware_build', primary_key=True, serialize=False, to='nodes.Node')),
+                ('node', models.OneToOneField(related_name='firmware_build', primary_key=True, serialize=False, to='nodes.Node')),
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('version', models.CharField(max_length=64)),
-                ('image', privatefiles.models.fields.PrivateFileField(storage=django.core.files.storage.FileSystemStorage(location=b'/var/lib/vct/images'), max_length=256, upload_to=b'.')),
+                ('image', controller.apps.privatefiles.models.fields.PrivateFileField(storage=django.core.files.storage.FileSystemStorage(location=b'/var/lib/vct/images'), max_length=256, upload_to=b'.')),
                 ('base_image', models.FileField(help_text=b'Image file compressed in gzip. The file name must end in .img.gz', upload_to=b'.')),
                 ('task_id', models.CharField(help_text=b'Celery task ID', max_length=36, unique=True, null=True)),
                 ('kwargs', models.TextField()),
@@ -50,7 +51,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('path', models.CharField(max_length=256)),
                 ('content', models.TextField()),
-                ('build', models.ForeignKey(related_name=b'files', to='firmware.Build')),
+                ('build', models.ForeignKey(related_name='files', to='firmware.Build')),
             ],
             options={
             },
@@ -80,7 +81,7 @@ class Migration(migrations.Migration):
                 ('priority', models.IntegerField(default=0)),
                 ('is_optional', models.BooleanField(default=False)),
                 ('is_active', models.BooleanField(default=True)),
-                ('config', models.ForeignKey(related_name=b'files', to='firmware.Config')),
+                ('config', models.ForeignKey(related_name='files', to='firmware.Config')),
             ],
             options={
                 'ordering': ['-priority'],
@@ -93,7 +94,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('help_text', models.TextField()),
                 ('config', models.ForeignKey(to='firmware.Config')),
-                ('file', models.OneToOneField(related_name=b'help_text', to='firmware.ConfigFile')),
+                ('file', models.OneToOneField(related_name='help_text', to='firmware.ConfigFile')),
             ],
             options={
             },
@@ -106,7 +107,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=False)),
                 ('label', models.CharField(unique=True, max_length=128, blank=True)),
                 ('module', models.CharField(max_length=256, blank=True)),
-                ('config', models.ForeignKey(related_name=b'plugins', to='firmware.Config')),
+                ('config', models.ForeignKey(related_name='plugins', to='firmware.Config')),
             ],
             options={
                 'abstract': False,
@@ -144,9 +145,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('allow_node_admins', models.BooleanField(default=True, help_text=b"Enable this option to permanently allow the current group and node administrators' SSH keys to log into the node as root.", verbose_name=b'Allow current node admins')),
                 ('sync_node_admins', models.BooleanField(default=False, help_text=b"Enable this option to also allow current or future group and node administrators' SSH keys (as configured in the registry) to log into the node as root. Please note that this may expose your node to an attack if the testbed registry is compromised.", verbose_name=b'Synchronize node admins')),
-                ('ssh_auth', models.TextField(help_text=b'Enter additional SSH keys (in "authorized_keys" format) permanently allowed to log into the node as root. You may leave the default keys to allow centralized maintenance of your node by the controller. Please note that this may expose your node to an attack if the controller is compromised.', null=True, verbose_name=b'Additional keys', blank=True)),
+                ('ssh_auth', models.TextField(blank=True, help_text=b'Enter additional SSH keys (in "authorized_keys" format) permanently allowed to log into the node as root. You may leave the default keys to allow centralized maintenance of your node by the controller. Please note that this may expose your node to an attack if the controller is compromised.', null=True, verbose_name=b'Additional keys', validators=[controller.apps.firmware.validators.validate_ssh_auth])),
                 ('ssh_pass', models.CharField(max_length=128, null=True, blank=True)),
-                ('node', models.OneToOneField(related_name=b'keys', primary_key=True, serialize=False, to='nodes.Node')),
+                ('node', models.OneToOneField(related_name='keys', primary_key=True, serialize=False, to='nodes.Node')),
             ],
             options={
             },
@@ -155,7 +156,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='nodebuildfile',
             name='node',
-            field=models.ForeignKey(related_name=b'files', to='nodes.Node'),
+            field=models.ForeignKey(related_name='files', to='nodes.Node'),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -173,7 +174,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='buildfile',
             name='config',
-            field=models.ForeignKey(related_name=b'files', to='firmware.ConfigFile'),
+            field=models.ForeignKey(related_name='files', to='firmware.ConfigFile'),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -183,7 +184,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseimage',
             name='config',
-            field=models.ForeignKey(related_name=b'images', to='firmware.Config'),
+            field=models.ForeignKey(related_name='images', to='firmware.Config'),
             preserve_default=True,
         ),
     ]

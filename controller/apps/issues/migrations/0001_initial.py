@@ -54,10 +54,10 @@ class Migration(migrations.Migration):
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('last_modified_on', models.DateTimeField(auto_now=True)),
                 ('cc', models.TextField(help_text=b'emails to send a carbon copy', verbose_name=b'CC', blank=True)),
-                ('created_by', models.ForeignKey(related_name=b'created_tickets', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('group', models.ForeignKey(related_name=b'assigned_tickets', blank=True, to='users.Group', null=True)),
-                ('owner', models.ForeignKey(related_name=b'owned_tickets', verbose_name=b'assigned to', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('queue', models.ForeignKey(related_name=b'tickets', blank=True, to='issues.Queue', null=True)),
+                ('created_by', models.ForeignKey(related_name='created_tickets', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('group', models.ForeignKey(related_name='assigned_tickets', blank=True, to='users.Group', null=True)),
+                ('owner', models.ForeignKey(related_name='owned_tickets', verbose_name=b'assigned to', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('queue', models.ForeignKey(related_name='tickets', blank=True, to='issues.Queue', null=True)),
             ],
             options={
                 'ordering': ['-last_modified_on'],
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='message',
             name='ticket',
-            field=models.ForeignKey(related_name=b'messages', to='issues.Ticket'),
+            field=models.ForeignKey(related_name='messages', to='issues.Ticket'),
             preserve_default=True,
         ),
     ]

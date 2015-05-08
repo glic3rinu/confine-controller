@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='delivered',
             name='notification',
-            field=models.ForeignKey(related_name=b'delivered', to='notifications.Notification'),
+            field=models.ForeignKey(related_name='delivered', to='notifications.Notification'),
             preserve_default=True,
         ),
     ]

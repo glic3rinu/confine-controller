@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('data', models.TextField(help_text=b'Authentication token like SSH or other kinds of public keys or X.509 certificates to be used for slivers or experiments. The exact valid format depends on the type of token as long as it is non-empty and only contains ASCII characters (e.g. by using PEM encoding or other ASCII armour).', validators=[controller.core.validators.validate_ascii])),
-                ('user', models.ForeignKey(related_name=b'auth_tokens', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(related_name='auth_tokens', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'authentication token',
@@ -66,8 +66,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('date', models.DateTimeField(auto_now_add=True)),
-                ('group', models.ForeignKey(related_name=b'join_requests', to='users.Group')),
-                ('user', models.ForeignKey(related_name=b'join_requests', to=settings.AUTH_USER_MODEL)),
+                ('group', models.ForeignKey(related_name='join_requests', to='users.Group')),
+                ('user', models.ForeignKey(related_name='join_requests', to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('resource', models.CharField(max_length=16, choices=[(b'nodes', b'Nodes'), (b'slices', b'Slices')])),
-                ('group', models.ForeignKey(related_name=b'resource_requests', to='users.Group')),
+                ('group', models.ForeignKey(related_name='resource_requests', to='users.Group')),
             ],
             options={
             },
@@ -91,8 +91,8 @@ class Migration(migrations.Migration):
                 ('is_group_admin', models.BooleanField(default=False, help_text=b'Whether that user is an administrator in this group. An administrator can manage slices and nodes belonging to the group, members in the group and their roles, and the group itself.', verbose_name=b'group admin')),
                 ('is_node_admin', models.BooleanField(default=False, help_text=b'Whether that user is a node administrator in this group. A node administrator can manage nodes belonging to the group.', verbose_name=b'node admin (technician)')),
                 ('is_slice_admin', models.BooleanField(default=False, help_text=b'Whether that user is a slice administrator in this group. A slice administrator can manage slices belonging to the group.', verbose_name=b'slice admin (researcher)')),
-                ('group', models.ForeignKey(related_name=b'roles', to='users.Group')),
-                ('user', models.ForeignKey(related_name=b'roles', to=settings.AUTH_USER_MODEL)),
+                ('group', models.ForeignKey(related_name='roles', to='users.Group')),
+                ('user', models.ForeignKey(related_name='roles', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name_plural': 'roles',
@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='groups',
-            field=models.ManyToManyField(related_name=b'users', through='users.Roles', to='users.Group', blank=True),
+            field=models.ManyToManyField(related_name='users', through='users.Roles', to='users.Group', blank=True),
             preserve_default=True,
         ),
     ]

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('value', models.CharField(max_length=256)),
-                ('node', models.OneToOneField(related_name=b'soft_version', to='nodes.Node')),
+                ('node', models.OneToOneField(related_name='soft_version', to='nodes.Node')),
             ],
             options={
             },
@@ -28,13 +28,14 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('object_id', models.PositiveIntegerField()),
-                ('last_seen_on', models.DateTimeField(help_text=b'Last time the state retrieval was successfull', null=True)),
-                ('last_try_on', models.DateTimeField(help_text=b'Last time the state retrieval operation has been executed', null=True)),
+                ('last_seen_on', models.DateTimeField(help_text=b'Last time the state retrieval was successfull.', null=True)),
+                ('last_try_on', models.DateTimeField(help_text=b'Last time the state retrieval operation has been executed.', null=True)),
                 ('last_contact_on', models.DateTimeField(help_text=b'Last API pull of this resource received from the node.', null=True)),
                 ('value', models.CharField(max_length=32, choices=[(b'started', b'STARTED'), (b'safe', b'SAFE'), (b'fail_allocate', b'FAIL_ALLOCATE'), (b'offline', b'OFFLINE'), (b'fail_start', b'FAIL_START'), (b'registered', b'REGISTERED'), (b'unknown', b'UNKNOWN'), (b'crashed', b'CRASHED'), (b'debug', b'DEBUG'), (b'production', b'PRODUCTION'), (b'fail_deploy', b'FAIL_DEPLOY'), (b'deployed', b'DEPLOYED'), (b'failure', b'FAILURE'), (b'nodata', b'NODATA')])),
                 ('metadata', models.TextField()),
                 ('data', models.TextField()),
                 ('add_date', models.DateTimeField(auto_now_add=True)),
+                ('ssl_verified', models.BooleanField(default=False, help_text=b'Whether the SSL certificate could be verified on node API retrieval.', verbose_name=b'verified')),
                 ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
             ],
             options={
@@ -50,7 +51,7 @@ class Migration(migrations.Migration):
                 ('end', models.DateTimeField()),
                 ('data', models.TextField(default=b'', blank=True)),
                 ('metadata', models.TextField(default=b'', blank=True)),
-                ('state', models.ForeignKey(related_name=b'history', to='state.State')),
+                ('state', models.ForeignKey(related_name='history', to='state.State')),
             ],
             options={
                 'ordering': ('-start',),

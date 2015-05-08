@@ -37,8 +37,8 @@ class Migration(migrations.Migration):
                 ('traceback', models.TextField()),
                 ('exit_code', models.IntegerField(null=True)),
                 ('task_id', models.CharField(help_text=b'Celery task ID', max_length=36, unique=True, null=True)),
-                ('execution', models.ForeignKey(related_name=b'instances', to='maintenance.Execution')),
-                ('node', models.ForeignKey(related_name=b'operations', to='nodes.Node')),
+                ('execution', models.ForeignKey(related_name='instances', to='maintenance.Execution')),
+                ('node', models.ForeignKey(related_name='operations', to='nodes.Node')),
             ],
             options={
                 'ordering': ['-last_try'],
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='execution',
             name='operation',
-            field=models.ForeignKey(related_name=b'executions', to='maintenance.Operation'),
+            field=models.ForeignKey(related_name='executions', to='maintenance.Operation'),
             preserve_default=True,
         ),
     ]

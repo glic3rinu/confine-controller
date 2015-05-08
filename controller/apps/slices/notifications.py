@@ -5,7 +5,7 @@ from django.utils import timezone
 from controller.apps.notifications import Notification
 from controller.apps.users.models import Roles
 
-from .models import Slice
+from controller.apps.slices.models import Slice
 from .settings import SLICES_SLICE_EXP_WARN
 
 

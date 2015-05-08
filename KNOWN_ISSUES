@@ -1,0 +1,8 @@
+== Notifications app ==
+* Absolute imports should be used to import models on plugable notifications.py
+    # controller/apps/nodes/notifications.py
+    from controller.apps.nodes.models import Node
+
+  This will avoid errors like:
+    RuntimeError: Conflicting 'node' models in application 'node':
+    <class 'controller.apps.nodes.models.Node'> and <class 'nodes.models.Node'>.

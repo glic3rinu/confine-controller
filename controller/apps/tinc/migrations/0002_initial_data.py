@@ -2,9 +2,12 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+from django.contrib.contenttypes.management import update_all_contenttypes
 
 
 def create_tinc_server(apps, schema_editor):
+    update_all_contenttypes(verbosity=0, interactive=False)
+    
     # Create server.tinc with name 'server' as tinc_name (backwards compatibility)
     ContentType = apps.get_model("contenttypes", "ContentType")
     ctype = ContentType.objects.get(app_label="nodes", model="server")
@@ -12,7 +15,7 @@ def create_tinc_server(apps, schema_editor):
     server = apps.get_model("nodes", "Server").objects.first()
     
     TincHost = apps.get_model("tinc", "TincHost")
-    tinc = TincHost.objects.update_or_create(content_type=ctype,
+    tinc, _ = TincHost.objects.update_or_create(content_type=ctype,
         object_id=server.pk, defaults={'name': 'server'})
 
 
@@ -29,6 +32,7 @@ def delete_tinc_server(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('contenttypes', '0001_initial'),
         ('tinc', '0001_initial'),
         ('nodes', '0002_initial_data'),
     ]

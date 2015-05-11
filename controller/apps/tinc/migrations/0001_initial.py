@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ('pubkey', controller.models.fields.RSAPublicKeyField(help_text=b'PEM-encoded RSA public key used on tinc management network.', unique=True, null=True, verbose_name=b'public Key', blank=True)),
                 ('object_id', models.PositiveIntegerField()),
                 ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
-                ('default_connect_to', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, default=controller.apps.tinc.models.get_default_gateway, blank=True, to='tinc.TincHost', null=True)),
+                ('default_connect_to', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, default=None, blank=True, to='tinc.TincHost', null=True)),
             ],
             options={
                 'ordering': ['content_type', 'object_id'],

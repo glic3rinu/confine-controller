@@ -3,7 +3,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.utils.six.moves import input
 
-from controller.apps.pki.import ca
+from controller.apps.pki import ca
 
 
 class Command(BaseCommand):

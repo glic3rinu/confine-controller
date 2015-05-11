@@ -168,7 +168,7 @@ class Command(BaseCommand):
             deprecate_periodic_tasks(('state.ping',))
         if version < 809:
             # Add PKI directories
-            from controller.apps.pki.import ca
+            from controller.apps.pki import ca
             from controller.utils.paths import get_site_root
             site_root = get_site_root()
             username = run("stat -c %%U %s" % site_root)
@@ -256,7 +256,7 @@ class Command(BaseCommand):
             # reloaded yet and cannot access e.g. server.api
             from django.db import connection
             from controller.apps.nodes.models import Server
-            from controller.apps.pki.import ca
+            from controller.apps.pki import ca
             
             server_id = Server.objects.order_by('id').first().pk
             try:

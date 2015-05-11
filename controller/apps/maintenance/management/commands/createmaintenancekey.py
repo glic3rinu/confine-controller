@@ -2,7 +2,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand
 
-from controller.apps.pki.import Bob
+from controller.apps.pki import Bob
 
 from controller.apps.maintenance.settings import MAINTENANCE_KEY_PATH, MAINTENANCE_PUB_KEY_PATH
 

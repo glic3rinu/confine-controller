@@ -60,22 +60,12 @@ scp '{{ build.image_name }}' root@[fdbd:e804:6aa9:1::2]:/tmp{% endcode %}
         <p>See <a href="https://wiki.confine-project.eu/arch:addressing">Addressing in CONFINE</a> for other addresses available in CONFINE nodes.</p>
 
         <h4>Install the firmware image</h4>
-        <p style="margin-top:1em">You can use <code>ssh</code> to access the node and enter its temporary directory:</p>
+        <p style="margin-top:1em">You can use <code>ssh</code> to access the node and
+        run the following command, which is the recommended way for flashing
+        the image in a node which is already running the CONFINE node system software:</p>
+
         {% code 'bash' %}ssh root@NODE_ADDRESS
-cd /tmp{% endcode %}
-
-        <p style="margin-top:1em">The following command can be used for flashing
-        this image (remember to change the <strong>destination device</strong>). <br/>
-        <strong>WARNING!</strong> Be sure you execute these commands 
-        <strong>INSIDE</strong> the node, not in your own computer!</p>
-
-        <ol type="A">
-            <li>If the node is already running the CONFINE node system software, using <code>confine.sysupgrade</code> is highly recommended:
-            {% code 'bash' %}# This command will upgrade your node:
-confine.sysupgrade -n '{{ build.image_name }}'{% endcode %}</li>
-            <li>Otherwise executing the following command may work for you:
-            {% code 'bash' %}gunzip '{{ build.image_name }}' -c | dd of=/dev/sdX bs=1M; sync{% endcode %}<br/></li>
-        </ol>
+confine.sysupgrade -n '/tmp/{{ build.image_name }}'{% endcode %}
 
         <p>The CONFINE wiki contains more information on <a href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a>.</p>
     {% endif %}{# end instructions #}

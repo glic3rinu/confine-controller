@@ -179,7 +179,7 @@ class Slice(models.Model):
               (DEPLOY, 'DEPLOY'),
               (START, 'START'),)
     
-    name = models.CharField(max_length=64, unique=True,
+    name = models.CharField(max_length=128, unique=True,
             help_text='A unique name of this slice. A single non-empty line of free-form '
                       'text with no whitespace surrounding it.',
             validators=[validate_name])

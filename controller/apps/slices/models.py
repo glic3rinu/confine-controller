@@ -563,6 +563,9 @@ class SliverIface(models.Model):
                       "mandatory) for isolated interfaces.")
     
     class Meta:
+        index_together = [
+            ["sliver", "nr"]
+        ]
         unique_together = (('sliver', 'name'), ('sliver', 'nr'))
         verbose_name = 'sliver interface'
         verbose_name_plural = 'sliver interfaces'

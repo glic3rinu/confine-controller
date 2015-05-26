@@ -13,6 +13,7 @@ class BaseIface(object):
     Base class for defining Sliver Iface specific behaviour.
     """
     DEFAULT_NAME = 'eth0'
+    NR_MAIN_IFACE = None  # Should be defined in subclasses
     ALLOW_BULK = True
     AUTO_CREATE = False
     CREATE_BY_DEFAULT = False
@@ -45,6 +46,7 @@ class IsolatedIface(BaseIface):
     slices may share the same physical interface.
     """
     DEFAULT_NAME = 'iso0'
+    NR_MAIN_IFACE = 5
     ALLOW_BULK = False
     DISABLED_MSG = 'no VLAN or no Direct Ifaces'
     VERBOSE_DISABLED_MSG = "Isolated interfaces cannot be added on bulk creation."
@@ -104,6 +106,7 @@ class Pub6Iface(BaseIface):
     DEFAULT_NAME = 'pub1'
     VERBOSE_DISABLED_MSG = ("Some of the selected nodes do not have support "
                             "for public IPv6 sliver interfaces.")
+    NR_MAIN_IFACE = 3
     
     def ipv6_addr(self, iface):
         return 'Unknown'
@@ -130,6 +133,7 @@ class DebugIface(BaseIface):
     for debugging purposes
     """
     DEFAULT_NAME = 'dbg0'
+    NR_MAIN_IFACE = 4
     
     def ipv6_addr(self, iface):
         """ DEBUG_IPV6_PREFIX:N:10ii:ssss:ssss:ssss """

@@ -532,6 +532,13 @@ IFACE_TYPE_CHOICES = tuple(
     (name, name.capitalize()) for name in Sliver.get_registered_ifaces() )
 
 
+class SliverIfaceManager(models.Manager):
+    def create_default(self, sliver, iface_type):
+        iface_cls = Sliver.get_registered_ifaces()[iface_type]
+        return self.create(sliver=sliver, name=iface_cls.DEFAULT_NAME,
+                           nr=iface_cls.NR_MAIN_IFACE, type=iface_type)
+
+
 class SliverIface(models.Model):
     """
     Implememts the network interfaces that will be created in the slivers.
@@ -561,6 +568,8 @@ class SliverIface(models.Model):
                       "for this interface's traffic (VLAN-tagged); the slice must "
                       "have a non-null isolated_vlan_tag. Only meaningful (and "
                       "mandatory) for isolated interfaces.")
+    
+    objects = SliverIfaceManager()
     
     class Meta:
         index_together = [

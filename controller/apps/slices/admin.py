@@ -205,12 +205,7 @@ class SliverAdmin(ChangeViewActions, ChangeListDefaultFilter, PermissionModelAdm
         for iface_type, iface_object in Sliver.get_registered_ifaces().items():
             if (iface_object.AUTO_CREATE and
                 not object.interfaces.filter(type=iface_type).exists()):
-                    SliverIface.objects.create(
-                        sliver=object,
-                        name=iface_object.DEFAULT_NAME,
-                        nr=iface_object.NR_MAIN_IFACE,
-                        type=iface_type,
-                    )
+                    SliverIface.objects.create_default(object, iface_type)
         super(SliverAdmin, self).log_addition(request, object)
         # log sliver history on the node #523
         msg = 'Added sliver "%s" (%i).' % (object, object.pk)

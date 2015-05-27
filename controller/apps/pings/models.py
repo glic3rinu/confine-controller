@@ -40,7 +40,10 @@ class Ping(models.Model):
     content_object = generic.GenericForeignKey()
     
     class Meta:
-        index_together = [['object_id', 'content_type', 'date']]
+        index_together = [
+            ['object_id', 'content_type'],
+            ['object_id', 'content_type', 'date'],
+        ]
         get_latest_by = 'date'
     
     @classmethod

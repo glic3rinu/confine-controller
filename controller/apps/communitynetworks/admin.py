@@ -28,8 +28,9 @@ class CnHostInline(PermissionGenericTabularInline):
 
 app_url_link = link('related_cnhost__app_url', description='CN URL')
 
-insertattr(Node, 'actions', cache_node_db)
-insert_change_view_action(Node, cache_node_db)
+# NOTE: Disabled as is not finished and there isn't a nodedb instance.
+# insertattr(Node, 'actions', cache_node_db)
+# insert_change_view_action(Node, cache_node_db)
 
 insertattr(Node, 'inlines', CnHostInline)
 insertattr(Server, 'inlines', CnHostInline)

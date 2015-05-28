@@ -60,7 +60,9 @@ class MemoryRes(ResourcePlugin):
     max_req = settings.RESOURCES_DEFAULT_MEMORY_MAX_REQ
     dflt_req = settings.RESOURCES_DEFAULT_MEMORY_DFLT_REQ
     producers = ['nodes.Node']
-    consumers = ['slices.Sliver']
+    # FIXME replace Slice with SliverDefaults when api.aggregate supports
+    # nested serializers and django.admin nested inlines
+    consumers = ['slices.Slice', 'slices.Sliver']
 
 
 class Pub4Res(ResourcePlugin):

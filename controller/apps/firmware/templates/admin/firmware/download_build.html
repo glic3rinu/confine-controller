@@ -95,11 +95,11 @@ scp '{{ build.image_name }}' root@[fdbd:e804:6aa9:1::2]:/tmp{% endcode %}
         </li>
 
         <li>
-          <h5>Direct download to the node (may be unsecure)</h5>
+          <h5>Direct download to the node (may be insecure)</h5>
             <p>Maybe you want to download the firmware directly to the node to
                 avoid uploading it using a low bandwith connection. This method
                 is discouraged because of security concerns (see <a href="https://wiki.confine-project.eu/soft:node-upgrade#upgrade_a_node_non-automatic">node upgrade</a>
-                for more details), <strong>use it at your own risk!</strong></p>
+                for more details). <strong>Use it at your own risk!</strong></p>
           {% code 'bash' False %}ssh root@NODE_ADDRESS
 cd /tmp
 curl -u {{ request.user.username|default:request.user.email }} -k -O {% absurl build.image.url %}

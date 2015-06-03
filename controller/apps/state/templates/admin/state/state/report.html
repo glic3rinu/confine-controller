@@ -82,12 +82,12 @@
               <tr>
                 <th>Group <img src="{% static 'admin/img/icon-unknown.gif' %}"
                     class="help help-tooltip" alt="(only groups with nodes)"
-                    title="(only groups with nodes)"></th>
+                    title="(only groups with nodes)" /></th>
                 {% for name, value in node_sw.totals.iteritems %}
                 <th>{% if value.url %}<a class="version_link" title="detail of '{{ name }}' in the repository"
                         href="{{ value.url }}">{{ name }}</a>
                     {% else %}{{ name }} <img src="{% static 'admin/img/icon-unknown.gif' %}" class="help help-tooltip"
-                        alt="{{ value.title }}" title="{{ value.title }}">{% endif %}</th>
+                        alt="{{ value.title }}" title="{{ value.title }}" />{% endif %}</th>
                 {% endfor %}
               </tr>
             </thead>
@@ -102,7 +102,7 @@
             <tbody>
             {% for group, versions in node_sw.groups.iteritems %}
               <tr class="{% cycle 'row1' 'row2' %}">
-                <th><a href="{% url 'admin:nodes_node_changelist' %}?group__id__exact={{ group.id }}&my_nodes=False ">{{ group.name }}</a></th>
+                <th><a href="{% url 'admin:nodes_node_changelist' %}?group__id__exact={{ group.id }}&amp;my_nodes=False ">{{ group.name }}</a></th>
                 {% for v in versions %}
                 <td>{{ v.count }}</td>
                 {% endfor %}

@@ -24,6 +24,9 @@ class Api(models.Model):
     class Meta:
         abstract = True
     
+    def __unicode__(self):
+        return "%s@%s" % (self.type, self.base_uri)
+    
     def clean(self):
         super(Api, self).clean()
         # base_uri SHOULD always end with slash '/'

@@ -9,6 +9,24 @@ from users.models import Group, User
 from .models import Island, Node, NodeApi, Server, ServerApi
 
 
+class ApiTest(TestCase):
+    def test_nodeapi_unicode_repr(self):
+        self.group = Group.objects.create(name='group', allow_nodes=True)
+        node = Node.objects.create(name='one', group=self.group)
+        NodeApi.objects.create(node=node, base_uri='http://foo.local')
+        
+        repr(node.api)
+        
+    def test_serverapi_unicode_repr(self):
+        server = Server.objects.create(description="A server")
+        ServerApi.objects.create(type=ServerApi.REGISTRY, server=server)
+        ServerApi.objects.create(type=ServerApi.CONTROLLER, server=server,
+                                 base_uri='http://controller.local')
+        
+        for api in server.api.all():
+            repr(api)
+        
+
 class IslandTest(TestCase):
     def setUp(self):
         self.password = 'vct'

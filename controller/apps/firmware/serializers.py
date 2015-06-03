@@ -157,7 +157,7 @@ class NodeFirmwareConfigSerializer(serializers.Serializer):
             
             # initialize registry defaults
             base_uri = self.get_default_registry().base_uri
-            cert = self.get_default_registry().cert
+            cert = self.get_default_registry().cert or ''
             attrs['registry_base_uri'] = base_uri
             attrs['registry_cert'] = cert
         

@@ -181,9 +181,10 @@ def get_node_version_data():
         NOTE: only the most recent, old versions will be grouped.
     """
     from .models import NodeSoftwareVersion
-    versions = NodeSoftwareVersion.objects.distinct('value').extra(
-        select={'date': "SUBSTRING(value from '-r........')"}).values('date', 'value')
-    versions = sorted(versions, key=lambda k: k['date'], reverse=True)[:4]
+    master_versions = NodeSoftwareVersion.objects.ordered_versions('master')
+    testing_versions = NodeSoftwareVersion.objects.ordered_versions('testing')
+    versions = master_versions[:2] + testing_versions
+    versions = sorted(versions[:4], key=lambda v: v.version['date'], reverse=True)
     
     totals = OrderedDict()
     groups = OrderedDict()
@@ -194,8 +195,8 @@ def get_node_version_data():
         sw_data = []
         version_count = 0
         for version in versions:
-            count = nodes.filter(soft_version__value=version['value']).count()
-            version_schema = extract_node_software_version(version['value'])
+            count = nodes.filter(soft_version__value=version.value).count()
+            version_schema = extract_node_software_version(version.value)
             name = STATE_NODE_SOFT_VERSION_NAME(version_schema)
             url = STATE_NODE_SOFT_VERSION_URL(version_schema)
             sw_data.append({

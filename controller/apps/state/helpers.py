@@ -196,16 +196,13 @@ def get_node_version_data():
         version_count = 0
         for version in versions:
             count = nodes.filter(soft_version__value=version.value).count()
-            version_schema = extract_node_software_version(version.value)
-            name = STATE_NODE_SOFT_VERSION_NAME(version_schema)
-            url = STATE_NODE_SOFT_VERSION_URL(version_schema)
             sw_data.append({
-                'name': name,
-                'url': url,
+                'name': version.name,
+                'url': version.url,
                 'count': count
             })
-            totals.setdefault(name, {'url': url, 'count':0})
-            totals[name]['count'] += count
+            totals.setdefault(version.name, {'url': version.url, 'count':0})
+            totals[version.name]['count'] += count
             version_count += count
         
         # aggregate nodes without firmware version data
@@ -215,7 +212,7 @@ def get_node_version_data():
             'count': nodata_count
         })
 
-        # aggregate old firmware versions
+        # aggregate other firmware versions
         others_count = nodes.count() - (version_count + nodata_count)
         sw_data.append({
             'name': 'Other',
@@ -225,7 +222,7 @@ def get_node_version_data():
         # store aggregated data
         groups[group] = sw_data
         totals.setdefault('N/A', {'title': 'No data', 'count':0})
-        totals.setdefault('Other', {'title': 'Old firmware versions', 'count':0})
+        totals.setdefault('Other', {'title': 'Other firmware versions', 'count': 0})
         totals['N/A']['count'] += nodata_count
         totals['Other']['count'] += others_count
     

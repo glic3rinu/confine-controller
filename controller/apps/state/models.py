@@ -248,6 +248,12 @@ class NodeSoftwareVersionManager(models.Manager):
             if soft_version.value != version:
                 soft_version.value = version
                 soft_version.save()
+    
+    def ordered_versions(self, branch=None):
+        versions = self.distinct('value')
+        if branch is not None:
+            versions = [v for v in versions if v.version['branch'] == branch]
+        return sorted(versions, key=lambda v: v.version['date'], reverse=True)
 
 
 class NodeSoftwareVersion(models.Model):

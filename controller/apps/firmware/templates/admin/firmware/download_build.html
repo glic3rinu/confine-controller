@@ -78,10 +78,10 @@
               <li>The <a href={{ build.image.url }}>firmware can be downloaded</a> from this page into your computer.</li>
               <li>Then upload the firmware to the node:</li>
           <ol type="a">
-            <li>using <code>scp</code> to copy the image into the node's temporary directory:</li>
+            <li>In the general case, you may use <code>scp</code> to copy the image into the node's temporary directory (with whatever <code>NODE_ADDRESS</code> reachable from your computer):</li>
             {% code 'bash' False %}scp '{{ build.image_name }}' root@NODE_ADDRESS:/tmp{% endcode %}
 
-            <li>You may use whatever <code>NODE_ADDRESS</code> reachable from your computer. If the node is running the CONFINE node system software and both the node and your computer are on the testbed management network but at different locations, you may use the node's management address:</li>
+            <li>If the node is running the CONFINE node system software and both the node and your computer are on the testbed management network but at different locations, you may use the node's management address:</li>
             {% code 'bash' False %}scp '{{ build.image_name }}' root@[{{ node.mgmt_net.addr }}]:/tmp{% endcode %}
 
             <li>If the node is running the CONFINE node system software and it is connected to the same local link as your computer, you may use the node's recovery address by first adding your computer to that network:</li>
@@ -103,30 +103,29 @@ scp '{{ build.image_name }}' root@[fdbd:e804:6aa9:1::2]:/tmp{% endcode %}
           {% code 'bash' False %}ssh root@NODE_ADDRESS
 cd /tmp
 curl -u {{ request.user.username|default:request.user.email }} -k -O {% absurl build.image.url %}
-# It will ask for your controller account password{% endcode %}
+# It will ask for your controller account password.{% endcode %}
         </li>
         </ol>
 
         <h4 style="margin-top: 3em;">Installing the firmware image</h4>
         <p style="margin-top:1em">You can use <code>ssh</code> to access the node and
-        run the following command, which is the recommended way for flashing
+        run the following commands, which are the recommended way for flashing
         the image in a node which is already running the CONFINE node system software:</p>
-        
-        <ol type="A">
-          <li>
-            <h5>Safest method</h5>
-            {% code 'bash' False %}ssh root@NODE_ADDRESS
+
+        {% code 'bash' False %}ssh root@NODE_ADDRESS
 cd /tmp
 gunzip {{ build.image_name }}
 sysupgrade -n {{ build.image_name|cut:".gz" }}{% endcode %}
-          </li>
-          <li>
-            <h5>Most aggressive method, only for advanced users</h5>
-            {% code 'bash' False %}ssh root@NODE_ADDRESS
+
+        <p>For systems lacking <code>sysupgrade</code> you may use the following commands,
+        which are more aggressive and only recommented for advanced users
+        who know about their system processes:</p>
+
+        {% code 'bash' False %}ssh root@NODE_ADDRESS
 cd /tmp
-gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}
-          </li>
-        </ol>
+# Stop here any processes writing to /dev/sdX.
+mount -o ro,remount /dev/sdX
+gunzip -c {{ build.image_name }} | dd of=/dev/sdX bs=1M; sync{% endcode %}
     {% endif %}{# end instructions #}
     </fieldset>
     </div>

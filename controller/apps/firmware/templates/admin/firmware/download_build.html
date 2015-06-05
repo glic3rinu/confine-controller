@@ -118,14 +118,15 @@ gunzip {{ build.image_name }}
 sysupgrade -n {{ build.image_name|cut:".gz" }}{% endcode %}
 
         <p>For systems lacking <code>sysupgrade</code> you may use the following commands,
-        which are more aggressive and only recommented for advanced users
-        who know about their system processes:</p>
+        which are more aggressive and only recommended for advanced users
+        who have a deep knowledge about their system processes:</p>
 
         {% code 'bash' False %}ssh root@NODE_ADDRESS
 cd /tmp
-# Stop here any processes writing to /dev/sdX.
+# Stop any processes writing to /dev/sdX here.
 mount -o ro,remount /dev/sdX
-gunzip -c {{ build.image_name }} | dd of=/dev/sdX bs=1M; sync{% endcode %}
+gunzip -c {{ build.image_name }} | dd of=/dev/sdX bs=1M; sync
+# Force a reboot here.{% endcode %}
     {% endif %}{# end instructions #}
     </fieldset>
     </div>

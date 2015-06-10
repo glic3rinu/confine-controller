@@ -73,21 +73,9 @@ def init_firmware_config(apps, schema_editor):
 		),
         ConfigUCI(
             config=config,
-            section="tinc-net confine",
-            option="enabled",
-            value="'1'"
-		),
-        ConfigUCI(
-            config=config,
             section="node node",
             option="state",
             value="'prepared'"
-		),
-        ConfigUCI(
-            config=config,
-            section="server server",
-            option="base_path",
-            value="'/api'"
 		),
         
         # South 0034_datamigration__add__configuc_sync_node_admins.py
@@ -125,19 +113,14 @@ def init_firmware_config(apps, schema_editor):
     ])
     
     ### ConfigFile ###
-    # TODO (eventually): break backwards compatibility with old node firmware #245 note-25
-    # ConfigUCI.objects.filter(section='server server', option='base_path').delete()
-    ### Update Config file /etc/config/confine ###
-    # TODO (eventually): break backwards compatibility: remove 'server server' section
-    # on ConfigFile /etc/config/confine
-    
     ConfigFile = apps.get_model("firmware", "ConfigFile")
     ConfigFile.objects.bulk_create([
         ConfigFile(
             priority=0,
             is_active= True,
             # includes South 0035_datamigration__add_registry_uci.py update
-            content="self.config.render_uci(node, sections=['node node', 'server server', 'testbed testbed', 'registry registry'])",
+            #          South 0040_datamigration__b620_drop_legacy_fw_config.py
+            content="self.config.render_uci(node, sections=['node node', 'registry registry', 'testbed testbed'])",
             mode="",
             is_optional=False,
             path="/etc/config/confine",
@@ -191,33 +174,6 @@ def init_firmware_config(apps, schema_editor):
             mode="",
             is_optional=False,
             path="/etc/tinc/confine/tinc.conf",
-            config=config
-        ),
-        ConfigFile(
-            priority=0,
-            is_active= False,
-            content="node.tinc.get_tinc_up()",
-            mode="+x",
-            is_optional=False,
-            path="/etc/tinc/confine/tinc-up",
-            config=config
-        ),
-        ConfigFile(
-            priority=0,
-            is_active= False,
-            content="node.tinc.get_tinc_down()",
-            mode="+x",
-            is_optional=False,
-            path="/etc/tinc/confine/tinc-down",
-            config=config
-        ),
-        ConfigFile(
-            priority=0,
-            is_active= False,
-            content="self.config.render_uci(node, sections=['tinc-net confine'])",
-            mode="",
-            is_optional=False,
-            path="/etc/config/tinc",
             config=config
         ),
         ConfigFile(

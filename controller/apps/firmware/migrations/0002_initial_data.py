@@ -113,6 +113,15 @@ def init_firmware_config(apps, schema_editor):
             option='cert',
             value="'/etc/confine/registry-server.crt'"
 		),
+        
+        # South 0036_datamigration__add_uci_tinc_gateway.py
+        # Update firmware configuration to support tinc default gateway (#236).
+        ConfigUCI(
+             config=config,
+             section='node node',
+             option='tinc_gateway',
+             value="node.tinc.default_connect_to.name"
+        ),
     ])
     
     ### ConfigFile ###
@@ -134,15 +143,29 @@ def init_firmware_config(apps, schema_editor):
             path="/etc/config/confine",
             config=config
         ),
+        
+        # South 0036_datamigration__add_uci_tinc_gateway.py
+        # Update firmware configuration to support tinc default gateway (#236).
         ConfigFile(
             priority=0,
             is_active= True,
             content="[ server.get_host(island=node.island) for server in node.tinc.connect_to ]",
             mode="",
             is_optional=False,
-            path="[ \"/etc/tinc/confine/hosts/%s\" % server for server in node.tinc.connect_to ]",
+            path='[ "/etc/confine/tinc-gateways/%s" % server.name for server in node.tinc.connect_to ]',
             config=config
         ),
+        ConfigFile(
+            priority=0,
+            is_active= True,
+            content="node.tinc.default_connect_to.get_host()",
+            mode="",
+            is_optional=False,
+            path="'/etc/tinc/confine/hosts/%s' % node.tinc.default_connect_to.name",
+            config=config
+        ),
+        # end of South 0036
+        
         ConfigFile(
             priority=1,
             is_active= True,

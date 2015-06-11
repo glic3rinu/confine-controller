@@ -15,7 +15,7 @@ class Migration(DataMigration):
         
         # remove legacy UCI entries
         orm.ConfigUCI.objects.filter(section='server server', option='base_path').delete()
-        orm.ConfigUCI.objects.filter(section='tinc-net confine', option='enable').delete()
+        orm.ConfigUCI.objects.filter(section='tinc-net confine', option='enabled').delete()
         
         # remove legacy Config files
         orm.ConfigFile.objects.filter(path='/etc/config/tinc').delete()
@@ -34,7 +34,7 @@ class Migration(DataMigration):
         
         # restore legacy UCI entries
         orm.ConfigUCI.objects.create(config=cfg, section='server server', option='base_path', value="'/api'")
-        orm.ConfigUCI.objects.create(config=cfg, section='tinc-net confine', option='enable', value="'1'")
+        orm.ConfigUCI.objects.create(config=cfg, section='tinc-net confine', option='enabled', value="'1'")
         
         # restore legacy Config files
         orm.ConfigFile.objects.create(config=cfg, path='/etc/config/tinc',

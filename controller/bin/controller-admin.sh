@@ -157,7 +157,7 @@ function install_requirements () {
                      pyflakes==0.8.1 \
                      requests==2.5.1 \
                      greenlet==0.4.5 \
-                     gevent==1.0.1"
+                     gevent==1.0.2"
     PRODUCTION_PIP="django-simple-captcha==0.4.4 \
                     django-registration==1.0 \
                     django-google-maps==0.2.3"

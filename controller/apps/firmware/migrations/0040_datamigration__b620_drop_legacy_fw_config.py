@@ -33,16 +33,32 @@ class Migration(DataMigration):
         cfg = orm.Config.objects.get()
         
         # restore legacy UCI entries
-        orm.ConfigUCI.objects.create(config=cfg, section='server server', option='base_path', value="'/api'")
-        orm.ConfigUCI.objects.create(config=cfg, section='tinc-net confine', option='enabled', value="'1'")
+        orm.ConfigUCI.objects.create(config=cfg, section='server server',
+                                     option='base_path', value="'/api'")
+        orm.ConfigUCI.objects.create(config=cfg, section='tinc-net confine',
+                                     option='enabled', value="'1'")
         
         # restore legacy Config files
-        orm.ConfigFile.objects.create(config=cfg, path='/etc/config/tinc',
-            content="self.config.render_uci(node, sections=['tinc-net confine'])", is_active=False)
-        orm.ConfigFile.objects.create(config=cfg, path='/etc/tinc/confine/tinc-down',
-            content="node.tinc.get_tinc_down()", is_active=False)
-        orm.ConfigFile.objects.create(config=cfg, path='/etc/tinc/confine/tinc-up',
-            content="node.tinc.get_tinc_up()", is_active=False)
+        orm.ConfigFile.objects.create(
+            config=cfg,
+            path='/etc/config/tinc',
+            content="self.config.render_uci(node, sections=['tinc-net confine'])",
+            is_active=False
+        )
+        orm.ConfigFile.objects.create(
+            config=cfg,
+            path='/etc/tinc/confine/tinc-down',
+            content="node.tinc.get_tinc_down()",
+            is_active=False,
+            mode='+x'
+        )
+        orm.ConfigFile.objects.create(
+            config=cfg,
+            path='/etc/tinc/confine/tinc-up',
+            content="node.tinc.get_tinc_up()",
+            is_active=False,
+            mode='+x'
+        )
         
         # restore confine Config file: render 'server server' section
         cfile = orm.ConfigFile.objects.get(path='/etc/config/confine')

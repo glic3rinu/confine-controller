@@ -20,9 +20,13 @@
             padding-right: 2em;
         }
         #download-instructions .note {
-            background: #ffc;
+            background: #ffc url({% static "firmware/tip.png" %}) no-repeat;
             border-bottom: 1px solid #ddd;
             margin-top: 0;
+            padding: 1em 1em 1em 50px;
+        }
+        #download-instructions .highlight {
+            margin-left: 1.5em;
         }
     </style>
 {% endblock %}
@@ -67,7 +71,10 @@
 
     {% else %}{# standard instrucctions #}
       <h2>Instructions</h2>
-      <p class="note">The CONFINE wiki contains more information on <a href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a>.</p>
+      <p class="note">The CONFINE wiki contains more information on <a
+        href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a> page.<br/>
+        If your node is running a <strong>firmware older than June 2015</strong>
+        follow specific instructions for <strong><a href="https://wiki.confine-project.eu/soft:node-upgrade#nodes_with_old_firmware">nodes with old firmware</a></strong>.</p>
 
       <h4>Getting the firmware image</h4>
 

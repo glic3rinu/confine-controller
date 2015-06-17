@@ -181,9 +181,10 @@ def get_node_version_data():
         NOTE: only the most recent, old versions will be grouped.
     """
     from .models import NodeSoftwareVersion
-    versions = NodeSoftwareVersion.objects.distinct('value').extra(
-        select={'date': "SUBSTRING(value from '-r........')"}).values('date', 'value')
-    versions = sorted(versions, key=lambda k: k['date'], reverse=True)[:4]
+    master_versions = NodeSoftwareVersion.objects.ordered_versions('master')
+    testing_versions = NodeSoftwareVersion.objects.ordered_versions('testing')
+    versions = master_versions[:2] + testing_versions
+    versions = sorted(versions[:4], key=lambda v: v.version['date'], reverse=True)
     
     totals = OrderedDict()
     groups = OrderedDict()
@@ -194,17 +195,14 @@ def get_node_version_data():
         sw_data = []
         version_count = 0
         for version in versions:
-            count = nodes.filter(soft_version__value=version['value']).count()
-            version_schema = extract_node_software_version(version['value'])
-            name = STATE_NODE_SOFT_VERSION_NAME(version_schema)
-            url = STATE_NODE_SOFT_VERSION_URL(version_schema)
+            count = nodes.filter(soft_version__value=version.value).count()
             sw_data.append({
-                'name': name,
-                'url': url,
+                'name': version.name,
+                'url': version.url,
                 'count': count
             })
-            totals.setdefault(name, {'url': url, 'count':0})
-            totals[name]['count'] += count
+            totals.setdefault(version.name, {'url': version.url, 'count':0})
+            totals[version.name]['count'] += count
             version_count += count
         
         # aggregate nodes without firmware version data
@@ -214,7 +212,7 @@ def get_node_version_data():
             'count': nodata_count
         })
 
-        # aggregate old firmware versions
+        # aggregate other firmware versions
         others_count = nodes.count() - (version_count + nodata_count)
         sw_data.append({
             'name': 'Other',
@@ -224,7 +222,7 @@ def get_node_version_data():
         # store aggregated data
         groups[group] = sw_data
         totals.setdefault('N/A', {'title': 'No data', 'count':0})
-        totals.setdefault('Other', {'title': 'Old firmware versions', 'count':0})
+        totals.setdefault('Other', {'title': 'Other firmware versions', 'count': 0})
         totals['N/A']['count'] += nodata_count
         totals['Other']['count'] += others_count
     

@@ -53,6 +53,18 @@ class DiskRes(ResourcePlugin):
     consumers = ['slices.Slice', 'slices.Sliver']
 
 
+class MemoryRes(ResourcePlugin):
+    name = 'memory'
+    verbose_name = 'Memory'
+    unit = 'MiB'
+    max_req = settings.RESOURCES_DEFAULT_MEMORY_MAX_REQ
+    dflt_req = settings.RESOURCES_DEFAULT_MEMORY_DFLT_REQ
+    producers = ['nodes.Node']
+    # FIXME replace Slice with SliverDefaults when api.aggregate supports
+    # nested serializers and django.admin nested inlines
+    consumers = ['slices.Slice', 'slices.Sliver']
+
+
 class Pub4Res(ResourcePlugin):
     name = 'pub_ipv4'
     verbose_name = 'Public IPv4 addresses'

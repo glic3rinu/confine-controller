@@ -1,9 +1,34 @@
 {% extends "admin/firmware/base_build.html" %}
-{% load code staticfiles %}
+{% load absurl code staticfiles %}
 
 {% block extrahead %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" media="screen" href="{% static "controller/css/default.css" %}"/>
+    <style>
+        #download-instructions {
+            margin-bottom:20px;
+            margin-top:30px;
+        }
+        #download-instructions h4 {
+            border-bottom: 1px solid #ccc;
+        }
+        #download-instructions ol {
+            margin-left: 0;
+        }
+        #download-instructions p, #download-instructions li {
+            padding-left: 1em;
+            padding-right: 2em;
+        }
+        #download-instructions .note {
+            background: #ffc url({% static "firmware/tip.png" %}) no-repeat;
+            border-bottom: 1px solid #ddd;
+            margin-top: 0;
+            padding: 1em 1em 1em 50px;
+        }
+        #download-instructions .highlight {
+            margin-left: 1.5em;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -26,7 +51,7 @@
         </li>
         {% endif %}
     </ul>
-    <div style="margin-bottom:20px; margin-top:30px;">
+    <div id="download-instructions">
     <fieldset class="module aligned">
     {% if build.kwargs_dict.usb_image %}{# usb plug-in #}
         <h2>USB-installer instructions</h2>
@@ -43,41 +68,72 @@
             <li>Plug the USB stick in the research device</li>
             <li>Boot the RD (the installation will start automatically)</li>
         </ol>
+
     {% else %}{# standard instrucctions #}
-        <h2>Instructions</h2>
-        <h4>Upload the firmware image</h4>
-        <p>The firmware can be downloaded from this page into your computer. Then upload the firmware to the node, for instance by using <code>scp</code> to copy the image into the node's temporary directory:</p>
-        {% code 'bash' %}scp {{ build.image_name }} root@NODE_ADDRESS:/tmp{% endcode %}
+      <h2>Instructions</h2>
+      <p class="note">The CONFINE wiki contains more information on <a
+        href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a> page.<br/>
+        If your node is running a <strong>firmware older than June 2015</strong>
+        follow specific instructions for <strong><a href="https://wiki.confine-project.eu/soft:node-upgrade#nodes_with_old_firmware">nodes with old firmware</a></strong>.</p>
 
-        <p>Yoy may use whatever <code>NODE_ADDRESS</code> reachable from your computer. If the node is running the CONFINE node system software and both the node and your computer are on the testbed management network but at different locations, you may use the node's management address:</p>
-        {% code 'bash' %}scp {{ build.image_name }} root@[{{ node.mgmt_net.addr }}]:/tmp{% endcode %}
+      <h4>Getting the firmware image</h4>
 
-        <p>If the node is running the CONFINE node system software and it is connected to the same local link as your computer, you may use the node's recovery address by first adding your computer to that network:</p>
-        {% code 'bash' %}# Whatever address after "...2000:" works.
+      <ol type="A">
+        <li>
+          <h5>Download through your computer (recommended)</h5>
+          <ol>
+              <li>The <a href={{ build.image.url }}>firmware can be downloaded</a> from this page into your computer.</li>
+              <li>Then upload the firmware to the node:</li>
+          <ol type="a">
+            <li>In the general case, you may use <code>scp</code> to copy the image into the node's temporary directory (with whatever <code>NODE_ADDRESS</code> reachable from your computer):</li>
+            {% code 'bash' False %}scp '{{ build.image_name }}' root@NODE_ADDRESS:/tmp{% endcode %}
+
+            <li>If the node is running the CONFINE node system software and both the node and your computer are on the testbed management network but at different locations, you may use the node's management address:</li>
+            {% code 'bash' False %}scp '{{ build.image_name }}' root@[{{ node.mgmt_net.addr }}]:/tmp{% endcode %}
+
+            <li>If the node is running the CONFINE node system software and it is connected to the same local link as your computer, you may use the node's recovery address by first adding your computer to that network:</li>
+            {% code 'bash' False %}# Whatever address after "...2000:" works.
 ip addr add fdbd:e804:6aa9:1:2000::1234/64 dev eth0
-scp {{ build.image_name }} root@[fdbd:e804:6aa9:1::2]:/tmp{% endcode %}
+scp '{{ build.image_name }}' root@[fdbd:e804:6aa9:1::2]:/tmp{% endcode %}
+          </ol>
 
-        <p>See <a href="https://wiki.confine-project.eu/arch:addressing">Addressing in CONFINE</a> for other addresses available in CONFINE nodes.</p>
+            <p>See <a href="https://wiki.confine-project.eu/arch:addressing">Addressing in CONFINE</a> for other addresses available in CONFINE nodes.</p>
+            </ol>
+        </li>
 
-        <h4>Install the firmware image</h4>
-        <p style="margin-top:1em">You can use <code>ssh</code> to access the node and enter its temporary directory:</p>
-        {% code 'bash' %}ssh root@NODE_ADDRESS
-cd /tmp{% endcode %}
-
-        <p style="margin-top:1em">The following command can be used for flashing
-        this image (remember to change the <strong>destination device</strong>). <br/>
-        <strong>WARNING!</strong> Be sure you execute these commands 
-        <strong>INSIDE</strong> the node, not in your own computer!</p>
-
-        <ol type="A">
-            <li>If the node is already running the CONFINE node system software, using <code>confine.sysupgrade</code> is highly recommended:
-            {% code 'bash' %}# This command will upgrade your node:
-confine.sysupgrade -n {{ build.image_name }}{% endcode %}</li>
-            <li>Otherwise executing the following command may work for you:
-            {% code 'bash' %}gunzip {{ build.image_name }} -c | dd of=/dev/sdX bs=1M; sync{% endcode %}<br/></li>
+        <li>
+          <h5>Direct download to the node (may be insecure)</h5>
+            <p>Maybe you want to download the firmware directly to the node to
+                avoid uploading it using a low bandwith connection. This method
+                is discouraged because of security concerns (see <a href="https://wiki.confine-project.eu/soft:node-upgrade#upgrade_a_node_non-automatic">node upgrade</a>
+                for more details). <strong>Use it at your own risk!</strong></p>
+          {% code 'bash' False %}ssh root@NODE_ADDRESS
+cd /tmp
+curl -u {{ request.user.username|default:request.user.email }} -k -O {% absurl build.image.url %}
+# It will ask for your controller account password.{% endcode %}
+        </li>
         </ol>
 
-        <p>The CONFINE wiki contains more information on <a href="https://wiki.confine-project.eu/soft:node-upgrade">node upgrade</a>.</p>
+        <h4 style="margin-top: 3em;">Installing the firmware image</h4>
+        <p style="margin-top:1em">You can use <code>ssh</code> to access the node and
+        run the following commands, which are the recommended way for flashing
+        the image in a node which is already running the CONFINE node system software:</p>
+
+        {% code 'bash' False %}ssh root@NODE_ADDRESS
+cd /tmp
+gunzip {{ build.image_name }}
+confine.sysupgrade -n {{ build.image_name|cut:".gz" }}{% endcode %}
+
+        <p>For systems lacking <code>confine.sysupgrade</code> you may use the following commands,
+        which are more aggressive and only recommended for advanced users
+        who have a deep knowledge about their system processes:</p>
+
+        {% code 'bash' False %}ssh root@NODE_ADDRESS
+cd /tmp
+# Stop any processes writing to /dev/sdX here.
+mount -o ro,remount /dev/sdX
+gunzip -c {{ build.image_name }} | dd of=/dev/sdX bs=1M; sync
+# Force a reboot here.{% endcode %}
     {% endif %}{# end instructions #}
     </fieldset>
     </div>

@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.dispatch import Signal
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django_transaction_signals import defer
 
 from controller.utils.functional import cached
@@ -248,6 +249,12 @@ class NodeSoftwareVersionManager(models.Manager):
             if soft_version.value != version:
                 soft_version.value = version
                 soft_version.save()
+    
+    def ordered_versions(self, branch=None):
+        versions = self.distinct('value')
+        if branch is not None:
+            versions = [v for v in versions if v.version['branch'] == branch]
+        return sorted(versions, key=lambda v: v.version['date'], reverse=True)
 
 
 class NodeSoftwareVersion(models.Model):
@@ -259,10 +266,20 @@ class NodeSoftwareVersion(models.Model):
     def __unicode__(self):
         return self.value
     
-    @property
+    @cached_property
     def version(self):
         """Return structured version data."""
         return extract_node_software_version(self.value)
+    
+    @cached_property
+    def name(self):
+        name = settings.STATE_NODE_SOFT_VERSION_NAME(self.version)
+        return "%s (%s)" % (name, self.version['date'])
+    
+    @cached_property
+    def url(self):
+        return settings.STATE_NODE_SOFT_VERSION_URL(self.version)
+
 
 node_heartbeat = Signal(providing_args=["instance", "node"])
 

@@ -17,7 +17,7 @@ r = functools.partial(run, silent=False)
 
 
 def validate_controller_version(version):
-    if not version or version == 'dev':
+    if not version or version in ['beta', 'dev']:
         return
     try:
         decode_version(version)
@@ -48,23 +48,13 @@ class Command(BaseCommand):
         current_path = get_existing_pip_installation()
         proxy = '--proxy %s' % options.get('proxy') if options.get('proxy') else ''
         
-#        # Getting version that will be installed, yeah pip doesn't support it :)
-#        pypi_url = 'https://pypi.python.org/pypi/confine-controller'
-#        grep = 'href="/pypi?:action=doap&amp;name=confine-controller&amp;version='
-#        extract = '| head -n1 | cut -d"=" -f5 | cut -d\'"\' -f1'
-#        pypi_version = "wget -q '%s' -O - | grep '%s' %s" % (pypi_url, grep, extract)
-#        pypi_version = run(pypi_version).stdout
-#        
-#        if current_version == pypi_version:
-#            msg = "Not upgrading, you already have version %s installed"
-#            raise CommandError(msg % current_version)
-        
         if current_path is not None:
             desired_version = options.get('version')
             validate_controller_version(desired_version)
             if current_version == desired_version:
                 msg = "Not upgrading, you already have version %s installed"
                 raise CommandError(msg % desired_version)
+            
             # Create a backup of current installation
             base_path = os.path.abspath(os.path.join(current_path, '..'))
             char_set = string.ascii_uppercase + string.digits
@@ -78,9 +68,11 @@ class Command(BaseCommand):
             eggs = eggs.stdout.splitlines()
             try:
                 if desired_version:
-                    # if desired_version == 'dev':
-                    #     r('pip install -e git+http://git.confine-project.eu/confine/controller.git@master#egg=confine-controller')
-                    # else:
+                    if desired_version == 'dev':
+                        r('pip install -e git+http://git.confine-project.eu/confine/controller.git@master#egg=confine-controller')
+                    elif desired_version == 'beta':
+                        r('pip install -e git+http://git.confine-project.eu/confine/controller.git@beta#egg=confine-controller')
+                    else:
                         r('pip %s install confine-controller==%s' % (proxy, desired_version))
                 else:
                     # Did I mentioned how I hate PIP?

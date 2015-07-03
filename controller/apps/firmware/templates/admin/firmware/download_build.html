@@ -121,19 +121,11 @@ curl -u {{ request.user.username|default:request.user.email }} -k -O {% absurl b
 
         {% code 'bash' False %}ssh root@NODE_ADDRESS
 cd /tmp
-gunzip {{ build.image_name }}
-confine.sysupgrade -n {{ build.image_name|cut:".gz" }}{% endcode %}
+confine.sysupgrade -n {{ build.image_name }}{% endcode %}
 
-        <p>For systems lacking <code>confine.sysupgrade</code> you may use the following commands,
-        which are more aggressive and only recommended for advanced users
-        who have a deep knowledge about their system processes:</p>
-
-        {% code 'bash' False %}ssh root@NODE_ADDRESS
-cd /tmp
-# Stop any processes writing to /dev/sdX here.
-mount -o ro,remount /dev/sdX
-gunzip -c {{ build.image_name }} | dd of=/dev/sdX bs=1M; sync
-# Force a reboot here.{% endcode %}
+        <p>For systems lacking <code>confine.sysupgrade</code>, please refer to <a
+        href="https://wiki.confine-project.eu/soft:node-upgrade#first-time_installation">
+        first-time installation</a> section.
     {% endif %}{# end instructions #}
     </fieldset>
     </div>

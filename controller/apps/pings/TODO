@@ -1,0 +1,9 @@
+class Ping
+----------
+As seems that there is only one content_type value maybe we can avoid
+using a generic relation that is less efficient?
+
+This is false, at least there are pings to MgmtNetConf (nodes, hosts)
+and pings to MgmtIface (slivers).
+
+Is there any way to optimize generic relations on Postgres?

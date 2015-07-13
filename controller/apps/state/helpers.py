@@ -43,6 +43,10 @@ def fetch_state(obj):
     (if any), although verification fails, state will be retrieved
     but marked as not trusted.
     """
+    # TODO(santiago) sometimes a 304 is returned but there is
+    # no stored data. So computed state becames UNKNOWN
+    # Check how this can be avoided.
+    
     # Use HTTP Etag to allow 304 Not Modified to be returned
     try:
         etag = json.loads(obj.state.metadata)['headers']['etag']

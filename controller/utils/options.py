@@ -169,6 +169,9 @@ class LockFile(object):
         return True
     
     def release(self):
+        # TODO(santiago) handle if it has been removed by other
+        # process because the lock has expired.
+        # OSError: [Errno 2] No such file or directory: '/dev/shm/.nodes.Node.lock'
         os.remove(self.lockfile)
     
     def __enter__(self):

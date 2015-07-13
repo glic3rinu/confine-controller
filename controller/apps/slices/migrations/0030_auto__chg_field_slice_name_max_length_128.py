@@ -91,7 +91,7 @@ class Migration(SchemaMigration):
             'template': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['slices.Template']"})
         },
         u'slices.sliveriface': {
-            'Meta': {'unique_together': "(('sliver', 'name'), ('sliver', 'nr'))", 'object_name': 'SliverIface'},
+            'Meta': {'unique_together': "(('sliver', 'name'),)", 'object_name': 'SliverIface'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'nr': ('django.db.models.fields.PositiveIntegerField', [], {}),

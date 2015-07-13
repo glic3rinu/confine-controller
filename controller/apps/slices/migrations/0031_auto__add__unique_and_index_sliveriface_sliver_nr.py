@@ -8,11 +8,17 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding unique constraint on 'SliverIface', fields ['sliver', 'nr']
+        db.create_unique(u'slices_sliveriface', ['sliver_id', 'nr'])
+
         # Adding index on 'SliverIface', fields ['sliver', 'nr']
         db.create_index(u'slices_sliveriface', ['sliver_id', 'nr'])
 
 
     def backwards(self, orm):
+        # Removing unique constraint on 'SliverIface', fields ['sliver', 'nr']
+        db.delete_unique(u'slices_sliveriface', ['sliver_id', 'nr'])
+
         # Removing index on 'SliverIface', fields ['sliver', 'nr']
         db.delete_index(u'slices_sliveriface', ['sliver_id', 'nr'])
 

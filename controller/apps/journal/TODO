@@ -1,0 +1,8 @@
+- Refactor view into admin View? (take advantatge of ordering and filtering)
+- Notifications by email:
+    a. extend node status report?
+    b. create slice warning.
+- General public page? with some kind of general overview (number of experiments?)
+- Try to extract old info from admin history to initialize journal.
+
+++ More graphic data representation: e.g. timeline. ++

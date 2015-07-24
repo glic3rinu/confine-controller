@@ -55,10 +55,8 @@ class Image(object):
         """ sector number of image part_nr """
         if not hasattr(self, '_sector'):
             context = { 'image': self.file, 'part_nr': self.part_nr }
-            # File -k option for keep looking and getting part_nr sector number
-            # different behaviour between version 5.11 and 5.14
-            result = r("file -k %(image)s|grep -Po '(?<=startsector ).*?(?=,)'|"
-                       "sed -n %(part_nr)dp" % context)
+            result = r("/sbin/sfdisk -d %(image)s|"
+                       "sed -rne 's/^.*[^0-9]%(part_nr)d :.*\bstart= *([0-9]+).*/\1/p'" % context)
             try:
                 self._sector = int(result.stdout)
             except ValueError:

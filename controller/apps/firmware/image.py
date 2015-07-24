@@ -56,7 +56,7 @@ class Image(object):
         if not hasattr(self, '_sector'):
             context = { 'image': self.file, 'part_nr': self.part_nr }
             result = r("/sbin/sfdisk -d %(image)s|"
-                       "sed -rne 's/^.*[^0-9]%(part_nr)d :.*\bstart= *([0-9]+).*/\1/p'" % context)
+                       r"sed -rne 's/^.*[^0-9]%(part_nr)d :.*\bstart= *([0-9]+).*/\1/p'" % context)
             try:
                 self._sector = int(result.stdout)
             except ValueError:

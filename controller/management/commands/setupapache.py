@@ -40,7 +40,6 @@ class Command(BaseCommand):
             'project_name': get_project_name(),
             'project_root': get_project_root(),
             'site_root': get_site_root(),
-            # TODO end with single /
             'media_root': settings.MEDIA_ROOT,
             'static_root': settings.STATIC_ROOT,
             'cert_path': ca.cert_path,
@@ -49,7 +48,8 @@ class Command(BaseCommand):
             'user': options.get('user'),
             'group': options.get('group') or options.get('user'),
             'processes': int(options.get('processes')),
-            'threads': int(options.get('threads')) }
+            'threads': int(options.get('threads'))
+        }
         
         apache_conf = (
             'WSGIDaemonProcess %(project_name)s user=%(user)s group=%(group)s processes=%(processes)d \\\n'
@@ -87,11 +87,13 @@ class Command(BaseCommand):
             '    SSLCertificateKeyFile %(cert_key_path)s\n'
             '    SSLCACertificateFile %(cert_path)s\n'
             '    SSLVerifyClient None\n'
-            '</VirtualHost>' % context)
+            '</VirtualHost>' % context
+        )
         
         context.update({
             'apache_conf': apache_conf,
-            'apache_conf_file': '/etc/apache2/conf.d/%(project_name)s.conf' % context})
+            'apache_conf_file': '/etc/apache2/conf.d/%(project_name)s.conf' % context
+        })
         
         # Apache 2.4 compatibility - feature #684
         run('mkdir -p /etc/apache2/conf.d')

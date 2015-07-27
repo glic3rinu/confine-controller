@@ -93,6 +93,36 @@ class Command(BaseCommand):
             'apache_conf': apache_conf,
             'apache_conf_file': '/etc/apache2/conf.d/%(project_name)s.conf' % context})
         
+        # Apache 2.4 compatibility - feature #684
+        run('mkdir -p /etc/apache2/conf.d')
+        run('mkdir -p /etc/apache2/conf-available')
+        
+        compat_conf = (
+            '# This enables configuration files in the legacy Apache directory.\n'
+            'IncludeOptional conf.d/*.conf\n'
+            '\n'
+            '# These correct access control to Controller files for Apache 2.4.\n'
+            '<Directory %(project_root)s>\n'
+            '    <Files wsgi.py>\n'
+            '        Require all granted\n'
+            '    </Files>\n'
+            '</Directory>\n'
+            '<Location /media>\n'
+            '    Require all granted\n'
+            '</Location>\n'
+            '<Location /static>\n'
+            '    Require all granted\n'
+            '</Location>' % context
+        )
+        
+        context.update({
+            'compat_conf': compat_conf,
+            'compat_conf_file': '/etc/apache2/conf-available/local-%(project_name)s-compat.conf' % context
+        })
+        
+        run("echo '%(compat_conf)s' > %(compat_conf_file)s" % context)
+        
+        # Store apache2 configuration keeping existing one (if any).
         diff = run("echo '%(apache_conf)s'|diff - %(apache_conf_file)s" % context, err_codes=[0,1,2])
         if diff.return_code == 2:
             # File does not exist
@@ -116,20 +146,12 @@ class Command(BaseCommand):
                 "has been installed.\n The old version has been placed at "
                 "%(apache_conf_file)s.$save\033[m" % context)
         
-#        include_httpd = run("grep '^\s*Include\s\s*httpd.conf\s*' /etc/apache2/apache2.conf", err_codes=[0,1])
-#        if include_httpd.return_code == 1:
-#            run("echo 'Include httpd.conf' >> /etc/apache2/apache2.conf")
-        
-        # run('a2ensite %s' % project_name)
         run('a2enmod wsgi')
         run('a2enmod expires')
         run('a2enmod deflate')
         run('a2enmod ssl')
-        
-        # Give upload file permissions to apache
-#        username = run("stat -c %%U %(project_root)s" % context)
-#        run('adduser www-data %s' % username)
-#        run('chmod g+w %(media_root)s' % context)
+        # catch 127 error 'command not found' for apache 2.2 installations
+        run('a2enconf local-%(project_name)s-compat.conf' % context, err_codes=[0, 127])
         
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)

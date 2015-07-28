@@ -153,7 +153,7 @@ class Command(BaseCommand):
         run('a2enmod deflate')
         run('a2enmod ssl')
         # catch 127 error 'command not found' for apache 2.2 installations
-        run('a2enconf local-%(project_name)s-compat.conf' % context, err_codes=[0, 127])
+        run('a2enconf local-%(project_name)s-compat' % context, err_codes=[0, 127])
         
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)

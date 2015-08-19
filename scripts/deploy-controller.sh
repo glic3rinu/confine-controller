@@ -298,7 +298,7 @@ User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine'
     
     su $USER -c "python $DIR/manage.py collectstatic --noinput"
     
-    cmd="python $DIR/manage.py setuptincd --noinput --safe"
+    cmd="python $DIR/manage.py setuptincd --noinput"
         [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix $MGMT_PREFIX"
         [[ $TINC_ADDRESS != false ]] && cmd="$cmd --tinc_address $TINC_ADDRESS"
         [[ $TINC_PRIV_KEY != false ]] && cmd="$cmd --tinc_privkey $TINC_PRIV_KEY"

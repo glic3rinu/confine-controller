@@ -254,13 +254,6 @@ deploy_common () {
     adduser $USER sudo
     cd $(eval echo "~$USER")
     su $USER -c "controller-admin.sh clone $PROJECT_NAME --skeletone $SKELETONE"
-    cd $PROJECT_NAME
-    run python manage.py setupceleryd
-    run python manage.py setupapache
-    cmd="run python manage.py setupfirmware"
-        [[ $BASE_IMAGE_PATH != false ]] && cmd="$cmd --base_image_path $BASE_IMAGE_PATH"
-        [[ $BUILD_PATH != false ]] && cmd="$cmd --build_path $BUILD_PATH"
-        $cmd
 }
 export -f deploy_common
 
@@ -284,25 +277,35 @@ deploy_running_services () {
     python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
     su $USER -c "python manage.py syncdb --noinput"
     su $USER -c "python manage.py migrate --noinput"
-    # The following command is indent sensitive
-    su $USER -c "echo -e \"\\
-from django.contrib.auth import get_user_model;\\
-User = get_user_model()\n\\
-if not User.objects.filter(username='confine').exists(): \\
-User.objects.create_superuser('confine', 'confine@confine-project.eu', 'confine')\n\" | $DIR/manage.py shell"
+    su $USER -c "python manage.py createsuperuser"  # XXXX asks username, email, name, password
+
+    run python manage.py setupceleryd --username $USER
     
-    su $USER -c "python $DIR/manage.py collectstatic --noinput"
-    
-    cmd="python $DIR/manage.py setuptincd --noinput"
+    cmd="python manage.py setuptincd --noinput"
         [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix $MGMT_PREFIX"
         [[ $TINC_ADDRESS != false ]] && cmd="$cmd --tinc_address $TINC_ADDRESS"
         [[ $TINC_PRIV_KEY != false ]] && cmd="$cmd --tinc_privkey $TINC_PRIV_KEY"
         [[ $TINC_PUB_KEY != false ]] && cmd="$cmd --tinc_pubkey $TINC_PUB_KEY"
         [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
         run $cmd
-    su $USER -c "python $DIR/manage.py updatetincd"
-    python $DIR/manage.py restartservices
-    [[ $CURRENT_VERSION != false ]] && run python $DIR/manage.py postupgradecontroller --specifics --from $CURRENT_VERSION
+    su $USER -c "python manage.py updatetincd"
+
+    su $USER -c "python manage.py setuppki"  # XXXX asks cert data
+
+    su $USER -c "python manage.py collectstatic --noinput"
+
+    run python manage.py setupnginx
+
+    su $USER -c "python manage.py createmaintenancekey --noinput"
+
+    cmd="run python manage.py setupfirmware"
+        [[ $BASE_IMAGE_PATH != false ]] && cmd="$cmd --base_image_path $BASE_IMAGE_PATH"
+        [[ $BUILD_PATH != false ]] && cmd="$cmd --build_path $BUILD_PATH"
+        $cmd
+    su $USER -c "python manage.py syncfirmwareplugins"
+
+    run python manage.py restartservices
+    [[ $CURRENT_VERSION != false ]] && run python manage.py postupgradecontroller --specifics --from $CURRENT_VERSION
 }
 export -f deploy_running_services
 

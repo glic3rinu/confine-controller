@@ -16,7 +16,7 @@ runsu () {
     local user=$1
     shift
     echo " ${bold}\$ ${@}${normal}"
-    su "$user" -c "${@}"
+    su "$user" -c "$(echo "${@}")"  # squeeze args
 }
 export -f runsu
 

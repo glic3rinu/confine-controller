@@ -300,6 +300,7 @@ deploy_running_services () {
         [[ $TINC_PUB_KEY != false ]] && cmd="$cmd --tinc_pubkey $TINC_PUB_KEY"
         [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
         rmanage $cmd
+    run service tinc restart
     umanage updatetincd
 
     umanage setuppki  # XXXX asks country, state, locality, orgname, orgunit, email

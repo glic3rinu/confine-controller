@@ -273,9 +273,11 @@ deploy_running_services () {
     local TINC_PRIV_KEY=$9
     local TINC_PUB_KEY=${10}
     local CURRENT_VERSION=${11}
+
+    local cmd
     
     cd $DIR
-    python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
+    run python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
     runsu $USER "python manage.py syncdb --noinput"
     runsu $USER "python manage.py migrate --noinput"
     runsu $USER "python manage.py createsuperuser"  # XXXX asks username, email, name, password
@@ -299,10 +301,10 @@ deploy_running_services () {
 
     runsu $USER "python manage.py createmaintenancekey --noinput"
 
-    cmd="run python manage.py setupfirmware"
+    cmd="python manage.py setupfirmware"
         [[ $BASE_IMAGE_PATH != false ]] && cmd="$cmd --base_image_path $BASE_IMAGE_PATH"
         [[ $BUILD_PATH != false ]] && cmd="$cmd --build_path $BUILD_PATH"
-        $cmd
+        run $cmd
     runsu $USER "python manage.py syncfirmwareplugins"
 
     run python manage.py restartservices

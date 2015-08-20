@@ -6,17 +6,17 @@ bold=$(tput bold)
 normal=$(tput sgr0)
 
 
-show () {
-    echo " ${bold}\$ ${@}${normal}"
-}
-export -f show
-
-
 run () {
-    show "${@}"
+    echo " ${bold}# ${@}${normal}"
     "${@}"
 }
 export -f run
+
+runsu () {
+    echo " ${bold}\$ ${@}${normal}"
+    su "$1" -c "$2"
+}
+export -f runsu
 
 
 check_root () {
@@ -254,7 +254,7 @@ deploy_common () {
     try_create_system_user $USER $PASSWORD
     adduser $USER sudo
     cd $(eval echo "~$USER")
-    run su $USER -c "controller-admin.sh clone $PROJECT_NAME --skeletone $SKELETONE"
+    runsu $USER "controller-admin.sh clone $PROJECT_NAME --skeletone $SKELETONE"
 }
 export -f deploy_common
 
@@ -276,9 +276,9 @@ deploy_running_services () {
     
     cd $DIR
     python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
-    run su $USER -c "python manage.py syncdb --noinput"
-    run su $USER -c "python manage.py migrate --noinput"
-    run su $USER -c "python manage.py createsuperuser"  # XXXX asks username, email, name, password
+    runsu $USER "python manage.py syncdb --noinput"
+    runsu $USER "python manage.py migrate --noinput"
+    runsu $USER "python manage.py createsuperuser"  # XXXX asks username, email, name, password
 
     run python manage.py setupceleryd --username $USER
     
@@ -289,21 +289,21 @@ deploy_running_services () {
         [[ $TINC_PUB_KEY != false ]] && cmd="$cmd --tinc_pubkey $TINC_PUB_KEY"
         [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
         run $cmd
-    run su $USER -c "python manage.py updatetincd"
+    runsu $USER "python manage.py updatetincd"
 
-    run su $USER -c "python manage.py setuppki"  # XXXX asks country, state, locality, orgname, orgunit, email
+    runsu $USER "python manage.py setuppki"  # XXXX asks country, state, locality, orgname, orgunit, email
 
-    run su $USER -c "python manage.py collectstatic --noinput"
+    runsu $USER "python manage.py collectstatic --noinput"
 
     run python manage.py setupnginx
 
-    run su $USER -c "python manage.py createmaintenancekey --noinput"
+    runsu $USER "python manage.py createmaintenancekey --noinput"
 
     cmd="run python manage.py setupfirmware"
         [[ $BASE_IMAGE_PATH != false ]] && cmd="$cmd --base_image_path $BASE_IMAGE_PATH"
         [[ $BUILD_PATH != false ]] && cmd="$cmd --build_path $BUILD_PATH"
         $cmd
-    run su $USER -c "python manage.py syncfirmwareplugins"
+    runsu $USER "python manage.py syncfirmwareplugins"
 
     run python manage.py restartservices
     [[ $CURRENT_VERSION != false ]] && run python manage.py postupgradecontroller --specifics --from $CURRENT_VERSION

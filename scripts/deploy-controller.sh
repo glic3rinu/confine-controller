@@ -13,8 +13,8 @@ export -f show
 
 
 run () {
-    show ${@}
-    ${@}
+    show "${@}"
+    "${@}"
 }
 export -f run
 

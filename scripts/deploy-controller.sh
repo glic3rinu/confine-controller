@@ -102,6 +102,7 @@ export -f custom_umount
 
 
 clean () {
+    run rm -fr ~/.cache/pip
     run rm -fr /tmp/pip-*
     run rm -fr /tmp/build
     run rm -fr /tmp/src

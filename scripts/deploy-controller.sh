@@ -13,8 +13,10 @@ run () {
 export -f run
 
 runsu () {
+    local user=$1
+    shift
     echo " ${bold}\$ ${@}${normal}"
-    su "$1" -c "$2"
+    su "$user" -c "${@}"
 }
 export -f runsu
 

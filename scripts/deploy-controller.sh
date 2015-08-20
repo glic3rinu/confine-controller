@@ -28,8 +28,8 @@ export -f check_root
 try_create_system_user() {
     # USAGE: try_create_system_user user password
     
-    local USER='confine'
-    local PASSWORD=false
+    local USER=$1
+    local PASSWORD=$2
     
     if [[ ! $(id $USER &> /dev/null) ]]; then
         # disabled user by default

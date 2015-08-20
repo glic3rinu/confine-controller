@@ -290,7 +290,7 @@ deploy_running_services () {
         run $cmd
     su $USER -c "python manage.py updatetincd"
 
-    su $USER -c "python manage.py setuppki"  # XXXX asks cert data
+    su $USER -c "python manage.py setuppki"  # XXXX asks country, state, locality, orgname, orgunit, email
 
     su $USER -c "python manage.py collectstatic --noinput"
 

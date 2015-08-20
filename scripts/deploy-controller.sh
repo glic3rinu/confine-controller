@@ -310,8 +310,8 @@ deploy_running_services () {
     rmanage setupnginx
     # BEGIN: Work around issue #687.
     run rm -f /etc/nginx/sites-enabled/default
-    run service nginx restart
     # END
+    run service nginx restart
 
     umanage createmaintenancekey --noinput
 

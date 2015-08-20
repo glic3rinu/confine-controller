@@ -277,40 +277,47 @@ deploy_running_services () {
     local CURRENT_VERSION=${11}
 
     local cmd
+    local rmanage umanage
+    rmanage () {
+        run python manage.py "${@}"
+    }
+    umanage () {
+        runsu $USER "python manage.py ${@}"
+    }
     
     cd $DIR
-    run python manage.py setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
-    runsu $USER "python manage.py syncdb --noinput"
-    runsu $USER "python manage.py migrate --noinput"
-    runsu $USER "python manage.py createsuperuser"  # XXXX asks username, email, name, password
+    rmanage setuppostgres --db_name $DB_NAME --db_user $DB_USER --db_password $DB_PASSWORD
+    umanage syncdb --noinput
+    umanage migrate --noinput
+    umanage createsuperuser  # XXXX asks username, email, name, password
 
-    run python manage.py setupceleryd --username $USER
+    rmanage setupceleryd --username $USER
     
-    cmd="python manage.py setuptincd --noinput"
+    cmd="setuptincd --noinput"
         [[ $MGMT_PREFIX != false ]] && cmd="$cmd --mgmt_prefix $MGMT_PREFIX"
         [[ $TINC_ADDRESS != false ]] && cmd="$cmd --tinc_address $TINC_ADDRESS"
         [[ $TINC_PRIV_KEY != false ]] && cmd="$cmd --tinc_privkey $TINC_PRIV_KEY"
         [[ $TINC_PUB_KEY != false ]] && cmd="$cmd --tinc_pubkey $TINC_PUB_KEY"
         [[ $TINC_PORT != false ]] && cmd="$cmd --tinc_port $TINC_PORT"
-        run $cmd
-    runsu $USER "python manage.py updatetincd"
+        rmanage $cmd
+    umanage updatetincd
 
-    runsu $USER "python manage.py setuppki"  # XXXX asks country, state, locality, orgname, orgunit, email
+    umanage setuppki  # XXXX asks country, state, locality, orgname, orgunit, email
 
-    runsu $USER "python manage.py collectstatic --noinput"
+    umanage collectstatic --noinput
 
-    run python manage.py setupnginx
+    rmanage setupnginx
 
-    runsu $USER "python manage.py createmaintenancekey --noinput"
+    umanage createmaintenancekey --noinput
 
-    cmd="python manage.py setupfirmware"
+    cmd="setupfirmware"
         [[ $BASE_IMAGE_PATH != false ]] && cmd="$cmd --base_image_path $BASE_IMAGE_PATH"
         [[ $BUILD_PATH != false ]] && cmd="$cmd --build_path $BUILD_PATH"
-        run $cmd
-    runsu $USER "python manage.py syncfirmwareplugins"
+        rmanage $cmd
+    umanage syncfirmwareplugins
 
-    run python manage.py restartservices
-    [[ $CURRENT_VERSION != false ]] && run python manage.py postupgradecontroller --specifics --from $CURRENT_VERSION
+    rmanage restartservices
+    [[ $CURRENT_VERSION != false ]] && rmanage postupgradecontroller --specifics --from $CURRENT_VERSION
 }
 export -f deploy_running_services
 

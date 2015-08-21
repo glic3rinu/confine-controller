@@ -255,6 +255,9 @@ deploy_common () {
     else
         run python $DIR/manage.py upgradecontroller --pip --version $VERSION
     fi
+    # BEGIN: Work around issue #688.
+    run apt-get install -y libjpeg-dev libfreetype6-dev
+    # END
     run controller-admin.sh install_requirements
     try_create_system_user $USER $PASSWORD
     adduser $USER sudo

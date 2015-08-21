@@ -240,6 +240,9 @@ deploy_common () {
     
     run apt-get update
     run apt-get install -y --force-yes sudo nano python-pip
+    # BEGIN: Work around issue #689.
+    run easy_install --upgrade pip
+    # END
     # for cleaning pip garbage afterwards
     cd /tmp
     

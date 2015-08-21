@@ -255,6 +255,8 @@ deploy_common () {
     else
         run python $DIR/manage.py upgradecontroller --pip --version $VERSION
     fi
+    # TODO: Select between Apache and NginX.
+    run apt-get install -y nginx uwsgi uwsgi-plugin-python
     # BEGIN: Work around issue #688.
     run apt-get install -y libjpeg-dev libfreetype6-dev
     # END
@@ -313,6 +315,7 @@ deploy_running_services () {
 
     umanage collectstatic --noinput
 
+    # TODO: Select between Apache and NginX.
     rmanage setupnginx
     # BEGIN: Work around issue #687.
     run rm -f /etc/nginx/sites-enabled/default

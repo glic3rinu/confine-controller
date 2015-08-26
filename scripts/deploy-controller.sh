@@ -257,6 +257,9 @@ deploy_common () {
     fi
     # TODO: Select between Apache and NginX.
     run apt-get install -y nginx uwsgi uwsgi-plugin-python
+    # BEGIN: Work around issue #691.
+    run apt-get install -y iputils-ping
+    # END
     # BEGIN: Work around issue #688.
     run apt-get install -y libjpeg-dev libfreetype6-dev
     # END

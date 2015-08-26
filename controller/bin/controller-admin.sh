@@ -127,7 +127,7 @@ function install_requirements () {
                      rabbitmq-server \
                      python-dev gcc \
                      fuseext2 file \
-                     tinc \
+                     iputils-ping tinc \
                      libevent-dev \
                      ntp"
     

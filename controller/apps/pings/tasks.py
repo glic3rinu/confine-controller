@@ -29,7 +29,7 @@ def pinger(ip):
         'count': PING_COUNT,
         'version': 6 if ip.version() == 6 else ''
     }
-    # Async execution of the ping command
+    # Async execution of the ping command from iputils
     ping = subprocess.Popen("ping%(version)s -c %(count)s %(ip)s" % context,
             shell=True,
             stdout=subprocess.PIPE,

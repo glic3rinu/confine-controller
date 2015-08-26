@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# NOTE: Workarounds for bugs should only be removed when fixed in a *relased* version.
+
 set -u
 
 bold=$(tput bold)

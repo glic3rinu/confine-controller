@@ -52,8 +52,13 @@ class Host(models.Model):
 
 class TincHostQuerySet(models.query.QuerySet):
     def hosts(self, *args, **kwargs):
+        """Returns hosts of the management network except the main server."""
+        dflt_server = Server.objects.get_default()
         server_ct = ContentType.objects.get_for_model(Server)
-        return self.exclude(content_type=server_ct).filter(*args, **kwargs)
+        return self.exclude(
+            content_type=server_ct,
+            object_id=dflt_server.pk,
+        ).filter(*args, **kwargs)
     
     def servers(self, *args, **kwargs):
         """Returns TincHosts with TincAddress."""

@@ -1,3 +1,6 @@
+{% load users_registration %}
+{% get_settings_value "SITE_NAME" as site_name %}
+
 {% if subject %}New user registration (approval request){% endif %}
 {% if message %}Dear operator,
 A new user ({{ user }}) has created an account. Due the system policy you must approve
@@ -7,5 +10,5 @@ Please use the admin interface for doing the required operations.
 http://{{ site }}{% url 'admin:users_user_change' user.id %}
 
 Have a nice day,
-Testbed management team
+{{ site_name }} management team.
 {% endif %}

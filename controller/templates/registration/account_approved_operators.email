@@ -1,3 +1,6 @@
+{% load users_registration %}
+{% get_settings_value "SITE_NAME" as site_name %}
+
 {% if subject %}New user registration (approved){% endif %}
 {% if message %}Dear operator,
 A new user ({{ user }}) account has been enabled by an operator.
@@ -5,5 +8,5 @@ If you want more information check the user history at
 http://{{ site.domain }}{% url 'admin:users_user_history' user.pk %}
 
 Have a nice day,
-Testbed management team.
+{{ site_name }} management team.
 {% endif %}

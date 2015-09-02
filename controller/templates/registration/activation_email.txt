@@ -1,7 +1,8 @@
 {% load users_registration %}
 {% get_settings_value "ACCOUNT_ACTIVATION_DAYS" as activation_days %}
+{% get_settings_value "SITE_NAME" as site_name %}
 
-Hi, welcome to {{ site }}:
+Hi, welcome to {{ site_name }}:
 
 Please, validate your email using the link below:
 
@@ -9,5 +10,5 @@ http://{{ site }}/accounts/activate/{{ activation_key }}
 
 You have {{ activation_days }} days remaining to activate your account.
 
-Thanks!
-the Community-lab operations team.
+Have a nice day,
+{{ site_name }} management team.

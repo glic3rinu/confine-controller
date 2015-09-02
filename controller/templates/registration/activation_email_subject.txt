@@ -1,1 +1,3 @@
-Welcome to {{ site }}, please enable your account within {{ expiration_days }} days.
+{% load users_registration %}
+{% get_settings_value "SITE_NAME" as site_name %}
+Welcome to {{ site_name }}, please enable your account within {{ expiration_days }} days.

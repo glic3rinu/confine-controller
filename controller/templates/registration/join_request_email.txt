@@ -1,3 +1,6 @@
+{% load users_registration %}
+{% get_settings_value "SITE_NAME" as site_name %}
+
 Hi:
 
 You receive this mail because your are the administrator of the group
@@ -6,4 +9,5 @@ You receive this mail because your are the administrator of the group
 Please, check this request and approve or refuse it visiting the section groups
 at manager page: http://{{ site }}/admin/users/group/{{ group.id }}.
 
-Thank you!
+Have a nice day,
+{{ site_name }} management team.

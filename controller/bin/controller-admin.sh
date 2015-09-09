@@ -137,6 +137,7 @@ function install_requirements () {
     #                https://github.com/bradjasper/django-jsonfield/issues/57
     #TODO(santiago): Markdown 2.5 has some backwards incompatible changes
     #                https://pythonhosted.org/Markdown/release-2.5.html
+    # NOTE: requests 2.4+ requires pip 6.0+ (issue #689)
     DEVELOPMENT_PIP="Django==1.6.10 \
                      django-celery-email==1.0.4 \
                      django-fluent-dashboard==0.4 \
@@ -153,6 +154,7 @@ function install_requirements () {
                      django-admin-tools==0.5.2 \
                      djangorestframework==2.3.14 \
                      paramiko==1.15.2 \
+                     pip>=6.0 \
                      Pygments==2.0.1 \
                      pyflakes==0.8.1 \
                      requests==2.5.1 \

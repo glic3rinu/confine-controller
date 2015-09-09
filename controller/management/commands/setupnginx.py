@@ -136,6 +136,12 @@ class Command(BaseCommand):
         
         run('ln -s /etc/uwsgi/apps-available/%(project_name)s.ini /etc/uwsgi/apps-enabled/' % context, err_codes=[0,1])
         
+        # Disable default site
+        run('rm -f /etc/nginx/sites-enabled/default')
+        
+        # Reload nginx configuration to apply changes
+        run('service nginx reload')
+        
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)
         

@@ -31,7 +31,7 @@ SITE_VERBOSE_NAME = getattr(settings, 'SITE_VERBOSE_NAME',
 DOUBLE_EXTENSIONS = ('tar.gz', 'img.gz')
 
 
-# Service managemente
+# Service management
 START_SERVICES = getattr(settings, 'START_SERVICES',
     ['postgresql', 'tinc', 'celeryevcam', 'celeryd', 'celerybeat', [('uwsgi', 'nginx'), 'apache2',]])
 

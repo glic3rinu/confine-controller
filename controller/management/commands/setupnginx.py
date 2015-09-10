@@ -139,8 +139,9 @@ class Command(BaseCommand):
         # Disable default site
         run('rm -f /etc/nginx/sites-enabled/default')
         
-        # Reload nginx configuration to apply changes
-        run('service nginx reload')
+        # Restart nginx configuration to apply changes of sites,
+        # addresses and ports
+        run('service nginx restart')
         
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)

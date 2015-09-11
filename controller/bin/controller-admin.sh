@@ -153,6 +153,7 @@ function install_requirements () {
                      django-filter==0.9.2 \
                      django-admin-tools==0.5.2 \
                      djangorestframework==2.3.14 \
+                     django-registration==1.0 \
                      paramiko==1.15.2 \
                      pip>=6.0 \
                      Pygments==2.0.1 \
@@ -161,7 +162,6 @@ function install_requirements () {
                      greenlet==0.4.5 \
                      gevent==1.0.2"
     PRODUCTION_PIP="django-simple-captcha==0.4.4 \
-                    django-registration==1.0 \
                     django-google-maps==0.2.3"
     
     # Make sure locales are in place before installing postgres

@@ -173,6 +173,9 @@ function install_requirements () {
     
     run apt-get update
     run apt-get install -y $DEVELOPMENT_APT
+    # upgrade pip using easy_install because something got screwed up
+    # while pip was updating itself (issue #689)
+    run easy_install --upgrade pip
     run pip install $proxy $DEVELOPMENT_PIP
     
     # Some versions of rabbitmq-server will not start automatically by default unless ...

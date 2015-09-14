@@ -242,9 +242,6 @@ deploy_common () {
     
     run apt-get update
     run apt-get install -y --force-yes sudo nano python-pip
-    # BEGIN: Work around issue #689.
-    run easy_install --upgrade pip
-    # END
     # for cleaning pip garbage afterwards
     cd /tmp
     
@@ -259,12 +256,6 @@ deploy_common () {
     fi
     # TODO: Select between Apache and NginX.
     run apt-get install -y nginx uwsgi uwsgi-plugin-python
-    # BEGIN: Work around issue #691.
-    run apt-get install -y iputils-ping
-    # END
-    # BEGIN: Work around issue #688.
-    run apt-get install -y libjpeg-dev libfreetype6-dev
-    # END
     run controller-admin.sh install_requirements
     try_create_system_user $USER $PASSWORD
     adduser $USER sudo
@@ -322,10 +313,6 @@ deploy_running_services () {
 
     # TODO: Select between Apache and NginX.
     rmanage setupnginx
-    # BEGIN: Work around issue #687.
-    run rm -f /etc/nginx/sites-enabled/default
-    # END
-    run service nginx restart
 
     umanage createmaintenancekey --noinput
 

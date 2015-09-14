@@ -139,10 +139,6 @@ class Command(BaseCommand):
         # Disable default site
         run('rm -f /etc/nginx/sites-enabled/default')
         
-        # Restart nginx configuration to apply changes of sites,
-        # addresses and ports
-        run('service nginx restart')
-        
         # Give read permissions to cert key file
         run('chmod g+r %(cert_key_path)s' % context)
         
@@ -168,3 +164,8 @@ class Command(BaseCommand):
         
         # Allow nginx to write to uwsgi socket
         run('adduser www-data %(group)s' % context)
+        
+        # Restart nginx to apply new configuration and also uwsgi
+        # to force reloading permissions (user added to a group)
+        run('service nginx restart')
+        run('service uwsgi restart')

@@ -185,10 +185,6 @@ function install_requirements () {
     
     if $production; then
         run apt-get install -y $PRODUCTION_APT
-        # PIL has some mental problems with library paths
-        [ ! -e /usr/lib/libjpeg.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libjpeg.so /usr/lib
-        [ ! -e /usr/lib/libfreetype.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libfreetype.so /usr/lib
-        [ ! -e /usr/lib/libz.so ] && run ln -s /usr/lib/$(uname -m)-linux-gnu/libz.so /usr/lib
         run pip install $proxy $PRODUCTION_PIP
     fi
     

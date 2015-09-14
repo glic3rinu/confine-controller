@@ -131,7 +131,7 @@ function install_requirements () {
                      libevent-dev \
                      ntp"
     
-    PRODUCTION_APT="libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev" # captcha
+    PRODUCTION_APT="libjpeg-dev libfreetype6-dev"  # captcha
     
     #TODO(santiago): django-jsonfield 1.0 breaks backwards compatibility
     #                https://github.com/bradjasper/django-jsonfield/issues/57
